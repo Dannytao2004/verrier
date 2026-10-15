@@ -212,7 +212,7 @@ def build(ctx: Context):
         extra = []
         if rnd == 1:
             raw = [x for x in out.get("extra_directions") or [] if isinstance(x, dict)][: b.extra_directions]
-            extra = [{**_clean_direction(x, i + 1, "b"), "category": "base_rates"} for i, x in enumerate(raw)]
+            extra = [{**_clean_direction(x, i + 1, "b"), "category": (str(x.get("category", "")).strip() if str(x.get("category", "")).strip() in CATEGORIES else "base_rates")} for i, x in enumerate(raw)]
         jr = {"round": rnd, "assessment": out.get("assessment") or [], "decisions": list(dec.values()),
               "extra_directions": extra, "methods": [m for m in out.get("methods") or [] if isinstance(m, dict)],
               "unknown_ids_in_decisions": sorted(set(dec) - ids)}
