@@ -379,6 +379,22 @@ class TestApiRuns(unittest.TestCase):
         self.assertEqual(self.c.post(f"/api/runs/{rid}/cancel").status_code, 409)
         self.assertEqual(self.c.post("/api/runs", json={"question": "q2", "as_of": "2026-06-20"}).status_code, 200)
 
+    def test_cancel_during_planning_ends_without_approval(self):
+        # 审查发现：规划中点取消，原来会停进 awaiting_approval、占着名额，还能被批准
+        self.gate.clear()
+        rid = self.c.post("/api/runs", json={"question": "q1", "as_of": "2026-06-20"}).json()["id"]
+        self.assertEqual(self.c.post(f"/api/runs/{rid}/cancel").status_code, 200)
+        self.gate.set()
+        st = wait_for(self.c, rid, ("cancelled", "failed", "awaiting_approval"))
+        self.assertEqual(st["status"], "cancelled", st)
+        self.assertFalse(any(a.get("approved") for a in st["approvals"]), st["approvals"])
+        self.assertEqual(self.c.post(f"/api/runs/{rid}/approve", json={}).status_code, 409)
+        self.assertEqual(self.c.post("/api/runs", json={"question": "q2", "as_of": "2026-06-20"}).status_code, 200)
+
+    def test_non_string_fields_are_400(self):
+        self.assertEqual(self.c.post("/api/runs", json={"question": 123}).status_code, 400)
+        self.assertEqual(self.c.post("/api/runs", json={"question": "x", "as_of": 20260101}).status_code, 400)
+
     def test_cancel_while_running_uses_budget_abort(self):
         from triangulate.web.runs import CANCEL_REASON, Registry
         go = threading.Event()

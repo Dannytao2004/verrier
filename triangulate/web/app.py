@@ -103,7 +103,8 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
             raise HTTPException(404, f"{qid}/{tag} 没有 {name}")
         if name.endswith(".md"):
             return PlainTextResponse(p.read_text(encoding="utf-8"), media_type=FILES[name])
-        return FileResponse(p, media_type=FILES[name])
+        # graph.html 加载 CDN 上的 vis-network：放进 sandbox（opaque origin），它就拿不到本机 API 的同源权限（审查发现）
+        return FileResponse(p, media_type=FILES[name], headers={"Content-Security-Policy": "sandbox allow-scripts"})
 
     @app.get("/api/backtests")
     def backtests():

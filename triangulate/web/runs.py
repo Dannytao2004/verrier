@@ -103,7 +103,13 @@ class WebRun:
             with self.lock:
                 self.target = payload.get("target") or self.target
                 self.proposed = list(payload.get("directions") or [])
-                self.status = "awaiting_approval"
+                cancelled = self.cancel_requested
+                if cancelled:  # 规划时点了取消：不进入等待确认，直接按「不批准」结束（审查发现：否则会占着名额、还能被批准）
+                    self.approvals.append({"approved": False, "by": "web-cancel"})
+                else:
+                    self.status = "awaiting_approval"
+            if cancelled:
+                self._resume(self.approvals[-1])
             return
         state = self._save(self.h, self.approvals)
         r = ((state or {}).get("compute") or {}).get("result") or {}
@@ -126,8 +132,8 @@ class WebRun:
     # ---------- 用户操作 ----------
     def approve(self, keep_ids=None):
         with self.lock:
-            if self.status != "awaiting_approval":
-                raise BadState(f"run is {self.status}, not awaiting_approval")
+            if self.status != "awaiting_approval" or self.cancel_requested:
+                raise BadState(f"run is {self.status}{' (cancel requested)' if self.cancel_requested else ''}, not awaiting_approval")
             ids = [d.get("id") for d in self.proposed]
             if keep_ids is None:
                 keep = ids
@@ -150,6 +156,8 @@ class WebRun:
         with self.lock:
             if self.status not in ACTIVE:
                 raise BadState(f"run is {self.status}")
+            if getattr(self, "final_done", False):  # 最终答案已经写完、只差存盘：不再接受取消（否则完整结果会被标成 cancelled）
+                raise BadState("run has finished computing; it is being saved")
             self.cancel_requested = True
             waiting = self.status == "awaiting_approval"
             if waiting:
@@ -345,6 +353,8 @@ class Registry:
         self.lock = threading.Lock()
 
     def start(self, question: str, as_of=None) -> WebRun:
+        if not isinstance(question, str) or not (as_of is None or isinstance(as_of, str)):
+            raise ValueError("question 必须是字符串，as_of 必须是字符串或留空")   # 审查发现：非字符串原来会 500
         question = (question or "").strip()
         if not question:
             raise ValueError("问题不能为空")
