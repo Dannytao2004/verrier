@@ -403,3 +403,23 @@ class TestJudgeRepairDryRun(unittest.TestCase):
     def test_no_methods(self):
         from triangulate.agent import graph as G
         self.assertEqual(G._dry_run_errors({"methods": [], "assumptions": []}, [], TARGET), ["no methods were proposed"])
+
+
+class TestV21FormulaGuards(unittest.TestCase):
+    """v2.1：公式至少要有一个「量」输入（v2.1 第一轮 9 月消融版用两个比率相乘，交出了 2.2 这个「估计」）；mean() 取平均。"""
+
+    def test_product_of_ratios_rejected(self):
+        pts = {"p1": _pt("p1", 2.2, "2024-09-30", unit="percent")}
+        out = C.run([{"method": "formula_mc", "params": {"formula": "s * r", "inputs": {"s": {"id": "p1"}, "r": {"id": "a1"}}}}],
+                    pts, TARGET, assumptions=AS.validate([A(name="ratio 2026 to 2024", unit="ratio", value=1.0, low=0.85, high=1.18)], TARGET))
+        self.assertIn("needs at least one input that is a quantity", out["methods"][0]["error"])
+
+    def test_mean_of_points(self):
+        pts = {f"p{i}": _pt(f"p{i}", v, f"2021-09-0{i}", unit="vehicle entries") for i, v in enumerate([8945.0, 11062.0, 12380.0, 9982.0], 1)}
+        out = C.run([{"method": "formula_mc", "params": {"formula": "mean(a, b, c, d) * n",
+                                                         "inputs": {"a": {"id": "p1"}, "b": {"id": "p2"}, "c": {"id": "p3"},
+                                                                    "d": {"id": "p4"}, "n": {"id": "k_days_target"}}}}],
+                    pts, TARGET, assumptions=AS.validate([], TARGET))
+        m = out["methods"][0]
+        self.assertNotIn("error", m)
+        self.assertAlmostEqual(m["estimate"] / (sum([8945.0, 11062.0, 12380.0, 9982.0]) / 4 * 31), 1, delta=0.1)

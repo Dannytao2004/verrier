@@ -1,4 +1,4 @@
-"""白名单表达式求值器：只接受 + - * / **、括号、min/max/sqrt、输入名和极少数常量。
+"""白名单表达式求值器：只接受 + - * / **、括号、min/max/mean/sqrt、输入名和极少数常量。
 
 用 ast.parse 解析成语法树，再逐节点检查类型；不调用 eval/exec，不允许属性访问、下标、其他函数。
 同一棵树支持三种求值：标量求值、向量求值（Monte Carlo 样本列表）、量纲推导。
@@ -13,7 +13,7 @@ from .units import DIMLESS, dims_mul, dims_pow, dims_str
 MAX_LEN = 400
 MAX_NODES = 200
 MAX_EXP = 4
-FUNCS = {"min", "max", "sqrt"}
+FUNCS = {"min", "max", "sqrt", "mean"}
 NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
@@ -86,7 +86,7 @@ class Formula:
             return node
         if isinstance(node, ast.Call):
             if not isinstance(node.func, ast.Name) or node.func.id not in FUNCS:
-                raise FormulaError("only min(), max(), sqrt() may be called")
+                raise FormulaError("only min(), max(), mean(), sqrt() may be called")
             if node.keywords or not node.args:
                 raise FormulaError(f"bad call to {node.func.id}()")
             if node.func.id == "sqrt" and len(node.args) != 1:
@@ -152,6 +152,8 @@ def _scalar(node, env):
         args = [_scalar(a, env) for a in node.args]
         if node.func.id == "sqrt":
             return math.sqrt(args[0]) if args[0] >= 0 else math.nan
+        if node.func.id == "mean":
+            return sum(args) / len(args)
         return (min if node.func.id == "min" else max)(args)
     raise FormulaError(f"cannot evaluate {type(node).__name__}")
 
@@ -188,6 +190,8 @@ def _vec(node, env, n):
         cols = [a if isinstance(a, list) else [a] * n for a in args]
         if node.func.id == "sqrt":
             return [math.sqrt(x) if x >= 0 else math.nan for x in cols[0]]
+        if node.func.id == "mean":
+            return [sum(row) / len(row) for row in zip(*cols)]
         g = min if node.func.id == "min" else max
         return [g(row) for row in zip(*cols)]
     raise FormulaError(f"cannot evaluate {type(node).__name__}")

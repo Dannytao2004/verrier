@@ -1,6 +1,7 @@
 """COMPUTE（只有代码）：把裁判选的方法和数据点 id 变成序列，跑方法、回测、加权、给区间。
 formula_mc 的输入可以是保留的数据点，也可以是校验通过的假设（assumptions.py）；规则：至少一个观测点、最多 3 个假设。"""
 import random
+import re
 import statistics
 from datetime import timedelta
 
@@ -10,6 +11,15 @@ from ..mc import sample_lognormal
 from .evidence import parse_date
 
 TOL_DAYS = 3
+
+
+RATIO_UNIT = re.compile(r"^\s*$|%|\b(?:ratio|ratios|share|shares|fraction|factor|multiplier|proportion|percent|percentage|pct|"
+                        r"dimensionless|index)\b", re.I)
+
+
+def is_ratio_unit(unit: str) -> bool:
+    """单位是纯比率 / 百分比（没有「量」）。空单位也算：说不清是什么量的输入不能当作量。"""
+    return bool(RATIO_UNIT.search(unit or ""))
 
 
 def calendar_constants(tps, tpe) -> dict:
@@ -155,11 +165,16 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                         used.append(iid)
                         kind = "point"
                     env[name] = [fixed] * draws.n if fixed is not None else draws.get(iid, lo, hi)
-                    detail.append({"name": name, "id": iid, "kind": kind, "p10": lo, "p90": hi})
+                    unit = (kept_a[iid].get("unit") if kind == "assumption" else
+                            pts[iid].get("unit") if kind == "point" else "constant")
+                    detail.append({"name": name, "id": iid, "kind": kind, "p10": lo, "p90": hi, "unit": unit or ""})
                 r.update(used_ids=used, used_assumptions=sorted(set(used_a)), inputs_detail=detail)
                 if not used:
                     raise M.MethodError("formula_mc must use at least one kept observed data point "
                                         "(a formula made only of assumptions is rejected)")
+                if not any(d["kind"] in ("point", "assumption") and not is_ratio_unit(d.get("unit", "")) for d in detail):
+                    raise M.MethodError("formula_mc needs at least one input that is a quantity (not a share, ratio or %); "
+                                        "a product of ratios cannot produce the target")
                 if len(set(used_a)) > A.MAX_PER_METHOD:
                     raise M.MethodError(f"formula_mc uses {len(set(used_a))} assumptions (at most {A.MAX_PER_METHOD})")
                 s = M.formula_mc_samples(str(prm.get("formula", "")), env)
