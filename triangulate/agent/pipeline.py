@@ -123,23 +123,24 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
         return None, "missing quote or value_as_written"
     if len(q) > 400:
         return None, "quote longer than 400 chars"
-    if not ev.quote_in_text(q, text_n):
-        return None, "quote not found verbatim in page"
-    if vw not in q:
-        return None, "value_as_written not in quote"
+    span = ev.quote_span(q, text_n)
+    if span is None:
+        return None, "quote not found verbatim in page (elisions must skip <= 150 chars within one sentence)"
+    i = ev.find_value(q, vw)
+    if i < 0:
+        return None, "value_as_written not in quote as a whole number"
     sw = str(raw.get("scale_word") or "")
     try:
         value, is_pct = ev.parse_value(vw, sw)
     except ValueError as e:
         return None, f"number: {e}"
-    basis = ev.scale_supported(sw, q, text_n)
+    basis = ev.scale_supported(sw, q, text_n[max(0, span[0] - ev.HEADER_WINDOW_CHARS):span[0]], vw)
     if not basis:
-        return None, f"scale word {sw!r} not supported by quote or page header"
+        return None, f"scale word {sw!r} not supported by quote or table header"
     why = ev.date_check(raw, as_of, page_date, allow_no_period=allow_no_period)
     if why:
         return None, why
     unit = "%" if is_pct else str(raw.get("unit") or "")[:60]
-    i = q.find(vw)
     lo = max(0, min(i - 80, len(q) - QUOTE_STORE_CHARS))
     return {"name": str(raw.get("name") or "")[:160], "value": value, "value_as_written": vw, "scale_word": sw,
             "scale_basis": basis, "unit": unit, "period_start": str(raw.get("period_start") or ""),

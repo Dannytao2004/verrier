@@ -24,8 +24,13 @@ QUESTIONS = [
     {"id": "fc_yell_2026_09", "month": "September 2026", "as_of": "2026-09-06", "released": "2026-10-06",
      "answer_value": 868450, "last_year": 839579, "source": NPS.format(26024)},
 ]
+# 泄漏哨兵还要认「同一序列里、公布日晚于 as_of」的其他官方值（agent 回测用；不进任何 prompt）。
+# 26022（2026-09-15）：2026 年 8 月 856,467，截至 8 月的年累计 3,491,850；
+# 26024（2026-10-06）：2026 年 9 月 868,450，截至 9 月的年累计 4,360,300。两题的 as_of 都早于这两个公布日。
+_POST_AS_OF = [856467, 3491850, 868450, 4360300]
 for _q in QUESTIONS:
-    _q.update(question=Q.format(**_q), answer_unit="", unit_hint="a count of recreation visits", strict=False)
+    _q.update(question=Q.format(**_q), answer_unit="", unit_hint="a count of recreation visits", strict=False,
+              leak_values=sorted(set(_POST_AS_OF) | {_q["answer_value"]}))
 FNS = {"naive": run_naive, "structured": run_structured}
 
 

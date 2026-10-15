@@ -15,18 +15,48 @@ def norm(s: str) -> str:
     return _WS.sub(" ", unicodedata.normalize("NFKC", s or "").translate(_TRANS)).strip()
 
 
-def quote_in_text(quote: str, text_norm: str) -> bool:
-    """quote 在规范化后的页面文字里逐字出现。允许模型用 ... / … 省略中间部分：每段都必须按顺序逐字出现。"""
-    parts = [p.strip() for p in re.split("\\.\\.\\.|…", norm(quote)) if p.strip()]
+MAX_ELISION_CHARS = 150
+_SENTENCE_END = re.compile(r"[.!?]\s+[A-Z0-9]")
+
+
+def _gap_ok(gap: str) -> bool:
+    """省略号跳过的那段原文：不超过 MAX_ELISION_CHARS 个字符，且不跨句子（防止把远处的期间词和数字拼成一个 quote）。"""
+    return len(gap) <= MAX_ELISION_CHARS and not _SENTENCE_END.search(gap)
+
+
+def quote_span(quote: str, text_norm: str):
+    """quote 在规范化后的页面文字里逐字出现时返回 (起点, 终点)，否则 None。允许模型用 ... / … 省略中间部分：
+    每段都必须按顺序逐字出现，相邻两段之间跳过的原文要满足 _gap_ok。"""
+    parts = [p.strip() for p in re.split(r"\.\.\.|…", norm(quote)) if p.strip()]
     if not parts:
-        return False
-    pos = 0
-    for p in parts:
+        return None
+
+    def match_from(k: int, pos: int):
+        p = parts[k]
         i = text_norm.find(p, pos)
-        if i < 0:
-            return False
-        pos = i + len(p)
-    return True
+        while i >= 0:
+            if k > 0 and not _gap_ok(text_norm[pos:i]):
+                return None  # 更远的出现位置跳过的原文只会更长
+            if k == len(parts) - 1:
+                return i, i + len(p)
+            rest = match_from(k + 1, i + len(p))
+            if rest is not None:
+                return i, rest[1]
+            i = text_norm.find(p, i + 1)
+        return None
+
+    return match_from(0, 0)
+
+
+def quote_in_text(quote: str, text_norm: str) -> bool:
+    return quote_span(quote, text_norm) is not None
+
+
+def find_value(quote_n: str, value_written: str) -> int:
+    """value_as_written 在 quote 里作为完整的数字出现时返回位置，否则 -1：前面不能紧挨数字、小数点或千分位，
+    后面不能接数字或小数/千分位部分。'2.9%' 不能从 '12.9%' 里匹配，'412' 不能从 '3,412' 里匹配。"""
+    m = re.search(r"(?<![\d.,])" + re.escape(value_written) + r"(?!\d|[.,]\d)", quote_n)
+    return m.start() if m else -1
 
 
 # ---------- 数字与倍数词 ----------
@@ -37,12 +67,24 @@ PERCENT = {"%", "percent", "per cent", "pct"}
 _NUM = re.compile(r"(?<![\d.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
 _WORD_SCALE = re.compile(r"^\s*(hundred|thousand|million|billion|trillion)s?\b", re.I)
 _ABBR_SCALE = re.compile(r"^(k|m|mn|mln|bn|b|tn)\b", re.I)  # 只认紧贴数字的缩写：4.8M、$5bn
+_DOT_THOUSANDS = re.compile(r"\d{1,3}(?:\.\d{3}){2,}(?!\d)")  # 1.234.567（欧式千分位）：不猜，直接报错
+ABBREVIATIONS = {"k", "m", "mn", "mln", "b", "bn", "tn"}
+SCALE_WORDS = {"hundred", "thousand", "million", "billion", "trillion"}
+HEADER_WINDOW_CHARS = 3000
+# 独立的表头写法：(in thousands) / (thousands) / ($ millions) / (USD millions) / (millions of dollars) / ('000)；
+# 不带括号的 "in thousands" 后面必须紧跟标点或结尾（"resulted in thousands of cancellations" 不算）
+_HEADER = re.compile(r"\((?:in\s+)?(?:[A-Z]{3}\s+|US\$\s*|[$€£¥]\s*)?(hundreds|thousands|millions|billions|trillions)"
+                     r"(?:\s+of\s+[^()]{1,30})?\s*\)"
+                     r"|\bin\s+(hundreds|thousands|millions|billions|trillions)(?=\s*(?:[.:;,)\]]|$))"
+                     r"|\(\s*'?(000)s?'?\s*\)", re.I)
 
 
 def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
     """返回 (数值, 是否百分数)。数值 = 原文数字 x 倍数；只做这一次乘法。
     倍数可来自原文数字本身（"4.8 million"）或模型填的 scale_word；两者都有且不一致就报错。"""
     s = norm(value_as_written)
+    if _DOT_THOUSANDS.search(s):
+        raise ValueError("ambiguous separators: '.' used as a thousands separator")
     m = _NUM.search(s)
     if not m:
         raise ValueError("no number in value_as_written")
@@ -68,17 +110,32 @@ def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
     return num * factor, is_pct
 
 
-def scale_supported(scale_word: str, quote_n: str, text_n: str) -> str:
-    """倍数词必须有原文依据：在 quote 里，或页面里有 "in thousands" / "(millions)" 之类的表头。返回依据，否则空串。"""
+def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written: str = "") -> str:
+    """倍数词必须有原文依据。返回依据（quote / page_header / none_needed），否则空串。
+    - 缩写（k、m、b、bn ...）：只认紧贴数字的写法（value_as_written 本身带着，或 quote 里数字后面紧跟），没有页面级依据。
+    - 单词（thousand、million ...）：quote 里数字后面紧跟这个词；或者 quote / context_n（调用方给的、quote 前面
+      HEADER_WINDOW_CHARS 个字符的原文）里有独立的表头写法（见 _HEADER）。"""
     sw = norm(scale_word).lower()
     if sw in ("", "none") or sw in PERCENT:
         return "none_needed"
-    base = sw.rstrip("s")
-    forms = {sw, base, base + "s"}
-    if any(re.search(rf"(?<![A-Za-z]){re.escape(f)}(?![A-Za-z])", quote_n, re.I) for f in forms):
+    vw = norm(value_written)
+    base = sw[:-1] if sw.endswith("s") and sw[:-1] in SCALE_WORDS else sw
+    if base in ABBREVIATIONS:
+        if vw and re.search(rf"\d\s?{re.escape(base)}$", vw, re.I):
+            return "quote"
+        if vw and re.search(rf"(?<![\d.,]){re.escape(vw)}\s?{re.escape(base)}(?![A-Za-z])", quote_n, re.I):
+            return "quote"
+        return ""
+    if base not in SCALE_WORDS:
+        return ""
+    if vw and re.search(rf"\d\s*{base}s?\b", vw, re.I):
         return "quote"
-    if re.search(rf"(in|\()\s*{re.escape(base)}s?\b", text_n, re.I):
-        return "page_header"
+    if vw and re.search(rf"(?<![\d.,]){re.escape(vw)}\s*(?:-\s*)?{base}s?\b", quote_n, re.I):
+        return "quote"
+    for m in _HEADER.finditer(quote_n + " | " + context_n):
+        word = (m.group(1) or m.group(2) or "").lower()
+        if (word and word[:-1] == base) or (m.group(3) and base == "thousand"):
+            return "page_header"
     return ""
 
 
@@ -131,7 +188,8 @@ def date_check(point: dict, as_of: date, page_date, allow_no_period: bool = Fals
 
 # ---------- 泄漏哨兵 ----------
 def leak_forms(true_value: float) -> list:
-    """真值的常见写法。整数：千分位（, 空格 .）、无分隔、四舍五入到千、x.x thousand / k、0.xxx million / x.xx million。
+    """一个值的常见写法。整数：千分位（, 空格 .）、无分隔、四舍五入到百和千、x.x / x.xx thousand 和 k、整数 k、
+    0.xxx / 0.xx million 和 M、x.xx million。大小写不敏感（856K = 856k）。
     小于 1000 的数太容易撞车，只登记原样写法，并在报告里说明哨兵弱。"""
     v = float(true_value)
     forms = set()
@@ -140,20 +198,23 @@ def leak_forms(true_value: float) -> list:
         g = f"{n:,}"
         forms |= {g, g.replace(",", " "), g.replace(",", "."), str(n)} if abs(n) >= 1000 else {str(n)}
         if abs(n) >= 10_000:
-            k1 = f"{n / 1e3:.1f}"
-            forms |= {f"{k1} thousand", f"{k1}k", f"{k1}K", f"{k1} k", f"{round(n, -3):,}",
-                      f"{round(n / 1e3):,} thousand"}
+            k0 = f"{round(n / 1e3):,}"
+            forms |= {f"{round(n, -2):,}", f"{round(n, -3):,}", f"{k0} thousand", f"{k0}k", f"{k0} k"}
+            for kx in (f"{n / 1e3:.1f}", f"{n / 1e3:.2f}"):
+                forms |= {f"{kx} thousand", f"{kx}k", f"{kx} k"}
         if abs(n) >= 100_000:
-            forms |= {f"{n / 1e6:.3f} million", f"{n / 1e6:.3f}M"}
-        if abs(n) >= 1_000_000:
-            forms |= {f"{n / 1e6:.2f} million", f"{n / 1e6:.2f}M"}
+            for mx in (f"{n / 1e6:.3f}", f"{n / 1e6:.2f}"):
+                forms |= {f"{mx} million", f"{mx}M", f"{mx} M"}
     else:
         forms |= {f"{v:g}", f"{v:.1f}", f"{v:.2f}"}
     return sorted(forms)
 
 
-def leak_patterns(true_value: float) -> list:
-    return [re.compile(rf"(?<![\d.,]){re.escape(f)}(?!\d|[.,]\d)", re.I) for f in leak_forms(true_value)]
+def leak_patterns(values) -> list:
+    """values：一个数或一组数（目标真值，以及同一题里所有「公布日晚于 as_of」的已知官方值）。"""
+    vals = values if isinstance(values, (list, tuple, set)) else [values]
+    forms = sorted({f for v in vals if v is not None for f in leak_forms(v)})
+    return [re.compile(rf"(?<![\d.,]){re.escape(f)}(?!\d|[.,]\d)", re.I) for f in forms]
 
 
 def leak_scan(text: str, patterns: list) -> list:

@@ -71,10 +71,41 @@ class TestQuoteAndNumbers(unittest.TestCase):
                 ev.parse_value(*bad)
 
     def test_scale_needs_textual_support(self):
-        self.assertEqual(ev.scale_supported("million", ev.norm("Revenue was $4.8 million."), self.PAGE), "quote")
-        self.assertEqual(ev.scale_supported("thousand", "value 12", self.PAGE), "page_header")
-        self.assertEqual(ev.scale_supported("billion", "value 12", self.PAGE), "")
-        self.assertEqual(ev.scale_supported("", "value 12", self.PAGE), "none_needed")
+        self.assertEqual(ev.scale_supported("million", ev.norm("Revenue was $4.8 million."), self.PAGE, "$4.8"), "quote")
+        self.assertEqual(ev.scale_supported("thousand", "value 12", self.PAGE, "12"), "page_header")
+        self.assertEqual(ev.scale_supported("billion", "value 12", self.PAGE, "12"), "")
+        self.assertEqual(ev.scale_supported("", "value 12", self.PAGE, "12"), "none_needed")
+        self.assertEqual(ev.scale_supported("thousand", "Visitors 12", "Table 3 (in thousands of visits)", "12"), "page_header")
+        self.assertEqual(ev.scale_supported("m", "sales of $4.8m in May", "", "$4.8"), "quote")
+
+    BAD = ("Employees can enroll in the 401(k) plan. Section 2(b) applies. The storm resulted in thousands of "
+           "cancellations. In August 2025 the site counted 3,412 visitors. Annual total for 2025 was 41,250 visitors. "
+           "I'm told 12.9% fewer came.")
+
+    def _pt(self, **kw):
+        base = {"name": "x", "scale_word": "", "unit": "visitors", "period_start": "2025-08-01", "period_end": "2025-08-31"}
+        from triangulate.agent.pipeline import verify_point
+        return verify_point({**base, **kw}, ev.norm(self.BAD), date(2026, 8, 15), None, False)
+
+    def test_scale_counterexamples_rejected(self):
+        q = "In August 2025 the site counted 3,412 visitors."
+        for sw in ("thousand", "k", "b"):
+            p, why = self._pt(quote=q, value_as_written="3,412", scale_word=sw)
+            self.assertIsNone(p, sw)
+            self.assertIn("scale word", why)
+        self.assertEqual(self._pt(quote=q, value_as_written="3,412")[0]["value"], 3412.0)
+
+    def test_quote_and_number_boundaries(self):
+        p, why = self._pt(quote="In August 2025 ... 41,250 visitors", value_as_written="41,250")
+        self.assertIsNone(p)  # 省略号跨句子，把月份和年总量拼到了一起
+        self.assertIn("quote not found", why)
+        self.assertIsNotNone(self._pt(quote="In August 2025 ... counted 3,412 visitors", value_as_written="3,412")[0])
+        self.assertIsNone(self._pt(quote="I'm told 12.9% fewer came.", value_as_written="2.9%")[0])
+        self.assertIsNone(self._pt(quote="3,412 visitors", value_as_written="412")[0])
+        self.assertEqual(self._pt(quote="I'm told 12.9% fewer came.", value_as_written="12.9%")[0]["value"], 12.9)
+        with self.assertRaises(ValueError):
+            ev.parse_value("1.234.567", "")
+        self.assertEqual(ev.parse_value("1.234", ""), (1.234, False))
 
 
 class TestLeakSentinel(unittest.TestCase):
@@ -83,8 +114,15 @@ class TestLeakSentinel(unittest.TestCase):
         for t in ["visits: 856,467 in", "856467", "856 467 visits", "856.5 thousand", "about 856.5k", "0.856 million",
                   "nearly 856,000 visitors", "856 467"]:
             self.assertTrue(ev.leak_scan(t, pats), t)
-        for t in ["1,856,467", "856,4670", "8564671", "881,936", "856.47 thousand"]:
+        for t in ["856K visits", "0.86 million", "856,500", "856.47 thousand", "856k"]:  # 审查补上的写法
+            self.assertTrue(ev.leak_scan(t, pats), t)
+        for t in ["1,856,467", "856,4670", "8564671", "881,936", "857.5 thousand"]:
             self.assertFalse(ev.leak_scan(t, pats), t)
+
+    def test_several_values(self):
+        pats = ev.leak_patterns([868450, 856467])  # 目标真值 + 另一个 as_of 之后才公布的官方值
+        self.assertTrue(ev.leak_scan("August: 856,467", pats))
+        self.assertTrue(ev.leak_scan("September: 868,450", pats))
 
 
 class TestDateFilter(unittest.TestCase):
@@ -291,7 +329,7 @@ class TestGraphOffline(unittest.TestCase):
         leak_pages = [pg for r in st["results"] for pg in r["pages"] if pg.get("leak_hits")]
         self.assertEqual(len(leak_pages), 2)
         dropped = [x["reason"] for r in st["results"] for x in r["dropped_points"]]
-        self.assertIn("quote not found verbatim in page", dropped)
+        self.assertTrue(any(r.startswith("quote not found verbatim in page") for r in dropped), dropped)
         m = {x["id"]: x for x in st["compute"]["methods"]}
         self.assertEqual(m["m1"]["estimate"], 1210.0)
         self.assertIn("error", m["m2"])
