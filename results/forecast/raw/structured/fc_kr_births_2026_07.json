@@ -1,0 +1,328 @@
+{
+ "qid": "fc_kr_births_2026_07",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of live births in South Korea during July 2026, as first reported in the national statistics agency's monthly Population Trends release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_births_2025",
+      "description": "Total live births in South Korea in calendar year 2025",
+      "value": 240000,
+      "low": 220000,
+      "high": 260000,
+      "unit": "births",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual birth counts have been around 230k-250k; 2025 likely similar with slight recovery."
+      }
+     },
+     {
+      "name": "july_share_of_annual_births",
+      "description": "Fraction of annual live births that occur in July",
+      "value": 0.085,
+      "low": 0.075,
+      "high": 0.095,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July is near the annual average; monthly shares typically range 7.5%-9.5%."
+      }
+     },
+     {
+      "name": "monthly_births_2025_avg",
+      "description": "Average monthly live births in South Korea in 2025",
+      "value": 20000,
+      "low": 18333,
+      "high": 21667,
+      "unit": "births/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual 2025 births divided by 12; consistent with recent monthly figures."
+      }
+     },
+     {
+      "name": "july_seasonal_index",
+      "description": "Seasonal index for July relative to average month (1.0 = average)",
+      "value": 1.0,
+      "low": 0.9,
+      "high": 1.1,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July births are close to the annual average; index near 1.0 with modest uncertainty."
+      }
+     },
+     {
+      "name": "births_per_day",
+      "description": "Average number of live births per day in South Korea in 2025",
+      "value": 658,
+      "low": 603,
+      "high": 712,
+      "unit": "births/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual births divided by 365; recent daily average around 600-700."
+      }
+     },
+     {
+      "name": "days_in_july",
+      "description": "Number of days in July",
+      "value": 31,
+      "low": 31,
+      "high": 31,
+      "unit": "days",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "July has 31 days."
+      }
+     },
+     {
+      "name": "july_daily_factor",
+      "description": "Factor adjusting average daily births for July-specific daily rate",
+      "value": 1.0,
+      "low": 0.9,
+      "high": 1.1,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July daily birth rate is close to the annual average; factor near 1.0."
+      }
+     },
+     {
+      "name": "population_sk",
+      "description": "Population of South Korea in 2026",
+      "value": 51600000,
+      "low": 51000000,
+      "high": 52000000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent population estimates around 51.5-52 million."
+      }
+     },
+     {
+      "name": "annual_birth_rate_per_1000",
+      "description": "Annual live births per 1000 people in South Korea in 2026",
+      "value": 4.6,
+      "low": 4.2,
+      "high": 5.0,
+      "unit": "births per 1000 people per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Crude birth rate has been around 4.5-5.0 in recent years."
+      }
+     },
+     {
+      "name": "july_share_of_year",
+      "description": "Fraction of the year that July represents, adjusted for seasonality",
+      "value": 0.085,
+      "low": 0.075,
+      "high": 0.095,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July's share of annual births is near 1/12 but with seasonal variation."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual births for 2025 and multiply by July's share of annual births.",
+      "formula": "annual_births_2025 * july_share_of_annual_births",
+      "output_unit": "births"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Use average monthly births in 2025 and adjust for July seasonality.",
+      "formula": "monthly_births_2025_avg * july_seasonal_index",
+      "output_unit": "births"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from daily birth rate over the number of days in July.",
+      "formula": "births_per_day * days_in_july * july_daily_factor",
+      "output_unit": "births"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Number of live births in South Korea during July 2026, as first reported in the national statistics agency's monthly Population Trends release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_births_2025",
+      "description": "Total live births in South Korea in calendar year 2025",
+      "value": 240000,
+      "low": 220000,
+      "high": 260000,
+      "unit": "births",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual birth counts have been around 230k-250k; 2025 likely similar with slight recovery."
+      }
+     },
+     {
+      "name": "july_share_of_annual_births",
+      "description": "Fraction of annual live births that occur in July",
+      "value": 0.085,
+      "low": 0.075,
+      "high": 0.095,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July is near the annual average; monthly shares typically range 7.5%-9.5%."
+      }
+     },
+     {
+      "name": "monthly_births_2025_avg",
+      "description": "Average monthly live births in South Korea in 2025",
+      "value": 20000,
+      "low": 18333,
+      "high": 21667,
+      "unit": "births/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual 2025 births divided by 12; consistent with recent monthly figures."
+      }
+     },
+     {
+      "name": "july_seasonal_index",
+      "description": "Seasonal index for July relative to average month (1.0 = average)",
+      "value": 1.0,
+      "low": 0.9,
+      "high": 1.1,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July births are close to the annual average; index near 1.0 with modest uncertainty."
+      }
+     },
+     {
+      "name": "births_per_day",
+      "description": "Average number of live births per day in South Korea in 2025",
+      "value": 658,
+      "low": 603,
+      "high": 712,
+      "unit": "births/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual births divided by 365; recent daily average around 600-700."
+      }
+     },
+     {
+      "name": "days_in_july",
+      "description": "Number of days in July",
+      "value": 31,
+      "low": 31,
+      "high": 31,
+      "unit": "days",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "July has 31 days."
+      }
+     },
+     {
+      "name": "july_daily_factor",
+      "description": "Factor adjusting average daily births for July-specific daily rate",
+      "value": 1.0,
+      "low": 0.9,
+      "high": 1.1,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July daily birth rate is close to the annual average; factor near 1.0."
+      }
+     },
+     {
+      "name": "population_sk",
+      "description": "Population of South Korea in 2026",
+      "value": 51600000,
+      "low": 51000000,
+      "high": 52000000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent population estimates around 51.5-52 million."
+      }
+     },
+     {
+      "name": "annual_birth_rate_per_1000",
+      "description": "Annual live births per 1000 people in South Korea in 2026",
+      "value": 4.6,
+      "low": 4.2,
+      "high": 5.0,
+      "unit": "births per 1000 people per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Crude birth rate has been around 4.5-5.0 in recent years."
+      }
+     },
+     {
+      "name": "july_share_of_year",
+      "description": "Fraction of the year that July represents, adjusted for seasonality",
+      "value": 0.085,
+      "low": 0.075,
+      "high": 0.095,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July's share of annual births is near 1/12 but with seasonal variation."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual births for 2025 and multiply by July's share of annual births.",
+      "formula": "annual_births_2025 * july_share_of_annual_births",
+      "output_unit": "births"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Use average monthly births in 2025 and adjust for July seasonality.",
+      "formula": "monthly_births_2025_avg * july_seasonal_index",
+      "output_unit": "births"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from daily birth rate over the number of days in July.",
+      "formula": "births_per_day * days_in_july * july_daily_factor",
+      "output_unit": "births"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  }
+ ],
+ "final_attempt": 2
+}

@@ -1,0 +1,154 @@
+{
+ "qid": "fc_jnto_2026_08",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of foreign visitor arrivals to Japan in August 2026, as first reported in JNTO's monthly estimate.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "japan_annual_visitors_2025",
+      "description": "Total foreign visitor arrivals to Japan in calendar year 2025, as reported by JNTO.",
+      "value": 40000000,
+      "low": 35000000,
+      "high": 45000000,
+      "unit": "visitors",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Extrapolates recent strong growth from 25M in 2023 and 36.9M in 2024, with 2025 likely around 40M."
+      }
+     },
+     {
+      "name": "august_share_of_annual",
+      "description": "Fraction of annual foreign visitor arrivals that occur in August.",
+      "value": 0.09,
+      "low": 0.08,
+      "high": 0.1,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is peak summer holiday season; historical monthly shares typically range 8-10%."
+      }
+     },
+     {
+      "name": "annual_growth_factor_2025_to_2026",
+      "description": "Year-over-year growth factor for foreign visitor arrivals from 2025 to 2026.",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.15,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Continued recovery and growth expected, but with uncertainty due to economic and geopolitical factors."
+      }
+     },
+     {
+      "name": "august_2025_visitors",
+      "description": "Foreign visitor arrivals to Japan in August 2025, as reported by JNTO.",
+      "value": 3400000,
+      "low": 3000000,
+      "high": 3800000,
+      "unit": "visitors",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Based on 2024 August estimate of ~3.2M and assumed growth; actual 2025 data not yet published."
+      }
+     },
+     {
+      "name": "august_growth_factor_2025_to_2026",
+      "description": "Year-over-year growth factor for foreign visitor arrivals in August from 2025 to 2026.",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.15,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Similar to annual growth, but August-specific factors may cause slight variation."
+      }
+     },
+     {
+      "name": "japan_annual_visitors_2024",
+      "description": "Total foreign visitor arrivals to Japan in calendar year 2024, as reported by JNTO.",
+      "value": 36870000,
+      "low": 36870000,
+      "high": 36870000,
+      "unit": "visitors",
+      "provenance": {
+       "type": "sourced",
+       "source": "JNTO",
+       "url": "",
+       "quote": "2024年暦年の訪日外客数は3,687万人"
+      }
+     },
+     {
+      "name": "august_2024_visitors",
+      "description": "Foreign visitor arrivals to Japan in August 2024, as reported by JNTO.",
+      "value": 3200000,
+      "low": 3000000,
+      "high": 3400000,
+      "unit": "visitors",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Approximate figure from JNTO monthly estimates; August 2024 was a peak month."
+      }
+     },
+     {
+      "name": "annual_growth_factor_2024_to_2025",
+      "description": "Year-over-year growth factor for foreign visitor arrivals from 2024 to 2025.",
+      "value": 1.08,
+      "low": 1.0,
+      "high": 1.15,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Growth expected to continue but at a moderating pace compared to 2024."
+      }
+     },
+     {
+      "name": "august_growth_factor_2024_to_2025",
+      "description": "Year-over-year growth factor for foreign visitor arrivals in August from 2024 to 2025.",
+      "value": 1.06,
+      "low": 0.98,
+      "high": 1.12,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August-specific growth may differ slightly from annual trend."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual 2026 visitors from 2025 total and growth, then allocate to August using seasonal share.",
+      "formula": "japan_annual_visitors_2025 * annual_growth_factor_2025_to_2026 * august_share_of_annual",
+      "output_unit": "visitors"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Start from August 2025 actual and apply year-over-year growth factor for August.",
+      "formula": "august_2025_visitors * august_growth_factor_2025_to_2026",
+      "output_unit": "visitors"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Use 2024 annual and August figures, apply two years of growth factors to project August 2026.",
+      "formula": "august_2024_visitors * august_growth_factor_2024_to_2025 * august_growth_factor_2025_to_2026",
+      "output_unit": "visitors"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}
