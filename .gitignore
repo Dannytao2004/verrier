@@ -1,0 +1,13 @@
+# secrets
+.env
+*.env
+# python
+__pycache__/
+*.pyc
+.venv/
+# realFP has no licence in its official repo -> no redistribution grant.
+# Raw files and anything that embeds question text or answers stay local only.
+data/raw/
+data/backtest_realfp20.json
+results/realfp/
+docs/graphs/realfp/

@@ -1,0 +1,75 @@
+{
+ "meta": {
+  "split": "test",
+  "seed": 2021,
+  "n": 20,
+  "n_split": 557,
+  "n_eligible": 547,
+  "n_rejected": 10,
+  "rule": "random.Random(seed).sample(eligible sorted by index, n); eligible = numeric positive answer whose unit parses strictly with triangulate.units"
+ },
+ "ids": [
+  "test:422",
+  "test:288",
+  "test:258",
+  "test:35",
+  "test:463",
+  "test:494",
+  "test:67",
+  "test:325",
+  "test:281",
+  "test:308",
+  "test:496",
+  "test:80",
+  "test:169",
+  "test:172",
+  "test:56",
+  "test:109",
+  "test:306",
+  "test:54",
+  "test:487",
+  "test:120"
+ ],
+ "rejected": [
+  {
+   "id": "test:39",
+   "reason": "unit not parseable: unsupported unit 'degree' in 'degree C' (dimension not in table)"
+  },
+  {
+   "id": "test:53",
+   "reason": "unit not parseable: ambiguous one-letter unit 'M' in 'M'"
+  },
+  {
+   "id": "test:86",
+   "reason": "unit not parseable: unsupported unit 'degree' in 'degree' (dimension not in table)"
+  },
+  {
+   "id": "test:115",
+   "reason": "unit not parseable: unsupported unit 'kelvin' in 'kelvin' (dimension not in table)"
+  },
+  {
+   "id": "test:199",
+   "reason": "dollar plus extra unit"
+  },
+  {
+   "id": "test:329",
+   "reason": "dollar plus extra unit"
+  },
+  {
+   "id": "test:364",
+   "reason": "unit not parseable: unsupported unit 'degree' in 'degree C' (dimension not in table)"
+  },
+  {
+   "id": "test:383",
+   "reason": "unit not parseable: unsupported unit 'degree' in 'degree' (dimension not in table)"
+  },
+  {
+   "id": "test:408",
+   "reason": "unit not parseable: unsupported unit 'dB' in 'dB' (dimension not in table)"
+  },
+  {
+   "id": "test:495",
+   "reason": "unit not parseable: unsupported unit 'degree' in 'degree F' (dimension not in table)"
+  }
+ ]
+}
