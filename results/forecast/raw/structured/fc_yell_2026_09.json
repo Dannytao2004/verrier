@@ -1,0 +1,152 @@
+{
+ "qid": "fc_yell_2026_09",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of recreation visits to Yellowstone National Park during September 2026, as reported in NPS monthly visitation statistics.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_visits_2025",
+      "description": "Total recreation visits to Yellowstone National Park in calendar year 2025.",
+      "value": 4700000,
+      "low": 4200000,
+      "high": 5200000,
+      "unit": "visits",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual visitation has hovered around 4.5–4.9 million; 2025 likely similar."
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual Yellowstone visits that occur in September.",
+      "value": 0.12,
+      "low": 0.09,
+      "high": 0.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a popular shoulder month; typical share is roughly 10–14% of annual visits."
+      }
+     },
+     {
+      "name": "september_days",
+      "description": "Number of days in September 2026.",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "days",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September always has 30 days."
+      }
+     },
+     {
+      "name": "daily_visits_september",
+      "description": "Average number of recreation visits per day in Yellowstone during September.",
+      "value": 18000,
+      "low": 14000,
+      "high": 23000,
+      "unit": "visits/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September daily average is typically between 15,000 and 22,000 based on recent years."
+      }
+     },
+     {
+      "name": "september_visits_2025",
+      "description": "Recreation visits to Yellowstone in September 2025.",
+      "value": 560000,
+      "low": 500000,
+      "high": 620000,
+      "unit": "visits",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September 2025 likely similar to recent Septembers (e.g., 2024 ~ 550k)."
+      }
+     },
+     {
+      "name": "yoy_growth_factor",
+      "description": "Year-over-year growth factor for September visits from 2025 to 2026.",
+      "value": 1.02,
+      "low": 0.95,
+      "high": 1.08,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Visitation trends are relatively stable; modest growth or decline possible."
+      }
+     },
+     {
+      "name": "us_population",
+      "description": "Population of the United States in 2026.",
+      "value": 340000000,
+      "low": 335000000,
+      "high": 345000000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "US population is around 340 million in 2026."
+      }
+     },
+     {
+      "name": "yellowstone_visits_per_capita",
+      "description": "Annual Yellowstone recreation visits per US resident.",
+      "value": 0.014,
+      "low": 0.012,
+      "high": 0.016,
+      "unit": "visits/person",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "About 4.7 million visits / 340 million people ≈ 0.0138."
+      }
+     },
+     {
+      "name": "september_share_of_annual_proxy",
+      "description": "Fraction of annual visits occurring in September, used as a proxy from typical seasonality.",
+      "value": 0.12,
+      "low": 0.09,
+      "high": 0.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Same as september_share_of_annual but used in proxy path."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual visits and multiply by September's share.",
+      "formula": "annual_visits_2025 * september_share_of_annual",
+      "output_unit": "visits"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Average daily visits in September times number of days.",
+      "formula": "daily_visits_september * september_days",
+      "output_unit": "visits"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale last year's September visits by a growth factor.",
+      "formula": "september_visits_2025 * yoy_growth_factor",
+      "output_unit": "visits"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

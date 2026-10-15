@@ -1,0 +1,17 @@
+{
+ "qid": "fc_yell_2026_08",
+ "arm": "naive",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 850000,
+    "unit": ""
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

@@ -14,7 +14,16 @@ def main(argv=None):
     d = sub.add_parser("demo", help="structured arm on the finance demo question, then build the report")
     d.add_argument("--force", action="store_true")
     sub.add_parser("report", help="offline: rebuild states, graphs and tables from saved replies")
+    f = sub.add_parser("forecast", help="one-month-ahead forecast of Yellowstone visits (both arms), then score")
+    f.add_argument("--force", action="store_true")
     a = ap.parse_args(argv)
+
+    if a.cmd == "forecast":
+        from .forecast import report, run
+        run(force=a.force)
+        sys.stdout.reconfigure(encoding="utf-8")
+        print(json.dumps(report(), indent=1, ensure_ascii=False))
+        return
 
     if a.cmd == "select":
         from .data import select

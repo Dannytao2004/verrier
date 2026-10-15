@@ -1,0 +1,682 @@
+{
+ "qid": "fc_yell_2026_09",
+ "question": "Assume today is 2026-09-06. You know nothing published after this date. Estimate the number of recreation visits to Yellowstone National Park in September 2026, as it will be reported in the National Park Service's official monthly visitation statistics.",
+ "target": {
+  "unit": "",
+  "dims": "dimensionless",
+  "definition": "Number of recreation visits to Yellowstone National Park during September 2026, as reported in NPS monthly visitation statistics."
+ },
+ "inputs": [
+  {
+   "name": "annual_visits_2025",
+   "description": "Total recreation visits to Yellowstone National Park in calendar year 2025.",
+   "value": 4700000,
+   "low": 4200000,
+   "high": 5200000,
+   "unit": "visits",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Recent annual visitation has hovered around 4.5–4.9 million; 2025 likely similar."
+   },
+   "count_nouns": [
+    "visits"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 4200000.0,
+    "high": 5200000.0,
+    "value": 4700000.0
+   },
+   "median": 4673328.578219169,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.02020533673745728,
+   "sensitivity_path_max": 0.09275405323689867
+  },
+  {
+   "name": "september_share_of_annual",
+   "description": "Fraction of annual Yellowstone visits that occur in September.",
+   "value": 0.12,
+   "low": 0.09,
+   "high": 0.15,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September is a popular shoulder month; typical share is roughly 10–14% of annual visits."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.09,
+    "high": 0.15,
+    "value": 0.12
+   },
+   "median": 0.1161895003862225,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.02020533673745728,
+   "sensitivity_path_max": 0.22184874961635614
+  },
+  {
+   "name": "september_days",
+   "description": "Number of days in September 2026.",
+   "value": 30,
+   "low": 30,
+   "high": 30,
+   "unit": "days",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September always has 30 days."
+   },
+   "count_nouns": [],
+   "dims": "s",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 2592000.0,
+    "high": 2592000.0,
+    "value": 2592000.0
+   },
+   "median": 30.0,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0,
+   "sensitivity_path_max": 0.0
+  },
+  {
+   "name": "daily_visits_september",
+   "description": "Average number of recreation visits per day in Yellowstone during September.",
+   "value": 18000,
+   "low": 14000,
+   "high": 23000,
+   "unit": "visits/day",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September daily average is typically between 15,000 and 22,000 based on recent years."
+   },
+   "count_nouns": [
+    "visits"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.16203703703703703,
+    "high": 0.26620370370370366,
+    "value": 0.20833333333333331
+   },
+   "median": 17944.35844492636,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.016461326041183,
+   "sensitivity_path_max": 0.21559980033935489
+  },
+  {
+   "name": "september_visits_2025",
+   "description": "Recreation visits to Yellowstone in September 2025.",
+   "value": 560000,
+   "low": 500000,
+   "high": 620000,
+   "unit": "visits",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September 2025 likely similar to recent Septembers (e.g., 2024 ~ 550k)."
+   },
+   "count_nouns": [
+    "visits"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 500000.0,
+    "high": 620000.0,
+    "value": 560000.0
+   },
+   "median": 556776.4362830021,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0037440106962742803,
+   "sensitivity_path_max": 0.0934216851622347
+  },
+  {
+   "name": "yoy_growth_factor",
+   "description": "Year-over-year growth factor for September visits from 2025 to 2026.",
+   "value": 1.02,
+   "low": 0.95,
+   "high": 1.08,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Visitation trends are relatively stable; modest growth or decline possible."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.95,
+    "high": 1.08,
+    "value": 1.02
+   },
+   "median": 1.012916580968048,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0037440106962742803,
+   "sensitivity_path_max": 0.05570015019810182
+  },
+  {
+   "name": "us_population",
+   "description": "Population of the United States in 2026.",
+   "value": 340000000,
+   "low": 335000000,
+   "high": 345000000,
+   "unit": "people",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "US population is around 340 million in 2026."
+   },
+   "count_nouns": [
+    "people"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 335000000.0,
+    "high": 345000000.0,
+    "value": 340000000.0
+   },
+   "median": 339963233.3061915,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "yellowstone_visits_per_capita",
+   "description": "Annual Yellowstone recreation visits per US resident.",
+   "value": 0.014,
+   "low": 0.012,
+   "high": 0.016,
+   "unit": "visits/person",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "About 4.7 million visits / 340 million people ≈ 0.0138."
+   },
+   "count_nouns": [
+    "visits",
+    "person"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.012,
+    "high": 0.016,
+    "value": 0.014
+   },
+   "median": 0.013856406460551019,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "september_share_of_annual_proxy",
+   "description": "Fraction of annual visits occurring in September, used as a proxy from typical seasonality.",
+   "value": 0.12,
+   "low": 0.09,
+   "high": 0.15,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Same as september_share_of_annual but used in proxy path."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.09,
+    "high": 0.15,
+    "value": 0.12
+   },
+   "median": 0.1161895003862225,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  }
+ ],
+ "paths": [
+  {
+   "id": "p1",
+   "method": "top_down",
+   "description": "Estimate annual visits and multiply by September's share.",
+   "formula": "annual_visits_2025 * september_share_of_annual",
+   "output_unit": "visits",
+   "issues": [],
+   "uses": [
+    "annual_visits_2025",
+    "september_share_of_annual"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 544261.9087225986,
+   "p10": 411564.7574152066,
+   "p90": 715236.0780062611,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": -1.9286549331065747e-16
+  },
+  {
+   "id": "p2",
+   "method": "bottom_up",
+   "description": "Average daily visits in September times number of days.",
+   "formula": "daily_visits_september * september_days",
+   "output_unit": "visits",
+   "issues": [],
+   "uses": [
+    "daily_visits_september",
+    "september_days"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 537577.9974548366,
+   "p10": 419499.32144501206,
+   "p90": 689798.52096207,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": -0.005366455239123535
+  },
+  {
+   "id": "p3",
+   "method": "proxy",
+   "description": "Scale last year's September visits by a growth factor.",
+   "formula": "september_visits_2025 * yoy_growth_factor",
+   "output_unit": "visits",
+   "issues": [],
+   "uses": [
+    "september_visits_2025",
+    "yoy_growth_factor"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 564614.5094282476,
+   "p10": 498523.1190321627,
+   "p90": 638574.3310022881,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": 0.015944094029228622
+  }
+ ],
+ "errors": [],
+ "warnings": [],
+ "mc": {
+  "samples": 20000,
+  "seed": "20261015:fc_yell_2026_09",
+  "input_distribution": "lognormal, low/high = P10/P90"
+ },
+ "result": {
+  "central": 544261.9087225988,
+  "p10": 435607.1275112142,
+  "p90": 678122.1431109981,
+  "unit": "",
+  "n_valid_paths": 3,
+  "outliers": [],
+  "path_spread_oom": 0.021310549268352297
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "target",
+    "kind": "target",
+    "label": "target",
+    "status": "estimated",
+    "definition": "Number of recreation visits to Yellowstone National Park during September 2026, as reported in NPS monthly visitation statistics.",
+    "unit": "",
+    "central": 544261.9087225988,
+    "p10": 435607.1275112142,
+    "p90": 678122.1431109981,
+    "n_valid_paths": 3,
+    "outliers": []
+   },
+   {
+    "id": "path:p1",
+    "kind": "path",
+    "label": "p1 top_down",
+    "status": "valid",
+    "method": "top_down",
+    "description": "Estimate annual visits and multiply by September's share.",
+    "formula": "annual_visits_2025 * september_share_of_annual",
+    "output_unit": "visits",
+    "issues": [],
+    "median": 544261.9087225986,
+    "p10": 411564.7574152066,
+    "p90": 715236.0780062611,
+    "log10_vs_central": -1.9286549331065747e-16,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p2",
+    "kind": "path",
+    "label": "p2 bottom_up",
+    "status": "valid",
+    "method": "bottom_up",
+    "description": "Average daily visits in September times number of days.",
+    "formula": "daily_visits_september * september_days",
+    "output_unit": "visits",
+    "issues": [],
+    "median": 537577.9974548366,
+    "p10": 419499.32144501206,
+    "p90": 689798.52096207,
+    "log10_vs_central": -0.005366455239123535,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p3",
+    "kind": "path",
+    "label": "p3 proxy",
+    "status": "valid",
+    "method": "proxy",
+    "description": "Scale last year's September visits by a growth factor.",
+    "formula": "september_visits_2025 * yoy_growth_factor",
+    "output_unit": "visits",
+    "issues": [],
+    "median": 564614.5094282476,
+    "p10": 498523.1190321627,
+    "p90": 638574.3310022881,
+    "log10_vs_central": 0.015944094029228622,
+    "n_dependents": 1
+   },
+   {
+    "id": "input:annual_visits_2025",
+    "kind": "input",
+    "label": "annual_visits_2025",
+    "status": "assumption",
+    "description": "Total recreation visits to Yellowstone National Park in calendar year 2025.",
+    "value": 4700000,
+    "low": 4200000,
+    "high": 5200000,
+    "unit": "visits",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Recent annual visitation has hovered around 4.5–4.9 million; 2025 likely similar."
+    },
+    "issues": [],
+    "count_nouns": [
+     "visits"
+    ],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.02020533673745728,
+    "sensitivity_path_max": 0.09275405323689867
+   },
+   {
+    "id": "input:september_share_of_annual",
+    "kind": "input",
+    "label": "september_share_of_annual",
+    "status": "assumption",
+    "description": "Fraction of annual Yellowstone visits that occur in September.",
+    "value": 0.12,
+    "low": 0.09,
+    "high": 0.15,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September is a popular shoulder month; typical share is roughly 10–14% of annual visits."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.02020533673745728,
+    "sensitivity_path_max": 0.22184874961635614
+   },
+   {
+    "id": "input:september_days",
+    "kind": "input",
+    "label": "september_days",
+    "status": "assumption",
+    "description": "Number of days in September 2026.",
+    "value": 30,
+    "low": 30,
+    "high": 30,
+    "unit": "days",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September always has 30 days."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0,
+    "sensitivity_path_max": 0.0
+   },
+   {
+    "id": "input:daily_visits_september",
+    "kind": "input",
+    "label": "daily_visits_september",
+    "status": "assumption",
+    "description": "Average number of recreation visits per day in Yellowstone during September.",
+    "value": 18000,
+    "low": 14000,
+    "high": 23000,
+    "unit": "visits/day",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September daily average is typically between 15,000 and 22,000 based on recent years."
+    },
+    "issues": [],
+    "count_nouns": [
+     "visits"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.016461326041183,
+    "sensitivity_path_max": 0.21559980033935489
+   },
+   {
+    "id": "input:september_visits_2025",
+    "kind": "input",
+    "label": "september_visits_2025",
+    "status": "assumption",
+    "description": "Recreation visits to Yellowstone in September 2025.",
+    "value": 560000,
+    "low": 500000,
+    "high": 620000,
+    "unit": "visits",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September 2025 likely similar to recent Septembers (e.g., 2024 ~ 550k)."
+    },
+    "issues": [],
+    "count_nouns": [
+     "visits"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0037440106962742803,
+    "sensitivity_path_max": 0.0934216851622347
+   },
+   {
+    "id": "input:yoy_growth_factor",
+    "kind": "input",
+    "label": "yoy_growth_factor",
+    "status": "assumption",
+    "description": "Year-over-year growth factor for September visits from 2025 to 2026.",
+    "value": 1.02,
+    "low": 0.95,
+    "high": 1.08,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Visitation trends are relatively stable; modest growth or decline possible."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0037440106962742803,
+    "sensitivity_path_max": 0.05570015019810182
+   },
+   {
+    "id": "input:us_population",
+    "kind": "input",
+    "label": "us_population",
+    "status": "assumption",
+    "description": "Population of the United States in 2026.",
+    "value": 340000000,
+    "low": 335000000,
+    "high": 345000000,
+    "unit": "people",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "US population is around 340 million in 2026."
+    },
+    "issues": [],
+    "count_nouns": [
+     "people"
+    ],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:yellowstone_visits_per_capita",
+    "kind": "input",
+    "label": "yellowstone_visits_per_capita",
+    "status": "assumption",
+    "description": "Annual Yellowstone recreation visits per US resident.",
+    "value": 0.014,
+    "low": 0.012,
+    "high": 0.016,
+    "unit": "visits/person",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "About 4.7 million visits / 340 million people ≈ 0.0138."
+    },
+    "issues": [],
+    "count_nouns": [
+     "visits",
+     "person"
+    ],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:september_share_of_annual_proxy",
+    "kind": "input",
+    "label": "september_share_of_annual_proxy",
+    "status": "assumption",
+    "description": "Fraction of annual visits occurring in September, used as a proxy from typical seasonality.",
+    "value": 0.12,
+    "low": 0.09,
+    "high": 0.15,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Same as september_share_of_annual but used in proxy path."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   }
+  ],
+  "edges": [
+   {
+    "source": "path:p1",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:annual_visits_2025",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:september_share_of_annual",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p2",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:daily_visits_september",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:september_days",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p3",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:september_visits_2025",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:yoy_growth_factor",
+    "target": "path:p3",
+    "kind": "used_by"
+   }
+  ]
+ }
+}
