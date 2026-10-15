@@ -139,7 +139,7 @@ async function pageRun(id) {
   ${r.directions.length ? `<h2>各方向（子 agent）</h2><table><tr><th>方向</th><th>轮</th><th>类别</th><th>假设</th><th>状态</th>
   <th class="num">快照 / live / 丢弃</th><th class="num">抽取页</th><th class="num">核对通过的点</th></tr>
   ${r.directions.map(d => `<tr><td>${esc(d.id)}</td><td>${d.round}</td><td>${esc(d.category)}</td><td class="small">${esc(d.hypothesis)}</td>
-  <td>${dirStatus(d)}</td><td class="num">${d.pages.snapshot} / ${d.pages.live_dated} / ${d.pages.dropped}</td>
+  <td style="white-space:nowrap">${dirStatus(d)}</td><td class="num">${d.pages.snapshot} / ${d.pages.live_dated} / ${d.pages.dropped}</td>
   <td class="num">${d.n_extracted}</td><td class="num">${d.n_points ?? d.n_verified}</td></tr>`).join("")}</table>
   ${r.markets ? `<p class="muted">预测市场工具：${r.markets.n_markets} 个市场，${r.markets.n_points} 个点。${esc(r.markets.note || "")}</p>` : ""}` : ""}
   ${r.compute ? `<h2>计算结果</h2><p>估计 <b>${fmt(r.compute.central)}</b>，80% 区间 [${fmt(r.compute.p10)}, ${fmt(r.compute.p90)}]（${esc(r.compute.basis)}）</p>` : ""}

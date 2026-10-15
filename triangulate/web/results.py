@@ -223,7 +223,8 @@ def _repair_view(jr: dict):
         return None
     return {"round": jr.get("round"), "errors": rp.get("errors") or [], "error": rp.get("error"),
             "errors_after": rp.get("errors_after"), "reverted": rp.get("reverted"),
-            "previous_methods": [f"{m.get('id')} {m.get('method')}: {(m.get('params') or {}).get('formula') or ''}"
+            "previous_methods": [f"{m.get('id')} {m.get('method')}" + (f": {(m.get('params') or {})['formula']}"
+                                                                     if (m.get("params") or {}).get("formula") else "")
                                  for m in rp.get("previous_methods") or [] if isinstance(m, dict)]}
 
 

@@ -322,8 +322,8 @@ def _judge_summary(jr: dict) -> dict:
     parts = [f"丢弃 {n_drop} 个点", f"提出 {len(jr.get('methods') or [])} 个方法"]
     if jr.get("extra_directions"):
         parts.append(f"追加 {len(jr['extra_directions'])} 个 base-rate 方向")
-    if jr.get("audit_failed"):
-        parts.append(f"输入核对排除 {len(jr['audit_failed'])} 个方法")
+    if "audit_failed" in jr:   # 只有交给 compute 的那一轮做输入核对
+        parts.append(f"输入核对排除 {len(jr['audit_failed'] or {})} 个方法")
     if jr.get("audit_error"):
         parts.append(f"输入核对出错：{jr['audit_error']}"[:120])
     rp = jr.get("repair")
