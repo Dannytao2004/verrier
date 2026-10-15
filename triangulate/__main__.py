@@ -1,4 +1,4 @@
-"""python -m triangulate {select|run|demo|report}"""
+"""python -m triangulate {select|run|demo|report|forecast|agent|agent-score}"""
 import argparse
 import json
 import sys
@@ -16,7 +16,18 @@ def main(argv=None):
     sub.add_parser("report", help="offline: rebuild states, graphs and tables from saved replies")
     f = sub.add_parser("forecast", help="one-month-ahead forecast of Yellowstone visits (both arms), then score")
     f.add_argument("--force", action="store_true")
+    g = sub.add_parser("agent", help="research agent (LangGraph) on the forecast questions; needs .venv packages")
+    g.add_argument("--question", action="append", default=[], help="question id (repeatable); default: all")
+    g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+    sub.add_parser("agent-score", help="offline: score saved agent runs against official values and the other arms")
     a = ap.parse_args(argv)
+
+    if a.cmd in ("agent", "agent-score"):
+        from .agent import run as agent_run
+        sys.stdout.reconfigure(encoding="utf-8")
+        rows = agent_run.main(a.question, a.auto_approve) if a.cmd == "agent" else agent_run.score_all()
+        print(json.dumps(rows, indent=1, ensure_ascii=False))
+        return
 
     if a.cmd == "forecast":
         from .forecast import report, run
