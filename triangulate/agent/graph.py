@@ -1,5 +1,6 @@
 """LangGraph 状态图：plan -> approve(interrupt) -> [Send: 每个方向一个 subagent + markets] -> judge
 -> (可选一轮 base-rate 方向 -> judge) -> compute -> final。
+裁判可以为 formula_mc 提出假设输入（assumptions.py 校验）；--ablate-own-history 时按 ablation.py 去掉目标自身的历史。
 
 图里只放可序列化的数据；预算、LLM、哨兵等放在 Context 里，通过闭包交给节点。
 """
@@ -13,6 +14,8 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send, interrupt
 
+from . import ablation as AB
+from . import assumptions as AS
 from . import compute as C
 from .markets import search_markets
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
@@ -36,6 +39,7 @@ class AgentState(TypedDict, total=False):
     judge_rounds: Annotated[list, operator.add]
     points: list
     compute: dict
+    assumptions: dict
     final: dict
     aborted: str
 
@@ -118,8 +122,37 @@ def _table(points: list) -> str:
     return "\n".join(rows)
 
 
+def assumption_placeholders(a: dict) -> dict:
+    """一条假设的占位符：value 是裁判提的值，low / high 是代码实际采样用的 P10 / P90（已放宽、% 按原写法显示）。"""
+    f = 100.0 if a.get("is_pct") else 1.0
+    pct = "%" if a.get("is_pct") else ""
+    return {f"{a['id']}_value": _fmt_num(a["value"]) + pct, f"{a['id']}_low": _fmt_num(a["p10_used"] * f) + pct,
+            f"{a['id']}_high": _fmt_num(a["p90_used"] * f) + pct}
+
+
+def key_assumptions_template(used: list, year: int, keep_ids=frozenset()) -> str:
+    """最终答案末尾的「Key assumptions」：由代码按校验后的假设生成，数字只通过占位符出现。"""
+    if not used:
+        return "Key assumptions: none (every formula input is an observed data point)."
+    lines = ["Key assumptions (proposed by the analyst model, not observed; code samples each one between the "
+             "bounds shown):"]
+    def clean(t):  # 模型写的文字：数字换成 [n]，不许拼出占位符
+        return scrub_digits(t, year, keep_ids)[0].replace("[[", "[ [").replace("]]", "] ]")
+
+    for a in used:
+        unit = "" if a.get("is_pct") else " " + clean(a["unit"])
+        widened = " (range widened by code)" if a.get("widened_by_floor") else ""
+        line = (f"- {a['id']} {clean(a['name'])}: [[{a['id']}_value]]{unit}, range [[{a['id']}_low]] to "
+                f"[[{a['id']}_high]]{widened}; used by {', '.join(a['used_by'])}.")
+        if a.get("falsified_by"):
+            line += f" Overturned by: {clean(a['falsified_by'])}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def build(ctx: Context):
     b = ctx.budget
+    ablate = bool(getattr(ctx, "ablate_own_history", False))
 
     def plan(state: AgentState):
         notes = []
@@ -133,7 +166,14 @@ def build(ctx: Context):
             return {"aborted": f"plan failed: {err}", "plan": {}, "directions": []}
         raw = [d for d in (out.get("directions") or []) if isinstance(d, dict)]
         cands = [_clean_direction(d, i + 1, "c") for i, d in enumerate(raw)]
-        dirs = select_directions(cands, b.directions)
+        pool = cands
+        if ablate:  # 消融：目标自身历史的方向一个都不跑，名额留给别的类别
+            pool = [c for c in cands if c["category"] != "own_history"]
+            for c in cands:
+                if c["category"] == "own_history":
+                    c.update(selected=False, ablation_dropped=True)
+            notes.append(f"ablation: dropped {len(cands) - len(pool)} own_history candidate direction(s)")
+        dirs = select_directions(pool, b.directions)
         notes.append(f"plan proposed {len(cands)} candidate directions in {len({c['category'] for c in cands})} categories; "
                      f"running {len(dirs)} (budget cap {b.directions})")
         if not any(d["category"] == "own_history" for d in dirs):
@@ -151,7 +191,8 @@ def build(ctx: Context):
         decision = decision if isinstance(decision, dict) else {"approved": bool(decision)}
         upd = {"approval": decision}
         if decision.get("directions"):  # 人可以改方向列表
-            upd["directions"] = [_clean_direction(d, i + 1, "d") for i, d in enumerate(decision["directions"][: b.directions])]
+            ds = [_clean_direction(d, i + 1, "d") for i, d in enumerate(decision["directions"][: b.directions])]
+            upd["directions"] = [d for d in ds if not (ablate and d["category"] == "own_history")]
         return upd
 
     def fan_out(state: AgentState):
@@ -188,6 +229,13 @@ def build(ctx: Context):
         pts = [dict(p) for p in old.values()]
         for i, p in enumerate(new, start=len(pts) + 1):
             pts.append({**p, "id": f"p{i}", "keep": True})
+        if ablate:  # 消融：目标自身更早期间的值不进裁判的表格（规则见 ablation.py），state 里保留并标原因
+            by_id = {d["id"]: d for d in state.get("directions") or []}
+            for p in pts:
+                why = p.get("ablation_excluded") or AB.own_value_reason(p, state["plan"]["target"], by_id)
+                if why:
+                    p.update(keep=False, ablation_excluded=why)
+        shown = [p for p in pts if not p.get("ablation_excluded")]
         upd = {"points": pts}
         if state.get("aborted") or b.aborted:
             return {**upd, "judge_rounds": [{"round": rnd, "skipped": b.aborted or state.get("aborted")}]}
@@ -195,16 +243,17 @@ def build(ctx: Context):
         try:
             out, err = ctx.llm.ask(JUDGE_SYSTEM, JUDGE_USER.format(
                 question=state["question"], as_of=state["as_of"], target=dumps(state["plan"]["target"]),
-                directions=dirs, table=_table(pts) if pts else "(no verified data points)", methods_spec=METHODS_SPEC,
+                directions=dirs, table=_table(shown) if shown else "(no verified data points)",
+                methods_spec=AB.methods_spec() if ablate else METHODS_SPEC,
                 extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2), role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=6000)
         except BudgetExceeded as e:
             return {**upd, "aborted": str(e), "judge_rounds": [{"round": rnd, "skipped": str(e)}]}
         if out is None:
             return {**upd, "judge_rounds": [{"round": rnd, "error": err}]}
-        ids = {p["id"] for p in pts}
+        ids = {p["id"] for p in shown}
         # 裁判只列要丢的点（逐点表态会让输出超过 max_tokens，9 月第二轮就是这样失败的）；没列的点 = 保留
         dec = {str(x.get("id")): x for x in out.get("decisions") or [] if isinstance(x, dict)}
-        for p in pts:
+        for p in shown:
             p["judged_round"] = rnd
             if p["id"] in dec:
                 p["keep"] = bool(dec[p["id"]].get("keep", False))
@@ -213,9 +262,14 @@ def build(ctx: Context):
         if rnd == 1:
             raw = [x for x in out.get("extra_directions") or [] if isinstance(x, dict)][: b.extra_directions]
             extra = [{**_clean_direction(x, i + 1, "b"), "category": (str(x.get("category", "")).strip() if str(x.get("category", "")).strip() in CATEGORIES else "base_rates")} for i, x in enumerate(raw)]
+        dropped_extra = [x["id"] for x in extra if ablate and x["category"] == "own_history"]
+        extra = [x for x in extra if x["id"] not in dropped_extra]
+        raw_a = out.get("assumptions") if isinstance(out.get("assumptions"), list) else []
         jr = {"round": rnd, "assessment": out.get("assessment") or [], "decisions": list(dec.values()),
               "extra_directions": extra, "methods": [m for m in out.get("methods") or [] if isinstance(m, dict)],
-              "unknown_ids_in_decisions": sorted(set(dec) - ids)}
+              "assumptions": raw_a[:20], "unknown_ids_in_decisions": sorted(set(dec) - ids)}
+        if dropped_extra:
+            jr["ablation_dropped_extra_directions"] = dropped_extra
         upd.update(points=pts, judge_rounds=[jr])
         if extra:
             upd["directions"] = state["directions"] + extra
@@ -231,9 +285,18 @@ def build(ctx: Context):
     def compute(state: AgentState):
         jr = next((j for j in reversed(state.get("judge_rounds") or []) if j.get("methods")), {})
         pts = {p["id"]: p for p in state.get("points") or []}
-        out = C.run(jr.get("methods") or [], pts, state["plan"]["target"])
+        target = state["plan"]["target"]
+        av = AS.validate(jr.get("assumptions") or [], target)
+        out = C.run(jr.get("methods") or [], pts, target, assumptions=av,
+                    only_methods=AB.ALLOWED_METHODS if ablate else None)
         out["methods_from_round"] = jr.get("round")
-        return {"compute": out}
+        labels = {m["id"]: m.get("label") for m in out["methods"]}
+        for a in av["kept"]:
+            a["used_by"] = out["assumptions_used_by"].get(a["id"], [])
+            a["used_by_labels"] = [labels.get(m) for m in a["used_by"]]
+        av.update(from_round=jr.get("round"), min_width=AS.MIN_WIDTH, max_per_run=AS.MAX_PER_RUN,
+                  max_per_method=AS.MAX_PER_METHOD)
+        return {"compute": out, "assumptions": av}
 
     def final(state: AgentState):
         comp = state.get("compute") or {}
@@ -251,6 +314,15 @@ def build(ctx: Context):
             ph[f"{mid}_backtest_error"] = "n/a" if e is None else f"{100 * (math.exp(e) - 1):.1f}%"
             summary.append(f"- {m['id']} {m['method']}: estimate {ph[f'{mid}_estimate']}, weight {ph[f'{mid}_weight']}, "
                            f"backtest mean error {ph[f'{mid}_backtest_error']}, error: {m.get('error', '')}; {m.get('rationale', '')}")
+            if m.get("inputs_detail"):
+                summary.append(f"  inputs of {m['id']}: observed points {m.get('used_ids') or []}, "
+                               f"assumptions {m.get('used_assumptions') or []}")
+        used_a = [a for a in (state.get("assumptions") or {}).get("kept") or [] if a.get("used_by")]
+        for a in used_a:
+            ph.update(assumption_placeholders(a))
+            summary.append(f"- assumption {a['id']} (proposed by the analyst, not observed; used by {a['used_by']}): "
+                           f"{a['name']}, value {ph[a['id'] + '_value']}, range used by code {ph[a['id'] + '_low']} to "
+                           f"{ph[a['id'] + '_high']} ({a['unit']}); rationale: {a['rationale']}")
         summary.insert(0, f"combined estimate {ph['estimate']}, 80% interval {ph['p10']} to {ph['p90']} (basis: {ph['interval_basis']})")
         default = ("Estimate: [[estimate]] ([[interval_level]] interval [[p10]] to [[p90]], basis: [[interval_basis]]), "
                    "from [[n_methods]] method(s) over [[n_points_kept]] kept data points.")
@@ -269,11 +341,17 @@ def build(ctx: Context):
         # 渲染按切分后的片段拼，不再对拼好的文字重新找占位符，"[" + "[n]" + "]" 不会被当成占位符。
         parts = PLACEHOLDER.split(text)
         year = int(state["as_of"][:4])
-        mids = {m["id"] for m in comp.get("methods") or []}
+        mids = {m["id"] for m in comp.get("methods") or []} | {a["id"] for a in used_a}
         for i in range(0, len(parts), 2):
             parts[i], n = scrub_digits(parts[i], year, mids)
             digits_removed += n
         text = "".join(p if i % 2 == 0 else f"[[{p}]]" for i, p in enumerate(parts))
+        if r.get("central") is not None:  # 代码生成的假设清单：数字只走占位符，模型写的名字和理由里的数字同样替换掉
+            extra = "\n\n" + key_assumptions_template(used_a, year, mids)
+            text += extra
+            eparts = PLACEHOLDER.split(extra)  # 只切新加的这段，前面已经切好的片段不重新找占位符
+            parts[-1] += eparts[0]
+            parts += eparts[1:]
         rendered = "".join(p if i % 2 == 0 else ph.get(p, "[unknown placeholder]") for i, p in enumerate(parts))
         if r.get("central") is None:
             rendered = "No estimate: no estimation method could be computed from the verified evidence."

@@ -1,4 +1,4 @@
-"""输出：state.json（全过程）、evidence ledger（Markdown）、依赖图 HTML（target <- methods <- data points <- sources）。"""
+"""输出：state.json（全过程）、evidence ledger（Markdown）、依赖图 HTML（target <- methods <- data points / assumptions <- sources）。"""
 import html
 import json
 import urllib.parse
@@ -6,10 +6,12 @@ import urllib.parse
 from ..viewer import VIS
 
 COL = {"snapshot": "#1b7a3a", "live_dated": "#8fd19e", "discarded": "#bdbdbd", "leak": "#d93b3b",
-       "base_rate": "#4a7fd6", "method": "#4a7fd6", "method_failed": "#9e9e9e", "target": "#1f2d4d", "api": "#1b7a3a"}
+       "base_rate": "#4a7fd6", "method": "#4a7fd6", "method_failed": "#9e9e9e", "target": "#1f2d4d", "api": "#1b7a3a",
+       "assumption": "#f28e2b"}
 LEGEND = [("snapshot", "verified in archived snapshot <= as_of"), ("live_dated", "live page dated <= as_of"),
           ("discarded", "discarded by judge"), ("leak", "page excluded: leak sentinel hit"),
-          ("base_rate", "base-rate direction (kept)"), ("method_failed", "method failed"), ("target", "target")]
+          ("base_rate", "base-rate direction (kept)"), ("assumption", "assumption proposed by the judge (not observed)"),
+          ("method_failed", "method failed"), ("target", "target")]
 
 
 def _num(v):
@@ -32,6 +34,12 @@ def dep_graph(state: dict) -> dict:
             edges.append({"from": f"M:{m['id']}", "to": "target"})
         for i in m.get("used_ids") or []:
             used.setdefault(i, []).append(f"M:{m['id']}")
+        for a in m.get("used_assumptions") or []:
+            edges.append({"from": f"A:{a}", "to": f"M:{m['id']}"})
+    for a in (state.get("assumptions") or {}).get("kept") or []:
+        pct = "%" if a.get("is_pct") else ""
+        nodes.append({"id": f"A:{a['id']}", "kind": "assumption", "colour": COL["assumption"],
+                      "label": f"{a['id']} {_num(a['value'])}{pct}\n{a['name'][:28]}", "detail": a})
     srcs = {}
     for res_d in state.get("results") or []:
         for pg in res_d.get("pages") or []:
@@ -75,12 +83,12 @@ main{display:flex;height:calc(100vh - 150px);min-height:480px}
 .sw{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid #888}
 </style></head><body>
 <header><h1>__TITLE__</h1><div class="meta">__META__</div><div class="legend">__LEGEND__</div></header>
-<main><div id="graph"></div><div id="side"><p>Click a node to see its details. Levels: sources &rarr; data points &rarr; methods &rarr; target.</p>
+<main><div id="graph"></div><div id="side"><p>Click a node to see its details. Levels: sources &rarr; data points and assumptions &rarr; methods &rarr; target.</p>
 <pre id="detail"></pre></div></main>
 <script>
 const G = __GRAPH__;
-const LEVEL = {source:0, point:1, method:2, target:3};
-const SHAPE = {source:'square', point:'dot', method:'box', target:'star'};
+const LEVEL = {source:0, point:1, assumption:1, method:2, target:3};
+const SHAPE = {source:'square', point:'dot', assumption:'diamond', method:'box', target:'star'};
 const nodes = G.nodes.map(n => ({id:n.id, label:n.label, level:LEVEL[n.kind], shape:SHAPE[n.kind],
   size: n.kind === 'target' ? 26 : 12, color:{background:n.colour, border:'#555'},
   font:{color: n.kind === 'method' ? '#fff' : '#222', size:12}}));
@@ -142,7 +150,7 @@ def ledger(state: dict, score: dict | None = None) -> str:
                 L.append(f"- `{pg['url'][:150]}` -> **{via}** ({extra}){leak}; points raw/verified "
                          f"{pg.get('n_points_raw', '-')}/{pg.get('n_points_verified', '-')}")
                 for p in pts_by_url.get((d["id"], pg["url"]), []):
-                    k = "keep" if p.get("keep") else "DISCARD"
+                    k = "EXCLUDED (ablation)" if p.get("ablation_excluded") else "keep" if p.get("keep") else "DISCARD"
                     L.append(f"  - {p['id']} {_md(p['name'])[:80]} = **{_num(p['value'])}** {_md(p.get('unit'))} "
                              f"({p.get('period_start')}..{p.get('period_end')}) [{k}: {_md(p.get('judge_reason'))[:120]}] "
                              f"quote: \"{_md(p.get('quote'))[:200]}\"")
@@ -162,15 +170,64 @@ def ledger(state: dict, score: dict | None = None) -> str:
         if jr.get("extra_directions"):
             L.append(f"- extra base-rate directions requested: {[x['id'] for x in jr['extra_directions']]}")
         L.append("")
-    L += ["## Methods (computed by code)", "", "| id | method | estimate | backtest years | mean abs ln err | weight | notes / error |",
-          "|---|---|---|---|---|---|---|"]
+    L += assumptions_md(state)
+    L += ablation_md(state)
+    L += ["## Methods (computed by code)", "",
+          "| id | method | estimate | inputs (points / assumptions) | backtest years | mean abs ln err | weight | weight basis | "
+          "notes / error |", "|---|---|---|---|---|---|---|---|---|"]
     w = r.get("weights") or {}
+    wb = r.get("weight_basis") or {}
     for m in comp.get("methods") or []:
         e = m.get("backtest_mean_abs_log_err")
         es = "" if e is None else f"{e:.3f}"
-        L.append(f"| {m['id']} | {m['method']} | {_num(m.get('estimate'))} | {[b['year'] for b in m.get('backtest') or []]} | "
-                 f"{es} | {w.get(m['id'], 0):.2f} | {_md(m.get('error') or '; '.join(m.get('notes') or []))[:200]} |")
+        inp = f"{m.get('used_ids') or []} / {m.get('used_assumptions') or []}" if m.get("inputs_detail") else ""
+        L.append(f"| {m['id']} | {m['method']} | {_num(m.get('estimate'))} | {_md(inp)} | "
+                 f"{[b['year'] for b in m.get('backtest') or []]} | {es} | {w.get(m['id'], 0):.2f} | {wb.get(m['id'], '')} | "
+                 f"{_md(m.get('error') or '; '.join(m.get('notes') or []))[:200]} |")
+    share = r.get("assumption_weight_share")
+    tail = "" if share is None else f", weight on methods that use assumptions {share:.2f}"
     L += ["", f"Result: central **{_num(r.get('central'))}**, 80% interval [{_num(r.get('p10'))}, {_num(r.get('p90'))}], "
-              f"basis {r.get('basis')}, weight rule {r.get('weight_rule')}", "", "## Final answer", "",
+              f"basis {r.get('basis')}, weight rule {r.get('weight_rule')}{tail}", "", "## Final answer", "",
           (state.get("final") or {}).get("text", ""), ""]
     return "\n".join(L)
+
+
+def assumptions_md(state: dict) -> list:
+    """账本里的假设一节：保留的（值、裁判给的范围、代码实际采样的范围、理由、适用条件、推翻条件、被哪个方法用）和被拒的。"""
+    av = state.get("assumptions") or {}
+    kept, rej = av.get("kept") or [], av.get("rejected") or []
+    L = ["## Assumptions (proposed by the judge, validated by code)", ""]
+    if not kept and not rej:
+        return L + ["None proposed.", ""]
+    L += [f"Rules: ids a1..a{av.get('max_per_run', 8)}, at most {av.get('max_per_method', 3)} per method, every formula needs "
+          f"an observed point; sampled lognormally with P10/P90 = low/high, widened by code to high/low >= "
+          f"{av.get('min_width')}. From judge round {av.get('from_round')}.", "",
+          "| id | name | value | judge range | range used (P10..P90) | unit | used by | rationale | applies when | falsified by |",
+          "|---|---|---|---|---|---|---|---|---|---|"]
+    for a in kept:
+        f = 100.0 if a.get("is_pct") else 1.0
+        used = ", ".join(f"{m} ({lab})" for m, lab in zip(a.get("used_by") or [], a.get("used_by_labels") or [])) or "unused"
+        wid = " (widened)" if a.get("widened_by_floor") else ""
+        L.append(f"| {a['id']} | {_md(a['name'])} | {_num(a['value'])} | {_num(a['low'])}..{_num(a['high'])} | "
+                 f"{_num(a['p10_used'] * f)}..{_num(a['p90_used'] * f)}{wid} | {_md(a['unit'])} | {used} | "
+                 f"{_md(a['rationale'])} | {_md(a.get('applies_when'))} | {_md(a.get('falsified_by'))} |")
+    if rej:
+        L += ["", "Rejected by code:", ""]
+        for a in rej:
+            L.append(f"- {_md(a.get('id') or a.get('raw'))} {_md(a.get('name', ''))[:80]}: {_md(a.get('reason'))}")
+    return L + [""]
+
+
+def ablation_md(state: dict) -> list:
+    ab = state.get("ablation")
+    if not ab:
+        return []
+    L = ["## Ablation: no own history (--ablate-own-history)", "",
+         f"- own_history candidate directions dropped: {ab.get('dropped_candidate_directions')}",
+         f"- own_history extra directions dropped: {ab.get('dropped_extra_directions')}",
+         f"- entity anchors from the pinned target: {ab.get('entity_anchors')}; quantity stems: {ab.get('quantity_stems')}",
+         f"- points excluded before the judge: {ab.get('n_points_excluded')} of {ab.get('n_points_total')}",
+         f"- methods allowed: {ab.get('methods_allowed')}", ""]
+    for x in ab.get("excluded_points") or []:
+        L.append(f"  - {x['id']} {_md(x['name'])[:90]} = {_num(x['value'])} ({x.get('period_end')}): {_md(x['reason'])}")
+    return L + [""]

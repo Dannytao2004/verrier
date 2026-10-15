@@ -12,6 +12,7 @@ from datetime import date, datetime, timezone
 from langgraph.types import Command
 
 from ..config import RESULTS
+from . import ablation as AB
 from . import evidence as ev
 from .evidence import parse_date
 from .graph import build
@@ -28,6 +29,8 @@ RESIDUAL_RISKS = [
     "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include "
     "the target if the target was published after the model's release.",
     "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+    "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history "
+    "before as_of; code checks their form, not where the number came from.",
 ]
 BY_CONSTRUCTION = [
     "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result "
@@ -57,6 +60,10 @@ def leakage_audit(state: dict, as_of: str, leak_values=None) -> dict:
     late_snaps = [pg["url"] for pg in pages if pg.get("snapshot_ts") and pg["snapshot_ts"][:8] > a.strftime("%Y%m%d")]
     pats = ev.leak_patterns(leak_values) if leak_values else []
     queries = [q for r in state.get("results") or [] for q in (r.get("search") or {}).get("queries") or []]
+    av = state.get("assumptions") or {}
+    a_text = [(a.get("id"), " ".join(str(a.get(k, "")) for k in ("name", "value", "low", "high", "rationale",
+                                                                   "applies_when", "falsified_by")))
+              for a in (av.get("kept") or []) + (av.get("rejected") or [])]
     return {"pages_total": len(pages), "pages_snapshot": sum(pg.get("status") == "snapshot" for pg in pages),
             "pages_live_dated": sum(pg.get("status") == "live_dated" for pg in pages),
             "pages_dropped": sum(pg.get("status") == "dropped" for pg in pages),
@@ -69,12 +76,39 @@ def leakage_audit(state: dict, as_of: str, leak_values=None) -> dict:
             "sentinel_hits": [{"url": pg["url"], "hits": pg["leak_hits"]} for pg in pages if pg.get("leak_hits")],
             "points_dated_after_as_of": late_points, "snapshots_after_as_of": late_snaps,
             "searcher_queries_containing_registered_values": [q for q in queries if ev.leak_scan(q, pats)],
+            "assumptions_containing_registered_values": [i for i, t in a_text if ev.leak_scan(t, pats)],
             "page_selection": sorted({(r.get("search") or {}).get("selection", "searcher_urls")
                                       for r in state.get("results") or [] if r.get("search")}),
             "by_construction": BY_CONSTRUCTION, "residual_risks": RESIDUAL_RISKS}
 
 
-def run_question(q: dict, auto_approve: bool, tag: str = "") -> dict:
+def ablation_tag(tag: str) -> str:
+    """消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""
+    return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")
+
+
+def ablation_summary(state: dict) -> dict:
+    """消融记录（写进 state.json 和账本）：去掉了哪些方向、按什么规则排除了哪些点、残余风险。"""
+    target = (state.get("plan") or {}).get("target") or {}
+    pts = state.get("points") or []
+    ex = [{k: p.get(k) for k in ("id", "name", "value", "unit", "period_end", "direction_id")} | {"reason": p["ablation_excluded"]}
+          for p in pts if p.get("ablation_excluded")]
+    return {"own_history": True,
+            "dropped_candidate_directions": [c["id"] for c in (state.get("plan") or {}).get("candidates") or []
+                                             if c.get("ablation_dropped")],
+            "dropped_extra_directions": [i for j in state.get("judge_rounds") or []
+                                         for i in j.get("ablation_dropped_extra_directions") or []],
+            "entity_anchors": AB.entity_anchors(target), "quantity_stems": sorted(AB.quantity_stems(target)),
+            "n_points_total": len(pts), "n_points_excluded": len(ex), "excluded_points": ex,
+            "methods_allowed": sorted(AB.ALLOWED_METHODS),
+            "rule": "exclude points from own_history directions and points whose name contains a target entity anchor "
+                    "and whose name or unit shares a stem with the target unit (triangulate/agent/ablation.py)",
+            "residual_risks": AB.RESIDUAL_RISKS}
+
+
+def run_question(q: dict, auto_approve: bool, tag: str = "", ablate_own_history: bool = False) -> dict:
+    if ablate_own_history:
+        tag = ablation_tag(tag)
     out_dir = RES / q["id"] / tag if tag else RES / q["id"]
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -82,7 +116,7 @@ def run_question(q: dict, auto_approve: bool, tag: str = "") -> dict:
     if calls.exists():  # 保留之前那次运行的调用日志（失败重跑也留痕）
         calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
     leak_values = q.get("leak_values") or ([q["answer_value"]] if q.get("answer_value") is not None else None)
-    ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values)
+    ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values, ablate_own_history=ablate_own_history)
     g = build(ctx)
     cfg = {"configurable": {"thread_id": f"{q['id']}-{stamp}"}, "max_concurrency": 12, "recursion_limit": 80}
     t0 = time.time()
@@ -97,6 +131,8 @@ def run_question(q: dict, auto_approve: bool, tag: str = "") -> dict:
     state = dict(g.get_state(cfg).values)
     state.update(started_at=stamp, wall_s=round(time.time() - t0, 1), budget=ctx.budget.snapshot(), approvals=approvals,
                  leakage=leakage_audit(state, q["as_of"], leak_values), model=ctx.llm.model, tag=tag)
+    if ablate_own_history:
+        state["ablation"] = ablation_summary(state)
     (out_dir / "state.json").write_text(json.dumps(state, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
     score = score_one(q, state)
     (out_dir / "ledger.md").write_text(ledger(state, score), encoding="utf-8")
@@ -118,8 +154,11 @@ def _n(v):
 def score_one(q: dict, state: dict) -> dict:
     r = (state.get("compute") or {}).get("result") or {}
     est, ans = r.get("central"), q.get("answer_value")
+    used_a = [a for a in (state.get("assumptions") or {}).get("kept") or [] if a.get("used_by")]
     row = {"id": q["id"], "as_of": q["as_of"], "answer_value": ans, "source": q.get("source"), "estimate": est,
-           "p10": r.get("p10"), "p90": r.get("p90"), "basis": r.get("basis"), "scored": ans is not None}
+           "p10": r.get("p10"), "p90": r.get("p90"), "basis": r.get("basis"), "scored": ans is not None,
+           "n_assumptions_used": len(used_a), "assumptions_used": [a["id"] for a in used_a],
+           "assumption_weight_share": r.get("assumption_weight_share"), "ablation": bool(state.get("ablation"))}
     if ans is None:  # 真实使用：没有真值，不打分
         return row
     row.update(pct_err=None if est is None else est / ans - 1,
@@ -146,7 +185,8 @@ def score_all(questions: list, tag: str = "", forecast_summary=None) -> list:
         s["arms"] = {"agent": arm(s["estimate"]), "naive": arm((f.get("naive") or {}).get("estimate")),
                      "structured_no_retrieval": arm((f.get("structured") or {}).get("estimate")),
                      "last_year_same_period": arm(q.get("last_year"))}
-        s["within_20pct"] = {k: (v is not None and abs(v["pct_err"]) <= 0.20) for k, v in s["arms"].items()}
+        for lim in (20, 10, 5):
+            s[f"within_{lim}pct"] = {k: (v is not None and abs(v["pct_err"]) <= lim / 100) for k, v in s["arms"].items()}
         s["usd_total_assumed"] = st["budget"]["usd_total_assumed"]
         s["usd_tokens"] = st["budget"]["usd_tokens"]
         s["wall_s"] = st["wall_s"]
@@ -156,8 +196,10 @@ def score_all(questions: list, tag: str = "", forecast_summary=None) -> list:
     return rows
 
 
-def main(questions: list, auto_approve: bool, tag: str = "", forecast_summary=None):
+def main(questions: list, auto_approve: bool, tag: str = "", forecast_summary=None, ablate_own_history: bool = False):
     for q in questions:
-        run_question(q, auto_approve, tag)
+        run_question(q, auto_approve, tag, ablate_own_history)
+    if ablate_own_history:
+        tag = ablation_tag(tag)
     scored = [q for q in questions if q.get("answer_value") is not None]
     return score_all(scored, tag, forecast_summary) if scored else []

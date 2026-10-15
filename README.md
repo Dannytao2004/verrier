@@ -22,6 +22,7 @@ python -m unittest                # tests: evaluator, Monte Carlo aggregation, g
 .venv/Scripts/python.exe -m triangulate agent --ask "How many ... in ...?"        # research agent on any question (as_of = today)
 .venv/Scripts/python.exe -m triangulate agent --ask "..." --as-of 2026-08-15      # same, standing on an earlier date (backtest mode)
 .venv/Scripts/python.exe -m triangulate agent --auto-approve --tag post_review    # backtest on the two forecast questions
+.venv/Scripts/python.exe -m triangulate agent --auto-approve --tag v2 --ablate-own-history  # ablation: no own history (tag v2_noown)
 .venv/Scripts/python.exe -m triangulate agent-score [--tag post_review]           # offline: score saved backtest runs
 .venv/Scripts/python.exe probes/recompute_saved_runs.py                           # offline: saved runs under the current compute code
 ```
@@ -42,7 +43,7 @@ The DeepSeek key is read at run time from the file in `TRIANGULATE_KEY_FILE` (de
 | `triangulate/arms.py`, `prompts.py`, `llm.py` | the two arms, prompts, DeepSeek client with per-call logging |
 | `triangulate/report.py`, `viewer.py` | offline metrics, tables and HTML graph pages |
 | `results/` | `summary.json`, `per_question.json`, `report_tables.md`, `calls.jsonl`, `demo/` |
-| `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher, extractor checks, judge, method library |
+| `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher, extractor checks, judge, method library, assumption inputs for formula_mc (`assumptions.py`), own-history ablation (`ablation.py`) |
 | `results/agent/<id>/[<tag>/]` | `state.json`, `calls.jsonl`, `ledger.md`, `graph.html` per run; raw pages stay in `data/raw/agent/` (local only) |
 | `docs/graphs/` | `index.html`, the finance demo graph; realFP question pages under `realfp/` (local only) |
 

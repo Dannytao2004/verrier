@@ -1,11 +1,28 @@
-"""COMPUTE（只有代码）：把裁判选的方法和数据点 id 变成序列，跑方法、回测、加权、给区间。"""
+"""COMPUTE（只有代码）：把裁判选的方法和数据点 id 变成序列，跑方法、回测、加权、给区间。
+formula_mc 的输入可以是保留的数据点，也可以是校验通过的假设（assumptions.py）；规则：至少一个观测点、最多 3 个假设。"""
+import random
 import statistics
 from datetime import timedelta
 
+from . import assumptions as A
 from . import methods as M
+from ..mc import sample_lognormal
 from .evidence import parse_date
 
 TOL_DAYS = 3
+
+
+class Draws:
+    """按输入 id 抽 Monte Carlo 样本并缓存：同一个点或假设在几个方法里共用同一份样本（种子 = MC_SEED + id，可复现）。"""
+
+    def __init__(self, n: int = M.MC_N, seed: int = M.MC_SEED):
+        self.n, self.seed, self._cache = n, seed, {}
+
+    def get(self, key: str, low: float, high: float) -> list:
+        k = (key, low, high)
+        if k not in self._cache:
+            self._cache[k] = sample_lognormal(low, high, self.n, random.Random(f"{self.seed}|{key}"))
+        return self._cache[k]
 
 
 def _span(p):
@@ -60,7 +77,13 @@ def build_series(ids, pts: dict, ref=None) -> tuple:
     return {y: statistics.median(v) for y, v in by_year.items()}, notes, used
 
 
-def run(methods: list, pts: dict, target: dict) -> dict:
+def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=None) -> dict:
+    """assumptions：assumptions.validate() 的结果（{"kept": [...], "rejected": [...]}），没有就当空。
+    only_methods：只允许这些方法（消融 --ablate-own-history 时 = {"formula_mc"}），其余记错误、不计算。"""
+    av = assumptions or {"kept": [], "rejected": []}
+    kept_a = {a["id"]: a for a in av.get("kept") or []}
+    rejected_a = {a.get("id"): a.get("reason", "") for a in av.get("rejected") or [] if a.get("id") and a.get("id") not in kept_a}
+    draws = Draws()
     tps = parse_date(target.get("period_start"))
     tpe = parse_date(target.get("period_end"), end=True)
     if tpe is None:
@@ -74,6 +97,8 @@ def run(methods: list, pts: dict, target: dict) -> dict:
              "rationale": str(m.get("rationale", ""))[:400], "estimate": None, "backtest": [], "notes": []}
         prm = r["params"]
         try:
+            if only_methods is not None and r["method"] not in only_methods:
+                raise M.MethodError(f"ablation: only {sorted(only_methods)} allowed (method needs target_history)")
             if r["method"] in ("series_naive", "yoy_scaling", "linear_fit", "ratio"):
                 tgt, n1, u1 = build_series(prm.get("target_history"), pts, ref=(tps, tpe))
                 r["notes"] += n1
@@ -94,20 +119,40 @@ def run(methods: list, pts: dict, target: dict) -> dict:
                     r["years_used"] = M.prior_years(tgt, year, k)
                 r["backtest"] = M.backtest(r["method"], tgt, sig, year, k)
             elif r["method"] == "formula_mc":
-                inputs, used = {}, []
+                env, used, used_a, detail = {}, [], [], []
                 for name, spec in (prm.get("inputs") or {}).items():
                     spec = spec if isinstance(spec, dict) else {"id": spec}
-                    p = pts.get(spec.get("id"))
-                    if p is None or not p.get("keep", True):
-                        raise M.MethodError(f"input {name}: id {spec.get('id')} unknown or discarded")
-                    v = p["value"] / 100 if p.get("unit") == "%" else p["value"]
-                    # 不确定度由代码统一给；裁判填的 rel_uncertainty 只记录，不使用
-                    inputs[name] = (v, M.DEFAULT_REL_U)
-                    if "rel_uncertainty" in spec:
-                        r.setdefault("rel_uncertainty_from_judge_ignored", {})[name] = spec.get("rel_uncertainty")
-                    used.append(spec.get("id"))
-                s = M.formula_mc(str(prm.get("formula", "")), inputs)
-                r.update(estimate=s["median"], mc={"p10": s["p10"], "p90": s["p90"]}, used_ids=used)
+                    iid = str(spec.get("id"))
+                    if iid in kept_a:
+                        a = kept_a[iid]
+                        lo, hi = a["p10_used"], a["p90_used"]
+                        used_a.append(iid)
+                        kind = "assumption"
+                    elif iid in rejected_a:
+                        raise M.MethodError(f"input {name}: assumption {iid} was rejected ({rejected_a[iid]})")
+                    else:
+                        p = pts.get(iid)
+                        if p is None or not p.get("keep", True):
+                            raise M.MethodError(f"input {name}: id {iid} unknown or discarded")
+                        v = p["value"] / 100 if p.get("unit") == "%" else p["value"]
+                        if not (v > 0):
+                            raise M.MethodError(f"input {name} must be positive for lognormal sampling")
+                        # 观测点的不确定度由代码统一给；裁判填的 rel_uncertainty 只记录，不使用
+                        lo, hi = v / (1 + M.DEFAULT_REL_U), v * (1 + M.DEFAULT_REL_U)
+                        if "rel_uncertainty" in spec:
+                            r.setdefault("rel_uncertainty_from_judge_ignored", {})[name] = spec.get("rel_uncertainty")
+                        used.append(iid)
+                        kind = "point"
+                    env[name] = draws.get(iid, lo, hi)
+                    detail.append({"name": name, "id": iid, "kind": kind, "p10": lo, "p90": hi})
+                r.update(used_ids=used, used_assumptions=sorted(set(used_a)), inputs_detail=detail)
+                if not used:
+                    raise M.MethodError("formula_mc must use at least one kept observed data point "
+                                        "(a formula made only of assumptions is rejected)")
+                if len(set(used_a)) > A.MAX_PER_METHOD:
+                    raise M.MethodError(f"formula_mc uses {len(set(used_a))} assumptions (at most {A.MAX_PER_METHOD})")
+                s = M.formula_mc_samples(str(prm.get("formula", "")), env)
+                r.update(estimate=s["median"], mc={"p10": s["p10"], "p90": s["p90"]})
             else:
                 raise M.MethodError(f"unknown method {r['method']!r}")
         except M.MethodError as e:
@@ -118,5 +163,17 @@ def run(methods: list, pts: dict, target: dict) -> dict:
             errs = [abs(b["log_err"]) for b in r["backtest"]]
             r["backtest_mean_abs_log_err"] = statistics.fmean(errs)
         results.append(r)
+    for r in results:
+        r["n_point_inputs"] = len(set(r.get("used_ids") or []))
+        r["n_assumption_inputs"] = len(r.get("used_assumptions") or [])
+        r["rests_mainly_on_assumptions"] = r["n_assumption_inputs"] > 0 and r["n_assumption_inputs"] >= r["n_point_inputs"]
     ok = [r for r in results if r.get("estimate")]
-    return {"target_year": year, "methods": results, "result": M.combine(ok), "rel_uncertainty_formula_inputs": M.DEFAULT_REL_U}
+    res = M.combine(ok)
+    w = res.get("weights") or {}
+    res["assumption_weight_share"] = sum(w.get(r["id"], 0) for r in ok if r.get("used_assumptions"))
+    used_by = {}
+    for r in ok:
+        for aid in r.get("used_assumptions") or []:
+            used_by.setdefault(aid, []).append(r["id"])
+    return {"target_year": year, "methods": results, "result": res, "rel_uncertainty_formula_inputs": M.DEFAULT_REL_U,
+            "assumption_min_width": A.MIN_WIDTH, "assumptions_used_by": used_by}

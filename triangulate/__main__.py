@@ -24,6 +24,9 @@ def main(argv=None):
     g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
     g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
     g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+    g.add_argument("--ablate-own-history", action="store_true",
+                   help="backtest ablation: no own_history directions, own earlier values excluded before the judge, "
+                        "only formula_mc; results go under a tag ending in 'noown'")
     s = sub.add_parser("agent-score", help="offline: score saved agent backtest runs against official values and the other arms")
     s.add_argument("--tag", default="")
     a = ap.parse_args(argv)
@@ -36,14 +39,16 @@ def main(argv=None):
             from datetime import date
             as_of = a.as_of or date.today().isoformat()
             qid = a.id or "ask_" + hashlib.sha1(f"{a.ask}|{as_of}".encode("utf-8")).hexdigest()[:8]
-            state = agent_run.run_question({"id": qid, "question": a.ask, "as_of": as_of}, a.auto_approve, a.tag)
+            state = agent_run.run_question({"id": qid, "question": a.ask, "as_of": as_of}, a.auto_approve, a.tag,
+                                           a.ablate_own_history)
             print((state.get("final") or {}).get("text", ""))
             return
         from .forecast import FC, QUESTIONS  # 回测题库只在这里接进来；agent 代码本身不认识它
         fc = json.loads((FC / "summary.json").read_text(encoding="utf-8"))
         picked = getattr(a, "question", None)
         qs = [q for q in QUESTIONS if q["id"] in picked] if picked else QUESTIONS
-        rows = agent_run.main(qs, a.auto_approve, a.tag, fc) if a.cmd == "agent" else agent_run.score_all(QUESTIONS, a.tag, fc)
+        rows = (agent_run.main(qs, a.auto_approve, a.tag, fc, a.ablate_own_history) if a.cmd == "agent"
+                else agent_run.score_all(QUESTIONS, a.tag, fc))
         print(json.dumps(rows, indent=1, ensure_ascii=False))
         return
 

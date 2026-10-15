@@ -4,10 +4,13 @@
 series_naive 取「目标年之前、有值的最近 k 个年份」，年份可以不连续（用到哪几年记在结果里）。
 回测：在目标的历史年份上逐年回测，所有方法都只用被测年之前的数据（扩展窗口；signal 另取被测年当年的值）。
 误差 = ln(预测 / 实际)。
-加权：有回测的方法权重 = 1 / (平均 |ln 误差| + EPS)；没回测的方法取有回测方法权重的中位数；全都没回测就等权。
+加权：有回测的方法权重 = 1 / (平均 |ln 误差| + EPS)；没回测的方法（典型的是带假设输入的 formula_mc）取有回测方法
+权重的中位数，相当于「有回测方法的中位误差」、惩罚系数 1（不打折：没有证据说明没回测的路线更差或更好，打折系数只能
+拍脑袋）；全都没回测就等权。所以没回测的方法不会自动拿 0 权重。每个方法按哪条规则拿的权重记在 weight_basis 里。
 合并：加权几何平均（内部按列表下标，不按 id）。区间规则见 combine()。
-formula_mc：公式另过一道 agent 专用的白名单（整数指数、不许纯常数子式、常数 1 至多 3 个）；每个输入的不确定度由代码
-统一给 DEFAULT_REL_U，裁判填的值只记录、不使用。
+formula_mc：公式另过一道 agent 专用的白名单（整数指数、不许纯常数子式、常数 1 至多 3 个）；观测点输入的不确定度由代码
+统一给 DEFAULT_REL_U，裁判填的值只记录、不使用；假设输入按裁判给的 low / high（经代码放宽，见 assumptions.py）采样。
+样本按输入 id 抽（compute.Draws），同一个点或假设在几个方法里用的是同一份样本。
 """
 import ast
 import math
@@ -114,14 +117,19 @@ def check_agent_formula(f: Formula):
         raise MethodError(f"formula uses the constant 1 more than {MAX_ONES} times")
 
 
-def formula_mc(formula: str, inputs: dict) -> dict:
-    """inputs: name -> (value, rel_uncertainty)。value 以 P10/P90 = value/(1+u), value*(1+u) 的 lognormal 采样。
-    agent 调用时 rel_uncertainty 一律是 DEFAULT_REL_U（compute.py 传入），不是裁判给的。"""
+def _agent_formula(formula: str) -> Formula:
     try:
         f = Formula(formula)
     except FormulaError as e:
         raise MethodError(f"formula: {e}") from None
     check_agent_formula(f)
+    return f
+
+
+def formula_mc(formula: str, inputs: dict) -> dict:
+    """inputs: name -> (value, rel_uncertainty)。value 以 P10/P90 = value/(1+u), value*(1+u) 的 lognormal 采样。
+    agent 的 compute.py 不走这里：它按输入 id 先抽好样本（同一个 id 在几个方法里共用一份样本），再调 formula_mc_samples。"""
+    f = _agent_formula(formula)
     if f.names != set(inputs):
         raise MethodError(f"formula names {sorted(f.names)} != inputs {sorted(inputs)}")
     ranges = {}
@@ -130,7 +138,15 @@ def formula_mc(formula: str, inputs: dict) -> dict:
             raise MethodError(f"input {name} must be positive for lognormal sampling")
         u = min(max(float(u), 0.0), 1.0)
         ranges[name] = (v / (1 + u), v * (1 + u))
-    s = summarise(f.eval_vec(sample_inputs(ranges, MC_N, MC_SEED), MC_N))
+    return formula_mc_samples(formula, sample_inputs(ranges, MC_N, MC_SEED))
+
+
+def formula_mc_samples(formula: str, env: dict) -> dict:
+    """env: name -> 长度 MC_N 的样本列表（调用方已抽好）。返回样本分布的摘要（median / p10 / p90）。"""
+    f = _agent_formula(formula)
+    if f.names != set(env):
+        raise MethodError(f"formula names {sorted(f.names)} != inputs {sorted(env)}")
+    s = summarise(f.eval_vec(env, MC_N))
     if not (s["median"] > 0):
         raise MethodError("formula median is not positive")
     return s
@@ -184,9 +200,11 @@ def combine(results: list) -> dict:
         fill = statistics.median(raw.values())
         w = [raw.get(i, fill) for i in range(len(ok))]
         rule = "inverse_backtest_error"
+        wbasis = ["backtest" if i in raw else "median_of_backtested" for i in range(len(ok))]
     else:
         w = [1.0] * len(ok)
         rule = "equal"
+        wbasis = ["equal"] * len(ok)
     tot = sum(w)
     w = [v / tot for v in w]
     logs = [math.log(r["estimate"]) for r in ok]
@@ -208,4 +226,4 @@ def combine(results: list) -> dict:
         sigma, basis = max(cands, key=lambda c: c[0])
     return {"central": central, "p10": central * math.exp(-Z90 * sigma), "p90": central * math.exp(Z90 * sigma),
             "sigma_ln": sigma, "sigma_hist": hist, "sigma_spread": spread, "sigma_mc": sig_mc, "n_backtest_folds": n_folds,
-            "weights": dict(zip(ids, w)), "weight_rule": rule, "basis": basis}
+            "weights": dict(zip(ids, w)), "weight_rule": rule, "weight_basis": dict(zip(ids, wbasis)), "basis": basis}

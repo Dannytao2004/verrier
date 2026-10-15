@@ -144,7 +144,7 @@ METHODS_SPEC = """Code method library (you choose methods and parameters; code c
 - yoy_scaling: {"target_history": [ids], "signal_history": [ids]}. Target last year x signal(this year) / signal(last year). The signal must have a value for the target's year and the year before.
 - linear_fit: {"target_history": [ids], "signal_history": [ids]}. OLS of target on signal across aligned years (needs >= 3 aligned earlier years and the signal's value for the target's year).
 - ratio: {"target_history": [ids], "signal_history": [ids]}. Signal(target's year) x mean historical ratio target / signal.
-- formula_mc: {"formula": "a * b", "inputs": {"a": {"id": "p3"}, "b": {"id": "p7"}}}. A formula over data-point values; code converts percentages to fractions and runs Monte Carlo with the same lognormal uncertainty for every input (set by code). Formulas may use + - * / ( ) min max sqrt, input names, ** with an integer exponent from -3 to 3, and the number 1 (at most 3 times, never in a sub-expression without an input name).
+- formula_mc: {"formula": "a * b", "inputs": {"a": {"id": "p3"}, "b": {"id": "a1"}}}. A formula over inputs that each reference a kept data-point id or an assumption id; at least one input must be a kept data point. Code converts percentages to fractions and runs Monte Carlo: every data-point input gets the same lognormal uncertainty (set by code); an assumption input is sampled lognormally with P10/P90 = its low/high, widened by code to at least high/low = 2. Formulas may use + - * / ( ) min max sqrt, input names, ** with an integer exponent from -3 to 3, and the number 1 (at most 3 times, never in a sub-expression without an input name).
 Series rules: a series is the same quantity for the same calendar period in different years; code aligns series by the year of period_end and takes the median when a year has several values. target_history must be the target's own values for the same calendar period as the target in earlier years. signal_history must be one signal for one fixed calendar period in several years, including the target's year (with data available before today). Code backtests each method on earlier years (using only data from before each tested year) and weights methods by their historical error."""
 
 JUDGE_SYSTEM = """You are the lead analyst of a Fermi-estimation team.
@@ -206,13 +206,23 @@ Method-selection rules:
 - Missing inputs should trigger targeted repair, not an invented calculation.
 - If the current library cannot execute an otherwise reasonable route, explain the specific missing input or capability rather than disguising the limitation.
 
+Assumptions (for formula_mc only):
+- If a credible route lacks a coefficient that no kept point supplies, declare it under assumptions instead of writing it into a formula, and reference its id in formula_mc inputs. You propose the value; code does all computation.
+- Use an assumption only for a quantity that no kept point supplies. Never restate a kept point.
+- Never assume the target itself or a disguised copy of it. Code rejects an assumption whose name or unit mentions the target's year, that is a level of the target quantity, or that is a change of the target quantity.
+- Give honest, wide ranges: low and high are your 10th and 90th percentiles, with 0 < low <= value <= high. Write percentages as in the table (unit "%", 12 means 12%).
+- In applies_when, state when the value transfers to this target; in falsified_by, say what evidence would overturn it. In route, give the id of the method that uses it.
+- Ids a1 to a8, at most 3 assumptions per method. Every formula_mc must use at least one kept point; a formula made only of assumptions is rejected.
+
 Give each method an id (m1, m2, ...) and a rationale. Do not calculate its result or invent combination weights.
 
 Reply with JSON:
 {{"assessment": [{{"ids": ["p1", "p4"], "relation": "corroborating", "note": "..."}}],
  "decisions": [{{"id": "p4", "keep": false, "reason": "..."}}],
  "extra_directions": [],
- "methods": [{{"id": "m1", "method": "series_naive", "params": {{"target_history": ["p1", "p2"], "k": 1}}, "rationale": "..."}}]}}"""
+ "assumptions": [{{"id": "a1", "name": "...", "value": <number>, "low": <number>, "high": <number>, "unit": "...", "rationale": "...", "applies_when": "...", "falsified_by": "...", "route": "m2"}}],
+ "methods": [{{"id": "m1", "method": "series_naive", "params": {{"target_history": ["p1", "p2"], "k": 1}}, "rationale": "..."}},
+             {{"id": "m2", "method": "formula_mc", "params": {{"formula": "a * b", "inputs": {{"a": {{"id": "p3"}}, "b": {{"id": "a1"}}}}}}, "rationale": "..."}}]}}"""
 
 EXTRA_RULE_R1 = """extra_directions: propose up to 3 targeted follow-up directions that would most improve the estimate.
 

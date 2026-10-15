@@ -137,9 +137,11 @@ class AgentLLM(LLM):
 class Context:
     """一题一个：预算、LLM、SEARCHER、哨兵、as_of。图的节点通过闭包拿到它，不放进 LangGraph state。"""
 
-    def __init__(self, qid: str, question: str, as_of: str, calls_path, leak_value=None, budget: Budget | None = None):
+    def __init__(self, qid: str, question: str, as_of: str, calls_path, leak_value=None, budget: Budget | None = None,
+                 ablate_own_history: bool = False):
         self.qid, self.question, self.as_of_s = qid, question, as_of
         self.as_of = date.fromisoformat(as_of)
+        self.ablate_own_history = ablate_own_history  # 回测消融：见 ablation.py
         self.budget = budget or Budget()
         self.calls_path = calls_path
         self.llm = AgentLLM(calls_path, self.budget)
