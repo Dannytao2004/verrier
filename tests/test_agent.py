@@ -251,5 +251,24 @@ class TestGraphOffline(unittest.TestCase):
         self.assertEqual(st["final"]["digits_removed"], 1)
 
 
+
+class TestFetchDecoding(unittest.TestCase):
+    def test_gzip_body_is_decompressed(self):
+        import gzip
+
+        from triangulate.agent.net import decompress
+        self.assertEqual(decompress(gzip.compress(b"<p>x</p>"), {"Content-Encoding": "gzip"}), b"<p>x</p>")
+        self.assertEqual(decompress(gzip.compress(b"<p>x</p>"), {}), b"<p>x</p>")  # 缓存里没有头，靠魔数
+        self.assertEqual(decompress(b"<p>x</p>", {}), b"<p>x</p>")
+
+    def test_undecodable_text_is_rejected(self):
+        import os
+
+        from triangulate.agent.fetch import _to_text
+        text, why = _to_text(os.urandom(4000), {"Content-Type": "text/html"})
+        self.assertIsNone(text)
+        self.assertIn("undecodable", why)
+
+
 if __name__ == "__main__":
     unittest.main()

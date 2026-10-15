@@ -125,6 +125,8 @@ def _to_text(body: bytes, headers: dict) -> tuple:
     if ct and not ct.startswith(TEXT_TYPES):
         return None, f"unsupported content type {ct.split(';')[0]}"
     raw = _decode(body, headers)
+    if raw.count("\ufffd") > 0.01 * max(len(raw), 1):
+        return None, "undecodable content (binary or unsupported encoding)"
     if ct.startswith(("text/plain", "text/csv")):
         return raw, ""
     return html_to_text(raw), ""
@@ -151,8 +153,8 @@ def fetch_page(url: str, as_of: date, qid: str) -> dict:
         cache = CACHE / "snap" / f"{_key(ts + orig)}"
         try:
             if cache.with_suffix(".bin").exists():
-                body = cache.with_suffix(".bin").read_bytes()
                 headers = json.loads(cache.with_suffix(".json").read_text(encoding="utf-8"))
+                body = net.decompress(cache.with_suffix(".bin").read_bytes(), headers)
                 final = headers.pop("_final_url")
                 status = 200
             else:
