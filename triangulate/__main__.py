@@ -1,4 +1,4 @@
-"""python -m triangulate {select|run|demo|report|forecast|agent|agent-score}"""
+"""python -m triangulate {select|run|demo|report|forecast|agent|agent-score|serve}"""
 import argparse
 import json
 import sys
@@ -29,7 +29,16 @@ def main(argv=None):
                         "only formula_mc; results go under a tag ending in 'noown'")
     s = sub.add_parser("agent-score", help="offline: score saved agent backtest runs against official values and the other arms")
     s.add_argument("--tag", default="")
+    w = sub.add_parser("serve", help="local web UI on 127.0.0.1: start runs (stops for approval), browse saved runs and "
+                                     "backtests; needs .venv packages")
+    w.add_argument("--port", type=int, default=8770)
     a = ap.parse_args(argv)
+
+    if a.cmd == "serve":
+        from .web.app import serve
+        sys.stdout.reconfigure(encoding="utf-8")
+        serve(a.port)
+        return
 
     if a.cmd in ("agent", "agent-score"):
         from .agent import run as agent_run
