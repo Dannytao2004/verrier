@@ -20,8 +20,9 @@ from .pipeline import Context
 
 RES = RESULTS / "agent"
 RESIDUAL_RISKS = [
-    "Backtests pick pages from the Wayback index (captures on or before as_of) with a picker that never sees search "
-    "results; the searcher still sees post-cutoff results and chooses which sites and directories get listed.",
+    "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be "
+    "conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot "
+    "dated <= as_of.",
     "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
     "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
     "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include "
@@ -29,7 +30,7 @@ RESIDUAL_RISKS = [
     "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
 ]
 BY_CONSTRUCTION = [
-    "Only URLs leave the searcher (code regex); extractor, picker, judge and final prompts never contain search result "
+    "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result "
     "titles, snippets or the searcher's text. This holds by construction and is not measured.",
 ]
 
