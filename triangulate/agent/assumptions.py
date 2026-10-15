@@ -5,18 +5,14 @@
 1. id 必须是 a1..a8 且不重复；每次运行最多 MAX_PER_RUN = 8 条（超出的丢弃）。
 2. name、unit、rationale 不能为空；value / low / high 都是有限数字（布尔、字符串不算），且 0 < low <= value <= high。
 3. 百分数和数据点一样处理：unit 是 % / percent / per cent / pct / percentage 时记为 "%"，代码使用时除以 100。
-4. 不能是目标本身或它的变相复制（target_reason），三条任一成立就丢弃：
-   a. name 或 unit 提到目标期间的年份（目标 period_start..period_end 覆盖的四位年份），或 this year / current year /
-      this month / current month / next month：假设应当是可迁移的关系，不是目标期间的数值；
-   b. 是目标量的水平值：unit 的实词词干全部落在目标 unit 的词干里，或者 name 指向目标实体 + 目标量
-      （ablation.refers_to_target）；并且 name 和 unit 都没有比率类的词（RATIO_WORDS）；
-   c. 是目标量的变化：name 含 growth / change / yoy 等（CHANGE_WORDS），且和目标 what 至少共享一个实词词干。
-   规则是保守的启发式，宁可多丢；换了说法的变相目标仍可能漏过（记在残余风险里）。
+4. 不能是目标量的水平值（target_reason）：name 和 unit 都没有比率类的词（RATIO_WORDS），并且 unit 的实词词干全部落在
+   目标 unit 的词干里，或者 name 指向目标实体 + 目标量（ablation.refers_to_target）。v2 还按「提到目标年份」「是目标的
+   变化」拒绝，v2.1 去掉了这两条：它们挡住了「去年同期 × 今年变化倍数」这类正常路线（见 AGENT_MVP.md v2.1 节）。
 方法层面的规则在 compute.py：每个 formula_mc 至少引用一个保留的观测点（只由假设组成的公式丢弃）；每个方法最多
 MAX_PER_METHOD = 3 个假设。
 
-不确定度（effective_range）：P10 / P90 = low / high 的 lognormal。high / low < MIN_WIDTH 时，以 sqrt(low * high) 为中心、
-在对数空间对称放宽到 high / low = MIN_WIDTH。MIN_WIDTH = 2.0：探针 1 里模型给的假设区间 high / low 的中位数约 1.5
+不确定度（effective_range）：P10 / P90 = low / high 的 lognormal。high / low 小于下限时（变化倍数 MIN_WIDTH_CHANGE = 1.25，其余 MIN_WIDTH），以 sqrt(low * high) 为中心、
+在对数空间对称放宽到下限。MIN_WIDTH = 2.0：探针 1 里模型给的假设区间 high / low 的中位数约 1.5
 （38 / 163 个干脆 low == high），80% 区间只盖住 20% 的答案，所以下限取得比模型的中位数宽。观测点的不确定度不变
 （methods.DEFAULT_REL_U，P10 / P90 = v / 1.2, v * 1.2，即 high / low = 1.44）。
 """
@@ -24,18 +20,17 @@ import math
 import re
 
 from .ablation import refers_to_target, stems
-from .evidence import parse_date
 
 MAX_PER_RUN = 8
 MAX_PER_METHOD = 3
 MIN_WIDTH = 2.0
+MIN_WIDTH_CHANGE = 1.25
 ID_RE = re.compile(r"a[1-8]")
 PCT_UNITS = {"%", "percent", "per cent", "pct", "percentage", "percent (%)"}
 RATIO_WORDS = re.compile(r"%|/|\b(?:share|shares|ratio|ratios|rate|rates|per|fraction|proportion|percent|percentage|"
                          r"factor|multiplier|elasticity|coefficient|conversion)\b", re.I)
 CHANGE_WORDS = re.compile(r"\b(?:growth|grow|change|changes|yoy|year[- ]over[- ]year|year[- ]on[- ]year|increase|"
                           r"decrease|decline|trend)\b", re.I)
-RELATIVE_PERIOD = re.compile(r"\b(?:this|current|next)\s+(?:year|month|season|quarter)\b", re.I)
 TEXT_FIELDS = ("name", "unit", "rationale", "applies_when", "falsified_by", "route")
 
 
@@ -46,30 +41,25 @@ def _num(x):
     return x if math.isfinite(x) else None
 
 
-def target_years(target: dict) -> list:
-    ps = parse_date((target or {}).get("period_start"))
-    pe = parse_date((target or {}).get("period_end"), end=True)
-    if pe is None:
-        return []
-    return list(range((ps or pe).year, pe.year + 1))
-
 
 def target_reason(a: dict, target: dict) -> str:
-    """返回「这条假设就是目标或它的变相复制」的原因；空串 = 不是。规则见模块说明第 4 条。"""
+    """返回「这条假设就是目标或它的变相复制」的原因；空串 = 不是。
+    v2.1：只拒绝「目标量的水平值」（没有比率词、单位或名字对上目标）。带年份的系数、目标量的变化倍数、占比都允许：
+    它们本来就是「去年同期 × 今年变化」这类路线需要的输入（v2 按年份和变化词一律拒绝，把这类路线全挡掉了）；
+    任何 formula_mc 仍至少要有一个观测点，所以假设不能单独构成答案。"""
     name, unit = a.get("name", ""), a.get("unit", "")
     both = f"{name} {unit}"
-    for y in target_years(target):
-        if re.search(rf"(?<!\d){y}(?!\d)", both):
-            return f"names the target period ({y})"
-    if RELATIVE_PERIOD.search(both):
-        return "names the target period (relative wording)"
     ratio_like = bool(RATIO_WORDS.search(both)) or a.get("unit") == "%"
     tu, au = stems((target or {}).get("unit", "")), stems(unit)
     if not ratio_like and ((au and tu and au <= tu) or refers_to_target(name, unit, target)):
         return "a level of the target quantity (unit or name matches the target, no ratio wording)"
-    if CHANGE_WORDS.search(name) and stems(name) & stems((target or {}).get("what", "")):
-        return "a change of the target quantity (disguised copy of the target)"
     return ""
+
+
+def is_change_factor(a: dict) -> bool:
+    """「相对已观测期间的变化倍数」（如 2026 相对 2025 的倍数）：比率类、名字里有变化词。"""
+    both = f"{a.get('name', '')} {a.get('unit', '')}"
+    return (bool(RATIO_WORDS.search(both)) or a.get("unit") == "%") and bool(CHANGE_WORDS.search(both))
 
 
 def validate(raw, target: dict) -> dict:
@@ -112,10 +102,12 @@ def validate(raw, target: dict) -> dict:
 
 
 def effective_range(a: dict) -> tuple:
-    """(P10, P90, 是否被下限放宽)，单位换算后（% 已除以 100）。"""
+    """(P10, P90, 是否被下限放宽)，单位换算后（% 已除以 100）。
+    变化倍数用 MIN_WIDTH_CHANGE（1.25，约 ±11%）：它围绕 1 附近，2 倍下限会把区间撑到 ±40%，失去意义；其余用 MIN_WIDTH。"""
     f = 0.01 if a.get("unit") == "%" else 1.0
     lo, hi = a["low"] * f, a["high"] * f
-    if hi / lo >= MIN_WIDTH:
+    w = MIN_WIDTH_CHANGE if is_change_factor(a) else MIN_WIDTH
+    if hi / lo >= w:
         return lo, hi, False
     c = math.sqrt(lo * hi)
-    return c / math.sqrt(MIN_WIDTH), c * math.sqrt(MIN_WIDTH), True
+    return c / math.sqrt(w), c * math.sqrt(w), True

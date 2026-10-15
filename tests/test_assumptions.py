@@ -63,16 +63,36 @@ class TestAssumptionValidation(unittest.TestCase):
 
     def test_target_like_rejected(self):
         cases = [
-            A(name="Ratio of August 2026 to July 2026 visits"),                       # 目标年份
-            A(name="Share of visits this year arriving in August"),                   # 相对期间
             A(name="Uncounted backcountry visits", unit="visits", value=900, low=500, high=2000),   # 目标单位的水平值
             A(name="Yellowstone August visitors", unit="people", value=8e5, low=7e5, high=9e5),     # 名字指向目标实体和量
-            A(name="Year-over-year change in August recreation visits", unit="factor", value=0.98, low=0.94, high=1.02),
         ]
         for x in cases:
             v = AS.validate([x], TARGET)
             self.assertEqual(v["kept"], [], x["name"])
             self.assertIn("target-like", v["rejected"][0]["reason"], x["name"])
+
+    def test_year_and_change_factors_allowed_v21(self):
+        # v2.1：带目标年份的比率、相对期间的占比、目标的同比变化倍数都允许（v2 一律拒绝，挡掉了正常路线）
+        cases = [
+            A(name="Ratio of August 2026 to July 2026 visits"),
+            A(name="Share of visits this year arriving in August"),
+            A(name="Year-over-year change in August recreation visits", unit="factor", value=0.98, low=0.94, high=1.02),
+        ]
+        for x in cases:
+            v = AS.validate([x], TARGET)
+            self.assertEqual(len(v["kept"]), 1, (x["name"], v["rejected"]))
+        a = AS.validate([cases[2]], TARGET)["kept"][0]
+        self.assertTrue(AS.is_change_factor(a))
+        self.assertAlmostEqual(a["p90_used"] / a["p10_used"], AS.MIN_WIDTH_CHANGE)
+
+    def test_calendar_constants_in_formula(self):
+        pts = {"p1": _pt("p1", 28000.0, "2026-07-31", period_start="2026-07-01")}
+        out = C.run([{"method": "formula_mc", "params": {"formula": "d * n", "inputs": {"d": {"id": "p1"}, "n": {"id": "k_days_target"}}}}],
+                    pts, TARGET, assumptions=AS.validate([], TARGET))
+        m = out["methods"][0]
+        self.assertNotIn("error", m)
+        self.assertAlmostEqual(m["estimate"] / 28000.0, 31, delta=1.5)   # 8 月 31 天；中位数只受 p1 的采样影响
+        self.assertEqual((m["n_point_inputs"], m["n_assumption_inputs"]), (1, 0))
 
     def test_ratio_and_other_entity_allowed(self):
         ok = [A(), A(name="Yellowstone share of regional visits", unit="%", value=40, low=30, high=50),
@@ -160,7 +180,8 @@ class TestFormulaRulesWithAssumptions(unittest.TestCase):
         self.assertTrue(m["rests_mainly_on_assumptions"])
 
     def test_rejected_assumption_cannot_be_used(self):
-        m, _ = self._run({"p": {"id": "p1"}, "a": {"id": "a1"}}, "p * a", [A(name="Ratio for August 2026")])
+        m, _ = self._run({"p": {"id": "p1"}, "a": {"id": "a1"}}, "p * a",
+                         [A(name="Uncounted backcountry visits", unit="visits", value=900, low=500, high=2000)])
         self.assertIn("assumption a1 was rejected", m["error"])
 
     def test_observed_inputs_keep_code_uncertainty(self):
@@ -279,7 +300,7 @@ class TestGraphWithAssumptions(unittest.TestCase):
                 if role.startswith("judge"):
                     seen["judge_user"] = user
                     return {"decisions": [], "extra_directions": [],
-                            "assumptions": [A(route="m1"), A(id="a2", name="Ratio for August 2026"),
+                            "assumptions": [A(route="m1"), A(id="a2", name="Yellowstone August visitors", unit="people", value=8e5, low=7e5, high=9e5),
                                             A(id="a3", name="target to neighbour ratio, 2014 to 2018 average", value=2.2,
                                               low=2.0, high=2.4, route="m2")],
                             "methods": [{"id": "m1", "method": "formula_mc",
@@ -363,3 +384,22 @@ class TestAuditOfAssumptions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestJudgeRepairDryRun(unittest.TestCase):
+    """v2.1：裁判这一轮的方法一个都跑不出来时，代码先试跑，把错误清单交回裁判修一次（graph._dry_run_errors）。"""
+
+    def test_errors_listed_when_nothing_runs(self):
+        from triangulate.agent import graph as G
+        pts = [dict(_pt("p1", 958706.0, "2026-07-31", period_start="2026-07-01"), id="p1", keep=True)]
+        jr = {"methods": [{"id": "m1", "method": "formula_mc",
+                           "params": {"formula": "j * r", "inputs": {"j": {"id": "p1"}, "r": {"id": "a1"}}}}],
+              "assumptions": [A(name="Uncounted backcountry visits", unit="visits", value=900, low=500, high=2000)]}
+        errs = G._dry_run_errors(jr, pts, TARGET)
+        self.assertTrue(any("a1" in e and "rejected" in e for e in errs), errs)
+        jr["assumptions"] = [A()]
+        self.assertEqual(G._dry_run_errors(jr, pts, TARGET), [])
+
+    def test_no_methods(self):
+        from triangulate.agent import graph as G
+        self.assertEqual(G._dry_run_errors({"methods": [], "assumptions": []}, [], TARGET), ["no methods were proposed"])

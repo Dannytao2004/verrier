@@ -14,7 +14,7 @@ def main(argv=None):
     d = sub.add_parser("demo", help="structured arm on the finance demo question, then build the report")
     d.add_argument("--force", action="store_true")
     sub.add_parser("report", help="offline: rebuild states, graphs and tables from saved replies")
-    f = sub.add_parser("forecast", help="one-month-ahead forecast of Yellowstone visits (both arms), then score")
+    f = sub.add_parser("forecast", help="one-month-ahead forecast questions (naive and no-retrieval structured arms), then score")
     f.add_argument("--force", action="store_true")
     g = sub.add_parser("agent", help="research agent (LangGraph): any question via --ask, or the backtest questions; "
                                      "needs .venv packages")

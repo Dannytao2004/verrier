@@ -31,6 +31,29 @@ _POST_AS_OF = [856467, 3491850, 868450, 4360300]
 for _q in QUESTIONS:
     _q.update(question=Q.format(**_q), answer_unit="", unit_hint="a count of recreation visits", strict=False,
               leak_values=sorted(set(_POST_AS_OF) | {_q["answer_value"]}))
+
+# v2.1 新增的两道题：不是黄石、不是同一类来源，用来测通用性。选题标准同上：官方数字、公布日晚于模型上线日（2026-09-10），
+# as_of = 公布日前一个月；last_year = 去年同月官方值（as_of 前已公开）；leak_values = 真值 + 公布日晚于 as_of 的已知官方值。
+_ASOF = "Assume today is {as_of}. You know nothing published after this date. "
+QUESTIONS += [
+    # JNTO 2026-09-16 估计值（-9.6% 同比）；2025 年 8 月 3,428,406；7 月 3,442,100（2026-08-19 公布）和
+    # 1-8 月累计 27,626,300 都晚于 as_of。官方 PDF 文字是字体编码、读不出，数值由两篇独立报道交叉核对。
+    {"id": "fc_jnto_2026_08", "as_of": "2026-08-16", "released": "2026-09-16", "answer_value": 3098900,
+     "last_year": 3428406, "source": "https://www.jnto.go.jp/en/news/20260916.pdf",
+     "question": _ASOF.format(as_of="2026-08-16") + "Estimate the number of foreign visitor arrivals to Japan in August 2026, "
+                 "as it will be first reported in the Japan National Tourism Organization's (JNTO) monthly estimate.",
+     "unit_hint": "a count of visitor arrivals", "leak_values": [3098900, 3442100, 27626300]},
+    # 韩国国家数据处（原统计厅）2026-09-23「2026年7月人口动向」：7 月出生 24,275（+11.1%）；2025 年 7 月 21,854；
+    # 1-7 月累计 170,079 晚于 as_of。6 月数据约 8 月下旬公布、数值未登记（哨兵认不出，记在报告的残余风险里）。
+    {"id": "fc_kr_births_2026_07", "as_of": "2026-08-23", "released": "2026-09-23", "answer_value": 24275,
+     "last_year": 21854,
+     "source": "https://www.koreatimes.co.kr/southkorea/society/20260923/births-up-11-in-july-extending-gains-to-25th-consecutive-month",
+     "question": _ASOF.format(as_of="2026-08-23") + "Estimate the number of live births in South Korea in July 2026, "
+                 "as it will be first reported in the national statistics agency's monthly Population Trends release.",
+     "unit_hint": "a count of live births", "leak_values": [24275, 170079]},
+]
+for _q in QUESTIONS[2:]:
+    _q.update(answer_unit="", strict=False)
 FNS = {"naive": run_naive, "structured": run_structured}
 
 
@@ -65,7 +88,7 @@ def report():
     rows = []
     for q in QUESTIONS:
         ans = q["answer_value"]
-        row = {k: q[k] for k in ("id", "month", "as_of", "released", "answer_value", "source")}
+        row = {k: q.get(k) for k in ("id", "month", "as_of", "released", "answer_value", "source")}
         row["last_year_same_month"] = {"estimate": q["last_year"], "pct_err": _pct(q["last_year"], ans)}
         if (n := _load(_raw("naive", q["id"]))) is not None:
             status, est, _ = check_naive(final_reply(n), "", strict_target=False)
@@ -85,7 +108,7 @@ def report():
             extra = (f"As of {q['as_of']} (official figure released {q['released']}). Official value: <b>{ans:,}</b>. "
                      f"No retrieval: every input comes from model knowledge.")
             (GRAPHS / f"{q['id']}.html").write_text(
-                render_page(state, f"Forecast: Yellowstone recreation visits, {q['month']}", extra, back_link="index.html"),
+                render_page(state, f"Forecast: {q['question'].split('Estimate ', 1)[-1][:90]}", extra, back_link="index.html"),
                 encoding="utf-8")
         rows.append(row)
     _write(FC / "summary.json", _clean(rows))

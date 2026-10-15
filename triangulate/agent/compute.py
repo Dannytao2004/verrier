@@ -12,6 +12,12 @@ from .evidence import parse_date
 TOL_DAYS = 3
 
 
+def calendar_constants(tps, tpe) -> dict:
+    """formula_mc 里可以引用的日历常数（k_ 开头，由代码给，不采样，不算观测点）：天数、周数这类精确数不该让模型写进公式。"""
+    return {"k_days_target": float((tpe - tps).days + 1), "k_days_per_week": 7.0, "k_days_per_year": 365.25,
+            "k_weeks_per_year": 365.25 / 7, "k_months_per_year": 12.0}
+
+
 class Draws:
     """按输入 id 抽 Monte Carlo 样本并缓存：同一个点或假设在几个方法里共用同一份样本（种子 = MC_SEED + id，可复现）。"""
 
@@ -90,6 +96,7 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
         return {"error": "target period_end unparseable", "methods": [], "result": M.combine([])}
     tps = tps or tpe - timedelta(days=0)
     year = tpe.year
+    consts = calendar_constants(tps, tpe)
     results = []
     for n, m in enumerate(methods or [], start=1):
         # id 由代码按列表顺序重编（m1..mN），保证唯一；裁判给的 id 只作为 label 保存
@@ -123,7 +130,11 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                 for name, spec in (prm.get("inputs") or {}).items():
                     spec = spec if isinstance(spec, dict) else {"id": spec}
                     iid = str(spec.get("id"))
-                    if iid in kept_a:
+                    fixed = None
+                    if iid in consts:
+                        fixed = lo = hi = consts[iid]
+                        kind = "constant"
+                    elif iid in kept_a:
                         a = kept_a[iid]
                         lo, hi = a["p10_used"], a["p90_used"]
                         used_a.append(iid)
@@ -143,7 +154,7 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                             r.setdefault("rel_uncertainty_from_judge_ignored", {})[name] = spec.get("rel_uncertainty")
                         used.append(iid)
                         kind = "point"
-                    env[name] = draws.get(iid, lo, hi)
+                    env[name] = [fixed] * draws.n if fixed is not None else draws.get(iid, lo, hi)
                     detail.append({"name": name, "id": iid, "kind": kind, "p10": lo, "p90": hi})
                 r.update(used_ids=used, used_assumptions=sorted(set(used_a)), inputs_detail=detail)
                 if not used:

@@ -150,6 +150,31 @@ def key_assumptions_template(used: list, year: int, keep_ids=frozenset()) -> str
     return "\n".join(lines)
 
 
+JUDGE_MAX_TOKENS = 12000   # v2 的 6000 在 167 个数据点时被截断过
+REPAIR = """
+
+Your previous reply proposed these methods and assumptions:
+{previous}
+
+Code could not execute any of them:
+{errors}
+
+Return the complete JSON object again. Keep your assessment and decisions unless the errors show they were wrong; change the methods and assumptions so that at least one credible method can execute under the rules above. Do not repeat a rejected assumption in another wording."""
+
+
+def _dry_run_errors(jr: dict, pts: list, target: dict, only_methods=None) -> list:
+    """按 compute 的规则试跑裁判选的方法（纯代码，不调模型）。至少一个方法有估计 = 空列表；否则返回给裁判看的错误清单。"""
+    by_id = {p["id"]: p for p in pts}
+    av = AS.validate(jr.get("assumptions") or [], target)
+    out = C.run(jr.get("methods") or [], by_id, target, assumptions=av, only_methods=only_methods)
+    if any(m.get("estimate") for m in out.get("methods") or []):
+        return []
+    errs = [f"method {m.get('label') or m.get('id')} ({m.get('method')}): {m.get('error') or 'no estimate'}"
+            for m in out.get("methods") or []]
+    errs += [f"assumption {a.get('id')} rejected: {a.get('reason')}" for a in av["rejected"]]
+    return errs or ["no methods were proposed"]
+
+
 def build(ctx: Context):
     b = ctx.budget
     ablate = bool(getattr(ctx, "ablate_own_history", False))
@@ -240,12 +265,13 @@ def build(ctx: Context):
         if state.get("aborted") or b.aborted:
             return {**upd, "judge_rounds": [{"round": rnd, "skipped": b.aborted or state.get("aborted")}]}
         dirs = "\n".join(f"- {d['id']} [{d['category']}] {d['hypothesis']}" for d in state["directions"])
+        judge_user = JUDGE_USER.format(
+            question=state["question"], as_of=state["as_of"], target=dumps(state["plan"]["target"]),
+            directions=dirs, table=_table(shown) if shown else "(no verified data points)",
+            methods_spec=AB.methods_spec() if ablate else METHODS_SPEC,
+            extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2)
         try:
-            out, err = ctx.llm.ask(JUDGE_SYSTEM, JUDGE_USER.format(
-                question=state["question"], as_of=state["as_of"], target=dumps(state["plan"]["target"]),
-                directions=dirs, table=_table(shown) if shown else "(no verified data points)",
-                methods_spec=AB.methods_spec() if ablate else METHODS_SPEC,
-                extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2), role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=6000)
+            out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=JUDGE_MAX_TOKENS)
         except BudgetExceeded as e:
             return {**upd, "aborted": str(e), "judge_rounds": [{"round": rnd, "skipped": str(e)}]}
         if out is None:
@@ -270,6 +296,26 @@ def build(ctx: Context):
               "assumptions": raw_a[:20], "unknown_ids_in_decisions": sorted(set(dec) - ids)}
         if dropped_extra:
             jr["ablation_dropped_extra_directions"] = dropped_extra
+        if rnd == 2 or not extra:  # 这一轮的方法就是 compute 要用的：先用代码试跑，一个都跑不出来就把原因交回裁判修一次
+            errs = _dry_run_errors(jr, pts, state["plan"]["target"], AB.ALLOWED_METHODS if ablate else None)
+            if errs:
+                jr["repair"] = {"errors": errs}
+                try:
+                    out2, err2 = ctx.llm.ask(JUDGE_SYSTEM, judge_user + REPAIR.format(
+                        previous=dumps({"methods": jr["methods"], "assumptions": jr["assumptions"]}),
+                        errors="\n".join(f"- {e}" for e in errs)), role=f"judge:r{rnd}:repair", qid=ctx.qid,
+                        max_tokens=JUDGE_MAX_TOKENS)
+                except BudgetExceeded as e:
+                    out2, err2 = None, str(e)
+                if out2 is None:
+                    jr["repair"]["error"] = err2
+                else:
+                    jr["repair"]["previous_methods"], jr["repair"]["previous_assumptions"] = jr["methods"], jr["assumptions"]
+                    jr["methods"] = [m for m in out2.get("methods") or [] if isinstance(m, dict)]
+                    a2 = out2.get("assumptions")
+                    jr["assumptions"] = (a2 if isinstance(a2, list) else [])[:20]
+                    jr["repair"]["errors_after"] = _dry_run_errors(jr, pts, state["plan"]["target"],
+                                                                   AB.ALLOWED_METHODS if ablate else None)
         upd.update(points=pts, judge_rounds=[jr])
         if extra:
             upd["directions"] = state["directions"] + extra
