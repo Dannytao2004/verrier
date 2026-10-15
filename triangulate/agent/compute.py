@@ -22,6 +22,23 @@ def is_ratio_unit(unit: str) -> bool:
     return bool(RATIO_UNIT.search(unit or ""))
 
 
+def restated_point(a: dict, pts: dict, rel_tol: float = 0.005) -> str:
+    """假设的值和某个保留观测点的值相同（相对差 <= 0.5%）、单位也对得上（都是 %，或单位词干有交集）时，返回那个点的 id。
+    只比数值会误伤：黄石 9 月的「变化倍数 1.0（ratio）」撞上了「道路开放日 1（day of month）」。"""
+    v = a.get("value")
+    if not v:
+        return ""
+    a_pct, a_st = a.get("unit") == "%", A.stems(a.get("unit", ""))
+    for p in pts.values():
+        pv = p.get("value")
+        if not (p.get("keep", True) and pv and abs(pv - v) <= rel_tol * abs(v)):
+            continue
+        p_pct = p.get("unit") == "%"
+        if (a_pct and p_pct) or (not a_pct and not p_pct and a_st & A.stems(p.get("unit", ""))):
+            return p["id"]
+    return ""
+
+
 def calendar_constants(tps, tpe) -> dict:
     """formula_mc 里可以引用的日历常数（k_ 开头，由代码给，不采样，不算观测点）：天数、周数这类精确数不该让模型写进公式。"""
     return {"k_days_target": float((tpe - tps).days + 1), "k_days_per_week": 7.0, "k_days_per_year": 365.25,
@@ -146,6 +163,10 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                         kind = "constant"
                     elif iid in kept_a:
                         a = kept_a[iid]
+                        dup = restated_point(a, pts)
+                        if dup:  # 假设的值就是某个保留的观测点：应该直接用观测点（FOMC 题：FedWatch 概率被写成了假设）
+                            raise M.MethodError(f"input {name}: assumption {iid} restates kept data point {dup} "
+                                                f"(same value and unit); reference {dup} instead")
                         lo, hi = a["p10_used"], a["p90_used"]
                         used_a.append(iid)
                         kind = "assumption"
@@ -172,7 +193,9 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                 if not used:
                     raise M.MethodError("formula_mc must use at least one kept observed data point "
                                         "(a formula made only of assumptions is rejected)")
-                if not any(d["kind"] in ("point", "assumption") and not is_ratio_unit(d.get("unit", "")) for d in detail):
+                # 目标本身是百分比 / 比率（利率、占比）时不适用：那时百分比输入就是「量」（FOMC 题里这条把所有路线都挡掉了）
+                if not is_ratio_unit(target.get("unit", "")) and \
+                        not any(d["kind"] in ("point", "assumption") and not is_ratio_unit(d.get("unit", "")) for d in detail):
                     raise M.MethodError("formula_mc needs at least one input that is a quantity (not a share, ratio or %); "
                                         "a product of ratios cannot produce the target")
                 if len(set(used_a)) > A.MAX_PER_METHOD:

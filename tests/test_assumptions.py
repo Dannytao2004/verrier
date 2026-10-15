@@ -488,3 +488,26 @@ class TestProblemsKeepsGoodRuns(unittest.TestCase):
         n, probs = G._problems({"methods": [{}, {}]}, out, {"rejected": []}, {1: "numeric constant 100 not allowed"})
         self.assertEqual(n, 1)
         self.assertTrue(probs)
+
+
+class TestPercentTargetsAndRestatedPoints(unittest.TestCase):
+    """v2.1d（FOMC 题）：目标本身是百分比时不套用「至少一个量输入」；假设不能和保留的观测点同值。"""
+    RATE = {"what": "Upper bound of the US federal funds target range after the next FOMC meeting", "unit": "percent per annum",
+            "period_start": "2026-10-16", "period_end": "2026-12-31"}
+
+    def test_percent_target_allows_percent_inputs(self):
+        pts = {"p1": _pt("p1", 4.0, "2026-09-16", unit="percent per annum", period_start="2026-09-16"),
+               "p2": _pt("p2", 43.6, "2026-10-14", unit="%", period_start="2026-10-14")}
+        av = AS.validate([A(id="a1", name="rate step per move", unit="percentage points", value=0.25, low=0.25, high=0.25)], self.RATE)
+        out = C.run([{"method": "formula_mc", "params": {"formula": "u + s * q",
+                                                         "inputs": {"u": {"id": "p1"}, "s": {"id": "a1"}, "q": {"id": "p2"}}}}],
+                    pts, self.RATE, assumptions=av)
+        self.assertNotIn("error", out["methods"][0], out["methods"][0])
+
+    def test_assumption_restating_a_point_is_rejected(self):
+        pts = {"p1": _pt("p1", 4.0, "2026-09-16", unit="percent per annum", period_start="2026-09-16"),
+               "p43": _pt("p43", 43.6, "2026-10-14", unit="%", period_start="2026-10-14")}
+        av = AS.validate([A(id="a1", name="probability of a hike", unit="%", value=43.6, low=30, high=55)], self.RATE)
+        out = C.run([{"method": "formula_mc", "params": {"formula": "u * q", "inputs": {"u": {"id": "p1"}, "q": {"id": "a1"}}}}],
+                    pts, self.RATE, assumptions=av)
+        self.assertIn("restates kept data point p43", out["methods"][0]["error"])
