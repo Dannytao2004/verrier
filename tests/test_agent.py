@@ -357,5 +357,90 @@ class TestFetchDecoding(unittest.TestCase):
         self.assertIn("undecodable", why)
 
 
+class TestNetRobots(unittest.TestCase):
+    def setUp(self):
+        from triangulate.agent import net
+        self.net = net
+        net._ROBOTS.clear()
+        self.addCleanup(net._ROBOTS.clear)
+
+    def _fake(self, url, timeout):
+        if url == "http://www.example.com/robots.txt":
+            return 301, b"", {"Location": "https://www.example.com/robots.txt"}
+        if url == "https://www.example.com/robots.txt":
+            return 200, b"User-agent: *\nDisallow: /private/\nCrawl-delay: 5\n", {}
+        if url.endswith("/robots.txt"):
+            return 302, b"", {"Location": url}  # 自己重定向到自己：重定向太多
+        return 200, b"ok", {}
+
+    def test_redirected_robots_is_followed_per_scheme(self):
+        with mock.patch.object(self.net, "_raw_get", self._fake), mock.patch.object(self.net.time, "sleep", lambda s: None), \
+                mock.patch.object(self.net.LIMITER, "set_interval") as si:
+            self.assertFalse(self.net.robots_allowed("http://www.example.com/private/a"))
+            self.assertFalse(self.net.robots_allowed("https://www.example.com/private/b"))
+            self.assertTrue(self.net.robots_allowed("https://www.example.com/public/c"))
+            si.assert_called_with("www.example.com", 5.0)
+            self.assertFalse(self.net.robots_allowed("https://loop.example.org/x"))  # 超过 5 跳 -> 全部禁止
+
+    def test_crawl_delay_sets_host_interval(self):
+        lim = self.net.HostLimiter()
+        lim.set_interval("a.org", 5)
+        lim.wait("a.org")
+        self.assertGreaterEqual(lim._next["a.org"] - self.net.time.monotonic(), 4.0)
+
+
+class TestFetchLeakRules(unittest.TestCase):
+    """回测里不收 live 页；live 页正文有晚于 as_of 的日期就整页丢；快照重定向读不出时间戳就丢。"""
+
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+
+        from triangulate.agent import fetch
+        self.F = fetch
+        d = Path(tempfile.mkdtemp())
+        for name, val in (("RAW_AGENT", d), ("CACHE", d / "_cache")):
+            patcher = mock.patch.object(fetch, name, val)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    LIVE = (b"<html><head><meta property='article:published_time' content='2026-08-17'></head><body><p>"
+            + b"Market page. " * 30 + b"Kalshi prices No at 95% as of October 15, 2026.</p></body></html>")
+
+    def test_backtest_never_uses_live_pages(self):
+        with mock.patch.object(self.F, "cdx_lookup", lambda u, a: None), \
+                mock.patch.object(self.F.net, "get", lambda *a, **k: (200, self.LIVE, {"Content-Type": "text/html"}, a[0])):
+            rec = self.F.fetch_page("https://x.org/stats/2019-05/dashboard", date(2026, 9, 6), "t", today=date(2026, 10, 15))
+        self.assertEqual(rec["status"], "dropped")
+        self.assertIn("live pages not used in backtests", rec["reason"])
+
+    def test_live_page_with_later_date_in_text_is_dropped(self):
+        with mock.patch.object(self.F, "cdx_lookup", lambda u, a: None), \
+                mock.patch.object(self.F.net, "get", lambda *a, **k: (200, self.LIVE, {"Content-Type": "text/html"}, a[0])):
+            rec = self.F.fetch_page("https://x.org/stats/2019-05/dashboard", date(2026, 9, 6), "t", allow_live=True,
+                                    today=date(2026, 10, 15))
+        self.assertEqual(rec["status"], "dropped")
+        self.assertIn("2026-10-15", rec["reason"])
+        self.assertEqual(ev.late_dates("as of October 15, 2026; closes March 31, 2027", date(2026, 9, 6), date(2026, 10, 15)),
+                         [date(2026, 10, 15)])
+
+    def test_unverifiable_snapshot_redirect_is_dropped(self):
+        snap = {"timestamp": "20260801000000", "original": "https://a.org/x"}
+        html = b"<html><body><p>" + b"Some archived text. " * 30 + b"</p></body></html>"
+        for final in ("https://web.archive.org/web/20260901000000/https://a.org/x", "https://a.org/x"):
+            with mock.patch.object(self.F, "cdx_lookup", lambda u, a: snap), \
+                    mock.patch.object(self.F.net, "get", lambda *a, **k: (200, html, {"Content-Type": "text/html"}, final)):
+                rec = self.F.fetch_page("https://a.org/x", date(2026, 9, 6), "t", today=date(2026, 10, 15))
+            self.assertEqual(rec["status"], "dropped", final)
+            self.assertIn("not verifiable", rec["reason"])
+            import shutil
+            shutil.rmtree(self.F.CACHE / "snap", ignore_errors=True)  # 下一轮换一个最终 URL，不能读到缓存
+        ok = "https://web.archive.org/web/20260801000000id_/https://a.org/x"
+        with mock.patch.object(self.F, "cdx_lookup", lambda u, a: snap), \
+                mock.patch.object(self.F.net, "get", lambda *a, **k: (200, html, {"Content-Type": "text/html"}, ok)):
+            rec = self.F.fetch_page("https://a.org/x", date(2026, 9, 6), "t", today=date(2026, 10, 15))
+        self.assertEqual(rec["status"], "snapshot")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -142,6 +142,7 @@ def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written
 # ---------- 日期 ----------
 _MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
 _MONTHS.update({m.lower(): i for i, m in enumerate(calendar.month_abbr) if m})
+_MONTHS["sept"] = 9
 
 
 def parse_date(s, end: bool = False):
@@ -166,6 +167,37 @@ def parse_date(s, end: bool = False):
         return date(y, mo, int(d))
     except ValueError:
         return None
+
+
+_MON = "|".join(sorted(_MONTHS, key=len, reverse=True))
+_TEXT_DATE = re.compile(rf"\b(?:(?P<m1>{_MON})\.?\s+(?P<d1>\d{{1,2}})(?:st|nd|rd|th)?,?\s+(?P<y1>(?:19|20)\d{{2}})"
+                        rf"|(?P<d2>\d{{1,2}})\s+(?P<m2>{_MON})\.?,?\s+(?P<y2>(?:19|20)\d{{2}})"
+                        rf"|(?P<m3>{_MON})\.?,?\s+(?P<y3>(?:19|20)\d{{2}})"
+                        rf"|(?P<iso>(?:19|20)\d{{2}}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])))\b", re.I)
+
+
+def text_dates(text: str) -> list:
+    """正文里的显式日期：Month D, YYYY / D Month YYYY / Month YYYY（取该月 1 日）/ YYYY-MM-DD。"""
+    out = []
+    for m in _TEXT_DATE.finditer(text or ""):
+        try:
+            if m.group("iso"):
+                out.append(date.fromisoformat(m.group("iso")))
+            elif m.group("y1"):
+                out.append(date(int(m.group("y1")), _MONTHS[m.group("m1").lower()], int(m.group("d1"))))
+            elif m.group("y2"):
+                out.append(date(int(m.group("y2")), _MONTHS[m.group("m2").lower()], int(m.group("d2"))))
+            else:
+                out.append(date(int(m.group("y3")), _MONTHS[m.group("m3").lower()], 1))
+        except ValueError:
+            pass
+    return out
+
+
+def late_dates(text: str, as_of: date, until: date) -> list:
+    """正文里晚于 as_of、但不晚于 until（取页日）的显式日期，去重排序。比取页日还晚的日期多半是将来的安排
+    （结算日、开放日），不算。"""
+    return sorted({d for d in text_dates(text) if as_of < d <= until})
 
 
 def date_check(point: dict, as_of: date, page_date, allow_no_period: bool = False) -> str:

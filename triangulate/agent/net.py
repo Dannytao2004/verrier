@@ -1,5 +1,6 @@
-"""HTTP：统一 User-Agent；每个 host 两次请求的开始时间至少隔 1 秒（Wayback 1.5 秒且单连接）；robots.txt 用我们自己的
-UA 去取并遵守；重定向手动跟随（每一跳都过 robots 和限速）；gzip/deflate 由代码解压；连接失败退避重试。只用标准库。"""
+"""HTTP：统一 User-Agent；每个 host 两次请求的开始时间至少隔 1 秒（Wayback 1.5 秒且单连接；robots.txt 给了更长的
+Crawl-delay 就按它）；robots.txt 用我们自己的 UA 去取并遵守，取的时候跟随重定向，按 (scheme, host) 缓存；
+页面重定向手动跟随（每一跳都过 robots 和限速）；gzip/deflate 由代码解压；连接失败退避重试。只用标准库。"""
 import gzip
 import threading
 import time
@@ -17,6 +18,8 @@ HOST_INTERVAL = {"web.archive.org": 1.5}
 HOST_CONCURRENCY = {"web.archive.org": 1}
 DEFAULT_CONCURRENCY = 4
 CONNECT_BACKOFF_S = (10, 30)
+MAX_ROBOTS_REDIRECTS = 5
+MAX_CRAWL_DELAY_S = 30   # robots.txt 的 Crawl-delay 照办（取 max(它, 1 秒)）；超过 30 秒的 host 不抓
 
 
 class HostLimiter:
@@ -25,6 +28,12 @@ class HostLimiter:
         self._lock = threading.Lock()
         self._next = {}
         self._sems = {}
+        self._custom = {}
+
+    def set_interval(self, host: str, seconds: float):
+        """robots.txt 的 Crawl-delay：这个 host 的间隔取 max(默认, Crawl-delay)。"""
+        with self._lock:
+            self._custom[host] = max(self._custom.get(host, 0.0), float(seconds))
 
     def sem(self, host: str):
         with self._lock:
@@ -36,7 +45,7 @@ class HostLimiter:
         with self._lock:
             now = time.monotonic()
             t = max(now, self._next.get(host, 0.0))
-            self._next[host] = t + max(self.interval, HOST_INTERVAL.get(host, 0.0))
+            self._next[host] = t + max(self.interval, HOST_INTERVAL.get(host, 0.0), self._custom.get(host, 0.0))
         if t > now:
             time.sleep(t - now)
 
@@ -96,28 +105,50 @@ def _raw_get_inner(url: str, host: str, timeout: float):
         return e.code, body, dict(e.headers or {})
 
 
-def _robots_for(scheme: str, host: str):
-    with _ROBOTS_LOCK:
-        lock = _HOST_LOCKS.setdefault(host, threading.Lock())
-    with lock:  # 每个 host 只取一次 robots.txt；不同 host 互不阻塞
-        if host in _ROBOTS:
-            return _ROBOTS[host]
-        rp = urllib.robotparser.RobotFileParser()
+def _fetch_robots(url: str):
+    """取 robots.txt，跟随重定向（RFC 9309：至少跟 5 跳；每一跳都过限速）。返回 (status, body)。
+    超过 5 跳按「取不到」处理，返回 599（下面按全部禁止）。"""
+    for _ in range(MAX_ROBOTS_REDIRECTS + 1):
         status, body = 599, b""
         for wait_s in (0, 10):  # 连接失败重试一次，再失败按 RFC 9309 视为全部禁止
             time.sleep(wait_s)
             try:
-                status, body, _ = _raw_get(f"{scheme}://{host}/robots.txt", timeout=30)
+                status, body, headers = _raw_get(url, timeout=30)
                 break
             except (urllib.error.URLError, TimeoutError, OSError):
+                headers = {}
                 continue
+        if status in (301, 302, 303, 307, 308) and headers.get("Location"):
+            url = urllib.parse.urljoin(url, headers["Location"])
+            continue
+        return status, body
+    return 599, b""
+
+
+def _robots_for(scheme: str, host: str):
+    key = (scheme, host)  # http 和 https 分开缓存：http 的 robots.txt 可能只是 301 到 https
+    with _ROBOTS_LOCK:
+        lock = _HOST_LOCKS.setdefault(key, threading.Lock())
+    with lock:  # 每个 (scheme, host) 只取一次 robots.txt；不同 host 互不阻塞
+        if key in _ROBOTS:
+            return _ROBOTS[key]
+        rp = urllib.robotparser.RobotFileParser()
+        status, body = _fetch_robots(f"{scheme}://{host}/robots.txt")
         if status == 200:
             rp.parse(body.decode("utf-8", "replace").splitlines())
         elif status in (401, 403) or status >= 500:
-            rp.disallow_all = True   # RFC 9309：取不到（5xx / 网络错误）按全部禁止处理
+            rp.disallow_all = True   # RFC 9309：取不到（5xx / 网络错误 / 重定向太多）按全部禁止处理
         else:
             rp.allow_all = True      # 404 等：没有 robots.txt，按惯例全部允许
-        _ROBOTS[host] = rp
+        try:
+            cd = float(rp.crawl_delay(UA) or 0)
+        except (TypeError, ValueError):
+            cd = 0.0
+        if cd > MAX_CRAWL_DELAY_S:
+            rp.disallow_all = True   # 要求的间隔太长，这个 host 干脆不抓
+        elif cd > 0:
+            LIMITER.set_interval(host, cd)
+        _ROBOTS[key] = rp
         return rp
 
 

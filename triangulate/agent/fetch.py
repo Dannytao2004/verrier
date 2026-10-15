@@ -1,8 +1,11 @@
 """代码 FETCHER：给一个 URL，拿到「as_of 当天或之前就存在的那一版」页面文字。
 
 1. Wayback CDX 查这个 URL 在 as_of 当天或之前最新的 200 快照，用 id_ 原始形式抓（不带 Wayback 工具栏）。
-   跟随重定向后再检查一次最终快照时间戳 <= as_of。
-2. 没有快照：只有当代码能从 URL 或页面元数据里读出日期、且最晚的那个日期 <= as_of 时，才允许用 live 版本，标 live_dated。
+   跟随重定向后再检查一次：最终 URL 必须还在 web.archive.org 上、能读出 id_ 时间戳、且 <= as_of，否则丢弃。
+2. 没有快照：回测（as_of 早于取页当天）一律不用 live 版本——现抓的页面无法证明 as_of 那天就是这个内容
+   （审查发现：一个 htmldate 读成 2026-08-17 的预测市场页，正文是取页当天的价格）。
+   只有 as_of 就是今天（真实使用）时才用 live 版本：代码要能从 URL 或页面元数据读出日期且 <= as_of，
+   正文里也不能有晚于 as_of 的显式日期；标 live_dated。
 3. 都不行就丢弃并记原因。
 原件和文字存 data/raw/agent/<qid>/（不进 git）；CDX 结果和快照按 URL + 时间戳缓存，重跑不重复打 Wayback。
 """
@@ -14,6 +17,7 @@ from datetime import date, datetime
 
 from ..config import DATA
 from . import net
+from .evidence import late_dates
 
 RAW_AGENT = DATA / "raw" / "agent"
 CACHE = RAW_AGENT / "_cache"
@@ -103,7 +107,7 @@ def page_dates(url: str, html: str) -> list:
     try:
         from htmldate import find_date
         for orig in (True, False):
-            d = find_date(html, original_date=orig, outputformat="%Y-%m-%d", extensive_search=False)
+            d = find_date(html, original_date=orig, outputformat="%Y-%m-%d", extensive_search=True)
             if d:
                 out.append(date.fromisoformat(d))
     except Exception:  # noqa: BLE001
@@ -132,8 +136,12 @@ def _to_text(body: bytes, headers: dict) -> tuple:
     return html_to_text(raw), ""
 
 
-def fetch_page(url: str, as_of: date, qid: str) -> dict:
-    """返回页面记录：status in {snapshot, live_dated, dropped}；成功时带 text（只在内存里，落盘到 data/raw）。"""
+def fetch_page(url: str, as_of: date, qid: str, allow_live=None, today=None) -> dict:
+    """返回页面记录：status in {snapshot, live_dated, dropped}；成功时带 text（只在内存里，落盘到 data/raw）。
+    allow_live 默认 = as_of >= 今天（只有真实使用时才收 live 页）。"""
+    today = today or date.today()
+    if allow_live is None:
+        allow_live = as_of >= today
     url = clean_url(url)
     rec = {"url": url, "status": "dropped", "reason": "", "snapshot_ts": None, "page_date": None}
     if not url.startswith(("http://", "https://")):
@@ -170,6 +178,10 @@ def fetch_page(url: str, as_of: date, qid: str) -> dict:
             status, body, headers, final = -1, b"", {}, ""
             rec["fetch_error"] = f"{type(e).__name__}"[:100]
         m = SNAP_TS.search(final or "")
+        on_wayback = urllib.parse.urlsplit(final or "").netloc.lower() == "web.archive.org"
+        if status == 200 and not (m and on_wayback):
+            rec["reason"] = "snapshot redirect not verifiable (final URL has no Wayback id_ timestamp)"
+            return rec
         real_ts = m.group(1) if m else ts
         if status == 200 and ts_date(real_ts) <= as_of:
             text, why = _to_text(body, headers)
@@ -179,7 +191,10 @@ def fetch_page(url: str, as_of: date, qid: str) -> dict:
             rec.update(status="snapshot", snapshot_ts=real_ts, page_date=ts_date(real_ts).isoformat())
             return _store(rec, out_dir, body, text)
         rec["reason"] = f"snapshot fetch failed (http {status})" if status != 200 else f"snapshot redirected to {real_ts} > as_of"
-    # 没有快照：live 版本只在能读出日期且 <= as_of 时允许
+    # 没有快照：回测不用 live 版本；真实使用时 live 版本只在能读出日期且 <= as_of、正文没有更晚日期时允许
+    if not allow_live:
+        rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + "; live pages not used in backtests (as_of before fetch day)"
+        return rec
     try:
         status, body, headers, final = net.get(url, timeout=45)
     except net.Blocked:
@@ -202,6 +217,10 @@ def fetch_page(url: str, as_of: date, qid: str) -> dict:
     latest = max(dates)
     if latest > as_of:
         rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + f"; live page dated {latest} > as_of"
+        return rec
+    late = late_dates(text, as_of, today)
+    if late:
+        rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + f"; live page text mentions {late[-1]} > as_of"
         return rec
     rec.update(status="live_dated", page_date=latest.isoformat(), live_dates=sorted({d.isoformat() for d in dates}),
                reason="")
