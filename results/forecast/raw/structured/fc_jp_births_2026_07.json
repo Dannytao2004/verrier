@@ -1,0 +1,316 @@
+{
+ "qid": "fc_jp_births_2026_07",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of live births in Japan during July 2026, as counted in the MHLW preliminary monthly vital statistics (including foreign nationals).",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_births_2025",
+      "description": "Total live births in Japan in calendar year 2025, including foreign nationals, as reported in MHLW vital statistics.",
+      "value": 720000,
+      "low": 680000,
+      "high": 760000,
+      "unit": "births",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent MHLW data show ~727k births in 2023 and ~720k in 2024; 2025 likely similar or slightly lower."
+      }
+     },
+     {
+      "name": "july_share_of_annual_births",
+      "description": "Fraction of annual births that occur in July, based on seasonal patterns in Japan.",
+      "value": 0.085,
+      "low": 0.08,
+      "high": 0.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Japanese birth seasonality shows a peak in summer; July typically accounts for about 8.5% of annual births."
+      }
+     },
+     {
+      "name": "monthly_births_2025",
+      "description": "Average number of live births per month in Japan in 2025, including foreign nationals.",
+      "value": 60000,
+      "low": 57000,
+      "high": 63000,
+      "unit": "births/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Derived from annual births 2025 (~720k) divided by 12 months."
+      }
+     },
+     {
+      "name": "july_seasonal_index",
+      "description": "Ratio of July births to the average monthly births, capturing summer peak.",
+      "value": 1.02,
+      "low": 0.98,
+      "high": 1.06,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July tends to have slightly above-average births in Japan; index around 1.02."
+      }
+     },
+     {
+      "name": "births_per_day_july",
+      "description": "Average number of live births per day in Japan during July, including foreign nationals.",
+      "value": 2000,
+      "low": 1900,
+      "high": 2100,
+      "unit": "births/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Based on daily birth counts from recent years; roughly 2000 per day in summer months."
+      }
+     },
+     {
+      "name": "days_in_july",
+      "description": "Number of days in July.",
+      "value": 31,
+      "low": 31,
+      "high": 31,
+      "unit": "days",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "July has 31 days."
+      }
+     },
+     {
+      "name": "japan_population",
+      "description": "Total population of Japan in 2026, including foreign nationals.",
+      "value": 123000000,
+      "low": 120000000,
+      "high": 126000000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Japan's population is about 123 million in 2025, declining slowly."
+      }
+     },
+     {
+      "name": "annual_birth_rate",
+      "description": "Annual live births per person in Japan, including foreign nationals.",
+      "value": 0.00585,
+      "low": 0.0055,
+      "high": 0.0062,
+      "unit": "births/person/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Crude birth rate around 5.85 per 1000 people, based on recent years."
+      }
+     },
+     {
+      "name": "july_fraction_of_year",
+      "description": "Fraction of the year represented by July, adjusted for seasonality.",
+      "value": 0.085,
+      "low": 0.08,
+      "high": 0.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July accounts for about 8.5% of annual births due to summer peak."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual births in 2025 and multiply by July's share of annual births.",
+      "formula": "annual_births_2025 * july_share_of_annual_births",
+      "output_unit": "births"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Estimate average daily births in July and multiply by the number of days in July.",
+      "formula": "births_per_day_july * days_in_july",
+      "output_unit": "births"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Use population and crude birth rate to estimate annual births, then apply July fraction.",
+      "formula": "japan_population * annual_birth_rate * july_fraction_of_year",
+      "output_unit": "births"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Number of live births in Japan during July 2026, as counted in the MHLW preliminary monthly vital statistics (including foreign nationals).",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_births_2025",
+      "description": "Total live births in Japan in calendar year 2025, including foreign nationals, as reported in MHLW vital statistics.",
+      "value": 720000,
+      "low": 680000,
+      "high": 760000,
+      "unit": "births",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent MHLW data show ~727k births in 2023 and ~720k in 2024; 2025 likely similar or slightly lower."
+      }
+     },
+     {
+      "name": "july_share_of_annual_births",
+      "description": "Fraction of annual births that occur in July, based on seasonal patterns in Japan.",
+      "value": 0.085,
+      "low": 0.08,
+      "high": 0.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Japanese birth seasonality shows a peak in summer; July typically accounts for about 8.5% of annual births."
+      }
+     },
+     {
+      "name": "monthly_births_2025",
+      "description": "Average number of live births per month in Japan in 2025, including foreign nationals.",
+      "value": 60000,
+      "low": 57000,
+      "high": 63000,
+      "unit": "births/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Derived from annual births 2025 (~720k) divided by 12 months."
+      }
+     },
+     {
+      "name": "july_seasonal_index",
+      "description": "Ratio of July births to the average monthly births, capturing summer peak.",
+      "value": 1.02,
+      "low": 0.98,
+      "high": 1.06,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July tends to have slightly above-average births in Japan; index around 1.02."
+      }
+     },
+     {
+      "name": "births_per_day_july",
+      "description": "Average number of live births per day in Japan during July, including foreign nationals.",
+      "value": 2000,
+      "low": 1900,
+      "high": 2100,
+      "unit": "births/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Based on daily birth counts from recent years; roughly 2000 per day in summer months."
+      }
+     },
+     {
+      "name": "days_in_july",
+      "description": "Number of days in July.",
+      "value": 31,
+      "low": 31,
+      "high": 31,
+      "unit": "days",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "July has 31 days."
+      }
+     },
+     {
+      "name": "japan_population",
+      "description": "Total population of Japan in 2026, including foreign nationals.",
+      "value": 123000000,
+      "low": 120000000,
+      "high": 126000000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Japan's population is about 123 million in 2025, declining slowly."
+      }
+     },
+     {
+      "name": "annual_birth_rate",
+      "description": "Annual live births per person in Japan, including foreign nationals.",
+      "value": 0.00585,
+      "low": 0.0055,
+      "high": 0.0062,
+      "unit": "births/person/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Crude birth rate around 5.85 per 1000 people, based on recent years."
+      }
+     },
+     {
+      "name": "july_fraction_of_year",
+      "description": "Fraction of the year represented by July, adjusted for seasonality.",
+      "value": 0.085,
+      "low": 0.08,
+      "high": 0.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "July accounts for about 8.5% of annual births due to summer peak."
+      }
+     },
+     {
+      "name": "year",
+      "description": "Duration of one year, used to cancel the time unit in the birth rate.",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "year",
+      "provenance": {
+       "type": "sourced",
+       "source": "Definition of year",
+       "url": "",
+       "quote": "One year is the time for Earth to orbit the Sun."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual births in 2025 and multiply by July's share of annual births.",
+      "formula": "annual_births_2025 * july_share_of_annual_births",
+      "output_unit": "births"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Estimate average daily births in July and multiply by the number of days in July.",
+      "formula": "births_per_day_july * days_in_july",
+      "output_unit": "births"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Use population and crude birth rate to estimate annual births, then apply July fraction.",
+      "formula": "japan_population * annual_birth_rate * year * july_fraction_of_year",
+      "output_unit": "births"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2
+}

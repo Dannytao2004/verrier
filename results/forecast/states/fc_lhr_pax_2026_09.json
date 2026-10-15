@@ -1,0 +1,698 @@
+{
+ "qid": "fc_lhr_pax_2026_09",
+ "question": "Assume today is 2026-09-12. You know nothing published after this date. Estimate the number of passengers at London Heathrow Airport in September 2026, as reported in Heathrow's monthly traffic statistics.",
+ "target": {
+  "unit": "",
+  "dims": "dimensionless",
+  "definition": "Total number of passengers passing through London Heathrow Airport during the calendar month of September 2026, as reported in Heathrow's monthly traffic statistics."
+ },
+ "inputs": [
+  {
+   "name": "annual_passengers_2025",
+   "description": "Total passengers at Heathrow in the full year 2025.",
+   "value": 84000000,
+   "low": 80000000,
+   "high": 88000000,
+   "unit": "passengers",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Heathrow handled about 79–84 million passengers in recent years; 84 million is a plausible 2025 level."
+   },
+   "count_nouns": [
+    "passengers"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 80000000.0,
+    "high": 88000000.0,
+    "value": 84000000.0
+   },
+   "median": 83904707.85361212,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.008131520007157889,
+   "sensitivity_path_max": 0.04139268515822536
+  },
+  {
+   "name": "september_share_of_annual",
+   "description": "Fraction of annual passengers that travel in September.",
+   "value": 0.085,
+   "low": 0.075,
+   "high": 0.095,
+   "unit": "",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September is a busy month but not peak summer; roughly 8–9% of annual traffic."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.075,
+    "high": 0.095,
+    "value": 0.085
+   },
+   "median": 0.08440971508067066,
+   "used_by": [
+    "p1",
+    "p3"
+   ],
+   "n_dependents": 2,
+   "sensitivity": 0.09009751932519272,
+   "sensitivity_path_max": 0.10266234189714751
+  },
+  {
+   "name": "annual_growth_factor",
+   "description": "Growth factor from 2025 to 2026 for Heathrow passenger traffic.",
+   "value": 1.02,
+   "low": 0.98,
+   "high": 1.06,
+   "unit": "",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Heathrow traffic has been recovering; modest growth or slight decline is plausible."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.98,
+    "high": 1.06,
+    "value": 1.02
+   },
+   "median": 1.0192153844992726,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.004475072214183307,
+   "sensitivity_path_max": 0.0340797895722762
+  },
+  {
+   "name": "daily_passengers",
+   "description": "Average number of passengers per day at Heathrow in September.",
+   "value": 230000,
+   "low": 200000,
+   "high": 260000,
+   "unit": "passengers/day",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Heathrow handles roughly 200,000–250,000 passengers per day in busy months."
+   },
+   "count_nouns": [
+    "passengers"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 2.314814814814815,
+    "high": 3.009259259259259,
+    "value": 2.6620370370370368
+   },
+   "median": 228035.0850198276,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.012564822571954792,
+   "sensitivity_path_max": 0.11394335230683605
+  },
+  {
+   "name": "days_in_september",
+   "description": "Number of days in September.",
+   "value": 30,
+   "low": 30,
+   "high": 30,
+   "unit": "days",
+   "provenance": {
+    "type": "sourced",
+    "source": "Gregorian calendar",
+    "url": "",
+    "quote": "September has 30 days."
+   },
+   "count_nouns": [],
+   "dims": "s",
+   "issues": [],
+   "status": "sourced_unverified",
+   "usable": true,
+   "si": {
+    "low": 2592000.0,
+    "high": 2592000.0,
+    "value": 2592000.0
+   },
+   "median": 30.0,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0,
+   "sensitivity_path_max": 0.0
+  },
+  {
+   "name": "annual_capacity",
+   "description": "Practical annual passenger capacity of Heathrow Airport.",
+   "value": 80000000,
+   "low": 75000000,
+   "high": 85000000,
+   "unit": "passengers",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Heathrow's two runways have a practical capacity around 80 million passengers per year."
+   },
+   "count_nouns": [
+    "passengers"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 75000000.0,
+    "high": 85000000.0,
+    "value": 80000000.0
+   },
+   "median": 79843597.11335656,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "capacity_utilization",
+   "description": "Average utilization of annual capacity in September.",
+   "value": 0.95,
+   "low": 0.85,
+   "high": 1.0,
+   "unit": "",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September is a busy month; utilization is likely high but not necessarily 100%."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.85,
+    "high": 1.0,
+    "value": 0.95
+   },
+   "median": 0.9219544457292888,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "uk_annual_air_passengers",
+   "description": "Total passengers at all UK airports in a year.",
+   "value": 270000000,
+   "low": 250000000,
+   "high": 290000000,
+   "unit": "passengers",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "UK airports handle roughly 250–290 million passengers per year."
+   },
+   "count_nouns": [
+    "passengers"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 250000000.0,
+    "high": 290000000.0,
+    "value": 270000000.0
+   },
+   "median": 269258240.3567252,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.023321807852900278,
+   "sensitivity_path_max": 0.06445798922691814
+  },
+  {
+   "name": "heathrow_share_of_uk",
+   "description": "Heathrow's share of total UK air passengers.",
+   "value": 0.31,
+   "low": 0.28,
+   "high": 0.34,
+   "unit": "",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Heathrow is the largest UK airport, typically handling about 30% of UK passengers."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.28,
+    "high": 0.34,
+    "value": 0.31
+   },
+   "median": 0.3085449724108303,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.023321807852900278,
+   "sensitivity_path_max": 0.08432088570003593
+  }
+ ],
+ "paths": [
+  {
+   "id": "p1",
+   "method": "top_down",
+   "description": "Estimate annual passengers for 2026 and allocate the September share.",
+   "formula": "annual_passengers_2025 * annual_growth_factor * september_share_of_annual",
+   "output_unit": "passengers",
+   "issues": [],
+   "uses": [
+    "annual_growth_factor",
+    "annual_passengers_2025",
+    "september_share_of_annual"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 7219112.831967545,
+   "p10": 6309630.592107247,
+   "p90": 8224017.730356435,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": 0.01337649805016822
+  },
+  {
+   "id": "p2",
+   "method": "bottom_up",
+   "description": "Count daily passengers and multiply by days in September.",
+   "formula": "daily_passengers * days_in_september",
+   "output_unit": "passengers",
+   "issues": [],
+   "uses": [
+    "daily_passengers",
+    "days_in_september"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 6838241.35065696,
+   "p10": 5999016.660117369,
+   "p90": 7815360.266327435,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": -0.010162906839841954
+  },
+  {
+   "id": "p3",
+   "method": "proxy",
+   "description": "Scale from UK total air passengers using Heathrow's share, then allocate September share.",
+   "formula": "uk_annual_air_passengers * heathrow_share_of_uk * september_share_of_annual",
+   "output_unit": "passengers",
+   "issues": [],
+   "uses": [
+    "heathrow_share_of_uk",
+    "september_share_of_annual",
+    "uk_annual_air_passengers"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 7000149.76543954,
+   "p10": 5907697.788223926,
+   "p90": 8298592.216668642,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": -2.4108186663832183e-16
+  }
+ ],
+ "errors": [],
+ "warnings": [],
+ "mc": {
+  "samples": 20000,
+  "seed": "20261015:fc_lhr_pax_2026_09",
+  "input_distribution": "lognormal, low/high = P10/P90"
+ },
+ "result": {
+  "central": 7000149.765439544,
+  "p10": 6053404.054819362,
+  "p90": 8126418.269040176,
+  "unit": "",
+  "n_valid_paths": 3,
+  "outliers": [],
+  "path_spread_oom": 0.02353940489000994
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "target",
+    "kind": "target",
+    "label": "target",
+    "status": "estimated",
+    "definition": "Total number of passengers passing through London Heathrow Airport during the calendar month of September 2026, as reported in Heathrow's monthly traffic statistics.",
+    "unit": "",
+    "central": 7000149.765439544,
+    "p10": 6053404.054819362,
+    "p90": 8126418.269040176,
+    "n_valid_paths": 3,
+    "outliers": []
+   },
+   {
+    "id": "path:p1",
+    "kind": "path",
+    "label": "p1 top_down",
+    "status": "valid",
+    "method": "top_down",
+    "description": "Estimate annual passengers for 2026 and allocate the September share.",
+    "formula": "annual_passengers_2025 * annual_growth_factor * september_share_of_annual",
+    "output_unit": "passengers",
+    "issues": [],
+    "median": 7219112.831967545,
+    "p10": 6309630.592107247,
+    "p90": 8224017.730356435,
+    "log10_vs_central": 0.01337649805016822,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p2",
+    "kind": "path",
+    "label": "p2 bottom_up",
+    "status": "valid",
+    "method": "bottom_up",
+    "description": "Count daily passengers and multiply by days in September.",
+    "formula": "daily_passengers * days_in_september",
+    "output_unit": "passengers",
+    "issues": [],
+    "median": 6838241.35065696,
+    "p10": 5999016.660117369,
+    "p90": 7815360.266327435,
+    "log10_vs_central": -0.010162906839841954,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p3",
+    "kind": "path",
+    "label": "p3 proxy",
+    "status": "valid",
+    "method": "proxy",
+    "description": "Scale from UK total air passengers using Heathrow's share, then allocate September share.",
+    "formula": "uk_annual_air_passengers * heathrow_share_of_uk * september_share_of_annual",
+    "output_unit": "passengers",
+    "issues": [],
+    "median": 7000149.76543954,
+    "p10": 5907697.788223926,
+    "p90": 8298592.216668642,
+    "log10_vs_central": -2.4108186663832183e-16,
+    "n_dependents": 1
+   },
+   {
+    "id": "input:annual_passengers_2025",
+    "kind": "input",
+    "label": "annual_passengers_2025",
+    "status": "assumption",
+    "description": "Total passengers at Heathrow in the full year 2025.",
+    "value": 84000000,
+    "low": 80000000,
+    "high": 88000000,
+    "unit": "passengers",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Heathrow handled about 79–84 million passengers in recent years; 84 million is a plausible 2025 level."
+    },
+    "issues": [],
+    "count_nouns": [
+     "passengers"
+    ],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.008131520007157889,
+    "sensitivity_path_max": 0.04139268515822536
+   },
+   {
+    "id": "input:september_share_of_annual",
+    "kind": "input",
+    "label": "september_share_of_annual",
+    "status": "assumption",
+    "description": "Fraction of annual passengers that travel in September.",
+    "value": 0.085,
+    "low": 0.075,
+    "high": 0.095,
+    "unit": "",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September is a busy month but not peak summer; roughly 8–9% of annual traffic."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1",
+     "p3"
+    ],
+    "n_dependents": 2,
+    "sensitivity": 0.09009751932519272,
+    "sensitivity_path_max": 0.10266234189714751
+   },
+   {
+    "id": "input:annual_growth_factor",
+    "kind": "input",
+    "label": "annual_growth_factor",
+    "status": "assumption",
+    "description": "Growth factor from 2025 to 2026 for Heathrow passenger traffic.",
+    "value": 1.02,
+    "low": 0.98,
+    "high": 1.06,
+    "unit": "",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Heathrow traffic has been recovering; modest growth or slight decline is plausible."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.004475072214183307,
+    "sensitivity_path_max": 0.0340797895722762
+   },
+   {
+    "id": "input:daily_passengers",
+    "kind": "input",
+    "label": "daily_passengers",
+    "status": "assumption",
+    "description": "Average number of passengers per day at Heathrow in September.",
+    "value": 230000,
+    "low": 200000,
+    "high": 260000,
+    "unit": "passengers/day",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Heathrow handles roughly 200,000–250,000 passengers per day in busy months."
+    },
+    "issues": [],
+    "count_nouns": [
+     "passengers"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.012564822571954792,
+    "sensitivity_path_max": 0.11394335230683605
+   },
+   {
+    "id": "input:days_in_september",
+    "kind": "input",
+    "label": "days_in_september",
+    "status": "sourced_unverified",
+    "description": "Number of days in September.",
+    "value": 30,
+    "low": 30,
+    "high": 30,
+    "unit": "days",
+    "provenance": {
+     "type": "sourced",
+     "source": "Gregorian calendar",
+     "url": "",
+     "quote": "September has 30 days."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0,
+    "sensitivity_path_max": 0.0
+   },
+   {
+    "id": "input:annual_capacity",
+    "kind": "input",
+    "label": "annual_capacity",
+    "status": "assumption",
+    "description": "Practical annual passenger capacity of Heathrow Airport.",
+    "value": 80000000,
+    "low": 75000000,
+    "high": 85000000,
+    "unit": "passengers",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Heathrow's two runways have a practical capacity around 80 million passengers per year."
+    },
+    "issues": [],
+    "count_nouns": [
+     "passengers"
+    ],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:capacity_utilization",
+    "kind": "input",
+    "label": "capacity_utilization",
+    "status": "assumption",
+    "description": "Average utilization of annual capacity in September.",
+    "value": 0.95,
+    "low": 0.85,
+    "high": 1.0,
+    "unit": "",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September is a busy month; utilization is likely high but not necessarily 100%."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:uk_annual_air_passengers",
+    "kind": "input",
+    "label": "uk_annual_air_passengers",
+    "status": "assumption",
+    "description": "Total passengers at all UK airports in a year.",
+    "value": 270000000,
+    "low": 250000000,
+    "high": 290000000,
+    "unit": "passengers",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "UK airports handle roughly 250–290 million passengers per year."
+    },
+    "issues": [],
+    "count_nouns": [
+     "passengers"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.023321807852900278,
+    "sensitivity_path_max": 0.06445798922691814
+   },
+   {
+    "id": "input:heathrow_share_of_uk",
+    "kind": "input",
+    "label": "heathrow_share_of_uk",
+    "status": "assumption",
+    "description": "Heathrow's share of total UK air passengers.",
+    "value": 0.31,
+    "low": 0.28,
+    "high": 0.34,
+    "unit": "",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Heathrow is the largest UK airport, typically handling about 30% of UK passengers."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.023321807852900278,
+    "sensitivity_path_max": 0.08432088570003593
+   }
+  ],
+  "edges": [
+   {
+    "source": "path:p1",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:annual_growth_factor",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:annual_passengers_2025",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:september_share_of_annual",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p2",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:daily_passengers",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:days_in_september",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p3",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:heathrow_share_of_uk",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:september_share_of_annual",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:uk_annual_air_passengers",
+    "target": "path:p3",
+    "kind": "used_by"
+   }
+  ]
+ }
+}

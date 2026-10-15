@@ -1,0 +1,154 @@
+{
+ "qid": "fc_lhr_pax_2026_09",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total number of passengers passing through London Heathrow Airport during the calendar month of September 2026, as reported in Heathrow's monthly traffic statistics.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_passengers_2025",
+      "description": "Total passengers at Heathrow in the full year 2025.",
+      "value": 84000000,
+      "low": 80000000,
+      "high": 88000000,
+      "unit": "passengers",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Heathrow handled about 79–84 million passengers in recent years; 84 million is a plausible 2025 level."
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual passengers that travel in September.",
+      "value": 0.085,
+      "low": 0.075,
+      "high": 0.095,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a busy month but not peak summer; roughly 8–9% of annual traffic."
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Growth factor from 2025 to 2026 for Heathrow passenger traffic.",
+      "value": 1.02,
+      "low": 0.98,
+      "high": 1.06,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Heathrow traffic has been recovering; modest growth or slight decline is plausible."
+      }
+     },
+     {
+      "name": "daily_passengers",
+      "description": "Average number of passengers per day at Heathrow in September.",
+      "value": 230000,
+      "low": 200000,
+      "high": 260000,
+      "unit": "passengers/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Heathrow handles roughly 200,000–250,000 passengers per day in busy months."
+      }
+     },
+     {
+      "name": "days_in_september",
+      "description": "Number of days in September.",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "days",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "September has 30 days."
+      }
+     },
+     {
+      "name": "annual_capacity",
+      "description": "Practical annual passenger capacity of Heathrow Airport.",
+      "value": 80000000,
+      "low": 75000000,
+      "high": 85000000,
+      "unit": "passengers",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Heathrow's two runways have a practical capacity around 80 million passengers per year."
+      }
+     },
+     {
+      "name": "capacity_utilization",
+      "description": "Average utilization of annual capacity in September.",
+      "value": 0.95,
+      "low": 0.85,
+      "high": 1.0,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a busy month; utilization is likely high but not necessarily 100%."
+      }
+     },
+     {
+      "name": "uk_annual_air_passengers",
+      "description": "Total passengers at all UK airports in a year.",
+      "value": 270000000,
+      "low": 250000000,
+      "high": 290000000,
+      "unit": "passengers",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "UK airports handle roughly 250–290 million passengers per year."
+      }
+     },
+     {
+      "name": "heathrow_share_of_uk",
+      "description": "Heathrow's share of total UK air passengers.",
+      "value": 0.31,
+      "low": 0.28,
+      "high": 0.34,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Heathrow is the largest UK airport, typically handling about 30% of UK passengers."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual passengers for 2026 and allocate the September share.",
+      "formula": "annual_passengers_2025 * annual_growth_factor * september_share_of_annual",
+      "output_unit": "passengers"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Count daily passengers and multiply by days in September.",
+      "formula": "daily_passengers * days_in_september",
+      "output_unit": "passengers"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from UK total air passengers using Heathrow's share, then allocate September share.",
+      "formula": "uk_annual_air_passengers * heathrow_share_of_uk * september_share_of_annual",
+      "output_unit": "passengers"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

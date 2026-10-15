@@ -1,0 +1,17 @@
+{
+ "qid": "fc_jp_births_2026_07",
+ "arm": "naive",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 65000,
+    "unit": ""
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}
