@@ -694,3 +694,20 @@ class TestTruncatedReplies(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPeriodYearCheck(unittest.TestCase):
+    """v2.1b：数据点的期间年份必须出现在页面正文或网址里（旧页面上的「当年 7 月」被标成目标年份的情况）。"""
+
+    def test_year_must_appear(self):
+        from datetime import date
+        from triangulate.agent import evidence as ev
+        from triangulate.agent.pipeline import verify_point
+        text = "Births in July rose to 21,803 compared with the same month a year earlier."
+        raw = {"name": "births July", "value_as_written": "21,803", "unit": "births", "period_start": "2026-07-01",
+               "period_end": "2026-07-31", "quote": "Births in July rose to 21,803"}
+        p, why = verify_point(raw, ev.norm(text), date(2026, 8, 23), None, False)
+        self.assertIsNone(p)
+        self.assertIn("does not appear", why)
+        p, why = verify_point(raw, ev.norm(text), date(2026, 8, 23), None, False, url="https://x.example/news/2026-08-01/births")
+        self.assertIsNotNone(p, why)

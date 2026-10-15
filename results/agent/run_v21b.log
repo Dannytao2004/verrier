@@ -1,0 +1,151 @@
+[fc_jnto_2026_08] plan: 7 directions -> approved=True
+[fc_kr_births_2026_07] plan: 8 directions -> approved=True
+[fc_kr_births_2026_07] plan: 7 directions -> approved=True
+[fc_yell_2026_08] plan: 8 directions -> approved=True
+[fc_yell_2026_09] plan: 7 directions -> approved=True
+[fc_yell_2026_09] plan: 8 directions -> approved=True
+[fc_yell_2026_08] plan: 7 directions -> approved=True
+[fc_jnto_2026_08] plan: 8 directions -> approved=True
+[fc_yell_2026_08] done in 1852.3s; estimate 861,293; usd 0.5237
+[fc_yell_2026_08] done in 1860.1s; estimate 978,047; usd 0.4575
+[fc_yell_2026_09] done in 1863.0s; estimate n/a; usd 0.426
+[fc_yell_2026_09] done in 2281.9s; estimate 847,216; usd 0.502
+[fc_jnto_2026_08] done in 2361.6s; estimate 8,770,962; usd 0.5064
+[fc_jnto_2026_08] done in 2406.7s; estimate n/a; usd 0.4696
+[fc_kr_births_2026_07] done in 2436.3s; estimate n/a; usd 0.4872
+[fc_kr_births_2026_07] done in 2460.9s; estimate n/a; usd 0.5386
+[
+ {
+  "id": "fc_yell_2026_08",
+  "ablation": false,
+  "estimate": 861293.1641310862,
+  "wall_s": 1852.3
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "ablation": false,
+  "estimate": 847216.2444922675,
+  "wall_s": 2281.9
+ },
+ {
+  "id": "fc_jnto_2026_08",
+  "ablation": false,
+  "estimate": 8770962.36245221,
+  "wall_s": 2361.6
+ },
+ {
+  "id": "fc_kr_births_2026_07",
+  "ablation": false,
+  "estimate": null,
+  "wall_s": 2460.9
+ },
+ {
+  "id": "fc_yell_2026_08",
+  "ablation": true,
+  "estimate": 978047.3244145411,
+  "wall_s": 1860.1
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "ablation": true,
+  "estimate": null,
+  "wall_s": 1863.0
+ },
+ {
+  "id": "fc_jnto_2026_08",
+  "ablation": true,
+  "estimate": null,
+  "wall_s": 2406.7
+ },
+ {
+  "id": "fc_kr_births_2026_07",
+  "ablation": true,
+  "estimate": null,
+  "wall_s": 2436.3
+ }
+]
+v21b [
+ {
+  "id": "fc_yell_2026_08",
+  "estimate": 861293.1641310862,
+  "pct_err": 0.005634967991862139,
+  "covered_80": true,
+  "n_assumptions_used": 2,
+  "assumption_weight_share": 0.6666666666666667,
+  "usd_total_assumed": 0.5237,
+  "wall_s": 1852.3
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "estimate": 847216.2444922675,
+  "pct_err": -0.02445017618484946,
+  "covered_80": true,
+  "n_assumptions_used": 2,
+  "assumption_weight_share": 0.6666666666666666,
+  "usd_total_assumed": 0.502,
+  "wall_s": 2281.9
+ },
+ {
+  "id": "fc_jnto_2026_08",
+  "estimate": 8770962.36245221,
+  "pct_err": 1.8303470142477045,
+  "covered_80": false,
+  "n_assumptions_used": 1,
+  "assumption_weight_share": 1.0,
+  "usd_total_assumed": 0.5064,
+  "wall_s": 2361.6
+ },
+ {
+  "id": "fc_kr_births_2026_07",
+  "estimate": null,
+  "pct_err": null,
+  "covered_80": null,
+  "n_assumptions_used": 0,
+  "assumption_weight_share": 0,
+  "usd_total_assumed": 0.5386,
+  "wall_s": 2460.9
+ }
+]
+v21b_noown [
+ {
+  "id": "fc_yell_2026_08",
+  "estimate": 978047.3244145411,
+  "pct_err": 0.1419556438421341,
+  "covered_80": true,
+  "n_assumptions_used": 2,
+  "assumption_weight_share": 1.0,
+  "usd_total_assumed": 0.4575,
+  "wall_s": 1860.1
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "estimate": null,
+  "pct_err": null,
+  "covered_80": null,
+  "n_assumptions_used": 0,
+  "assumption_weight_share": 0,
+  "usd_total_assumed": 0.426,
+  "wall_s": 1863.0
+ },
+ {
+  "id": "fc_jnto_2026_08",
+  "estimate": null,
+  "pct_err": null,
+  "covered_80": null,
+  "n_assumptions_used": 0,
+  "assumption_weight_share": 0,
+  "usd_total_assumed": 0.4696,
+  "wall_s": 2406.7
+ },
+ {
+  "id": "fc_kr_births_2026_07",
+  "estimate": null,
+  "pct_err": null,
+  "covered_80": null,
+  "n_assumptions_used": 0,
+  "assumption_weight_share": 0,
+  "usd_total_assumed": 0.4872,
+  "wall_s": 2436.3
+ }
+]
+total wall 2461s

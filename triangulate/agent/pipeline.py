@@ -152,7 +152,7 @@ class Context:
         self.leak_patterns = ev.leak_patterns(leak_value) if leak_value else []
 
 
-def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period: bool) -> tuple:
+def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period: bool, url: str = "") -> tuple:
     """返回 (point|None, reason)。quote 逐字在页面里、value_as_written 在 quote 里、数字和倍数由代码解析、日期 <= as_of。"""
     if not isinstance(raw, dict):
         return None, "not an object"
@@ -178,6 +178,10 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
     why = ev.date_check(raw, as_of, page_date, allow_no_period=allow_no_period)
     if why:
         return None, why
+    # 抽取员给的期间年份必须在页面正文或网址里出现过（v2.1b 韩国题：旧页面上「7 月（报告当年）」被标成了 2026 年 7 月）
+    y = str(raw.get("period_end") or "")[:4]
+    if y.isdigit() and y not in text_n and y not in url:
+        return None, f"period year {y} does not appear in the page text or URL (likely mis-dated)"
     unit = "%" if is_pct else str(raw.get("unit") or "")[:60]
     lo = max(0, min(i - 80, len(q) - QUOTE_STORE_CHARS))
     return {"name": str(raw.get("name") or "")[:160], "value": value, "value_as_written": vw, "scale_word": sw,
@@ -232,7 +236,7 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
             kept = 0
             for j, r in enumerate(raws if isinstance(raws, list) else []):
                 pd = date.fromisoformat(page["page_date"]) if page.get("page_date") else None
-                p, why = verify_point(r, text_n, ctx.as_of, pd, allow_no_period)
+                p, why = verify_point(r, text_n, ctx.as_of, pd, allow_no_period, url=page["url"])
                 base = {"direction_id": d["id"], "round": round_no, "source_url": page["url"], "via": page["status"],
                         "page_date": page.get("page_date"), "snapshot_ts": page.get("snapshot_ts"), "order": (len(out["pages"]), j)}
                 if p is None:

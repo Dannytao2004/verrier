@@ -1,0 +1,250 @@
+[
+ {
+  "id": "fc_yell_2026_08",
+  "as_of": "2026-08-15",
+  "answer_value": 856467,
+  "source": "https://www.nps.gov/yell/learn/news/26022.htm",
+  "estimate": 861293.1641310862,
+  "p10": 823138.1884421406,
+  "p90": 901216.7397832766,
+  "basis": "historical_errors",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 0.6666666666666667,
+  "ablation": false,
+  "pct_err": 0.005634967991862139,
+  "abs_log10_err": 0.0024403662509668187,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 861293.1641310862,
+    "pct_err": 0.005634967991862139,
+    "abs_log10_err": 0.0024403662509668187
+   },
+   "naive": {
+    "estimate": 850000.0,
+    "pct_err": -0.007550787128984493,
+    "abs_log10_err": 0.0032917083776597285
+   },
+   "structured_no_retrieval": {
+    "estimate": 1019095.3666571244,
+    "pct_err": 0.18988281703454346,
+    "abs_log10_err": 0.07550419297137347
+   },
+   "last_year_same_period": {
+    "estimate": 881936,
+    "pct_err": 0.02973728117954333,
+    "abs_log10_err": 0.012726436464674008
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "usd_total_assumed": 0.5237,
+  "usd_tokens": 0.0637,
+  "wall_s": 1852.3
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "as_of": "2026-09-06",
+  "answer_value": 868450,
+  "source": "https://www.nps.gov/yell/learn/news/26024.htm",
+  "estimate": 847216.2444922675,
+  "p10": 571723.9949442171,
+  "p90": 1255457.8280409842,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 0.6666666666666666,
+  "ablation": false,
+  "pct_err": -0.02445017618484946,
+  "abs_log10_err": 0.010750545177286156,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 847216.2444922675,
+    "pct_err": -0.02445017618484946,
+    "abs_log10_err": 0.010750545177286156
+   },
+   "naive": {
+    "estimate": 720000.0,
+    "pct_err": -0.1709367263515459,
+    "abs_log10_err": 0.08141232307126964
+   },
+   "structured_no_retrieval": {
+    "estimate": 544261.9087225988,
+    "pct_err": -0.37329505587817513,
+    "abs_log10_err": 0.20293687910510852
+   },
+   "last_year_same_period": {
+    "estimate": 839579,
+    "pct_err": -0.033244285796534045,
+    "abs_log10_err": 0.014683252262707029
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "usd_total_assumed": 0.502,
+  "usd_tokens": 0.062,
+  "wall_s": 2281.9
+ },
+ {
+  "id": "fc_jnto_2026_08",
+  "as_of": "2026-08-16",
+  "answer_value": 3098900,
+  "source": "https://www.jnto.go.jp/en/news/20260916.pdf",
+  "estimate": 8770962.36245221,
+  "p10": 5936767.748613053,
+  "p90": 12958192.744111573,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 1.8303470142477045,
+  "abs_log10_err": 0.4518396853949181,
+  "covered_80": false,
+  "arms": {
+   "agent": {
+    "estimate": 8770962.36245221,
+    "pct_err": 1.8303470142477045,
+    "abs_log10_err": 0.4518396853949181
+   },
+   "naive": {
+    "estimate": 3400000.0,
+    "pct_err": 0.09716350963245013,
+    "abs_log10_err": 0.040271355049150324
+   },
+   "structured_no_retrieval": {
+    "estimate": 3529083.4474705406,
+    "pct_err": 0.13881811206251915,
+    "abs_log10_err": 0.056454365663411006
+   },
+   "last_year_same_period": {
+    "estimate": 3428406,
+    "pct_err": 0.10632998806027949,
+    "abs_log10_err": 0.043884684489944
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": false,
+   "last_year_same_period": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": false
+  },
+  "usd_total_assumed": 0.5064,
+  "usd_tokens": 0.0564,
+  "wall_s": 2361.6
+ },
+ {
+  "id": "fc_kr_births_2026_07",
+  "as_of": "2026-08-23",
+  "answer_value": 24275,
+  "source": "https://www.koreatimes.co.kr/southkorea/society/20260923/births-up-11-in-july-extending-gains-to-25th-consecutive-month",
+  "estimate": null,
+  "p10": null,
+  "p90": null,
+  "basis": "no_method",
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": 0,
+  "ablation": false,
+  "pct_err": null,
+  "abs_log10_err": null,
+  "covered_80": null,
+  "arms": {
+   "agent": null,
+   "naive": {
+    "estimate": 19000.0,
+    "pct_err": -0.21730175077239955,
+    "abs_log10_err": 0.10640563762721349
+   },
+   "structured_no_retrieval": {
+    "estimate": 20209.9130731277,
+    "pct_err": -0.16745981161162926,
+    "abs_log10_err": 0.07959479304802192
+   },
+   "last_year_same_period": {
+    "estimate": 21854,
+    "pct_err": -0.0997322348094748,
+    "abs_log10_err": 0.04562829983938695
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": false
+  },
+  "usd_total_assumed": 0.5386,
+  "usd_tokens": 0.0586,
+  "wall_s": 2460.9
+ }
+]

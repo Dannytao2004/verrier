@@ -1,0 +1,2917 @@
+{
+ "qid": "fc_kr_births_2026_07",
+ "question": "Assume today is 2026-08-23. You know nothing published after this date. Estimate the number of live births in South Korea in July 2026, as it will be first reported in the national statistics agency's monthly Population Trends release.",
+ "as_of": "2026-08-23",
+ "plan": {
+  "target": {
+   "what": "Number of live births occurring in South Korea during July 2026, as first reported in the national statistics agency's monthly Population Trends release",
+   "unit": "live births (persons)",
+   "period_start": "2026-07-01",
+   "period_end": "2026-07-31",
+   "publisher": "Statistics Korea (KOSTAT), Monthly Population Trends (인구동향)",
+   "cadence": "Monthly, typically released around the last week of the second following month (e.g., July data released late September 2026)",
+   "caveats": "The target period is completed relative to the 2026-08-23 cutoff, but the official July 2026 figure is not yet published. The first report may be provisional and subject to revision. Live births are counted by date of occurrence, not registration date; late registration can cause small revisions. Th"
+  },
+  "market_keywords": [
+   "south korea births",
+   "korea birth july",
+   "kostat births"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "Statistics Korea monthly birth series",
+    "hypothesis": "July 2026 births can be estimated by applying recent year-over-year growth rates or seasonal factors to the same month in prior years. The most recent published months (e.g., May or June 2026) provide the latest level and trend, while July values from 2023–2025 provide the seasonal baseline.",
+    "data_to_find": "Monthly live birth counts for South Korea from January 2023 through the latest available month before 2026-08-23 (likely May or June 2026), including July 2023, July 2024, and July 2025. Also useful: the year-over-year percent change for each month in 2025 and 2026 year-to-date.",
+    "search_hints": [
+     "Statistics Korea monthly live births 2025 2026",
+     "인구동향 출생아 수 2026년 6월",
+     "South Korea monthly birth statistics July 2025"
+    ],
+    "expected_information": 5,
+    "selected": false,
+    "ablation_dropped": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "Population registration and resident registration data",
+    "hypothesis": "Monthly birth counts from KOSTAT are closely correlated with birth registrations in the resident registration system, though with a lag. If July 2026 registration data are available (e.g., from Ministry of Interior and Safety), they can serve as a leading indicator or cross-check for the KOSTAT figure.",
+    "data_to_find": "Monthly number of birth registrations in South Korea's resident registration system for July 2026 (or the most recent months), and the historical relationship between registration counts and KOSTAT live birth counts (e.g., average ratio or lag).",
+    "search_hints": [
+     "주민등록 출생신고 2026년 7월",
+     "South Korea birth registration statistics July 2026",
+     "행정안전부 주민등록 인구통계 출생"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "related_series",
+    "perspective": "Hospital and health insurance claims for deliveries",
+    "hypothesis": "The number of live births is strongly related to the number of delivery-related hospital admissions or health insurance claims for childbirth. National Health Insurance Service (NHIS) data on delivery claims can provide an independent estimate, adjusted for multiple births and coverage.",
+    "data_to_find": "Monthly counts of health insurance claims for delivery (normal and cesarean) in South Korea for recent months, including July 2026 if available, and the historical ratio of live births to delivery claims.",
+    "search_hints": [
+     "건강보험 분만 청구 2026년",
+     "NHIS delivery claims South Korea monthly",
+     "국민건강보험공단 분만실적"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "physical_flow",
+    "perspective": "Obstetric service utilization",
+    "hypothesis": "Births can be estimated from the capacity and utilization of obstetric wards: number of obstetric beds, average length of stay, and occupancy rates. This route requires assumptions about the share of births in hospitals versus other settings, but can provide a lower-bound check.",
+    "data_to_find": "Number of obstetric beds and average occupancy rate in South Korean hospitals for 2025–2026, average length of stay for delivery, and the share of births occurring in medical facilities.",
+    "search_hints": [
+     "South Korea obstetric beds occupancy 2025",
+     "분만실 병상 가동률 2025",
+     "OECD obstetric beds Korea"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "shocks",
+    "perspective": "Policy and calendar effects",
+    "hypothesis": "Recent policy changes (e.g., parental benefits, housing support) or calendar effects (e.g., number of weekends, holidays) may have influenced births in July 2026. Quantifying these effects can adjust a baseline estimate.",
+    "data_to_find": "Any major pronatalist policy announcements or changes in 2025–2026, their expected impact on births, and the number of weekend days and public holidays in July 2026 compared to prior years.",
+    "search_hints": [
+     "South Korea birth policy 2026",
+     "저출산 대책 2026 출생아",
+     "Korea public holidays July 2026"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "forecasts_markets",
+    "perspective": "Official projections and expert forecasts",
+    "hypothesis": "Statistics Korea or other institutions may publish monthly or quarterly birth projections that include July 2026. These can serve as a direct estimate or a benchmark.",
+    "data_to_find": "Any published forecasts or projections of monthly live births for South Korea in 2026, especially for July, from KOSTAT, Bank of Korea, or research institutes.",
+    "search_hints": [
+     "Statistics Korea birth projection 2026",
+     "장래인구추계 2026 출생아",
+     "South Korea monthly birth forecast 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "base_rates",
+    "perspective": "Seasonality and trend decomposition",
+    "hypothesis": "The monthly birth series exhibits seasonality (e.g., higher births in certain months) and a long-term downward trend. A seasonal index and trend can be estimated from historical data to project July 2026 from a recent 12-month total or year-to-date total.",
+    "data_to_find": "Monthly live birth counts for South Korea for at least 5 years (2021–2025) to estimate seasonal factors, and the year-to-date total for 2026 (January–June) to anchor the level.",
+    "search_hints": [
+     "South Korea monthly births seasonality",
+     "월별 출생아 수 계절성",
+     "KOSTAT birth seasonality"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c8",
+    "category": "related_series",
+    "perspective": "Marriage and fertility intentions",
+    "hypothesis": "Births in July 2026 are largely determined by conceptions around October 2025, which may correlate with marriage counts and fertility intentions. Marriage data from late 2025 and early 2026 can provide a leading indicator.",
+    "data_to_find": "Monthly marriage counts in South Korea for 2025 and early 2026, and any survey data on fertility intentions or birth plans from late 2025.",
+    "search_hints": [
+     "South Korea marriage statistics 2025 2026",
+     "혼인건수 2025 2026",
+     "KOSTAT marriage monthly"
+    ],
+    "expected_information": 3,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "ablation: dropped 1 own_history candidate direction(s)",
+  "plan proposed 8 candidate directions in 6 categories; running 7 (budget cap 10)",
+  "no own_history direction in plan"
+ ],
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "related_series",
+   "perspective": "Population registration and resident registration data",
+   "hypothesis": "Monthly birth counts from KOSTAT are closely correlated with birth registrations in the resident registration system, though with a lag. If July 2026 registration data are available (e.g., from Ministry of Interior and Safety), they can serve as a leading indicator or cross-check for the KOSTAT figure.",
+   "data_to_find": "Monthly number of birth registrations in South Korea's resident registration system for July 2026 (or the most recent months), and the historical relationship between registration counts and KOSTAT live birth counts (e.g., average ratio or lag).",
+   "search_hints": [
+    "주민등록 출생신고 2026년 7월",
+    "South Korea birth registration statistics July 2026",
+    "행정안전부 주민등록 인구통계 출생"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d2",
+   "category": "base_rates",
+   "perspective": "Seasonality and trend decomposition",
+   "hypothesis": "The monthly birth series exhibits seasonality (e.g., higher births in certain months) and a long-term downward trend. A seasonal index and trend can be estimated from historical data to project July 2026 from a recent 12-month total or year-to-date total.",
+   "data_to_find": "Monthly live birth counts for South Korea for at least 5 years (2021–2025) to estimate seasonal factors, and the year-to-date total for 2026 (January–June) to anchor the level.",
+   "search_hints": [
+    "South Korea monthly births seasonality",
+    "월별 출생아 수 계절성",
+    "KOSTAT birth seasonality"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d3",
+   "category": "related_series",
+   "perspective": "Hospital and health insurance claims for deliveries",
+   "hypothesis": "The number of live births is strongly related to the number of delivery-related hospital admissions or health insurance claims for childbirth. National Health Insurance Service (NHIS) data on delivery claims can provide an independent estimate, adjusted for multiple births and coverage.",
+   "data_to_find": "Monthly counts of health insurance claims for delivery (normal and cesarean) in South Korea for recent months, including July 2026 if available, and the historical ratio of live births to delivery claims.",
+   "search_hints": [
+    "건강보험 분만 청구 2026년",
+    "NHIS delivery claims South Korea monthly",
+    "국민건강보험공단 분만실적"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d4",
+   "category": "forecasts_markets",
+   "perspective": "Official projections and expert forecasts",
+   "hypothesis": "Statistics Korea or other institutions may publish monthly or quarterly birth projections that include July 2026. These can serve as a direct estimate or a benchmark.",
+   "data_to_find": "Any published forecasts or projections of monthly live births for South Korea in 2026, especially for July, from KOSTAT, Bank of Korea, or research institutes.",
+   "search_hints": [
+    "Statistics Korea birth projection 2026",
+    "장래인구추계 2026 출생아",
+    "South Korea monthly birth forecast 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "d5",
+   "category": "related_series",
+   "perspective": "Marriage and fertility intentions",
+   "hypothesis": "Births in July 2026 are largely determined by conceptions around October 2025, which may correlate with marriage counts and fertility intentions. Marriage data from late 2025 and early 2026 can provide a leading indicator.",
+   "data_to_find": "Monthly marriage counts in South Korea for 2025 and early 2026, and any survey data on fertility intentions or birth plans from late 2025.",
+   "search_hints": [
+    "South Korea marriage statistics 2025 2026",
+    "혼인건수 2025 2026",
+    "KOSTAT marriage monthly"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c8"
+  },
+  {
+   "id": "d6",
+   "category": "physical_flow",
+   "perspective": "Obstetric service utilization",
+   "hypothesis": "Births can be estimated from the capacity and utilization of obstetric wards: number of obstetric beds, average length of stay, and occupancy rates. This route requires assumptions about the share of births in hospitals versus other settings, but can provide a lower-bound check.",
+   "data_to_find": "Number of obstetric beds and average occupancy rate in South Korean hospitals for 2025–2026, average length of stay for delivery, and the share of births occurring in medical facilities.",
+   "search_hints": [
+    "South Korea obstetric beds occupancy 2025",
+    "분만실 병상 가동률 2025",
+    "OECD obstetric beds Korea"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d7",
+   "category": "shocks",
+   "perspective": "Policy and calendar effects",
+   "hypothesis": "Recent policy changes (e.g., parental benefits, housing support) or calendar effects (e.g., number of weekends, holidays) may have influenced births in July 2026. Quantifying these effects can adjust a baseline estimate.",
+   "data_to_find": "Any major pronatalist policy announcements or changes in 2025–2026, their expected impact on births, and the number of weekend days and public holidays in July 2026 compared to prior years.",
+   "search_hints": [
+    "South Korea birth policy 2026",
+    "저출산 대책 2026 출생아",
+    "Korea public holidays July 2026"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "b1",
+   "category": "related_series",
+   "perspective": "d1",
+   "hypothesis": "Monthly resident-registration birth counts (Ministry of Interior and Safety 주민등록 인구통계) for June and July 2026 would provide a near-contemporaneous level and year-on-year change for the target month, anchoring the level that the KOSTAT occurrence-based series should land near after allowing for the registration lag. This is the single most valuable missing input because it converts the whole estimate from a growth-rate extrapolation into a level-plus-adjustment calculation.",
+   "data_to_find": "Monthly number of births registered in the resident registration system for June 2026 and July 2026, plus the same months of 2025 for a year-on-year ratio.",
+   "search_hints": [
+    "행",
+    "정",
+    "안",
+    "전"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b2",
+   "category": "base_rates",
+   "perspective": "d2",
+   "hypothesis": "A complete monthly KOSTAT live-birth series for 2024 and 2025 (levels, not just growth rates) would let us fit a level-plus-seasonal-plus-trend projection to July 2026 directly, replacing the need to chain a growth rate onto an assumed base level. It also supplies the July seasonal factor and the recent level that the current evidence lacks.",
+   "data_to_find": "KOSTAT monthly live births (occurrence basis) for each month of 2024 and 2025, and the January-June 2026 monthly figures if released.",
+   "search_hints": [
+    "K",
+    "O",
+    "S",
+    "T"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b3",
+   "category": "related_series",
+   "perspective": "d3",
+   "hypothesis": "NHIS delivery-related health-insurance claim counts for July 2026 (or the latest available month) would give an independent, near-complete count of hospital deliveries, which can be scaled to live births using the hospital-delivery share and multiple-birth adjustment. This would resolve whether the marriage-led rebound is actually showing up in deliveries.",
+   "data_to_find": "Monthly NHIS (건강보험심사평가원/국민건강보험공단) statistics on 분만 (delivery) claims or childbirth-related admissions for mid-2026, with the hospital-delivery share of all births.",
+   "search_hints": [
+    "건",
+    "강",
+    "보",
+    "험"
+   ],
+   "expected_information": 3
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "주민등록 출생신고 2026년 7월",
+     "South Korea birth registration statistics July 2026 resident registration",
+     "행정안전부 주민등록 인구통계 출생신고 2026년 7월 출생자 수",
+     "2026년 6월 인구동향 출생아 수 발표",
+     "주민등록 인구통계 출생등록 2026년 6월 전국 출생아",
+     "행정안전부 주민등록 출생신고 코스타 출생아 수 차이 비율"
+    ],
+    "urls": [
+     "https://nowon.kr/dong/user/bbs/BD_selectBbs.do?q_bbsCode=1042&q_bbscttSn=20260804170322638",
+     "https://www.ongjin.go.kr/open_content/main/peti/petiDetail.do?seq=810&pgno=5",
+     "https://www.yangcheon.go.kr/site/yangcheon/ex/seol/seolContentDeailView.do?not_ancmt_mgt_no=47438",
+     "https://www.osan.go.kr/portal/contents.do?mId=0102130000"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 29,
+    "web_search_requests": 6,
+    "usd": 0.00320892,
+    "usd_search_fee_assumed": 0.06
+   },
+   "pages": [
+    {
+     "url": "https://nowon.kr/dong/user/bbs/BD_selectBbs.do?q_bbsCode=1042&q_bbscttSn=20260804170322638",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ongjin.go.kr/open_content/main/peti/petiDetail.do?seq=810&pgno=5",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.yangcheon.go.kr/site/yangcheon/ex/seol/seolContentDeailView.do?not_ancmt_mgt_no=47438",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.osan.go.kr/portal/contents.do?mId=0102130000",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260408223852",
+     "page_date": "2026-04-08",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/330da326dd93b255.raw",
+     "text_chars": 1911,
+     "leak_hits": [],
+     "chars_sent": 1911,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 76.0
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea monthly live births 2025 Statistics Korea monthly population trends",
+     "월별 출생아 수 2021 2022 2023 2024 2025 통계청 인구동향",
+     "2026년 6월 인구동향 출생아 수 상반기 누계",
+     "2026년 5월 인구동향 출생아 수 통계청"
+    ],
+    "urls": [
+     "https://www.yna.co.kr/view/PYH20260826116300013",
+     "https://www.korea.kr/common/download.do?fileId=198368729",
+     "https://nsp.nanet.go.kr/trend/latest/detail.do?latestTrendControlNo=TREN0000003532",
+     "https://namu.wiki/w/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD/%EC%B6%9C%EC%82%B0%EC%9C%A8/%EC%83%81%EC%84%B8%20%ED%86%B5%EA%B3%84"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.003868356,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.yna.co.kr/view/PYH20260826116300013",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.korea.kr/common/download.do?fileId=198368729",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://nsp.nanet.go.kr/trend/latest/detail.do?latestTrendControlNo=TREN0000003532",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://namu.wiki/w/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD/%EC%B6%9C%EC%82%B0%EC%9C%A8/%EC%83%81%EC%84%B8%20%ED%86%B5%EA%B3%84",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 996.6
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "건강보험 분만 청구 2026년 월별",
+     "NHIS delivery claims South Korea monthly statistics",
+     "국민건강보험공단 분만실적 월별 분만건수 2025",
+     "Statistics Korea Monthly Population Trends July 2026 live births",
+     "인구동향 2026년 7월 출생아 수"
+    ],
+    "urls": [
+     "https://www.nhis.or.kr/_custom/nhis/_common/board/index/725.do?mode=download&articleNo=11008252&attachNo=365025",
+     "https://kha.or.kr/kha_home/notice_list.do?mode=download&articleNo=46661&attachNo=424913",
+     "https://m.bokjiro.go.kr/ssis-tem/cms/mob/common/download/2026%20%EB%82%98%EC%97%90%EA%B2%8C%20%ED%9E%98%EC%9D%B4%20%EB%90%98%EB%8A%94%20%EB%B3%B5%EC%A7%80%EC%84%9C%EB%B9%84%EC%8A%A4_%EB%B6%84%EA%B6%8C%28%EC%9E%84%EC%8B%A0%EC%B6%9C%EC%82%B0%EC%98%81%EC%9C%A0%EC%95%84%29.pdf",
+     "https://workingmom.or.kr/wp-content/plugins/bbang-cpboard/lib/download.php?att_id=29710"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 19,
+    "web_search_requests": 5,
+    "usd": 0.002598162,
+    "usd_search_fee_assumed": 0.05
+   },
+   "pages": [
+    {
+     "url": "https://www.nhis.or.kr/_custom/nhis/_common/board/index/725.do?mode=download&articleNo=11008252&attachNo=365025",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://kha.or.kr/kha_home/notice_list.do?mode=download&articleNo=46661&attachNo=424913",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://m.bokjiro.go.kr/ssis-tem/cms/mob/common/download/2026%20%EB%82%98%EC%97%90%EA%B2%8C%20%ED%9E%98%EC%9D%B4%20%EB%90%98%EB%8A%94%20%EB%B3%B5%EC%A7%80%EC%84%9C%EB%B9%84%EC%8A%A4_%EB%B6%84%EA%B6%8C%28%EC%9E%84%EC%8B%A0%EC%B6%9C%EC%82%B0%EC%98%81%EC%9C%A0%EC%95%84%29.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://workingmom.or.kr/wp-content/plugins/bbang-cpboard/lib/download.php?att_id=29710",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 1164.5
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Statistics Korea birth projection 2026 monthly live births",
+     "장래인구추계 2026 출생아 수 전망",
+     "South Korea monthly birth forecast 2026 KOSTAT 인구동향",
+     "한국은행 출생아 수 전망 2026"
+    ],
+    "urls": [
+     "https://chosun-chosun-prod.cdn.arcpublishing.com/economy/economy_general/2026/09/23/4336WE6G4BBALOXOVOQM7RBNKE/",
+     "https://namu.wiki/w/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD/%EC%B6%9C%EC%82%B0%EC%9C%A8/%EC%83%81%EC%84%B8%20%ED%86%B5%EA%B3%84",
+     "https://m.etoday.co.kr/news/view/2610060?trc=m_main_top_sub",
+     "https://www.newsworks.co.kr/news/articleView.html?idxno=848723"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.004492422,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://chosun-chosun-prod.cdn.arcpublishing.com/economy/economy_general/2026/09/23/4336WE6G4BBALOXOVOQM7RBNKE/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://namu.wiki/w/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD/%EC%B6%9C%EC%82%B0%EC%9C%A8/%EC%83%81%EC%84%B8%20%ED%86%B5%EA%B3%84",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://m.etoday.co.kr/news/view/2610060?trc=m_main_top_sub",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.newsworks.co.kr/news/articleView.html?idxno=848723",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 104.6
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea monthly marriage statistics 2025 KOSTAT 혼인건수",
+     "Statistics Korea Monthly Population Trends 2026 births marriage",
+     "2025년 월별 혼인건수 10월 11월 12월 인구동향",
+     "2026년 6월 인구동향 출생아 수 혼인건수 국가데이터처"
+    ],
+    "urls": [
+     "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "https://chosun-chosun-prod.cdn.arcpublishing.com/economy/economy_general/2026/04/22/DMBJ2HALXRADPCZV3ZFUGFIKXQ/",
+     "https://en.sedaily.com/finance/2026/06/24/koreas-birth-rate-rises-to-093-but-population-shrinks-for",
+     "https://mhdata.or.kr/mailing/Numbers325_260303_B1_Part.pdf"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0035905319999999996,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260210001709",
+     "page_date": "2026-02-10",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/7aa8129f715a6edf.raw",
+     "text_chars": 876,
+     "leak_hits": [],
+     "chars_sent": 876,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 11
+    },
+    {
+     "url": "https://chosun-chosun-prod.cdn.arcpublishing.com/economy/economy_general/2026/04/22/DMBJ2HALXRADPCZV3ZFUGFIKXQ/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://en.sedaily.com/finance/2026/06/24/koreas-birth-rate-rises-to-093-but-population-shrinks-for",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mhdata.or.kr/mailing/Numbers325_260303_B1_Part.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      1
+     ],
+     "name": "Year-on-year growth rate of South Korea live births in November 2025",
+     "value": 3.1,
+     "value_as_written": "3.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-11-01",
+     "period_end": "2025-11-30",
+     "published_at_if_visible": "",
+     "quote": "지난해 11월 출생아 수가 2만710명으로 전년 동월보다 3.1% 증가했다고 밝혔다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      2
+     ],
+     "name": "Year-on-year growth rate of South Korea live births in October 2025",
+     "value": 2.5,
+     "value_as_written": "2.5%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-10-01",
+     "period_end": "2025-10-31",
+     "published_at_if_visible": "",
+     "quote": "10월에는 2024년 6월 이후 16개월 만에 가장 낮은 증가율(2.5%)을 기록했고",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      4
+     ],
+     "name": "Year-on-year growth rate of South Korea marriages in November 2025",
+     "value": 2.7,
+     "value_as_written": "2.7%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-11-01",
+     "period_end": "2025-11-30",
+     "published_at_if_visible": "",
+     "quote": "11월 혼인 건수는 1만9079건으로 전년 동월보다 2.7% 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      5
+     ],
+     "name": "Year-on-year growth rate of South Korea marriages in October 2025",
+     "value": 0.2,
+     "value_as_written": "0.2%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-10-01",
+     "period_end": "2025-10-31",
+     "published_at_if_visible": "",
+     "quote": "10월에는 증가율(0.2%)이 2024년 3월 이후 19개월 만에 최저치를 기록했고",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      8
+     ],
+     "name": "South Korea annual total fertility rate forecast for 2025 (lower bound)",
+     "value": 0.78,
+     "value_as_written": "0.78",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "children per woman (total fertility rate)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "연간 합계출산율은 0.78~0.80명을 기록할 것으로 보인다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      9
+     ],
+     "name": "South Korea annual total fertility rate forecast for 2025 (upper bound)",
+     "value": 0.8,
+     "value_as_written": "0.80",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "children per woman (total fertility rate)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "연간 합계출산율은 0.78~0.80명을 기록할 것으로 보인다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      10
+     ],
+     "name": "South Korea annual live births threshold expected to be exceeded in 2025 (250 thousand)",
+     "value": 25.0,
+     "value_as_written": "25만",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "live births (persons)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "12월 출생아가 전년 수준만 기록해도 연간 출생아 수는 2021년 이후 4년 만에 25만 명을 넘어서게 된다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      11
+     ],
+     "name": "Year-on-year growth rate of cumulative live births in Seoul, January–November 2025",
+     "value": 8.7,
+     "value_as_written": "8.7%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-11-30",
+     "published_at_if_visible": "",
+     "quote": "서울은 8.7%, 인천은 8.4%, 경기는 6.8% 늘었으나",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      12
+     ],
+     "name": "Year-on-year growth rate of cumulative live births in Incheon, January–November 2025",
+     "value": 8.4,
+     "value_as_written": "8.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-11-30",
+     "published_at_if_visible": "",
+     "quote": "서울은 8.7%, 인천은 8.4%, 경기는 6.8% 늘었으나",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      13
+     ],
+     "name": "Year-on-year growth rate of cumulative live births in Gyeonggi, January–November 2025",
+     "value": 6.8,
+     "value_as_written": "6.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-11-30",
+     "published_at_if_visible": "",
+     "quote": "서울은 8.7%, 인천은 8.4%, 경기는 6.8% 늘었으나",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      14
+     ],
+     "name": "Year-on-year growth rate of cumulative marriages in Seoul, January–November 2025",
+     "value": 15.8,
+     "value_as_written": "15.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-11-30",
+     "published_at_if_visible": "",
+     "quote": "1~11월 누계로는 서울에서 15.8%, 경기에서 8.1% 늘었지만",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      0
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea live births in November 2025 (monthly)",
+     "value_as_written": "2만710명"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      3
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea marriages in November 2025 (monthly)",
+     "value_as_written": "1만9079건"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      6
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea annual live births in 2023",
+     "value_as_written": "23만28명"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+     "via": "snapshot",
+     "page_date": "2026-02-10",
+     "snapshot_ts": "20260210001709",
+     "order": [
+      0,
+      7
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea annual live births in 2024",
+     "value_as_written": "23만8317명"
+    }
+   ],
+   "wall_s": 1768.0
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea obstetric beds occupancy rate 2025 분만실 병상 가동률",
+     "OECD obstetric beds Korea per 1000 births",
+     "OECD health at a glance Korea length of stay normal delivery days",
+     "산부인과 병상 가동률 2025 분만 병상 평균 재원일수 제왕절개 자연분만"
+    ],
+    "urls": [
+     "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "https://mhlw-grants.niph.go.jp/system/files/download_pdf/2022/202205006B.pdf",
+     "https://hnews.kr/news/view.php?no=66910",
+     "https://www.medicalworldnews.co.kr/news/view.php?idx=1510969077"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 24,
+    "web_search_requests": 4,
+    "usd": 0.002993292,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20250724174330",
+     "page_date": "2025-07-24",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/2bb71354f0a7ed87.raw",
+     "text_chars": 1502,
+     "leak_hits": [],
+     "chars_sent": 1502,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 13
+    },
+    {
+     "url": "https://mhlw-grants.niph.go.jp/system/files/download_pdf/2022/202205006B.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://hnews.kr/news/view.php?no=66910",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.medicalworldnews.co.kr/news/view.php?idx=1510969077",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      0
+     ],
+     "name": "South Korea newborn nursery beds, Q1 2021",
+     "value": 6925.0,
+     "value_as_written": "6925",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "beds",
+     "period_start": "2021-01-01",
+     "period_end": "2021-03-31",
+     "published_at_if_visible": "",
+     "quote": "신생아실의 경우, 병상수는 2021년 6925개에서 2025년 6292개로 9.1%(633개) 줄었고",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      1
+     ],
+     "name": "South Korea newborn nursery beds, Q1 2025",
+     "value": 6292.0,
+     "value_as_written": "6292",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "beds",
+     "period_start": "2025-01-01",
+     "period_end": "2025-03-31",
+     "published_at_if_visible": "",
+     "quote": "신생아실의 경우, 병상수는 2021년 6925개에서 2025년 6292개로 9.1%(633개) 줄었고",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      2
+     ],
+     "name": "South Korea newborn nursery rooms, Q1 2021",
+     "value": 656.0,
+     "value_as_written": "656",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rooms",
+     "period_start": "2021-01-01",
+     "period_end": "2021-03-31",
+     "published_at_if_visible": "",
+     "quote": "병실 수는 656실에서 538실로 18%(118실) 감소했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      3
+     ],
+     "name": "South Korea newborn nursery rooms, Q1 2025",
+     "value": 538.0,
+     "value_as_written": "538",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rooms",
+     "period_start": "2025-01-01",
+     "period_end": "2025-03-31",
+     "published_at_if_visible": "",
+     "quote": "병실 수는 656실에서 538실로 18%(118실) 감소했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      4
+     ],
+     "name": "South Korea delivery (분만) facility beds, Q1 2021",
+     "value": 2060.0,
+     "value_as_written": "2060",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "beds",
+     "period_start": "2021-01-01",
+     "period_end": "2021-03-31",
+     "published_at_if_visible": "",
+     "quote": "같은 기간 분만 시설도 감소세를 보였다. 병상수는 2060개에서 1721개로 16.5%(339개)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      5
+     ],
+     "name": "South Korea delivery (분만) facility beds, Q1 2025",
+     "value": 1721.0,
+     "value_as_written": "1721",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "beds",
+     "period_start": "2025-01-01",
+     "period_end": "2025-03-31",
+     "published_at_if_visible": "",
+     "quote": "병상수는 2060개에서 1721개로 16.5%(339개), 병실 수는 1328실에서 1176실로 11.5%(152실) 줄었다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      6
+     ],
+     "name": "South Korea delivery (분만) facility rooms, Q1 2021",
+     "value": 1328.0,
+     "value_as_written": "1328",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rooms",
+     "period_start": "2021-01-01",
+     "period_end": "2021-03-31",
+     "published_at_if_visible": "",
+     "quote": "병실 수는 1328실에서 1176실로 11.5%(152실) 줄었다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      7
+     ],
+     "name": "South Korea delivery (분만) facility rooms, Q1 2025",
+     "value": 1176.0,
+     "value_as_written": "1176",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rooms",
+     "period_start": "2025-01-01",
+     "period_end": "2025-03-31",
+     "published_at_if_visible": "",
+     "quote": "병실 수는 1328실에서 1176실로 11.5%(152실) 줄었다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      8
+     ],
+     "name": "South Korea mother-and-baby rooming-in (모자동실) rooms, 2021",
+     "value": 268.0,
+     "value_as_written": "268",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rooms",
+     "period_start": "2021-01-01",
+     "period_end": "2021-12-31",
+     "published_at_if_visible": "",
+     "quote": "모자동실은 2021년 268개에서 2025년 251개로 6.3%(17개) 줄었다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      9
+     ],
+     "name": "South Korea mother-and-baby rooming-in (모자동실) rooms, 2025",
+     "value": 251.0,
+     "value_as_written": "251",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rooms",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "모자동실은 2021년 268개에서 2025년 251개로 6.3%(17개) 줄었다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      12
+     ],
+     "name": "South Korea operating room beds, Q1 2021",
+     "value": 8751.0,
+     "value_as_written": "8751",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "beds",
+     "period_start": "2021-01-01",
+     "period_end": "2021-03-31",
+     "published_at_if_visible": "",
+     "quote": "수술실 병상수는 2021년 8751개에서 2025년 9151개로 약 4.6%(400개)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      13
+     ],
+     "name": "South Korea operating room beds, Q1 2025",
+     "value": 9151.0,
+     "value_as_written": "9151",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "beds",
+     "period_start": "2025-01-01",
+     "period_end": "2025-03-31",
+     "published_at_if_visible": "",
+     "quote": "수술실 병상수는 2021년 8751개에서 2025년 9151개로 약 4.6%(400개)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      14
+     ],
+     "name": "South Korea emergency room beds, Q1 2021",
+     "value": 8948.0,
+     "value_as_written": "8948",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "beds",
+     "period_start": "2021-01-01",
+     "period_end": "2021-03-31",
+     "published_at_if_visible": "",
+     "quote": "응급실의 병상수는 8948개에서 8938개로 거의 변화가 없었지만",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      10
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea physical therapy rooms, Q1 2021",
+     "value_as_written": "1만 6844"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+     "via": "snapshot",
+     "page_date": "2025-07-24",
+     "snapshot_ts": "20250724174330",
+     "order": [
+      0,
+      11
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea physical therapy rooms, Q1 2025",
+     "value_as_written": "1만 9503"
+    }
+   ],
+   "wall_s": 1701.6
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Statistics Korea monthly population trends July 2026 live births",
+     "South Korea births 2026 policy parental benefits housing support",
+     "2026년 5월 인구동향 출생아 수 통계청",
+     "2026년 7월 달력 공휴일 주말 일수"
+    ],
+    "urls": [
+     "https://www.gov.kr/portal/ntnadmNews/4866340?srchOrgCd=1241000&pageIndex=1&hideurl=N",
+     "https://admin.korea.kr/briefing/pressReleaseView.do?newsId=156783095&pWise=mSub&pWiseSub=C3",
+     "https://news.kbs.co.kr/news/pc/view/view.do?ncd=8670306",
+     "https://busan.fnnews.com/news/202609231201183232"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005776997999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.gov.kr/portal/ntnadmNews/4866340?srchOrgCd=1241000&pageIndex=1&hideurl=N",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://admin.korea.kr/briefing/pressReleaseView.do?newsId=156783095&pWise=mSub&pWiseSub=C3",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://news.kbs.co.kr/news/pc/view/view.do?ncd=8670306",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://busan.fnnews.com/news/202609231201183232",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 1903.1
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "south korea births",
+     "korea birth july",
+     "kostat births"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 20
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "search": {
+    "queries": [
+     "주민등록 인구통계 월별 출생자 수 2026년 7월",
+     "행정안전부 주민등록 인구통계 2026년 6월 출생아 수",
+     "주민등록 인구통계 2026년 7월 출생 24,000명 월간",
+     "행정안전부 주민등록 인구통계 2026년 7월말 출생아 등록"
+    ],
+    "urls": [
+     "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=447111&act=view&mainXml=Y",
+     "https://mods.go.kr/board.es?act=view&bid=204&list_no=446612&mid=a10301020300",
+     "https://www.hani.co.kr/arti/economy/economy_general/1274698.html",
+     "https://gwangyang.go.kr/boardDownload.es?bid=0092&list_no=200423&seq=1"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.003613062,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=447111&act=view&mainXml=Y",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mods.go.kr/board.es?act=view&bid=204&list_no=446612&mid=a10301020300",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.hani.co.kr/arti/economy/economy_general/1274698.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://gwangyang.go.kr/boardDownload.es?bid=0092&list_no=200423&seq=1",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 393.9
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "search": {
+    "queries": [
+     "KOSTAT monthly live births 2024 2025 인구동향 출생아 수",
+     "Statistics Korea Monthly Population Trends live births 2025 monthly series",
+     "2026년 5월 인구동향 출생아 수 명",
+     "\"2026년 6월 인구동향\" 출생아 수",
+     "kosis DT_1B8000G 월별 출생아 수 2024 2025 인구동향 월간"
+    ],
+    "urls": [
+     "https://kostat.go.kr/boardDownload.es?bid=11749&list_no=435971&seq=2",
+     "https://www.kostat.go.kr/boardDownload.es?bid=11749&list_no=439522&seq=3",
+     "https://mods.go.kr/boardDownload.es?bid=204&list_no=447111&seq=1",
+     "https://www.kostat.go.kr/boardDownload.es?bid=204&list_no=439018&seq=3"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 30,
+    "web_search_requests": 5,
+    "usd": 0.00380541,
+    "usd_search_fee_assumed": 0.05
+   },
+   "pages": [
+    {
+     "url": "https://kostat.go.kr/boardDownload.es?bid=11749&list_no=435971&seq=2",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.kostat.go.kr/boardDownload.es?bid=11749&list_no=439522&seq=3",
+     "status": "dropped",
+     "reason": "unsupported content type application/pdf",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mods.go.kr/boardDownload.es?bid=204&list_no=447111&seq=1",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.kostat.go.kr/boardDownload.es?bid=204&list_no=439018&seq=3",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 485.2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "search": {
+    "queries": [
+     "국민건강보험공단 분만 진료비 청구 통계 2026",
+     "건강보험심사평가원 분만 건수 통계 월별 2026",
+     "심평원 분만 통계 2026년 6월 분만 건수 월별",
+     "보건의료빅데이터개방시스템 분만 통계 다운로드 시군구별 연령군별"
+    ],
+    "urls": [
+     "https://www.donga.com/news/article/all/20260805/134422454/1",
+     "https://www.medicaltimes.com/Users/News/NewsView.html?ID=11413",
+     "https://www.data.go.kr/data/15118813/fileData.do",
+     "http://www.drshingangnamclinic.co.kr/page/cboard_view.asp?idx=1475&page=3&gu=2"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 23,
+    "web_search_requests": 4,
+    "usd": 0.003842412,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.donga.com/news/article/all/20260805/134422454/1",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.medicaltimes.com/Users/News/NewsView.html?ID=11413",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.data.go.kr/data/15118813/fileData.do",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://www.drshingangnamclinic.co.kr/page/cboard_view.asp?idx=1475&page=3&gu=2",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 408.6
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "assessment": [
+    {
+     "ids": [
+      "p3",
+      "p4"
+     ],
+     "relation": "corroborating",
+     "note": "Both are KOSTAT-derived monthly marriage growth rates for adjacent months (Oct and Nov 2025) from the same underlying registration series; they jointly indicate a modest but positive marriage uptick in late 2025, which is the conception-relevant window for July 2026 births. They are not independent of each other."
+    },
+    {
+     "ids": [
+      "p8",
+      "p9",
+      "p10"
+     ],
+     "relation": "corroborating",
+     "note": "Seoul, Incheon and Gyeonggi cumulative Jan-Nov 2025 live-birth growth rates (8.7%, 8.4%, 6.8%) are all positive and mutually consistent, pointing to a genuine 2025 national birth rebound concentrated in the capital region. Same source and same measurement basis, so they corroborate rather than independently confirm."
+    },
+    {
+     "ids": [
+      "p11",
+      "p3",
+      "p4"
+     ],
+     "relation": "corroborating",
+     "note": "Seoul cumulative Jan-Nov 2025 marriage growth (+15.8%) is consistent in sign with the national monthly marriage increases in Oct-Nov 2025; both support the view that marriages were rising into the conception window for mid-2026 births."
+    },
+    {
+     "ids": [
+      "p5",
+      "p6"
+     ],
+     "relation": "corroborating",
+     "note": "Lower and upper bounds of the same 2025 TFR forecast (0.78-0.80); they are two endpoints of one forecast, not independent observations."
+    },
+    {
+     "ids": [
+      "p12",
+      "p13",
+      "p14",
+      "p15",
+      "p16",
+      "p17",
+      "p18",
+      "p19",
+      "p20",
+      "p21"
+     ],
+     "relation": "corroborating",
+     "note": "All describe the same 2021-to-2025 contraction of obstetric/newborn inpatient capacity (newborn nursery beds/rooms, delivery beds/rooms, rooming-in rooms). They share one source and one measurement basis and jointly show capacity shrinking faster than births, so capacity is a weak and biased proxy for birth volume."
+    },
+    {
+     "ids": [
+      "p22",
+      "p23",
+      "p24"
+     ],
+     "relation": "contextual",
+     "note": "Operating-room and emergency-room bed counts are general hospital capacity indicators, not obstetric-specific; they show overall hospital capacity roughly flat and therefore do not corroborate or contradict the obstetric-capacity contraction."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p22",
+     "keep": false,
+     "reason": "Operating-room beds are not a delivery-specific capacity measure and cannot be converted into a birth flow; irrelevant to the target."
+    },
+    {
+     "id": "p23",
+     "keep": false,
+     "reason": "Same as p22: general surgical capacity, no defensible bridge to live births."
+    },
+    {
+     "id": "p24",
+     "keep": false,
+     "reason": "Emergency-room beds are unrelated to obstetric delivery volume; unusable for this target."
+    },
+    {
+     "id": "p6",
+     "keep": false,
+     "reason": "Redundant upper endpoint of the same 2025 TFR forecast as p5; keeping both would double-count one forecast."
+    }
+   ],
+   "extra_directions": [
+    {
+     "id": "b1",
+     "category": "related_series",
+     "perspective": "d1",
+     "hypothesis": "Monthly resident-registration birth counts (Ministry of Interior and Safety 주민등록 인구통계) for June and July 2026 would provide a near-contemporaneous level and year-on-year change for the target month, anchoring the level that the KOSTAT occurrence-based series should land near after allowing for the registration lag. This is the single most valuable missing input because it converts the whole estimate from a growth-rate extrapolation into a level-plus-adjustment calculation.",
+     "data_to_find": "Monthly number of births registered in the resident registration system for June 2026 and July 2026, plus the same months of 2025 for a year-on-year ratio.",
+     "search_hints": [
+      "행",
+      "정",
+      "안",
+      "전"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b2",
+     "category": "base_rates",
+     "perspective": "d2",
+     "hypothesis": "A complete monthly KOSTAT live-birth series for 2024 and 2025 (levels, not just growth rates) would let us fit a level-plus-seasonal-plus-trend projection to July 2026 directly, replacing the need to chain a growth rate onto an assumed base level. It also supplies the July seasonal factor and the recent level that the current evidence lacks.",
+     "data_to_find": "KOSTAT monthly live births (occurrence basis) for each month of 2024 and 2025, and the January-June 2026 monthly figures if released.",
+     "search_hints": [
+      "K",
+      "O",
+      "S",
+      "T"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b3",
+     "category": "related_series",
+     "perspective": "d3",
+     "hypothesis": "NHIS delivery-related health-insurance claim counts for July 2026 (or the latest available month) would give an independent, near-complete count of hospital deliveries, which can be scaled to live births using the hospital-delivery share and multiple-birth adjustment. This would resolve whether the marriage-led rebound is actually showing up in deliveries.",
+     "data_to_find": "Monthly NHIS (건강보험심사평가원/국민건강보험공단) statistics on 분만 (delivery) claims or childbirth-related admissions for mid-2026, with the hospital-delivery share of all births.",
+     "search_hints": [
+      "건",
+      "강",
+      "보",
+      "험"
+     ],
+     "expected_information": 3
+    }
+   ],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a * b",
+      "inputs": {
+       "a": {
+        "id": "p8",
+        "role": "placeholder for the observed July 2025 national live-birth level, which is not in the kept set; this method is not executable as written"
+       },
+       "b": {
+        "id": "a1",
+        "role": "July 2026 national live births relative to July 2025 national live births"
+       }
+      }
+     },
+     "rationale": "Intended route: take the observed July 2025 national live-birth level and multiply by the year-on-year change factor a1. This is the most direct credible route, but it cannot be executed because no kept point supplies the July 2025 national live-birth level; p8-p10 are growth rates, not levels, and p5-p6 are TFR forecasts. The method is listed to make the missing input explicit; it should be replaced once b2 supplies the level."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a * b",
+      "inputs": {
+       "a": {
+        "id": "p5",
+        "role": "placeholder for a 2025 annual national live-birth total, which p5 does not supply (it is a TFR forecast, not a birth count); this method is not executable as written"
+       },
+       "b": {
+        "id": "a2",
+        "role": "share of annual live births occurring in July"
+       }
+      }
+     },
+     "rationale": "Intended route: multiply an annual national live-birth total by the July share a2 to obtain July 2026 births. This is a valid decomposition in principle, but no kept point provides the annual birth total; p5/p6 are fertility-rate forecasts and p8-p10 are regional growth rates. The method is listed to flag that the annual-total input is missing and must come from b2."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "July 2026 national live births relative to July 2025 national live births",
+     "value": 1.05,
+     "low": 0.98,
+     "high": 1.13,
+     "unit": "ratio",
+     "rationale": "The kept evidence points to a 2025 birth rebound (Seoul +8.7%, Incheon +8.4%, Gyeonggi +6.8% cumulative Jan-Nov 2025) and rising marriages in the conception window for July 2026 (national Oct +0.2%, Nov +2.7%; Seoul cumulative +15.8%). A modest positive year-on-year ratio for July 2026 is therefore the central case, but the national trend is weaker than the capital-region figures and the 2025 TFR forecast of 0.78-0.80 implies only a slow recovery, so the range spans a small decline to a solid increase.",
+     "applies_when": "Used only to scale an observed July 2025 national live-birth level to July 2026; it is a change factor, not a level of the target.",
+     "falsified_by": "A published July 2026 registration or KOSTAT figure showing a year-on-year change outside roughly -2% to +13%, or evidence that the 2025 marriage increase did not translate into 2026 conceptions.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "Share of annual live births occurring in July",
+     "value": 0.083,
+     "low": 0.078,
+     "high": 0.089,
+     "unit": "share",
+     "rationale": "July is close to an average month in the Korean birth seasonal pattern, with a mild summer peak; a share near 1/12 with a small upward tilt is the central value, and the range covers the observed amplitude of Korean monthly birth seasonality.",
+     "applies_when": "Used to convert a 12-month or annual live-birth total into a July component; requires the total to cover a period containing July 2026.",
+     "falsified_by": "A published monthly seasonal index for Korean births showing July materially outside the 7.8-8.9% band.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  },
+  {
+   "round": 2,
+   "assessment": [
+    {
+     "ids": [
+      "p3",
+      "p4"
+     ],
+     "relation": "corroborating",
+     "note": "Both are KOSTAT-derived marriage growth rates for adjacent months (Oct and Nov 2025) from the same source article; they jointly indicate a weak but positive marriage recovery in late 2025, which is the conception-relevant window for July 2026 births. They are not independent of each other."
+    },
+    {
+     "ids": [
+      "p8",
+      "p9",
+      "p10"
+     ],
+     "relation": "corroborating",
+     "note": "Seoul, Incheon, and Gyeonggi cumulative live-birth growth rates for Jan–Nov 2025 are all positive and of similar magnitude (6.8–8.7%), from the same source. They corroborate a national-level birth increase in 2025 but are regional subsets, not independent national measurements."
+    },
+    {
+     "ids": [
+      "p11"
+     ],
+     "relation": "corroborating",
+     "note": "Seoul cumulative marriage growth (15.8%) is much stronger than the national monthly marriage growth rates in p3/p4, consistent with a marriage-led birth rebound concentrated in the capital region; it supports the d5 conception-lag route but is a regional, not national, indicator."
+    },
+    {
+     "ids": [
+      "p5",
+      "p6"
+     ],
+     "relation": "corroborating",
+     "note": "Lower and upper bounds of the same 2025 TFR forecast (0.78–0.80); they are two endpoints of one forecast, not independent estimates. They provide context on the 2025 fertility level but do not directly give a July 2026 monthly birth count."
+    },
+    {
+     "ids": [
+      "p12",
+      "p13",
+      "p14",
+      "p15",
+      "p16",
+      "p17",
+      "p18",
+      "p19",
+      "p20",
+      "p21",
+      "p22",
+      "p23",
+      "p24"
+     ],
+     "relation": "corroborating",
+     "note": "All are hospital-capacity counts from the same 2025-07-24 snapshot of one article. They consistently show declining obstetric/newborn capacity (delivery beds −16.5%, newborn nursery beds −9.1% from 2021 to 2025), which is a structural constraint on hospital deliveries but not a direct birth count. They share a single source and are not independent of one another."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p5",
+     "keep": false,
+     "reason": "Annual TFR forecast lower bound; TFR is a period fertility intensity measure, not a monthly birth count, and the target is a July 2026 monthly level. It cannot be converted to the target without an assumed population and monthly seasonal share, which would be an invented coefficient. Retained only as context, not as a numerical input."
+    },
+    {
+     "id": "p6",
+     "keep": false,
+     "reason": "Annual TFR forecast upper bound; same ineligibility as p5. Redundant with p5 as the other endpoint of the same forecast."
+    },
+    {
+     "id": "p22",
+     "keep": false,
+     "reason": "Operating room beds are not delivery-specific capacity and have no defined conversion to births; irrelevant to the target."
+    },
+    {
+     "id": "p23",
+     "keep": false,
+     "reason": "Operating room beds (2025) are not delivery-specific capacity; irrelevant to the target."
+    },
+    {
+     "id": "p24",
+     "keep": false,
+     "reason": "Emergency room beds are not delivery-specific capacity; irrelevant to the target."
+    },
+    {
+     "id": "p20",
+     "keep": false,
+     "reason": "Mother-and-baby rooming-in rooms are a post-delivery amenity count, not a delivery-capacity measure; no defensible conversion to births. Redundant with the broader capacity set."
+    },
+    {
+     "id": "p21",
+     "keep": false,
+     "reason": "Mother-and-baby rooming-in rooms (2025); same ineligibility as p20."
+    }
+   ],
+   "extra_directions": [],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a * b",
+      "inputs": {
+       "a": {
+        "id": "a3",
+        "role": "July 2025 national monthly live-birth level in South Korea (base level, not the target)"
+       },
+       "b": {
+        "id": "a1",
+        "role": "July 2026 national live-birth change factor relative to July 2025"
+       }
+      }
+     },
+     "rationale": "July 2026 national live births = July 2025 national monthly live-birth level × change factor. The base level a3 is an assumption because no kept point supplies the KOSTAT July 2025 monthly count; the change factor a1 is supported by the late-2025 marriage uptick (p3, p4) and regional 2025 birth growth (p8–p10), tempered by the low TFR forecast (p5). Shared dependencies: both the base level and the factor rely on the same broad 2025 birth scale, so the interval is not fully independent. Failure mode: if the actual July 2025 level differs materially from a3, or if the 2025 rebound fades, the estimate shifts."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a * b",
+      "inputs": {
+       "a": {
+        "id": "a4",
+        "role": "July 2025 national monthly live-birth level in South Korea (base level, not the target)"
+       },
+       "b": {
+        "id": "a2",
+        "role": "July 2026 national live-birth change factor relative to July 2025 (marriage-lag route)"
+       }
+      }
+     },
+     "rationale": "July 2026 national live births = July 2025 national monthly live-birth level × marriage-lag change factor. The base level a4 is an assumption for the missing KOSTAT July 2025 count; the factor a2 is anchored on Oct–Nov 2025 national marriage growth (p3, p4) and Seoul cumulative marriage growth (p11). Shared dependencies: a2 and a4 both rest on the same 2025 scale evidence, and the marriage-to-birth conversion is uncertain. Failure mode: a breakdown in the marriage-to-birth lag or a different July 2025 base would move the estimate."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "July 2026 national live-birth change factor relative to July 2025",
+     "value": 1.05,
+     "low": 0.95,
+     "high": 1.16,
+     "unit": "ratio",
+     "rationale": "The conception window for July 2026 births is roughly October 2025. National marriage growth was weakly positive in Oct 2025 (p4, +0.2%) and Nov 2025 (p3, +2.7%), while regional cumulative live births in Jan–Nov 2025 rose 6.8–8.7% (p8, p9, p10), suggesting a modest national birth increase into 2026. The 2025 TFR forecast of 0.78–0.80 (p5) implies fertility remains near historic lows, and monthly birth growth is noisy. A central factor of 1.05 with a wide 0.95–1.16 range reflects a small positive carry-over from the 2025 marriage/birth uptick, tempered by continued low fertility and possible fading of the rebound.",
+     "applies_when": "A July 2025 national monthly live-birth level is available as the base, and the marriage-led birth increase observed in late 2025 continues at a similar or slightly weaker pace into July 2026.",
+     "falsified_by": "Evidence that national monthly live births in early 2026 turned negative year-on-year, or that the late-2025 marriage increase did not translate into a 2026 birth increase, would push the factor toward or below 1.0.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "July 2026 national live-birth change factor relative to July 2025 (marriage-lag route)",
+     "value": 1.04,
+     "low": 0.93,
+     "high": 1.16,
+     "unit": "ratio",
+     "rationale": "Same conception-window logic as a1 but anchored more directly on the marriage series: Oct 2025 marriages +0.2% (p4) and Nov 2025 +2.7% (p3), with Seoul cumulative marriages +15.8% (p11). Because national monthly marriage growth is much weaker than the regional cumulative figure, the central factor is set slightly lower than a1. The wide range reflects the weak and noisy marriage signal and the uncertain marriage-to-birth conversion.",
+     "applies_when": "A July 2025 national monthly live-birth level is available and the marriage-to-birth lag of roughly 9 months holds for the Oct–Nov 2025 marriage cohort.",
+     "falsified_by": "A breakdown in the historical marriage-to-birth relationship, or evidence that the 2025 marriage increase was concentrated in older or childless couples, would invalidate the transfer.",
+     "route": "m2"
+    },
+    {
+     "id": "a3",
+     "name": "July 2025 national monthly live-birth level",
+     "value": 19000,
+     "low": 17000,
+     "high": 21000,
+     "unit": "live births",
+     "rationale": "No kept data point supplies the KOSTAT national monthly live-birth count for July 2025. This assumption supplies the missing base level needed to convert the change factor into a July 2026 level. The value is anchored on the general scale of recent South Korean monthly births (roughly 17–21 thousand per month in 2024–2025, consistent with a TFR near 0.78–0.80 as in p5 and with the regional growth rates in p8–p10). It is a level of an earlier period, not the target level, so it is admissible as a base for a change-factor route.",
+     "applies_when": "Used only as the July 2025 base level in a change-factor projection to July 2026; it must be replaced by the actual KOSTAT July 2025 figure when available.",
+     "falsified_by": "Publication of the actual KOSTAT July 2025 monthly live-birth count outside the 17,000–21,000 range would falsify this assumption.",
+     "route": "m1"
+    },
+    {
+     "id": "a4",
+     "name": "July 2025 national monthly live-birth level (marriage-lag route)",
+     "value": 19000,
+     "low": 17000,
+     "high": 21000,
+     "unit": "live births",
+     "rationale": "Same missing base level as a3, used for the marriage-lag route. It is a level of an earlier period, not the target level, and is anchored on the same scale evidence (p5, p8–p10).",
+     "applies_when": "Used only as the July 2025 base level in the marriage-lag change-factor projection to July 2026; replace with the actual KOSTAT July 2025 figure when available.",
+     "falsified_by": "Publication of the actual KOSTAT July 2025 monthly live-birth count outside the 17,000–21,000 range would falsify this assumption.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": [],
+   "repair": {
+    "errors": [
+     "method m1 (formula_mc): formula_mc needs at least one input that is a quantity (not a share, ratio or %); a product of ratios cannot produce the target",
+     "method m2 (formula_mc): formula_mc needs at least one input that is a quantity (not a share, ratio or %); a product of ratios cannot produce the target"
+    ],
+    "previous_methods": [
+     {
+      "id": "m1",
+      "method": "formula_mc",
+      "params": {
+       "formula": "a * b",
+       "inputs": {
+        "a": {
+         "id": "p8",
+         "role": "placeholder for July 2025 national live-birth level; p8 is a regional growth rate and cannot serve this role, so this method is not executable with current kept ids"
+        },
+        "b": {
+         "id": "a1",
+         "role": "July 2026 national live-birth change factor relative to July 2025"
+        }
+       }
+      },
+      "rationale": "Intended route: July 2026 national live births = July 2025 national live-birth level × change factor. The change factor a1 is supported by the late-2025 marriage uptick (p3, p4) and regional 2025 birth growth (p8–p10). However, no kept data point supplies the July 2025 national monthly live-birth level; p8 is a regional cumulative growth rate, not a national level. This method is therefore not executable as written and is listed to document the missing input. The specific missing input is the KOSTAT national monthly live-birth count for July 2025 (or a recent 12-month total from which July 2025 can be derived)."
+     },
+     {
+      "id": "m2",
+      "method": "formula_mc",
+      "params": {
+       "formula": "a * b",
+       "inputs": {
+        "a": {
+         "id": "p3",
+         "role": "placeholder for July 2025 national live-birth level; p3 is a marriage growth rate and cannot serve this role, so this method is not executable with current kept ids"
+        },
+        "b": {
+         "id": "a2",
+         "role": "July 2026 national live-birth change factor relative to July 2025 (marriage-lag route)"
+        }
+       }
+      },
+      "rationale": "Intended route: July 2026 national live births = July 2025 national live-birth level × marriage-lag change factor. The factor a2 is anchored on the Oct–Nov 2025 marriage growth rates (p3, p4) and the Seoul cumulative marriage growth (p11). As with m1, the July 2025 national monthly live-birth level is missing from the kept evidence, so the method cannot be executed. The specific missing input is the KOSTAT national monthly live-birth count for July 2025."
+     }
+    ],
+    "previous_assumptions": [
+     {
+      "id": "a1",
+      "name": "July 2026 national live-birth change factor relative to July 2025",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.16,
+      "unit": "ratio",
+      "rationale": "The conception window for July 2026 births is roughly October 2025. Marriage growth was weakly positive in Oct 2025 (p4, +0.2%) and Nov 2025 (p3, +2.7%), and regional cumulative live births in Jan–Nov 2025 were up 6.8–8.7% (p8, p9, p10), suggesting a modest national birth increase into 2026. However, the 2025 TFR forecast of 0.78–0.80 (p5, p6) implies fertility remains near historic lows, and monthly birth growth is noisy. A central factor of 1.05 with a wide 0.95–1.16 range reflects a small positive carry-over from the 2025 marriage/birth uptick, tempered by continued low fertility and the possibility that the rebound fades.",
+      "applies_when": "The July 2025 KOSTAT monthly live-birth count is available as the base level and the marriage-led birth increase observed in late 2025 continues at a similar or slightly weaker pace into July 2026.",
+      "falsified_by": "Evidence that national monthly live births in early 2026 turned negative year-on-year, or that the late-2025 marriage increase did not translate into a 2026 birth increase, would push the factor toward or below 1.0.",
+      "route": "m1"
+     },
+     {
+      "id": "a2",
+      "name": "July 2026 national live-birth change factor relative to July 2025 (marriage-lag route)",
+      "value": 1.04,
+      "low": 0.93,
+      "high": 1.16,
+      "unit": "ratio",
+      "rationale": "Same conception-window logic as a1 but anchored more directly on the marriage series: Oct 2025 marriages +0.2% (p4) and Nov 2025 +2.7% (p3), with Seoul cumulative marriages +15.8% (p11). Because the national monthly marriage growth is much weaker than the regional cumulative figure, the central factor is set slightly lower than a1. The wide range reflects the weak and noisy marriage signal and the uncertain marriage-to-birth conversion.",
+      "applies_when": "The July 2025 KOSTAT monthly live-birth count is available and the marriage-to-birth lag of roughly 9 months holds for the Oct–Nov 2025 marriage cohort.",
+      "falsified_by": "A breakdown in the historical marriage-to-birth relationship, or evidence that the 2025 marriage increase was concentrated in older or childless couples, would invalidate the transfer.",
+      "route": "m2"
+     }
+    ],
+    "errors_after": [
+     "method m1 (formula_mc): input a: assumption a3 was rejected (target-like: a level of the target quantity (unit or name matches the target, no ratio wording))",
+     "method m2 (formula_mc): input a: assumption a4 was rejected (target-like: a level of the target quantity (unit or name matches the target, no ratio wording))",
+     "assumption a3 rejected: target-like: a level of the target quantity (unit or name matches the target, no ratio wording)",
+     "assumption a4 rejected: target-like: a level of the target quantity (unit or name matches the target, no ratio wording)"
+    ]
+   },
+   "audit_failed": {}
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    1
+   ],
+   "name": "Year-on-year growth rate of South Korea live births in November 2025",
+   "value": 3.1,
+   "value_as_written": "3.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-11-01",
+   "period_end": "2025-11-30",
+   "published_at_if_visible": "",
+   "quote": "지난해 11월 출생아 수가 2만710명으로 전년 동월보다 3.1% 증가했다고 밝혔다.",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['korea'] and quantity"
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    2
+   ],
+   "name": "Year-on-year growth rate of South Korea live births in October 2025",
+   "value": 2.5,
+   "value_as_written": "2.5%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-10-01",
+   "period_end": "2025-10-31",
+   "published_at_if_visible": "",
+   "quote": "10월에는 2024년 6월 이후 16개월 만에 가장 낮은 증가율(2.5%)을 기록했고",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['korea'] and quantity"
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    4
+   ],
+   "name": "Year-on-year growth rate of South Korea marriages in November 2025",
+   "value": 2.7,
+   "value_as_written": "2.7%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-11-01",
+   "period_end": "2025-11-30",
+   "published_at_if_visible": "",
+   "quote": "11월 혼인 건수는 1만9079건으로 전년 동월보다 2.7% 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    5
+   ],
+   "name": "Year-on-year growth rate of South Korea marriages in October 2025",
+   "value": 0.2,
+   "value_as_written": "0.2%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-10-01",
+   "period_end": "2025-10-31",
+   "published_at_if_visible": "",
+   "quote": "10월에는 증가율(0.2%)이 2024년 3월 이후 19개월 만에 최저치를 기록했고",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    8
+   ],
+   "name": "South Korea annual total fertility rate forecast for 2025 (lower bound)",
+   "value": 0.78,
+   "value_as_written": "0.78",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "children per woman (total fertility rate)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "연간 합계출산율은 0.78~0.80명을 기록할 것으로 보인다.",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Annual TFR forecast lower bound; TFR is a period fertility intensity measure, not a monthly birth count, and the target is a July 2026 monthly level. It cannot be converted to the target without an assumed population and monthly seasonal share, which would be an invented coefficient. Retained only a"
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    9
+   ],
+   "name": "South Korea annual total fertility rate forecast for 2025 (upper bound)",
+   "value": 0.8,
+   "value_as_written": "0.80",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "children per woman (total fertility rate)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "연간 합계출산율은 0.78~0.80명을 기록할 것으로 보인다.",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Annual TFR forecast upper bound; same ineligibility as p5. Redundant with p5 as the other endpoint of the same forecast."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    10
+   ],
+   "name": "South Korea annual live births threshold expected to be exceeded in 2025 (250 thousand)",
+   "value": 25.0,
+   "value_as_written": "25만",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "live births (persons)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "12월 출생아가 전년 수준만 기록해도 연간 출생아 수는 2021년 이후 4년 만에 25만 명을 넘어서게 된다.",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['korea'] and quantity"
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    11
+   ],
+   "name": "Year-on-year growth rate of cumulative live births in Seoul, January–November 2025",
+   "value": 8.7,
+   "value_as_written": "8.7%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-11-30",
+   "published_at_if_visible": "",
+   "quote": "서울은 8.7%, 인천은 8.4%, 경기는 6.8% 늘었으나",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    12
+   ],
+   "name": "Year-on-year growth rate of cumulative live births in Incheon, January–November 2025",
+   "value": 8.4,
+   "value_as_written": "8.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-11-30",
+   "published_at_if_visible": "",
+   "quote": "서울은 8.7%, 인천은 8.4%, 경기는 6.8% 늘었으나",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    13
+   ],
+   "name": "Year-on-year growth rate of cumulative live births in Gyeonggi, January–November 2025",
+   "value": 6.8,
+   "value_as_written": "6.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-11-30",
+   "published_at_if_visible": "",
+   "quote": "서울은 8.7%, 인천은 8.4%, 경기는 6.8% 늘었으나",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.etoday.co.kr/news/view/2550201?trc=sub_list_news",
+   "via": "snapshot",
+   "page_date": "2026-02-10",
+   "snapshot_ts": "20260210001709",
+   "order": [
+    0,
+    14
+   ],
+   "name": "Year-on-year growth rate of cumulative marriages in Seoul, January–November 2025",
+   "value": 15.8,
+   "value_as_written": "15.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-11-30",
+   "published_at_if_visible": "",
+   "quote": "1~11월 누계로는 서울에서 15.8%, 경기에서 8.1% 늘었지만",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    0
+   ],
+   "name": "South Korea newborn nursery beds, Q1 2021",
+   "value": 6925.0,
+   "value_as_written": "6925",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "beds",
+   "period_start": "2021-01-01",
+   "period_end": "2021-03-31",
+   "published_at_if_visible": "",
+   "quote": "신생아실의 경우, 병상수는 2021년 6925개에서 2025년 6292개로 9.1%(633개) 줄었고",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    1
+   ],
+   "name": "South Korea newborn nursery beds, Q1 2025",
+   "value": 6292.0,
+   "value_as_written": "6292",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "beds",
+   "period_start": "2025-01-01",
+   "period_end": "2025-03-31",
+   "published_at_if_visible": "",
+   "quote": "신생아실의 경우, 병상수는 2021년 6925개에서 2025년 6292개로 9.1%(633개) 줄었고",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    2
+   ],
+   "name": "South Korea newborn nursery rooms, Q1 2021",
+   "value": 656.0,
+   "value_as_written": "656",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rooms",
+   "period_start": "2021-01-01",
+   "period_end": "2021-03-31",
+   "published_at_if_visible": "",
+   "quote": "병실 수는 656실에서 538실로 18%(118실) 감소했다.",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    3
+   ],
+   "name": "South Korea newborn nursery rooms, Q1 2025",
+   "value": 538.0,
+   "value_as_written": "538",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rooms",
+   "period_start": "2025-01-01",
+   "period_end": "2025-03-31",
+   "published_at_if_visible": "",
+   "quote": "병실 수는 656실에서 538실로 18%(118실) 감소했다.",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    4
+   ],
+   "name": "South Korea delivery (분만) facility beds, Q1 2021",
+   "value": 2060.0,
+   "value_as_written": "2060",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "beds",
+   "period_start": "2021-01-01",
+   "period_end": "2021-03-31",
+   "published_at_if_visible": "",
+   "quote": "같은 기간 분만 시설도 감소세를 보였다. 병상수는 2060개에서 1721개로 16.5%(339개)",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    5
+   ],
+   "name": "South Korea delivery (분만) facility beds, Q1 2025",
+   "value": 1721.0,
+   "value_as_written": "1721",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "beds",
+   "period_start": "2025-01-01",
+   "period_end": "2025-03-31",
+   "published_at_if_visible": "",
+   "quote": "병상수는 2060개에서 1721개로 16.5%(339개), 병실 수는 1328실에서 1176실로 11.5%(152실) 줄었다.",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    6
+   ],
+   "name": "South Korea delivery (분만) facility rooms, Q1 2021",
+   "value": 1328.0,
+   "value_as_written": "1328",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rooms",
+   "period_start": "2021-01-01",
+   "period_end": "2021-03-31",
+   "published_at_if_visible": "",
+   "quote": "병실 수는 1328실에서 1176실로 11.5%(152실) 줄었다.",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    7
+   ],
+   "name": "South Korea delivery (분만) facility rooms, Q1 2025",
+   "value": 1176.0,
+   "value_as_written": "1176",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rooms",
+   "period_start": "2025-01-01",
+   "period_end": "2025-03-31",
+   "published_at_if_visible": "",
+   "quote": "병실 수는 1328실에서 1176실로 11.5%(152실) 줄었다.",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    8
+   ],
+   "name": "South Korea mother-and-baby rooming-in (모자동실) rooms, 2021",
+   "value": 268.0,
+   "value_as_written": "268",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rooms",
+   "period_start": "2021-01-01",
+   "period_end": "2021-12-31",
+   "published_at_if_visible": "",
+   "quote": "모자동실은 2021년 268개에서 2025년 251개로 6.3%(17개) 줄었다.",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Mother-and-baby rooming-in rooms are a post-delivery amenity count, not a delivery-capacity measure; no defensible conversion to births. Redundant with the broader capacity set."
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    9
+   ],
+   "name": "South Korea mother-and-baby rooming-in (모자동실) rooms, 2025",
+   "value": 251.0,
+   "value_as_written": "251",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rooms",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "모자동실은 2021년 268개에서 2025년 251개로 6.3%(17개) 줄었다.",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Mother-and-baby rooming-in rooms (2025); same ineligibility as p20."
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    12
+   ],
+   "name": "South Korea operating room beds, Q1 2021",
+   "value": 8751.0,
+   "value_as_written": "8751",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "beds",
+   "period_start": "2021-01-01",
+   "period_end": "2021-03-31",
+   "published_at_if_visible": "",
+   "quote": "수술실 병상수는 2021년 8751개에서 2025년 9151개로 약 4.6%(400개)",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Operating room beds are not delivery-specific capacity and have no defined conversion to births; irrelevant to the target."
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    13
+   ],
+   "name": "South Korea operating room beds, Q1 2025",
+   "value": 9151.0,
+   "value_as_written": "9151",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "beds",
+   "period_start": "2025-01-01",
+   "period_end": "2025-03-31",
+   "published_at_if_visible": "",
+   "quote": "수술실 병상수는 2021년 8751개에서 2025년 9151개로 약 4.6%(400개)",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Operating room beds (2025) are not delivery-specific capacity; irrelevant to the target."
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.hkn24.com/news/articleView.html?idxno=345602",
+   "via": "snapshot",
+   "page_date": "2025-07-24",
+   "snapshot_ts": "20250724174330",
+   "order": [
+    0,
+    14
+   ],
+   "name": "South Korea emergency room beds, Q1 2021",
+   "value": 8948.0,
+   "value_as_written": "8948",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "beds",
+   "period_start": "2021-01-01",
+   "period_end": "2021-03-31",
+   "published_at_if_visible": "",
+   "quote": "응급실의 병상수는 8948개에서 8938개로 거의 변화가 없었지만",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Emergency room beds are not delivery-specific capacity; irrelevant to the target."
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "formula_mc",
+    "params": {
+     "formula": "a * b",
+     "inputs": {
+      "a": {
+       "id": "a3",
+       "role": "July 2025 national monthly live-birth level in South Korea (base level, not the target)"
+      },
+      "b": {
+       "id": "a1",
+       "role": "July 2026 national live-birth change factor relative to July 2025"
+      }
+     }
+    },
+    "rationale": "July 2026 national live births = July 2025 national monthly live-birth level × change factor. The base level a3 is an assumption because no kept point supplies the KOSTAT July 2025 monthly count; the change factor a1 is supported by the late-2025 marriage uptick (p3, p4) and regional 2025 birth growth (p8–p10), tempered by the low TFR forecast (p5). Shared dependencies: both the base level and the",
+    "estimate": null,
+    "backtest": [],
+    "notes": [],
+    "error": "input a: assumption a3 was rejected (target-like: a level of the target quantity (unit or name matches the target, no ratio wording))",
+    "n_point_inputs": 0,
+    "n_assumption_inputs": 0,
+    "rests_mainly_on_assumptions": false
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "formula_mc",
+    "params": {
+     "formula": "a * b",
+     "inputs": {
+      "a": {
+       "id": "a4",
+       "role": "July 2025 national monthly live-birth level in South Korea (base level, not the target)"
+      },
+      "b": {
+       "id": "a2",
+       "role": "July 2026 national live-birth change factor relative to July 2025 (marriage-lag route)"
+      }
+     }
+    },
+    "rationale": "July 2026 national live births = July 2025 national monthly live-birth level × marriage-lag change factor. The base level a4 is an assumption for the missing KOSTAT July 2025 count; the factor a2 is anchored on Oct–Nov 2025 national marriage growth (p3, p4) and Seoul cumulative marriage growth (p11). Shared dependencies: a2 and a4 both rest on the same 2025 scale evidence, and the marriage-to-birt",
+    "estimate": null,
+    "backtest": [],
+    "notes": [],
+    "error": "input a: assumption a4 was rejected (target-like: a level of the target quantity (unit or name matches the target, no ratio wording))",
+    "n_point_inputs": 0,
+    "n_assumption_inputs": 0,
+    "rests_mainly_on_assumptions": false
+   }
+  ],
+  "result": {
+   "central": null,
+   "p10": null,
+   "p90": null,
+   "weights": {},
+   "basis": "no_method",
+   "assumption_weight_share": 0
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {},
+  "excluded_by_input_audit": [],
+  "methods_from_round": 2
+ },
+ "assumptions": {
+  "kept": [
+   {
+    "id": "a1",
+    "name": "July 2026 national live-birth change factor relative to July 2025",
+    "unit": "ratio",
+    "rationale": "The conception window for July 2026 births is roughly October 2025. National marriage growth was weakly positive in Oct 2025 (p4, +0.2%) and Nov 2025 (p3, +2.7%), while regional cumulative live births in Jan–Nov 2025 rose 6.8–8.7% (p8, p9, p10), suggesting a modest national birth increase into 2026.",
+    "applies_when": "A July 2025 national monthly live-birth level is available as the base, and the marriage-led birth increase observed in late 2025 continues at a similar or slightly weaker pace into July 2026.",
+    "falsified_by": "Evidence that national monthly live births in early 2026 turned negative year-on-year, or that the late-2025 marriage increase did not translate into a 2026 birth increase, would push the factor toward or below 1.0.",
+    "route": "m1",
+    "value": 1.05,
+    "low": 0.95,
+    "high": 1.16,
+    "is_pct": false,
+    "p10_used": 0.93893556754444,
+    "p90_used": 1.1736694594305501,
+    "widened_by_floor": true,
+    "used_by": [],
+    "used_by_labels": []
+   },
+   {
+    "id": "a2",
+    "name": "July 2026 national live-birth change factor relative to July 2025 (marriage-lag route)",
+    "unit": "ratio",
+    "rationale": "Same conception-window logic as a1 but anchored more directly on the marriage series: Oct 2025 marriages +0.2% (p4) and Nov 2025 +2.7% (p3), with Seoul cumulative marriages +15.8% (p11). Because national monthly marriage growth is much weaker than the regional cumulative figure, the central factor i",
+    "applies_when": "A July 2025 national monthly live-birth level is available and the marriage-to-birth lag of roughly 9 months holds for the Oct–Nov 2025 marriage cohort.",
+    "falsified_by": "A breakdown in the historical marriage-to-birth relationship, or evidence that the 2025 marriage increase was concentrated in older or childless couples, would invalidate the transfer.",
+    "route": "m2",
+    "value": 1.04,
+    "low": 0.93,
+    "high": 1.16,
+    "is_pct": false,
+    "p10_used": 0.9289994617867118,
+    "p90_used": 1.1612493272333897,
+    "widened_by_floor": true,
+    "used_by": [],
+    "used_by_labels": []
+   }
+  ],
+  "rejected": [
+   {
+    "id": "a3",
+    "name": "July 2025 national monthly live-birth level",
+    "unit": "live births",
+    "rationale": "No kept data point supplies the KOSTAT national monthly live-birth count for July 2025. This assumption supplies the missing base level needed to convert the change factor into a July 2026 level. The value is anchored on the general scale of recent South Korean monthly births (roughly 17–21 thousand",
+    "applies_when": "Used only as the July 2025 base level in a change-factor projection to July 2026; it must be replaced by the actual KOSTAT July 2025 figure when available.",
+    "falsified_by": "Publication of the actual KOSTAT July 2025 monthly live-birth count outside the 17,000–21,000 range would falsify this assumption.",
+    "route": "m1",
+    "value": 19000.0,
+    "low": 17000.0,
+    "high": 21000.0,
+    "reason": "target-like: a level of the target quantity (unit or name matches the target, no ratio wording)"
+   },
+   {
+    "id": "a4",
+    "name": "July 2025 national monthly live-birth level (marriage-lag route)",
+    "unit": "live births",
+    "rationale": "Same missing base level as a3, used for the marriage-lag route. It is a level of an earlier period, not the target level, and is anchored on the same scale evidence (p5, p8–p10).",
+    "applies_when": "Used only as the July 2025 base level in the marriage-lag change-factor projection to July 2026; replace with the actual KOSTAT July 2025 figure when available.",
+    "falsified_by": "Publication of the actual KOSTAT July 2025 monthly live-birth count outside the 17,000–21,000 range would falsify this assumption.",
+    "route": "m2",
+    "value": 19000.0,
+    "low": 17000.0,
+    "high": 21000.0,
+    "reason": "target-like: a level of the target quantity (unit or name matches the target, no ratio wording)"
+   }
+  ],
+  "from_round": 2,
+  "min_width": 2.0,
+  "max_per_run": 8,
+  "max_per_method": 3
+ },
+ "final": {
+  "template": "Estimate: [[estimate]] ([[interval_level]] interval [[p10]] to [[p90]], basis: [[interval_basis]]), from [[n_methods]] method(s) over [[n_points_kept]] kept data points.",
+  "text": "No estimate: no estimation method could be computed from the verified evidence.",
+  "placeholders": {
+   "estimate": "n/a",
+   "p10": "n/a",
+   "p90": "n/a",
+   "interval_level": "80%",
+   "interval_basis": "no method",
+   "n_points_kept": "14",
+   "n_methods": "0",
+   "m1_estimate": "n/a",
+   "m1_weight": "0%",
+   "m1_backtest_error": "n/a",
+   "m2_estimate": "n/a",
+   "m2_weight": "0%",
+   "m2_backtest_error": "n/a"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": false
+ },
+ "started_at": "20261015T102028Z",
+ "wall_s": 2436.3,
+ "budget": {
+  "usd_total_assumed": 0.4872,
+  "usd_tokens": 0.0472,
+  "usd_search_fee_assumed": 0.44,
+  "usd_cap": 1.0,
+  "pages_used": 3,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 17,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 40,
+  "pages_snapshot": 3,
+  "pages_live_dated": 0,
+  "pages_dropped": 37,
+  "pages_sent_to_extractor": {
+   "total": 3,
+   "snapshot": 3,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [
+   "주민등록 인구통계 2026년 7월 출생 24,000명 월간"
+  ],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "v21b_noown",
+ "ablation": {
+  "own_history": true,
+  "dropped_candidate_directions": [
+   "c1"
+  ],
+  "dropped_extra_directions": [],
+  "entity_anchors": [
+   "korea"
+  ],
+  "quantity_stems": [
+   "birth",
+   "live",
+   "perso"
+  ],
+  "n_points_total": 24,
+  "n_points_excluded": 3,
+  "excluded_points": [
+   {
+    "id": "p1",
+    "name": "Year-on-year growth rate of South Korea live births in November 2025",
+    "value": 3.1,
+    "unit": "%",
+    "period_end": "2025-11-30",
+    "direction_id": "d5",
+    "reason": "ablation: name refers to the target entity ['korea'] and quantity"
+   },
+   {
+    "id": "p2",
+    "name": "Year-on-year growth rate of South Korea live births in October 2025",
+    "value": 2.5,
+    "unit": "%",
+    "period_end": "2025-10-31",
+    "direction_id": "d5",
+    "reason": "ablation: name refers to the target entity ['korea'] and quantity"
+   },
+   {
+    "id": "p7",
+    "name": "South Korea annual live births threshold expected to be exceeded in 2025 (250 thousand)",
+    "value": 25.0,
+    "unit": "live births (persons)",
+    "period_end": "2025-12-31",
+    "direction_id": "d5",
+    "reason": "ablation: name refers to the target entity ['korea'] and quantity"
+   }
+  ],
+  "methods_allowed": [
+   "formula_mc"
+  ],
+  "rule": "exclude points from own_history directions and points whose name contains a target entity anchor and whose name or unit shares a stem with the target unit (triangulate/agent/ablation.py)",
+  "residual_risks": [
+   "Own values named by an alias or abbreviation, or with no entity in the point name, are not excluded.",
+   "The rule over-excludes on purpose: any point naming the target entity together with the target quantity (for example a survey of the target's visitors) is excluded, even when it is not a value of the target itself.",
+   "The model's own memory of the target's history is not removed: it can still shape the plan, the judge's choices and assumption values.",
+   "The searcher and the extractor still see pages that contain own values; only the judge's table is filtered."
+  ]
+ }
+}
