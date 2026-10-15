@@ -7,6 +7,7 @@ from datetime import date
 
 from ..config import MODEL, PRICES
 from ..llm import LLM, TransportError
+from . import archive
 from . import evidence as ev
 from .fetch import fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
@@ -140,6 +141,8 @@ class Context:
     def __init__(self, qid: str, question: str, as_of: str, calls_path, leak_value=None, budget: Budget | None = None):
         self.qid, self.question, self.as_of_s = qid, question, as_of
         self.as_of = date.fromisoformat(as_of)
+        # 回测（as_of 早于今天）：读哪几页由存档索引 + 看不到搜索结果的 PICKER 决定，不收 live 页
+        self.blind = self.as_of < date.today()
         self.budget = budget or Budget()
         self.calls_path = calls_path
         self.llm = AgentLLM(calls_path, self.budget)
@@ -184,7 +187,8 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
 
 
 def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
-    """一个子 agent：搜索（只取 URL）-> 逐个取快照 -> 哨兵 -> 抽取 -> 代码核对。异常和预算耗尽都在这里收住。"""
+    """一个子 agent：搜索（只取 URL）->（回测时）存档索引 + PICKER 选页 -> 逐个取快照 -> 哨兵 -> 抽取 -> 代码核对。
+    异常和预算耗尽都在这里收住。"""
     t0 = time.time()
     b = ctx.budget
     out = {"direction_id": d["id"], "round": round_no, "search": {}, "pages": [], "points": [], "dropped_points": []}
@@ -197,8 +201,18 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
             s = ctx.searcher.search(prompt, role=f"search:{d['id']}", qid=ctx.qid, max_uses=b.search_max_uses,
                                     cap=b.urls_per_direction)
         out["search"] = s
+        urls = s.get("urls", [])
+        if getattr(ctx, "blind", False):
+            # 回测：SEARCHER 的 URL 只用来推目录；读哪几页由看不到搜索结果的 PICKER 从存档列表里挑
+            sel = archive.build_candidates(s.get("all_urls") or urls, ctx.as_of)
+            urls, perr = archive.pick(ctx, target, d, sel["candidates"], b.urls_per_direction)
+            s["selection"] = "archive_index_blind_pick"
+            out["archive"] = {"prefixes": sel["prefixes"], "errors": sel["errors"], "n_candidates": len(sel["candidates"]),
+                              "candidates": sel["candidates"], "picked": urls, "picker_error": perr}
+        else:
+            s["selection"] = "searcher_urls"
         allow_no_period = d.get("category") == "base_rates"
-        for url in s.get("urls", [])[: b.urls_per_direction]:
+        for url in urls[: b.urls_per_direction]:
             if not b.reserve_page(round_no):
                 out["pages"].append({"url": url, "status": "dropped", "reason": "page cap reached"})
                 continue
