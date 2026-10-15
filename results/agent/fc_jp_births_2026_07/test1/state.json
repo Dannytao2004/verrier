@@ -1,0 +1,2509 @@
+{
+ "qid": "fc_jp_births_2026_07",
+ "question": "Assume today is 2026-08-25. You know nothing published after this date. Estimate the number of births in Japan in July 2026, as first reported in the Ministry of Health, Labour and Welfare's preliminary monthly vital statistics (which also count foreign nationals in Japan).",
+ "as_of": "2026-08-25",
+ "plan": {
+  "target": {
+   "what": "Number of live births in Japan during July 2026, as first reported in the Ministry of Health, Labour and Welfare's preliminary monthly vital statistics (which include foreign nationals residing in Japan).",
+   "unit": "births",
+   "period_start": "2026-07-01",
+   "period_end": "2026-07-31",
+   "publisher": "Ministry of Health, Labour and Welfare (MHLW), Japan",
+   "cadence": "Monthly preliminary release, typically published about two months after the reference month (e.g., July data released in September).",
+   "caveats": "The target period is completed relative to the cutoff (2026-08-25), but the preliminary report for July 2026 is not yet published. The estimate is for the first-reported preliminary figure, which may later be revised. The preliminary monthly vital statistics count births to foreign nationals residin"
+  },
+  "market_keywords": [
+   "japan births",
+   "july 2026 births",
+   "vital statistics"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "MHLW vital statistics time series",
+    "hypothesis": "July 2026 births can be estimated by applying the typical July seasonal factor and recent year-over-year trend to the most recent monthly or annual birth counts available before the cutoff.",
+    "data_to_find": "Monthly preliminary birth counts for Japan from January 2024 through June 2026 (or the latest available months before 2026-08-25), including both Japanese and foreign nationals if possible. Also annual total births for 2024 and 2025. Minimum evidence: at least 12 consecutive months of recent data to estimate seasonality and trend.",
+    "search_hints": [
+     "MHLW 人口動態統計 月報 出生数 2026",
+     "Japan monthly vital statistics births 2025 2026",
+     "厚生労働省 人口動態統計 速報 月別 出生数"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "MHLW annual vital statistics and quarterly estimates",
+    "hypothesis": "The July 2026 monthly figure is a share of the annual total; if a reliable annual forecast or year-to-date total is available, the monthly value can be derived using historical monthly shares.",
+    "data_to_find": "Annual birth totals for 2024 and 2025 (final or provisional), and any quarterly or year-to-date birth counts for 2026 published before the cutoff. Also historical monthly shares of annual births for July. Minimum evidence: annual totals and at least one recent year of monthly distribution.",
+    "search_hints": [
+     "Japan annual births 2025 2026 estimate",
+     "MHLW 人口動態統計 年次 出生数 2025",
+     "Japan births January-June 2026"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "related_series",
+    "perspective": "Municipal or prefectural birth registrations",
+    "hypothesis": "Aggregating birth registrations from major municipalities or prefectures for July 2026 can provide a lower-bound or proxy for the national total, scaled by their historical share of national births.",
+    "data_to_find": "Monthly birth counts for July 2026 from a set of large cities (e.g., Tokyo, Osaka, Yokohama) or prefectures, published in local statistics or news reports before the cutoff. Also their historical share of national births. Minimum evidence: at least a few major municipalities with July 2026 data and their typical national share.",
+    "search_hints": [
+     "東京都 出生数 2026年7月",
+     "大阪市 出生届 2026年7月",
+     "Japan city birth statistics July 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "physical_flow",
+    "perspective": "Hospital and maternity clinic discharge counts",
+    "hypothesis": "The number of births in July 2026 can be approximated by the number of maternity ward discharges or delivery admissions in a sample of hospitals, scaled to national coverage.",
+    "data_to_find": "Monthly delivery or maternity discharge counts for July 2026 from a sample of Japanese hospitals or a national hospital association survey. Also the sample's share of national births. Minimum evidence: at least one large hospital network or survey with July 2026 data.",
+    "search_hints": [
+     "Japan hospital deliveries July 2026",
+     "分娩数 2026年7月 病院",
+     "maternity ward statistics Japan 2026"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "administrative",
+    "perspective": "Birth registration and family register data",
+    "hypothesis": "Birth registrations filed in July 2026 (or the number of birth certificates issued) can serve as a proxy for births, though registration timing may lag actual birth by a few days.",
+    "data_to_find": "Number of birth registrations or family register entries for July 2026 from municipal offices or the Ministry of Justice. Also the typical lag between birth and registration. Minimum evidence: a national or large-sample count of registrations for July 2026.",
+    "search_hints": [
+     "出生届 件数 2026年7月",
+     "Japan birth registration statistics July 2026",
+     "戸籍 出生届 月別 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "shocks",
+    "perspective": "Calendar and policy effects",
+    "hypothesis": "July 2026 births may be affected by the number of days, weekends, holidays, and any major policy changes (e.g., fertility incentives) that alter conception timing or reporting. Adjusting a baseline for these factors improves the estimate.",
+    "data_to_find": "Calendar of July 2026 (weekdays, holidays), any new pronatalist policies implemented in late 2025 or early 2026, and their expected impact on births. Also any known disruptions (e.g., pandemic, natural disasters) affecting conception around October 2025. Minimum evidence: a list of relevant events and their timing relative to July 2026 births.",
+    "search_hints": [
+     "Japan birth rate policy 2026",
+     "Japan calendar July 2026 holidays",
+     "Japan fertility incentives 2025 2026"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "forecasts_markets",
+    "perspective": "Demographic forecasts and expert projections",
+    "hypothesis": "Published forecasts for Japan's 2026 births or monthly estimates from research institutes can be used directly or as a sanity check for the July 2026 figure.",
+    "data_to_find": "Any forecasts for Japan's total births in 2026 or monthly births for July 2026 from government agencies, research institutes (e.g., IPSS), or news articles published before the cutoff. Minimum evidence: at least one credible forecast with methodology.",
+    "search_hints": [
+     "Japan 2026 birth forecast",
+     "IPSS 出生数 予測 2026",
+     "Japan population estimates 2026 births"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c8",
+    "category": "base_rates",
+    "perspective": "Demographic accounting",
+    "hypothesis": "July 2026 births can be estimated from the population of women of childbearing age and age-specific fertility rates, adjusted for seasonality.",
+    "data_to_find": "Population of women aged 15-49 in Japan as of mid-2026 (or latest estimate), age-specific fertility rates for 2025 or 2026, and the seasonal index for July. Minimum evidence: population by age and recent fertility rates.",
+    "search_hints": [
+     "Japan female population 2026 age",
+     "Japan fertility rate 2025 2026",
+     "人口推計 2026 女性 年齢別"
+    ],
+    "expected_information": 3,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 8 candidate directions in 7 categories; running 8 (budget cap 10)"
+ ],
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "MHLW vital statistics time series",
+   "hypothesis": "July 2026 births can be estimated by applying the typical July seasonal factor and recent year-over-year trend to the most recent monthly or annual birth counts available before the cutoff.",
+   "data_to_find": "Monthly preliminary birth counts for Japan from January 2024 through June 2026 (or the latest available months before 2026-08-25), including both Japanese and foreign nationals if possible. Also annual total births for 2024 and 2025. Minimum evidence: at least 12 consecutive months of recent data to estimate seasonality and trend.",
+   "search_hints": [
+    "MHLW 人口動態統計 月報 出生数 2026",
+    "Japan monthly vital statistics births 2025 2026",
+    "厚生労働省 人口動態統計 速報 月別 出生数"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "related_series",
+   "perspective": "MHLW annual vital statistics and quarterly estimates",
+   "hypothesis": "The July 2026 monthly figure is a share of the annual total; if a reliable annual forecast or year-to-date total is available, the monthly value can be derived using historical monthly shares.",
+   "data_to_find": "Annual birth totals for 2024 and 2025 (final or provisional), and any quarterly or year-to-date birth counts for 2026 published before the cutoff. Also historical monthly shares of annual births for July. Minimum evidence: annual totals and at least one recent year of monthly distribution.",
+   "search_hints": [
+    "Japan annual births 2025 2026 estimate",
+    "MHLW 人口動態統計 年次 出生数 2025",
+    "Japan births January-June 2026"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d3",
+   "category": "forecasts_markets",
+   "perspective": "Demographic forecasts and expert projections",
+   "hypothesis": "Published forecasts for Japan's 2026 births or monthly estimates from research institutes can be used directly or as a sanity check for the July 2026 figure.",
+   "data_to_find": "Any forecasts for Japan's total births in 2026 or monthly births for July 2026 from government agencies, research institutes (e.g., IPSS), or news articles published before the cutoff. Minimum evidence: at least one credible forecast with methodology.",
+   "search_hints": [
+    "Japan 2026 birth forecast",
+    "IPSS 出生数 予測 2026",
+    "Japan population estimates 2026 births"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d4",
+   "category": "related_series",
+   "perspective": "Municipal or prefectural birth registrations",
+   "hypothesis": "Aggregating birth registrations from major municipalities or prefectures for July 2026 can provide a lower-bound or proxy for the national total, scaled by their historical share of national births.",
+   "data_to_find": "Monthly birth counts for July 2026 from a set of large cities (e.g., Tokyo, Osaka, Yokohama) or prefectures, published in local statistics or news reports before the cutoff. Also their historical share of national births. Minimum evidence: at least a few major municipalities with July 2026 data and their typical national share.",
+   "search_hints": [
+    "東京都 出生数 2026年7月",
+    "大阪市 出生届 2026年7月",
+    "Japan city birth statistics July 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d5",
+   "category": "administrative",
+   "perspective": "Birth registration and family register data",
+   "hypothesis": "Birth registrations filed in July 2026 (or the number of birth certificates issued) can serve as a proxy for births, though registration timing may lag actual birth by a few days.",
+   "data_to_find": "Number of birth registrations or family register entries for July 2026 from municipal offices or the Ministry of Justice. Also the typical lag between birth and registration. Minimum evidence: a national or large-sample count of registrations for July 2026.",
+   "search_hints": [
+    "出生届 件数 2026年7月",
+    "Japan birth registration statistics July 2026",
+    "戸籍 出生届 月別 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d6",
+   "category": "base_rates",
+   "perspective": "Demographic accounting",
+   "hypothesis": "July 2026 births can be estimated from the population of women of childbearing age and age-specific fertility rates, adjusted for seasonality.",
+   "data_to_find": "Population of women aged 15-49 in Japan as of mid-2026 (or latest estimate), age-specific fertility rates for 2025 or 2026, and the seasonal index for July. Minimum evidence: population by age and recent fertility rates.",
+   "search_hints": [
+    "Japan female population 2026 age",
+    "Japan fertility rate 2025 2026",
+    "人口推計 2026 女性 年齢別"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c8"
+  },
+  {
+   "id": "d7",
+   "category": "physical_flow",
+   "perspective": "Hospital and maternity clinic discharge counts",
+   "hypothesis": "The number of births in July 2026 can be approximated by the number of maternity ward discharges or delivery admissions in a sample of hospitals, scaled to national coverage.",
+   "data_to_find": "Monthly delivery or maternity discharge counts for July 2026 from a sample of Japanese hospitals or a national hospital association survey. Also the sample's share of national births. Minimum evidence: at least one large hospital network or survey with July 2026 data.",
+   "search_hints": [
+    "Japan hospital deliveries July 2026",
+    "分娩数 2026年7月 病院",
+    "maternity ward statistics Japan 2026"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d8",
+   "category": "shocks",
+   "perspective": "Calendar and policy effects",
+   "hypothesis": "July 2026 births may be affected by the number of days, weekends, holidays, and any major policy changes (e.g., fertility incentives) that alter conception timing or reporting. Adjusting a baseline for these factors improves the estimate.",
+   "data_to_find": "Calendar of July 2026 (weekdays, holidays), any new pronatalist policies implemented in late 2025 or early 2026, and their expected impact on births. Also any known disruptions (e.g., pandemic, natural disasters) affecting conception around October 2025. Minimum evidence: a list of relevant events and their timing relative to July 2026 births.",
+   "search_hints": [
+    "Japan birth rate policy 2026",
+    "Japan calendar July 2026 holidays",
+    "Japan fertility incentives 2025 2026"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "b1",
+   "category": "related_series",
+   "perspective": "national administrative",
+   "hypothesis": "Monthly or year-to-date birth counts for 2026 from MHLW preliminary vital statistics (e.g., January–May 2026) would provide the most recent national level and trend. Applying the historical July share of the annual total or a July seasonal factor to a 2026 year-to-date total would unlock a direct national monthly estimate, replacing the clinic-only analogue.",
+   "data_to_find": "MHLW monthly preliminary vital statistics for 2026 months already published before 2026-08-25 (e.g., January–May 2026 births), and historical monthly shares of annual births for July.",
+   "search_hints": [
+    "S",
+    "e",
+    "a",
+    "r"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b2",
+   "category": "forecasts_markets",
+   "perspective": "research institute",
+   "hypothesis": "Published 2026 annual birth forecasts from Japanese research institutes (e.g., IPSS, NIPSSR, or university demographers) would provide an independent annual anchor. Combined with the historical July share of annual births, this would yield a national July 2026 estimate and serve as a sanity check on any clinic-based scaling.",
+   "data_to_find": "Annual 2026 birth forecasts for Japan published before 2026-08-25, and the historical fraction of annual births occurring in July.",
+   "search_hints": [
+    "S",
+    "e",
+    "a",
+    "r"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b3",
+   "category": "related_series",
+   "perspective": "subnational administrative",
+   "hypothesis": "Monthly birth counts for July 2026 from major municipalities or prefectures (e.g., Tokyo, Osaka, Aichi) would provide a broader geographic proxy than a single clinic. Scaling by those areas' historical share of national births would give a national estimate and help validate or correct the clinic-based trend.",
+   "data_to_find": "July 2026 monthly birth counts from large prefectures or municipalities, and their historical share of national births.",
+   "search_hints": [
+    "S",
+    "e",
+    "a",
+    "r"
+   ],
+   "expected_information": 3
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "MHLW 人口動態統計 月報 出生数 2026",
+     "Japan monthly vital statistics births 2025 2026 preliminary",
+     "人口動態統計速報 2025年 月別 出生数 1月 2月 3月 推移",
+     "令和7年 2025年 出生数 月別 速報 累計 人口動態統計 6月 7月"
+    ],
+    "urls": [
+     "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "https://www.nippon.com/en/japan-data/h02872/japan-births-edge-up-in-first-half-of-2026-after-a-decade-of-decline.html",
+     "https://www.wic-net.com/publisher/%e6%9c%88%e5%a0%b1%e8%aa%bf%e6%95%b4%e4%bf%82/page/3/",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/01.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 28,
+    "web_search_requests": 4,
+    "usd": 0.003511644,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nippon.com/en/japan-data/h02872/japan-births-edge-up-in-first-half-of-2026-after-a-decade-of-decline.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.wic-net.com/publisher/%e6%9c%88%e5%a0%b1%e8%aa%bf%e6%95%b4%e4%bf%82/page/3/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/01.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260410161952",
+     "page_date": "2026-04-10",
+     "raw_path": "data/raw/agent/fc_jp_births_2026_07/da63fc818eeeac2d.raw",
+     "text_chars": 649,
+     "leak_hits": [],
+     "chars_sent": 649,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 934.8
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "MHLW 人口動態統計 月次 出生数 2026年6月 速報",
+     "Japan births 2025 annual total 人口動態統計 出生数 2025年",
+     "人口動態統計速報 2026年5月分 出生数",
+     "月別 出生数 2025年 7月 人口動態統計 月報 概数"
+    ],
+    "urls": [
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/05.html",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/nengai25/dl/gaikyouR7houdou.pdf",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2025/dl/202512h.pdf",
+     "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0032082060000000003,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/05.html",
+     "status": "dropped",
+     "reason": "undecodable content (binary or unsupported encoding)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/nengai25/dl/gaikyouR7houdou.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2025/dl/202512h.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 408.0
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Japan 2026 birth forecast IPSS 出生数 予測",
+     "IPSS 将来推計人口 2026年 出生数 予測",
+     "2026年上半期 出生数 34万2068人 厚生労働省 速報",
+     "Japan births first half 2026 rose 11 years population estimates"
+    ],
+    "urls": [
+     "https://www.ipss.go.jp/pp-zenkoku/e/zenkoku_e2023/pp2023e_Summary.pdf",
+     "https://www.nippon.com/ja/japan-data/h02872/",
+     "https://www.yomiuri.co.jp/national/20260828-GYT1T00289/",
+     "https://www.chiba-tv.com/plus/detail/202506339182"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.003334278,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.ipss.go.jp/pp-zenkoku/e/zenkoku_e2023/pp2023e_Summary.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nippon.com/ja/japan-data/h02872/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.yomiuri.co.jp/national/20260828-GYT1T00289/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.chiba-tv.com/plus/detail/202506339182",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 712.9
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "東京都 出生数 2026年7月",
+     "大阪市 出生届 2026年7月 出生数",
+     "東京都 人口動態統計 月報 出生数 令和8年7月",
+     "大阪市 出生数 2026年 月別 推計人口"
+    ],
+    "urls": [
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202607.pdf",
+     "https://www.yomiuri.co.jp/national/20260829-GYT1T00068/",
+     "https://www.asahi.com/articles/ASV8X3GN7V8XUTFL015M.html",
+     "https://www.businesstimes.com.sg/international/tokyo-reverses-baby-bust-ai-matchmaking-and-generous-subsidies"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 13,
+    "web_search_requests": 4,
+    "usd": 0.0016882440000000002,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202607.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.yomiuri.co.jp/national/20260829-GYT1T00068/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.asahi.com/articles/ASV8X3GN7V8XUTFL015M.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.businesstimes.com.sg/international/tokyo-reverses-baby-bust-ai-matchmaking-and-generous-subsidies",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 551.9
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "出生届 件数 2026年7月",
+     "人口動態統計 速報 2026年 出生数 月別",
+     "人口動態統計速報 2026年6月分 出生数 5万9846人 前年同月比",
+     "人口動態統計速報 令和7年7月分 出生数 前年同月比"
+    ],
+    "urls": [
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202607.pdf",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202605.pdf",
+     "https://research.nicoxz.com/articles/japan-births-post-covid-bottoming",
+     "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 21,
+    "web_search_requests": 4,
+    "usd": 0.00328152,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202607.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202605.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://research.nicoxz.com/articles/japan-births-post-covid-bottoming",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 274.9
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Japan female population 2026 age 15-49 人口推計 2026 女性 年齢別",
+     "Japan total fertility rate 2025 2026 age-specific fertility rates 合計特殊出生率",
+     "人口動態統計 月別 出生数 2025年 7月 速報 厚生労働省",
+     "日本 出生数 月別 季節性 7月 多い 月別出生数 2024"
+    ],
+    "urls": [
+     "https://www.stat.go.jp/data/jinsui/pdf/202605.pdf",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/nengai25/dl/gaikyouR7.pdf",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/m2025/07.html",
+     "https://www.ipss.go.jp/syoushika/bunken/data/pdf/jinkokenshiryo353.pdf"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0038743439999999996,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.stat.go.jp/data/jinsui/pdf/202605.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/nengai25/dl/gaikyouR7.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/m2025/07.html",
+     "status": "dropped",
+     "reason": "undecodable content (binary or unsupported encoding)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ipss.go.jp/syoushika/bunken/data/pdf/jinkokenshiryo353.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 357.3
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Japan hospital deliveries July 2026 分娩数 病院",
+     "MHLW 人口動態統計速報 2026年7月 出生数",
+     "分娩数 2026年7月 病院 産科 統計",
+     "2025年7月 出生数 人口動態統計速報 前年同月"
+    ],
+    "urls": [
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/07.html",
+     "https://www.nippon.com/ja/japan-data/h02872/",
+     "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "http://tsubaki-wc.com/obstetrics/medical_experience.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 13,
+    "web_search_requests": 4,
+    "usd": 0.0021254219999999996,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/07.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nippon.com/ja/japan-data/h02872/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260414175600",
+     "page_date": "2026-04-14",
+     "raw_path": "data/raw/agent/fc_jp_births_2026_07/ba71c980579e8522.raw",
+     "text_chars": 5341,
+     "leak_hits": [],
+     "chars_sent": 5341,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 14
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      0
+     ],
+     "name": "Total deliveries at this clinic, July 2025",
+     "value": 61.0,
+     "value_as_written": "61",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 58 | 51 | 50 | 45 | 74 | 62 | 61 | 74 | 51 | 62 | 55 | 59 | 702 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      1
+     ],
+     "name": "Total deliveries at this clinic, July 2024",
+     "value": 49.0,
+     "value_as_written": "49",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2024-07-01",
+     "period_end": "2024-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 63 | 52 | 36 | 47 | 62 | 45 | 49 | 47 | 55 | 63 | 59 | 53 | 631 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      2
+     ],
+     "name": "Total deliveries at this clinic, July 2023",
+     "value": 64.0,
+     "value_as_written": "64",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2023-07-01",
+     "period_end": "2023-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 46 | 45 | 55 | 54 | 42 | 47 | 64 | 52 | 49 | 52 | 60 | 63 | 629 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      3
+     ],
+     "name": "Total deliveries at this clinic, July 2022",
+     "value": 64.0,
+     "value_as_written": "64",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2022-07-01",
+     "period_end": "2022-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 60 | 56 | 49 | 40 | 49 | 52 | 64 | 61 | 62 | 66 | 50 | 41 | 650 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      4
+     ],
+     "name": "Total deliveries at this clinic, July 2021",
+     "value": 56.0,
+     "value_as_written": "56",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2021-07-01",
+     "period_end": "2021-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 40 | 61 | 61 | 64 | 57 | 56 | 56 | 60 | 58 | 57 | 57 | 59 | 686 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      5
+     ],
+     "name": "Total deliveries at this clinic, July 2020",
+     "value": 52.0,
+     "value_as_written": "52",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2020-07-01",
+     "period_end": "2020-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 48 | 42 | 54 | 45 | 50 | 49 | 52 | 84 | 46 | 55 | 53 | 56 | 634 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      6
+     ],
+     "name": "Total deliveries at this clinic, July 2019",
+     "value": 59.0,
+     "value_as_written": "59",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2019-07-01",
+     "period_end": "2019-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 50 | 49 | 50 | 46 | 55 | 56 | 59 | 58 | 47 | 49 | 51 | 50 | 620 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      7
+     ],
+     "name": "Total deliveries at this clinic, July 2018",
+     "value": 43.0,
+     "value_as_written": "43",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2018-07-01",
+     "period_end": "2018-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 50 | 34 | 52 | 54 | 44 | 41 | 43 | 59 | 56 | 43 | 38 | 59 | 573 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      8
+     ],
+     "name": "Total deliveries at this clinic, July 2017",
+     "value": 54.0,
+     "value_as_written": "54",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2017-07-01",
+     "period_end": "2017-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 47 | 44 | 39 | 60 | 34 | 47 | 54 | 77 | 56 | 61 | 44 | 55 | 618 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      9
+     ],
+     "name": "Total deliveries at this clinic, July 2016",
+     "value": 48.0,
+     "value_as_written": "48",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2016-07-01",
+     "period_end": "2016-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 38 | 31 | 43 | 43 | 56 | 47 | 48 | 51 | 38 | 43 | 38 | 51 | 527 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      10
+     ],
+     "name": "Total deliveries at this clinic, January–April 2026 cumulative",
+     "value": 229.0,
+     "value_as_written": "229",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2026-01-01",
+     "period_end": "2026-04-30",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 62 | 59 | 54 | 54 | | | | | | | | | 229 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      11
+     ],
+     "name": "Total deliveries at this clinic, calendar year 2025",
+     "value": 702.0,
+     "value_as_written": "702",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "| 総分娩数 | 58 | 51 | 50 | 45 | 74 | 62 | 61 | 74 | 51 | 62 | 55 | 59 | 702 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      13
+     ],
+     "name": "Normal vaginal deliveries at this clinic, July 2025",
+     "value": 43.0,
+     "value_as_written": "43",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 正常経膣分娩 | 44 | 33 | 35 | 32 | 58 | 45 | 43 | 55 | 39 | 45 | 39 | 46 | 514 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      14
+     ],
+     "name": "Cesarean deliveries at this clinic, July 2025",
+     "value": 11.0,
+     "value_as_written": "11",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "deliveries",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 帝王切開 | 5 | 5 | 5 | 4 | 7 | 8 | 11 | 5 | 3 | 5 | 7 | 3 | 68 |",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414175600",
+     "order": [
+      3,
+      12
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Total deliveries at this clinic since clinic opening (cumulative)",
+     "value_as_written": "6,592"
+    }
+   ],
+   "wall_s": 834.9
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "search": {
+    "queries": [
+     "MHLW monthly vital statistics preliminary Japan births 2025 monthly",
+     "Japan births July 2026 monthly estimate 厚生労働省 人口動態統計 月報",
+     "2026年7月 出生数 人口動態統計速報 令和8年7月分",
+     "Japan public holidays 2026 calendar Marine Day July 20"
+    ],
+    "urls": [
+     "https://caixinboke1.blog.caixin.com/archives/288480",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202607.pdf",
+     "https://www.zhihu.com/column/c_1639320595354652672",
+     "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=447111&act=view&mainXml=Y"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 19,
+    "web_search_requests": 4,
+    "usd": 0.0032102160000000005,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://caixinboke1.blog.caixin.com/archives/288480",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202607.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.zhihu.com/column/c_1639320595354652672",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=447111&act=view&mainXml=Y",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 743.5
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "japan births",
+     "july 2026 births",
+     "vital statistics"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 20
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "search": {
+    "queries": [
+     "MHLW preliminary vital statistics 2026 births monthly January February March April May",
+     "厚生労働省 人口動態統計速報 2026年 出生数",
+     "人口動態統計速報 令和7年7月分 出生数 2025年7月",
+     "日本の月別出生数 2024年 7月 年間出生数に占める割合 月別シェア"
+    ],
+    "urls": [
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202605.pdf",
+     "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2025/07.html",
+     "https://yosshy0131.hatenablog.com/entry/2025/10/09/200257"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0032236979999999992,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202605.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2025/07.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260317070542",
+     "page_date": "2026-03-17",
+     "raw_path": "data/raw/agent/fc_jp_births_2026_07/beb17a83dc918190.raw",
+     "text_chars": 631,
+     "leak_hits": [],
+     "chars_sent": 631,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://yosshy0131.hatenablog.com/entry/2025/10/09/200257",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 232.8
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "search": {
+    "queries": [
+     "IPSS Japan 2026 birth forecast annual live births estimate",
+     "Japan 2026年 出生数 予測 推計 国立社会保障・人口問題研究所",
+     "厚生労働省 人口動態統計 月報 2026年7月 出生数",
+     "日本 出生数 月別 構成比 7月 年間出生数 割合"
+    ],
+    "urls": [
+     "https://www.ipss.go.jp/pp-zenkoku/e/zenkoku_e2023/pp2023e_Summary.pdf",
+     "https://www.shugiin.go.jp/Internet/itdb_shitsumon.nsf/html/shitsumon/b216033.htm",
+     "https://www.nippon.com/ja/japan-data/h02872/",
+     "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 28,
+    "web_search_requests": 4,
+    "usd": 0.00281616,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.ipss.go.jp/pp-zenkoku/e/zenkoku_e2023/pp2023e_Summary.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.shugiin.go.jp/Internet/itdb_shitsumon.nsf/html/shitsumon/b216033.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260209055049",
+     "page_date": "2026-02-09",
+     "raw_path": "data/raw/agent/fc_jp_births_2026_07/83863c8df057560c.raw",
+     "text_chars": 1083,
+     "leak_hits": [],
+     "chars_sent": 1083,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 4,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://www.nippon.com/ja/japan-data/h02872/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.shugiin.go.jp/Internet/itdb_shitsumon.nsf/html/shitsumon/b216033.htm",
+     "via": "snapshot",
+     "page_date": "2026-02-09",
+     "snapshot_ts": "20260209055049",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "IPSS (National Institute of Population and Social Security Research) projected number of births in Japan for 2026, Japan",
+     "value_as_written": "七十四万四千人"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.shugiin.go.jp/Internet/itdb_shitsumon.nsf/html/shitsumon/b216033.htm",
+     "via": "snapshot",
+     "page_date": "2026-02-09",
+     "snapshot_ts": "20260209055049",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Publication date of IPSS 'Population Projections for Japan (2023 revision)' referenced in the answer",
+     "value_as_written": "令和五年四月"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.shugiin.go.jp/Internet/itdb_shitsumon.nsf/html/shitsumon/b216033.htm",
+     "via": "snapshot",
+     "page_date": "2026-02-09",
+     "snapshot_ts": "20260209055049",
+     "order": [
+      1,
+      2
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Date of Cabinet decision on the 'Children's Future Strategy' (こども未来戦略)",
+     "value_as_written": "令和五年十二月二十二日"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.shugiin.go.jp/Internet/itdb_shitsumon.nsf/html/shitsumon/b216033.htm",
+     "via": "snapshot",
+     "page_date": "2026-02-09",
+     "snapshot_ts": "20260209055049",
+     "order": [
+      1,
+      3
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Concentrated three-year intensive effort period under the Children's Future Strategy, including calendar year 2025",
+     "value_as_written": "三年間"
+    }
+   ],
+   "wall_s": 112.1
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "search": {
+    "queries": [
+     "厚生労働省 人口動態統計 2026年7月 出生数 速報",
+     "東京都 2026年7月 出生数 月報 人口動態",
+     "東京都 人口動態統計 2026年 月別 出生数 速報 都内",
+     "\"2026年6月\" 人口動態統計速報 出生数 都道府県別 東京都 愛知県 大阪府"
+    ],
+    "urls": [
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202606.pdf",
+     "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/07.html",
+     "https://www.straitstimes.com/asia/east-asia/tokyo-reverses-baby-bust-with-ai-matchmaking-and-generous-subsidies"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 21,
+    "web_search_requests": 4,
+    "usd": 0.0032509740000000002,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/dl/202606.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.sentankyo.jp/articles/3b848bca-e88c-45ce-96cf-1278fb20c1a0",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/07.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.straitstimes.com/asia/east-asia/tokyo-reverses-baby-bust-with-ai-matchmaking-and-generous-subsidies",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 108.5
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p3",
+      "p4",
+      "p5",
+      "p6",
+      "p7",
+      "p8",
+      "p9",
+      "p10"
+     ],
+     "relation": "corroborating",
+     "note": "These are July delivery counts from the same single clinic for 2016–2025. They form a consistent same-clinic July series, but they are one small clinic's experience, not a national sample. They can only support a clinic-level seasonal/trend analogue, not a direct national level."
+    },
+    {
+     "ids": [
+      "p1",
+      "p12"
+     ],
+     "relation": "corroborating",
+     "note": "p1 is the July 2025 component of the calendar-year 2025 total p12 from the same clinic. They are internally consistent but not independent; p12 adds annual context only."
+    },
+    {
+     "ids": [
+      "p1",
+      "p13",
+      "p14"
+     ],
+     "relation": "corroborating",
+     "note": "p13 and p14 are subcategories of p1 (normal vaginal plus cesarean deliveries) for July 2025 at the same clinic. They confirm the clinic's July 2025 delivery count but are not independent observations of the national target."
+    },
+    {
+     "ids": [
+      "p11",
+      "p12"
+     ],
+     "relation": "corroborating",
+     "note": "p11 is the January–April 2026 cumulative count at the same clinic; p12 is the 2025 annual total. They are from the same source and can be used only as a within-clinic trend signal, not as a national birth count."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p13",
+     "keep": false,
+     "reason": "Subcategory of p1 (normal vaginal deliveries) at the same clinic; adds no independent information for the national target and is not needed for any executable route."
+    },
+    {
+     "id": "p14",
+     "keep": false,
+     "reason": "Subcategory of p1 (cesarean deliveries) at the same clinic; redundant with p1 for the national target."
+    }
+   ],
+   "extra_directions": [
+    {
+     "id": "b1",
+     "category": "related_series",
+     "perspective": "national administrative",
+     "hypothesis": "Monthly or year-to-date birth counts for 2026 from MHLW preliminary vital statistics (e.g., January–May 2026) would provide the most recent national level and trend. Applying the historical July share of the annual total or a July seasonal factor to a 2026 year-to-date total would unlock a direct national monthly estimate, replacing the clinic-only analogue.",
+     "data_to_find": "MHLW monthly preliminary vital statistics for 2026 months already published before 2026-08-25 (e.g., January–May 2026 births), and historical monthly shares of annual births for July.",
+     "search_hints": [
+      "S",
+      "e",
+      "a",
+      "r"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b2",
+     "category": "forecasts_markets",
+     "perspective": "research institute",
+     "hypothesis": "Published 2026 annual birth forecasts from Japanese research institutes (e.g., IPSS, NIPSSR, or university demographers) would provide an independent annual anchor. Combined with the historical July share of annual births, this would yield a national July 2026 estimate and serve as a sanity check on any clinic-based scaling.",
+     "data_to_find": "Annual 2026 birth forecasts for Japan published before 2026-08-25, and the historical fraction of annual births occurring in July.",
+     "search_hints": [
+      "S",
+      "e",
+      "a",
+      "r"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b3",
+     "category": "related_series",
+     "perspective": "subnational administrative",
+     "hypothesis": "Monthly birth counts for July 2026 from major municipalities or prefectures (e.g., Tokyo, Osaka, Aichi) would provide a broader geographic proxy than a single clinic. Scaling by those areas' historical share of national births would give a national estimate and help validate or correct the clinic-based trend.",
+     "data_to_find": "July 2026 monthly birth counts from large prefectures or municipalities, and their historical share of national births.",
+     "search_hints": [
+      "S",
+      "e",
+      "a",
+      "r"
+     ],
+     "expected_information": 3
+    }
+   ],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p1 * a1",
+      "inputs": {
+       "p1": {
+        "id": "p1",
+        "role": "July 2025 deliveries at the same clinic, used as the clinic-level July baseline"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "national-to-clinic scaling factor converting clinic July deliveries to national July births"
+       }
+      }
+     },
+     "rationale": "Uses the clinic's July 2025 delivery count as a proxy for its July 2026 level, then scales to national births with a wide, explicitly uncertain factor. This is a weak route because it relies on a single small clinic and an assumed stable national-to-clinic ratio, but it is executable with kept evidence and an assumption. Shared dependency: any error in the clinic's representativeness propagates directly. Failure mode: the clinic's July 2026 volume may differ from July 2025, and the scaling factor may not be stable."
+    },
+    {
+     "id": "m2",
+     "method": "series_naive",
+     "params": {
+      "target_history": [
+       "p1",
+       "p2",
+       "p3",
+       "p4",
+       "p5",
+       "p6",
+       "p7",
+       "p8",
+       "p9",
+       "p10"
+      ],
+      "k": 3
+     },
+     "rationale": "A naive forecast of the clinic's July 2026 deliveries using the mean of the three most recent July values (2023–2025). This provides a clinic-level July 2026 baseline that could be scaled to national births if a scaling factor were available. It is not a national estimate by itself and is included only as a component for a possible future scaling route. Failure mode: the clinic's trend may not continue, and the clinic is not representative of national births."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "National-to-clinic July 2026 births scaling factor",
+     "value": 12000,
+     "low": 6000,
+     "high": 24000,
+     "unit": "ratio",
+     "rationale": "The clinic's July deliveries are a tiny, non-random sample of national births. The clinic's annual deliveries are roughly 600–700, while national annual births are roughly 700,000–800,000, implying a national-to-clinic ratio of about 1,000–1,300. However, the clinic may not be representative in trend or seasonality, and the target includes foreign nationals while the clinic's patient mix is unknown. A wide lognormal range (P10/P90 = 0.5x to 2x the central value) is used to reflect this uncertainty. The central value is chosen so that the resulting national July estimate is of plausible order of magnitude given recent national monthly births.",
+     "applies_when": "The clinic's July 2026 delivery count is available or can be forecast from its own history, and the clinic's share of national births is assumed stable enough to transfer with wide uncertainty.",
+     "falsified_by": "Evidence that the clinic's patient population, geographic catchment, or trend diverges materially from national patterns, or a direct national July 2026 count that falls outside the resulting interval.",
+     "route": "m1"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  },
+  {
+   "round": 2,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p3",
+      "p4",
+      "p5",
+      "p6",
+      "p7",
+      "p8",
+      "p9",
+      "p10"
+     ],
+     "relation": "corroborating",
+     "note": "All are the same clinic's July total-delivery counts across consecutive years, so they form one consistent series measuring the same quantity (deliveries at one facility in July). They corroborate each other as a stable, slowly drifting series but are not independent of one another: they share the same single clinic, same definition, and same source page. They are a clinic-level analogue, not national births, and require a scaling/transfer assumption to reach the national July 2026 figure."
+    },
+    {
+     "ids": [
+      "p1",
+      "p13",
+      "p14"
+     ],
+     "relation": "corroborating",
+     "note": "For July 2025 the clinic reports 61 total deliveries, split into 43 normal vaginal and 11 cesarean (43+11=54, leaving 7 other/unspecified modes). These are internally consistent components of the same July 2025 clinic total and confirm the total is a delivery count, not a birth count; they add no independent information about the national level."
+    },
+    {
+     "ids": [
+      "p11",
+      "p12"
+     ],
+     "relation": "corroborating",
+     "note": "January–April 2026 cumulative (229) and calendar-year 2025 (702) are the same clinic's counts on a different period basis. They are consistent with the monthly series (2025 monthly values sum to 702) and provide the most recent clinic-level level/trend information before the cutoff, but they are not the target period and cannot be substituted directly."
+    },
+    {
+     "ids": [
+      "p1",
+      "p11"
+     ],
+     "relation": "conflicting",
+     "note": "Apparent tension only: p1 is July 2025 (61) while p11 is Jan–Apr 2026 cumulative (229, i.e. ~57/month). Different periods and aggregation, so not a true contradiction; it does indicate the clinic's 2026 run-rate is near its 2025 level, which matters for any trend adjustment."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p13",
+     "keep": false,
+     "reason": "Sub-component of p1 (normal vaginal deliveries in July 2025); adds no independent information for a national July 2026 estimate and is redundant with the total-delivery series."
+    },
+    {
+     "id": "p14",
+     "keep": false,
+     "reason": "Sub-component of p1 (cesarean deliveries in July 2025); redundant with the total-delivery series and not usable as a separate national signal."
+    }
+   ],
+   "extra_directions": [],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "mean(p1, p2, p3) * a1",
+      "inputs": {
+       "p1": {
+        "id": "p1",
+        "role": "July 2025 total deliveries at the reference clinic"
+       },
+       "p2": {
+        "id": "p2",
+        "role": "July 2024 total deliveries at the reference clinic"
+       },
+       "p3": {
+        "id": "p3",
+        "role": "July 2023 total deliveries at the reference clinic"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "national July 2026 live births per clinic July delivery (scaling factor)"
+       }
+      }
+     },
+     "rationale": "Physical-flow scaling route: take the clinic's recent July delivery level (mean of the three most recent Julys) and multiply by an assumed national-to-clinic scaling factor to reach national July 2026 live births. The clinic counts are deliveries, not births, and cover one facility, so the scaling factor absorbs both the national/clinic size ratio and the delivery-to-birth definitional gap. Failure modes: the clinic's share of national births may drift; the clinic's July seasonality may differ from the national pattern; the scaling factor is wide and dominates the uncertainty. Shared dependency: all clinic inputs come from one facility and one source page, so this method carries facility-specific noise and cannot detect national divergence."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "mean(p1, p2, p3) * a1 * a2",
+      "inputs": {
+       "p1": {
+        "id": "p1",
+        "role": "July 2025 total deliveries at the reference clinic"
+       },
+       "p2": {
+        "id": "p2",
+        "role": "July 2024 total deliveries at the reference clinic"
+       },
+       "p3": {
+        "id": "p3",
+        "role": "July 2023 total deliveries at the reference clinic"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "national July 2026 live births per clinic July delivery (scaling factor)"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "year-over-year change factor for national July 2026 live births relative to July 2025"
+       }
+      }
+     },
+     "rationale": "Same physical-flow scaling as m1 but with an explicit year-over-year trend adjustment, so the clinic's recent July level is first carried to a July 2026-equivalent level before national scaling. This separates the level transfer (a1) from the temporal trend (a2) and allows the trend to be informed by the clinic's 2026 run-rate (p11 vs p12). Shared dependencies with m1: same clinic inputs and same scaling factor, so the two methods are not independent; m2 is preferred if the 2026 decline is judged real. Failure modes: double-counting the decline if the clinic's 2026 level already embeds it, and the wide scaling factor."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "National July 2026 live births per clinic July delivery (scaling factor)",
+     "value": 1100,
+     "low": 550,
+     "high": 2200,
+     "unit": "births per clinic delivery",
+     "rationale": "The clinic records roughly 50-65 deliveries per July (p1-p3). Japan's national monthly live births in recent years are on the order of 60,000-80,000, so the national-to-clinic ratio is of order 1e3, not 1e5. This factor absorbs both the national/clinic size ratio and the delivery-to-live-birth definitional gap. The range is wide (factor ~4) because the clinic's catchment, case mix, and share of national births are unknown and may drift; it is anchored only on the order-of-magnitude relationship between a plausible national monthly level and the observed clinic counts, not on any sourced national figure.",
+     "applies_when": "The clinic's July delivery count is assumed to move proportionally with national July live births, so that a fixed multiplicative scaling transfers the clinic analogue to the national level.",
+     "falsified_by": "Evidence that the clinic's share of national births changed materially between 2025 and 2026, or a published national monthly birth figure that implies a ratio far outside this range.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "Year-over-year change factor for national July 2026 live births relative to July 2025",
+     "value": 0.96,
+     "low": 0.9,
+     "high": 1.02,
+     "unit": "ratio",
+     "rationale": "Japan's births have been declining gradually; a modest further decline in July 2026 versus July 2025 is the central expectation. The range spans a continued decline to near-stabilisation, consistent with the clinic's own 2026 run-rate being close to its 2025 level (p11 vs p12). This is a dimensionless change factor, not a level of the target.",
+     "applies_when": "Used to carry a July 2025 national level forward to July 2026 when no 2026 national monthly data are available.",
+     "falsified_by": "A published 2026 year-to-date national birth count showing growth or a much steeper decline than this range.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": [],
+   "repair": {
+    "errors": [
+     "method m1 (series_naive): input audit: p1: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p2: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p3: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p4: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p5: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p6: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p7: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p8: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p9: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.; p10: Evidence is deliveries at a single clinic, not live births in Japan; different entity and measure.",
+     "method m2 (formula_mc): input audit: p1: Role requires clinic deliveries, but the target quantity is national live births; the evidence is a different entity and measure.; p2: Role requires clinic deliveries, but the target quantity is national live births; the evidence is a different entity and measure.; p3: Role requires clinic deliveries, but the target quantity is national live births; the evidence is a different entity and measure.",
+     "method m3 (formula_mc): input audit: p1: Role requires clinic deliveries, but the target quantity is national live births; the evidence is a different entity and measure.; p2: Role requires clinic deliveries, but the target quantity is national live births; the evidence is a different entity and measure.; p3: Role requires clinic deliveries, but the target quantity is national live births; the evidence is a different entity and measure."
+    ],
+    "previous_methods": [
+     {
+      "id": "m1",
+      "method": "series_naive",
+      "params": {
+       "target_history": [
+        "p1",
+        "p2",
+        "p3",
+        "p4",
+        "p5",
+        "p6",
+        "p7",
+        "p8",
+        "p9",
+        "p10"
+       ],
+       "k": 3
+      },
+      "rationale": "Baseline clinic-level July analogue: the mean of the three most recent July clinic delivery counts (2025, 2024, 2023) gives a stable recent level for the clinic's July activity. This is not a national estimate by itself; it is the input level that the scaling route (m2) converts to national births. Shared dependency: all inputs come from one clinic and one source page, so this method carries facility-specific noise and cannot detect national divergence."
+     },
+     {
+      "id": "m2",
+      "method": "formula_mc",
+      "params": {
+       "formula": "mean(p1, p2, p3) * a1",
+       "inputs": {
+        "p1": {
+         "id": "p1",
+         "role": "July 2025 total deliveries at the reference clinic"
+        },
+        "p2": {
+         "id": "p2",
+         "role": "July 2024 total deliveries at the reference clinic"
+        },
+        "p3": {
+         "id": "p3",
+         "role": "July 2023 total deliveries at the reference clinic"
+        },
+        "a1": {
+         "id": "a1",
+         "role": "national July 2026 births per clinic July delivery (scaling factor)"
+        }
+       }
+      },
+      "rationale": "Physical-flow scaling route: take the clinic's recent July delivery level (mean of the three most recent Julys) and multiply by an assumed national-to-clinic scaling factor to reach national July 2026 births. The clinic counts are deliveries, not births, and cover one facility, so the scaling factor absorbs both the national/clinic size ratio and the delivery-to-birth definitional gap. Failure modes: the clinic's share of national births may drift; the clinic's July seasonality may differ from the national pattern; the scaling factor is wide and dominates the uncertainty."
+     },
+     {
+      "id": "m3",
+      "method": "formula_mc",
+      "params": {
+       "formula": "mean(p1, p2, p3) * a1 * a2",
+       "inputs": {
+        "p1": {
+         "id": "p1",
+         "role": "July 2025 total deliveries at the reference clinic"
+        },
+        "p2": {
+         "id": "p2",
+         "role": "July 2024 total deliveries at the reference clinic"
+        },
+        "p3": {
+         "id": "p3",
+         "role": "July 2023 total deliveries at the reference clinic"
+        },
+        "a1": {
+         "id": "a1",
+         "role": "national July 2026 births per clinic July delivery (scaling factor)"
+        },
+        "a2": {
+         "id": "a2",
+         "role": "year-over-year change factor for national July 2026 births relative to July 2025"
+        }
+       }
+      },
+      "rationale": "Same physical-flow scaling as m2 but with an explicit year-over-year trend adjustment, so the clinic's recent July level is first carried to a July 2026-equivalent level before national scaling. This separates the level transfer (a1) from the temporal trend (a2) and allows the trend to be informed by the clinic's 2026 run-rate (p11 vs p12). Shared dependencies with m2: same clinic inputs and same scaling factor, so the two methods are not independent; m3 is preferred if the 2026 decline is judged real. Failure modes: double-counting the decline if the clinic's 2026 level already embeds it, and the wide scaling factor."
+     }
+    ],
+    "previous_assumptions": [
+     {
+      "id": "a1",
+      "name": "National July 2026 births per clinic July delivery (scaling factor)",
+      "value": 110000,
+      "low": 70000,
+      "high": 175000,
+      "unit": "births per clinic delivery",
+      "rationale": "The clinic series is a single-facility analogue. Japan's national monthly births are on the order of 60,000–80,000 in recent years, while this clinic records roughly 50–65 deliveries per July, implying a national-to-clinic ratio of order 1e5. The range is deliberately wide (factor ~2.5) because the clinic's catchment, case mix, and share of national births are unknown and may drift; it is anchored only on the order-of-magnitude relationship between a plausible national monthly level and the observed clinic counts, not on any sourced national figure.",
+      "applies_when": "The clinic's July delivery count is assumed to move proportionally with national July births, so that a fixed multiplicative scaling transfers the clinic analogue to the national level.",
+      "falsified_by": "Evidence that the clinic's share of national births changed materially between 2025 and 2026, or a published national monthly birth figure that implies a ratio far outside this range.",
+      "route": "m2"
+     },
+     {
+      "id": "a2",
+      "name": "Year-over-year change factor for national July 2026 births relative to July 2025",
+      "value": 0.96,
+      "low": 0.9,
+      "high": 1.02,
+      "unit": "ratio",
+      "rationale": "Japan's births have been declining gradually; a modest further decline in July 2026 versus July 2025 is the central expectation. The range spans a continued decline to near-stabilisation, consistent with the clinic's own 2026 run-rate being close to its 2025 level (p11 vs p12). This is a dimensionless change factor, not a level of the target.",
+      "applies_when": "Used to carry a July 2025 national level forward to July 2026 when no 2026 national monthly data are available.",
+      "falsified_by": "A published 2026 year-to-date national birth count showing growth or a much steeper decline than this range.",
+      "route": "m3"
+     }
+    ],
+    "errors_after": []
+   },
+   "audit_failed": {}
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    0
+   ],
+   "name": "Total deliveries at this clinic, July 2025",
+   "value": 61.0,
+   "value_as_written": "61",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 58 | 51 | 50 | 45 | 74 | 62 | 61 | 74 | 51 | 62 | 55 | 59 | 702 |",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    1
+   ],
+   "name": "Total deliveries at this clinic, July 2024",
+   "value": 49.0,
+   "value_as_written": "49",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2024-07-01",
+   "period_end": "2024-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 63 | 52 | 36 | 47 | 62 | 45 | 49 | 47 | 55 | 63 | 59 | 53 | 631 |",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    2
+   ],
+   "name": "Total deliveries at this clinic, July 2023",
+   "value": 64.0,
+   "value_as_written": "64",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2023-07-01",
+   "period_end": "2023-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 46 | 45 | 55 | 54 | 42 | 47 | 64 | 52 | 49 | 52 | 60 | 63 | 629 |",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    3
+   ],
+   "name": "Total deliveries at this clinic, July 2022",
+   "value": 64.0,
+   "value_as_written": "64",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2022-07-01",
+   "period_end": "2022-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 60 | 56 | 49 | 40 | 49 | 52 | 64 | 61 | 62 | 66 | 50 | 41 | 650 |",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    4
+   ],
+   "name": "Total deliveries at this clinic, July 2021",
+   "value": 56.0,
+   "value_as_written": "56",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2021-07-01",
+   "period_end": "2021-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 40 | 61 | 61 | 64 | 57 | 56 | 56 | 60 | 58 | 57 | 57 | 59 | 686 |",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    5
+   ],
+   "name": "Total deliveries at this clinic, July 2020",
+   "value": 52.0,
+   "value_as_written": "52",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2020-07-01",
+   "period_end": "2020-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 48 | 42 | 54 | 45 | 50 | 49 | 52 | 84 | 46 | 55 | 53 | 56 | 634 |",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    6
+   ],
+   "name": "Total deliveries at this clinic, July 2019",
+   "value": 59.0,
+   "value_as_written": "59",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2019-07-01",
+   "period_end": "2019-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 50 | 49 | 50 | 46 | 55 | 56 | 59 | 58 | 47 | 49 | 51 | 50 | 620 |",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    7
+   ],
+   "name": "Total deliveries at this clinic, July 2018",
+   "value": 43.0,
+   "value_as_written": "43",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2018-07-01",
+   "period_end": "2018-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 50 | 34 | 52 | 54 | 44 | 41 | 43 | 59 | 56 | 43 | 38 | 59 | 573 |",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    8
+   ],
+   "name": "Total deliveries at this clinic, July 2017",
+   "value": 54.0,
+   "value_as_written": "54",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2017-07-01",
+   "period_end": "2017-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 47 | 44 | 39 | 60 | 34 | 47 | 54 | 77 | 56 | 61 | 44 | 55 | 618 |",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    9
+   ],
+   "name": "Total deliveries at this clinic, July 2016",
+   "value": 48.0,
+   "value_as_written": "48",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2016-07-01",
+   "period_end": "2016-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 38 | 31 | 43 | 43 | 56 | 47 | 48 | 51 | 38 | 43 | 38 | 51 | 527 |",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    10
+   ],
+   "name": "Total deliveries at this clinic, January–April 2026 cumulative",
+   "value": 229.0,
+   "value_as_written": "229",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2026-01-01",
+   "period_end": "2026-04-30",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 62 | 59 | 54 | 54 | | | | | | | | | 229 |",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    11
+   ],
+   "name": "Total deliveries at this clinic, calendar year 2025",
+   "value": 702.0,
+   "value_as_written": "702",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "| 総分娩数 | 58 | 51 | 50 | 45 | 74 | 62 | 61 | 74 | 51 | 62 | 55 | 59 | 702 |",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    13
+   ],
+   "name": "Normal vaginal deliveries at this clinic, July 2025",
+   "value": 43.0,
+   "value_as_written": "43",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 正常経膣分娩 | 44 | 33 | 35 | 32 | 58 | 45 | 43 | 55 | 39 | 45 | 39 | 46 | 514 |",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Sub-component of p1 (normal vaginal deliveries in July 2025); adds no independent information for a national July 2026 estimate and is redundant with the total-delivery series."
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "http://tsubaki-wc.com/obstetrics/medical_experience.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414175600",
+   "order": [
+    3,
+    14
+   ],
+   "name": "Cesarean deliveries at this clinic, July 2025",
+   "value": 11.0,
+   "value_as_written": "11",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "deliveries",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 帝王切開 | 5 | 5 | 5 | 4 | 7 | 8 | 11 | 5 | 3 | 5 | 7 | 3 | 68 |",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Sub-component of p1 (cesarean deliveries in July 2025); redundant with the total-delivery series and not usable as a separate national signal."
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "formula_mc",
+    "params": {
+     "formula": "mean(p1, p2, p3) * a1",
+     "inputs": {
+      "p1": {
+       "id": "p1",
+       "role": "July 2025 total deliveries at the reference clinic"
+      },
+      "p2": {
+       "id": "p2",
+       "role": "July 2024 total deliveries at the reference clinic"
+      },
+      "p3": {
+       "id": "p3",
+       "role": "July 2023 total deliveries at the reference clinic"
+      },
+      "a1": {
+       "id": "a1",
+       "role": "national July 2026 live births per clinic July delivery (scaling factor)"
+      }
+     }
+    },
+    "rationale": "Physical-flow scaling route: take the clinic's recent July delivery level (mean of the three most recent Julys) and multiply by an assumed national-to-clinic scaling factor to reach national July 2026 live births. The clinic counts are deliveries, not births, and cover one facility, so the scaling factor absorbs both the national/clinic size ratio and the delivery-to-birth definitional gap. Failur",
+    "estimate": 64330.67604631495,
+    "backtest": [],
+    "notes": [],
+    "used_ids": [
+     "p1",
+     "p2",
+     "p3"
+    ],
+    "used_assumptions": [
+     "a1"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p1",
+      "id": "p1",
+      "kind": "point",
+      "p10": 50.833333333333336,
+      "p90": 73.2,
+      "unit": "deliveries"
+     },
+     {
+      "name": "p2",
+      "id": "p2",
+      "kind": "point",
+      "p10": 40.833333333333336,
+      "p90": 58.8,
+      "unit": "deliveries"
+     },
+     {
+      "name": "p3",
+      "id": "p3",
+      "kind": "point",
+      "p10": 53.333333333333336,
+      "p90": 76.8,
+      "unit": "deliveries"
+     },
+     {
+      "name": "a1",
+      "id": "a1",
+      "kind": "assumption",
+      "p10": 550.0,
+      "p90": 2200.0,
+      "unit": "births per clinic delivery"
+     }
+    ],
+    "mc": {
+     "p10": 31958.440509430246,
+     "p90": 130032.81860877121
+    },
+    "n_point_inputs": 3,
+    "n_assumption_inputs": 1,
+    "rests_mainly_on_assumptions": false
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "formula_mc",
+    "params": {
+     "formula": "mean(p1, p2, p3) * a1 * a2",
+     "inputs": {
+      "p1": {
+       "id": "p1",
+       "role": "July 2025 total deliveries at the reference clinic"
+      },
+      "p2": {
+       "id": "p2",
+       "role": "July 2024 total deliveries at the reference clinic"
+      },
+      "p3": {
+       "id": "p3",
+       "role": "July 2023 total deliveries at the reference clinic"
+      },
+      "a1": {
+       "id": "a1",
+       "role": "national July 2026 live births per clinic July delivery (scaling factor)"
+      },
+      "a2": {
+       "id": "a2",
+       "role": "year-over-year change factor for national July 2026 live births relative to July 2025"
+      }
+     }
+    },
+    "rationale": "Same physical-flow scaling as m1 but with an explicit year-over-year trend adjustment, so the clinic's recent July level is first carried to a July 2026-equivalent level before national scaling. This separates the level transfer (a1) from the temporal trend (a2) and allows the trend to be informed by the clinic's 2026 run-rate (p11 vs p12). Shared dependencies with m1: same clinic inputs and same ",
+    "estimate": 61627.5272663909,
+    "backtest": [],
+    "notes": [],
+    "used_ids": [
+     "p1",
+     "p2",
+     "p3"
+    ],
+    "used_assumptions": [
+     "a1",
+     "a2"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p1",
+      "id": "p1",
+      "kind": "point",
+      "p10": 50.833333333333336,
+      "p90": 73.2,
+      "unit": "deliveries"
+     },
+     {
+      "name": "p2",
+      "id": "p2",
+      "kind": "point",
+      "p10": 40.833333333333336,
+      "p90": 58.8,
+      "unit": "deliveries"
+     },
+     {
+      "name": "p3",
+      "id": "p3",
+      "kind": "point",
+      "p10": 53.333333333333336,
+      "p90": 76.8,
+      "unit": "deliveries"
+     },
+     {
+      "name": "a1",
+      "id": "a1",
+      "kind": "assumption",
+      "p10": 550.0,
+      "p90": 2200.0,
+      "unit": "births per clinic delivery"
+     },
+     {
+      "name": "a2",
+      "id": "a2",
+      "kind": "assumption",
+      "p10": 0.856971411425142,
+      "p90": 1.0712142642814275,
+      "unit": "ratio"
+     }
+    ],
+    "mc": {
+     "p10": 30316.95007936761,
+     "p90": 125976.72609323767
+    },
+    "n_point_inputs": 3,
+    "n_assumption_inputs": 2,
+    "rests_mainly_on_assumptions": false
+   }
+  ],
+  "result": {
+   "central": 62964.59713290987,
+   "p10": 30888.301263419056,
+   "p90": 128350.8749250914,
+   "sigma_ln": 0.5557287938991852,
+   "sigma_hist": null,
+   "sigma_spread": 0.02146397623711227,
+   "sigma_mc": 0.5557287938991852,
+   "n_backtest_folds": 0,
+   "weights": {
+    "m1": 0.5,
+    "m2": 0.5
+   },
+   "weight_rule": "equal",
+   "weight_basis": {
+    "m1": "equal",
+    "m2": "equal"
+   },
+   "basis": "monte_carlo",
+   "assumption_weight_share": 1.0
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {
+   "a1": [
+    "m1",
+    "m2"
+   ],
+   "a2": [
+    "m2"
+   ]
+  },
+  "excluded_by_input_audit": [],
+  "methods_from_round": 2
+ },
+ "assumptions": {
+  "kept": [
+   {
+    "id": "a1",
+    "name": "National July 2026 live births per clinic July delivery (scaling factor)",
+    "unit": "births per clinic delivery",
+    "rationale": "The clinic records roughly 50-65 deliveries per July (p1-p3). Japan's national monthly live births in recent years are on the order of 60,000-80,000, so the national-to-clinic ratio is of order 1e3, not 1e5. This factor absorbs both the national/clinic size ratio and the delivery-to-live-birth defin",
+    "applies_when": "The clinic's July delivery count is assumed to move proportionally with national July live births, so that a fixed multiplicative scaling transfers the clinic analogue to the national level.",
+    "falsified_by": "Evidence that the clinic's share of national births changed materially between 2025 and 2026, or a published national monthly birth figure that implies a ratio far outside this range.",
+    "route": "m1",
+    "value": 1100.0,
+    "low": 550.0,
+    "high": 2200.0,
+    "is_pct": false,
+    "p10_used": 550.0,
+    "p90_used": 2200.0,
+    "widened_by_floor": false,
+    "used_by": [
+     "m1",
+     "m2"
+    ],
+    "used_by_labels": [
+     "m1",
+     "m2"
+    ]
+   },
+   {
+    "id": "a2",
+    "name": "Year-over-year change factor for national July 2026 live births relative to July 2025",
+    "unit": "ratio",
+    "rationale": "Japan's births have been declining gradually; a modest further decline in July 2026 versus July 2025 is the central expectation. The range spans a continued decline to near-stabilisation, consistent with the clinic's own 2026 run-rate being close to its 2025 level (p11 vs p12). This is a dimensionle",
+    "applies_when": "Used to carry a July 2025 national level forward to July 2026 when no 2026 national monthly data are available.",
+    "falsified_by": "A published 2026 year-to-date national birth count showing growth or a much steeper decline than this range.",
+    "route": "m2",
+    "value": 0.96,
+    "low": 0.9,
+    "high": 1.02,
+    "is_pct": false,
+    "p10_used": 0.856971411425142,
+    "p90_used": 1.0712142642814275,
+    "widened_by_floor": true,
+    "used_by": [
+     "m2"
+    ],
+    "used_by_labels": [
+     "m2"
+    ]
+   }
+  ],
+  "rejected": [],
+  "from_round": 2,
+  "min_width": 2.0,
+  "max_per_run": 8,
+  "max_per_method": 3
+ },
+ "final": {
+  "template": "The best computed estimate for live births in Japan during July 2026, as first reported in MHLW's preliminary monthly vital statistics (including foreign nationals residing in Japan), is [[estimate]] births. The supplied interval is [[p10]] to [[p90]], a model-based range conditional on the stated assumptions rather than a demonstrated accuracy guarantee.\n\nTwo methods were combined with weights [[m1_weight]] and [[m2_weight]]: [[m1_estimate]] and [[m2_estimate]]. Both scale a single clinic's recent July delivery level (observed points [[n_points_kept]]) to national births using assumption a1 = [[a1_value]] (range [[a1_low]]–[[a1_high]]); the second adds a year-over-year factor a2 = [[a2_value]] (range [[a2_low]]–[[a2_high]]). The clinic data are observed; the national scaling and trend are analyst assumptions, not measurements.\n\nThe main risk is that one clinic's deliveries poorly proxy national births, and the scaling factor is unverified. The most valuable missing evidence would be actual national July 2026 counts or a representative sample of clinics.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 National July 2026 live births per clinic July delivery (scaling factor): [[a1_value]] births per clinic delivery, range [[a1_low]] to [[a1_high]]; used by m1, m2. Overturned by: Evidence that the clinic's share of national births changed materially between 2025 and 2026, or a published national monthly birth figure that implies a ratio far outside this range.\n- a2 Year-over-year change factor for national July 2026 live births relative to July 2025: [[a2_value]] ratio, range [[a2_low]] to [[a2_high]] (range widened by code); used by m2. Overturned by: A published [n] year-to-date national birth count showing growth or a much steeper decline than this range.",
+  "text": "The best computed estimate for live births in Japan during July 2026, as first reported in MHLW's preliminary monthly vital statistics (including foreign nationals residing in Japan), is 62,965 births. The supplied interval is 30,888 to 128,351, a model-based range conditional on the stated assumptions rather than a demonstrated accuracy guarantee.\n\nTwo methods were combined with weights 50% and 50%: 64,331 and 61,628. Both scale a single clinic's recent July delivery level (observed points 12) to national births using assumption a1 = 1,100 (range 550–2,200); the second adds a year-over-year factor a2 = 0.96 (range 0.857–1.071). The clinic data are observed; the national scaling and trend are analyst assumptions, not measurements.\n\nThe main risk is that one clinic's deliveries poorly proxy national births, and the scaling factor is unverified. The most valuable missing evidence would be actual national July 2026 counts or a representative sample of clinics.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 National July 2026 live births per clinic July delivery (scaling factor): 1,100 births per clinic delivery, range 550 to 2,200; used by m1, m2. Overturned by: Evidence that the clinic's share of national births changed materially between 2025 and 2026, or a published national monthly birth figure that implies a ratio far outside this range.\n- a2 Year-over-year change factor for national July 2026 live births relative to July 2025: 0.96 ratio, range 0.857 to 1.071 (range widened by code); used by m2. Overturned by: A published [n] year-to-date national birth count showing growth or a much steeper decline than this range.",
+  "placeholders": {
+   "estimate": "62,965",
+   "p10": "30,888",
+   "p90": "128,351",
+   "interval_level": "80%",
+   "interval_basis": "monte carlo",
+   "n_points_kept": "12",
+   "n_methods": "2",
+   "m1_estimate": "64,331",
+   "m1_weight": "50%",
+   "m1_backtest_error": "n/a",
+   "m2_estimate": "61,628",
+   "m2_weight": "50%",
+   "m2_backtest_error": "n/a",
+   "a1_value": "1,100",
+   "a1_low": "550",
+   "a1_high": "2,200",
+   "a2_value": "0.96",
+   "a2_low": "0.857",
+   "a2_high": "1.071"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": true
+ },
+ "started_at": "20261015T183538Z",
+ "wall_s": 1214.6,
+ "budget": {
+  "usd_total_assumed": 0.4835,
+  "usd_tokens": 0.0435,
+  "usd_search_fee_assumed": 0.44,
+  "usd_cap": 1.0,
+  "pages_used": 4,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 22,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 44,
+  "pages_snapshot": 4,
+  "pages_live_dated": 0,
+  "pages_dropped": 40,
+  "pages_sent_to_extractor": {
+   "total": 4,
+   "snapshot": 4,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "test1"
+}

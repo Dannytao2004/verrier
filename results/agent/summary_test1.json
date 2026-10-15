@@ -1,0 +1,191 @@
+[
+ {
+  "id": "fc_tw_births_2026_09",
+  "as_of": "2026-09-08",
+  "answer_value": 7704,
+  "source": "https://www.taipeitimes.com/News/taiwan/archives/2026/10/08/2003865628",
+  "estimate": 7787.659733591133,
+  "p10": 5267.599509144945,
+  "p90": 11513.336201984965,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.010859259292722356,
+  "abs_log10_err": 0.004690693506543269,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 7787.659733591133,
+    "pct_err": 0.010859259292722356,
+    "abs_log10_err": 0.004690693506543269
+   },
+   "naive": {
+    "estimate": 11000.0,
+    "pct_err": 0.42782969885773614,
+    "abs_log10_err": 0.1546764110417469
+   },
+   "structured_no_retrieval": null,
+   "last_year_same_period": {
+    "estimate": 8603,
+    "pct_err": 0.11669262720664597,
+    "abs_log10_err": 0.04793364878423284
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": false
+  },
+  "usd_total_assumed": 0.536,
+  "usd_tokens": 0.076,
+  "wall_s": 1455.7
+ },
+ {
+  "id": "fc_lhr_pax_2026_09",
+  "as_of": "2026-09-12",
+  "answer_value": 7180000,
+  "source": "https://www.sharecast.com/news/other-company-news/heathrow-airport-travel-tourism-london-passenger-traffic-uk--23819142.html",
+  "estimate": 7395676.450898756,
+  "p10": 4989648.181212653,
+  "p90": 10961901.15614232,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.030038502910690212,
+  "abs_log10_err": 0.012853458966452559,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 7395676.450898756,
+    "pct_err": 0.030038502910690212,
+    "abs_log10_err": 0.012853458966452559
+   },
+   "naive": {
+    "estimate": 7200000.0,
+    "pct_err": 0.0027855153203342198,
+    "abs_log10_err": 0.001208052188968099
+   },
+   "structured_no_retrieval": {
+    "estimate": 7000149.765439544,
+    "pct_err": -0.025048779186693015,
+    "abs_log10_err": 0.011017112569730416
+   },
+   "last_year_same_period": {
+    "estimate": 7350000,
+    "pct_err": 0.023676880222841312,
+    "abs_log10_err": 0.010162894841894598
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "usd_total_assumed": 0.4888,
+  "usd_tokens": 0.0688,
+  "wall_s": 1456.4
+ },
+ {
+  "id": "fc_jp_births_2026_07",
+  "as_of": "2026-08-25",
+  "answer_value": 62479,
+  "source": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/07.html",
+  "estimate": 62964.59713290987,
+  "p10": 30888.301263419056,
+  "p90": 128350.8749250914,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.007772165574190915,
+  "abs_log10_err": 0.0033623590758396164,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 62964.59713290987,
+    "pct_err": 0.007772165574190915,
+    "abs_log10_err": 0.0033623590758396164
+   },
+   "naive": {
+    "estimate": 65000.0,
+    "pct_err": 0.04034955745130353,
+    "abs_log10_err": 0.017179286765247475
+   },
+   "structured_no_retrieval": {
+    "estimate": 60995.88860668152,
+    "pct_err": -0.023737758179844137,
+    "abs_log10_err": 0.010433507253840606
+   },
+   "last_year_same_period": {
+    "estimate": 63415,
+    "pct_err": 0.014981033627298856,
+    "abs_log10_err": 0.006457926911334848
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "usd_total_assumed": 0.4835,
+  "usd_tokens": 0.0435,
+  "wall_s": 1214.6
+ }
+]

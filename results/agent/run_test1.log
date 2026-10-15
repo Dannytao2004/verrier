@@ -1,0 +1,59 @@
+[fc_jp_births_2026_07] plan: 8 directions -> approved=True
+[fc_tw_births_2026_09] plan: 8 directions -> approved=True
+[fc_lhr_pax_2026_09] plan: 8 directions -> approved=True
+[fc_jp_births_2026_07] done in 1214.6s; estimate 62,965; usd 0.4835
+[fc_tw_births_2026_09] done in 1455.7s; estimate 7,788; usd 0.536
+[fc_lhr_pax_2026_09] done in 1456.4s; estimate 7,395,676; usd 0.4888
+[
+ {
+  "id": "fc_tw_births_2026_09",
+  "ablation": false,
+  "estimate": 7787.659733591133,
+  "wall_s": 1455.7
+ },
+ {
+  "id": "fc_lhr_pax_2026_09",
+  "ablation": false,
+  "estimate": 7395676.450898756,
+  "wall_s": 1456.4
+ },
+ {
+  "id": "fc_jp_births_2026_07",
+  "ablation": false,
+  "estimate": 62964.59713290987,
+  "wall_s": 1214.6
+ }
+]
+test1 [
+ {
+  "id": "fc_tw_births_2026_09",
+  "estimate": 7787.659733591133,
+  "pct_err": 0.010859259292722356,
+  "covered_80": true,
+  "n_assumptions_used": 3,
+  "assumption_weight_share": 1.0,
+  "usd_total_assumed": 0.536,
+  "wall_s": 1455.7
+ },
+ {
+  "id": "fc_lhr_pax_2026_09",
+  "estimate": 7395676.450898756,
+  "pct_err": 0.030038502910690212,
+  "covered_80": true,
+  "n_assumptions_used": 2,
+  "assumption_weight_share": 1.0,
+  "usd_total_assumed": 0.4888,
+  "wall_s": 1456.4
+ },
+ {
+  "id": "fc_jp_births_2026_07",
+  "estimate": 62964.59713290987,
+  "pct_err": 0.007772165574190915,
+  "covered_80": true,
+  "n_assumptions_used": 2,
+  "assumption_weight_share": 1.0,
+  "usd_total_assumed": 0.4835,
+  "wall_s": 1214.6
+ }
+]
+total wall 1457s
