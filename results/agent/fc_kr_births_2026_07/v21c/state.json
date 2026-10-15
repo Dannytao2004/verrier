@@ -1,0 +1,4296 @@
+{
+ "qid": "fc_kr_births_2026_07",
+ "question": "Assume today is 2026-08-23. You know nothing published after this date. Estimate the number of live births in South Korea in July 2026, as it will be first reported in the national statistics agency's monthly Population Trends release.",
+ "as_of": "2026-08-23",
+ "plan": {
+  "target": {
+   "what": "Number of live births occurring in South Korea during July 2026, as first reported in the national statistics agency's monthly Population Trends release (population movement statistics).",
+   "unit": "live births (persons)",
+   "period_start": "2026-07-01",
+   "period_end": "2026-07-31",
+   "publisher": "Statistics Korea (KOSTAT), Monthly Population Trends / population movement statistics",
+   "cadence": "monthly, typically first released around the last week of the second following month (e.g., July data released late September)",
+   "caveats": "The target period is completed relative to the 2026-08-23 cutoff, but the official July 2026 figure is not yet published. The question asks for the number as it will be first reported, so provisional vs revised figures may differ slightly. Live births are registered births; late registration can cau"
+  },
+  "market_keywords": [
+   "south korea births",
+   "korea birth july",
+   "kostat births"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "Statistics Korea monthly birth series",
+    "hypothesis": "July 2026 births can be projected from the most recent monthly birth counts and the seasonal pattern of July relative to adjacent months and prior years. The role is to anchor the level and seasonality; the transfer assumption is that recent trends and seasonal factors persist.",
+    "data_to_find": "Monthly live birth counts for South Korea from January 2023 through June 2026 (or the latest available month before the cutoff), including the July values for 2023, 2024, and 2025. Minimum evidence: a table of monthly births for at least the last 24 months. Substitute: quarterly or annual birth totals with monthly seasonal indices.",
+    "search_hints": [
+     "Statistics Korea monthly live births 2025 2026",
+     "South Korea population trends monthly births July",
+     "KOSTAT 출생아 수 월별 2025 2026"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "Marriage registrations as a leading indicator",
+    "hypothesis": "Marriage registrations in South Korea lead first births by roughly 1–2 years. A change in marriages around mid-2024 to mid-2025 should be associated with a proportional change in births in July 2026. The role is to adjust the recent birth trend for a marriage-driven shift; the transfer assumption is a stable marriage-to-first-birth lag and share.",
+    "data_to_find": "Monthly marriage registration counts for South Korea from January 2023 through June 2026, and if possible the historical ratio of births in a given month to marriages 12–24 months earlier. Minimum evidence: monthly marriage counts for the last 36 months. Substitute: annual marriage totals with monthly seasonal pattern.",
+    "search_hints": [
+     "South Korea monthly marriage registrations 2024 2025",
+     "KOSTAT 혼인 건수 월별 2025",
+     "marriage births lag South Korea statistics"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "related_series",
+    "perspective": "Population by age and sex, women of childbearing age",
+    "hypothesis": "Births in July 2026 are approximately the product of the number of women aged 20–39 in mid-2026 and an age-specific fertility rate. The role is to provide the denominator and check whether the population at risk changed materially; the transfer assumption is that fertility rates by age follow recent trends.",
+    "data_to_find": "Resident population by single year of age and sex for South Korea as of mid-2026 (or latest available), and age-specific fertility rates for 2024–2025. Minimum evidence: female population aged 20–39 for 2025 and 2026. Substitute: total population and broad age group shares.",
+    "search_hints": [
+     "South Korea population by age 2026 statistics",
+     "KOSTAT 주민등록인구 연령별 2026",
+     "age specific fertility rate South Korea 2025"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "administrative",
+    "perspective": "Birth registration records and provisional monthly counts",
+    "hypothesis": "The number of birth registrations in July 2026, as recorded by local governments and compiled by KOSTAT, is the direct administrative trace of live births. The role is to provide a near-complete count; the transfer assumption is that registration timing closely matches occurrence month, with only minor lag.",
+    "data_to_find": "Any provisional or preliminary monthly birth registration counts for 2026, including July if available, from KOSTAT or Ministry of Interior and Safety. Minimum evidence: a monthly series of birth registrations for 2026. Substitute: weekly or daily registration counts from a major province or city.",
+    "search_hints": [
+     "South Korea birth registration July 2026",
+     "KOSTAT 출생신고 2026 7월",
+     "행정안전부 주민등록 출생 2026"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "forecasts_markets",
+    "perspective": "Official projections and demographic forecasts",
+    "hypothesis": "Statistics Korea or other demographers may publish monthly or quarterly birth projections for 2026. These forecasts can serve as a prior for the July 2026 level, adjusted for any known deviations in recent months. The role is to provide an independent anchor; the transfer assumption is that the forecast methodology captures current trends.",
+    "data_to_find": "Any published 2026 monthly or quarterly birth projections from KOSTAT, Bank of Korea, or research institutes, with the date of publication and the assumed fertility/marriage trends. Minimum evidence: a point forecast for 2026 annual births or a monthly path. Substitute: 2026 annual birth forecast from a reputable source.",
+    "search_hints": [
+     "South Korea 2026 birth forecast KOSTAT",
+     "2026년 출생아 수 전망",
+     "Korea population projection 2026 births"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "shocks",
+    "perspective": "Policy and economic shocks affecting fertility",
+    "hypothesis": "Policies such as parental leave expansion, baby bonuses, or housing support introduced in 2024–2025 could have changed birth timing or number by July 2026. The role is to identify any measurable step-change in births; the transfer assumption is that the shock’s effect is quantifiable from pre/post comparisons.",
+    "data_to_find": "Dates and details of major pronatalist policies implemented in South Korea in 2024–2025, and any evidence of their impact on monthly births (e.g., from government evaluations or news reports). Minimum evidence: a list of major policies with implementation dates and any reported birth response. Substitute: expert commentary on expected effects.",
+    "search_hints": [
+     "South Korea birth policy 2025 effect",
+     "저출산 대책 2025 출생아 수 영향",
+     "Korea baby bonus 2025 births"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "base_rates",
+    "perspective": "Seasonal adjustment factors for July",
+    "hypothesis": "July births in South Korea have a consistent seasonal relationship to the annual total or to adjacent months. The role is to convert an annual or quarterly estimate into a July-specific figure; the transfer assumption is that the seasonal factor is stable across recent years.",
+    "data_to_find": "Monthly birth counts for South Korea for 2020–2025 to compute the average share of July births relative to the annual total and the July-to-June ratio. Minimum evidence: at least 5 years of monthly data. Substitute: seasonal indices from KOSTAT or academic sources.",
+    "search_hints": [
+     "South Korea monthly births seasonal pattern July",
+     "KOSTAT 월별 출생아 수 계절성",
+     "birth seasonality South Korea statistics"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c8",
+    "category": "attention",
+    "perspective": "Online search and social media interest in pregnancy and childbirth",
+    "hypothesis": "Search volume for pregnancy-related terms or online birth announcements may correlate with birth counts with a lag. The role is to provide a high-frequency signal of birth trends; the transfer assumption is a stable relationship between attention and actual births, which is uncertain.",
+    "data_to_find": "Google Trends or Naver DataLab search interest for terms like '임신' (pregnancy), '출산' (childbirth), '산부인과' (OB/GYN) for South Korea, monthly, 2024–2026. Minimum evidence: a time series of search interest that can be compared to birth counts. Substitute: social media post volumes from parenting communities.",
+    "search_hints": [
+     "Google Trends South Korea pregnancy childbirth",
+     "네이버 데이터랩 임신 출산 검색량",
+     "Korea birth search interest 2026"
+    ],
+    "expected_information": 1,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 8 candidate directions in 7 categories; running 8 (budget cap 10)"
+ ],
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "Statistics Korea monthly birth series",
+   "hypothesis": "July 2026 births can be projected from the most recent monthly birth counts and the seasonal pattern of July relative to adjacent months and prior years. The role is to anchor the level and seasonality; the transfer assumption is that recent trends and seasonal factors persist.",
+   "data_to_find": "Monthly live birth counts for South Korea from January 2023 through June 2026 (or the latest available month before the cutoff), including the July values for 2023, 2024, and 2025. Minimum evidence: a table of monthly births for at least the last 24 months. Substitute: quarterly or annual birth totals with monthly seasonal indices.",
+   "search_hints": [
+    "Statistics Korea monthly live births 2025 2026",
+    "South Korea population trends monthly births July",
+    "KOSTAT 출생아 수 월별 2025 2026"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "administrative",
+   "perspective": "Birth registration records and provisional monthly counts",
+   "hypothesis": "The number of birth registrations in July 2026, as recorded by local governments and compiled by KOSTAT, is the direct administrative trace of live births. The role is to provide a near-complete count; the transfer assumption is that registration timing closely matches occurrence month, with only minor lag.",
+   "data_to_find": "Any provisional or preliminary monthly birth registration counts for 2026, including July if available, from KOSTAT or Ministry of Interior and Safety. Minimum evidence: a monthly series of birth registrations for 2026. Substitute: weekly or daily registration counts from a major province or city.",
+   "search_hints": [
+    "South Korea birth registration July 2026",
+    "KOSTAT 출생신고 2026 7월",
+    "행정안전부 주민등록 출생 2026"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d3",
+   "category": "related_series",
+   "perspective": "Marriage registrations as a leading indicator",
+   "hypothesis": "Marriage registrations in South Korea lead first births by roughly 1–2 years. A change in marriages around mid-2024 to mid-2025 should be associated with a proportional change in births in July 2026. The role is to adjust the recent birth trend for a marriage-driven shift; the transfer assumption is a stable marriage-to-first-birth lag and share.",
+   "data_to_find": "Monthly marriage registration counts for South Korea from January 2023 through June 2026, and if possible the historical ratio of births in a given month to marriages 12–24 months earlier. Minimum evidence: monthly marriage counts for the last 36 months. Substitute: annual marriage totals with monthly seasonal pattern.",
+   "search_hints": [
+    "South Korea monthly marriage registrations 2024 2025",
+    "KOSTAT 혼인 건수 월별 2025",
+    "marriage births lag South Korea statistics"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d4",
+   "category": "base_rates",
+   "perspective": "Seasonal adjustment factors for July",
+   "hypothesis": "July births in South Korea have a consistent seasonal relationship to the annual total or to adjacent months. The role is to convert an annual or quarterly estimate into a July-specific figure; the transfer assumption is that the seasonal factor is stable across recent years.",
+   "data_to_find": "Monthly birth counts for South Korea for 2020–2025 to compute the average share of July births relative to the annual total and the July-to-June ratio. Minimum evidence: at least 5 years of monthly data. Substitute: seasonal indices from KOSTAT or academic sources.",
+   "search_hints": [
+    "South Korea monthly births seasonal pattern July",
+    "KOSTAT 월별 출생아 수 계절성",
+    "birth seasonality South Korea statistics"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d5",
+   "category": "related_series",
+   "perspective": "Population by age and sex, women of childbearing age",
+   "hypothesis": "Births in July 2026 are approximately the product of the number of women aged 20–39 in mid-2026 and an age-specific fertility rate. The role is to provide the denominator and check whether the population at risk changed materially; the transfer assumption is that fertility rates by age follow recent trends.",
+   "data_to_find": "Resident population by single year of age and sex for South Korea as of mid-2026 (or latest available), and age-specific fertility rates for 2024–2025. Minimum evidence: female population aged 20–39 for 2025 and 2026. Substitute: total population and broad age group shares.",
+   "search_hints": [
+    "South Korea population by age 2026 statistics",
+    "KOSTAT 주민등록인구 연령별 2026",
+    "age specific fertility rate South Korea 2025"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d6",
+   "category": "forecasts_markets",
+   "perspective": "Official projections and demographic forecasts",
+   "hypothesis": "Statistics Korea or other demographers may publish monthly or quarterly birth projections for 2026. These forecasts can serve as a prior for the July 2026 level, adjusted for any known deviations in recent months. The role is to provide an independent anchor; the transfer assumption is that the forecast methodology captures current trends.",
+   "data_to_find": "Any published 2026 monthly or quarterly birth projections from KOSTAT, Bank of Korea, or research institutes, with the date of publication and the assumed fertility/marriage trends. Minimum evidence: a point forecast for 2026 annual births or a monthly path. Substitute: 2026 annual birth forecast from a reputable source.",
+   "search_hints": [
+    "South Korea 2026 birth forecast KOSTAT",
+    "2026년 출생아 수 전망",
+    "Korea population projection 2026 births"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d7",
+   "category": "shocks",
+   "perspective": "Policy and economic shocks affecting fertility",
+   "hypothesis": "Policies such as parental leave expansion, baby bonuses, or housing support introduced in 2024–2025 could have changed birth timing or number by July 2026. The role is to identify any measurable step-change in births; the transfer assumption is that the shock’s effect is quantifiable from pre/post comparisons.",
+   "data_to_find": "Dates and details of major pronatalist policies implemented in South Korea in 2024–2025, and any evidence of their impact on monthly births (e.g., from government evaluations or news reports). Minimum evidence: a list of major policies with implementation dates and any reported birth response. Substitute: expert commentary on expected effects.",
+   "search_hints": [
+    "South Korea birth policy 2025 effect",
+    "저출산 대책 2025 출생아 수 영향",
+    "Korea baby bonus 2025 births"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "d8",
+   "category": "attention",
+   "perspective": "Online search and social media interest in pregnancy and childbirth",
+   "hypothesis": "Search volume for pregnancy-related terms or online birth announcements may correlate with birth counts with a lag. The role is to provide a high-frequency signal of birth trends; the transfer assumption is a stable relationship between attention and actual births, which is uncertain.",
+   "data_to_find": "Google Trends or Naver DataLab search interest for terms like '임신' (pregnancy), '출산' (childbirth), '산부인과' (OB/GYN) for South Korea, monthly, 2024–2026. Minimum evidence: a time series of search interest that can be compared to birth counts. Substitute: social media post volumes from parenting communities.",
+   "search_hints": [
+    "Google Trends South Korea pregnancy childbirth",
+    "네이버 데이터랩 임신 출산 검색량",
+    "Korea birth search interest 2026"
+   ],
+   "expected_information": 1,
+   "selected": true,
+   "candidate_id": "c8"
+  },
+  {
+   "id": "b1",
+   "category": "own_history",
+   "perspective": "Monthly birth series continuity",
+   "hypothesis": "The July 2026 estimate is anchored on the July 2025 level (p7) plus the 2026 year-to-date monthly birth counts. If KOSTAT monthly Population Trends releases for January-June 2026 are available, they give the actual 2026 level and trend, replacing the assumption that the 2025 y/y growth rate persists. This is the single most valuable missing input because it converts a trend-extrapolation into a level-plus-recent-momentum estimate.",
+   "data_to_find": "KOSTAT Monthly Population Trends (인구동향) live-birth counts for each month January-June 2026, and the corresponding y/y change rates.",
+   "search_hints": [
+    "S",
+    "e",
+    "a",
+    "r"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b2",
+   "category": "related_series",
+   "perspective": "Marriage-to-birth bridge",
+   "hypothesis": "The 2024-2025 marriage surge (p1-p3, p11-p12) should raise first births in 2026. A quantified lag structure (share of first births occurring 12-24 months after marriage, and the marriage cohort sizes) would let the marriage signal adjust the birth trend rather than being used only qualitatively. This resolves whether the 2026 birth level should be above or below a simple extrapolation of the 2025 y/y rate.",
+   "data_to_find": "Monthly marriage registrations for 2024-2026 and the distribution of first-birth intervals after marriage (or first-birth counts by marriage cohort) from KOSTAT.",
+   "search_hints": [
+    "K",
+    "O",
+    "S",
+    "T"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b3",
+   "category": "forecasts_markets",
+   "perspective": "Official 2026 projection",
+   "hypothesis": "Statistics Korea's 2026 population projections or its 2026 birth forecast provide an independent anchor for the annual 2026 level, which can be combined with the July seasonal share. This would resolve the disagreement between a pure 2025-trend extrapolation and a marriage-driven rebound, and it is the most direct check on the central level.",
+   "data_to_find": "Statistics Korea 2026 birth projections (장래인구추계 or 인구동향 전망) and any 2026 annual birth forecast from KOSTAT or demographers.",
+   "search_hints": [
+    "K",
+    "O",
+    "S",
+    "T"
+   ],
+   "expected_information": 3
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Statistics Korea monthly live births 2025 2026 population trends",
+     "KOSTAT 출생아 수 월별 2025 2026 인구동향",
+     "2025년 7월 인구동향 출생아 수 21,854명 통계청",
+     "2024년 7월 출생아 수 인구동향 20,000명대"
+    ],
+    "urls": [
+     "https://mods.go.kr/boardDownload.es?bid=204&list_no=446612&seq=7",
+     "https://namu.wiki/w/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD/%EC%B6%9C%EC%82%B0%EC%9C%A8/%EC%83%81%EC%84%B8%20%ED%86%B5%EA%B3%84",
+     "https://nsp.nanet.go.kr/trend/latest/detail.do?latestTrendControlNo=TREN0000003532",
+     "http://47.newstomato.com/ReadNews.aspx?no=1308574"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005051514,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/boardDownload.es?bid=204&list_no=446612&seq=7",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://namu.wiki/w/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD/%EC%B6%9C%EC%82%B0%EC%9C%A8/%EC%83%81%EC%84%B8%20%ED%86%B5%EA%B3%84",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://nsp.nanet.go.kr/trend/latest/detail.do?latestTrendControlNo=TREN0000003532",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://47.newstomato.com/ReadNews.aspx?no=1308574",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 105.7
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea birth registration July 2026 KOSTAT monthly population trends",
+     "KOSTAT 출생아 수 2026년 7월 인구동향"
+    ],
+    "urls": [
+     "https://mods.go.kr/boardDownload.es?bid=204&list_no=447111&seq=1",
+     "https://mods.go.kr/board.es?mid=a10301020300&bid=204&act=view&list_no=447111",
+     "https://admin.korea.kr/briefing/pressReleaseView.do?newsId=156783095",
+     "https://www.yna.co.kr/view/AKR20260923077000002"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 20,
+    "web_search_requests": 2,
+    "usd": 0.0030671220000000003,
+    "usd_search_fee_assumed": 0.02
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/boardDownload.es?bid=204&list_no=447111&seq=1",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301020300&bid=204&act=view&list_no=447111",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://admin.korea.kr/briefing/pressReleaseView.do?newsId=156783095",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.yna.co.kr/view/AKR20260923077000002",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 25.0
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea monthly marriage registrations 2025 KOSTAT statistics",
+     "KOSTAT 혼인 건수 월별 2025 통계",
+     "2026년 6월 인구동향 출생 혼인 국가데이터처",
+     "\"2026년 5월 인구동향\" 혼인 건수 출생아 수",
+     "\"2026년 5월 인구동향\" 혼인 6.4% 감소 출생아",
+     "South Korea births July 2025 2024 monthly number KOSTAT 인구동향 7월 출생아 수"
+    ],
+    "urls": [
+     "https://nsp.nanet.go.kr/plan/subject/detail.do?nationalPlanControlNo=PLAN0000062839&listChk=list&backUrl=https%3A%2F%2Fnsp.nanet.go.kr%2Fsearch%2Flist.do%3Fkeyword%3D%2B%25ec%259d%25b4%25ed%2598%25bc%25ed%2586%25b5%25ea%25b3%2584",
+     "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "https://mhdata.or.kr/mailing/Numbers325_260303_B1_Part.pdf",
+     "https://m.sedaily.com/NewsView/2GY0Z41268/GC13"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 30,
+    "web_search_requests": 6,
+    "usd": 0.0029439,
+    "usd_search_fee_assumed": 0.06
+   },
+   "pages": [
+    {
+     "url": "https://nsp.nanet.go.kr/plan/subject/detail.do?nationalPlanControlNo=PLAN0000062839&listChk=list&backUrl=https%3A%2F%2Fnsp.nanet.go.kr%2Fsearch%2Flist.do%3Fkeyword%3D%2B%25ec%259d%25b4%25ed%2598%25bc%25ed%2586%25b5%25ea%25b3%2584",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260520100445",
+     "page_date": "2026-05-20",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/7c2e51113ab59fef.raw",
+     "text_chars": 3347,
+     "leak_hits": [],
+     "chars_sent": 3347,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 6
+    },
+    {
+     "url": "https://mhdata.or.kr/mailing/Numbers325_260303_B1_Part.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://m.sedaily.com/NewsView/2GY0Z41268/GC13",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      2
+     ],
+     "name": "South Korea marriage registrations, year-on-year increase rate, 2024",
+     "value": 14.8,
+     "value_as_written": "14.8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2024-01-01",
+     "period_end": "2024-12-31",
+     "published_at_if_visible": "",
+     "quote": "2024년 22만2000건, 2025년에는 24만370건으로 각각 14.8%, 8.1% 증가한 것이다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      3
+     ],
+     "name": "South Korea marriage registrations, year-on-year increase rate, 2025",
+     "value": 8.1,
+     "value_as_written": "8.1",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "2024년 22만2000건, 2025년에는 24만370건으로 각각 14.8%, 8.1% 증가한 것이다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      5
+     ],
+     "name": "South Korea marriage registrations, December 2025 year-on-year increase rate",
+     "value": 13.4,
+     "value_as_written": "13.4",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-12-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "특히 2025년 12월 한 달간 혼인 건수는 2만5527건으로 전년 동월 대비 13.4%나 급증하며 강한 상승세를 기록했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      10
+     ],
+     "name": "South Korea live births, annual increase rate, 2025 vs 2024",
+     "value": 6.8,
+     "value_as_written": "6.8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "국가데이터처가 발표한 2025년 인구동향조사에 따르면 지난해 출생아 수는 25만4500명으로 전년보다 1만6100명(6.8%) 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      11
+     ],
+     "name": "South Korea total fertility rate, 2025",
+     "value": 0.8,
+     "value_as_written": "0.8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "children per woman",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "합계출산율은 0.8명을 기록해 2021년(0.81명) 이후 4년 만에 가장 높은 수준을 회복했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      12
+     ],
+     "name": "South Korea total fertility rate, 2021 (comparison)",
+     "value": 0.81,
+     "value_as_written": "0.81",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "children per woman",
+     "period_start": "2021-01-01",
+     "period_end": "2021-12-31",
+     "published_at_if_visible": "",
+     "quote": "합계출산율은 0.8명을 기록해 2021년(0.81명) 이후 4년 만에 가장 높은 수준을 회복했다.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea marriage registrations, annual total, 2024",
+     "value_as_written": "22만2000"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea marriage registrations, annual total, 2025",
+     "value_as_written": "24만370"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      4
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea marriage registrations, monthly count, December 2025",
+     "value_as_written": "2만5527"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      6
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea marriage registrations, annual total, 1999",
+     "value_as_written": "43만5000"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      7
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea marriage registrations, annual total, 2022",
+     "value_as_written": "19만2000"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      8
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea live births, annual total, 2025 (Population Trends Survey)",
+     "value_as_written": "25만4500"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      9
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea live births, annual increase, 2025 vs 2024",
+     "value_as_written": "1만6100"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      13
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Stated marriage-to-birth lag in South Korea (expert analysis)",
+     "value_as_written": "2"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+     "via": "snapshot",
+     "page_date": "2026-05-20",
+     "snapshot_ts": "20260520100445",
+     "order": [
+      1,
+      14
+     ],
+     "reason": "number: unknown scale word '만'",
+     "name": "South Korea second echo-boom cohort annual births, 1991–1996",
+     "value_as_written": "70"
+    }
+   ],
+   "wall_s": 238.7
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea monthly births by month 2020 2021 2022 2023 2024 statistics",
+     "KOSTAT 월별 출생아 수 2025년 7월 인구동향",
+     "월별 출생아 수 2025년 12월 인구동향 연간 출생아 2025년 25만명",
+     "namu wiki 대한민국 출산율 상세통계 월별 출생아 수 2020 2021 2022 2023 2024 2025 7월"
+    ],
+    "urls": [
+     "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "https://namu.wiki/w/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD/%EC%B6%9C%EC%82%B0%EC%9C%A8/%EC%83%81%EC%84%B8%20%ED%86%B5%EA%B3%84",
+     "https://mods.go.kr/board.es?mid=a10301020100&bid=204&act=view&list_no=443681&tag=&nPage=1&ref_bid=203,204,205,206,207&keyField=T&keyWord=",
+     "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.003946715999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20251212121719",
+     "page_date": "2025-12-12",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/bdd394a3d534dc8b.raw",
+     "text_chars": 464,
+     "leak_hits": [],
+     "chars_sent": 464,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 9,
+     "n_points_verified": 9
+    },
+    {
+     "url": "https://namu.wiki/w/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD/%EC%B6%9C%EC%82%B0%EC%9C%A8/%EC%83%81%EC%84%B8%20%ED%86%B5%EA%B3%84",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301020100&bid=204&act=view&list_no=443681&tag=&nPage=1&ref_bid=203,204,205,206,207&keyField=T&keyWord=",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20250128134604",
+     "page_date": "2025-01-28",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/0daa5b458933e08c.raw",
+     "text_chars": 1094,
+     "leak_hits": [],
+     "chars_sent": 1094,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 5
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      0
+     ],
+     "name": "South Korea live births, July 2025 (monthly Population Trends)",
+     "value": 21803.0,
+     "value_as_written": "21,803",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons (live births)",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "출생아 수는 21,803명으로 전년동월대비 5.9% 증가",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      1
+     ],
+     "name": "South Korea live births year-on-year change rate, July 2025 vs July 2024",
+     "value": 5.9,
+     "value_as_written": "5.9%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "출생아 수는 21,803명으로 전년동월대비 5.9% 증가",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      2
+     ],
+     "name": "South Korea deaths, July 2025",
+     "value": 27979.0,
+     "value_as_written": "27,979",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons (deaths)",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "사망자 수는 27,979명으로 전년동월대비 0.7% 감소",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      3
+     ],
+     "name": "South Korea deaths year-on-year change rate, July 2025 vs July 2024",
+     "value": 0.7,
+     "value_as_written": "0.7%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "사망자 수는 27,979명으로 전년동월대비 0.7% 감소",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      4
+     ],
+     "name": "South Korea marriages, July 2025",
+     "value": 20394.0,
+     "value_as_written": "20,394",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "cases (marriages)",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "혼인 건수는 20,394건으로 전년동월대비 8.4% 증가",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      5
+     ],
+     "name": "South Korea marriages year-on-year change rate, July 2025 vs July 2024",
+     "value": 8.4,
+     "value_as_written": "8.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "혼인 건수는 20,394건으로 전년동월대비 8.4% 증가",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      6
+     ],
+     "name": "South Korea divorces, July 2025",
+     "value": 7826.0,
+     "value_as_written": "7,826",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "cases (divorces)",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "이혼 건수는 7,826건으로 전년동월대비 1.4% 감소",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      7
+     ],
+     "name": "South Korea divorces year-on-year change rate, July 2025 vs July 2024",
+     "value": 1.4,
+     "value_as_written": "1.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "이혼 건수는 7,826건으로 전년동월대비 1.4% 감소",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+     "via": "snapshot",
+     "page_date": "2025-12-12",
+     "snapshot_ts": "20251212121719",
+     "order": [
+      0,
+      8
+     ],
+     "name": "South Korea natural increase (live births minus deaths), July 2025",
+     "value": -6175.0,
+     "value_as_written": "-6,175",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons (natural increase)",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "2025-09-24",
+     "quote": "자연증가(출생아 수 - 사망자 수)는 -6,175명",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      2
+     ],
+     "name": "South Korea January share of total births, 1981–2023",
+     "value": 10.0,
+     "value_as_written": "10.0%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "1981-01-01",
+     "period_end": "2023-12-31",
+     "published_at_if_visible": "",
+     "quote": "43년간 총 출생아 수 2332만 7013명 가운데 10.0%의 비중을 차지했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      4
+     ],
+     "name": "South Korea February share of total births, 1981–2023",
+     "value": 9.6,
+     "value_as_written": "9.6%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "1981-01-01",
+     "period_end": "2023-12-31",
+     "published_at_if_visible": "",
+     "quote": "그다음은 2월로 224만 44명(9.6%)이 태어났다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      6
+     ],
+     "name": "South Korea March share of total births, 1981–2023",
+     "value": 8.6,
+     "value_as_written": "8.6%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "1981-01-01",
+     "period_end": "2023-12-31",
+     "published_at_if_visible": "",
+     "quote": "세 번째는 3월로 200만 1716명(8.6%)이 출생했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      7
+     ],
+     "name": "South Korea Q1 (Jan–Mar) share of total births, 1981–2023",
+     "value": 28.2,
+     "value_as_written": "28.2%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "1981-01-01",
+     "period_end": "2023-12-31",
+     "published_at_if_visible": "",
+     "quote": "전체 비중은 28.2%, 국민 10명 중 3명이 1분기에 태어난 셈이다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      14
+     ],
+     "name": "South Korea July share of total births, 1981–2023",
+     "value": 7.8,
+     "value_as_written": "7.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "1981-01-01",
+     "period_end": "2023-12-31",
+     "published_at_if_visible": "",
+     "quote": "7월에는 183만 812명(7.8%), 12월에는 181만 4420명(7.8%), 6월에는 175만 237명(7.5%)이 태어났다.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      0
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea total live births, January 1981–December 2023 cumulative (43 years)",
+     "value_as_written": "2332만 7013명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      1
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea January births, cumulative 1981–2023",
+     "value_as_written": "233만 2681명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      3
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea February births, cumulative 1981–2023",
+     "value_as_written": "224만 44명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      5
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea March births, cumulative 1981–2023",
+     "value_as_written": "200만 1716명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      8
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea October births, cumulative 1981–2023",
+     "value_as_written": "196만 1332명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      9
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea September births, cumulative 1981–2023",
+     "value_as_written": "192만 1065명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      10
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea April births, cumulative 1981–2023",
+     "value_as_written": "188만 795명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      11
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea November births, cumulative 1981–2023",
+     "value_as_written": "187만 1314명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      12
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea August births, cumulative 1981–2023",
+     "value_as_written": "186만 6496명"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+     "via": "snapshot",
+     "page_date": "2025-01-28",
+     "snapshot_ts": "20250128134604",
+     "order": [
+      3,
+      13
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea July births, cumulative 1981–2023",
+     "value_as_written": "183만 812명"
+    }
+   ],
+   "wall_s": 236.7
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea population by age 2026 statistics women 20-39",
+     "KOSTAT 주민등록인구 연령별 2026 여성 인구",
+     "age specific fertility rate South Korea 2024 2025 per 1000 women 20-39",
+     "KOSTAT Monthly Population Trends live births July 2025 2026 인구동향 출생아수"
+    ],
+    "urls": [
+     "https://www.index.go.kr/unity/potal/eNara/sub/showStblGams3.do?stts_cd=H000202&idx_cd=H0002&freq=Y&period=N",
+     "https://namu.wiki/w/%EC%84%B1%EB%B9%84/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD",
+     "https://mods.go.kr/boardDownload.es?bid=204&list_no=446625&seq=1",
+     "https://jumin.mois.go.kr/ageStatMonth.do"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0020115059999999997,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.index.go.kr/unity/potal/eNara/sub/showStblGams3.do?stts_cd=H000202&idx_cd=H0002&freq=Y&period=N",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://namu.wiki/w/%EC%84%B1%EB%B9%84/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mods.go.kr/boardDownload.es?bid=204&list_no=446625&seq=1",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260423104656",
+     "page_date": "2026-04-23",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/fa77efe6dcc4f663.raw",
+     "text_chars": 8107,
+     "leak_hits": [],
+     "chars_sent": 8107,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 14
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      1
+     ],
+     "name": "South Korea (전국) female population aged 20-29, March 2026",
+     "value": 2698567.0,
+     "value_as_written": "2,698,567",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      2
+     ],
+     "name": "South Korea (전국) female population aged 30-39, March 2026",
+     "value": 3184332.0,
+     "value_as_written": "3,184,332",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      3
+     ],
+     "name": "South Korea (전국) total population, March 2026",
+     "value": 51101371.0,
+     "value_as_written": "51,101,371",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "| 전국 | 51,101,371 | 51,101,371 | 2,920,250 | 4,623,895 | 5,609,816 | 6,678,153 | 7,534,672 | 8,621,183 | 7,962,748 | 4,623,870 | 2,139,068 | 378,754 | 8,962 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      4
+     ],
+     "name": "South Korea (전국) male population, March 2026",
+     "value": 25425930.0,
+     "value_as_written": "25,425,930",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "| 7,534,672 | 8,621,183 | 7,962,748 | 4,623,870 | 2,139,068 | 378,754 | 8,962 | 25,425,930 | 25,425,930 | 1,496,704 | 2,372,897 | 2,911,249 | 3,493,821 | 3,837,966 | 4,346,162 | 3,929,880 | 2,138,007 ",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      5
+     ],
+     "name": "South Korea (전국) female population aged 0-9, March 2026",
+     "value": 1423546.0,
+     "value_as_written": "1,423,546",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      6
+     ],
+     "name": "South Korea (전국) female population aged 10-19, March 2026",
+     "value": 2250998.0,
+     "value_as_written": "2,250,998",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      7
+     ],
+     "name": "South Korea (전국) female population aged 40-49, March 2026",
+     "value": 3696706.0,
+     "value_as_written": "3,696,706",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      8
+     ],
+     "name": "South Korea (전국) female population aged 50-59, March 2026",
+     "value": 4275021.0,
+     "value_as_written": "4,275,021",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      9
+     ],
+     "name": "South Korea (전국) female population aged 60-69, March 2026",
+     "value": 4032868.0,
+     "value_as_written": "4,032,868",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      10
+     ],
+     "name": "South Korea (전국) female population aged 70-79, March 2026",
+     "value": 2485863.0,
+     "value_as_written": "2,485,863",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      11
+     ],
+     "name": "South Korea (전국) female population aged 80-89, March 2026",
+     "value": 1333754.0,
+     "value_as_written": "1,333,754",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      12
+     ],
+     "name": "South Korea (전국) female population aged 90-99, March 2026",
+     "value": 286315.0,
+     "value_as_written": "286,315",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      13
+     ],
+     "name": "South Korea (전국) female population aged 100 and over, March 2026",
+     "value": 7471.0,
+     "value_as_written": "7,471",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      14
+     ],
+     "name": "South Korea (전국) male population aged 20-29, March 2026",
+     "value": 2911249.0,
+     "value_as_written": "2,911,249",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "persons",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "25,425,930 | 25,425,930 | 1,496,704 | 2,372,897 | 2,911,249 | 3,493,821 | 3,837,966 | 4,346,162 | 3,929,880 | 2,138,007 | 805,314 | 92,439 | 1,491 |",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+     "via": "snapshot",
+     "page_date": "2026-04-23",
+     "snapshot_ts": "20260423104656",
+     "order": [
+      3,
+      0
+     ],
+     "reason": "quote longer than 400 chars",
+     "name": "South Korea (전국) total female population, March 2026",
+     "value_as_written": "25,675,441"
+    }
+   ],
+   "wall_s": 241.1
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea 2026 birth forecast KOSTAT births projection",
+     "2026년 출생아 수 전망 통계청",
+     "2025년 7월 출생아 수 인구동향 월별 출생아",
+     "2026년 연간 출생아 수 전망 29만명 30만명 하반기"
+    ],
+    "urls": [
+     "https://www.etoday.co.kr/news/view/2610060?trc=main_top_sub",
+     "https://www.yna.co.kr/view/AKR20250924067700002?input=1195m",
+     "https://www.wowtv.co.kr/NewsCenter/News/Read?articleId=2026072938541",
+     "http://koreabizwire.com/birth-rate-poised-to-return-to-0-9-after-seven-years?ckattempt=1"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005027214,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.etoday.co.kr/news/view/2610060?trc=main_top_sub",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.yna.co.kr/view/AKR20250924067700002?input=1195m",
+     "status": "dropped",
+     "reason": "snapshot fetch failed (http 404); live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.wowtv.co.kr/NewsCenter/News/Read?articleId=2026072938541",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://koreabizwire.com/birth-rate-poised-to-return-to-0-9-after-seven-years?ckattempt=1",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 122.3
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "South Korea monthly births 2025 increase Statistics Korea population trends",
+     "South Korea pronatalist policy 2025 birth rate effect baby bonus parental leave",
+     "7월 출생아 수 2025년 2만명 인구동향 통계청",
+     "2026년 5월 출생아 수 인구동향 국가데이터처"
+    ],
+    "urls": [
+     "https://newsws.kbs.co.kr/news/pc/view/view.do?ncd=8366129",
+     "https://www.hkcna.hk/hk/content/s6aa254bfe4b01e987f7c1964.html",
+     "https://m.seoul.co.kr/news/society/2026/08/27/20260827010006",
+     "https://www.sacbee.com/news/nation-world/world/article313993900.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005135004,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://newsws.kbs.co.kr/news/pc/view/view.do?ncd=8366129",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.hkcna.hk/hk/content/s6aa254bfe4b01e987f7c1964.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://m.seoul.co.kr/news/society/2026/08/27/20260827010006",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.sacbee.com/news/nation-world/world/article313993900.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 243.0
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "search": {
+    "queries": [
+     "네이버 데이터랩 임신 출산 검색량 추이",
+     "Google Trends South Korea pregnancy childbirth search interest birth correlation",
+     "Statistics Korea monthly population trends live births 2026",
+     "South Korea monthly births 2026 KOSTAT population movement statistics"
+    ],
+    "urls": [
+     "https://www.chosun.com/economy/economy_general/2026/09/23/4336WE6G4BBALOXOVOQM7RBNKE/",
+     "https://indonesian.korea.net/NewsFocus/Society/view?articleId=297012",
+     "https://en.sedaily.com/finance/2026/06/24/koreas-birth-rate-rises-to-093-but-population-shrinks-for",
+     "http://koreabizwire.com/gender-reveal-parties-maternity-photos-and-ai-baby-faces-how-koreas-millennials-and-gen-z-are-redefining-parenthood/330134"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 23,
+    "web_search_requests": 4,
+    "usd": 0.0036817740000000005,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.chosun.com/economy/economy_general/2026/09/23/4336WE6G4BBALOXOVOQM7RBNKE/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://indonesian.korea.net/NewsFocus/Society/view?articleId=297012",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://en.sedaily.com/finance/2026/06/24/koreas-birth-rate-rises-to-093-but-population-shrinks-for",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://koreabizwire.com/gender-reveal-parties-maternity-photos-and-ai-baby-faces-how-koreas-millennials-and-gen-z-are-redefining-parenthood/330134",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260410161530",
+     "page_date": "2026-04-10",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/d3d6af95addfc2bd.raw",
+     "text_chars": 59,
+     "leak_hits": [],
+     "chars_sent": 59,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 242.2
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "south korea births",
+     "korea birth july",
+     "kostat births"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 20
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "search": {
+    "queries": [
+     "KOSTAT Monthly Population Trends live births January 2026",
+     "Statistics Korea 인구동향 2026년 1월 출생아 수",
+     "2026년 5월 인구동향 출생아 수 국가데이터처",
+     "2026년 4월 인구동향 출생아 수 전년동월대비"
+    ],
+    "urls": [
+     "https://mods.go.kr/board.es?mid=a10301020100&bid=204&act=view&list_no=446225",
+     "https://www.korea.net/NewsFocus/Society/view?articleId=297003&koreanId=296981",
+     "https://www.news1.kr/economy/trend/6242343",
+     "https://mods.go.kr/board.es?mid=a10301010000&bid=204&act=view&list_no=444188"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.004115226,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301020100&bid=204&act=view&list_no=446225",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.korea.net/NewsFocus/Society/view?articleId=297003&koreanId=296981",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.news1.kr/economy/trend/6242343",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&act=view&list_no=444188",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 32.8
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "search": {
+    "queries": [
+     "KOSTAT monthly marriage registrations 2024 2025 first birth interval after marriage distribution",
+     "South Korea first birth within 12-24 months after marriage share statistics",
+     "KOSTAT 인구동향 혼인건수 2025년 월별 2024년 결혼 증가 출생아수",
+     "South Korea marriages 2025 increase 20% births 2026 first birth lag statistics"
+    ],
+    "urls": [
+     "https://mods.go.kr/boardDownload.es?bid=11815&list_no=365445&seq=15",
+     "https://www.mhdata.or.kr/mailing/Numbers325_260303_B1_Part.pdf",
+     "http://tv.edaily.co.kr/News/NewsRead?NewsId=04382086642337840&Kind=257",
+     "https://www.kihasa.re.kr/api/kihasa/file/download?seq=12297"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 21,
+    "web_search_requests": 4,
+    "usd": 0.003294456,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/boardDownload.es?bid=11815&list_no=365445&seq=15",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.mhdata.or.kr/mailing/Numbers325_260303_B1_Part.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://tv.edaily.co.kr/News/NewsRead?NewsId=04382086642337840&Kind=257",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.kihasa.re.kr/api/kihasa/file/download?seq=12297",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 122.7
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "search": {
+    "queries": [
+     "Statistics Korea 2026 birth projection 장래인구추계 2026년 출생아 수 전망",
+     "KOSTAT 2026 population projection annual births forecast 2026",
+     "장래인구추계 2022-2072 출생아 수 2026년 중위 고위 시나리오 통계청",
+     "2026년 7월 출생아 수 인구동향 발표"
+    ],
+    "urls": [
+     "https://sri.kostat.go.kr/boardDownload.es?bid=207&list_no=428476&seq=6",
+     "https://www.etoday.co.kr/news/view/2610060",
+     "https://mods.go.kr/boardDownload.es?bid=0056&list_no=431838&seq=2",
+     "http://koreabizwire.com/birth-rate-poised-to-return-to-0-9-after-seven-years"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 22,
+    "web_search_requests": 4,
+    "usd": 0.0033987899999999996,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://sri.kostat.go.kr/boardDownload.es?bid=207&list_no=428476&seq=6",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.etoday.co.kr/news/view/2610060",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260803022708",
+     "page_date": "2026-08-03",
+     "raw_path": "data/raw/agent/fc_kr_births_2026_07/f3a74da990bd6d14.raw",
+     "text_chars": 1371,
+     "leak_hits": [],
+     "chars_sent": 1371,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://mods.go.kr/boardDownload.es?bid=0056&list_no=431838&seq=2",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://koreabizwire.com/birth-rate-poised-to-return-to-0-9-after-seven-years",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea cumulative live births growth rate, Jan–May 2026 vs same period prior year",
+     "value_as_written": "15.2"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total fertility rate, January 2026",
+     "value_as_written": "0.99"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      2
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total fertility rate, February 2026",
+     "value_as_written": "0.93"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      3
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total fertility rate, March 2026",
+     "value_as_written": "0.93"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      4
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total fertility rate, April 2026",
+     "value_as_written": "0.93"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      5
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total fertility rate, May 2026",
+     "value_as_written": "0.85"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      6
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "South Korea forecast annual total fertility rate for 2026 (analyst projection)",
+     "value_as_written": "0.9"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      7
+     ],
+     "reason": "number: unknown scale word '만'",
+     "name": "South Korea forecast annual live births for 2026 (analyst projection, 290-thousand range)",
+     "value_as_written": "29"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      8
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total fertility rate, 2025 (actual)",
+     "value_as_written": "0.80"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      9
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Statistics Korea 2022–2072 future population projection, high-fertility assumption total fertility rate for 2025",
+     "value_as_written": "0.75"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      10
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "South Korea live births, 2025 (actual)",
+     "value_as_written": "25만4000"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      11
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Statistics Korea 2022–2072 future population projection, high-fertility assumption live births for 2025",
+     "value_as_written": "25만5000"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      12
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "OECD average scenario total fertility rate for South Korea, 2026 (projection)",
+     "value_as_written": "0.88"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      13
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "OECD average scenario live births for South Korea, 2026 (projection)",
+     "value_as_written": "29만5000"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.etoday.co.kr/news/view/2610060",
+     "via": "snapshot",
+     "page_date": "2026-08-03",
+     "snapshot_ts": "20260803022708",
+     "order": [
+      1,
+      14
+     ],
+     "reason": "period_end 2035-12-31 after as_of",
+     "name": "South Korea total fertility rate, 2035 (projection under OECD average scenario)",
+     "value_as_written": "1.12"
+    }
+   ],
+   "wall_s": 92.8
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p3"
+     ],
+     "relation": "corroborating",
+     "note": "All three describe the same underlying administrative series (KOSTAT marriage registrations) and are consistent: a 2024 surge (+14.8%), continued growth in 2025 (+8.1%), and a strong December 2025 (+13.4%). They share one source, so they are one signal, not three independent confirmations. They matter because marriages lead first births by roughly 1-2 years, so the 2024-2025 marriage surge should support births in mid-2026."
+    },
+    {
+     "ids": [
+      "p4",
+      "p5",
+      "p6"
+     ],
+     "relation": "corroborating",
+     "note": "Same KOSTAT 2025 population-movement release: births 254,500 (+6.8% vs 2024) and TFR 0.80, the highest since 2021 (0.81). Internally consistent (rising births and a TFR rebound). Shared source, so treated as one anchor for the 2025 level and direction of change."
+    },
+    {
+     "ids": [
+      "p7",
+      "p8"
+     ],
+     "relation": "corroborating",
+     "note": "Same July 2025 release: 21,803 births, +5.9% y/y. p8 is the change rate implied by p7 and its 2024 base; they are not independent, but p7 is the key level anchor for the July seasonal position."
+    },
+    {
+     "ids": [
+      "p9",
+      "p10",
+      "p15"
+     ],
+     "relation": "corroborating",
+     "note": "Deaths 27,979 (-0.7%) and natural increase -6,175 are arithmetically consistent with p7 (21,803 - 27,979 = -6,176, rounding). Same release; useful only as a consistency check, not as a birth input."
+    },
+    {
+     "ids": [
+      "p11",
+      "p12"
+     ],
+     "relation": "corroborating",
+     "note": "July 2025 marriages 20,394, +8.4% y/y. Same release as p7-p10 and consistent with the annual marriage growth in p1-p2. Provides the July-specific marriage level for a marriage-to-birth bridge."
+    },
+    {
+     "ids": [
+      "p13",
+      "p14"
+     ],
+     "relation": "corroborating",
+     "note": "Divorces 7,826, -1.4%. Same release; no direct role in births, kept only as context."
+    },
+    {
+     "ids": [
+      "p16",
+      "p17",
+      "p18",
+      "p19",
+      "p20"
+     ],
+     "relation": "corroborating",
+     "note": "Long-run (1981-2023) monthly birth shares from one article: Jan 10.0%, Feb 9.6%, Mar 8.6%, Q1 28.2%, July 7.8%. Internally consistent (Jan+Feb+Mar = 28.2%). They describe a very different fertility regime (TFR ~2 in the 1980s vs 0.8 now), so the July share is a weak seasonal prior, not a current level."
+    },
+    {
+     "ids": [
+      "p21",
+      "p22",
+      "p25",
+      "p26",
+      "p27",
+      "p28",
+      "p29",
+      "p30",
+      "p31",
+      "p32",
+      "p33"
+     ],
+     "relation": "corroborating",
+     "note": "Resident-registration female population by age, March 2026, from one MOIS table. The 20-29 (2,698,567) and 30-39 (3,184,332) groups are the reproductive-age denominator; the other age groups are context. One source, one snapshot."
+    },
+    {
+     "ids": [
+      "p23",
+      "p24",
+      "p34"
+     ],
+     "relation": "corroborating",
+     "note": "Same MOIS table: total population 51,101,371, males 25,425,930, males 20-29 2,911,249. Consistent with the female columns (total = male + female). Context only."
+    },
+    {
+     "ids": [
+      "p7",
+      "p20"
+     ],
+     "relation": "conflicting",
+     "note": "Not a true contradiction but a scope/period mismatch: p20's 7.8% July share is a 1981-2023 average, while p7's 21,803 is the current-regime July 2025 level. Using the old share on a current annual total would misstate July because seasonality and the annual level have both changed. The share must be treated as a weak seasonal prior only."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p6",
+     "keep": true,
+     "reason": "Kept as the comparison that establishes 2025 TFR 0.80 as a four-year high; it is context for the direction of the birth trend, not a direct input."
+    },
+    {
+     "id": "p9",
+     "keep": true,
+     "reason": "Kept as a consistency check on the July 2025 release; not a birth input."
+    },
+    {
+     "id": "p10",
+     "keep": true,
+     "reason": "Kept as the change rate paired with p9; no direct birth role."
+    },
+    {
+     "id": "p13",
+     "keep": true,
+     "reason": "Kept as context on the same release; divorces do not enter the birth estimate."
+    },
+    {
+     "id": "p14",
+     "keep": true,
+     "reason": "Kept as the change rate paired with p13; no direct birth role."
+    },
+    {
+     "id": "p15",
+     "keep": true,
+     "reason": "Kept as an arithmetic consistency check on p7 and p9."
+    },
+    {
+     "id": "p16",
+     "keep": true,
+     "reason": "Kept as part of the long-run monthly-share set; only the July share (p20) is usable, but the set documents the seasonal pattern."
+    },
+    {
+     "id": "p17",
+     "keep": true,
+     "reason": "Kept as part of the long-run monthly-share set; not a July input."
+    },
+    {
+     "id": "p18",
+     "keep": true,
+     "reason": "Kept as part of the long-run monthly-share set; not a July input."
+    },
+    {
+     "id": "p19",
+     "keep": true,
+     "reason": "Kept as the Q1 aggregate that validates the monthly shares; not a July input."
+    },
+    {
+     "id": "p23",
+     "keep": true,
+     "reason": "Kept as the population total for context and cross-checking the MOIS table."
+    },
+    {
+     "id": "p24",
+     "keep": true,
+     "reason": "Kept as the male total for context; not a reproductive-age input."
+    },
+    {
+     "id": "p25",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; not a reproductive-age input."
+    },
+    {
+     "id": "p26",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; not a reproductive-age input."
+    },
+    {
+     "id": "p27",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; ages 40-49 contribute few births but are context."
+    },
+    {
+     "id": "p28",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; not a reproductive-age input."
+    },
+    {
+     "id": "p29",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; not a reproductive-age input."
+    },
+    {
+     "id": "p30",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; not a reproductive-age input."
+    },
+    {
+     "id": "p31",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; not a reproductive-age input."
+    },
+    {
+     "id": "p32",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; not a reproductive-age input."
+    },
+    {
+     "id": "p33",
+     "keep": true,
+     "reason": "Kept as part of the MOIS age table; not a reproductive-age input."
+    },
+    {
+     "id": "p34",
+     "keep": true,
+     "reason": "Kept as the male 20-29 count for context; not a reproductive-age input."
+    }
+   ],
+   "extra_directions": [
+    {
+     "id": "b1",
+     "category": "own_history",
+     "perspective": "Monthly birth series continuity",
+     "hypothesis": "The July 2026 estimate is anchored on the July 2025 level (p7) plus the 2026 year-to-date monthly birth counts. If KOSTAT monthly Population Trends releases for January-June 2026 are available, they give the actual 2026 level and trend, replacing the assumption that the 2025 y/y growth rate persists. This is the single most valuable missing input because it converts a trend-extrapolation into a level-plus-recent-momentum estimate.",
+     "data_to_find": "KOSTAT Monthly Population Trends (인구동향) live-birth counts for each month January-June 2026, and the corresponding y/y change rates.",
+     "search_hints": [
+      "S",
+      "e",
+      "a",
+      "r"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b2",
+     "category": "related_series",
+     "perspective": "Marriage-to-birth bridge",
+     "hypothesis": "The 2024-2025 marriage surge (p1-p3, p11-p12) should raise first births in 2026. A quantified lag structure (share of first births occurring 12-24 months after marriage, and the marriage cohort sizes) would let the marriage signal adjust the birth trend rather than being used only qualitatively. This resolves whether the 2026 birth level should be above or below a simple extrapolation of the 2025 y/y rate.",
+     "data_to_find": "Monthly marriage registrations for 2024-2026 and the distribution of first-birth intervals after marriage (or first-birth counts by marriage cohort) from KOSTAT.",
+     "search_hints": [
+      "K",
+      "O",
+      "S",
+      "T"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b3",
+     "category": "forecasts_markets",
+     "perspective": "Official 2026 projection",
+     "hypothesis": "Statistics Korea's 2026 population projections or its 2026 birth forecast provide an independent anchor for the annual 2026 level, which can be combined with the July seasonal share. This would resolve the disagreement between a pure 2025-trend extrapolation and a marriage-driven rebound, and it is the most direct check on the central level.",
+     "data_to_find": "Statistics Korea 2026 birth projections (장래인구추계 or 인구동향 전망) and any 2026 annual birth forecast from KOSTAT or demographers.",
+     "search_hints": [
+      "K",
+      "O",
+      "S",
+      "T"
+     ],
+     "expected_information": 3
+    }
+   ],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p7 * a1",
+      "inputs": {
+       "p7": {
+        "id": "p7",
+        "role": "July 2025 live births in South Korea, the same calendar period one year earlier"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "ratio of July 2026 live births to July 2025 live births"
+       }
+      }
+     },
+     "rationale": "Direct year-over-year extrapolation from the observed July 2025 level (p7 = 21,803). The transfer assumption is that the recent y/y growth trend and July seasonality persist into 2026, supported by the 2024-2025 marriage surge (p1-p3, p11-p12) and the 2025 birth rebound (p4-p5). Main failure mode: a break in the y/y trend or a change in registration timing; the wide a1 range covers this."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a3 * a2",
+      "inputs": {
+       "a3": {
+        "id": "a3",
+        "role": "total live births in South Korea during calendar year 2026"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "share of 2026 annual live births occurring in July"
+       }
+      }
+     },
+     "rationale": "Annual-total times July-share decomposition. The annual total (a3) is anchored on the 2025 level of 254,500 (p4) plus the marriage-driven growth signal (p1-p3); the July share (a2) is anchored on the long-run 7.8% (p20) adjusted toward the recent-regime July position. Main failure mode: the annual total and the July share are both uncertain and partly correlated through the marriage impulse; the method is kept as an independent structural route rather than a refinement of m1."
+    },
+    {
+     "id": "m3",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p7 * (1 + p8 / 100) * a1",
+      "inputs": {
+       "p7": {
+        "id": "p7",
+        "role": "July 2025 live births in South Korea"
+       },
+       "p8": {
+        "id": "p8",
+        "role": "July 2025 year-on-year change rate, used here only as a scale reference for the recent growth regime"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "ratio of July 2026 live births to July 2025 live births"
+       }
+      }
+     },
+     "rationale": "This route is intentionally not submitted as a separate estimate because p8 is the July 2025 change rate, not a 2026 change rate, and multiplying it in would double-count the 2025 growth already embedded in p7. It is listed only to document that the July 2025 y/y rate is not a valid 2026 growth input; the executable July 2026 growth is carried by a1 in m1."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "July 2026 live births relative to July 2025",
+     "value": 1.03,
+     "low": 0.95,
+     "high": 1.12,
+     "unit": "ratio",
+     "rationale": "July 2025 births were 21,803 (p7), +5.9% y/y (p8), and 2025 annual births rose 6.8% (p4) with TFR at a four-year high (p5). The 2024-2025 marriage surge (p1-p3, p11-p12) supports continued growth into 2026, but the y/y rate has been decelerating (2024 +14.8% to 2025 +8.1% marriages; births +6.8% in 2025) and monthly volatility is high. A central 3% y/y increase with a wide 10-90 range reflects both the positive marriage impulse and the risk of a stall.",
+     "applies_when": "July 2026 births are assumed to follow the same seasonal position as July 2025 and the recent y/y growth trend, with no major registration-timing break.",
+     "falsified_by": "January-June 2026 monthly birth counts showing y/y growth below 0% or above 12%, or evidence of a large change in birth registration timing.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "July share of 2026 annual births",
+     "value": 0.082,
+     "low": 0.075,
+     "high": 0.09,
+     "unit": "share",
+     "rationale": "The long-run 1981-2023 July share is 7.8% (p20), but that average spans a high-fertility era with different seasonality. In the current low-fertility regime, July has been a relatively strong month (July 2025 births 21,803 vs a 2025 annual total of 254,500, implying about 8.6%). A central 8.2% with a 7.5-9.0% range brackets the historical average and the recent July position.",
+     "applies_when": "Used to convert an annual 2026 birth estimate into a July figure; assumes the current-regime July seasonal share is stable.",
+     "falsified_by": "A published 2026 monthly birth distribution showing July's share outside 7.5-9.0%, or evidence that the July seasonal peak has shifted.",
+     "route": "m2"
+    },
+    {
+     "id": "a3",
+     "name": "2026 annual live births in South Korea",
+     "value": 262000,
+     "low": 245000,
+     "high": 280000,
+     "unit": "persons",
+     "rationale": "2025 annual births were 254,500 (p4), +6.8% y/y, with TFR 0.80 (p5). The 2024-2025 marriage surge (p1-p3) supports a further rise in 2026, but the pace of increase is decelerating. A central 262,000 (about +3% y/y) with a 245,000-280,000 range reflects the positive marriage impulse and the risk of a plateau.",
+     "applies_when": "Used only as the annual total in the July-share route; assumes no major policy or economic shock changes the 2026 birth level.",
+     "falsified_by": "Official 2026 annual birth projections or year-to-date 2026 monthly counts implying an annual total outside 245,000-280,000.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  },
+  {
+   "round": 2,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p3"
+     ],
+     "relation": "corroborating",
+     "note": "All three describe the same underlying administrative series (marriage registrations compiled by the national statistics agency) and are mutually consistent: a 2024 jump, continued 2025 growth, and a strong December 2025. They share one measurement source, so they are one signal, not three independent confirmations."
+    },
+    {
+     "ids": [
+      "p4",
+      "p5",
+      "p6"
+     ],
+     "relation": "corroborating",
+     "note": "2025 annual births up 6.8% and TFR back to 0.80 (highest since 2021's 0.81) come from the same 2025 population-movement release and are internally consistent; they establish that 2025 was a genuine turning point, not noise."
+    },
+    {
+     "ids": [
+      "p7",
+      "p8"
+     ],
+     "relation": "corroborating",
+     "note": "July 2025 level (21,803) and its +5.9% y/y rate are the same release and arithmetically consistent; p7 is the direct anchor for the July seasonal level."
+    },
+    {
+     "ids": [
+      "p4",
+      "p7",
+      "p8"
+     ],
+     "relation": "corroborating",
+     "note": "The annual 2025 increase (+6.8%) and the July 2025 monthly increase (+5.9%) are close, indicating July 2025 was near the 2025 trend rather than an outlier month."
+    },
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p11",
+      "p12"
+     ],
+     "relation": "corroborating",
+     "note": "Annual 2024-2025 marriage growth and the July 2025 monthly marriage growth (+8.4%) point the same way; the marriage surge is broad-based, supporting a positive 2026 birth impulse via the 1-2 year lag."
+    },
+    {
+     "ids": [
+      "p16",
+      "p17",
+      "p18",
+      "p19",
+      "p20"
+     ],
+     "relation": "corroborating",
+     "note": "The monthly shares are internally consistent (Jan+Feb+Mar = 28.2% = Q1 share) and come from one long-run tabulation; they are a single seasonal source, not independent."
+    },
+    {
+     "ids": [
+      "p21",
+      "p22",
+      "p25",
+      "p26",
+      "p27",
+      "p28",
+      "p29",
+      "p30",
+      "p31",
+      "p32",
+      "p33"
+     ],
+     "relation": "corroborating",
+     "note": "All female age bands come from one resident-registration snapshot and sum to the female total; they are one denominator source."
+    },
+    {
+     "ids": [
+      "p23",
+      "p24",
+      "p21",
+      "p22"
+     ],
+     "relation": "corroborating",
+     "note": "Male plus female totals reconcile with the national total in the same March 2026 snapshot, confirming internal consistency of the population file."
+    },
+    {
+     "ids": [
+      "p9",
+      "p10",
+      "p15"
+     ],
+     "relation": "corroborating",
+     "note": "Deaths and natural increase are from the same July 2025 release and reconcile arithmetically (21,803 - 27,979 = -6,175); they are context only, not inputs to a birth estimate."
+    },
+    {
+     "ids": [
+      "p13",
+      "p14"
+     ],
+     "relation": "corroborating",
+     "note": "Divorce level and rate are the same release; they carry no direct information on births and are context only."
+    },
+    {
+     "ids": [
+      "p20",
+      "p7"
+     ],
+     "relation": "conflicting",
+     "note": "The long-run July share (7.8% of annual births, 1981-2023) applied to a 2026 annual level would give a July figure that need not match a level-plus-momentum extrapolation from p7; the two routes can disagree because the seasonal share is a 43-year average while p7 is a single recent month. This is a scope/vintage difference, not a factual contradiction."
+    },
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p4"
+     ],
+     "relation": "corroborating",
+     "note": "Marriage growth in 2024-2025 and the 2025 birth rebound are consistent with a lagged marriage-to-birth channel, but they are different series and the link is an assumption, not a measurement."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p6",
+     "keep": false,
+     "reason": "2021 TFR is a comparison value inside the same sentence as p5; it adds no independent information for a July 2026 level and is redundant with p5."
+    },
+    {
+     "id": "p9",
+     "keep": false,
+     "reason": "July 2025 deaths are not an input to a birth estimate; retained only as context and not usable in any executable method."
+    },
+    {
+     "id": "p10",
+     "keep": false,
+     "reason": "Deaths y/y rate is irrelevant to the birth target and redundant with p9."
+    },
+    {
+     "id": "p13",
+     "keep": false,
+     "reason": "Divorce count is not a birth input and has no established transfer to the target."
+    },
+    {
+     "id": "p14",
+     "keep": false,
+     "reason": "Divorce y/y rate is irrelevant and redundant with p13."
+    },
+    {
+     "id": "p15",
+     "keep": false,
+     "reason": "Natural increase is a derived identity from births and deaths; it cannot be used to estimate births without already knowing births."
+    },
+    {
+     "id": "p24",
+     "keep": false,
+     "reason": "Male population total is not a denominator for births and is redundant with the female age bands for the fertility route."
+    },
+    {
+     "id": "p34",
+     "keep": false,
+     "reason": "Male population aged 20-29 is not a fertility denominator and adds nothing to the target."
+    },
+    {
+     "id": "p25",
+     "keep": false,
+     "reason": "Female population aged 0-9 is far below reproductive age and cannot enter an age-specific fertility decomposition."
+    },
+    {
+     "id": "p26",
+     "keep": false,
+     "reason": "Female population aged 10-19 is largely below reproductive age and is not a usable fertility denominator for July 2026 births."
+    },
+    {
+     "id": "p27",
+     "keep": false,
+     "reason": "Female population aged 40-49 contributes only a small share of births and is not needed once the 20-39 denominator is available; keeping it would add a weak, redundant input."
+    },
+    {
+     "id": "p28",
+     "keep": false,
+     "reason": "Female population aged 50-59 is outside reproductive age and irrelevant."
+    },
+    {
+     "id": "p29",
+     "keep": false,
+     "reason": "Female population aged 60-69 is outside reproductive age and irrelevant."
+    },
+    {
+     "id": "p30",
+     "keep": false,
+     "reason": "Female population aged 70-79 is outside reproductive age and irrelevant."
+    },
+    {
+     "id": "p31",
+     "keep": false,
+     "reason": "Female population aged 80-89 is outside reproductive age and irrelevant."
+    },
+    {
+     "id": "p32",
+     "keep": false,
+     "reason": "Female population aged 90-99 is outside reproductive age and irrelevant."
+    },
+    {
+     "id": "p33",
+     "keep": false,
+     "reason": "Female population aged 100+ is outside reproductive age and irrelevant."
+    }
+   ],
+   "extra_directions": [],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p7 * a1",
+      "inputs": {
+       "p7": {
+        "id": "p7",
+        "role": "July 2025 live births in South Korea"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "ratio of July 2026 live births to July 2025 live births"
+       }
+      }
+     },
+     "rationale": "Anchors on the observed July 2025 monthly level (p7) and applies a modest growth factor (a1) informed by the 2025 annual rebound (p4), the July 2025 y/y rate (p8), and the 2024-2025 marriage surge (p1, p2, p3, p11, p12). Shared dependency: p7 and a1 both rest on the same 2025 population-movement release, so the method inherits any revision to July 2025. Failure mode: if the 2026 monthly trend has already turned down, a1 is too high."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p4 * a3 * a2",
+      "inputs": {
+       "p4": {
+        "id": "p4",
+        "role": "2025 annual live births in South Korea"
+       },
+       "a3": {
+        "id": "a3",
+        "role": "ratio of 2026 annual live births to 2025 annual live births"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "July share of 2026 annual live births"
+       }
+      }
+     },
+     "rationale": "Builds a July 2026 figure from the 2025 annual level (p4), a 2026 annual growth factor (a3) supported by the marriage surge, and the historical July share (p20 via a2). This route is structurally different from m1 and provides an independent check on the level. Shared dependency: p4 and the marriage evidence come from the same statistical system. Failure mode: the 43-year average July share may not match 2026 seasonality, and a3 may be too high if the rebound stalls."
+    },
+    {
+     "id": "m3",
+     "method": "formula_mc",
+     "params": {
+      "formula": "(p21 + p22) * a4",
+      "inputs": {
+       "p21": {
+        "id": "p21",
+        "role": "South Korea female population aged 20-29 in March 2026"
+       },
+       "p22": {
+        "id": "p22",
+        "role": "South Korea female population aged 30-39 in March 2026"
+       },
+       "a4": {
+        "id": "a4",
+        "role": "monthly live births per woman aged 20-39 in July 2026"
+       }
+      }
+     },
+     "rationale": "A demographic decomposition using the March 2026 female population aged 20-39 (p21, p22) as the population at risk and a monthly age-specific fertility rate (a4) consistent with the 2025 TFR (p5). This route is independent of the monthly birth series and tests whether the population denominator implies a materially different level. Shared dependency: p21 and p22 come from one resident-registration snapshot. Failure mode: a4 is an assumption not directly observed, and the March 2026 denominator may differ slightly from the July 2026 population."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "July 2026 live births relative to July 2025",
+     "value": 1.03,
+     "low": 0.95,
+     "high": 1.12,
+     "unit": "ratio",
+     "rationale": "July 2025 was 21,803 (p7), up 5.9% y/y (p8), and 2025 annual births rose 6.8% (p4). The 2024-2025 marriage surge (p1, p2, p3, p11, p12) should keep 2026 births at or above the 2025 level through the 1-2 year lag, but the pace of the rebound is likely to moderate and month-to-month noise is large. A central factor of about 1.03 with a wide range reflects continued mild growth rather than a repeat of the 2025 jump.",
+     "applies_when": "The 2026 monthly birth trend continues the 2025 recovery at a moderating pace and no new shock (policy, epidemic, registration change) shifts July 2026 births.",
+     "falsified_by": "Published January-June 2026 monthly births showing a y/y decline, or evidence that the 2024-2025 marriage surge did not translate into first births by mid-2026.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "July share of 2026 annual live births",
+     "value": 0.078,
+     "low": 0.07,
+     "high": 0.086,
+     "unit": "share",
+     "rationale": "The long-run July share of annual births is 7.8% (p20), from a 1981-2023 tabulation. The share is used to convert an annual 2026 level into a July figure; the range allows for drift in seasonality and for the fact that the 43-year average may not match the recent monthly pattern.",
+     "applies_when": "The seasonal distribution of births in 2026 is close to the historical average, so July's share of the annual total is near 7.8%.",
+     "falsified_by": "Recent monthly releases showing July shares persistently above or below the historical 7.8% by more than the stated range.",
+     "route": "m2"
+    },
+    {
+     "id": "a3",
+     "name": "2026 annual live births relative to 2025",
+     "value": 1.02,
+     "low": 0.94,
+     "high": 1.1,
+     "unit": "ratio",
+     "rationale": "2025 annual births were 254,500, up 6.8% (p4), and the marriage surge (p1, p2, p3) supports a further but smaller 2026 increase. A factor near 1.02 with a wide range is used to scale the 2025 annual level before applying the July share.",
+     "applies_when": "The 2026 annual birth total continues the 2025 recovery at a moderating pace, consistent with the lagged marriage signal.",
+     "falsified_by": "A published 2026 annual or year-to-date birth total showing a decline versus 2025, or evidence that the marriage surge has already been fully absorbed.",
+     "route": "m2"
+    },
+    {
+     "id": "a4",
+     "name": "July 2026 births per woman aged 20-39",
+     "value": 0.00055,
+     "low": 0.00045,
+     "high": 0.00068,
+     "unit": "births per woman per month",
+     "rationale": "No kept point gives a monthly age-specific fertility rate for women 20-39. The value is a monthly rate consistent with a TFR near 0.8 (p5) concentrated in ages 20-39, spread over 12 months; the range is wide because the age distribution of births and the monthly rate are uncertain.",
+     "applies_when": "Fertility in July 2026 follows recent age-specific patterns and the 20-39 female population from the March 2026 snapshot is a valid mid-2026 denominator.",
+     "falsified_by": "Published age-specific fertility rates for 2026 showing a monthly rate outside the stated range, or a large mid-2026 change in the 20-39 female population.",
+     "route": "m3"
+    }
+   ],
+   "unknown_ids_in_decisions": [],
+   "audit_failed": {}
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+   "via": "snapshot",
+   "page_date": "2026-05-20",
+   "snapshot_ts": "20260520100445",
+   "order": [
+    1,
+    2
+   ],
+   "name": "South Korea marriage registrations, year-on-year increase rate, 2024",
+   "value": 14.8,
+   "value_as_written": "14.8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2024-01-01",
+   "period_end": "2024-12-31",
+   "published_at_if_visible": "",
+   "quote": "2024년 22만2000건, 2025년에는 24만370건으로 각각 14.8%, 8.1% 증가한 것이다.",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+   "via": "snapshot",
+   "page_date": "2026-05-20",
+   "snapshot_ts": "20260520100445",
+   "order": [
+    1,
+    3
+   ],
+   "name": "South Korea marriage registrations, year-on-year increase rate, 2025",
+   "value": 8.1,
+   "value_as_written": "8.1",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "2024년 22만2000건, 2025년에는 24만370건으로 각각 14.8%, 8.1% 증가한 것이다.",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+   "via": "snapshot",
+   "page_date": "2026-05-20",
+   "snapshot_ts": "20260520100445",
+   "order": [
+    1,
+    5
+   ],
+   "name": "South Korea marriage registrations, December 2025 year-on-year increase rate",
+   "value": 13.4,
+   "value_as_written": "13.4",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-12-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "특히 2025년 12월 한 달간 혼인 건수는 2만5527건으로 전년 동월 대비 13.4%나 급증하며 강한 상승세를 기록했다.",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+   "via": "snapshot",
+   "page_date": "2026-05-20",
+   "snapshot_ts": "20260520100445",
+   "order": [
+    1,
+    10
+   ],
+   "name": "South Korea live births, annual increase rate, 2025 vs 2024",
+   "value": 6.8,
+   "value_as_written": "6.8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "국가데이터처가 발표한 2025년 인구동향조사에 따르면 지난해 출생아 수는 25만4500명으로 전년보다 1만6100명(6.8%) 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+   "via": "snapshot",
+   "page_date": "2026-05-20",
+   "snapshot_ts": "20260520100445",
+   "order": [
+    1,
+    11
+   ],
+   "name": "South Korea total fertility rate, 2025",
+   "value": 0.8,
+   "value_as_written": "0.8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "children per woman",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "합계출산율은 0.8명을 기록해 2021년(0.81명) 이후 4년 만에 가장 높은 수준을 회복했다.",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://woman.donga.com/issue/article/all/12/6178276/1",
+   "via": "snapshot",
+   "page_date": "2026-05-20",
+   "snapshot_ts": "20260520100445",
+   "order": [
+    1,
+    12
+   ],
+   "name": "South Korea total fertility rate, 2021 (comparison)",
+   "value": 0.81,
+   "value_as_written": "0.81",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "children per woman",
+   "period_start": "2021-01-01",
+   "period_end": "2021-12-31",
+   "published_at_if_visible": "",
+   "quote": "합계출산율은 0.8명을 기록해 2021년(0.81명) 이후 4년 만에 가장 높은 수준을 회복했다.",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "2021 TFR is a comparison value inside the same sentence as p5; it adds no independent information for a July 2026 level and is redundant with p5."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    0
+   ],
+   "name": "South Korea live births, July 2025 (monthly Population Trends)",
+   "value": 21803.0,
+   "value_as_written": "21,803",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons (live births)",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "출생아 수는 21,803명으로 전년동월대비 5.9% 증가",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    1
+   ],
+   "name": "South Korea live births year-on-year change rate, July 2025 vs July 2024",
+   "value": 5.9,
+   "value_as_written": "5.9%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "출생아 수는 21,803명으로 전년동월대비 5.9% 증가",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    2
+   ],
+   "name": "South Korea deaths, July 2025",
+   "value": 27979.0,
+   "value_as_written": "27,979",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons (deaths)",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "사망자 수는 27,979명으로 전년동월대비 0.7% 감소",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "July 2025 deaths are not an input to a birth estimate; retained only as context and not usable in any executable method."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    3
+   ],
+   "name": "South Korea deaths year-on-year change rate, July 2025 vs July 2024",
+   "value": 0.7,
+   "value_as_written": "0.7%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "사망자 수는 27,979명으로 전년동월대비 0.7% 감소",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Deaths y/y rate is irrelevant to the birth target and redundant with p9."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    4
+   ],
+   "name": "South Korea marriages, July 2025",
+   "value": 20394.0,
+   "value_as_written": "20,394",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "cases (marriages)",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "혼인 건수는 20,394건으로 전년동월대비 8.4% 증가",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    5
+   ],
+   "name": "South Korea marriages year-on-year change rate, July 2025 vs July 2024",
+   "value": 8.4,
+   "value_as_written": "8.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "혼인 건수는 20,394건으로 전년동월대비 8.4% 증가",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    6
+   ],
+   "name": "South Korea divorces, July 2025",
+   "value": 7826.0,
+   "value_as_written": "7,826",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "cases (divorces)",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "이혼 건수는 7,826건으로 전년동월대비 1.4% 감소",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Divorce count is not a birth input and has no established transfer to the target."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    7
+   ],
+   "name": "South Korea divorces year-on-year change rate, July 2025 vs July 2024",
+   "value": 1.4,
+   "value_as_written": "1.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "이혼 건수는 7,826건으로 전년동월대비 1.4% 감소",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Divorce y/y rate is irrelevant and redundant with p13."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&list_no=438748&act=view&mainXml=Y",
+   "via": "snapshot",
+   "page_date": "2025-12-12",
+   "snapshot_ts": "20251212121719",
+   "order": [
+    0,
+    8
+   ],
+   "name": "South Korea natural increase (live births minus deaths), July 2025",
+   "value": -6175.0,
+   "value_as_written": "-6,175",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons (natural increase)",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "2025-09-24",
+   "quote": "자연증가(출생아 수 - 사망자 수)는 -6,175명",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Natural increase is a derived identity from births and deaths; it cannot be used to estimate births without already knowing births."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+   "via": "snapshot",
+   "page_date": "2025-01-28",
+   "snapshot_ts": "20250128134604",
+   "order": [
+    3,
+    2
+   ],
+   "name": "South Korea January share of total births, 1981–2023",
+   "value": 10.0,
+   "value_as_written": "10.0%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "1981-01-01",
+   "period_end": "2023-12-31",
+   "published_at_if_visible": "",
+   "quote": "43년간 총 출생아 수 2332만 7013명 가운데 10.0%의 비중을 차지했다.",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": true,
+   "judged_round": 2,
+   "judge_reason": "Kept as part of the long-run monthly-share set; only the July share (p20) is usable, but the set documents the seasonal pattern."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+   "via": "snapshot",
+   "page_date": "2025-01-28",
+   "snapshot_ts": "20250128134604",
+   "order": [
+    3,
+    4
+   ],
+   "name": "South Korea February share of total births, 1981–2023",
+   "value": 9.6,
+   "value_as_written": "9.6%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "1981-01-01",
+   "period_end": "2023-12-31",
+   "published_at_if_visible": "",
+   "quote": "그다음은 2월로 224만 44명(9.6%)이 태어났다.",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": true,
+   "judged_round": 2,
+   "judge_reason": "Kept as part of the long-run monthly-share set; not a July input."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+   "via": "snapshot",
+   "page_date": "2025-01-28",
+   "snapshot_ts": "20250128134604",
+   "order": [
+    3,
+    6
+   ],
+   "name": "South Korea March share of total births, 1981–2023",
+   "value": 8.6,
+   "value_as_written": "8.6%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "1981-01-01",
+   "period_end": "2023-12-31",
+   "published_at_if_visible": "",
+   "quote": "세 번째는 3월로 200만 1716명(8.6%)이 출생했다.",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": true,
+   "judged_round": 2,
+   "judge_reason": "Kept as part of the long-run monthly-share set; not a July input."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+   "via": "snapshot",
+   "page_date": "2025-01-28",
+   "snapshot_ts": "20250128134604",
+   "order": [
+    3,
+    7
+   ],
+   "name": "South Korea Q1 (Jan–Mar) share of total births, 1981–2023",
+   "value": 28.2,
+   "value_as_written": "28.2%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "1981-01-01",
+   "period_end": "2023-12-31",
+   "published_at_if_visible": "",
+   "quote": "전체 비중은 28.2%, 국민 10명 중 3명이 1분기에 태어난 셈이다.",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": true,
+   "judged_round": 2,
+   "judge_reason": "Kept as the Q1 aggregate that validates the monthly shares; not a July input."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "http://www6.seoul.co.kr/news/economy/2025/01/27/20250127500008",
+   "via": "snapshot",
+   "page_date": "2025-01-28",
+   "snapshot_ts": "20250128134604",
+   "order": [
+    3,
+    14
+   ],
+   "name": "South Korea July share of total births, 1981–2023",
+   "value": 7.8,
+   "value_as_written": "7.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "1981-01-01",
+   "period_end": "2023-12-31",
+   "published_at_if_visible": "",
+   "quote": "7월에는 183만 812명(7.8%), 12월에는 181만 4420명(7.8%), 6월에는 175만 237명(7.5%)이 태어났다.",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    1
+   ],
+   "name": "South Korea (전국) female population aged 20-29, March 2026",
+   "value": 2698567.0,
+   "value_as_written": "2,698,567",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    2
+   ],
+   "name": "South Korea (전국) female population aged 30-39, March 2026",
+   "value": 3184332.0,
+   "value_as_written": "3,184,332",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    3
+   ],
+   "name": "South Korea (전국) total population, March 2026",
+   "value": 51101371.0,
+   "value_as_written": "51,101,371",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "| 전국 | 51,101,371 | 51,101,371 | 2,920,250 | 4,623,895 | 5,609,816 | 6,678,153 | 7,534,672 | 8,621,183 | 7,962,748 | 4,623,870 | 2,139,068 | 378,754 | 8,962 |",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": true,
+   "judged_round": 2,
+   "judge_reason": "Kept as the population total for context and cross-checking the MOIS table."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    4
+   ],
+   "name": "South Korea (전국) male population, March 2026",
+   "value": 25425930.0,
+   "value_as_written": "25,425,930",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "| 7,534,672 | 8,621,183 | 7,962,748 | 4,623,870 | 2,139,068 | 378,754 | 8,962 | 25,425,930 | 25,425,930 | 1,496,704 | 2,372,897 | 2,911,249 | 3,493,821 | 3,837,966 | 4,346,162 | 3,929,880 | 2,138,007 ",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Male population total is not a denominator for births and is redundant with the female age bands for the fertility route."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    5
+   ],
+   "name": "South Korea (전국) female population aged 0-9, March 2026",
+   "value": 1423546.0,
+   "value_as_written": "1,423,546",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p25",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 0-9 is far below reproductive age and cannot enter an age-specific fertility decomposition."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    6
+   ],
+   "name": "South Korea (전국) female population aged 10-19, March 2026",
+   "value": 2250998.0,
+   "value_as_written": "2,250,998",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p26",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 10-19 is largely below reproductive age and is not a usable fertility denominator for July 2026 births."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    7
+   ],
+   "name": "South Korea (전국) female population aged 40-49, March 2026",
+   "value": 3696706.0,
+   "value_as_written": "3,696,706",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p27",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 40-49 contributes only a small share of births and is not needed once the 20-39 denominator is available; keeping it would add a weak, redundant input."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    8
+   ],
+   "name": "South Korea (전국) female population aged 50-59, March 2026",
+   "value": 4275021.0,
+   "value_as_written": "4,275,021",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p28",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 50-59 is outside reproductive age and irrelevant."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    9
+   ],
+   "name": "South Korea (전국) female population aged 60-69, March 2026",
+   "value": 4032868.0,
+   "value_as_written": "4,032,868",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p29",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 60-69 is outside reproductive age and irrelevant."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    10
+   ],
+   "name": "South Korea (전국) female population aged 70-79, March 2026",
+   "value": 2485863.0,
+   "value_as_written": "2,485,863",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p30",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 70-79 is outside reproductive age and irrelevant."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    11
+   ],
+   "name": "South Korea (전국) female population aged 80-89, March 2026",
+   "value": 1333754.0,
+   "value_as_written": "1,333,754",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p31",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 80-89 is outside reproductive age and irrelevant."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    12
+   ],
+   "name": "South Korea (전국) female population aged 90-99, March 2026",
+   "value": 286315.0,
+   "value_as_written": "286,315",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p32",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 90-99 is outside reproductive age and irrelevant."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    13
+   ],
+   "name": "South Korea (전국) female population aged 100 and over, March 2026",
+   "value": 7471.0,
+   "value_as_written": "7,471",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,675,441 | 25,675,441 | 1,423,546 | 2,250,998 | 2,698,567 | 3,184,332 | 3,696,706 | 4,275,021 | 4,032,868 | 2,485,863 | 1,333,754 | 286,315 | 7,471 |",
+   "verified_by": "quote_in_page",
+   "id": "p33",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Female population aged 100+ is outside reproductive age and irrelevant."
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://jumin.mois.go.kr/ageStatMonth.do",
+   "via": "snapshot",
+   "page_date": "2026-04-23",
+   "snapshot_ts": "20260423104656",
+   "order": [
+    3,
+    14
+   ],
+   "name": "South Korea (전국) male population aged 20-29, March 2026",
+   "value": 2911249.0,
+   "value_as_written": "2,911,249",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "persons",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "25,425,930 | 25,425,930 | 1,496,704 | 2,372,897 | 2,911,249 | 3,493,821 | 3,837,966 | 4,346,162 | 3,929,880 | 2,138,007 | 805,314 | 92,439 | 1,491 |",
+   "verified_by": "quote_in_page",
+   "id": "p34",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Male population aged 20-29 is not a fertility denominator and adds nothing to the target."
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "formula_mc",
+    "params": {
+     "formula": "p7 * a1",
+     "inputs": {
+      "p7": {
+       "id": "p7",
+       "role": "July 2025 live births in South Korea"
+      },
+      "a1": {
+       "id": "a1",
+       "role": "ratio of July 2026 live births to July 2025 live births"
+      }
+     }
+    },
+    "rationale": "Anchors on the observed July 2025 monthly level (p7) and applies a modest growth factor (a1) informed by the 2025 annual rebound (p4), the July 2025 y/y rate (p8), and the 2024-2025 marriage surge (p1, p2, p3, p11, p12). Shared dependency: p7 and a1 both rest on the same 2025 population-movement release, so the method inherits any revision to July 2025. Failure mode: if the 2026 monthly trend has ",
+    "estimate": 22494.088164805355,
+    "backtest": [],
+    "notes": [],
+    "used_ids": [
+     "p7"
+    ],
+    "used_assumptions": [
+     "a1"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p7",
+      "id": "p7",
+      "kind": "point",
+      "p10": 18169.166666666668,
+      "p90": 26163.6,
+      "unit": "persons (live births)"
+     },
+     {
+      "name": "a1",
+      "id": "a1",
+      "kind": "assumption",
+      "p10": 0.7293833011524187,
+      "p90": 1.4587666023048376,
+      "unit": "ratio"
+     }
+    ],
+    "mc": {
+     "p10": 15224.777724106067,
+     "p90": 33441.37485474127
+    },
+    "n_point_inputs": 1,
+    "n_assumption_inputs": 1,
+    "rests_mainly_on_assumptions": true
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "formula_mc",
+    "params": {
+     "formula": "p4 * a3 * a2",
+     "inputs": {
+      "p4": {
+       "id": "p4",
+       "role": "2025 annual live births in South Korea"
+      },
+      "a3": {
+       "id": "a3",
+       "role": "ratio of 2026 annual live births to 2025 annual live births"
+      },
+      "a2": {
+       "id": "a2",
+       "role": "July share of 2026 annual live births"
+      }
+     }
+    },
+    "rationale": "Builds a July 2026 figure from the 2025 annual level (p4), a 2026 annual growth factor (a3) supported by the marriage surge, and the historical July share (p20 via a2). This route is structurally different from m1 and provides an independent check on the level. Shared dependency: p4 and the marriage evidence come from the same statistical system. Failure mode: the 43-year average July share may no",
+    "estimate": null,
+    "backtest": [],
+    "notes": [],
+    "used_ids": [
+     "p4"
+    ],
+    "used_assumptions": [
+     "a2",
+     "a3"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p4",
+      "id": "p4",
+      "kind": "point",
+      "p10": 0.05666666666666667,
+      "p90": 0.0816,
+      "unit": "%"
+     },
+     {
+      "name": "a3",
+      "id": "a3",
+      "kind": "assumption",
+      "p10": 0.7190271204899019,
+      "p90": 1.4380542409798038,
+      "unit": "ratio"
+     },
+     {
+      "name": "a2",
+      "id": "a2",
+      "kind": "assumption",
+      "p10": 0.05486346689738081,
+      "p90": 0.10972693379476163,
+      "unit": "share"
+     }
+    ],
+    "error": "formula_mc needs at least one input that is a quantity (not a share, ratio or %); a product of ratios cannot produce the target",
+    "n_point_inputs": 1,
+    "n_assumption_inputs": 2,
+    "rests_mainly_on_assumptions": true
+   },
+   {
+    "id": "m3",
+    "label": "m3",
+    "method": "formula_mc",
+    "params": {
+     "formula": "(p21 + p22) * a4",
+     "inputs": {
+      "p21": {
+       "id": "p21",
+       "role": "South Korea female population aged 20-29 in March 2026"
+      },
+      "p22": {
+       "id": "p22",
+       "role": "South Korea female population aged 30-39 in March 2026"
+      },
+      "a4": {
+       "id": "a4",
+       "role": "monthly live births per woman aged 20-39 in July 2026"
+      }
+     }
+    },
+    "rationale": "A demographic decomposition using the March 2026 female population aged 20-39 (p21, p22) as the population at risk and a monthly age-specific fertility rate (a4) consistent with the 2025 TFR (p5). This route is independent of the monthly birth series and tests whether the population denominator implies a materially different level. Shared dependency: p21 and p22 come from one resident-registration",
+    "estimate": 3263.960776581809,
+    "backtest": [],
+    "notes": [],
+    "used_ids": [
+     "p21",
+     "p22"
+    ],
+    "used_assumptions": [
+     "a4"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p21",
+      "id": "p21",
+      "kind": "point",
+      "p10": 2248805.8333333335,
+      "p90": 3238280.4,
+      "unit": "persons"
+     },
+     {
+      "name": "p22",
+      "id": "p22",
+      "kind": "point",
+      "p10": 2653610.0,
+      "p90": 3821198.4,
+      "unit": "persons"
+     },
+     {
+      "name": "a4",
+      "id": "a4",
+      "kind": "assumption",
+      "p10": 0.00039115214431215893,
+      "p90": 0.000782304288624318,
+      "unit": "births per woman per month"
+     }
+    ],
+    "mc": {
+     "p10": 2260.5860631378237,
+     "p90": 4722.645753346153
+    },
+    "n_point_inputs": 2,
+    "n_assumption_inputs": 1,
+    "rests_mainly_on_assumptions": false
+   }
+  ],
+  "result": {
+   "central": 8568.536717252126,
+   "p10": 2487.306412876551,
+   "p90": 29517.8033131786,
+   "sigma_ln": 0.965155553202047,
+   "sigma_hist": null,
+   "sigma_spread": 0.965155553202047,
+   "sigma_mc": 0.30699883973324965,
+   "n_backtest_folds": 0,
+   "weights": {
+    "m1": 0.5,
+    "m3": 0.5
+   },
+   "weight_rule": "equal",
+   "weight_basis": {
+    "m1": "equal",
+    "m3": "equal"
+   },
+   "basis": "method_spread",
+   "assumption_weight_share": 1.0
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {
+   "a1": [
+    "m1"
+   ],
+   "a4": [
+    "m3"
+   ]
+  },
+  "excluded_by_input_audit": [],
+  "methods_from_round": 2
+ },
+ "assumptions": {
+  "kept": [
+   {
+    "id": "a1",
+    "name": "July 2026 live births relative to July 2025",
+    "unit": "ratio",
+    "rationale": "July 2025 was 21,803 (p7), up 5.9% y/y (p8), and 2025 annual births rose 6.8% (p4). The 2024-2025 marriage surge (p1, p2, p3, p11, p12) should keep 2026 births at or above the 2025 level through the 1-2 year lag, but the pace of the rebound is likely to moderate and month-to-month noise is large. A ",
+    "applies_when": "The 2026 monthly birth trend continues the 2025 recovery at a moderating pace and no new shock (policy, epidemic, registration change) shifts July 2026 births.",
+    "falsified_by": "Published January-June 2026 monthly births showing a y/y decline, or evidence that the 2024-2025 marriage surge did not translate into first births by mid-2026.",
+    "route": "m1",
+    "value": 1.03,
+    "low": 0.95,
+    "high": 1.12,
+    "is_pct": false,
+    "p10_used": 0.7293833011524187,
+    "p90_used": 1.4587666023048376,
+    "widened_by_floor": true,
+    "used_by": [
+     "m1"
+    ],
+    "used_by_labels": [
+     "m1"
+    ]
+   },
+   {
+    "id": "a2",
+    "name": "July share of 2026 annual live births",
+    "unit": "share",
+    "rationale": "The long-run July share of annual births is 7.8% (p20), from a 1981-2023 tabulation. The share is used to convert an annual 2026 level into a July figure; the range allows for drift in seasonality and for the fact that the 43-year average may not match the recent monthly pattern.",
+    "applies_when": "The seasonal distribution of births in 2026 is close to the historical average, so July's share of the annual total is near 7.8%.",
+    "falsified_by": "Recent monthly releases showing July shares persistently above or below the historical 7.8% by more than the stated range.",
+    "route": "m2",
+    "value": 0.078,
+    "low": 0.07,
+    "high": 0.086,
+    "is_pct": false,
+    "p10_used": 0.05486346689738081,
+    "p90_used": 0.10972693379476163,
+    "widened_by_floor": true,
+    "used_by": [],
+    "used_by_labels": []
+   },
+   {
+    "id": "a3",
+    "name": "2026 annual live births relative to 2025",
+    "unit": "ratio",
+    "rationale": "2025 annual births were 254,500, up 6.8% (p4), and the marriage surge (p1, p2, p3) supports a further but smaller 2026 increase. A factor near 1.02 with a wide range is used to scale the 2025 annual level before applying the July share.",
+    "applies_when": "The 2026 annual birth total continues the 2025 recovery at a moderating pace, consistent with the lagged marriage signal.",
+    "falsified_by": "A published 2026 annual or year-to-date birth total showing a decline versus 2025, or evidence that the marriage surge has already been fully absorbed.",
+    "route": "m2",
+    "value": 1.02,
+    "low": 0.94,
+    "high": 1.1,
+    "is_pct": false,
+    "p10_used": 0.7190271204899019,
+    "p90_used": 1.4380542409798038,
+    "widened_by_floor": true,
+    "used_by": [],
+    "used_by_labels": []
+   },
+   {
+    "id": "a4",
+    "name": "July 2026 births per woman aged 20-39",
+    "unit": "births per woman per month",
+    "rationale": "No kept point gives a monthly age-specific fertility rate for women 20-39. The value is a monthly rate consistent with a TFR near 0.8 (p5) concentrated in ages 20-39, spread over 12 months; the range is wide because the age distribution of births and the monthly rate are uncertain.",
+    "applies_when": "Fertility in July 2026 follows recent age-specific patterns and the 20-39 female population from the March 2026 snapshot is a valid mid-2026 denominator.",
+    "falsified_by": "Published age-specific fertility rates for 2026 showing a monthly rate outside the stated range, or a large mid-2026 change in the 20-39 female population.",
+    "route": "m3",
+    "value": 0.00055,
+    "low": 0.00045,
+    "high": 0.00068,
+    "is_pct": false,
+    "p10_used": 0.00039115214431215893,
+    "p90_used": 0.000782304288624318,
+    "widened_by_floor": true,
+    "used_by": [
+     "m3"
+    ],
+    "used_by_labels": [
+     "m3"
+    ]
+   }
+  ],
+  "rejected": [],
+  "from_round": 2,
+  "min_width": 2.0,
+  "max_per_run": 8,
+  "max_per_method": 3
+ },
+ "final": {
+  "template": "The best computed estimate for live births occurring in South Korea during July 2026, as first reported by Statistics Korea's monthly Population Trends release, is [[estimate]] persons. The supplied interval is [[p10]] to [[p90]], at the [[interval_level]] level, on a [[interval_basis]] basis; it is model-based and conditional on the assumptions, not a demonstrated accuracy guarantee.\n\nTwo methods were combined with weights: [[m1_estimate]] ([[m1_weight]]) anchors on July 2025 and a growth factor [[a1_value]] (range [[a1_low]] to [[a1_high]]); [[m3_estimate]] ([[m3_weight]]) uses the female population aged [n]-[n] and a monthly fertility rate [[a4_value]] (range [[a4_low]] to [[a4_high]]). Observed inputs are the [n] monthly and annual birth levels and population counts; the growth factor and fertility rate are analyst assumptions. The combination reflects method spread, not independent validation.\n\nThe main risk is that the [n] monthly trend diverges from the [n] rebound, or that the assumed fertility rate is wrong. The most useful missing evidence would be early [n] monthly birth counts.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 July 2026 live births relative to July 2025: [[a1_value]] ratio, range [[a1_low]] to [[a1_high]] (range widened by code); used by m1. Overturned by: Published January-June 2026 monthly births showing a y/y decline, or evidence that the [n]-2025 marriage surge did not translate into first births by mid-2026.\n- a4 July 2026 births per woman aged [n]-[n]: [[a4_value]] births per woman per month, range [[a4_low]] to [[a4_high]] (range widened by code); used by m3. Overturned by: Published age-specific fertility rates for 2026 showing a monthly rate outside the stated range, or a large mid-2026 change in the [n]-[n] female population.",
+  "text": "The best computed estimate for live births occurring in South Korea during July 2026, as first reported by Statistics Korea's monthly Population Trends release, is 8,569 persons. The supplied interval is 2,487 to 29,518, at the 80% level, on a method spread basis; it is model-based and conditional on the assumptions, not a demonstrated accuracy guarantee.\n\nTwo methods were combined with weights: 22,494 (50%) anchors on July 2025 and a growth factor 1.03 (range 0.7294 to 1.459); 3,264 (50%) uses the female population aged [n]-[n] and a monthly fertility rate 0.00055 (range 0.0003912 to 0.0007823). Observed inputs are the [n] monthly and annual birth levels and population counts; the growth factor and fertility rate are analyst assumptions. The combination reflects method spread, not independent validation.\n\nThe main risk is that the [n] monthly trend diverges from the [n] rebound, or that the assumed fertility rate is wrong. The most useful missing evidence would be early [n] monthly birth counts.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 July 2026 live births relative to July 2025: 1.03 ratio, range 0.7294 to 1.459 (range widened by code); used by m1. Overturned by: Published January-June 2026 monthly births showing a y/y decline, or evidence that the [n]-2025 marriage surge did not translate into first births by mid-2026.\n- a4 July 2026 births per woman aged [n]-[n]: 0.00055 births per woman per month, range 0.0003912 to 0.0007823 (range widened by code); used by m3. Overturned by: Published age-specific fertility rates for 2026 showing a monthly rate outside the stated range, or a large mid-2026 change in the [n]-[n] female population.",
+  "placeholders": {
+   "estimate": "8,569",
+   "p10": "2,487",
+   "p90": "29,518",
+   "interval_level": "80%",
+   "interval_basis": "method spread",
+   "n_points_kept": "17",
+   "n_methods": "2",
+   "m1_estimate": "22,494",
+   "m1_weight": "50%",
+   "m1_backtest_error": "n/a",
+   "m2_estimate": "n/a",
+   "m2_weight": "0%",
+   "m2_backtest_error": "n/a",
+   "m3_estimate": "3,264",
+   "m3_weight": "50%",
+   "m3_backtest_error": "n/a",
+   "a1_value": "1.03",
+   "a1_low": "0.7294",
+   "a1_high": "1.459",
+   "a4_value": "0.00055",
+   "a4_low": "0.0003912",
+   "a4_high": "0.0007823"
+  },
+  "digits_removed": 6,
+  "model_error": null,
+  "used_model_text": true
+ },
+ "started_at": "20261015T111320Z",
+ "wall_s": 423.7,
+ "budget": {
+  "usd_total_assumed": 0.4976,
+  "usd_tokens": 0.0576,
+  "usd_search_fee_assumed": 0.44,
+  "usd_cap": 1.0,
+  "pages_used": 6,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 22,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 44,
+  "pages_snapshot": 6,
+  "pages_live_dated": 0,
+  "pages_dropped": 38,
+  "pages_sent_to_extractor": {
+   "total": 6,
+   "snapshot": 6,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "v21c"
+}

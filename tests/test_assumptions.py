@@ -455,3 +455,36 @@ class TestInputAuditRows(unittest.TestCase):
         self.assertEqual(G._repair_errors(jr, out, av, {0: "input audit: b: a change used as a level"}), [])
         errs = G._repair_errors(jr, out, av, {0: "x", 1: "input audit: y"})
         self.assertEqual(len(errs), 2)
+
+
+class TestProblemsForRepair(unittest.TestCase):
+    """v2.1c：有方法失败、或能跑的方法差 3 倍以上，都交回裁判修一次（graph._problems）。"""
+
+    def test_conflict_and_failures(self):
+        from triangulate.agent import graph as G
+        out = {"methods": [{"id": "m1", "method": "formula_mc", "estimate": 22494.0},
+                           {"id": "m2", "method": "formula_mc", "estimate": None},
+                           {"id": "m3", "method": "formula_mc", "estimate": 3264.0}]}
+        n_ok, probs = G._problems({"methods": [{}, {}, {}]}, out, {"rejected": []}, {1: "bad params"})
+        self.assertEqual(n_ok, 2)
+        self.assertTrue(any("disagree" in p for p in probs), probs)
+        self.assertTrue(any("bad params" in p for p in probs), probs)
+
+    def test_agreeing_methods_no_problems(self):
+        from triangulate.agent import graph as G
+        out = {"methods": [{"id": "m1", "estimate": 843000.0}, {"id": "m2", "estimate": 853000.0}]}
+        self.assertEqual(G._problems({"methods": [{}, {}]}, out, {"rejected": []}, {}), (2, []))
+
+
+class TestProblemsKeepsGoodRuns(unittest.TestCase):
+    def test_two_agreeing_survivors_with_a_failure(self):
+        from triangulate.agent import graph as G
+        out = {"methods": [{"id": "m1", "estimate": 843000.0}, {"id": "m2", "estimate": 853000.0}, {"id": "m3", "estimate": None}]}
+        self.assertEqual(G._problems({"methods": [{}, {}, {}]}, out, {"rejected": []}, {2: "x"}), (2, []))
+
+    def test_single_survivor_with_a_failure_goes_back(self):
+        from triangulate.agent import graph as G
+        out = {"methods": [{"id": "m1", "estimate": 8.77e6}, {"id": "m2", "estimate": None}]}
+        n, probs = G._problems({"methods": [{}, {}]}, out, {"rejected": []}, {1: "numeric constant 100 not allowed"})
+        self.assertEqual(n, 1)
+        self.assertTrue(probs)

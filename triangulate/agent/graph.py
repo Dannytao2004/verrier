@@ -156,10 +156,10 @@ REPAIR = """
 Your previous reply proposed these methods and assumptions:
 {previous}
 
-Code could not execute any of them:
+Code found these problems:
 {errors}
 
-Return the complete JSON object again. Keep your assessment and decisions unless the errors show they were wrong; change the methods and assumptions so that at least one credible method can execute under the rules above. Do not repeat a rejected assumption in another wording."""
+Return the complete JSON object again. Keep your assessment and decisions unless the problems show they were wrong. Fix or drop each failing method. Where methods that do execute disagree strongly, decide which input or assumption is wrong and fix or drop that method instead of letting the methods be averaged. Keep at least one credible method that executes under the rules above. Do not repeat a rejected assumption in another wording."""
 
 
 SERIES_METHODS = ("series_naive", "yoy_scaling", "linear_fit", "ratio")
@@ -183,6 +183,30 @@ def _repair_errors(jr: dict, out: dict, av: dict, failed: dict) -> list:
             for i, m in enumerate(out.get("methods") or [])]
     errs += [f"assumption {a.get('id')} rejected: {a.get('reason')}" for a in av["rejected"]]
     return errs or ["no methods were proposed"]
+
+
+CONFLICT_RATIO = 3.0   # 能跑的方法之间差到这个倍数以上，就当作「至少一条路线的输入或假设错了」交回裁判
+
+
+def _problems(jr: dict, out: dict, av: dict, failed: dict) -> tuple:
+    """(能跑的方法数, 交给裁判的问题清单)：失败的方法和原因、被拒的假设、能跑的方法之间差 CONFLICT_RATIO 倍以上。
+    已有两条以上能跑而且互相吻合的方法时返回空清单。"""
+    ms = out.get("methods") or []
+    ok = [(i, m) for i, m in enumerate(ms) if i not in failed and m.get("estimate")]
+    probs = [f"method {m.get('label') or m.get('id')} ({m.get('method')}): {failed[i]}" for i, m in enumerate(ms) if i in failed]
+    if probs:
+        probs += [f"assumption {a.get('id')} rejected: {a.get('reason')}" for a in av["rejected"]]
+    if len(ok) >= 2:
+        hi, lo = max(ok, key=lambda x: x[1]["estimate"]), min(ok, key=lambda x: x[1]["estimate"])
+        if hi[1]["estimate"] / lo[1]["estimate"] > CONFLICT_RATIO:
+            probs.append(f"methods disagree: {hi[1].get('label') or hi[1]['id']} gives {hi[1]['estimate']:,.0f} but "
+                         f"{lo[1].get('label') or lo[1]['id']} gives {lo[1]['estimate']:,.0f} (more than {CONFLICT_RATIO:g}x apart); "
+                         f"at least one route's input or assumption is wrong")
+    if not ms:
+        probs = ["no methods were proposed"]
+    if len(ok) >= 2 and not any(x.startswith("methods disagree") for x in probs):
+        return len(ok), []   # 已有两条以上互相吻合的路线：不交回裁判，免得把好结果改坏
+    return len(ok), probs
 
 
 def _dry_run_errors(jr: dict, pts: list, target: dict, only_methods=None) -> list:
@@ -386,9 +410,10 @@ def build(ctx: Context):
                 out_c, av_c, failed = _code_check(jr, pts, target, only)
                 aud = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, target)
                 failed.update(aud)
-                return aud, _repair_errors(jr, out_c, av_c, failed)
+                return (aud, *_problems(jr, out_c, av_c, failed))
 
-            aud, errs = check()
+            # 有方法失败、或能跑的方法互相打架，就交回裁判修一次；修完一个都跑不了而原来能跑，就退回原方案
+            aud, n_ok, errs = check()
             if errs:
                 jr["repair"] = {"errors": errs}
                 try:
@@ -401,11 +426,15 @@ def build(ctx: Context):
                 if out2 is None:
                     jr["repair"]["error"] = err2
                 else:
-                    jr["repair"]["previous_methods"], jr["repair"]["previous_assumptions"] = jr["methods"], jr["assumptions"]
+                    prev = (jr["methods"], jr["assumptions"], aud)
+                    jr["repair"]["previous_methods"], jr["repair"]["previous_assumptions"] = prev[0], prev[1]
                     jr["methods"] = [m for m in out2.get("methods") or [] if isinstance(m, dict)]
                     a2 = out2.get("assumptions")
                     jr["assumptions"] = (a2 if isinstance(a2, list) else [])[:20]
-                    aud, jr["repair"]["errors_after"] = check()
+                    aud, n_ok2, jr["repair"]["errors_after"] = check()
+                    if n_ok2 == 0 and n_ok > 0:
+                        jr["methods"], jr["assumptions"], aud = prev
+                        jr["repair"]["reverted"] = "repaired methods could not execute; kept the original ones"
             jr["audit_failed"] = {str(i): r for i, r in aud.items()}
         upd.update(points=pts, judge_rounds=[jr])
         if extra:
