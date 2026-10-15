@@ -19,7 +19,7 @@ from . import assumptions as AS
 from . import compute as C
 from .markets import search_markets
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
-from .prompts import (CHECKLIST, EXTRA_RULE_R1, EXTRA_RULE_R2, FINAL_SYSTEM, FINAL_USER, JUDGE_SYSTEM, JUDGE_USER,
+from .prompts import (AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, EXTRA_RULE_R1, EXTRA_RULE_R2, FINAL_SYSTEM, FINAL_USER, JUDGE_SYSTEM, JUDGE_USER,
                       METHODS_SPEC, PLAN_SYSTEM, PLAN_USER)
 
 CATEGORIES = {"own_history", "related_series", "physical_flow", "capacity_consumption", "administrative", "attention",
@@ -162,17 +162,98 @@ Code could not execute any of them:
 Return the complete JSON object again. Keep your assessment and decisions unless the errors show they were wrong; change the methods and assumptions so that at least one credible method can execute under the rules above. Do not repeat a rejected assumption in another wording."""
 
 
-def _dry_run_errors(jr: dict, pts: list, target: dict, only_methods=None) -> list:
-    """按 compute 的规则试跑裁判选的方法（纯代码，不调模型）。至少一个方法有估计 = 空列表；否则返回给裁判看的错误清单。"""
+SERIES_METHODS = ("series_naive", "yoy_scaling", "linear_fit", "ratio")
+TARGET_HISTORY_ROLE = "the target quantity itself (same entity and measure), for an earlier period of the same calendar span"
+
+
+def _code_check(jr: dict, pts: list, target: dict, only_methods=None) -> tuple:
+    """按 compute 的规则试跑裁判选的方法（纯代码，不调模型）。返回 (compute 结果, 假设校验结果, {方法下标: 失败原因})。"""
     by_id = {p["id"]: p for p in pts}
     av = AS.validate(jr.get("assumptions") or [], target)
     out = C.run(jr.get("methods") or [], by_id, target, assumptions=av, only_methods=only_methods)
-    if any(m.get("estimate") for m in out.get("methods") or []):
+    failed = {i: (m.get("error") or "no estimate") for i, m in enumerate(out.get("methods") or []) if not m.get("estimate")}
+    return out, av, failed
+
+
+def _repair_errors(jr: dict, out: dict, av: dict, failed: dict) -> list:
+    """至少一个方法能用 = 空列表；否则给裁判看的错误清单（每个方法为什么不能用 + 被拒的假设）。"""
+    if len(failed) < len(jr.get("methods") or []):
         return []
-    errs = [f"method {m.get('label') or m.get('id')} ({m.get('method')}): {m.get('error') or 'no estimate'}"
-            for m in out.get("methods") or []]
+    errs = [f"method {m.get('label') or m.get('id')} ({m.get('method')}): {failed.get(i, 'no estimate')}"
+            for i, m in enumerate(out.get("methods") or [])]
     errs += [f"assumption {a.get('id')} rejected: {a.get('reason')}" for a in av["rejected"]]
     return errs or ["no methods were proposed"]
+
+
+def _dry_run_errors(jr: dict, pts: list, target: dict, only_methods=None) -> list:
+    """只按代码规则检查（不做输入核对）。"""
+    out, av, failed = _code_check(jr, pts, target, only_methods)
+    return _repair_errors(jr, out, av, failed)
+
+
+def _evidence(iid: str, by_id: dict, kept_a: dict) -> str:
+    if iid in kept_a:
+        a = kept_a[iid]
+        return f'analyst assumption {iid}: "{a["name"]}" = {a["value"]} {a["unit"]}'
+    p = by_id.get(iid)
+    if p is None:
+        return f"{iid}: unknown id"
+    dom = urllib.parse.urlsplit(p.get("source_url", "")).netloc
+    return (f'data point {iid}: "{p["name"]}" = {_fmt_num(p["value"])} {p.get("unit", "")}, period '
+            f'{p.get("period_start") or "?"}..{p.get("period_end") or "?"}, source {dom}')
+
+
+def audit_rows(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
+    """一个方法里要核对的输入：[(输入名, id, 裁判写的 role, 证据描述)]。日历常数不核对；序列方法核对 target_history。"""
+    prm = m_in.get("params") or {}
+    if m_out.get("method") == "formula_mc":
+        rows = []
+        for name, spec in (prm.get("inputs") or {}).items():
+            spec = spec if isinstance(spec, dict) else {"id": spec}
+            iid = str(spec.get("id"))
+            if not iid.startswith("k_"):
+                rows.append((name, iid, str(spec.get("role") or "").strip(), _evidence(iid, by_id, kept_a)))
+        return rows
+    if m_out.get("method") in SERIES_METHODS:
+        return [(str(i), str(i), TARGET_HISTORY_ROLE, _evidence(str(i), by_id, kept_a)) for i in prm.get("target_history") or []]
+    return []
+
+
+def audit_methods(llm, qid: str, jr: dict, out: dict, av: dict, pts: list, failed: dict, target: dict) -> dict:
+    """输入核对：对代码能跑的方法，问一次模型「每个输入的证据是不是公式需要的那个量」。返回 {方法下标: 原因}。
+    核对本身失败（调用出错、超预算）时不拦方法，原因记在 jr["audit_error"]。"""
+    by_id, kept_a = {p["id"]: p for p in pts}, {a["id"]: a for a in av["kept"]}
+    res, blocks, index = {}, [], {}
+    for i, (mi, mo) in enumerate(zip(jr.get("methods") or [], out.get("methods") or [])):
+        if i in failed:
+            continue
+        rows = audit_rows(mi, mo, by_id, kept_a)
+        no_role = [r[0] for r in rows if not r[2]]
+        if no_role:
+            res[i] = f"input audit: no role stated for {', '.join(no_role)}"
+            continue
+        if rows:
+            index[mo["id"]] = i
+            formula = (mi.get("params") or {}).get("formula") or mo.get("method")
+            blocks.append(f"{mo['id']} ({mo.get('method')}): {formula}\n" +
+                          "\n".join(f'  - {n}: role = "{role}"; evidence = {ev}' for n, _, role, ev in rows))
+    if not blocks:
+        return res
+    try:
+        out_a, err = llm.ask(AUDIT_SYSTEM, AUDIT_USER.format(target=dumps(target), methods="\n\n".join(blocks)),
+                                 role="audit", qid=qid, max_tokens=4000)
+    except BudgetExceeded as e:
+        out_a, err = None, str(e)
+    if out_a is None:
+        jr["audit_error"] = err
+        return res
+    for m in out_a.get("methods") or []:
+        i = index.get(str(m.get("id")))
+        bad = [f"{x.get('name')}: {x.get('reason', '')}"[:200] for x in m.get("inputs") or []
+               if isinstance(x, dict) and str(x.get("verdict", "")).lower() == "mismatch"]
+        if i is not None and bad:
+            res[i] = "input audit: " + "; ".join(bad)
+    return res
 
 
 def build(ctx: Context):
@@ -296,8 +377,18 @@ def build(ctx: Context):
               "assumptions": raw_a[:20], "unknown_ids_in_decisions": sorted(set(dec) - ids)}
         if dropped_extra:
             jr["ablation_dropped_extra_directions"] = dropped_extra
-        if rnd == 2 or not extra:  # 这一轮的方法就是 compute 要用的：先用代码试跑，一个都跑不出来就把原因交回裁判修一次
-            errs = _dry_run_errors(jr, pts, state["plan"]["target"], AB.ALLOWED_METHODS if ablate else None)
+        if rnd == 2 or not extra:
+            # 这一轮的方法就是 compute 要用的：代码试跑 + 输入核对（另一次模型调用：每个输入实际是什么 vs 公式需要它是什么），
+            # 一个方法都过不了就把原因交回裁判修一次；核对没过的方法 compute 不用
+            target, only = state["plan"]["target"], (AB.ALLOWED_METHODS if ablate else None)
+
+            def check():
+                out_c, av_c, failed = _code_check(jr, pts, target, only)
+                aud = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, target)
+                failed.update(aud)
+                return aud, _repair_errors(jr, out_c, av_c, failed)
+
+            aud, errs = check()
             if errs:
                 jr["repair"] = {"errors": errs}
                 try:
@@ -314,8 +405,8 @@ def build(ctx: Context):
                     jr["methods"] = [m for m in out2.get("methods") or [] if isinstance(m, dict)]
                     a2 = out2.get("assumptions")
                     jr["assumptions"] = (a2 if isinstance(a2, list) else [])[:20]
-                    jr["repair"]["errors_after"] = _dry_run_errors(jr, pts, state["plan"]["target"],
-                                                                   AB.ALLOWED_METHODS if ablate else None)
+                    aud, jr["repair"]["errors_after"] = check()
+            jr["audit_failed"] = {str(i): r for i, r in aud.items()}
         upd.update(points=pts, judge_rounds=[jr])
         if extra:
             upd["directions"] = state["directions"] + extra
@@ -333,8 +424,11 @@ def build(ctx: Context):
         pts = {p["id"]: p for p in state.get("points") or []}
         target = state["plan"]["target"]
         av = AS.validate(jr.get("assumptions") or [], target)
-        out = C.run(jr.get("methods") or [], pts, target, assumptions=av,
-                    only_methods=AB.ALLOWED_METHODS if ablate else None)
+        bad = jr.get("audit_failed") or {}
+        methods = [m for i, m in enumerate(jr.get("methods") or []) if str(i) not in bad]
+        out = C.run(methods, pts, target, assumptions=av, only_methods=AB.ALLOWED_METHODS if ablate else None)
+        out["excluded_by_input_audit"] = [{"label": str(m.get("id", "")), "method": m.get("method"), "reason": bad[str(i)]}
+                                          for i, m in enumerate(jr.get("methods") or []) if str(i) in bad]
         out["methods_from_round"] = jr.get("round")
         labels = {m["id"]: m.get("label") for m in out["methods"]}
         for a in av["kept"]:

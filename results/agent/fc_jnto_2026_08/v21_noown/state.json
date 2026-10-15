@@ -1,0 +1,5539 @@
+{
+ "qid": "fc_jnto_2026_08",
+ "question": "Assume today is 2026-08-16. You know nothing published after this date. Estimate the number of foreign visitor arrivals to Japan in August 2026, as it will be first reported in the Japan National Tourism Organization's (JNTO) monthly estimate.",
+ "as_of": "2026-08-16",
+ "plan": {
+  "target": {
+   "what": "Number of foreign visitor arrivals to Japan (inbound international visitors) as estimated by the Japan National Tourism Organization (JNTO) for the calendar month of August 2026. This is the headline monthly estimate of visitor arrivals, counting foreign nationals entering Japan for tourism, busines",
+   "unit": "visits (arrivals)",
+   "period_start": "2026-08-01",
+   "period_end": "2026-08-31",
+   "publisher": "Japan National Tourism Organization (JNTO)",
+   "cadence": "monthly, typically released around the 15th-20th of the following month",
+   "caveats": "The target period is future relative to the information cutoff (2026-08-16). The estimate will be based on JNTO's methodology, which uses immigration data from the Ministry of Justice and may include preliminary figures. The definition counts entries, not unique visitors. Alternative interpretations"
+  },
+  "market_keywords": [
+   "japan tourism",
+   "visitor arrivals",
+   "august 2026"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "JNTO monthly estimates",
+    "hypothesis": "The target is a continuation of a time series with strong seasonality. August is typically a peak month for inbound tourism to Japan due to summer holidays. The most recent published months before the cutoff (e.g., June 2026, July 2026 if available) and the same month in previous years (August 2023, 2024, 2025) provide a baseline for trend and seasonality. The relationship is direct: target = recent level * seasonal factor * trend adjustment.",
+    "data_to_find": "JNTO monthly foreign visitor arrivals for August 2023, August 2024, August 2025, and the most recent months available before 2026-08-16 (e.g., June 2026, July 2026 if published). Also year-to-date totals for 2026 up to July. Minimum evidence: at least the August values for the last two years and the latest monthly value in 2026.",
+    "search_hints": [
+     "JNTO monthly visitor arrivals August 2025",
+     "Japan inbound tourism statistics 2026 June July",
+     "訪日外客数 2026年6月 JNTO"
+    ],
+    "expected_information": 5,
+    "selected": false,
+    "ablation_dropped": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "Immigration and border control statistics",
+    "hypothesis": "JNTO's estimates are based on immigration records. The number of foreign nationals entering Japan in August 2026 can be approximated by the number of foreign entries recorded by immigration, possibly adjusted for coverage (e.g., excluding crew, diplomats, etc.). This route uses a broader administrative total multiplied by a coverage share to match JNTO's definition.",
+    "data_to_find": "Monthly statistics on foreign entries to Japan from the Ministry of Justice (MOJ) or Immigration Services Agency for recent months and August in previous years. Also the ratio of JNTO reported arrivals to MOJ foreign entries in overlapping periods to estimate the coverage adjustment. Minimum evidence: MOJ foreign entries for August 2025 and the corresponding JNTO figure to compute the ratio.",
+    "search_hints": [
+     "出入国在留管理庁 外国人入国者数 月別",
+     "Japan immigration foreign entries monthly statistics 2025",
+     "MOJ foreign visitor arrivals August 2025"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "physical_flow",
+    "perspective": "Airport and seaport passenger traffic",
+    "hypothesis": "Foreign visitor arrivals are a subset of international passenger arrivals at Japanese airports and seaports. Total international arrivals (including Japanese nationals) multiplied by the foreign share gives an estimate. The foreign share can be derived from historical data or from immigration statistics. This route uses physical throughput data from airports and ports.",
+    "data_to_find": "Monthly international passenger arrivals at major Japanese airports (Narita, Haneda, Kansai, Chubu, Fukuoka, etc.) and cruise ship passenger arrivals for August 2026 (if available) or August 2025 as a proxy. Also the share of foreign nationals among international arrivals. Minimum evidence: total international arrivals for August 2025 and the foreign share for that month.",
+    "search_hints": [
+     "Narita airport international passenger arrivals August 2025",
+     "Japan international air passenger traffic monthly 2026",
+     "クルーズ船 乗客数 2026年8月 日本"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "capacity_consumption",
+    "perspective": "Airlines and travel agencies",
+    "hypothesis": "Available seat capacity on international flights to Japan multiplied by expected load factor and the share of foreign visitors yields an estimate. This route uses airline schedules and booking data. It is forward-looking and can incorporate announced capacity changes for August 2026.",
+    "data_to_find": "International airline seat capacity to Japan for August 2026 (from OAG or airline schedules), historical load factors on Japan routes, and the proportion of seats occupied by foreign visitors. Minimum evidence: seat capacity for August 2026 and a recent load factor and foreign share.",
+    "search_hints": [
+     "Japan international flight seat capacity August 2026",
+     "OAG Japan inbound capacity 2026",
+     "国際線 座席供給 2026年8月 日本"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "forecasts_markets",
+    "perspective": "Government and industry forecasts",
+    "hypothesis": "Official or industry forecasts for inbound tourism in 2026, particularly for the summer months, can provide a direct estimate or a range. The Japan Tourism Agency, JNTO, or private research institutes may publish forecasts. These forecasts often incorporate current trends and policy changes.",
+    "data_to_find": "Published forecasts for Japan inbound tourism in 2026, especially for August, from JNTO, Japan Tourism Agency, or reputable industry sources (e.g., Nomura Research Institute, JTB). Minimum evidence: a forecast for August 2026 or a full-year 2026 forecast that can be seasonally decomposed.",
+    "search_hints": [
+     "Japan inbound tourism forecast 2026",
+     "訪日外国人 2026年 予測 8月",
+     "JNTO 2026 forecast visitor arrivals"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "shocks",
+    "perspective": "Event and policy calendar",
+    "hypothesis": "Major events, policy changes (e.g., visa liberalization, travel advisories), or disruptions (e.g., natural disasters, pandemics, geopolitical tensions) in August 2026 could significantly affect arrivals. Identifying such shocks and their expected impact helps adjust the baseline estimate.",
+    "data_to_find": "Calendar of major events in Japan in August 2026 (e.g., World Expo if still ongoing, sports events, festivals), any new visa policies or travel restrictions announced before the cutoff, and any known disruptions (e.g., typhoon forecasts, airline strikes). Minimum evidence: a list of events with expected attendance from abroad and any policy changes.",
+    "search_hints": [
+     "Japan major events August 2026",
+     "Japan visa policy changes 2026",
+     "2026年8月 日本 イベント 外国人"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "base_rates",
+    "perspective": "Seasonal and trend decomposition",
+    "hypothesis": "The ratio of August arrivals to the annual total or to adjacent months is stable. Using a recent year's seasonal pattern and the year-to-date total for 2026, we can estimate August 2026. This route requires the seasonal factor (August share of annual total) and the 2026 YTD total.",
+    "data_to_find": "Monthly distribution of foreign visitor arrivals for a recent full year (e.g., 2025) to compute the August share, and the year-to-date total for 2026 up to July (or latest available). Minimum evidence: August share from 2025 and 2026 YTD total.",
+    "search_hints": [
+     "JNTO monthly arrivals 2025 seasonality",
+     "訪日外客数 月別 2025年",
+     "Japan inbound tourism year-to-date 2026"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c8",
+    "category": "related_series",
+    "perspective": "Source market trends",
+    "hypothesis": "Arrivals from major source countries (e.g., South Korea, China, Taiwan, USA) can be summed to approximate the total. Trends in these markets, such as recovery rates compared to 2019, can be used to project August 2026. This route uses country-level data and assumes stable shares.",
+    "data_to_find": "Monthly foreign visitor arrivals by country for recent months (e.g., June 2026) and for August 2025, from JNTO or source country statistics. Also any available data on flight routes or visa changes for these markets. Minimum evidence: country-level arrivals for August 2025 and the latest month in 2026.",
+    "search_hints": [
+     "JNTO arrivals by country August 2025",
+     "訪日外客数 国別 2026年6月",
+     "Japan inbound visitors by nationality 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "ablation: dropped 1 own_history candidate direction(s)",
+  "plan proposed 8 candidate directions in 7 categories; running 7 (budget cap 10)",
+  "no own_history direction in plan"
+ ],
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "related_series",
+   "perspective": "Immigration and border control statistics",
+   "hypothesis": "JNTO's estimates are based on immigration records. The number of foreign nationals entering Japan in August 2026 can be approximated by the number of foreign entries recorded by immigration, possibly adjusted for coverage (e.g., excluding crew, diplomats, etc.). This route uses a broader administrative total multiplied by a coverage share to match JNTO's definition.",
+   "data_to_find": "Monthly statistics on foreign entries to Japan from the Ministry of Justice (MOJ) or Immigration Services Agency for recent months and August in previous years. Also the ratio of JNTO reported arrivals to MOJ foreign entries in overlapping periods to estimate the coverage adjustment. Minimum evidence: MOJ foreign entries for August 2025 and the corresponding JNTO figure to compute the ratio.",
+   "search_hints": [
+    "出入国在留管理庁 外国人入国者数 月別",
+    "Japan immigration foreign entries monthly statistics 2025",
+    "MOJ foreign visitor arrivals August 2025"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d2",
+   "category": "forecasts_markets",
+   "perspective": "Government and industry forecasts",
+   "hypothesis": "Official or industry forecasts for inbound tourism in 2026, particularly for the summer months, can provide a direct estimate or a range. The Japan Tourism Agency, JNTO, or private research institutes may publish forecasts. These forecasts often incorporate current trends and policy changes.",
+   "data_to_find": "Published forecasts for Japan inbound tourism in 2026, especially for August, from JNTO, Japan Tourism Agency, or reputable industry sources (e.g., Nomura Research Institute, JTB). Minimum evidence: a forecast for August 2026 or a full-year 2026 forecast that can be seasonally decomposed.",
+   "search_hints": [
+    "Japan inbound tourism forecast 2026",
+    "訪日外国人 2026年 予測 8月",
+    "JNTO 2026 forecast visitor arrivals"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d3",
+   "category": "base_rates",
+   "perspective": "Seasonal and trend decomposition",
+   "hypothesis": "The ratio of August arrivals to the annual total or to adjacent months is stable. Using a recent year's seasonal pattern and the year-to-date total for 2026, we can estimate August 2026. This route requires the seasonal factor (August share of annual total) and the 2026 YTD total.",
+   "data_to_find": "Monthly distribution of foreign visitor arrivals for a recent full year (e.g., 2025) to compute the August share, and the year-to-date total for 2026 up to July (or latest available). Minimum evidence: August share from 2025 and 2026 YTD total.",
+   "search_hints": [
+    "JNTO monthly arrivals 2025 seasonality",
+    "訪日外客数 月別 2025年",
+    "Japan inbound tourism year-to-date 2026"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d4",
+   "category": "physical_flow",
+   "perspective": "Airport and seaport passenger traffic",
+   "hypothesis": "Foreign visitor arrivals are a subset of international passenger arrivals at Japanese airports and seaports. Total international arrivals (including Japanese nationals) multiplied by the foreign share gives an estimate. The foreign share can be derived from historical data or from immigration statistics. This route uses physical throughput data from airports and ports.",
+   "data_to_find": "Monthly international passenger arrivals at major Japanese airports (Narita, Haneda, Kansai, Chubu, Fukuoka, etc.) and cruise ship passenger arrivals for August 2026 (if available) or August 2025 as a proxy. Also the share of foreign nationals among international arrivals. Minimum evidence: total international arrivals for August 2025 and the foreign share for that month.",
+   "search_hints": [
+    "Narita airport international passenger arrivals August 2025",
+    "Japan international air passenger traffic monthly 2026",
+    "クルーズ船 乗客数 2026年8月 日本"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d5",
+   "category": "capacity_consumption",
+   "perspective": "Airlines and travel agencies",
+   "hypothesis": "Available seat capacity on international flights to Japan multiplied by expected load factor and the share of foreign visitors yields an estimate. This route uses airline schedules and booking data. It is forward-looking and can incorporate announced capacity changes for August 2026.",
+   "data_to_find": "International airline seat capacity to Japan for August 2026 (from OAG or airline schedules), historical load factors on Japan routes, and the proportion of seats occupied by foreign visitors. Minimum evidence: seat capacity for August 2026 and a recent load factor and foreign share.",
+   "search_hints": [
+    "Japan international flight seat capacity August 2026",
+    "OAG Japan inbound capacity 2026",
+    "国際線 座席供給 2026年8月 日本"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d6",
+   "category": "related_series",
+   "perspective": "Source market trends",
+   "hypothesis": "Arrivals from major source countries (e.g., South Korea, China, Taiwan, USA) can be summed to approximate the total. Trends in these markets, such as recovery rates compared to 2019, can be used to project August 2026. This route uses country-level data and assumes stable shares.",
+   "data_to_find": "Monthly foreign visitor arrivals by country for recent months (e.g., June 2026) and for August 2025, from JNTO or source country statistics. Also any available data on flight routes or visa changes for these markets. Minimum evidence: country-level arrivals for August 2025 and the latest month in 2026.",
+   "search_hints": [
+    "JNTO arrivals by country August 2025",
+    "訪日外客数 国別 2026年6月",
+    "Japan inbound visitors by nationality 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c8"
+  },
+  {
+   "id": "d7",
+   "category": "shocks",
+   "perspective": "Event and policy calendar",
+   "hypothesis": "Major events, policy changes (e.g., visa liberalization, travel advisories), or disruptions (e.g., natural disasters, pandemics, geopolitical tensions) in August 2026 could significantly affect arrivals. Identifying such shocks and their expected impact helps adjust the baseline estimate.",
+   "data_to_find": "Calendar of major events in Japan in August 2026 (e.g., World Expo if still ongoing, sports events, festivals), any new visa policies or travel restrictions announced before the cutoff, and any known disruptions (e.g., typhoon forecasts, airline strikes). Minimum evidence: a list of events with expected attendance from abroad and any policy changes.",
+   "search_hints": [
+    "Japan major events August 2026",
+    "Japan visa policy changes 2026",
+    "2026年8月 日本 イベント 外国人"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "b1",
+   "category": "base_rates",
+   "perspective": "JNTO monthly seasonality",
+   "hypothesis": "A stable August share of annual JNTO foreign visitor arrivals would unlock a seasonal-share route (d3) using a 2026 year-to-date total or a 2025 annual total. Without this share, the August level cannot be anchored to the annual scale.",
+   "data_to_find": "JNTO monthly visitor arrival estimates for August in recent years (e.g., 2018, 2019, 2023, 2024, 2025) and the corresponding annual totals, to compute August's share of the annual total.",
+   "search_hints": [
+    "J",
+    "N",
+    "T",
+    "O"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b2",
+   "category": "related_series",
+   "perspective": "Immigration coverage bridge",
+   "hypothesis": "A conversion factor from total foreign national entries (Immigration Services Agency) to JNTO visitor arrivals would let the 2025 immigration total (p4) and short-term share (p3) be used to scale a 2026 August estimate. This is the key missing bridge for d1.",
+   "data_to_find": "Annual or monthly JNTO foreign visitor arrivals alongside Immigration Services Agency foreign entry totals for the same periods, to estimate the JNTO/immigration coverage ratio.",
+   "search_hints": [
+    "J",
+    "N",
+    "T",
+    "O"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b3",
+   "category": "forecasts_markets",
+   "perspective": "Summer 2026 capacity and demand",
+   "hypothesis": "Announced international seat capacity to Japan for August 2026 and any airline/industry summer outlook would provide a forward-looking anchor for d5 and help bound the August 2026 level, especially given the post-2025 Chinese advisory shock.",
+   "data_to_find": "OAG or airline schedule data for international seats to Japan in August 2026; JNTO/JTA summer 2026 forecasts; airline capacity announcements for Japan routes.",
+   "search_hints": [
+    "O",
+    "A",
+    "G",
+    " "
+   ],
+   "expected_information": 3
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "出入国在留管理庁 外国人入国者数 月別 2025",
+     "JNTO 訪日外国人 2025年8月 推計値",
+     "出入国在留管理庁 2025年8月 外国人入国者数 新規入国者 月別 速報",
+     "JNTO 訪日外客数 2026年 月別 推計値"
+    ],
+    "urls": [
+     "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "https://www.e-stat.go.jp/stat-search/files?page=1&layout=dataset&bunya_l=02&stat_infid=000040362034",
+     "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007847208000000001,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.e-stat.go.jp/stat-search/files?page=1&layout=dataset&bunya_l=02&stat_infid=000040362034",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260416063424",
+     "page_date": "2026-04-16",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/440edd8c03f4f4fc.raw",
+     "text_chars": 2573,
+     "leak_hits": [],
+     "chars_sent": 2573,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 3
+    },
+    {
+     "url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260308231405",
+     "page_date": "2026-03-08",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/f3cc366255ab0ed1.raw",
+     "text_chars": 1657,
+     "leak_hits": [],
+     "chars_sent": 1657,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 9,
+     "n_points_verified": 8
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      6
+     ],
+     "name": "Year-on-year percentage increase in foreign national entries, first half of 2025",
+     "value": 20.0,
+     "value_as_written": "20.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2025-01-01",
+     "period_end": "2025-06-30",
+     "published_at_if_visible": "",
+     "quote": "2,137万6,170人で、前年同期に比べ355万5,541人(20.0%)増加",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      8
+     ],
+     "name": "Year-on-year percentage increase in foreign national new entries, first half of 2025",
+     "value": 20.2,
+     "value_as_written": "20.2",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2025-01-01",
+     "period_end": "2025-06-30",
+     "published_at_if_visible": "",
+     "quote": "1,972万8,405人で、前年同期に比べ331万4,380人(20.2%)増加しました",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      13
+     ],
+     "name": "Share of 'short-term stay' among new foreign entries, first half of 2025",
+     "value": 98.1,
+     "value_as_written": "98.1",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent (share of new foreign entries)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-06-30",
+     "published_at_if_visible": "",
+     "quote": "「短期滞在」(1,935万8,017人、対前年同期20.3%増)が最も多く、全体の98.1%を占め",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      0
+     ],
+     "name": "Foreign nationals entering Japan in 2025 (Immigration Services Agency total, all-time high)",
+     "value": 42430000.0,
+     "value_as_written": "42.43",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "foreign nationals entering Japan",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "the number of foreign nationals who entered Japan in 2025 totaled an all-time high of about 42.43 million.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      1
+     ],
+     "name": "Year-on-year increase in foreign nationals entering Japan in 2025",
+     "value": 5650000.0,
+     "value_as_written": "5.65",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "foreign nationals entering Japan (increase)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "The figure that includes permanent residents and other long-term stayers increased by about 5.65 million from the year before, surpassing 40 million for the first time.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      2
+     ],
+     "name": "Share of first-time arrivals in Japan in 2025 who were short-term visitors",
+     "value": 98.1,
+     "value_as_written": "98.1",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent (short-term visitors / first-time arrivals)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "Among those arriving in Japan for the first time, 98.1 percent were short-term visitors, indicating an increase in tourists driven by factors such as the weak yen and the rising number of internationa",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      3
+     ],
+     "name": "Foreigners entering Japan with a student visa in 2025 (record high)",
+     "value": 180000.0,
+     "value_as_written": "180,000",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "foreigners entering with a student visa",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "The number of foreigners entering with a student visa totaled about 180,000, also a record high.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      4
+     ],
+     "name": "New entrants from China in 2025",
+     "value": 7220000.0,
+     "value_as_written": "7.22",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "new entrants from China",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "Last year, the number of new entrants from China came to about 7.22 million, up 1.74 million from 2024.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      5
+     ],
+     "name": "Year-on-year increase in new entrants from China in 2025",
+     "value": 1740000.0,
+     "value_as_written": "1.74",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "new entrants from China (increase)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "Last year, the number of new entrants from China came to about 7.22 million, up 1.74 million from 2024.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      6
+     ],
+     "name": "Monthly arrivals in December 2025 (after Chinese travel advisory)",
+     "value": 280000.0,
+     "value_as_written": "280,000",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "arrivals",
+     "period_start": "2025-12-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "ged its citizens to refrain from traveling to Japan following Prime Minister Takaichi Sanae's remarks concerning a potential Taiwan contingency nearly halved from the previous year to roughly 280,000.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      7
+     ],
+     "name": "Foreign workers in Japan as of end of October 2025 (record high)",
+     "value": 2571037.0,
+     "value_as_written": "2,571,037",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "foreign workers",
+     "period_start": "2025-10-31",
+     "period_end": "2025-10-31",
+     "published_at_if_visible": "",
+     "quote": "the number of foreign workers in Japan as of the end of October 2025 reached a record-high 2,571,037.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      0
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign national entries to Japan (new entries plus re-entries), first half of 2025",
+     "value_as_written": "2,137万6,170"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      1
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign national new entries to Japan, first half of 2025",
+     "value_as_written": "1,972万8,405"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      2
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign nationals granted special landing permission (ship tourism landing etc.), first half of 2025",
+     "value_as_written": "202万530"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      3
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Total foreign entries and special landing permissions (foreign entrants total), first half of 2025",
+     "value_as_written": "2,339万6,700"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      4
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Japanese nationals departing Japan, first half of 2025",
+     "value_as_written": "660万8,996"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      5
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Year-on-year increase in foreign national entries, first half of 2025",
+     "value_as_written": "355万5,541"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      7
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Year-on-year increase in foreign national new entries, first half of 2025",
+     "value_as_written": "331万4,380"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      9
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign entries from South Korea, first half of 2025",
+     "value_as_written": "466万7,285"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      10
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign entries from China, first half of 2025",
+     "value_as_written": "374万3,406"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      11
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign entries from Taiwan, first half of 2025",
+     "value_as_written": "311万124"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      12
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign entries with status of residence 'short-term stay', first half of 2025",
+     "value_as_written": "1,935万8,017"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416063424",
+     "order": [
+      2,
+      14
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign nationals granted crew landing permission, first half of 2025",
+     "value_as_written": "121万9,417"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+     "via": "snapshot",
+     "page_date": "2026-03-08",
+     "snapshot_ts": "20260308231405",
+     "order": [
+      3,
+      8
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Share of foreign workers in manufacturing (as of end of October 2025)",
+     "value_as_written": "a quarter"
+    }
+   ],
+   "wall_s": 1731.4
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Japan inbound tourism forecast 2026 visitor arrivals",
+     "訪日外国人 2026年 予測 8月",
+     "JNTO 訪日外客数 2026年6月 推計値 前年同月比",
+     "訪日外国人 2026年夏 8月 予測 インバウンド 減少"
+    ],
+    "urls": [
+     "https://www.tourism.jp/en/research-reports/2026-inbound-outlook/",
+     "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "https://www.dir.co.jp/english/research/report/analysis/20260413_025695.html",
+     "https://www.toutiao.com/article/7664460194746729001/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.012209807999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.tourism.jp/en/research-reports/2026-inbound-outlook/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260716193946",
+     "page_date": "2026-07-16",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/e0d3878bc4d87111.raw",
+     "text_chars": 971,
+     "leak_hits": [],
+     "chars_sent": 971,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 5,
+     "n_points_verified": 4
+    },
+    {
+     "url": "https://www.dir.co.jp/english/research/report/analysis/20260413_025695.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260520165358",
+     "page_date": "2026-05-20",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/53c67e5639a474c9.raw",
+     "text_chars": 2243,
+     "leak_hits": [],
+     "chars_sent": 2243,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://www.toutiao.com/article/7664460194746729001/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      1,
+      0
+     ],
+     "name": "Japan inbound foreign visitor arrivals, June 2026 monthly estimate (JNTO)",
+     "value": 3148600.0,
+     "value_as_written": "3,148,600",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "6月の訪日外客数は3,148,600人で、前年同月比6.8%減となったものの",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      1,
+      2
+     ],
+     "name": "Year-on-year change in Japan inbound foreign visitor arrivals, June 2026 vs June 2025",
+     "value": 6.8,
+     "value_as_written": "6.8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "6月:前年同月比6.8%減の315万人",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      1,
+      3
+     ],
+     "name": "Cumulative Japan inbound foreign visitor arrivals, first half (January-June) 2026",
+     "value": 21084800.0,
+     "value_as_written": "21,084,800",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2026-01-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "また、上半期の累計で21,084,800人となった。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      1,
+      4
+     ],
+     "name": "Number of markets recording record-high June inbound arrivals, June 2026",
+     "value": 15.0,
+     "value_as_written": "15",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "markets",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "台湾、韓国、米国、インドなど15市場で6月として過去最高を記録した",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "number: unknown scale word '万'",
+     "name": "Japan inbound foreign visitor arrivals, June 2026 monthly estimate rounded (JNTO)",
+     "value_as_written": "315"
+    }
+   ],
+   "wall_s": 1904.2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "JNTO monthly foreign visitor arrivals 2025 monthly breakdown August",
+     "訪日外客数 2025年 月別 推計値 JNTO",
+     "訪日外客数 2026年6月 推計値 JNTO 累計",
+     "Japan visitor arrivals 2026 first half year-to-date JNTO record"
+    ],
+    "urls": [
+     "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "https://www.travelvision.jp/news/detail/news-120617?comment_pg=3",
+     "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "https://www.travelvoice.jp/20260715-160182"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007472388,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260716193946",
+     "page_date": "2026-07-16",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/e0d3878bc4d87111.raw",
+     "text_chars": 971,
+     "leak_hits": [],
+     "chars_sent": 971,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 4,
+     "n_points_verified": 3
+    },
+    {
+     "url": "https://www.travelvision.jp/news/detail/news-120617?comment_pg=3",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.travelvoice.jp/20260715-160182",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260716034720",
+     "page_date": "2026-07-16",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/30f6e459ef7a3945.raw",
+     "text_chars": 424,
+     "leak_hits": [],
+     "chars_sent": 424,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 8
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      0,
+      0
+     ],
+     "name": "June 2026 estimated foreign visitor arrivals to Japan (JNTO monthly estimate)",
+     "value": 3148600.0,
+     "value_as_written": "3,148,600",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "6月の訪日外客数は3,148,600人で、前年同月比6.8%減となったものの",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      0,
+      2
+     ],
+     "name": "Year-on-year change in June 2026 foreign visitor arrivals to Japan",
+     "value": 6.8,
+     "value_as_written": "6.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "6月:前年同月比6.8%減の315万人",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      0,
+      3
+     ],
+     "name": "Cumulative first-half 2026 foreign visitor arrivals to Japan (JNTO estimate)",
+     "value": 21084800.0,
+     "value_as_written": "21,084,800",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2026-01-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "また、上半期の累計で21,084,800人となった。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      0
+     ],
+     "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026 (provisional), year-on-year change",
+     "value": 6.8,
+     "value_as_written": "6.8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "2026年6月の訪日外国人旅行者数(推計値)は、2025年同月比6.8%減の314万8600人となった。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      2
+     ],
+     "name": "JNTO cumulative foreign visitor arrivals to Japan, January–June 2026, year-on-year change",
+     "value": 2.0,
+     "value_as_written": "2.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-01-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "1~6月の累計でも、前年同期比2.0%減の2108万4800人と前年割れとなった。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      4
+     ],
+     "name": "Foreign visitor arrivals to Japan from South Korea, June 2026, year-on-year change",
+     "value": 7.8,
+     "value_as_written": "7.8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "韓国が78万7100人(2025年比7.8%増)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      6
+     ],
+     "name": "Foreign visitor arrivals to Japan from Taiwan, June 2026, year-on-year change",
+     "value": 14.6,
+     "value_as_written": "14.6",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "台湾が67万400人(同14.6%増)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      8
+     ],
+     "name": "Foreign visitor arrivals to Japan from the United States, June 2026, year-on-year change",
+     "value": 2.7,
+     "value_as_written": "2.7",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "米国が35万4500人(同2.7%増)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      10
+     ],
+     "name": "Foreign visitor arrivals to Japan from China, June 2026, year-on-year change",
+     "value": 57.3,
+     "value_as_written": "57.3",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "中国が34万700人(同57.3%減)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      12
+     ],
+     "name": "Foreign visitor arrivals to Japan from Hong Kong, June 2026, year-on-year change",
+     "value": 28.5,
+     "value_as_written": "28.5",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "香港が21万4300人(同28.5%増)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      14
+     ],
+     "name": "Number of markets setting a record high for June arrivals, June 2026",
+     "value": 15.0,
+     "value_as_written": "15",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "markets",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "韓国や台湾、米国、インドなど15市場で、6月の過去最多を更新した。",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      0,
+      1
+     ],
+     "reason": "number: unknown scale word '万'",
+     "name": "June 2026 foreign visitor arrivals to Japan, rounded headline figure",
+     "value_as_written": "315"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      1
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026 (provisional)",
+     "value_as_written": "314万8600"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      3
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "JNTO cumulative foreign visitor arrivals to Japan, January–June 2026",
+     "value_as_written": "2108万4800"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      5
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from South Korea, June 2026",
+     "value_as_written": "78万7100"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      7
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from Taiwan, June 2026",
+     "value_as_written": "67万400"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      9
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from the United States, June 2026",
+     "value_as_written": "35万4500"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      11
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from China, June 2026",
+     "value_as_written": "34万700"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      13
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from Hong Kong, June 2026",
+     "value_as_written": "21万4300"
+    }
+   ],
+   "wall_s": 1422.8
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "JNTO 訪日外国人客数 2026年8月 推計",
+     "Narita airport international passenger arrivals August 2025 monthly statistics",
+     "出入国管理統計月報 2025年8月 外国人入国者数 日本人帰国者数 総数",
+     "関西国際空港 2025年8月 国際線旅客数 外国人"
+    ],
+    "urls": [
+     "https://www.narita-airport.jp/files/b2e22b1f56ede88eda96151d616c3d8893efaeaa57658001834df6fb32d70835",
+     "https://www.jnto.go.jp/news/press/20260916_montly.html",
+     "https://www.jnto.go.jp/statistics/data/visitors-statistics/?tab=block10",
+     "https://www.moj.go.jp/isa/content/001459115.pdf"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 23,
+    "web_search_requests": 4,
+    "usd": 0.007851072,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.narita-airport.jp/files/b2e22b1f56ede88eda96151d616c3d8893efaeaa57658001834df6fb32d70835",
+     "status": "dropped",
+     "reason": "snapshot fetch failed (http 404); live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/news/press/20260916_montly.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/visitors-statistics/?tab=block10",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.moj.go.jp/isa/content/001459115.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 951.4
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Japan international flight seat capacity August 2026 OAG",
+     "JNTO 訪日外国人 2026年8月 推計",
+     "OAG 国際線 座席数 日本 2026年夏ダイヤ 増便",
+     "訪日外客数 2026年6月 推計値 JNTO"
+    ],
+    "urls": [
+     "https://press.jal.co.jp/en/items/uploads/JAL%20Traffic%20Data%20AUG%202026.pdf",
+     "https://www.jnto.go.jp/statistics/data/visitors-statistics/?tab=block10",
+     "https://www.travelvoice.jp/english/international-arrivals-in-japan-in-august-2026-were-down-9-6-to-3-1-million-despite-record-high-in-14-source-markets/print",
+     "https://www.ttnmedia.com/?p=142962"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 12,
+    "web_search_requests": 4,
+    "usd": 0.004386635999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://press.jal.co.jp/en/items/uploads/JAL%20Traffic%20Data%20AUG%202026.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/visitors-statistics/?tab=block10",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.travelvoice.jp/english/international-arrivals-in-japan-in-august-2026-were-down-9-6-to-3-1-million-despite-record-high-in-14-source-markets/print",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ttnmedia.com/?p=142962",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 1081.1
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "JNTO 訪日外客数 国別 2026年6月",
+     "JNTO foreign visitor arrivals by country August 2025",
+     "JNTO 2025年8月 国別 訪日外客数 推計値 pdf 20250917",
+     "訪日外客数 2026年7月 推計値 JNTO"
+    ],
+    "urls": [
+     "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "https://www.jnto.go.jp/statistics/data/_files/20260715_1615-1.pdf",
+     "https://wwwtb.mlit.go.jp/kyushu/content/000378221.pdf",
+     "https://www.travelvoice.jp/20260715-160182"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.010281624,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/_files/20260715_1615-1.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://wwwtb.mlit.go.jp/kyushu/content/000378221.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.travelvoice.jp/20260715-160182",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260716034720",
+     "page_date": "2026-07-16",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/30f6e459ef7a3945.raw",
+     "text_chars": 424,
+     "leak_hits": [],
+     "chars_sent": 424,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 8
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      1
+     ],
+     "name": "Year-on-year change in total foreign visitor arrivals to Japan, June 2026 vs June 2025",
+     "value": 6.8,
+     "value_as_written": "6.8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "2026年6月の訪日外国人旅行者数(推計値)は、2025年同月比6.8%減の314万8600人となった。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      3
+     ],
+     "name": "Year-on-year change in cumulative foreign visitor arrivals to Japan, January–June 2026 vs same period 2025",
+     "value": 2.0,
+     "value_as_written": "2.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-01-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "1~6月の累計でも、前年同期比2.0%減の2108万4800人と前年割れとなった。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      5
+     ],
+     "name": "Year-on-year change in foreign visitor arrivals to Japan from South Korea, June 2026 vs 2025",
+     "value": 7.8,
+     "value_as_written": "7.8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "韓国が78万7100人(2025年比7.8%増)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      7
+     ],
+     "name": "Year-on-year change in foreign visitor arrivals to Japan from Taiwan, June 2026 vs 2025",
+     "value": 14.6,
+     "value_as_written": "14.6",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "台湾が67万400人(同14.6%増)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      9
+     ],
+     "name": "Year-on-year change in foreign visitor arrivals to Japan from the United States, June 2026 vs 2025",
+     "value": 2.7,
+     "value_as_written": "2.7",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "米国が35万4500人(同2.7%増)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      11
+     ],
+     "name": "Year-on-year change in foreign visitor arrivals to Japan from China, June 2026 vs 2025",
+     "value": 57.3,
+     "value_as_written": "57.3",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "中国が34万700人(同57.3%減)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      13
+     ],
+     "name": "Year-on-year change in foreign visitor arrivals to Japan from Hong Kong, June 2026 vs 2025",
+     "value": 28.5,
+     "value_as_written": "28.5",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "香港が21万4300人(同28.5%増)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      14
+     ],
+     "name": "Number of markets setting record-high June arrivals, June 2026",
+     "value": 15.0,
+     "value_as_written": "15",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "markets",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "",
+     "quote": "韓国や台湾、米国、インドなど15市場で、6月の過去最多を更新した。",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      0
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Total estimated foreign visitor arrivals to Japan, June 2026 (JNTO estimate)",
+     "value_as_written": "314万8600"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      2
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Cumulative foreign visitor arrivals to Japan, January–June 2026",
+     "value_as_written": "2108万4800"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      4
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from South Korea, June 2026",
+     "value_as_written": "78万7100"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      6
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from Taiwan, June 2026",
+     "value_as_written": "67万400"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      8
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from the United States, June 2026",
+     "value_as_written": "35万4500"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      10
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from China, June 2026",
+     "value_as_written": "34万700"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.travelvoice.jp/20260715-160182",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716034720",
+     "order": [
+      3,
+      12
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreign visitor arrivals to Japan from Hong Kong, June 2026",
+     "value_as_written": "21万4300"
+    }
+   ],
+   "wall_s": 1000.5
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "JNTO foreign visitor arrivals Japan monthly 2026",
+     "Japan major events August 2026 Expo inbound tourism",
+     "訪日外客数 2025年8月 推計値 342万人 JNTO",
+     "Japan visa policy change 2026 visa-free travel advisory China"
+    ],
+    "urls": [
+     "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "https://www.jnto.go.jp/statistics/data/visitors-statistics/",
+     "https://micetimes.jp/2026-8-picks/",
+     "https://www.travelvoice.jp/english/international-arrivals-in-japan-were-down-5-5-to-3-7-million-in-april-2026/print"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 25,
+    "web_search_requests": 4,
+    "usd": 0.0060497879999999995,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/visitors-statistics/",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260228082412",
+     "page_date": "2026-02-28",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/b2d96cc00352482a.raw",
+     "text_chars": 752,
+     "leak_hits": [],
+     "chars_sent": 752,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://micetimes.jp/2026-8-picks/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.travelvoice.jp/english/international-arrivals-in-japan-were-down-5-5-to-3-7-million-in-april-2026/print",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 1499.4
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "japan tourism",
+     "visitor arrivals",
+     "august 2026"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 20
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "search": {
+    "queries": [
+     "JNTO foreign visitor arrivals August 2024 monthly estimate annual total",
+     "JNTO 訪日外客数 2024年 年間 推計値 月別 8月",
+     "JNTO 訪日外客数 2026年6月 推計値 発表",
+     "JNTO 2025年 年間訪日外客数 42,687,000 確定値"
+    ],
+    "urls": [
+     "https://www.jnto.go.jp/statistics/data/visitors-statistics/",
+     "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "https://www.travelvision.jp/news/detail/news-114693",
+     "https://www.jnto.go.jp/news/press/20260715_monthly.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.006273923999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/visitors-statistics/",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260228082412",
+     "page_date": "2026-02-28",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/b2d96cc00352482a.raw",
+     "text_chars": 752,
+     "leak_hits": [],
+     "chars_sent": 752,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.travelvision.jp/news/detail/news-114693",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20250810214908",
+     "page_date": "2025-08-10",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/23229003cad1477c.raw",
+     "text_chars": 1796,
+     "leak_hits": [],
+     "chars_sent": 1796,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 14,
+     "n_points_verified": 13
+    },
+    {
+     "url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260716193946",
+     "page_date": "2026-07-16",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/e0d3878bc4d87111.raw",
+     "text_chars": 971,
+     "leak_hits": [],
+     "chars_sent": 971,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 4,
+     "n_points_verified": 3
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      0
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, August 2019",
+     "value": 2520134.0,
+     "value_as_written": "2,520,134",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2019-08-01",
+     "period_end": "2019-08-31",
+     "published_at_if_visible": "",
+     "quote": "| 8月 | 2,520,134 | 2,933,381 | 116.4% | 2,109,568 | 1,437,126 | 68.1% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      1
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, August 2024",
+     "value": 2933381.0,
+     "value_as_written": "2,933,381",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-08-01",
+     "period_end": "2024-08-31",
+     "published_at_if_visible": "",
+     "quote": "| 8月 | 2,520,134 | 2,933,381 | 116.4% | 2,109,568 | 1,437,126 | 68.1% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      2
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, annual total 2019",
+     "value": 31882049.0,
+     "value_as_written": "31,882,049",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2019-01-01",
+     "period_end": "2019-12-31",
+     "published_at_if_visible": "",
+     "quote": "| 1~12月 | 31,882,049 | 36,869,900 | 115.6% | 20,080,669 | 13,007,300 | 64.8% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      3
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, annual total 2024",
+     "value": 36869900.0,
+     "value_as_written": "36,869,900",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-01-01",
+     "period_end": "2024-12-31",
+     "published_at_if_visible": "",
+     "quote": "| 1~12月 | 31,882,049 | 36,869,900 | 115.6% | 20,080,669 | 13,007,300 | 64.8% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      5
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, January 2024",
+     "value": 2688478.0,
+     "value_as_written": "2,688,478",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-01-01",
+     "period_end": "2024-01-31",
+     "published_at_if_visible": "",
+     "quote": "| 1月 | 2,689,339 | 2,688,478 | 100.0% | 1,452,157 | 838,581 | 57.7% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      6
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, February 2024",
+     "value": 2788224.0,
+     "value_as_written": "2,788,224",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-02-01",
+     "period_end": "2024-02-29",
+     "published_at_if_visible": "",
+     "quote": "| 2月 | 2,604,322 | 2,788,224 | 107.1% | 1,534,792 | 978,884 | 63.8% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      7
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, March 2024",
+     "value": 3081781.0,
+     "value_as_written": "3,081,781",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-03-01",
+     "period_end": "2024-03-31",
+     "published_at_if_visible": "",
+     "quote": "| 3月 | 2,760,136 | 3,081,781 | 111.7% | 1,929,915 | 1,219,789 | 63.2% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      8
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, April 2024",
+     "value": 3043003.0,
+     "value_as_written": "3,043,003",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-04-01",
+     "period_end": "2024-04-30",
+     "published_at_if_visible": "",
+     "quote": "| 4月 | 2,926,685 | 3,043,003 | 104.0% | 1,666,546 | 888,767 | 53.3% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      9
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, May 2024",
+     "value": 3040294.0,
+     "value_as_written": "3,040,294",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-05-01",
+     "period_end": "2024-05-31",
+     "published_at_if_visible": "",
+     "quote": "| 5月 | 2,773,091 | 3,040,294 | 109.6% | 1,437,929 | 941,709 | 65.5% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      10
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, June 2024",
+     "value": 3140642.0,
+     "value_as_written": "3,140,642",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-06-01",
+     "period_end": "2024-06-30",
+     "published_at_if_visible": "",
+     "quote": "| 6月 | 2,880,041 | 3,140,642 | 109.0% | 1,520,993 | 930,229 | 61.2% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      11
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, July 2024",
+     "value": 3292602.0,
+     "value_as_written": "3,292,602",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-07-01",
+     "period_end": "2024-07-31",
+     "published_at_if_visible": "",
+     "quote": "| 7月 | 2,991,189 | 3,292,602 | 110.1% | 1,659,166 | 1,048,823 | 63.2% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      12
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, September 2024",
+     "value": 2872487.0,
+     "value_as_written": "2,872,487",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-09-01",
+     "period_end": "2024-09-30",
+     "published_at_if_visible": "",
+     "quote": "| 9月 | 2,272,883 | 2,872,487 | 126.4% | 1,751,477 | 1,212,545 | 69.2% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      13
+     ],
+     "name": "JNTO foreign visitor arrivals to Japan, October 2024",
+     "value": 3312193.0,
+     "value_as_written": "3,312,193",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2024-10-01",
+     "period_end": "2024-10-31",
+     "published_at_if_visible": "",
+     "quote": "| 10月 | 2,496,568 | 3,312,193 | 132.7% | 1,663,474 | 1,148,502 | 69.0% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      3,
+      0
+     ],
+     "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026 (monthly estimate)",
+     "value": 3148600.0,
+     "value_as_written": "3,148,600",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "6月の訪日外客数は3,148,600人で、前年同月比6.8%減となったものの",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      3,
+      1
+     ],
+     "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026, year-on-year change",
+     "value": 6.8,
+     "value_as_written": "6.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-06-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "6月:前年同月比6.8%減の315万人",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      3,
+      3
+     ],
+     "name": "JNTO cumulative foreign visitor arrivals to Japan, first half (January-June) 2026",
+     "value": 21084800.0,
+     "value_as_written": "21,084,800",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits (arrivals)",
+     "period_start": "2026-01-01",
+     "period_end": "2026-06-30",
+     "published_at_if_visible": "2026-07-15",
+     "quote": "また、上半期の累計で21,084,800人となった。",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+     "via": "snapshot",
+     "page_date": "2025-08-10",
+     "snapshot_ts": "20250810214908",
+     "order": [
+      2,
+      4
+     ],
+     "reason": "value_as_written not in quote as a whole number",
+     "name": "JNTO foreign visitor arrivals to Japan, December 2024",
+     "value_as_written": "3,489,800"
+    },
+    {
+     "direction_id": "b1",
+     "round": 2,
+     "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+     "via": "snapshot",
+     "page_date": "2026-07-16",
+     "snapshot_ts": "20260716193946",
+     "order": [
+      3,
+      2
+     ],
+     "reason": "number: unknown scale word '万人'",
+     "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026 (rounded headline figure)",
+     "value_as_written": "315"
+    }
+   ],
+   "wall_s": 299.5
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "search": {
+    "queries": [
+     "JNTO foreign visitor arrivals vs Immigration Services Agency foreign entries total comparison",
+     "出入国在留管理庁 外国人入国者数 統計 2025年 JNTO 訪日外客数 比較",
+     "出入国在留管理庁 出入国管理統計 月別 2025年8月 外国人入国者数 速報",
+     "JNTO 訪日外客数 2025年8月 推計値 342万人 過去最高"
+    ],
+    "urls": [
+     "https://www.jef.or.jp/journal/pdf/250th_Economic_Indicators.pdf",
+     "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "https://www.mlit.go.jp/pri/houkoku/gaiyou/pdf/kkk38.pdf",
+     "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.006431208,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.jef.or.jp/journal/pdf/250th_Economic_Indicators.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260418165023",
+     "page_date": "2026-04-18",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/b1c53764ec36cade.raw",
+     "text_chars": 2602,
+     "leak_hits": [],
+     "chars_sent": 2602,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 3
+    },
+    {
+     "url": "https://www.mlit.go.jp/pri/houkoku/gaiyou/pdf/kkk38.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/_files/20250917_1615-1.pdf",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      6
+     ],
+     "name": "Year-on-year percentage increase in total foreign national entries, calendar year 2025",
+     "value": 15.4,
+     "value_as_written": "15.4",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent (year-on-year change in foreign national entries)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "4,243万930人で、前年に比べ565万966人(15.4%)増加、新規入国者数は、3,918万4,525人で、前年に比べ516万8,759人(15.2%)増加",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      8
+     ],
+     "name": "Year-on-year percentage increase in new foreign national entries, calendar year 2025",
+     "value": 15.2,
+     "value_as_written": "15.2",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent (year-on-year change in new foreign national entries",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "新規入国者数は、3,918万4,525人で、前年に比べ516万8,759人(15.2%)増加し、いずれも過去最高となりました",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      13
+     ],
+     "name": "Share of 'short-term stay' among new foreign national entries, calendar year 2025",
+     "value": 98.1,
+     "value_as_written": "98.1",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent (short-term stay new entries / total new foreign nat",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "「短期滞在」(3,845万8,105人、対前年15.3%増)が最も多く、全体の98.1%を占め",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Total foreign national entries to Japan (foreigners entering Japan, sum of new entries and re-entries), calendar year 20",
+     "value_as_written": "4,243万930"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign national entries to Japan (foreigners granted landing permission with a status of residence), calendar year ",
+     "value_as_written": "3,918万4,525"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      2
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreigners granted special landing permission (including cruise ship shore leave etc.), calendar year 2025",
+     "value_as_written": "404万9,338"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      3
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Total foreign national entries and special landing permission recipients combined, calendar year 2025",
+     "value_as_written": "4,648万268"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      4
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Japanese nationals departing Japan, calendar year 2025",
+     "value_as_written": "1,473万1,615"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      5
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Year-on-year increase in total foreign national entries, calendar year 2025",
+     "value_as_written": "565万966"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      7
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Year-on-year increase in new foreign national entries, calendar year 2025",
+     "value_as_written": "516万8,759"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      9
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign national entries from South Korea, calendar year 2025",
+     "value_as_written": "923万875"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      10
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign national entries from China, calendar year 2025",
+     "value_as_written": "722万2,691"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      11
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign national entries from Taiwan, calendar year 2025",
+     "value_as_written": "639万65"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      12
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "New foreign national entries with 'short-term stay' status of residence, calendar year 2025",
+     "value_as_written": "3,845万8,105"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418165023",
+     "order": [
+      1,
+      14
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Foreigners granted cruise ship shore leave permission (船舶観光上陸許可), calendar year 2025",
+     "value_as_written": "154万8,138"
+    }
+   ],
+   "wall_s": 296.1
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "search": {
+    "queries": [
+     "OAG international seat capacity Japan August 2026",
+     "JNTO foreign visitor arrivals August 2026 forecast",
+     "South China Morning Post OAG China-Japan flights August 2026 down 57% capacity",
+     "international seat capacity Japan summer 2026 airline schedule OAG seats million"
+    ],
+    "urls": [
+     "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "https://www.travelandtourworld.com/news/article/0czr1h4z6n4n/",
+     "https://www.jnto.go.jp/statistics/data/visitors-statistics/?tab=block10",
+     "https://www.jnto.go.jp/en/news/result/?page=1"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 25,
+    "web_search_requests": 4,
+    "usd": 0.007901484,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260719234847",
+     "page_date": "2026-07-19",
+     "raw_path": "data/raw/agent/fc_jnto_2026_08/73b222668fa0d400.raw",
+     "text_chars": 1465,
+     "leak_hits": [],
+     "chars_sent": 1465,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 12,
+     "n_points_verified": 4
+    },
+    {
+     "url": "https://www.travelandtourworld.com/news/article/0czr1h4z6n4n/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/statistics/data/visitors-statistics/?tab=block10",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jnto.go.jp/en/news/result/?page=1",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      0
+     ],
+     "name": "China-Japan round-trip flights scheduled for July 2026 (summer travel period)",
+     "value": 2629.0,
+     "value_as_written": "2,629",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "round-trip flights",
+     "period_start": "2026-07-01",
+     "period_end": "2026-07-31",
+     "published_at_if_visible": "",
+     "quote": "A total of 2,629 round-trip flights were expected next month between the two Asian countries, down from 6,317 in July last year.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      1
+     ],
+     "name": "China-Japan round-trip flights flown in July 2025",
+     "value": 6317.0,
+     "value_as_written": "6,317",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "round-trip flights",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "",
+     "quote": "A total of 2,629 round-trip flights were expected next month between the two Asian countries, down from 6,317 in July last year.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      3
+     ],
+     "name": "China-Japan round-trip flights flown in August 2025",
+     "value": 6127.0,
+     "value_as_written": "6,127",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "round-trip flights",
+     "period_start": "2025-08-01",
+     "period_end": "2025-08-31",
+     "published_at_if_visible": "",
+     "quote": "In August, 2,641 were scheduled, a drop from the 6,127 flown in August 2025, data compiled by British aviation intelligence firm OAG showed.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      6
+     ],
+     "name": "China-Japan flights scrapped by China as of June 23 (current year)",
+     "value": 9000.0,
+     "value_as_written": "9,000",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "flights",
+     "period_start": "",
+     "period_end": "2026-06-23",
+     "published_at_if_visible": "",
+     "quote": "As of June 23, China had scrapped nearly 9,000 flights to Japan this year.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      2
+     ],
+     "reason": "period_end 2026-08-31 after as_of",
+     "name": "China-Japan round-trip flights scheduled for August 2026",
+     "value_as_written": "2,641"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      4
+     ],
+     "reason": "period_end 2026-08-31 after as_of",
+     "name": "Year-on-year drop in China-Japan flights scheduled for July-August summer travel period",
+     "value_as_written": "57"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      5
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Airlines tracked in OAG China-Japan flight data",
+     "value_as_written": "23"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      7
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Japan single-entry visa fee after increase (next month)",
+     "value_as_written": "15,000"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      8
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Japan single-entry visa fee before increase",
+     "value_as_written": "3,000"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      9
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Japan multiple-entry visa fee after increase (next month)",
+     "value_as_written": "30,000"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      10
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Japan multiple-entry visa fee before increase",
+     "value_as_written": "6,000"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+     "via": "snapshot",
+     "page_date": "2026-07-19",
+     "snapshot_ts": "20260719234847",
+     "order": [
+      0,
+      11
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "US dollar equivalent of Japan single-entry visa fee after increase",
+     "value_as_written": "92.75"
+    }
+   ],
+   "wall_s": 668.8
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2"
+     ],
+     "relation": "corroborating",
+     "note": "Both are first-half 2025 year-on-year growth rates for foreign entries from the same Immigration Services Agency release; p1 covers all foreign entries while p2 covers new entries, so they are closely related but not independent measurements."
+    },
+    {
+     "ids": [
+      "p3"
+     ],
+     "relation": "contextual",
+     "note": "Short-term stay share of new foreign entries in H1 2025 is a definitional/coverage factor, not a level estimate; it helps bridge broader immigration totals to JNTO's visitor definition."
+    },
+    {
+     "ids": [
+      "p4",
+      "p5"
+     ],
+     "relation": "corroborating",
+     "note": "Both come from the same 2025 immigration total report; p5 is the year-on-year increment consistent with p4, so they are not independent."
+    },
+    {
+     "ids": [
+      "p8",
+      "p9"
+     ],
+     "relation": "corroborating",
+     "note": "Both describe 2025 new entrants from China and its increase from 2024; same underlying source and same measurement."
+    },
+    {
+     "ids": [
+      "p15",
+      "p26",
+      "p34"
+     ],
+     "relation": "corroborating",
+     "note": "All three report the same June 2026 JNTO-related fact that 15 markets set June records; they are redundant copies of the same underlying statistic."
+    },
+    {
+     "ids": [
+      "p10"
+     ],
+     "relation": "contextual",
+     "note": "December 2025 arrivals after a Chinese travel advisory is a shock-related observation; it is useful for scenario adjustment but not a direct August 2026 level."
+    },
+    {
+     "ids": [
+      "p7",
+      "p11"
+     ],
+     "relation": "contextual",
+     "note": "Student visa entries and foreign workers are different populations from short-term visitors; they help characterize total foreign entries but are not direct JNTO visitor arrivals."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p26",
+     "keep": false,
+     "reason": "Redundant copy of the same June 2026 record-market count as p15 and p34; adds no independent information."
+    },
+    {
+     "id": "p34",
+     "keep": false,
+     "reason": "Redundant copy of the same June 2026 record-market count as p15 and p26; adds no independent information."
+    }
+   ],
+   "extra_directions": [
+    {
+     "id": "b1",
+     "category": "base_rates",
+     "perspective": "JNTO monthly seasonality",
+     "hypothesis": "A stable August share of annual JNTO foreign visitor arrivals would unlock a seasonal-share route (d3) using a 2026 year-to-date total or a 2025 annual total. Without this share, the August level cannot be anchored to the annual scale.",
+     "data_to_find": "JNTO monthly visitor arrival estimates for August in recent years (e.g., 2018, 2019, 2023, 2024, 2025) and the corresponding annual totals, to compute August's share of the annual total.",
+     "search_hints": [
+      "J",
+      "N",
+      "T",
+      "O"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b2",
+     "category": "related_series",
+     "perspective": "Immigration coverage bridge",
+     "hypothesis": "A conversion factor from total foreign national entries (Immigration Services Agency) to JNTO visitor arrivals would let the 2025 immigration total (p4) and short-term share (p3) be used to scale a 2026 August estimate. This is the key missing bridge for d1.",
+     "data_to_find": "Annual or monthly JNTO foreign visitor arrivals alongside Immigration Services Agency foreign entry totals for the same periods, to estimate the JNTO/immigration coverage ratio.",
+     "search_hints": [
+      "J",
+      "N",
+      "T",
+      "O"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b3",
+     "category": "forecasts_markets",
+     "perspective": "Summer 2026 capacity and demand",
+     "hypothesis": "Announced international seat capacity to Japan for August 2026 and any airline/industry summer outlook would provide a forward-looking anchor for d5 and help bound the August 2026 level, especially given the post-2025 Chinese advisory shock.",
+     "data_to_find": "OAG or airline schedule data for international seats to Japan in August 2026; JNTO/JTA summer 2026 forecasts; airline capacity announcements for Japan routes.",
+     "search_hints": [
+      "O",
+      "A",
+      "G",
+      " "
+     ],
+     "expected_information": 3
+    }
+   ],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a1 * b1",
+      "inputs": {
+       "a1": {
+        "id": "a1"
+       },
+       "b1": {
+        "id": "p4"
+       }
+      }
+     },
+     "rationale": "This route uses the 2025 immigration foreign-entry total (p4) as a scale anchor and applies a change factor (a1) to move from 2025 to August 2026. It is a coarse bridge because p4 is an annual total, not an August level, and because the change factor is assumption-based. Shared dependency: both m1 and m2 rely on immigration totals and the coverage bridge; failure of the coverage assumption affects both."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p4 * a2",
+      "inputs": {
+       "p4": {
+        "id": "p4"
+       },
+       "a2": {
+        "id": "a2"
+       }
+      }
+     },
+     "rationale": "This route converts the 2025 immigration foreign-entry total (p4) into an approximate JNTO visitor count using the short-term/visitor coverage share (a2). It is a level estimate for 2025, not August 2026, so it serves as a scale check rather than a direct August forecast. Shared dependency: same immigration total as m1; the coverage share is the main failure mode."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "August 2026 JNTO arrivals relative to August 2025",
+     "value": 1.05,
+     "low": 0.85,
+     "high": 1.3,
+     "unit": "ratio",
+     "rationale": "No kept point gives the August 2026 level directly. The ratio is centered slightly above 1 because 2025 was a record year and early-2026 JNTO data show many markets at record highs (p15), but it is widened to reflect the December 2025 Chinese travel advisory shock (p10) and uncertainty about whether Chinese demand fully recovers by August 2026.",
+     "applies_when": "Used only as a change factor applied to an observed August 2025 JNTO arrivals level; it does not set the target level itself.",
+     "falsified_by": "Evidence that August 2026 capacity or bookings are materially below August 2025, or that Chinese arrivals remain severely depressed through summer 2026.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "JNTO visitor share of foreign national entries",
+     "value": 0.9,
+     "low": 0.8,
+     "high": 0.97,
+     "unit": "share",
+     "rationale": "JNTO counts short-term visitors, while Immigration Services Agency totals include students, workers, and other long-term entrants. The H1 2025 short-term share of new entries was 98.1% (p3), but JNTO's definition is narrower than all new entries, so a slightly lower share is used as a coverage bridge.",
+     "applies_when": "Used to convert a total foreign national entry count into an approximate JNTO visitor count for the same period.",
+     "falsified_by": "A direct comparison showing JNTO arrivals are a much smaller or larger fraction of immigration foreign entries than this range.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  },
+  {
+   "round": 2,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2"
+     ],
+     "relation": "corroborating",
+     "note": "Both from the same Immigration Services Agency release (MOJ), measuring the same first-half 2025 foreign-entry surge: total foreign national entries +20.0% and new entries +20.2%. They are not independent (shared source, overlapping population), but they jointly establish a strong ~20% H1-2025 growth baseline for foreign entries."
+    },
+    {
+     "ids": [
+      "p4",
+      "p5",
+      "p51",
+      "p52"
+     ],
+     "relation": "corroborating",
+     "note": "All describe the same 2025 Immigration Services Agency annual total: p4 gives ~42.43m foreign nationals entering, p5 the +5.65m increase, p51 the precise 42,430,930 (+15.4%), p52 new entries 39,184,525 (+15.2%). Same underlying measurement, so they corroborate rather than independently confirm; p51/p52 are the more precise vintage."
+    },
+    {
+     "ids": [
+      "p3",
+      "p53"
+     ],
+     "relation": "corroborating",
+     "note": "Both report the 'short-term stay' share of new foreign entries at 98.1%, one for H1-2025 and one for CY2025. Same source and definition; the stability across periods supports using ~98% as the short-term share bridging immigration entries to JNTO visitor arrivals."
+    },
+    {
+     "ids": [
+      "p8",
+      "p9"
+     ],
+     "relation": "corroborating",
+     "note": "Same NTV report: China new entrants ~7.22m in 2025, up 1.74m from 2024. Identical underlying figure, so they are one observation, not two."
+    },
+    {
+     "ids": [
+      "p15",
+      "p26",
+      "p34"
+     ],
+     "relation": "corroborating",
+     "note": "All three report the same JNTO June 2026 result: 15 markets set June record highs. p15 is the JNTO primary source; p26/p34 are the same figure via TravelVoice. One underlying measurement, useful as a qualitative signal of continued strong 2026 demand."
+    },
+    {
+     "ids": [
+      "p54",
+      "p55",
+      "p56",
+      "p57"
+     ],
+     "relation": "corroborating",
+     "note": "All from the same SCMP/OAG aviation dataset on the China-Japan flight collapse: July 2026 scheduled 2,629 vs 6,317 flown July 2025; August 2026 scheduled 2,641 vs 6,127 flown August 2025; ~9,000 flights scrapped by June 23. Same source and measurement, jointly quantifying a large negative China-market shock."
+    },
+    {
+     "ids": [
+      "p10",
+      "p54",
+      "p56"
+     ],
+     "relation": "corroborating",
+     "note": "p10 (December 2025 arrivals ~280,000 after the Chinese travel advisory) and the OAG flight cuts (p54/p56) are consistent evidence of a China-driven demand shock persisting into 2026; they describe different periods but the same causal mechanism."
+    },
+    {
+     "ids": [
+      "p7",
+      "p11"
+     ],
+     "relation": "contextual",
+     "note": "Student-visa entries (p7) and foreign workers (p11) are stock/flow measures of long-term stayers, not short-term visitors. They are consistent with a large foreign-entry total but are not direct inputs to the visitor-arrival estimate."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p5",
+     "keep": false,
+     "reason": "Redundant restatement of the same 2025 annual increase already captured more precisely by p51/p52; adds no independent information."
+    },
+    {
+     "id": "p9",
+     "keep": false,
+     "reason": "Redundant duplicate of p8 (same China 2025 figure and same source); keeping both would double-count one observation."
+    },
+    {
+     "id": "p26",
+     "keep": false,
+     "reason": "Duplicate of p15/p34 (same 15-market June 2026 record via a secondary outlet); no additional information."
+    },
+    {
+     "id": "p34",
+     "keep": false,
+     "reason": "Duplicate of p15/p26 (same 15-market June 2026 record); redundant copy."
+    },
+    {
+     "id": "p11",
+     "keep": false,
+     "reason": "Foreign-worker stock is a long-term-stay population measure, not a short-term visitor flow; unusable for the target and not needed as a bound."
+    },
+    {
+     "id": "p7",
+     "keep": false,
+     "reason": "Student-visa entries are long-term stayers outside JNTO's visitor definition; not usable as a direct input."
+    }
+   ],
+   "extra_directions": [],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a1 * b1",
+      "inputs": {
+       "a1": {
+        "id": "a1"
+       },
+       "b1": {
+        "id": "p56"
+       }
+      }
+     },
+     "rationale": "Route d5/b3: scale the known August 2025 China-Japan flight collapse into a visitor-arrival change factor. p56 gives August 2025 China-Japan round-trip flights (6,127) as the observed anchor; a1 converts the 2026-vs-2025 capacity/demand situation into a ratio of August 2026 to August 2025 arrivals. This is a change-factor decomposition, not a capacity-as-output claim: the flight data only informs the direction and rough magnitude of the China shock, while a1 carries the net effect including offsetting growth in other markets. Shared dependency: both the flight data and a1 reflect the same China advisory shock, so the interval may understate correlated risk. Failure mode: if non-China markets grow faster than assumed, the estimate is biased low."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a2 * a3",
+      "inputs": {
+       "a2": {
+        "id": "a2"
+       },
+       "a3": {
+        "id": "a3"
+       }
+      }
+     },
+     "rationale": "Route d3/b1: seasonal-share decomposition. a3 is the assumed 2026 annual JNTO visitor total (anchored on 2025 immigration entries p4/p51 and short-term share p53), and a2 is the assumed August share of the annual total. Multiplying gives August 2026 arrivals. This route is independent of the flight-shock route in structure but shares the same underlying demand uncertainty. Failure mode: if 2026 seasonality is distorted by the China advisory (which may suppress summer more than the annual average), the August share assumption is biased high."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "August 2026 foreign visitor arrivals as a multiple of August 2025 JNTO arrivals",
+     "value": 0.95,
+     "low": 0.8,
+     "high": 1.15,
+     "unit": "ratio (dimensionless)",
+     "rationale": "No kept point gives the August 2026 level directly. June 2026 set records in 15 markets (p15), indicating broad-based strength, but the China-Japan flight collapse (p54/p56: August 2026 scheduled 2,641 vs 6,127 flown August 2025) removes a large share of Chinese arrivals, and the December 2025 advisory effect (p10) persists. Net effect is plausibly a modest decline versus August 2025, with wide uncertainty. This is a change factor relative to an observed earlier period, not the target level itself.",
+     "applies_when": "Used to scale a known August 2025 JNTO arrival level to August 2026; valid only if the China shock is not fully offset by growth in Korea, Taiwan, US and other markets.",
+     "falsified_by": "Evidence that China-Japan capacity has been restored toward 2025 levels, or that total 2026 summer arrivals are running clearly above 2025.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "August share of annual JNTO foreign visitor arrivals",
+     "value": 0.095,
+     "low": 0.085,
+     "high": 0.105,
+     "unit": "share (dimensionless)",
+     "rationale": "August is a peak summer month; historically it accounts for roughly 9-10% of annual JNTO arrivals. No kept point supplies this share, so it is assumed with a wide range to allow the seasonal-share route.",
+     "applies_when": "Used with a 2026 annual arrivals total to derive the August 2026 level; valid if 2026 seasonality resembles recent years.",
+     "falsified_by": "A published 2026 monthly distribution showing August materially outside 8.5-10.5% of the annual total.",
+     "route": "m2"
+    },
+    {
+     "id": "a3",
+     "name": "2026 full-year JNTO foreign visitor arrivals",
+     "value": 40000000,
+     "low": 34000000,
+     "high": 46000000,
+     "unit": "visits (arrivals)",
+     "rationale": "2025 immigration entries were ~42.4m (p4/p51) with short-term share ~98% (p53), implying roughly 38-40m JNTO-type visitors in 2025. For 2026, broad market strength (p15) is offset by the China shock (p54/p56), so a full-year total near 2025 levels with wide uncertainty is assumed. This is an annual total, not the target month level.",
+     "applies_when": "Used only as the annual scale in the seasonal-share decomposition for August 2026.",
+     "falsified_by": "Official 2026 YTD totals implying a full-year figure well outside 34-46m.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416063424",
+   "order": [
+    2,
+    6
+   ],
+   "name": "Year-on-year percentage increase in foreign national entries, first half of 2025",
+   "value": 20.0,
+   "value_as_written": "20.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2025-01-01",
+   "period_end": "2025-06-30",
+   "published_at_if_visible": "",
+   "quote": "2,137万6,170人で、前年同期に比べ355万5,541人(20.0%)増加",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416063424",
+   "order": [
+    2,
+    8
+   ],
+   "name": "Year-on-year percentage increase in foreign national new entries, first half of 2025",
+   "value": 20.2,
+   "value_as_written": "20.2",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2025-01-01",
+   "period_end": "2025-06-30",
+   "published_at_if_visible": "",
+   "quote": "1,972万8,405人で、前年同期に比べ331万4,380人(20.2%)増加しました",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.moj.go.jp/isa/publications/press/13_00056.html",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416063424",
+   "order": [
+    2,
+    13
+   ],
+   "name": "Share of 'short-term stay' among new foreign entries, first half of 2025",
+   "value": 98.1,
+   "value_as_written": "98.1",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent (share of new foreign entries)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-06-30",
+   "published_at_if_visible": "",
+   "quote": "「短期滞在」(1,935万8,017人、対前年同期20.3%増)が最も多く、全体の98.1%を占め",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+   "via": "snapshot",
+   "page_date": "2026-03-08",
+   "snapshot_ts": "20260308231405",
+   "order": [
+    3,
+    0
+   ],
+   "name": "Foreign nationals entering Japan in 2025 (Immigration Services Agency total, all-time high)",
+   "value": 42430000.0,
+   "value_as_written": "42.43",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "foreign nationals entering Japan",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "the number of foreign nationals who entered Japan in 2025 totaled an all-time high of about 42.43 million.",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+   "via": "snapshot",
+   "page_date": "2026-03-08",
+   "snapshot_ts": "20260308231405",
+   "order": [
+    3,
+    1
+   ],
+   "name": "Year-on-year increase in foreign nationals entering Japan in 2025",
+   "value": 5650000.0,
+   "value_as_written": "5.65",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "foreign nationals entering Japan (increase)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "The figure that includes permanent residents and other long-term stayers increased by about 5.65 million from the year before, surpassing 40 million for the first time.",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Redundant restatement of the same 2025 annual increase already captured more precisely by p51/p52; adds no independent information."
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+   "via": "snapshot",
+   "page_date": "2026-03-08",
+   "snapshot_ts": "20260308231405",
+   "order": [
+    3,
+    2
+   ],
+   "name": "Share of first-time arrivals in Japan in 2025 who were short-term visitors",
+   "value": 98.1,
+   "value_as_written": "98.1",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent (short-term visitors / first-time arrivals)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "Among those arriving in Japan for the first time, 98.1 percent were short-term visitors, indicating an increase in tourists driven by factors such as the weak yen and the rising number of internationa",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+   "via": "snapshot",
+   "page_date": "2026-03-08",
+   "snapshot_ts": "20260308231405",
+   "order": [
+    3,
+    3
+   ],
+   "name": "Foreigners entering Japan with a student visa in 2025 (record high)",
+   "value": 180000.0,
+   "value_as_written": "180,000",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "foreigners entering with a student visa",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "The number of foreigners entering with a student visa totaled about 180,000, also a record high.",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Student-visa entries are long-term stayers outside JNTO's visitor definition; not usable as a direct input."
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+   "via": "snapshot",
+   "page_date": "2026-03-08",
+   "snapshot_ts": "20260308231405",
+   "order": [
+    3,
+    4
+   ],
+   "name": "New entrants from China in 2025",
+   "value": 7220000.0,
+   "value_as_written": "7.22",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "new entrants from China",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "Last year, the number of new entrants from China came to about 7.22 million, up 1.74 million from 2024.",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+   "via": "snapshot",
+   "page_date": "2026-03-08",
+   "snapshot_ts": "20260308231405",
+   "order": [
+    3,
+    5
+   ],
+   "name": "Year-on-year increase in new entrants from China in 2025",
+   "value": 1740000.0,
+   "value_as_written": "1.74",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "new entrants from China (increase)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "Last year, the number of new entrants from China came to about 7.22 million, up 1.74 million from 2024.",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Redundant duplicate of p8 (same China 2025 figure and same source); keeping both would double-count one observation."
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+   "via": "snapshot",
+   "page_date": "2026-03-08",
+   "snapshot_ts": "20260308231405",
+   "order": [
+    3,
+    6
+   ],
+   "name": "Monthly arrivals in December 2025 (after Chinese travel advisory)",
+   "value": 280000.0,
+   "value_as_written": "280,000",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "arrivals",
+   "period_start": "2025-12-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "ged its citizens to refrain from traveling to Japan following Prime Minister Takaichi Sanae's remarks concerning a potential Taiwan contingency nearly halved from the previous year to roughly 280,000.",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.ntv.co.jp/englishnews/articles/20213sqoivhayoczritt.html",
+   "via": "snapshot",
+   "page_date": "2026-03-08",
+   "snapshot_ts": "20260308231405",
+   "order": [
+    3,
+    7
+   ],
+   "name": "Foreign workers in Japan as of end of October 2025 (record high)",
+   "value": 2571037.0,
+   "value_as_written": "2,571,037",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "foreign workers",
+   "period_start": "2025-10-31",
+   "period_end": "2025-10-31",
+   "published_at_if_visible": "",
+   "quote": "the number of foreign workers in Japan as of the end of October 2025 reached a record-high 2,571,037.",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Foreign-worker stock is a long-term-stay population measure, not a short-term visitor flow; unusable for the target and not needed as a bound."
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    1,
+    0
+   ],
+   "name": "Japan inbound foreign visitor arrivals, June 2026 monthly estimate (JNTO)",
+   "value": 3148600.0,
+   "value_as_written": "3,148,600",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "6月の訪日外客数は3,148,600人で、前年同月比6.8%減となったものの",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    1,
+    2
+   ],
+   "name": "Year-on-year change in Japan inbound foreign visitor arrivals, June 2026 vs June 2025",
+   "value": 6.8,
+   "value_as_written": "6.8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "6月:前年同月比6.8%減の315万人",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    1,
+    3
+   ],
+   "name": "Cumulative Japan inbound foreign visitor arrivals, first half (January-June) 2026",
+   "value": 21084800.0,
+   "value_as_written": "21,084,800",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2026-01-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "また、上半期の累計で21,084,800人となった。",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    1,
+    4
+   ],
+   "name": "Number of markets recording record-high June inbound arrivals, June 2026",
+   "value": 15.0,
+   "value_as_written": "15",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "markets",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "台湾、韓国、米国、インドなど15市場で6月として過去最高を記録した",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    0,
+    0
+   ],
+   "name": "June 2026 estimated foreign visitor arrivals to Japan (JNTO monthly estimate)",
+   "value": 3148600.0,
+   "value_as_written": "3,148,600",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "6月の訪日外客数は3,148,600人で、前年同月比6.8%減となったものの",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    0,
+    2
+   ],
+   "name": "Year-on-year change in June 2026 foreign visitor arrivals to Japan",
+   "value": 6.8,
+   "value_as_written": "6.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "6月:前年同月比6.8%減の315万人",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    0,
+    3
+   ],
+   "name": "Cumulative first-half 2026 foreign visitor arrivals to Japan (JNTO estimate)",
+   "value": 21084800.0,
+   "value_as_written": "21,084,800",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2026-01-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "また、上半期の累計で21,084,800人となった。",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    0
+   ],
+   "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026 (provisional), year-on-year change",
+   "value": 6.8,
+   "value_as_written": "6.8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "2026年6月の訪日外国人旅行者数(推計値)は、2025年同月比6.8%減の314万8600人となった。",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    2
+   ],
+   "name": "JNTO cumulative foreign visitor arrivals to Japan, January–June 2026, year-on-year change",
+   "value": 2.0,
+   "value_as_written": "2.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-01-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "1~6月の累計でも、前年同期比2.0%減の2108万4800人と前年割れとなった。",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    4
+   ],
+   "name": "Foreign visitor arrivals to Japan from South Korea, June 2026, year-on-year change",
+   "value": 7.8,
+   "value_as_written": "7.8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "韓国が78万7100人(2025年比7.8%増)",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    6
+   ],
+   "name": "Foreign visitor arrivals to Japan from Taiwan, June 2026, year-on-year change",
+   "value": 14.6,
+   "value_as_written": "14.6",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "台湾が67万400人(同14.6%増)",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    8
+   ],
+   "name": "Foreign visitor arrivals to Japan from the United States, June 2026, year-on-year change",
+   "value": 2.7,
+   "value_as_written": "2.7",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "米国が35万4500人(同2.7%増)",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    10
+   ],
+   "name": "Foreign visitor arrivals to Japan from China, June 2026, year-on-year change",
+   "value": 57.3,
+   "value_as_written": "57.3",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "中国が34万700人(同57.3%減)",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    12
+   ],
+   "name": "Foreign visitor arrivals to Japan from Hong Kong, June 2026, year-on-year change",
+   "value": 28.5,
+   "value_as_written": "28.5",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "香港が21万4300人(同28.5%増)",
+   "verified_by": "quote_in_page",
+   "id": "p25",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    14
+   ],
+   "name": "Number of markets setting a record high for June arrivals, June 2026",
+   "value": 15.0,
+   "value_as_written": "15",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "markets",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "韓国や台湾、米国、インドなど15市場で、6月の過去最多を更新した。",
+   "verified_by": "quote_in_page",
+   "id": "p26",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p15/p34 (same 15-market June 2026 record via a secondary outlet); no additional information."
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    1
+   ],
+   "name": "Year-on-year change in total foreign visitor arrivals to Japan, June 2026 vs June 2025",
+   "value": 6.8,
+   "value_as_written": "6.8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "2026年6月の訪日外国人旅行者数(推計値)は、2025年同月比6.8%減の314万8600人となった。",
+   "verified_by": "quote_in_page",
+   "id": "p27",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    3
+   ],
+   "name": "Year-on-year change in cumulative foreign visitor arrivals to Japan, January–June 2026 vs same period 2025",
+   "value": 2.0,
+   "value_as_written": "2.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-01-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "1~6月の累計でも、前年同期比2.0%減の2108万4800人と前年割れとなった。",
+   "verified_by": "quote_in_page",
+   "id": "p28",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    5
+   ],
+   "name": "Year-on-year change in foreign visitor arrivals to Japan from South Korea, June 2026 vs 2025",
+   "value": 7.8,
+   "value_as_written": "7.8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "韓国が78万7100人(2025年比7.8%増)",
+   "verified_by": "quote_in_page",
+   "id": "p29",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    7
+   ],
+   "name": "Year-on-year change in foreign visitor arrivals to Japan from Taiwan, June 2026 vs 2025",
+   "value": 14.6,
+   "value_as_written": "14.6",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "台湾が67万400人(同14.6%増)",
+   "verified_by": "quote_in_page",
+   "id": "p30",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    9
+   ],
+   "name": "Year-on-year change in foreign visitor arrivals to Japan from the United States, June 2026 vs 2025",
+   "value": 2.7,
+   "value_as_written": "2.7",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "米国が35万4500人(同2.7%増)",
+   "verified_by": "quote_in_page",
+   "id": "p31",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    11
+   ],
+   "name": "Year-on-year change in foreign visitor arrivals to Japan from China, June 2026 vs 2025",
+   "value": 57.3,
+   "value_as_written": "57.3",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "中国が34万700人(同57.3%減)",
+   "verified_by": "quote_in_page",
+   "id": "p32",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    13
+   ],
+   "name": "Year-on-year change in foreign visitor arrivals to Japan from Hong Kong, June 2026 vs 2025",
+   "value": 28.5,
+   "value_as_written": "28.5",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "香港が21万4300人(同28.5%増)",
+   "verified_by": "quote_in_page",
+   "id": "p33",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.travelvoice.jp/20260715-160182",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716034720",
+   "order": [
+    3,
+    14
+   ],
+   "name": "Number of markets setting record-high June arrivals, June 2026",
+   "value": 15.0,
+   "value_as_written": "15",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "markets",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "",
+   "quote": "韓国や台湾、米国、インドなど15市場で、6月の過去最多を更新した。",
+   "verified_by": "quote_in_page",
+   "id": "p34",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p15/p26 (same 15-market June 2026 record); redundant copy."
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    0
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, August 2019",
+   "value": 2520134.0,
+   "value_as_written": "2,520,134",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2019-08-01",
+   "period_end": "2019-08-31",
+   "published_at_if_visible": "",
+   "quote": "| 8月 | 2,520,134 | 2,933,381 | 116.4% | 2,109,568 | 1,437,126 | 68.1% |",
+   "verified_by": "quote_in_page",
+   "id": "p35",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    1
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, August 2024",
+   "value": 2933381.0,
+   "value_as_written": "2,933,381",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-08-01",
+   "period_end": "2024-08-31",
+   "published_at_if_visible": "",
+   "quote": "| 8月 | 2,520,134 | 2,933,381 | 116.4% | 2,109,568 | 1,437,126 | 68.1% |",
+   "verified_by": "quote_in_page",
+   "id": "p36",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    2
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, annual total 2019",
+   "value": 31882049.0,
+   "value_as_written": "31,882,049",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2019-01-01",
+   "period_end": "2019-12-31",
+   "published_at_if_visible": "",
+   "quote": "| 1~12月 | 31,882,049 | 36,869,900 | 115.6% | 20,080,669 | 13,007,300 | 64.8% |",
+   "verified_by": "quote_in_page",
+   "id": "p37",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    3
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, annual total 2024",
+   "value": 36869900.0,
+   "value_as_written": "36,869,900",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-01-01",
+   "period_end": "2024-12-31",
+   "published_at_if_visible": "",
+   "quote": "| 1~12月 | 31,882,049 | 36,869,900 | 115.6% | 20,080,669 | 13,007,300 | 64.8% |",
+   "verified_by": "quote_in_page",
+   "id": "p38",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    5
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, January 2024",
+   "value": 2688478.0,
+   "value_as_written": "2,688,478",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-01-01",
+   "period_end": "2024-01-31",
+   "published_at_if_visible": "",
+   "quote": "| 1月 | 2,689,339 | 2,688,478 | 100.0% | 1,452,157 | 838,581 | 57.7% |",
+   "verified_by": "quote_in_page",
+   "id": "p39",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    6
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, February 2024",
+   "value": 2788224.0,
+   "value_as_written": "2,788,224",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-02-01",
+   "period_end": "2024-02-29",
+   "published_at_if_visible": "",
+   "quote": "| 2月 | 2,604,322 | 2,788,224 | 107.1% | 1,534,792 | 978,884 | 63.8% |",
+   "verified_by": "quote_in_page",
+   "id": "p40",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    7
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, March 2024",
+   "value": 3081781.0,
+   "value_as_written": "3,081,781",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-03-01",
+   "period_end": "2024-03-31",
+   "published_at_if_visible": "",
+   "quote": "| 3月 | 2,760,136 | 3,081,781 | 111.7% | 1,929,915 | 1,219,789 | 63.2% |",
+   "verified_by": "quote_in_page",
+   "id": "p41",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    8
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, April 2024",
+   "value": 3043003.0,
+   "value_as_written": "3,043,003",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-04-01",
+   "period_end": "2024-04-30",
+   "published_at_if_visible": "",
+   "quote": "| 4月 | 2,926,685 | 3,043,003 | 104.0% | 1,666,546 | 888,767 | 53.3% |",
+   "verified_by": "quote_in_page",
+   "id": "p42",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    9
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, May 2024",
+   "value": 3040294.0,
+   "value_as_written": "3,040,294",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-05-01",
+   "period_end": "2024-05-31",
+   "published_at_if_visible": "",
+   "quote": "| 5月 | 2,773,091 | 3,040,294 | 109.6% | 1,437,929 | 941,709 | 65.5% |",
+   "verified_by": "quote_in_page",
+   "id": "p43",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    10
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, June 2024",
+   "value": 3140642.0,
+   "value_as_written": "3,140,642",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-06-01",
+   "period_end": "2024-06-30",
+   "published_at_if_visible": "",
+   "quote": "| 6月 | 2,880,041 | 3,140,642 | 109.0% | 1,520,993 | 930,229 | 61.2% |",
+   "verified_by": "quote_in_page",
+   "id": "p44",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    11
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, July 2024",
+   "value": 3292602.0,
+   "value_as_written": "3,292,602",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-07-01",
+   "period_end": "2024-07-31",
+   "published_at_if_visible": "",
+   "quote": "| 7月 | 2,991,189 | 3,292,602 | 110.1% | 1,659,166 | 1,048,823 | 63.2% |",
+   "verified_by": "quote_in_page",
+   "id": "p45",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    12
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, September 2024",
+   "value": 2872487.0,
+   "value_as_written": "2,872,487",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-09-01",
+   "period_end": "2024-09-30",
+   "published_at_if_visible": "",
+   "quote": "| 9月 | 2,272,883 | 2,872,487 | 126.4% | 1,751,477 | 1,212,545 | 69.2% |",
+   "verified_by": "quote_in_page",
+   "id": "p46",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.travelvision.jp/news/detail/news-114693",
+   "via": "snapshot",
+   "page_date": "2025-08-10",
+   "snapshot_ts": "20250810214908",
+   "order": [
+    2,
+    13
+   ],
+   "name": "JNTO foreign visitor arrivals to Japan, October 2024",
+   "value": 3312193.0,
+   "value_as_written": "3,312,193",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2024-10-01",
+   "period_end": "2024-10-31",
+   "published_at_if_visible": "",
+   "quote": "| 10月 | 2,496,568 | 3,312,193 | 132.7% | 1,663,474 | 1,148,502 | 69.0% |",
+   "verified_by": "quote_in_page",
+   "id": "p47",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    3,
+    0
+   ],
+   "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026 (monthly estimate)",
+   "value": 3148600.0,
+   "value_as_written": "3,148,600",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "6月の訪日外客数は3,148,600人で、前年同月比6.8%減となったものの",
+   "verified_by": "quote_in_page",
+   "id": "p48",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    3,
+    1
+   ],
+   "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026, year-on-year change",
+   "value": 6.8,
+   "value_as_written": "6.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-06-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "6月:前年同月比6.8%減の315万人",
+   "verified_by": "quote_in_page",
+   "id": "p49",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "source_url": "https://www.jnto.go.jp/news/press/20260715_monthly.html",
+   "via": "snapshot",
+   "page_date": "2026-07-16",
+   "snapshot_ts": "20260716193946",
+   "order": [
+    3,
+    3
+   ],
+   "name": "JNTO cumulative foreign visitor arrivals to Japan, first half (January-June) 2026",
+   "value": 21084800.0,
+   "value_as_written": "21,084,800",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits (arrivals)",
+   "period_start": "2026-01-01",
+   "period_end": "2026-06-30",
+   "published_at_if_visible": "2026-07-15",
+   "quote": "また、上半期の累計で21,084,800人となった。",
+   "verified_by": "quote_in_page",
+   "id": "p50",
+   "keep": false,
+   "ablation_excluded": "ablation: name refers to the target entity ['japan'] and quantity"
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418165023",
+   "order": [
+    1,
+    6
+   ],
+   "name": "Year-on-year percentage increase in total foreign national entries, calendar year 2025",
+   "value": 15.4,
+   "value_as_written": "15.4",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent (year-on-year change in foreign national entries)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "4,243万930人で、前年に比べ565万966人(15.4%)増加、新規入国者数は、3,918万4,525人で、前年に比べ516万8,759人(15.2%)増加",
+   "verified_by": "quote_in_page",
+   "id": "p51",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418165023",
+   "order": [
+    1,
+    8
+   ],
+   "name": "Year-on-year percentage increase in new foreign national entries, calendar year 2025",
+   "value": 15.2,
+   "value_as_written": "15.2",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent (year-on-year change in new foreign national entries",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "新規入国者数は、3,918万4,525人で、前年に比べ516万8,759人(15.2%)増加し、いずれも過去最高となりました",
+   "verified_by": "quote_in_page",
+   "id": "p52",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.moj.go.jp/isa/publications/press/13_00063.html",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418165023",
+   "order": [
+    1,
+    13
+   ],
+   "name": "Share of 'short-term stay' among new foreign national entries, calendar year 2025",
+   "value": 98.1,
+   "value_as_written": "98.1",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent (short-term stay new entries / total new foreign nat",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "「短期滞在」(3,845万8,105人、対前年15.3%増)が最も多く、全体の98.1%を占め",
+   "verified_by": "quote_in_page",
+   "id": "p53",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+   "via": "snapshot",
+   "page_date": "2026-07-19",
+   "snapshot_ts": "20260719234847",
+   "order": [
+    0,
+    0
+   ],
+   "name": "China-Japan round-trip flights scheduled for July 2026 (summer travel period)",
+   "value": 2629.0,
+   "value_as_written": "2,629",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "round-trip flights",
+   "period_start": "2026-07-01",
+   "period_end": "2026-07-31",
+   "published_at_if_visible": "",
+   "quote": "A total of 2,629 round-trip flights were expected next month between the two Asian countries, down from 6,317 in July last year.",
+   "verified_by": "quote_in_page",
+   "id": "p54",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+   "via": "snapshot",
+   "page_date": "2026-07-19",
+   "snapshot_ts": "20260719234847",
+   "order": [
+    0,
+    1
+   ],
+   "name": "China-Japan round-trip flights flown in July 2025",
+   "value": 6317.0,
+   "value_as_written": "6,317",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "round-trip flights",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "",
+   "quote": "A total of 2,629 round-trip flights were expected next month between the two Asian countries, down from 6,317 in July last year.",
+   "verified_by": "quote_in_page",
+   "id": "p55",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+   "via": "snapshot",
+   "page_date": "2026-07-19",
+   "snapshot_ts": "20260719234847",
+   "order": [
+    0,
+    3
+   ],
+   "name": "China-Japan round-trip flights flown in August 2025",
+   "value": 6127.0,
+   "value_as_written": "6,127",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "round-trip flights",
+   "period_start": "2025-08-01",
+   "period_end": "2025-08-31",
+   "published_at_if_visible": "",
+   "quote": "In August, 2,641 were scheduled, a drop from the 6,127 flown in August 2025, data compiled by British aviation intelligence firm OAG showed.",
+   "verified_by": "quote_in_page",
+   "id": "p56",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.scmp.com/economy/global-economy/article/3358296/china-japan-flights-drop-57-summer-travel-peak-amid-geopolitical-tensions?module=inline&pgtype=article",
+   "via": "snapshot",
+   "page_date": "2026-07-19",
+   "snapshot_ts": "20260719234847",
+   "order": [
+    0,
+    6
+   ],
+   "name": "China-Japan flights scrapped by China as of June 23 (current year)",
+   "value": 9000.0,
+   "value_as_written": "9,000",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "flights",
+   "period_start": "",
+   "period_end": "2026-06-23",
+   "published_at_if_visible": "",
+   "quote": "As of June 23, China had scrapped nearly 9,000 flights to Japan this year.",
+   "verified_by": "quote_in_page",
+   "id": "p57",
+   "keep": true,
+   "judged_round": 2
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "formula_mc",
+    "params": {
+     "formula": "a1 * b1",
+     "inputs": {
+      "a1": {
+       "id": "a1"
+      },
+      "b1": {
+       "id": "p56"
+      }
+     }
+    },
+    "rationale": "Route d5/b3: scale the known August 2025 China-Japan flight collapse into a visitor-arrival change factor. p56 gives August 2025 China-Japan round-trip flights (6,127) as the observed anchor; a1 converts the 2026-vs-2025 capacity/demand situation into a ratio of August 2026 to August 2025 arrivals. This is a change-factor decomposition, not a capacity-as-output claim: the flight data only informs ",
+    "estimate": 5880.412978901513,
+    "backtest": [],
+    "notes": [],
+    "used_ids": [
+     "p56"
+    ],
+    "used_assumptions": [
+     "a1"
+    ],
+    "inputs_detail": [
+     {
+      "name": "a1",
+      "id": "a1",
+      "kind": "assumption",
+      "p10": 0.6782329983125267,
+      "p90": 1.3564659966250536
+     },
+     {
+      "name": "b1",
+      "id": "p56",
+      "kind": "point",
+      "p10": 5105.833333333334,
+      "p90": 7352.4
+     }
+    ],
+    "mc": {
+     "p10": 3972.9450695540363,
+     "p90": 8687.826095671808
+    },
+    "n_point_inputs": 1,
+    "n_assumption_inputs": 1,
+    "rests_mainly_on_assumptions": true
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "formula_mc",
+    "params": {
+     "formula": "a2 * a3",
+     "inputs": {
+      "a2": {
+       "id": "a2"
+      },
+      "a3": {
+       "id": "a3"
+      }
+     }
+    },
+    "rationale": "Route d3/b1: seasonal-share decomposition. a3 is the assumed 2026 annual JNTO visitor total (anchored on 2025 immigration entries p4/p51 and short-term share p53), and a2 is the assumed August share of the annual total. Multiplying gives August 2026 arrivals. This route is independent of the flight-shock route in structure but shares the same underlying demand uncertainty. Failure mode: if 2026 se",
+    "estimate": null,
+    "backtest": [],
+    "notes": [],
+    "error": "input a3: assumption a3 was rejected (target-like: a level of the target quantity (unit or name matches the target, no ratio wording))",
+    "n_point_inputs": 0,
+    "n_assumption_inputs": 0,
+    "rests_mainly_on_assumptions": false
+   }
+  ],
+  "result": {
+   "central": 5880.412978901519,
+   "p10": 3976.5692344378936,
+   "p90": 8695.75122770907,
+   "sigma_ln": 0.30526087151478515,
+   "sigma_hist": null,
+   "sigma_spread": null,
+   "sigma_mc": 0.30526087151478515,
+   "n_backtest_folds": 0,
+   "weights": {
+    "m1": 1.0
+   },
+   "weight_rule": "equal",
+   "weight_basis": {
+    "m1": "equal"
+   },
+   "basis": "monte_carlo",
+   "assumption_weight_share": 1.0
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {
+   "a1": [
+    "m1"
+   ]
+  },
+  "methods_from_round": 2
+ },
+ "assumptions": {
+  "kept": [
+   {
+    "id": "a1",
+    "name": "August 2026 foreign visitor arrivals as a multiple of August 2025 JNTO arrivals",
+    "unit": "ratio (dimensionless)",
+    "rationale": "No kept point gives the August 2026 level directly. June 2026 set records in 15 markets (p15), indicating broad-based strength, but the China-Japan flight collapse (p54/p56: August 2026 scheduled 2,641 vs 6,127 flown August 2025) removes a large share of Chinese arrivals, and the December 2025 advis",
+    "applies_when": "Used to scale a known August 2025 JNTO arrival level to August 2026; valid only if the China shock is not fully offset by growth in Korea, Taiwan, US and other markets.",
+    "falsified_by": "Evidence that China-Japan capacity has been restored toward 2025 levels, or that total 2026 summer arrivals are running clearly above 2025.",
+    "route": "m1",
+    "value": 0.95,
+    "low": 0.8,
+    "high": 1.15,
+    "is_pct": false,
+    "p10_used": 0.6782329983125267,
+    "p90_used": 1.3564659966250536,
+    "widened_by_floor": true,
+    "used_by": [
+     "m1"
+    ],
+    "used_by_labels": [
+     "m1"
+    ]
+   },
+   {
+    "id": "a2",
+    "name": "August share of annual JNTO foreign visitor arrivals",
+    "unit": "share (dimensionless)",
+    "rationale": "August is a peak summer month; historically it accounts for roughly 9-10% of annual JNTO arrivals. No kept point supplies this share, so it is assumed with a wide range to allow the seasonal-share route.",
+    "applies_when": "Used with a 2026 annual arrivals total to derive the August 2026 level; valid if 2026 seasonality resembles recent years.",
+    "falsified_by": "A published 2026 monthly distribution showing August materially outside 8.5-10.5% of the annual total.",
+    "route": "m2",
+    "value": 0.095,
+    "low": 0.085,
+    "high": 0.105,
+    "is_pct": false,
+    "p10_used": 0.06680194607943693,
+    "p90_used": 0.1336038921588739,
+    "widened_by_floor": true,
+    "used_by": [],
+    "used_by_labels": []
+   }
+  ],
+  "rejected": [
+   {
+    "id": "a3",
+    "name": "2026 full-year JNTO foreign visitor arrivals",
+    "unit": "visits (arrivals)",
+    "rationale": "2025 immigration entries were ~42.4m (p4/p51) with short-term share ~98% (p53), implying roughly 38-40m JNTO-type visitors in 2025. For 2026, broad market strength (p15) is offset by the China shock (p54/p56), so a full-year total near 2025 levels with wide uncertainty is assumed. This is an annual ",
+    "applies_when": "Used only as the annual scale in the seasonal-share decomposition for August 2026.",
+    "falsified_by": "Official 2026 YTD totals implying a full-year figure well outside 34-46m.",
+    "route": "m2",
+    "value": 40000000.0,
+    "low": 34000000.0,
+    "high": 46000000.0,
+    "reason": "target-like: a level of the target quantity (unit or name matches the target, no ratio wording)"
+   }
+  ],
+  "from_round": 2,
+  "min_width": 2.0,
+  "max_per_run": 8,
+  "max_per_method": 3
+ },
+ "final": {
+  "template": "The best computed estimate for foreign visitor arrivals to Japan in August 2026, as JNTO would first report it, is [[estimate]] visits. The code supplies a model-based interval of [[p10]] to [[p90]] at the [[interval_level]] level, conditional on the assumptions rather than a demonstrated accuracy guarantee.\n\nThe estimate rests mainly on one route: scaling August 2025 China-Japan flight volume into a change factor for arrivals, using observed point [[p10]] and assumption [[a1_value]] (range [[a1_low]] to [[a1_high]]). A second seasonal-share route was rejected because its input was target-like, so it received weight [[m2_weight]]. The combination therefore reflects the single retained method, not independent confirmation.\n\nThe key risk is that the flight-shock transfer may misstate how Chinese demand and other markets offset each other. Better evidence would be actual August 2026 immigration or arrival counts.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 August 2026 foreign visitor arrivals as a multiple of August 2025 JNTO arrivals: [[a1_value]] ratio (dimensionless), range [[a1_low]] to [[a1_high]] (range widened by code); used by m1. Overturned by: Evidence that China-Japan capacity has been restored toward [n] levels, or that total [n] summer arrivals are running clearly above [n].",
+  "text": "The best computed estimate for foreign visitor arrivals to Japan in August 2026, as JNTO would first report it, is 5,880 visits. The code supplies a model-based interval of 3,977 to 8,696 at the 80% level, conditional on the assumptions rather than a demonstrated accuracy guarantee.\n\nThe estimate rests mainly on one route: scaling August 2025 China-Japan flight volume into a change factor for arrivals, using observed point 3,977 and assumption 0.95 (range 0.6782 to 1.356). A second seasonal-share route was rejected because its input was target-like, so it received weight 0%. The combination therefore reflects the single retained method, not independent confirmation.\n\nThe key risk is that the flight-shock transfer may misstate how Chinese demand and other markets offset each other. Better evidence would be actual August 2026 immigration or arrival counts.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 August 2026 foreign visitor arrivals as a multiple of August 2025 JNTO arrivals: 0.95 ratio (dimensionless), range 0.6782 to 1.356 (range widened by code); used by m1. Overturned by: Evidence that China-Japan capacity has been restored toward [n] levels, or that total [n] summer arrivals are running clearly above [n].",
+  "placeholders": {
+   "estimate": "5,880",
+   "p10": "3,977",
+   "p90": "8,696",
+   "interval_level": "80%",
+   "interval_basis": "monte carlo",
+   "n_points_kept": "14",
+   "n_methods": "1",
+   "m1_estimate": "5,880",
+   "m1_weight": "100%",
+   "m1_backtest_error": "n/a",
+   "m2_estimate": "n/a",
+   "m2_weight": "0%",
+   "m2_backtest_error": "n/a",
+   "a1_value": "0.95",
+   "a1_low": "0.6782",
+   "a1_high": "1.356"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": true
+ },
+ "started_at": "20261015T092411Z",
+ "wall_s": 2611.8,
+ "budget": {
+  "usd_total_assumed": 0.5016,
+  "usd_tokens": 0.1016,
+  "usd_search_fee_assumed": 0.4,
+  "usd_cap": 1.0,
+  "pages_used": 13,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 27,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 40,
+  "pages_snapshot": 13,
+  "pages_live_dated": 0,
+  "pages_dropped": 27,
+  "pages_sent_to_extractor": {
+   "total": 13,
+   "snapshot": 13,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "v21_noown",
+ "ablation": {
+  "own_history": true,
+  "dropped_candidate_directions": [
+   "c1"
+  ],
+  "dropped_extra_directions": [],
+  "entity_anchors": [
+   "japan"
+  ],
+  "quantity_stems": [
+   "arriv",
+   "visit"
+  ],
+  "n_points_total": 57,
+  "n_points_excluded": 37,
+  "excluded_points": [
+   {
+    "id": "p6",
+    "name": "Share of first-time arrivals in Japan in 2025 who were short-term visitors",
+    "value": 98.1,
+    "unit": "percent (short-term visitors / first-time arrivals)",
+    "period_end": "2025-12-31",
+    "direction_id": "d1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p12",
+    "name": "Japan inbound foreign visitor arrivals, June 2026 monthly estimate (JNTO)",
+    "value": 3148600.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2026-06-30",
+    "direction_id": "d2",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p13",
+    "name": "Year-on-year change in Japan inbound foreign visitor arrivals, June 2026 vs June 2025",
+    "value": 6.8,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d2",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p14",
+    "name": "Cumulative Japan inbound foreign visitor arrivals, first half (January-June) 2026",
+    "value": 21084800.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2026-06-30",
+    "direction_id": "d2",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p16",
+    "name": "June 2026 estimated foreign visitor arrivals to Japan (JNTO monthly estimate)",
+    "value": 3148600.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p17",
+    "name": "Year-on-year change in June 2026 foreign visitor arrivals to Japan",
+    "value": 6.8,
+    "unit": "%",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p18",
+    "name": "Cumulative first-half 2026 foreign visitor arrivals to Japan (JNTO estimate)",
+    "value": 21084800.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p19",
+    "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026 (provisional), year-on-year change",
+    "value": 6.8,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p20",
+    "name": "JNTO cumulative foreign visitor arrivals to Japan, January–June 2026, year-on-year change",
+    "value": 2.0,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p21",
+    "name": "Foreign visitor arrivals to Japan from South Korea, June 2026, year-on-year change",
+    "value": 7.8,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p22",
+    "name": "Foreign visitor arrivals to Japan from Taiwan, June 2026, year-on-year change",
+    "value": 14.6,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p23",
+    "name": "Foreign visitor arrivals to Japan from the United States, June 2026, year-on-year change",
+    "value": 2.7,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p24",
+    "name": "Foreign visitor arrivals to Japan from China, June 2026, year-on-year change",
+    "value": 57.3,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p25",
+    "name": "Foreign visitor arrivals to Japan from Hong Kong, June 2026, year-on-year change",
+    "value": 28.5,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d3",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p27",
+    "name": "Year-on-year change in total foreign visitor arrivals to Japan, June 2026 vs June 2025",
+    "value": 6.8,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d6",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p28",
+    "name": "Year-on-year change in cumulative foreign visitor arrivals to Japan, January–June 2026 vs same period 2025",
+    "value": 2.0,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d6",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p29",
+    "name": "Year-on-year change in foreign visitor arrivals to Japan from South Korea, June 2026 vs 2025",
+    "value": 7.8,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d6",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p30",
+    "name": "Year-on-year change in foreign visitor arrivals to Japan from Taiwan, June 2026 vs 2025",
+    "value": 14.6,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d6",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p31",
+    "name": "Year-on-year change in foreign visitor arrivals to Japan from the United States, June 2026 vs 2025",
+    "value": 2.7,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d6",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p32",
+    "name": "Year-on-year change in foreign visitor arrivals to Japan from China, June 2026 vs 2025",
+    "value": 57.3,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d6",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p33",
+    "name": "Year-on-year change in foreign visitor arrivals to Japan from Hong Kong, June 2026 vs 2025",
+    "value": 28.5,
+    "unit": "percent",
+    "period_end": "2026-06-30",
+    "direction_id": "d6",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p35",
+    "name": "JNTO foreign visitor arrivals to Japan, August 2019",
+    "value": 2520134.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2019-08-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p36",
+    "name": "JNTO foreign visitor arrivals to Japan, August 2024",
+    "value": 2933381.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-08-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p37",
+    "name": "JNTO foreign visitor arrivals to Japan, annual total 2019",
+    "value": 31882049.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2019-12-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p38",
+    "name": "JNTO foreign visitor arrivals to Japan, annual total 2024",
+    "value": 36869900.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-12-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p39",
+    "name": "JNTO foreign visitor arrivals to Japan, January 2024",
+    "value": 2688478.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-01-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p40",
+    "name": "JNTO foreign visitor arrivals to Japan, February 2024",
+    "value": 2788224.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-02-29",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p41",
+    "name": "JNTO foreign visitor arrivals to Japan, March 2024",
+    "value": 3081781.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-03-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p42",
+    "name": "JNTO foreign visitor arrivals to Japan, April 2024",
+    "value": 3043003.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-04-30",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p43",
+    "name": "JNTO foreign visitor arrivals to Japan, May 2024",
+    "value": 3040294.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-05-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p44",
+    "name": "JNTO foreign visitor arrivals to Japan, June 2024",
+    "value": 3140642.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-06-30",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p45",
+    "name": "JNTO foreign visitor arrivals to Japan, July 2024",
+    "value": 3292602.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-07-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p46",
+    "name": "JNTO foreign visitor arrivals to Japan, September 2024",
+    "value": 2872487.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-09-30",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p47",
+    "name": "JNTO foreign visitor arrivals to Japan, October 2024",
+    "value": 3312193.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2024-10-31",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p48",
+    "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026 (monthly estimate)",
+    "value": 3148600.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2026-06-30",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p49",
+    "name": "JNTO estimated foreign visitor arrivals to Japan, June 2026, year-on-year change",
+    "value": 6.8,
+    "unit": "%",
+    "period_end": "2026-06-30",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   },
+   {
+    "id": "p50",
+    "name": "JNTO cumulative foreign visitor arrivals to Japan, first half (January-June) 2026",
+    "value": 21084800.0,
+    "unit": "visits (arrivals)",
+    "period_end": "2026-06-30",
+    "direction_id": "b1",
+    "reason": "ablation: name refers to the target entity ['japan'] and quantity"
+   }
+  ],
+  "methods_allowed": [
+   "formula_mc"
+  ],
+  "rule": "exclude points from own_history directions and points whose name contains a target entity anchor and whose name or unit shares a stem with the target unit (triangulate/agent/ablation.py)",
+  "residual_risks": [
+   "Own values named by an alias or abbreviation, or with no entity in the point name, are not excluded.",
+   "The rule over-excludes on purpose: any point naming the target entity together with the target quantity (for example a survey of the target's visitors) is excluded, even when it is not a value of the target itself.",
+   "The model's own memory of the target's history is not removed: it can still shape the plan, the judge's choices and assumption values.",
+   "The searcher and the extractor still see pages that contain own values; only the judge's table is filtered."
+  ]
+ }
+}

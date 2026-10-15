@@ -303,6 +303,8 @@ class TestGraphOffline(unittest.TestCase):
                     return {"decisions": [], "extra_directions": [],
                             "methods": [{"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}},
                                         {"id": "m2", "method": "linear_fit", "params": {"target_history": ["p1"]}}]}, None
+                if role == "audit":
+                    return {"methods": []}, None
                 if role == "final":
                     return {"answer": "About [[estimate]] widgets (range [[p10]] to [[p90]]); I think 1,234 too."}, None
                 raise AssertionError(role)
@@ -383,6 +385,8 @@ class TestGraphRound2AndBudget(unittest.TestCase):
                             "methods": [{"id": "x", "method": "series_naive", "params": {"target_history": ["p2", "p3"], "k": 1}}]}, None
                 if role == "judge:r2":
                     return None, "reply is not valid JSON"
+                if role == "audit":
+                    return {"methods": []}, None
                 if role == "final":
                     return {"answer": "About [[estimate]]."}, None
                 raise AssertionError(role)

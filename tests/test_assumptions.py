@@ -297,6 +297,9 @@ class TestGraphWithAssumptions(unittest.TestCase):
                         {"name": "Grand Teton National Park recreation visits in July 2026", "value_as_written": "410,000",
                          "unit": "visits", "period_start": "2026-07-01", "period_end": "2026-07-31",
                          "quote": "neighbour July 2026: 410,000 visits"}]}, None
+                if role == "audit":
+                    seen["audit_user"] = user
+                    return {"methods": []}, None
                 if role.startswith("judge"):
                     seen["judge_user"] = user
                     return {"decisions": [], "extra_directions": [],
@@ -304,9 +307,11 @@ class TestGraphWithAssumptions(unittest.TestCase):
                                             A(id="a3", name="target to neighbour ratio, 2014 to 2018 average", value=2.2,
                                               low=2.0, high=2.4, route="m2")],
                             "methods": [{"id": "m1", "method": "formula_mc",
-                                         "params": {"formula": "j * r", "inputs": {"j": {"id": "p1"}, "r": {"id": "a1"}}}},
+                                         "params": {"formula": "j * r", "inputs": {"j": {"id": "p1", "role": "July 2026 visits"},
+                                                                                      "r": {"id": "a1", "role": "August/July ratio"}}}},
                                         {"id": "m2", "method": "formula_mc",
-                                         "params": {"formula": "g * k", "inputs": {"g": {"id": "p2"}, "k": {"id": "a3"}}}}]}, None
+                                         "params": {"formula": "g * k", "inputs": {"g": {"id": "p2", "role": "neighbour July visits"},
+                                                                                   "k": {"id": "a3", "role": "target/neighbour ratio"}}}}]}, None
                 if role == "final":
                     return {"answer": "About [[estimate]] visits; a1 is about 0.9 (my guess)."}, None
                 raise AssertionError(role)
@@ -423,3 +428,30 @@ class TestV21FormulaGuards(unittest.TestCase):
         m = out["methods"][0]
         self.assertNotIn("error", m)
         self.assertAlmostEqual(m["estimate"] / (sum([8945.0, 11062.0, 12380.0, 9982.0]) / 4 * 31), 1, delta=0.1)
+
+
+class TestInputAuditRows(unittest.TestCase):
+    """v2.1：输入核对要看的内容（graph.audit_rows）：formula_mc 每个输入的 role 和证据；序列方法的 target_history。"""
+
+    def test_rows(self):
+        from triangulate.agent import graph as G
+        by_id = {"p1": dict(_pt("p1", 2781.0, "2026-05-31", unit="births", name="Year-over-year increase in births, May 2026"),
+                            id="p1", source_url="https://x.example/a")}
+        kept_a = {"a1": {"id": "a1", "name": "July 2026 / July 2025", "value": 1.13, "unit": "ratio"}}
+        m_in = {"method": "formula_mc", "params": {"formula": "b * r", "inputs": {"b": {"id": "p1", "role": "July 2025 births"},
+                                                                                 "r": {"id": "a1"}, "d": {"id": "k_days_target"}}}}
+        rows = G.audit_rows(m_in, {"method": "formula_mc"}, by_id, kept_a)
+        self.assertEqual([r[0] for r in rows], ["b", "r"])          # 日历常数不核对
+        self.assertEqual(rows[1][2], "")                            # 没写 role -> 由 audit 直接判不通过
+        self.assertIn("Year-over-year increase", rows[0][3])
+        s_rows = G.audit_rows({"method": "series_naive", "params": {"target_history": ["p1"]}}, {"method": "series_naive"}, by_id, {})
+        self.assertEqual(s_rows[0][2], G.TARGET_HISTORY_ROLE)
+
+    def test_repair_errors_only_when_nothing_survives(self):
+        from triangulate.agent import graph as G
+        jr = {"methods": [{"id": "m1"}, {"id": "m2"}]}
+        out = {"methods": [{"id": "m1", "method": "formula_mc"}, {"id": "m2", "method": "formula_mc"}]}
+        av = {"rejected": []}
+        self.assertEqual(G._repair_errors(jr, out, av, {0: "input audit: b: a change used as a level"}), [])
+        errs = G._repair_errors(jr, out, av, {0: "x", 1: "input audit: y"})
+        self.assertEqual(len(errs), 2)
