@@ -1,0 +1,247 @@
+[
+ {
+  "run": "8 月第 1 次（预注册主结果）",
+  "qid": "fc_yell_2026_08",
+  "dir": "results/agent/fc_yell_2026_08/run1_gzip_bug",
+  "answer": 856467,
+  "old": {
+   "central": 858553.2309527629,
+   "p10": 791349.9990634598,
+   "p90": 931463.5133023078,
+   "basis": "historical_errors",
+   "sigma_ln": 0.06360129285093019
+  },
+  "new": {
+   "central": 858553.2309527629,
+   "p10": 623195.8227523253,
+   "p90": 1182796.1989924582,
+   "basis": "no_basis",
+   "sigma_ln": 0.25,
+   "n_backtest_folds": 1,
+   "weights": {
+    "m1": 0.3333333333333333,
+    "m2": 0.3333333333333333,
+    "m4": 0.3333333333333333
+   }
+  },
+  "new_pct_err": 0.0024358567846314294,
+  "new_covered_80": true,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "series_naive",
+    "estimate": 875097.5,
+    "years_used": [
+     2024,
+     2025
+    ],
+    "error": null,
+    "backtest_years": []
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "yoy_scaling",
+    "estimate": 863810.0678006954,
+    "years_used": null,
+    "error": null,
+    "backtest_years": []
+   },
+   {
+    "id": "m3",
+    "label": "m3",
+    "method": "linear_fit",
+    "estimate": null,
+    "years_used": null,
+    "error": "linear_fit needs >= 3 aligned years, has 2",
+    "backtest_years": []
+   },
+   {
+    "id": "m4",
+    "label": "m4",
+    "method": "ratio",
+    "estimate": 837195.6750877387,
+    "years_used": null,
+    "error": null,
+    "backtest_years": [
+     2025
+    ]
+   }
+  ],
+  "used_points_recheck": {
+   "p1": "passes",
+   "p2": "passes",
+   "p3": "passes",
+   "p19": "passes",
+   "p20": "passes",
+   "p21": "passes"
+  }
+ },
+ {
+  "run": "8 月第 2 次",
+  "qid": "fc_yell_2026_08",
+  "dir": "results/agent/fc_yell_2026_08",
+  "answer": 856467,
+  "old": {
+   "central": 918712.5109822364,
+   "p10": 825786.183740093,
+   "p90": 1022095.9062460358,
+   "basis": "monte_carlo",
+   "sigma_ln": 0.08320957629359556
+  },
+  "new": {
+   "central": 918790.3687470411,
+   "p10": 666919.9988366569,
+   "p90": 1265782.6173676949,
+   "basis": "no_basis",
+   "sigma_ln": 0.25,
+   "n_backtest_folds": 0,
+   "weights": {
+    "m1": 0.3333333333333333,
+    "m2": 0.3333333333333333,
+    "m5": 0.3333333333333333
+   }
+  },
+  "new_pct_err": 0.07276797441937766,
+  "new_covered_80": true,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "series_naive",
+    "estimate": 890679.6666666666,
+    "years_used": [
+     2021,
+     2024,
+     2025
+    ],
+    "error": null,
+    "backtest_years": []
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "series_naive",
+    "estimate": 875097.5,
+    "years_used": [
+     2024,
+     2025
+    ],
+    "error": null,
+    "backtest_years": []
+   },
+   {
+    "id": "m3",
+    "label": "m3",
+    "method": "yoy_scaling",
+    "estimate": null,
+    "years_used": null,
+    "error": "yoy_scaling needs signal for 2026",
+    "backtest_years": []
+   },
+   {
+    "id": "m4",
+    "label": "m4",
+    "method": "ratio",
+    "estimate": null,
+    "years_used": null,
+    "error": "signal has no value for 2026",
+    "backtest_years": []
+   },
+   {
+    "id": "m5",
+    "label": "m5",
+    "method": "formula_mc",
+    "estimate": 995110.5281832714,
+    "years_used": null,
+    "error": null,
+    "backtest_years": []
+   }
+  ],
+  "used_points_recheck": {
+   "p1": "passes",
+   "p2": "passes",
+   "p3": "passes",
+   "p36": "passes",
+   "p50": "passes"
+  }
+ },
+ {
+  "run": "9 月",
+  "qid": "fc_yell_2026_09",
+  "dir": "results/agent/fc_yell_2026_09",
+  "answer": 868450,
+  "old": {
+   "central": 851529.8637455406,
+   "p10": 843741.5735131379,
+   "p90": 859390.0450245012,
+   "basis": "method_spread",
+   "sigma_ln": 0.007169681245719595
+  },
+  "new": {
+   "central": 851529.8637455406,
+   "p10": 618097.7892846284,
+   "p90": 1173120.3725703596,
+   "basis": "no_basis",
+   "sigma_ln": 0.25,
+   "n_backtest_folds": 0,
+   "weights": {
+    "m1": 0.5,
+    "m2": 0.5
+   }
+  },
+  "new_pct_err": -0.01948314382458327,
+  "new_covered_80": true,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "series_naive",
+    "estimate": 845446.5,
+    "years_used": [
+     2023,
+     2024
+    ],
+    "error": null,
+    "backtest_years": []
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "series_naive",
+    "estimate": 857657.0,
+    "years_used": [
+     2021,
+     2023,
+     2024
+    ],
+    "error": null,
+    "backtest_years": []
+   },
+   {
+    "id": "m3",
+    "label": "m3",
+    "method": "yoy_scaling",
+    "estimate": null,
+    "years_used": null,
+    "error": "yoy_scaling needs target for 2025",
+    "backtest_years": []
+   },
+   {
+    "id": "m4",
+    "label": "m4",
+    "method": "ratio",
+    "estimate": null,
+    "years_used": null,
+    "error": "signal has no value for 2026",
+    "backtest_years": []
+   }
+  ],
+  "used_points_recheck": {
+   "p1": "passes",
+   "p2": "passes",
+   "p3": "passes"
+  }
+ }
+]
