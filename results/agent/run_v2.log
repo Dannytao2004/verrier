@@ -1,0 +1,79 @@
+[fc_yell_2026_08] plan: 8 directions -> approved=True
+[fc_yell_2026_09] plan: 8 directions -> approved=True
+[fc_yell_2026_08] plan: 7 directions -> approved=True
+[fc_yell_2026_09] plan: 7 directions -> approved=True
+[fc_yell_2026_08] done in 1019.1s; estimate n/a; usd 0.4354
+[fc_yell_2026_08] done in 1062.9s; estimate n/a; usd 0.5153
+[fc_yell_2026_09] done in 1069.7s; estimate n/a; usd 0.5474
+[fc_yell_2026_09] done in 1075.3s; estimate n/a; usd 0.5575
+[
+ {
+  "id": "fc_yell_2026_08",
+  "ablation": false,
+  "estimate": null,
+  "wall_s": 1019.1
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "ablation": false,
+  "estimate": null,
+  "wall_s": 1075.3
+ },
+ {
+  "id": "fc_yell_2026_08",
+  "ablation": true,
+  "estimate": null,
+  "wall_s": 1062.9
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "ablation": true,
+  "estimate": null,
+  "wall_s": 1069.7
+ }
+]
+v2 [
+ {
+  "id": "fc_yell_2026_08",
+  "estimate": null,
+  "pct_err": null,
+  "covered_80": null,
+  "n_assumptions_used": 0,
+  "assumption_weight_share": 0,
+  "usd_total_assumed": 0.4354,
+  "wall_s": 1019.1
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "estimate": null,
+  "pct_err": null,
+  "covered_80": null,
+  "n_assumptions_used": 0,
+  "assumption_weight_share": 0,
+  "usd_total_assumed": 0.5575,
+  "wall_s": 1075.3
+ }
+]
+v2_noown [
+ {
+  "id": "fc_yell_2026_08",
+  "estimate": null,
+  "pct_err": null,
+  "covered_80": null,
+  "n_assumptions_used": 0,
+  "assumption_weight_share": 0,
+  "usd_total_assumed": 0.5153,
+  "wall_s": 1062.9
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "estimate": null,
+  "pct_err": null,
+  "covered_80": null,
+  "n_assumptions_used": 0,
+  "assumption_weight_share": 0,
+  "usd_total_assumed": 0.5474,
+  "wall_s": 1069.7
+ }
+]
+total wall 1076s

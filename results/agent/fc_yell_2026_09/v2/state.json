@@ -1,0 +1,3878 @@
+{
+ "qid": "fc_yell_2026_09",
+ "question": "Assume today is 2026-09-06. You know nothing published after this date. Estimate the number of recreation visits to Yellowstone National Park in September 2026, as it will be reported in the National Park Service's official monthly visitation statistics.",
+ "as_of": "2026-09-06",
+ "plan": {
+  "target": {
+   "what": "Recreation visits to Yellowstone National Park as reported in the National Park Service's official monthly visitation statistics (NPS Visitor Use Statistics / Monthly Public Use Reports). A recreation visit is one person entering the park for recreational purposes; the same person entering multiple ",
+   "unit": "recreation visits (count)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "publisher": "National Park Service (NPS), Visitor Use Statistics program",
+   "cadence": "Monthly, typically published with a lag of several weeks to a few months after the month ends",
+   "caveats": "The target period is future relative to the 2026-09-06 cutoff, so no September 2026 data exist yet. The estimate must rely on historical seasonal patterns, recent 2026 monthly data (January–August 2026 if published before cutoff), and any available signals about park access, weather, or travel. The "
+  },
+  "market_keywords": [
+   "yellowstone",
+   "visitation",
+   "september"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "NPS official monthly visitation reports",
+    "hypothesis": "September recreation visits in recent years (2019–2025) provide a seasonal baseline. The 2026 September value is likely to be similar to the same month in recent years, adjusted for any trend or unusual events. The ratio of September visits to the preceding January–August total can be used to project September 2026 from the known 2026 year-to-date total.",
+    "data_to_find": "Monthly recreation visits for Yellowstone National Park for September 2019, 2020, 2021, 2022, 2023, 2024, and 2025; and the January–August totals for each of those years. Also the most recent 2026 monthly data (January–August 2026) if published before 2026-09-06.",
+    "search_hints": [
+     "Yellowstone National Park monthly visitation statistics September 2025",
+     "NPS visitor use statistics Yellowstone monthly recreation visits 2024",
+     "Yellowstone visitation report September 2023 2022"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "NPS-wide or regional visitation trends",
+    "hypothesis": "Yellowstone's visitation may move with broader National Park System or Rocky Mountain region visitation. If NPS-wide or regional September visitation trends are available for 2026, they can indicate whether Yellowstone is likely above or below its historical seasonal pattern.",
+    "data_to_find": "NPS-wide monthly recreation visits for September 2025 and any preliminary 2026 monthly data (January–August 2026) for the National Park System or for the Intermountain Region; also comparable parks like Grand Teton, Glacier, and Zion for September 2025 and 2026 year-to-date.",
+    "search_hints": [
+     "NPS national visitation statistics 2026 monthly",
+     "National Park Service visitor use statistics 2026 year to date",
+     "Grand Teton visitation September 2025 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "physical_flow",
+    "perspective": "Entrance station counts and vehicle traffic",
+    "hypothesis": "Recreation visits are derived from entrance station counts and vehicle occupancy factors. If entrance station data or traffic counts for Yellowstone in September 2026 are available (e.g., from park reports or traffic monitoring), they can be converted to visits using historical vehicle occupancy rates.",
+    "data_to_find": "Yellowstone entrance station vehicle counts or total entries for September 2025 and any 2026 partial data; average persons per vehicle for Yellowstone in September; any real-time or preliminary September 2026 entrance counts.",
+    "search_hints": [
+     "Yellowstone entrance station counts September 2025",
+     "Yellowstone vehicle occupancy rate visitation",
+     "Yellowstone park traffic counts 2026"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "capacity_consumption",
+    "perspective": "Lodging, campground, and tour bookings",
+    "hypothesis": "Overnight stays and tours are a component of recreation visits. Occupancy rates and bookings for Yellowstone lodging and campgrounds in September 2026 can indicate whether visitation is likely high or low relative to historical norms. However, day-use visits dominate, so this is a partial signal.",
+    "data_to_find": "Yellowstone lodging occupancy rates or reservations for September 2025 and 2026 (if available); campground occupancy; number of overnight stays reported by Xanterra or other concessioners; any forward-looking booking data for September 2026.",
+    "search_hints": [
+     "Yellowstone lodging occupancy September 2025",
+     "Xanterra Yellowstone bookings 2026",
+     "Yellowstone campground occupancy statistics"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "shocks",
+    "perspective": "Park closures, weather, and access restrictions",
+    "hypothesis": "Any closures, road construction, wildfire smoke, or policy changes in September 2026 could significantly alter visitation. Conversely, if no major disruptions are known, visitation may follow normal patterns. The 2022 flood drastically reduced June visitation that year, showing sensitivity to shocks.",
+    "data_to_find": "News of Yellowstone closures or access restrictions for September 2026 (as of 2026-09-06); weather forecasts for September 2026; road construction schedules; any NPS alerts affecting park entry.",
+    "search_hints": [
+     "Yellowstone National Park closures September 2026",
+     "Yellowstone road construction 2026",
+     "Yellowstone visitation impact wildfire smoke 2026"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "base_rates",
+    "perspective": "Seasonal share of annual visitation",
+    "hypothesis": "September typically accounts for a stable share of Yellowstone's annual recreation visits (e.g., around 10–12% in recent years). If a forecast for total 2026 visitation exists, or if the year-to-date total is known, the September share can be applied to estimate the target.",
+    "data_to_find": "Historical September share of annual recreation visits for Yellowstone (2015–2025); any published forecast for Yellowstone 2026 annual visitation; the 2026 year-to-date total through August if available.",
+    "search_hints": [
+     "Yellowstone annual visitation 2025 total",
+     "Yellowstone September share annual visitation",
+     "Yellowstone 2026 visitation forecast"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "attention",
+    "perspective": "Search and social media interest",
+    "hypothesis": "Online attention (Google Trends, social media mentions) for Yellowstone in September 2026 may correlate with actual visitation, but the relationship is noisy and not a direct count. It can serve as a directional check.",
+    "data_to_find": "Google Trends interest for 'Yellowstone National Park' in September 2025 and September 2026 (if available); social media post volumes; website traffic to Yellowstone pages.",
+    "search_hints": [
+     "Google Trends Yellowstone National Park September 2026",
+     "Yellowstone social media mentions September 2026",
+     "Yellowstone website traffic 2026"
+    ],
+    "expected_information": 1,
+    "selected": true
+   },
+   {
+    "id": "c8",
+    "category": "forecasts_markets",
+    "perspective": "Prediction markets and expert forecasts",
+    "hypothesis": "If any prediction market or expert forecast exists for Yellowstone September 2026 visitation, it could provide a direct estimate. However, such markets are unlikely for this specific target.",
+    "data_to_find": "Prediction market contracts on Yellowstone visitation or national park attendance; expert commentary from tourism economists or NPS watchers forecasting 2026 visitation.",
+    "search_hints": [
+     "Yellowstone visitation prediction market 2026",
+     "Yellowstone September 2026 visitation forecast",
+     "national park visitation forecast 2026"
+    ],
+    "expected_information": 2,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 8 candidate directions in 8 categories; running 8 (budget cap 10)"
+ ],
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "NPS official monthly visitation reports",
+   "hypothesis": "September recreation visits in recent years (2019–2025) provide a seasonal baseline. The 2026 September value is likely to be similar to the same month in recent years, adjusted for any trend or unusual events. The ratio of September visits to the preceding January–August total can be used to project September 2026 from the known 2026 year-to-date total.",
+   "data_to_find": "Monthly recreation visits for Yellowstone National Park for September 2019, 2020, 2021, 2022, 2023, 2024, and 2025; and the January–August totals for each of those years. Also the most recent 2026 monthly data (January–August 2026) if published before 2026-09-06.",
+   "search_hints": [
+    "Yellowstone National Park monthly visitation statistics September 2025",
+    "NPS visitor use statistics Yellowstone monthly recreation visits 2024",
+    "Yellowstone visitation report September 2023 2022"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "physical_flow",
+   "perspective": "Entrance station counts and vehicle traffic",
+   "hypothesis": "Recreation visits are derived from entrance station counts and vehicle occupancy factors. If entrance station data or traffic counts for Yellowstone in September 2026 are available (e.g., from park reports or traffic monitoring), they can be converted to visits using historical vehicle occupancy rates.",
+   "data_to_find": "Yellowstone entrance station vehicle counts or total entries for September 2025 and any 2026 partial data; average persons per vehicle for Yellowstone in September; any real-time or preliminary September 2026 entrance counts.",
+   "search_hints": [
+    "Yellowstone entrance station counts September 2025",
+    "Yellowstone vehicle occupancy rate visitation",
+    "Yellowstone park traffic counts 2026"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d3",
+   "category": "shocks",
+   "perspective": "Park closures, weather, and access restrictions",
+   "hypothesis": "Any closures, road construction, wildfire smoke, or policy changes in September 2026 could significantly alter visitation. Conversely, if no major disruptions are known, visitation may follow normal patterns. The 2022 flood drastically reduced June visitation that year, showing sensitivity to shocks.",
+   "data_to_find": "News of Yellowstone closures or access restrictions for September 2026 (as of 2026-09-06); weather forecasts for September 2026; road construction schedules; any NPS alerts affecting park entry.",
+   "search_hints": [
+    "Yellowstone National Park closures September 2026",
+    "Yellowstone road construction 2026",
+    "Yellowstone visitation impact wildfire smoke 2026"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d4",
+   "category": "base_rates",
+   "perspective": "Seasonal share of annual visitation",
+   "hypothesis": "September typically accounts for a stable share of Yellowstone's annual recreation visits (e.g., around 10–12% in recent years). If a forecast for total 2026 visitation exists, or if the year-to-date total is known, the September share can be applied to estimate the target.",
+   "data_to_find": "Historical September share of annual recreation visits for Yellowstone (2015–2025); any published forecast for Yellowstone 2026 annual visitation; the 2026 year-to-date total through August if available.",
+   "search_hints": [
+    "Yellowstone annual visitation 2025 total",
+    "Yellowstone September share annual visitation",
+    "Yellowstone 2026 visitation forecast"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "d5",
+   "category": "related_series",
+   "perspective": "NPS-wide or regional visitation trends",
+   "hypothesis": "Yellowstone's visitation may move with broader National Park System or Rocky Mountain region visitation. If NPS-wide or regional September visitation trends are available for 2026, they can indicate whether Yellowstone is likely above or below its historical seasonal pattern.",
+   "data_to_find": "NPS-wide monthly recreation visits for September 2025 and any preliminary 2026 monthly data (January–August 2026) for the National Park System or for the Intermountain Region; also comparable parks like Grand Teton, Glacier, and Zion for September 2025 and 2026 year-to-date.",
+   "search_hints": [
+    "NPS national visitation statistics 2026 monthly",
+    "National Park Service visitor use statistics 2026 year to date",
+    "Grand Teton visitation September 2025 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d6",
+   "category": "capacity_consumption",
+   "perspective": "Lodging, campground, and tour bookings",
+   "hypothesis": "Overnight stays and tours are a component of recreation visits. Occupancy rates and bookings for Yellowstone lodging and campgrounds in September 2026 can indicate whether visitation is likely high or low relative to historical norms. However, day-use visits dominate, so this is a partial signal.",
+   "data_to_find": "Yellowstone lodging occupancy rates or reservations for September 2025 and 2026 (if available); campground occupancy; number of overnight stays reported by Xanterra or other concessioners; any forward-looking booking data for September 2026.",
+   "search_hints": [
+    "Yellowstone lodging occupancy September 2025",
+    "Xanterra Yellowstone bookings 2026",
+    "Yellowstone campground occupancy statistics"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d7",
+   "category": "forecasts_markets",
+   "perspective": "Prediction markets and expert forecasts",
+   "hypothesis": "If any prediction market or expert forecast exists for Yellowstone September 2026 visitation, it could provide a direct estimate. However, such markets are unlikely for this specific target.",
+   "data_to_find": "Prediction market contracts on Yellowstone visitation or national park attendance; expert commentary from tourism economists or NPS watchers forecasting 2026 visitation.",
+   "search_hints": [
+    "Yellowstone visitation prediction market 2026",
+    "Yellowstone September 2026 visitation forecast",
+    "national park visitation forecast 2026"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c8"
+  },
+  {
+   "id": "d8",
+   "category": "attention",
+   "perspective": "Search and social media interest",
+   "hypothesis": "Online attention (Google Trends, social media mentions) for Yellowstone in September 2026 may correlate with actual visitation, but the relationship is noisy and not a direct count. It can serve as a directional check.",
+   "data_to_find": "Google Trends interest for 'Yellowstone National Park' in September 2025 and September 2026 (if available); social media post volumes; website traffic to Yellowstone pages.",
+   "search_hints": [
+    "Google Trends Yellowstone National Park September 2026",
+    "Yellowstone social media mentions September 2026",
+    "Yellowstone website traffic 2026"
+   ],
+   "expected_information": 1,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "b1",
+   "category": "own_history",
+   "perspective": "NPS monthly visitation statistics",
+   "hypothesis": "Recent September recreation-visit counts for Yellowstone (2019-2025) would provide the target's own historical series, enabling series_naive and yoy_scaling routes. The 2014-2018 average is too old to capture post-COVID and post-2022-flood levels, so this is the single most valuable missing input.",
+   "data_to_find": "Yellowstone National Park September recreation visits for 2019, 2020, 2021, 2022, 2023, 2024, and 2025 from NPS Visitor Use Statistics monthly reports.",
+   "search_hints": [
+    "N",
+    "P",
+    "S",
+    " "
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b2",
+   "category": "own_history",
+   "perspective": "NPS monthly visitation statistics",
+   "hypothesis": "Yellowstone January-August 2026 recreation visits would allow a September-to-year-to-date ratio projection. The 2014-2018 seasonal share is the only current basis, but a recent-year ratio would be more representative of 2026 conditions.",
+   "data_to_find": "Yellowstone National Park monthly recreation visits for January through August 2026, and the corresponding January-August totals for 2019-2025.",
+   "search_hints": [
+    "N",
+    "P",
+    "S",
+    " "
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b3",
+   "category": "shocks",
+   "perspective": "Park operations and access",
+   "hypothesis": "Any September 2026 closures, wildfire smoke, road construction, or reservation requirements would materially shift visitation away from the historical seasonal pattern. The road-opening schedule shows normal access, but operational disruptions are not fully covered.",
+   "data_to_find": "Yellowstone National Park September 2026 alerts, road status, fire activity, and any timed-entry or reservation system announcements.",
+   "search_hints": [
+    "N",
+    "P",
+    "S",
+    " "
+   ],
+   "expected_information": 3
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Yellowstone National Park monthly visitation statistics September 2025 NPS",
+     "NPS visitor use statistics Yellowstone monthly recreation visits 2024",
+     "Yellowstone National Park visitation August 2026 recreation visits year-to-date",
+     "Yellowstone September 2023 recreation visits 838,458 September 2022 NPS press release"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+By+Month+(1979+-+Last+Calendar+Year",
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "https://www.nps.gov/yell/learn/news/26022.htm",
+     "https://www.bozemandailychronicle.com/news/yellowstone-national-park-glacier-national-park-see-boost-in-visitor-numbers/article_d449a6e0-9001-11ef-9e0b-b38e8079a4bf.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.008529624,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+By+Month+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nps.gov/yell/learn/news/26022.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.bozemandailychronicle.com/news/yellowstone-national-park-glacier-national-park-see-boost-in-visitor-numbers/article_d449a6e0-9001-11ef-9e0b-b38e8079a4bf.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 630.8
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Yellowstone entrance station counts September 2025 visitation",
+     "Yellowstone vehicle occupancy rate persons per vehicle visitation study",
+     "Yellowstone National Park September 2025 visitation monthly report NPS",
+     "NPS visitor use statistics monthly public use report Yellowstone 2025 2026"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "https://irma.nps.gov/Stats/FileDownload/43470",
+     "https://www.travelandtourworld.pl/aktualno%C5%9Bci/artyku%C5%82/63ykvnvt60ul/",
+     "https://irma.nps.gov/DataStore/DownloadFile/759491"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 21,
+    "web_search_requests": 4,
+    "usd": 0.006511019999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://irma.nps.gov/Stats/FileDownload/43470",
+     "status": "dropped",
+     "reason": "unsupported content type application/pdf",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.travelandtourworld.pl/aktualno%C5%9Bci/artyku%C5%82/63ykvnvt60ul/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://irma.nps.gov/DataStore/DownloadFile/759491",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 29.6
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Yellowstone National Park closures September 2026",
+     "Yellowstone road construction 2026 access restrictions",
+     "Yellowstone visitation September 2025 recreation visits NPS",
+     "Yellowstone temporary closure September 2026 fire smoke"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "https://www.nps.gov/yell/planyourvisit/situationreport.htm",
+     "http://home.nps.gov/yell/learn/news/26004.htm"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0067349639999999995,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260906063912",
+     "page_date": "2026-09-06",
+     "raw_path": "data/raw/agent/fc_yell_2026_09/d265ac1fa5f1bb16.raw",
+     "text_chars": 6430,
+     "leak_hits": [],
+     "chars_sent": 6430,
+     "truncated": false,
+     "late_dates_in_sent_text": [
+      "2026-09-07",
+      "2026-10-01",
+      "2026-10-12"
+     ],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 3
+    },
+    {
+     "url": "https://www.nps.gov/yell/planyourvisit/situationreport.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260618033531",
+     "page_date": "2026-06-18",
+     "raw_path": "data/raw/agent/fc_yell_2026_09/e3d3338587bca27d.raw",
+     "text_chars": 29937,
+     "leak_hits": [],
+     "chars_sent": 24000,
+     "truncated": true,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "http://home.nps.gov/yell/learn/news/26004.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      4
+     ],
+     "name": "Projected 2026 opening date of West Entrance to Madison, Madison to Old Faithful, Madison to Norris, Mammoth Hot Springs to Norris, Norris to Canyon Village",
+     "value": 17.0,
+     "value_as_written": "April 17",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "date",
+     "period_start": "2026-04-17",
+     "period_end": "2026-04-17",
+     "published_at_if_visible": "2026-09-01",
+     "quote": "Open April 17 - October 31, 2026: West Entrance to Madison, Madison to Old Faithful, Madison to Norris, Mammoth Hot Springs to Norris, Norris to Canyon Village",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      6
+     ],
+     "name": "Projected 2026 opening date of East Entrance to Fishing Bridge (Sylvan Pass), Canyon Village to Bridge Bay",
+     "value": 1.0,
+     "value_as_written": "May 1",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "date",
+     "period_start": "2026-05-01",
+     "period_end": "2026-05-01",
+     "published_at_if_visible": "2026-09-01",
+     "quote": "Open May 1 - October 31, 2026: East Entrance to Fishing Bridge (Sylvan Pass), Canyon Village to Bridge Bay",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      8
+     ],
+     "name": "Projected 2026 opening date of South Entrance to West Thumb, West Thumb to Old Faithful (Craig Pass), West Thumb to Lake Village, Tower-Roosevelt to Tower Fall",
+     "value": 8.0,
+     "value_as_written": "May 8",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "date",
+     "period_start": "2026-05-08",
+     "period_end": "2026-05-08",
+     "published_at_if_visible": "2026-09-01",
+     "quote": "Open May 8 - October 31, 2026: South Entrance to West Thumb, West Thumb to Old Faithful (Craig Pass), West Thumb to Lake Village, Tower-Roosevelt to Tower Fall",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Yellowstone road closure period for most park roads to regular vehicles (annual seasonal closure)",
+     "value_as_written": "early November"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Yellowstone oversnow travel season start (commercially-guided snowmobiles and snowcoaches)",
+     "value_as_written": "mid-December"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      2
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Yellowstone oversnow travel season end (commercially-guided snowmobiles and snowcoaches)",
+     "value_as_written": "mid-March"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      3
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Number of Yellowstone entrance stations",
+     "value_as_written": "five"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      5
+     ],
+     "reason": "period_end 2026-10-31 after as_of",
+     "name": "Projected 2026 closing date of West Entrance to Madison, Madison to Old Faithful, Madison to Norris, Mammoth Hot Springs",
+     "value_as_written": "October 31"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      7
+     ],
+     "reason": "period_end 2026-10-31 after as_of",
+     "name": "Projected 2026 closing date of East Entrance to Fishing Bridge (Sylvan Pass), Canyon Village to Bridge Bay",
+     "value_as_written": "October 31"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      9
+     ],
+     "reason": "period_end 2026-10-31 after as_of",
+     "name": "Projected 2026 closing date of South Entrance to West Thumb, West Thumb to Old Faithful (Craig Pass), West Thumb to Lake",
+     "value_as_written": "October 31"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      10
+     ],
+     "reason": "period_end 2026-10-12 after as_of",
+     "name": "Projected 2026 closing date of Canyon Village to Tower Fall (Dunraven Pass) and Beartooth Highway (US-212) / Chief Josep",
+     "value_as_written": "October 12"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      11
+     ],
+     "reason": "period_end 2026-11-30 after as_of",
+     "name": "Maximum traffic delay at Bridge Bay area construction (August 25 through November)",
+     "value_as_written": "15"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      12
+     ],
+     "reason": "period_end 2026-09-30 after as_of",
+     "name": "Maximum traffic delay in September at construction 1.5 miles south of Old Faithful area",
+     "value_as_written": "15"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      13
+     ],
+     "reason": "period_end 2026-10-31 after as_of",
+     "name": "Maximum traffic delay at construction 0.5 miles southeast of Mammoth Hot Springs toward Tower Junction (April 13 through",
+     "value_as_written": "15"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906063912",
+     "order": [
+      1,
+      14
+     ],
+     "reason": "number: no number in value_as_written",
+     "name": "Number of full nighttime closures (9 p.m.-4 a.m.) at Mammoth Hot Springs bridge after September 7, 2026",
+     "value_as_written": "Five"
+    }
+   ],
+   "wall_s": 654.1
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Yellowstone annual visitation 2025 total recreation visits",
+     "Yellowstone September visitation share annual recreation visits NPS",
+     "Yellowstone National Park reports August 2026 visitation statistics",
+     "Yellowstone 2026 visitation forecast annual total projection"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+By+Month+(1979+-+Last+Calendar+Year",
+     "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "http://home.nps.gov/yell/learn/news/26004.htm",
+     "https://www.nps.gov/yell/learn/news/26022.htm"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.006079164,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+By+Month+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260422081553",
+     "page_date": "2026-04-22",
+     "raw_path": "data/raw/agent/fc_yell_2026_09/269458a5a7676f7e.raw",
+     "text_chars": 781,
+     "leak_hits": [],
+     "chars_sent": 781,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 13,
+     "n_points_verified": 13
+    },
+    {
+     "url": "http://home.nps.gov/yell/learn/news/26004.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nps.gov/yell/learn/news/26022.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      0
+     ],
+     "name": "Yellowstone National Park average September recreation visits, 2014-2018 average",
+     "value": 663651.0,
+     "value_as_written": "663,651",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| September | 663,651 | 16.51% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      1
+     ],
+     "name": "September share of average annual recreation visits at Yellowstone, 2014-2018 average",
+     "value": 16.51,
+     "value_as_written": "16.51%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| September | 663,651 | 16.51% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      2
+     ],
+     "name": "Yellowstone National Park average January recreation visits, 2014-2018 average",
+     "value": 28837.0,
+     "value_as_written": "28,837",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| January | 28,837 | 0.72% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      3
+     ],
+     "name": "Yellowstone National Park average February recreation visits, 2014-2018 average",
+     "value": 33088.0,
+     "value_as_written": "33,088",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| February | 33,088 | 0.82% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      4
+     ],
+     "name": "Yellowstone National Park average March recreation visits, 2014-2018 average",
+     "value": 22266.0,
+     "value_as_written": "22,266",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| March | 22,266 | 0.55% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      5
+     ],
+     "name": "Yellowstone National Park average April recreation visits, 2014-2018 average",
+     "value": 44027.0,
+     "value_as_written": "44,027",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| April | 44,027 | 1.10% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      6
+     ],
+     "name": "Yellowstone National Park average May recreation visits, 2014-2018 average",
+     "value": 401449.0,
+     "value_as_written": "401,449",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| May | 401,449 | 9.99% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      7
+     ],
+     "name": "Yellowstone National Park average June recreation visits, 2014-2018 average",
+     "value": 780652.0,
+     "value_as_written": "780,652",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| June | 780,652 | 19.42% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      8
+     ],
+     "name": "Yellowstone National Park average July recreation visits, 2014-2018 average",
+     "value": 947688.0,
+     "value_as_written": "947,688",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| July | 947,688 | 23.57% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      9
+     ],
+     "name": "Yellowstone National Park average August recreation visits, 2014-2018 average",
+     "value": 839787.0,
+     "value_as_written": "839,787",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| August | 839,787 | 20.89% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      10
+     ],
+     "name": "Yellowstone National Park average October recreation visits, 2014-2018 average",
+     "value": 223777.0,
+     "value_as_written": "223,777",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| October | 223,777 | 5.57% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      11
+     ],
+     "name": "Yellowstone National Park average November recreation visits, 2014-2018 average",
+     "value": 14323.0,
+     "value_as_written": "14,323",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| November | 14,323 | 0.36% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      12
+     ],
+     "name": "Yellowstone National Park average December recreation visits, 2014-2018 average",
+     "value": 20434.0,
+     "value_as_written": "20,434",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| December | 20,434 | 0.51% |",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [],
+   "wall_s": 421.2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "NPS national visitation statistics 2026 monthly recreation visits",
+     "Yellowstone National Park visitation September 2025 statistics",
+     "Yellowstone visitation 2026 year to date August recreation visits",
+     "National Park Service system-wide visitation 2026 record January July",
+     "Grand Teton Glacier Zion visitation September 2025 statistics"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "https://www.nps.gov/yell/learn/news/26022.htm",
+     "https://irma.nps.gov/Stats/Reports/National",
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=403bc337-c90a-4e9e-95f6-09a36155174d&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fMonthly+Public+Use&Park=YELL"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 24,
+    "web_search_requests": 5,
+    "usd": 0.006195864,
+    "usd_search_fee_assumed": 0.05
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nps.gov/yell/learn/news/26022.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://irma.nps.gov/Stats/Reports/National",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260821013908",
+     "page_date": "2026-08-21",
+     "raw_path": "data/raw/agent/fc_yell_2026_09/b9b86be83e35ac52.raw",
+     "text_chars": 182,
+     "leak_hits": [],
+     "chars_sent": 182,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=403bc337-c90a-4e9e-95f6-09a36155174d&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fMonthly+Public+Use&Park=YELL",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 769.4
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Yellowstone lodging occupancy September 2025 Xanterra bookings",
+     "Yellowstone National Park monthly visitation statistics September 2025",
+     "Xanterra Yellowstone 2026 reservations bookings",
+     "Yellowstone campground occupancy statistics 2025 overnight stays"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "https://powelltribune.com/stories/region-continues-to-buck-downward-trend-of-tourism,170327",
+     "https://www.travelandtourworld.cz/zpr%C3%A1vy/%C4%8Dl%C3%A1nek/yellowstone-tourism-surges-during-shoulder-season-as-hotels-and-lodges-maintain-strong-occupancy-amid-national-travel-decline/",
+     "https://yellowstonetrips.com/when-to-book-yellowstone-lodging/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.009412344,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://powelltribune.com/stories/region-continues-to-buck-downward-trend-of-tourism,170327",
+     "status": "dropped",
+     "reason": "snapshot fetch failed (http 302); live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.travelandtourworld.cz/zpr%C3%A1vy/%C4%8Dl%C3%A1nek/yellowstone-tourism-surges-during-shoulder-season-as-hotels-and-lodges-maintain-strong-occupancy-amid-national-travel-decline/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://yellowstonetrips.com/when-to-book-yellowstone-lodging/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 774.3
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Yellowstone visitation prediction market 2026",
+     "Yellowstone September 2026 visitation forecast",
+     "national park visitation forecast 2026",
+     "Yellowstone National Park monthly visitation statistics September"
+    ],
+    "urls": [
+     "https://www.coinrithm.com/en/prediction-markets/kalshi/kxyellvisits-27mar31",
+     "https://www.nps.gov/yell/learn/news/26024.htm",
+     "https://doaj.org/article/a9a34a9eb7224f0a87d38d34da1d1b69",
+     "https://www.sacbee.com/entertainment/living/article317328753.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 22,
+    "web_search_requests": 4,
+    "usd": 0.008119044,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.coinrithm.com/en/prediction-markets/kalshi/kxyellvisits-27mar31",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nps.gov/yell/learn/news/26024.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://doaj.org/article/a9a34a9eb7224f0a87d38d34da1d1b69",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.sacbee.com/entertainment/living/article317328753.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 551.9
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Yellowstone National Park September visitation statistics monthly public use reports",
+     "Google Trends Yellowstone National Park September 2026 interest",
+     "Yellowstone September 2025 recreation visits 839,579 news release",
+     "\"Google Trends\" Yellowstone National Park interest over time September 2025"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "https://www.nps.gov/yell/learn/news/26024.htm",
+     "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.008522412,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260422081553",
+     "page_date": "2026-04-22",
+     "raw_path": "data/raw/agent/fc_yell_2026_09/269458a5a7676f7e.raw",
+     "text_chars": 781,
+     "leak_hits": [],
+     "chars_sent": 781,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 13,
+     "n_points_verified": 13
+    },
+    {
+     "url": "https://www.nps.gov/yell/learn/news/26024.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260906015105",
+     "page_date": "2026-09-06",
+     "raw_path": "data/raw/agent/fc_yell_2026_09/fb495be4059ee2e4.raw",
+     "text_chars": 3338,
+     "leak_hits": [],
+     "chars_sent": 3338,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      0
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in September, 2014-2018 average",
+     "value": 663651.0,
+     "value_as_written": "663,651",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-09-01",
+     "period_end": "2018-09-30",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| September | 663,651 | 16.51% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      1
+     ],
+     "name": "September share of average annual visits at Yellowstone National Park, 2014-2018 average",
+     "value": 16.51,
+     "value_as_written": "16.51%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2014-09-01",
+     "period_end": "2018-09-30",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| September | 663,651 | 16.51% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      2
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in January, 2014-2018 average",
+     "value": 28837.0,
+     "value_as_written": "28,837",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-01-01",
+     "period_end": "2018-01-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| January | 28,837 | 0.72% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      3
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in February, 2014-2018 average",
+     "value": 33088.0,
+     "value_as_written": "33,088",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-02-01",
+     "period_end": "2018-02-28",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| February | 33,088 | 0.82% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      4
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in March, 2014-2018 average",
+     "value": 22266.0,
+     "value_as_written": "22,266",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-03-01",
+     "period_end": "2018-03-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| March | 22,266 | 0.55% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      5
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in April, 2014-2018 average",
+     "value": 44027.0,
+     "value_as_written": "44,027",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-04-01",
+     "period_end": "2018-04-30",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| April | 44,027 | 1.10% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      6
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in May, 2014-2018 average",
+     "value": 401449.0,
+     "value_as_written": "401,449",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-05-01",
+     "period_end": "2018-05-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| May | 401,449 | 9.99% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      7
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in June, 2014-2018 average",
+     "value": 780652.0,
+     "value_as_written": "780,652",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-06-01",
+     "period_end": "2018-06-30",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| June | 780,652 | 19.42% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      8
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in July, 2014-2018 average",
+     "value": 947688.0,
+     "value_as_written": "947,688",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-07-01",
+     "period_end": "2018-07-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| July | 947,688 | 23.57% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      9
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in August, 2014-2018 average",
+     "value": 839787.0,
+     "value_as_written": "839,787",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-08-01",
+     "period_end": "2018-08-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| August | 839,787 | 20.89% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      10
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in October, 2014-2018 average",
+     "value": 223777.0,
+     "value_as_written": "223,777",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-10-01",
+     "period_end": "2018-10-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| October | 223,777 | 5.57% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      11
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in November, 2014-2018 average",
+     "value": 14323.0,
+     "value_as_written": "14,323",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-11-01",
+     "period_end": "2018-11-30",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| November | 14,323 | 0.36% |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-22",
+     "snapshot_ts": "20260422081553",
+     "order": [
+      1,
+      12
+     ],
+     "name": "Yellowstone National Park average number of recreation visits in December, 2014-2018 average",
+     "value": 20434.0,
+     "value_as_written": "20,434",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visits",
+     "period_start": "2014-12-01",
+     "period_end": "2018-12-31",
+     "published_at_if_visible": "2025-05-16",
+     "quote": "| December | 20,434 | 0.51% |",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      0
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Yellowstone National Park over the past 12 months (most searched US national park)",
+     "value_as_written": "7.5"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      1
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Increase in searches for natural vacation spots (study by hoppa)",
+     "value_as_written": "27"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      2
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Grand Canyon National Park (No. 2 most searched)",
+     "value_as_written": "6,123,000"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      3
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Zion National Park (No. 3 most searched)",
+     "value_as_written": "5,818,000"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      4
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Glacier National Park (No. 4 most searched)",
+     "value_as_written": "5,367,000"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      5
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Yosemite National Park (No. 5 most searched)",
+     "value_as_written": "3,864,000"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      6
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Mount Rainier National Park (No. 6 most searched)",
+     "value_as_written": "3,519,000"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      7
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Olympic National Park (No. 7 most searched)",
+     "value_as_written": "2,261,000"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      8
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Bryce Canyon National Park (No. 8 most searched)",
+     "value_as_written": "1,888,000"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      9
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Hawaii Volcanoes National Park (No. 9 most searched)",
+     "value_as_written": "1,272,500"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      10
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Google searches for Hot Springs National Park (No. 10 most searched)",
+     "value_as_written": "1,266,500"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      11
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Admission fee to Yellowstone and most other national parks per vehicle",
+     "value_as_written": "35"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      12
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Number of hot springs at Hot Springs National Park",
+     "value_as_written": "40"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      13
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "National Park Week date range (fee-free entrance day Aug. 25)",
+     "value_as_written": "Aug. 22 through Aug. 30"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://nypost.com/2026/09/05/us-news/10-best-national-parks-in-america-ranked-as-yellowstone-no-1/",
+     "via": "snapshot",
+     "page_date": "2026-09-06",
+     "snapshot_ts": "20260906015105",
+     "order": [
+      3,
+      14
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Anniversary of the National Park Service celebrated with waived entrance fees",
+     "value_as_written": "110"
+    }
+   ],
+   "wall_s": 24.3
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "yellowstone",
+     "visitation",
+     "september"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 20
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "search": {
+    "queries": [
+     "Yellowstone National Park September recreation visits 2024 2023 NPS monthly visitation statistics",
+     "NPS Visitor Use Statistics Yellowstone monthly public use report September 2022 visitation",
+     "Yellowstone visitation statistics September 2025 recreation visits NPS news release",
+     "Yellowstone National Park September 2020 recreation visits 871,000 monthly"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+By+Month+(1979+-+Last+Calendar+Year",
+     "https://home.nps.gov/yell/learn/news/24036.htm",
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "https://www.nps.gov/yell/learn/news/26024.htm"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 28,
+    "web_search_requests": 4,
+    "usd": 0.004935804,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+By+Month+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://home.nps.gov/yell/learn/news/24036.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nps.gov/yell/learn/news/26024.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 8.5
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "search": {
+    "queries": [
+     "Yellowstone National Park monthly recreation visits 2026",
+     "NPS Visitor Use Statistics Yellowstone monthly public use report 2026",
+     "\"Yellowstone visitation statistics for August 2026\" year-to-date trend recreation visits",
+     "Yellowstone recreation visits by month 2019 2020 2021 2022 2023 2024 2025 September totals table"
+    ],
+    "urls": [
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+",
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+By+Month+(1979+-+Last+Calendar+Year",
+     "https://dailymontanan.com/2026/06/10/yellowstone-national-park-visitation-on-record-pace-through-may/",
+     "https://www.ypradio.org/regional-news/2026-06-10/another-record-month"
+    ],
+    "n_text_urls": 1,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.00956772,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=c595a5c7-e6f0-43a6-8e87-68da4b5a880a&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fRecreation+Visitors+By+Month+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://dailymontanan.com/2026/06/10/yellowstone-national-park-visitation-on-record-pace-through-may/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260810124904",
+     "page_date": "2026-08-10",
+     "raw_path": "data/raw/agent/fc_yell_2026_09/d57613d093d2bca3.raw",
+     "text_chars": 614,
+     "leak_hits": [],
+     "chars_sent": 614,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 9,
+     "n_points_verified": 7
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      0
+     ],
+     "name": "Yellowstone National Park recreation visits, May 2026",
+     "value": 570272.0,
+     "value_as_written": "570,272",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "recreation visits",
+     "period_start": "2026-05-01",
+     "period_end": "2026-05-31",
+     "published_at_if_visible": "",
+     "quote": "the park hosted 570,272 visits in May, up 1% from May 2025",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      1
+     ],
+     "name": "Yellowstone National Park recreation visits, May 2025",
+     "value": 1.0,
+     "value_as_written": "1",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent change in recreation visits (May 2026 vs May 2025)",
+     "period_start": "2025-05-01",
+     "period_end": "2025-05-31",
+     "published_at_if_visible": "",
+     "quote": "570,272 visits in May, up 1% from May 2025",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      2
+     ],
+     "name": "Yellowstone National Park recreation visits, May 2021",
+     "value": 20.0,
+     "value_as_written": "20",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent change in recreation visits (May 2026 vs May 2021)",
+     "period_start": "2021-05-01",
+     "period_end": "2021-05-31",
+     "published_at_if_visible": "",
+     "quote": "up 20 % from May 2021, which was Yellowstone's record-breaking year",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      3
+     ],
+     "name": "Yellowstone National Park annual visitors, 2021 record-breaking year",
+     "value": 4800000.0,
+     "value_as_written": "4.8",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "visitors",
+     "period_start": "2021-01-01",
+     "period_end": "2021-12-31",
+     "published_at_if_visible": "",
+     "quote": "record-breaking year with more than 4.8 million visitors",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      4
+     ],
+     "name": "Yellowstone National Park recreation visits, year-to-date 2026 (through May)",
+     "value": 773653.0,
+     "value_as_written": "773,653",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "recreation visits",
+     "period_start": "2026-01-01",
+     "period_end": "2026-05-31",
+     "published_at_if_visible": "",
+     "quote": "So far this year, the park has hosted 773,653 recreation visits",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      5
+     ],
+     "name": "Yellowstone National Park recreation visits, year-to-date 2026 vs same time 2025",
+     "value": 1.0,
+     "value_as_written": "1",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent change in recreation visits (year-to-date 2026 vs ye",
+     "period_start": "2026-01-01",
+     "period_end": "2026-05-31",
+     "published_at_if_visible": "",
+     "quote": "773,653 recreation visits, up 1% from last year at the same time",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      6
+     ],
+     "name": "Yellowstone National Park recreation visits, year-to-date 2026 vs same time 2021",
+     "value": 19.0,
+     "value_as_written": "19",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percent change in recreation visits (year-to-date 2026 vs ye",
+     "period_start": "2026-01-01",
+     "period_end": "2026-05-31",
+     "published_at_if_visible": "",
+     "quote": "up 19 % from 2021",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      7
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Yellowstone National Park annual visitors, years with more than 4 million (last 10 years)",
+     "value_as_written": "8"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+     "via": "snapshot",
+     "page_date": "2026-08-10",
+     "snapshot_ts": "20260810124904",
+     "order": [
+      3,
+      8
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Yellowstone National Park cumulative visitors since 1904",
+     "value_as_written": "213,257,451"
+    }
+   ],
+   "wall_s": 266.8
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "search": {
+    "queries": [
+     "Yellowstone National Park September 2026 road status alerts",
+     "Yellowstone National Park September 2026 reservation timed entry",
+     "Yellowstone National Park visitation statistics September 2025 monthly public use report",
+     "Yellowstone National Park fire 2026 August closure smoke"
+    ],
+    "urls": [
+     "https://nbcmontana.com/news/local/recreation-visits-up-3-from-2025-in-yellowstone",
+     "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "https://www.nps.gov/yell/planyourvisit/parkroads.htm?pubDate=20260625",
+     "https://www.tripadvisor.com/ShowTopic-g60999-i481-k15514679-Spring_Summer_2026_Temporary_YNP_Road_Closure_Alerts-Yellowstone_National_Park_Wyoming.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.009989495999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://nbcmontana.com/news/local/recreation-visits-up-3-from-2025-in-yellowstone",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://irma.nps.gov/Stats/MvcReportViewer.aspx?_id=67167d69-7e8e-4356-b91c-30e3e61ca29c&_m=Remote&_r=%2fIRMA+Prod%2fSTATS%2fPark+Specific+Reports%2fSummary+of+Visitor+Use+By+Month+and+Year+(1979+-+Last+Calendar+Year",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm?pubDate=20260625",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.tripadvisor.com/ShowTopic-g60999-i481-k15514679-Spring_Summer_2026_Temporary_YNP_Road_Closure_Alerts-Yellowstone_National_Park_Wyoming.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 147.4
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "assessment": [
+    {
+     "ids": [
+      "p4",
+      "p5",
+      "p17",
+      "p18"
+     ],
+     "relation": "corroborating",
+     "note": "Same underlying NPS 2014-2018 monthly average table; p4/p17 are the same September visit level and p5/p18 the same September share. They are redundant copies, not independent measurements."
+    },
+    {
+     "ids": [
+      "p6",
+      "p7",
+      "p8",
+      "p9",
+      "p10",
+      "p11",
+      "p12",
+      "p13",
+      "p14",
+      "p15",
+      "p16",
+      "p19",
+      "p20",
+      "p21",
+      "p22",
+      "p23",
+      "p24",
+      "p25",
+      "p26",
+      "p27",
+      "p28",
+      "p29"
+     ],
+     "relation": "corroborating",
+     "note": "All are monthly components of the same 2014-2018 NPS average table. They are mutually consistent by construction and provide the seasonal shape, but they are not independent of p4/p5/p17/p18."
+    },
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p3"
+     ],
+     "relation": "corroborating",
+     "note": "Road-opening schedules for 2026 show all major entrances and interior routes open through October 31, 2026, so no September 2026 access closure is indicated. They are contextual access evidence, not visitation counts."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p17",
+     "keep": false,
+     "reason": "Redundant copy of p4: same September 2014-2018 average visits, same source table, no additional information."
+    },
+    {
+     "id": "p18",
+     "keep": false,
+     "reason": "Redundant copy of p5: same September share, same source table, no additional information."
+    },
+    {
+     "id": "p19",
+     "keep": false,
+     "reason": "Redundant copy of p6: same January 2014-2018 average visits."
+    },
+    {
+     "id": "p20",
+     "keep": false,
+     "reason": "Redundant copy of p7: same February 2014-2018 average visits."
+    },
+    {
+     "id": "p21",
+     "keep": false,
+     "reason": "Redundant copy of p8: same March 2014-2018 average visits."
+    },
+    {
+     "id": "p22",
+     "keep": false,
+     "reason": "Redundant copy of p9: same April 2014-2018 average visits."
+    },
+    {
+     "id": "p23",
+     "keep": false,
+     "reason": "Redundant copy of p10: same May 2014-2018 average visits."
+    },
+    {
+     "id": "p24",
+     "keep": false,
+     "reason": "Redundant copy of p11: same June 2014-2018 average visits."
+    },
+    {
+     "id": "p25",
+     "keep": false,
+     "reason": "Redundant copy of p12: same July 2014-2018 average visits."
+    },
+    {
+     "id": "p26",
+     "keep": false,
+     "reason": "Redundant copy of p13: same August 2014-2018 average visits."
+    },
+    {
+     "id": "p27",
+     "keep": false,
+     "reason": "Redundant copy of p14: same October 2014-2018 average visits."
+    },
+    {
+     "id": "p28",
+     "keep": false,
+     "reason": "Redundant copy of p15: same November 2014-2018 average visits."
+    },
+    {
+     "id": "p29",
+     "keep": false,
+     "reason": "Redundant copy of p16: same December 2014-2018 average visits."
+    }
+   ],
+   "extra_directions": [
+    {
+     "id": "b1",
+     "category": "own_history",
+     "perspective": "NPS monthly visitation statistics",
+     "hypothesis": "Recent September recreation-visit counts for Yellowstone (2019-2025) would provide the target's own historical series, enabling series_naive and yoy_scaling routes. The 2014-2018 average is too old to capture post-COVID and post-2022-flood levels, so this is the single most valuable missing input.",
+     "data_to_find": "Yellowstone National Park September recreation visits for 2019, 2020, 2021, 2022, 2023, 2024, and 2025 from NPS Visitor Use Statistics monthly reports.",
+     "search_hints": [
+      "N",
+      "P",
+      "S",
+      " "
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b2",
+     "category": "own_history",
+     "perspective": "NPS monthly visitation statistics",
+     "hypothesis": "Yellowstone January-August 2026 recreation visits would allow a September-to-year-to-date ratio projection. The 2014-2018 seasonal share is the only current basis, but a recent-year ratio would be more representative of 2026 conditions.",
+     "data_to_find": "Yellowstone National Park monthly recreation visits for January through August 2026, and the corresponding January-August totals for 2019-2025.",
+     "search_hints": [
+      "N",
+      "P",
+      "S",
+      " "
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b3",
+     "category": "shocks",
+     "perspective": "Park operations and access",
+     "hypothesis": "Any September 2026 closures, wildfire smoke, road construction, or reservation requirements would materially shift visitation away from the historical seasonal pattern. The road-opening schedule shows normal access, but operational disruptions are not fully covered.",
+     "data_to_find": "Yellowstone National Park September 2026 alerts, road status, fire activity, and any timed-entry or reservation system announcements.",
+     "search_hints": [
+      "N",
+      "P",
+      "S",
+      " "
+     ],
+     "expected_information": 3
+    }
+   ],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p4 * a1",
+      "inputs": {
+       "p4": {
+        "id": "p4"
+       },
+       "a1": {
+        "id": "a1"
+       }
+      }
+     },
+     "rationale": "Uses the only kept September level (2014-2018 average, p4) scaled by an explicit transfer ratio a1 to September 2026. This is a transparent level-times-adjustment route. Shared dependency: p4 is a 2014-2018 average, so it does not capture recent shocks or trends; a1 carries that uncertainty. Failure mode: if 2026 visitation is far outside the 2014-2018 range, the estimate will be biased."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "September 2026 visits relative to 2014-2018 September average",
+     "value": 1.0,
+     "low": 0.75,
+     "high": 1.35,
+     "unit": "ratio",
+     "rationale": "The 2014-2018 September average is the only kept September level. Post-2018 visitation has generally been higher, but 2020 COVID, the 2022 flood, and possible 2026 conditions create wide uncertainty. A central ratio of 1.0 with a wide range reflects no reliable trend signal in the kept evidence.",
+     "applies_when": "Used to transfer the 2014-2018 September average to September 2026 when no recent September data are available.",
+     "falsified_by": "Recent September 2019-2025 counts or January-August 2026 data showing a consistent level materially different from the 2014-2018 average.",
+     "route": "m1"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  },
+  {
+   "round": 2,
+   "assessment": [
+    {
+     "ids": [
+      "p4",
+      "p5",
+      "p17",
+      "p18"
+     ],
+     "relation": "corroborating",
+     "note": "Same underlying NPS 2014-2018 monthly-average table: p4/p17 are the September visit level (663,651) and p5/p18 its 16.51% annual share. They are duplicate renderings of one measurement, not independent evidence."
+    },
+    {
+     "ids": [
+      "p6",
+      "p7",
+      "p8",
+      "p9",
+      "p10",
+      "p11",
+      "p12",
+      "p13",
+      "p14",
+      "p15",
+      "p16",
+      "p19",
+      "p20",
+      "p21",
+      "p22",
+      "p23",
+      "p24",
+      "p25",
+      "p26",
+      "p27",
+      "p28",
+      "p29"
+     ],
+     "relation": "corroborating",
+     "note": "All from the same 2014-2018 NPS monthly-average table; they jointly define the seasonal shape (Jan-Aug sum and September share) used for a share-of-year projection. Duplicated across d4 and d8 directions."
+    },
+    {
+     "ids": [
+      "p30",
+      "p31",
+      "p32",
+      "p33",
+      "p34",
+      "p35",
+      "p36"
+     ],
+     "relation": "corroborating",
+     "note": "All from one Yellowstone Public Radio report on 2026 YTD data: May 2026 = 570,272 visits, YTD through May 2026 = 773,653, up ~1% vs 2025 and ~19% vs 2021. Shared source, so they are one evidence cluster, not six independent signals."
+    },
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p3"
+     ],
+     "relation": "corroborating",
+     "note": "2026 road-opening schedule shows all five entrances open through October 31, 2026, i.e. normal September access with no scheduled seasonal closure. This is a shock-absence check, not a visit count."
+    },
+    {
+     "ids": [
+      "p4",
+      "p30"
+     ],
+     "relation": "conflicting",
+     "note": "The 2014-2018 September average (663,651) predates the post-COVID surge and the 2022 flood; 2026 YTD is running ~1% above 2025 and ~19% above 2021, so the old level is likely too low for 2026. The old table is usable only as a seasonal-shape input, not as a level."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p31",
+     "keep": false,
+     "reason": "A percent-change figure (1%) whose base value is already carried by p30; it adds no independent level information and cannot enter a level formula."
+    },
+    {
+     "id": "p32",
+     "keep": false,
+     "reason": "Percent change vs May 2021, a comparison year not otherwise used; redundant with p30/p34 and not a level."
+    },
+    {
+     "id": "p35",
+     "keep": false,
+     "reason": "Percent change of YTD 2026 vs YTD 2025; the level is already in p34 and the comparison year's level is absent, so it cannot be converted."
+    },
+    {
+     "id": "p36",
+     "keep": false,
+     "reason": "Percent change of YTD 2026 vs 2021; no 2021 YTD level is supplied, so it is not convertible to a visit count."
+    },
+    {
+     "id": "p33",
+     "keep": false,
+     "reason": "2021 annual total (4.8M) is a different period and a rounded figure; it is not the target period and cannot be combined with the 2026 YTD level without an unsupported bridge."
+    },
+    {
+     "id": "p5",
+     "keep": false,
+     "reason": "Duplicate of p18 (same 16.51% September share from the same table); keep one copy."
+    },
+    {
+     "id": "p17",
+     "keep": false,
+     "reason": "Duplicate of p4 (same 663,651 September average); keep one copy."
+    },
+    {
+     "id": "p18",
+     "keep": false,
+     "reason": "Duplicate of p5; the September share is retained once via p5."
+    },
+    {
+     "id": "p19",
+     "keep": false,
+     "reason": "Duplicate of p6."
+    },
+    {
+     "id": "p20",
+     "keep": false,
+     "reason": "Duplicate of p7."
+    },
+    {
+     "id": "p21",
+     "keep": false,
+     "reason": "Duplicate of p8."
+    },
+    {
+     "id": "p22",
+     "keep": false,
+     "reason": "Duplicate of p9."
+    },
+    {
+     "id": "p23",
+     "keep": false,
+     "reason": "Duplicate of p10."
+    },
+    {
+     "id": "p24",
+     "keep": false,
+     "reason": "Duplicate of p11."
+    },
+    {
+     "id": "p25",
+     "keep": false,
+     "reason": "Duplicate of p12."
+    },
+    {
+     "id": "p26",
+     "keep": false,
+     "reason": "Duplicate of p13."
+    },
+    {
+     "id": "p27",
+     "keep": false,
+     "reason": "Duplicate of p14."
+    },
+    {
+     "id": "p28",
+     "keep": false,
+     "reason": "Duplicate of p15."
+    },
+    {
+     "id": "p29",
+     "keep": false,
+     "reason": "Duplicate of p16."
+    }
+   ],
+   "extra_directions": [],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p4 * a1",
+      "inputs": {
+       "p4": {
+        "id": "p4"
+       },
+       "a1": {
+        "id": "a1"
+       }
+      }
+     },
+     "rationale": "Anchors on the only kept September-specific level (p4, the 2014-2018 September average of 663,651 visits) and scales it by a1, the assumed 2026-to-2014/18 September level multiple. This is a level-transfer route: it assumes the 2014-2018 September level is a valid base and that the recent upward shift is captured by a1. Failure modes: the 2014-2018 base may be structurally too low, and a1 is an assumption rather than a measured 2026 signal. Shared dependency: p4 is also the source of the seasonal shape used in m2."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "a3 * a2",
+      "inputs": {
+       "a3": {
+        "id": "a3"
+       },
+       "a2": {
+        "id": "a2"
+       }
+      }
+     },
+     "rationale": "A totals-times-share decomposition: projected 2026 annual visits (a3) times the September share of annual visits (a2). This route is structurally independent of m1's level-transfer logic, but it depends on two assumptions and on the 2026 seasonal shape resembling recent years. Failure modes: a3 and a2 are both assumptions, so the interval is wide; if September 2026 is unusually warm/dry or unusually smoky, the share will miss. Shared dependency: the seasonal-shape concept is informed by the 2014-2018 table (p4-p16), though the share value itself is assumed."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "September 2026 visits as a multiple of the 2014-2018 September average level",
+     "value": 1.15,
+     "low": 0.85,
+     "high": 1.55,
+     "unit": "ratio",
+     "rationale": "The 2014-2018 September average (p4) predates the post-COVID surge and the 2022 flood. 2026 YTD is ~1% above 2025 and ~19% above 2021 (p34-p36), and recent Septembers have generally run above the 2014-2018 norm, but the level is uncertain and a bad-weather or smoke September could fall below it. A wide lognormal range centered modestly above 1.0 reflects that uncertainty.",
+     "applies_when": "September 2026 has normal access (all entrances open through Oct 31 per p1-p3) and no major closure, wildfire, or policy shock.",
+     "falsified_by": "Evidence of a September 2026 closure, wildfire smoke episode, reservation requirement, or published 2026 monthly data showing a level far from this multiple.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "September share of 2026 annual recreation visits",
+     "value": 12.0,
+     "low": 9.0,
+     "high": 15.0,
+     "unit": "%",
+     "rationale": "The 2014-2018 table gives a 16.51% September share (p5), but recent years have shifted more visitation into summer and shoulder months, so the September share of the annual total is plausibly lower than the 2014-2018 value. No recent-year September share is available, so this is an assumption rather than a restatement of p5.",
+     "applies_when": "Used to convert a projected 2026 annual total into a September 2026 level; valid only if the 2026 seasonal shape resembles recent years rather than 2014-2018.",
+     "falsified_by": "A published 2026 monthly series showing September's share of the annual total outside this range.",
+     "route": "m2"
+    },
+    {
+     "id": "a3",
+     "name": "2026 annual recreation visits at Yellowstone",
+     "value": 4900000,
+     "low": 4300000,
+     "high": 5500000,
+     "unit": "recreation visits",
+     "rationale": "2026 YTD through May is 773,653, up ~1% vs 2025 and ~19% vs 2021 (p34-p36). A full-year total near the recent 4.5-5.0M range is plausible, but no 2026 annual forecast exists in the kept evidence, so this is an assumption with a wide range.",
+     "applies_when": "Used only as the numerator for the September-share route; requires that the rest of 2026 follows a normal seasonal pattern.",
+     "falsified_by": "Published 2026 monthly data implying an annual total well outside this range.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+   "via": "snapshot",
+   "page_date": "2026-09-06",
+   "snapshot_ts": "20260906063912",
+   "order": [
+    1,
+    4
+   ],
+   "name": "Projected 2026 opening date of West Entrance to Madison, Madison to Old Faithful, Madison to Norris, Mammoth Hot Springs to Norris, Norris to Canyon Village",
+   "value": 17.0,
+   "value_as_written": "April 17",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "date",
+   "period_start": "2026-04-17",
+   "period_end": "2026-04-17",
+   "published_at_if_visible": "2026-09-01",
+   "quote": "Open April 17 - October 31, 2026: West Entrance to Madison, Madison to Old Faithful, Madison to Norris, Mammoth Hot Springs to Norris, Norris to Canyon Village",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+   "via": "snapshot",
+   "page_date": "2026-09-06",
+   "snapshot_ts": "20260906063912",
+   "order": [
+    1,
+    6
+   ],
+   "name": "Projected 2026 opening date of East Entrance to Fishing Bridge (Sylvan Pass), Canyon Village to Bridge Bay",
+   "value": 1.0,
+   "value_as_written": "May 1",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "date",
+   "period_start": "2026-05-01",
+   "period_end": "2026-05-01",
+   "published_at_if_visible": "2026-09-01",
+   "quote": "Open May 1 - October 31, 2026: East Entrance to Fishing Bridge (Sylvan Pass), Canyon Village to Bridge Bay",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+   "via": "snapshot",
+   "page_date": "2026-09-06",
+   "snapshot_ts": "20260906063912",
+   "order": [
+    1,
+    8
+   ],
+   "name": "Projected 2026 opening date of South Entrance to West Thumb, West Thumb to Old Faithful (Craig Pass), West Thumb to Lake Village, Tower-Roosevelt to Tower Fall",
+   "value": 8.0,
+   "value_as_written": "May 8",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "date",
+   "period_start": "2026-05-08",
+   "period_end": "2026-05-08",
+   "published_at_if_visible": "2026-09-01",
+   "quote": "Open May 8 - October 31, 2026: South Entrance to West Thumb, West Thumb to Old Faithful (Craig Pass), West Thumb to Lake Village, Tower-Roosevelt to Tower Fall",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    0
+   ],
+   "name": "Yellowstone National Park average September recreation visits, 2014-2018 average",
+   "value": 663651.0,
+   "value_as_written": "663,651",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| September | 663,651 | 16.51% |",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    1
+   ],
+   "name": "September share of average annual recreation visits at Yellowstone, 2014-2018 average",
+   "value": 16.51,
+   "value_as_written": "16.51%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| September | 663,651 | 16.51% |",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p18 (same 16.51% September share from the same table); keep one copy."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    2
+   ],
+   "name": "Yellowstone National Park average January recreation visits, 2014-2018 average",
+   "value": 28837.0,
+   "value_as_written": "28,837",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| January | 28,837 | 0.72% |",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    3
+   ],
+   "name": "Yellowstone National Park average February recreation visits, 2014-2018 average",
+   "value": 33088.0,
+   "value_as_written": "33,088",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| February | 33,088 | 0.82% |",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    4
+   ],
+   "name": "Yellowstone National Park average March recreation visits, 2014-2018 average",
+   "value": 22266.0,
+   "value_as_written": "22,266",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| March | 22,266 | 0.55% |",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    5
+   ],
+   "name": "Yellowstone National Park average April recreation visits, 2014-2018 average",
+   "value": 44027.0,
+   "value_as_written": "44,027",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| April | 44,027 | 1.10% |",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    6
+   ],
+   "name": "Yellowstone National Park average May recreation visits, 2014-2018 average",
+   "value": 401449.0,
+   "value_as_written": "401,449",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| May | 401,449 | 9.99% |",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    7
+   ],
+   "name": "Yellowstone National Park average June recreation visits, 2014-2018 average",
+   "value": 780652.0,
+   "value_as_written": "780,652",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| June | 780,652 | 19.42% |",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    8
+   ],
+   "name": "Yellowstone National Park average July recreation visits, 2014-2018 average",
+   "value": 947688.0,
+   "value_as_written": "947,688",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| July | 947,688 | 23.57% |",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    9
+   ],
+   "name": "Yellowstone National Park average August recreation visits, 2014-2018 average",
+   "value": 839787.0,
+   "value_as_written": "839,787",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| August | 839,787 | 20.89% |",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    10
+   ],
+   "name": "Yellowstone National Park average October recreation visits, 2014-2018 average",
+   "value": 223777.0,
+   "value_as_written": "223,777",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| October | 223,777 | 5.57% |",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    11
+   ],
+   "name": "Yellowstone National Park average November recreation visits, 2014-2018 average",
+   "value": 14323.0,
+   "value_as_written": "14,323",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| November | 14,323 | 0.36% |",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    12
+   ],
+   "name": "Yellowstone National Park average December recreation visits, 2014-2018 average",
+   "value": 20434.0,
+   "value_as_written": "20,434",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| December | 20,434 | 0.51% |",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    0
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in September, 2014-2018 average",
+   "value": 663651.0,
+   "value_as_written": "663,651",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-09-01",
+   "period_end": "2018-09-30",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| September | 663,651 | 16.51% |",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p4 (same 663,651 September average); keep one copy."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    1
+   ],
+   "name": "September share of average annual visits at Yellowstone National Park, 2014-2018 average",
+   "value": 16.51,
+   "value_as_written": "16.51%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2014-09-01",
+   "period_end": "2018-09-30",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| September | 663,651 | 16.51% |",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p5; the September share is retained once via p5."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    2
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in January, 2014-2018 average",
+   "value": 28837.0,
+   "value_as_written": "28,837",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-01-01",
+   "period_end": "2018-01-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| January | 28,837 | 0.72% |",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p6."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    3
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in February, 2014-2018 average",
+   "value": 33088.0,
+   "value_as_written": "33,088",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-02-01",
+   "period_end": "2018-02-28",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| February | 33,088 | 0.82% |",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p7."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    4
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in March, 2014-2018 average",
+   "value": 22266.0,
+   "value_as_written": "22,266",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-03-01",
+   "period_end": "2018-03-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| March | 22,266 | 0.55% |",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p8."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    5
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in April, 2014-2018 average",
+   "value": 44027.0,
+   "value_as_written": "44,027",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-04-01",
+   "period_end": "2018-04-30",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| April | 44,027 | 1.10% |",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p9."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    6
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in May, 2014-2018 average",
+   "value": 401449.0,
+   "value_as_written": "401,449",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-05-01",
+   "period_end": "2018-05-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| May | 401,449 | 9.99% |",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p10."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    7
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in June, 2014-2018 average",
+   "value": 780652.0,
+   "value_as_written": "780,652",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-06-01",
+   "period_end": "2018-06-30",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| June | 780,652 | 19.42% |",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p11."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    8
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in July, 2014-2018 average",
+   "value": 947688.0,
+   "value_as_written": "947,688",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-07-01",
+   "period_end": "2018-07-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| July | 947,688 | 23.57% |",
+   "verified_by": "quote_in_page",
+   "id": "p25",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p12."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    9
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in August, 2014-2018 average",
+   "value": 839787.0,
+   "value_as_written": "839,787",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-08-01",
+   "period_end": "2018-08-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| August | 839,787 | 20.89% |",
+   "verified_by": "quote_in_page",
+   "id": "p26",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p13."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    10
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in October, 2014-2018 average",
+   "value": 223777.0,
+   "value_as_written": "223,777",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-10-01",
+   "period_end": "2018-10-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| October | 223,777 | 5.57% |",
+   "verified_by": "quote_in_page",
+   "id": "p27",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p14."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    11
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in November, 2014-2018 average",
+   "value": 14323.0,
+   "value_as_written": "14,323",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-11-01",
+   "period_end": "2018-11-30",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| November | 14,323 | 0.36% |",
+   "verified_by": "quote_in_page",
+   "id": "p28",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p15."
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://home.nps.gov/yell/planyourvisit/visitationstats.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-22",
+   "snapshot_ts": "20260422081553",
+   "order": [
+    1,
+    12
+   ],
+   "name": "Yellowstone National Park average number of recreation visits in December, 2014-2018 average",
+   "value": 20434.0,
+   "value_as_written": "20,434",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visits",
+   "period_start": "2014-12-01",
+   "period_end": "2018-12-31",
+   "published_at_if_visible": "2025-05-16",
+   "quote": "| December | 20,434 | 0.51% |",
+   "verified_by": "quote_in_page",
+   "id": "p29",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p16."
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+   "via": "snapshot",
+   "page_date": "2026-08-10",
+   "snapshot_ts": "20260810124904",
+   "order": [
+    3,
+    0
+   ],
+   "name": "Yellowstone National Park recreation visits, May 2026",
+   "value": 570272.0,
+   "value_as_written": "570,272",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "recreation visits",
+   "period_start": "2026-05-01",
+   "period_end": "2026-05-31",
+   "published_at_if_visible": "",
+   "quote": "the park hosted 570,272 visits in May, up 1% from May 2025",
+   "verified_by": "quote_in_page",
+   "id": "p30",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+   "via": "snapshot",
+   "page_date": "2026-08-10",
+   "snapshot_ts": "20260810124904",
+   "order": [
+    3,
+    1
+   ],
+   "name": "Yellowstone National Park recreation visits, May 2025",
+   "value": 1.0,
+   "value_as_written": "1",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent change in recreation visits (May 2026 vs May 2025)",
+   "period_start": "2025-05-01",
+   "period_end": "2025-05-31",
+   "published_at_if_visible": "",
+   "quote": "570,272 visits in May, up 1% from May 2025",
+   "verified_by": "quote_in_page",
+   "id": "p31",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "A percent-change figure (1%) whose base value is already carried by p30; it adds no independent level information and cannot enter a level formula."
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+   "via": "snapshot",
+   "page_date": "2026-08-10",
+   "snapshot_ts": "20260810124904",
+   "order": [
+    3,
+    2
+   ],
+   "name": "Yellowstone National Park recreation visits, May 2021",
+   "value": 20.0,
+   "value_as_written": "20",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent change in recreation visits (May 2026 vs May 2021)",
+   "period_start": "2021-05-01",
+   "period_end": "2021-05-31",
+   "published_at_if_visible": "",
+   "quote": "up 20 % from May 2021, which was Yellowstone's record-breaking year",
+   "verified_by": "quote_in_page",
+   "id": "p32",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Percent change vs May 2021, a comparison year not otherwise used; redundant with p30/p34 and not a level."
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+   "via": "snapshot",
+   "page_date": "2026-08-10",
+   "snapshot_ts": "20260810124904",
+   "order": [
+    3,
+    3
+   ],
+   "name": "Yellowstone National Park annual visitors, 2021 record-breaking year",
+   "value": 4800000.0,
+   "value_as_written": "4.8",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "visitors",
+   "period_start": "2021-01-01",
+   "period_end": "2021-12-31",
+   "published_at_if_visible": "",
+   "quote": "record-breaking year with more than 4.8 million visitors",
+   "verified_by": "quote_in_page",
+   "id": "p33",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "2021 annual total (4.8M) is a different period and a rounded figure; it is not the target period and cannot be combined with the 2026 YTD level without an unsupported bridge."
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+   "via": "snapshot",
+   "page_date": "2026-08-10",
+   "snapshot_ts": "20260810124904",
+   "order": [
+    3,
+    4
+   ],
+   "name": "Yellowstone National Park recreation visits, year-to-date 2026 (through May)",
+   "value": 773653.0,
+   "value_as_written": "773,653",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "recreation visits",
+   "period_start": "2026-01-01",
+   "period_end": "2026-05-31",
+   "published_at_if_visible": "",
+   "quote": "So far this year, the park has hosted 773,653 recreation visits",
+   "verified_by": "quote_in_page",
+   "id": "p34",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+   "via": "snapshot",
+   "page_date": "2026-08-10",
+   "snapshot_ts": "20260810124904",
+   "order": [
+    3,
+    5
+   ],
+   "name": "Yellowstone National Park recreation visits, year-to-date 2026 vs same time 2025",
+   "value": 1.0,
+   "value_as_written": "1",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent change in recreation visits (year-to-date 2026 vs ye",
+   "period_start": "2026-01-01",
+   "period_end": "2026-05-31",
+   "published_at_if_visible": "",
+   "quote": "773,653 recreation visits, up 1% from last year at the same time",
+   "verified_by": "quote_in_page",
+   "id": "p35",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Percent change of YTD 2026 vs YTD 2025; the level is already in p34 and the comparison year's level is absent, so it cannot be converted."
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "source_url": "https://www.ypradio.org/regional-news/2026-06-10/another-record-month",
+   "via": "snapshot",
+   "page_date": "2026-08-10",
+   "snapshot_ts": "20260810124904",
+   "order": [
+    3,
+    6
+   ],
+   "name": "Yellowstone National Park recreation visits, year-to-date 2026 vs same time 2021",
+   "value": 19.0,
+   "value_as_written": "19",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percent change in recreation visits (year-to-date 2026 vs ye",
+   "period_start": "2026-01-01",
+   "period_end": "2026-05-31",
+   "published_at_if_visible": "",
+   "quote": "up 19 % from 2021",
+   "verified_by": "quote_in_page",
+   "id": "p36",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Percent change of YTD 2026 vs 2021; no 2021 YTD level is supplied, so it is not convertible to a visit count."
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "formula_mc",
+    "params": {
+     "formula": "p4 * a1",
+     "inputs": {
+      "p4": {
+       "id": "p4"
+      },
+      "a1": {
+       "id": "a1"
+      }
+     }
+    },
+    "rationale": "Anchors on the only kept September-specific level (p4, the 2014-2018 September average of 663,651 visits) and scales it by a1, the assumed 2026-to-2014/18 September level multiple. This is a level-transfer route: it assumes the 2014-2018 September level is a valid base and that the recent upward shift is captured by a1. Failure modes: the 2014-2018 base may be structurally too low, and a1 is an as",
+    "estimate": null,
+    "backtest": [],
+    "notes": [],
+    "error": "input a1: assumption a1 was rejected (target-like: names the target period (2026))",
+    "n_point_inputs": 0,
+    "n_assumption_inputs": 0,
+    "rests_mainly_on_assumptions": false
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "formula_mc",
+    "params": {
+     "formula": "a3 * a2",
+     "inputs": {
+      "a3": {
+       "id": "a3"
+      },
+      "a2": {
+       "id": "a2"
+      }
+     }
+    },
+    "rationale": "A totals-times-share decomposition: projected 2026 annual visits (a3) times the September share of annual visits (a2). This route is structurally independent of m1's level-transfer logic, but it depends on two assumptions and on the 2026 seasonal shape resembling recent years. Failure modes: a3 and a2 are both assumptions, so the interval is wide; if September 2026 is unusually warm/dry or unusual",
+    "estimate": null,
+    "backtest": [],
+    "notes": [],
+    "error": "input a3: assumption a3 was rejected (target-like: names the target period (2026))",
+    "n_point_inputs": 0,
+    "n_assumption_inputs": 0,
+    "rests_mainly_on_assumptions": false
+   }
+  ],
+  "result": {
+   "central": null,
+   "p10": null,
+   "p90": null,
+   "weights": {},
+   "basis": "no_method",
+   "assumption_weight_share": 0
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {},
+  "methods_from_round": 2
+ },
+ "assumptions": {
+  "kept": [],
+  "rejected": [
+   {
+    "id": "a1",
+    "name": "September 2026 visits as a multiple of the 2014-2018 September average level",
+    "unit": "ratio",
+    "rationale": "The 2014-2018 September average (p4) predates the post-COVID surge and the 2022 flood. 2026 YTD is ~1% above 2025 and ~19% above 2021 (p34-p36), and recent Septembers have generally run above the 2014-2018 norm, but the level is uncertain and a bad-weather or smoke September could fall below it. A w",
+    "applies_when": "September 2026 has normal access (all entrances open through Oct 31 per p1-p3) and no major closure, wildfire, or policy shock.",
+    "falsified_by": "Evidence of a September 2026 closure, wildfire smoke episode, reservation requirement, or published 2026 monthly data showing a level far from this multiple.",
+    "route": "m1",
+    "value": 1.15,
+    "low": 0.85,
+    "high": 1.55,
+    "reason": "target-like: names the target period (2026)"
+   },
+   {
+    "id": "a2",
+    "name": "September share of 2026 annual recreation visits",
+    "unit": "%",
+    "rationale": "The 2014-2018 table gives a 16.51% September share (p5), but recent years have shifted more visitation into summer and shoulder months, so the September share of the annual total is plausibly lower than the 2014-2018 value. No recent-year September share is available, so this is an assumption rather",
+    "applies_when": "Used to convert a projected 2026 annual total into a September 2026 level; valid only if the 2026 seasonal shape resembles recent years rather than 2014-2018.",
+    "falsified_by": "A published 2026 monthly series showing September's share of the annual total outside this range.",
+    "route": "m2",
+    "value": 12.0,
+    "low": 9.0,
+    "high": 15.0,
+    "reason": "target-like: names the target period (2026)"
+   },
+   {
+    "id": "a3",
+    "name": "2026 annual recreation visits at Yellowstone",
+    "unit": "recreation visits",
+    "rationale": "2026 YTD through May is 773,653, up ~1% vs 2025 and ~19% vs 2021 (p34-p36). A full-year total near the recent 4.5-5.0M range is plausible, but no 2026 annual forecast exists in the kept evidence, so this is an assumption with a wide range.",
+    "applies_when": "Used only as the numerator for the September-share route; requires that the rest of 2026 follows a normal seasonal pattern.",
+    "falsified_by": "Published 2026 monthly data implying an annual total well outside this range.",
+    "route": "m2",
+    "value": 4900000.0,
+    "low": 4300000.0,
+    "high": 5500000.0,
+    "reason": "target-like: names the target period (2026)"
+   }
+  ],
+  "from_round": 2,
+  "min_width": 2.0,
+  "max_per_run": 8,
+  "max_per_method": 3
+ },
+ "final": {
+  "template": "Estimate: [[estimate]] ([[interval_level]] interval [[p10]] to [[p90]], basis: [[interval_basis]]), from [[n_methods]] method(s) over [[n_points_kept]] kept data points.",
+  "text": "No estimate: no estimation method could be computed from the verified evidence.",
+  "placeholders": {
+   "estimate": "n/a",
+   "p10": "n/a",
+   "p90": "n/a",
+   "interval_level": "80%",
+   "interval_basis": "no method",
+   "n_points_kept": "17",
+   "n_methods": "0",
+   "m1_estimate": "n/a",
+   "m1_weight": "0%",
+   "m1_backtest_error": "n/a",
+   "m2_estimate": "n/a",
+   "m2_weight": "0%",
+   "m2_backtest_error": "n/a"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": false
+ },
+ "started_at": "20261015T083831Z",
+ "wall_s": 1075.3,
+ "budget": {
+  "usd_total_assumed": 0.5575,
+  "usd_tokens": 0.1075,
+  "usd_search_fee_assumed": 0.45,
+  "usd_cap": 1.0,
+  "pages_used": 7,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 21,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 44,
+  "pages_snapshot": 7,
+  "pages_live_dated": 0,
+  "pages_dropped": 37,
+  "pages_sent_to_extractor": {
+   "total": 7,
+   "snapshot": 7,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [
+   {
+    "url": "https://www.nps.gov/yell/planyourvisit/parkroads.htm",
+    "status": "snapshot",
+    "dates": [
+     "2026-09-07",
+     "2026-10-01",
+     "2026-10-12"
+    ]
+   }
+  ],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "v2"
+}
