@@ -35,14 +35,17 @@ a{color:#2457b3}
 </style></head><body>
 <header><h1>__H1__</h1><div class="meta">__META__</div><div class="legend">__LEGEND__</div></header>
 <main><div id="graph"></div><div id="side"><p>Click a node to see its details. Input node size = sensitivity
-|&Delta;log10(final estimate)| when the input moves from low to high with all others at their medians.</p>
+|&Delta;log10(final estimate)| when the input moves from low to high with all others at their medians,
+scaled relative to the most sensitive input on this page (largest here: <b id="maxs"></b>).
+<code>sensitivity_path_max</code> is the same change measured on the input's own path.</p>
 <pre id="detail"></pre></div></main>
 <script>
 const G = __GRAPH__;
 const COL = __COLOURS__;
 const LEVEL = {input:0, path:1, target:2};
+const maxS = Math.max(0, ...G.nodes.filter(n => n.kind === 'input').map(n => Math.abs(n.sensitivity || 0)));
 const nodes = G.nodes.map(n => {
-  const s = n.kind === 'input' ? 10 + 28 * Math.min(Math.abs(n.sensitivity || 0), 1.5) / 1.5 : (n.kind === 'path' ? 18 : 26);
+  const s = n.kind === 'input' ? 8 + (maxS > 0 ? 30 * Math.abs(n.sensitivity || 0) / maxS : 0) : (n.kind === 'path' ? 18 : 26);
   return {id:n.id, label:n.label, level:LEVEL[n.kind], size:s,
           shape: n.kind === 'input' ? 'dot' : (n.kind === 'path' ? 'box' : 'star'),
           color:{background:COL[n.status] || '#ccc', border:'#555'},
@@ -53,13 +56,14 @@ nodes.forEach(n => { if (n.shape === 'star') n.font = {color:'#222', size:14}; }
 const edges = G.edges.map(e => ({from:e.source, to:e.target, arrows:'to',
   dashes: e.kind === 'aggregated_into' && !e.included, color:{color: e.kind === 'used_by' ? '#999' : '#555'}}));
 const net = new vis.Network(document.getElementById('graph'), {nodes:new vis.DataSet(nodes), edges:new vis.DataSet(edges)},
-  {layout:{hierarchical:{direction:'LR', sortMethod:'directed', levelSeparation:260, nodeSpacing:70}},
+  {layout:{hierarchical:{direction:'LR', sortMethod:'directed', levelSeparation:280, nodeSpacing:115}},
    physics:false, interaction:{hover:true}});
 const byId = Object.fromEntries(G.nodes.map(n => [n.id, n]));
 function show(id){ const n = byId[id]; if(!n) return;
   const clean = Object.fromEntries(Object.entries(n).filter(([k,v]) => v !== null && v !== undefined && !(Array.isArray(v) && !v.length)));
   document.getElementById('detail').textContent = JSON.stringify(clean, null, 2); }
 net.on('click', p => { if (p.nodes.length) show(p.nodes[0]); });
+document.getElementById('maxs').textContent = maxS.toFixed(3) + ' in log10';
 show('target');
 </script></body></html>"""
 

@@ -41,5 +41,6 @@ python -m triangulate select
 - Eligible: answer parses as a positive number with an optional unit (a leading `$` means USD) **and** the unit parses strictly with the explicit unit table in `triangulate/units.py`. 547 eligible, 10 rejected (temperature, angle, decibel, molar `M`, and two `$ per unit` answers). The rejected ids and reasons are listed in `data/backtest_realfp20_ids.json`.
 - Selection: `random.Random(2021).sample(eligible sorted by index, 20)`.
 - Committed: `data/backtest_realfp20_ids.json` (ids, selection metadata, rejected ids). Local only: `data/backtest_realfp20.json` (question, answer value, unit).
+- Results committed per question (`results/per_question.json`, `results/report_tables.md`, `PROBE.md`): id, target unit, estimates and signed log10 errors. Answer values can be derived from these numbers; question text is never committed. Per-question states and graph pages that show the question text live in the git-ignored `results/realfp/` and `docs/graphs/realfp/`.
 
 Caveat: realFP answers are the annotators' own Fermi estimates, not measured ground truth. Some are odd (one selected item's answer is about 6e-18 km). The probe scores against them as given.

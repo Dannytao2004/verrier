@@ -2,20 +2,38 @@
  "model": "deepseek-flash",
  "n_questions": 20,
  "naive": {
-  "n": 0
+  "n": 20,
+  "median_abs_log10_err": 1.1039267729838662,
+  "share_within_1_oom": 0.45,
+  "fp_score": 0.4391105015588006,
+  "n_failed": 1,
+  "failures": {
+   "invalid_output": 1
+  },
+  "n_retried": 1
  },
  "structured": {
-  "n": 0
+  "n": 20,
+  "median_abs_log10_err": 0.9663360247332718,
+  "share_within_1_oom": 0.55,
+  "fp_score": 0.5065542438524059,
+  "n_failed": 3,
+  "failures": {
+   "no_valid_path": 3
+  },
+  "n_retried": 16,
+  "coverage_80": 0.2,
+  "n_with_outlier_path": 6
  },
  "both_estimated": {
-  "n": 0,
-  "naive_median": null,
-  "structured_median": null
+  "n": 16,
+  "naive_median": 1.0352905371428536,
+  "structured_median": 0.7912686654975821
  },
  "paired": {
-  "structured_better": 0,
+  "structured_better": 12,
   "equal": 0,
-  "structured_worse": 0
+  "structured_worse": 8
  },
  "calls": {
   "demo": {
@@ -32,18 +50,46 @@
     "stop": 2
    }
   },
-  "all": {
-   "calls": 3,
-   "ok": 2,
+  "structured": {
+   "calls": 36,
+   "ok": 36,
+   "retry_calls": 16,
+   "prompt_tokens": 55530,
+   "completion_tokens": 49649,
+   "usd": 0.030965,
+   "latency_median_s": 164.22500000000002,
+   "latency_max_s": 725.43,
+   "finish_reasons": {
+    "stop": 36
+   }
+  },
+  "naive": {
+   "calls": 21,
+   "ok": 19,
    "retry_calls": 1,
-   "prompt_tokens": 1788,
-   "completion_tokens": 2181,
-   "usd": 0.001521,
-   "latency_median_s": 77.24,
+   "prompt_tokens": 4162,
+   "completion_tokens": 1269,
+   "usd": 0.00131,
+   "latency_median_s": 112.58,
+   "latency_max_s": 521.71,
+   "finish_reasons": {
+    "stop": 19,
+    "length": 2
+   }
+  },
+  "all": {
+   "calls": 60,
+   "ok": 57,
+   "retry_calls": 18,
+   "prompt_tokens": 61480,
+   "completion_tokens": 53099,
+   "usd": 0.033796,
+   "latency_median_s": 135.905,
    "latency_max_s": 900.81,
    "finish_reasons": {
     "None": 1,
-    "stop": 2
+    "stop": 57,
+    "length": 2
    }
   }
  },
@@ -53,5 +99,6 @@
   "p90": 1072319.985890842,
   "n_valid_paths": 3,
   "outliers": []
- }
+ },
+ "stop_rule_triggered": false
 }

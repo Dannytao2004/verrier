@@ -219,7 +219,7 @@ def build():
             a, b = row["naive"], row["structured"]
             extra = (f"Question: {html.escape(q['question'])}<br>realFP answer: <b>{html.escape(q['answer_raw'])}</b> "
                      f"&middot; structured |log10 err| {_f(b['abs_log10_err'])} &middot; 80% covers: {'yes' if b['covered_80'] else 'no'}"
-                     f" &middot; naive estimate {_f(a.get('estimate'), 3) if a.get('estimate') else a.get('status')}"
+                     f" &middot; naive estimate {format(a['estimate'], '.3g') if a.get('estimate') else a.get('status')}"
                      f" (|log10 err| {_f(a.get('abs_log10_err'))})")
             GRAPHS_LOCAL.mkdir(parents=True, exist_ok=True)
             (GRAPHS_LOCAL / f"{safe(q['id'])}.html").write_text(
