@@ -1,0 +1,57 @@
+{
+ "model": "deepseek-flash",
+ "n_questions": 20,
+ "naive": {
+  "n": 0
+ },
+ "structured": {
+  "n": 0
+ },
+ "both_estimated": {
+  "n": 0,
+  "naive_median": null,
+  "structured_median": null
+ },
+ "paired": {
+  "structured_better": 0,
+  "equal": 0,
+  "structured_worse": 0
+ },
+ "calls": {
+  "demo": {
+   "calls": 3,
+   "ok": 2,
+   "retry_calls": 1,
+   "prompt_tokens": 1788,
+   "completion_tokens": 2181,
+   "usd": 0.001521,
+   "latency_median_s": 77.24,
+   "latency_max_s": 900.81,
+   "finish_reasons": {
+    "None": 1,
+    "stop": 2
+   }
+  },
+  "all": {
+   "calls": 3,
+   "ok": 2,
+   "retry_calls": 1,
+   "prompt_tokens": 1788,
+   "completion_tokens": 2181,
+   "usd": 0.001521,
+   "latency_median_s": 77.24,
+   "latency_max_s": 900.81,
+   "finish_reasons": {
+    "None": 1,
+    "stop": 2
+   }
+  }
+ },
+ "demo": {
+  "central": 905956.7081938621,
+  "p10": 673383.950954597,
+  "p90": 1072319.985890842,
+  "n_valid_paths": 3,
+  "outliers": []
+ }
+}

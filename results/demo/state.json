@@ -1,0 +1,538 @@
+{
+ "qid": "demo_cn_hdt_2024",
+ "question": "Estimate the number of heavy-duty trucks sold in China in calendar year 2024",
+ "target": {
+  "unit": "",
+  "dims": "dimensionless",
+  "definition": "Number of heavy-duty trucks sold in China in calendar year 2024"
+ },
+ "inputs": [
+  {
+   "name": "china_gdp_2024",
+   "description": "China's nominal GDP in 2024",
+   "value": 18500000000000.0,
+   "low": 17500000000000.0,
+   "high": 19500000000000.0,
+   "unit": "USD",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Approximate 2024 nominal GDP based on recent growth trends and exchange rates."
+   },
+   "count_nouns": [],
+   "dims": "USD",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 17500000000000.0,
+    "high": 19500000000000.0,
+    "value": 18500000000000.0
+   },
+   "median": 18472953201911.164,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0,
+   "sensitivity_path_max": 0.046996562676222986
+  },
+  {
+   "name": "truck_sales_per_gdp",
+   "description": "Heavy-duty truck sales per unit of GDP in China",
+   "value": 4.5e-08,
+   "low": 3e-08,
+   "high": 6e-08,
+   "unit": "trucks/USD",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Derived from historical ratio: ~900k trucks sold in 2023 with GDP ~17.8T USD, giving ~5e-8; adjusted for 2024."
+   },
+   "count_nouns": [
+    "trucks"
+   ],
+   "dims": "USD**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 3e-08,
+    "high": 6e-08,
+    "value": 4.5e-08
+   },
+   "median": 4.242640687119285e-08,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.020385886337879633,
+   "sensitivity_path_max": 0.30102999566398125
+  },
+  {
+   "name": "truck_sales_2023",
+   "description": "Heavy-duty truck sales in China in 2023",
+   "value": 910000,
+   "low": 850000,
+   "high": 970000,
+   "unit": "trucks",
+   "provenance": {
+    "type": "sourced",
+    "source": "China Association of Automobile Manufacturers (CAAM)",
+    "url": "",
+    "quote": "China's heavy truck sales reached 910,000 units in 2023."
+   },
+   "count_nouns": [
+    "trucks"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "sourced_unverified",
+   "usable": true,
+   "si": {
+    "low": 850000.0,
+    "high": 970000.0,
+    "value": 910000.0
+   },
+   "median": 908019.8235721509,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.008290517938096542,
+   "sensitivity_path_max": 0.05735280855195235
+  },
+  {
+   "name": "growth_factor",
+   "description": "Year-over-year growth factor for heavy-duty truck sales from 2023 to 2024",
+   "value": 1.05,
+   "low": 0.95,
+   "high": 1.15,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Expected modest growth due to economic recovery and infrastructure spending, but with uncertainty."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.95,
+    "high": 1.15,
+    "value": 1.05
+   },
+   "median": 1.0452272480183435,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.021101231194502468,
+   "sensitivity_path_max": 0.0829742350647642
+  },
+  {
+   "name": "truck_sales_per_capita",
+   "description": "Heavy-duty truck sales per capita in China",
+   "value": 0.00065,
+   "low": 0.00055,
+   "high": 0.00075,
+   "unit": "trucks/person",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Based on ~900k trucks and 1.4B population, giving ~0.00064; adjusted for 2024."
+   },
+   "count_nouns": [
+    "trucks",
+    "person"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.00055,
+    "high": 0.00075,
+    "value": 0.00065
+   },
+   "median": 0.0006422616289332565,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.08313347023543916,
+   "sensitivity_path_max": 0.134698573897456
+  },
+  {
+   "name": "china_population_2024",
+   "description": "Population of China in 2024",
+   "value": 1410000000.0,
+   "low": 1400000000.0,
+   "high": 1420000000.0,
+   "unit": "people",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Recent population estimates from UN and Chinese statistics."
+   },
+   "count_nouns": [
+    "people"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1400000000.0,
+    "high": 1420000000.0,
+    "value": 1410000000.0
+   },
+   "median": 1409964538.5611653,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.00616030870481854,
+   "sensitivity_path_max": 0.00616030870481854
+  }
+ ],
+ "paths": [
+  {
+   "id": "p1",
+   "method": "top_down",
+   "description": "Estimate truck sales as a share of GDP.",
+   "formula": "china_gdp_2024 * truck_sales_per_gdp",
+   "output_unit": "trucks",
+   "issues": [],
+   "uses": [
+    "china_gdp_2024",
+    "truck_sales_per_gdp"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 783283.072761412,
+   "p10": 552629.8718319965,
+   "p90": 1109120.7287308073,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": -0.06318870382431019
+  },
+  {
+   "id": "p2",
+   "method": "bottom_up",
+   "description": "Project 2024 sales from 2023 sales using a growth factor.",
+   "formula": "truck_sales_2023 * growth_factor",
+   "output_unit": "trucks",
+   "issues": [],
+   "uses": [
+    "growth_factor",
+    "truck_sales_2023"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 950133.940236952,
+   "p10": 844574.0362749024,
+   "p90": 1066928.7687213798,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": 0.02067738693940614
+  },
+  {
+   "id": "p3",
+   "method": "proxy",
+   "description": "Scale from per-capita truck sales.",
+   "formula": "china_population_2024 * truck_sales_per_capita",
+   "output_unit": "trucks",
+   "issues": [],
+   "uses": [
+    "china_population_2024",
+    "truck_sales_per_capita"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 905956.7081938625,
+   "p10": 775286.0897312205,
+   "p90": 1058430.2856823676,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": 1.9286549331065737e-16
+  }
+ ],
+ "errors": [],
+ "warnings": [],
+ "mc": {
+  "samples": 20000,
+  "seed": "20261015:demo_cn_hdt_2024",
+  "input_distribution": "lognormal, low/high = P10/P90"
+ },
+ "result": {
+  "central": 905956.7081938621,
+  "p10": 673383.950954597,
+  "p90": 1072319.985890842,
+  "unit": "",
+  "n_valid_paths": 3,
+  "outliers": [],
+  "path_spread_oom": 0.0838660907637161
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "target",
+    "kind": "target",
+    "label": "target",
+    "status": "estimated",
+    "definition": "Number of heavy-duty trucks sold in China in calendar year 2024",
+    "unit": "",
+    "central": 905956.7081938621,
+    "p10": 673383.950954597,
+    "p90": 1072319.985890842,
+    "n_valid_paths": 3,
+    "outliers": []
+   },
+   {
+    "id": "path:p1",
+    "kind": "path",
+    "label": "p1 top_down",
+    "status": "valid",
+    "method": "top_down",
+    "description": "Estimate truck sales as a share of GDP.",
+    "formula": "china_gdp_2024 * truck_sales_per_gdp",
+    "output_unit": "trucks",
+    "issues": [],
+    "median": 783283.072761412,
+    "p10": 552629.8718319965,
+    "p90": 1109120.7287308073,
+    "log10_vs_central": -0.06318870382431019,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p2",
+    "kind": "path",
+    "label": "p2 bottom_up",
+    "status": "valid",
+    "method": "bottom_up",
+    "description": "Project 2024 sales from 2023 sales using a growth factor.",
+    "formula": "truck_sales_2023 * growth_factor",
+    "output_unit": "trucks",
+    "issues": [],
+    "median": 950133.940236952,
+    "p10": 844574.0362749024,
+    "p90": 1066928.7687213798,
+    "log10_vs_central": 0.02067738693940614,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p3",
+    "kind": "path",
+    "label": "p3 proxy",
+    "status": "valid",
+    "method": "proxy",
+    "description": "Scale from per-capita truck sales.",
+    "formula": "china_population_2024 * truck_sales_per_capita",
+    "output_unit": "trucks",
+    "issues": [],
+    "median": 905956.7081938625,
+    "p10": 775286.0897312205,
+    "p90": 1058430.2856823676,
+    "log10_vs_central": 1.9286549331065737e-16,
+    "n_dependents": 1
+   },
+   {
+    "id": "input:china_gdp_2024",
+    "kind": "input",
+    "label": "china_gdp_2024",
+    "status": "assumption",
+    "description": "China's nominal GDP in 2024",
+    "value": 18500000000000.0,
+    "low": 17500000000000.0,
+    "high": 19500000000000.0,
+    "unit": "USD",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Approximate 2024 nominal GDP based on recent growth trends and exchange rates."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0,
+    "sensitivity_path_max": 0.046996562676222986
+   },
+   {
+    "id": "input:truck_sales_per_gdp",
+    "kind": "input",
+    "label": "truck_sales_per_gdp",
+    "status": "assumption",
+    "description": "Heavy-duty truck sales per unit of GDP in China",
+    "value": 4.5e-08,
+    "low": 3e-08,
+    "high": 6e-08,
+    "unit": "trucks/USD",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Derived from historical ratio: ~900k trucks sold in 2023 with GDP ~17.8T USD, giving ~5e-8; adjusted for 2024."
+    },
+    "issues": [],
+    "count_nouns": [
+     "trucks"
+    ],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.020385886337879633,
+    "sensitivity_path_max": 0.30102999566398125
+   },
+   {
+    "id": "input:truck_sales_2023",
+    "kind": "input",
+    "label": "truck_sales_2023",
+    "status": "sourced_unverified",
+    "description": "Heavy-duty truck sales in China in 2023",
+    "value": 910000,
+    "low": 850000,
+    "high": 970000,
+    "unit": "trucks",
+    "provenance": {
+     "type": "sourced",
+     "source": "China Association of Automobile Manufacturers (CAAM)",
+     "url": "",
+     "quote": "China's heavy truck sales reached 910,000 units in 2023."
+    },
+    "issues": [],
+    "count_nouns": [
+     "trucks"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.008290517938096542,
+    "sensitivity_path_max": 0.05735280855195235
+   },
+   {
+    "id": "input:growth_factor",
+    "kind": "input",
+    "label": "growth_factor",
+    "status": "assumption",
+    "description": "Year-over-year growth factor for heavy-duty truck sales from 2023 to 2024",
+    "value": 1.05,
+    "low": 0.95,
+    "high": 1.15,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Expected modest growth due to economic recovery and infrastructure spending, but with uncertainty."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.021101231194502468,
+    "sensitivity_path_max": 0.0829742350647642
+   },
+   {
+    "id": "input:truck_sales_per_capita",
+    "kind": "input",
+    "label": "truck_sales_per_capita",
+    "status": "assumption",
+    "description": "Heavy-duty truck sales per capita in China",
+    "value": 0.00065,
+    "low": 0.00055,
+    "high": 0.00075,
+    "unit": "trucks/person",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Based on ~900k trucks and 1.4B population, giving ~0.00064; adjusted for 2024."
+    },
+    "issues": [],
+    "count_nouns": [
+     "trucks",
+     "person"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.08313347023543916,
+    "sensitivity_path_max": 0.134698573897456
+   },
+   {
+    "id": "input:china_population_2024",
+    "kind": "input",
+    "label": "china_population_2024",
+    "status": "assumption",
+    "description": "Population of China in 2024",
+    "value": 1410000000.0,
+    "low": 1400000000.0,
+    "high": 1420000000.0,
+    "unit": "people",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Recent population estimates from UN and Chinese statistics."
+    },
+    "issues": [],
+    "count_nouns": [
+     "people"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.00616030870481854,
+    "sensitivity_path_max": 0.00616030870481854
+   }
+  ],
+  "edges": [
+   {
+    "source": "path:p1",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:china_gdp_2024",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:truck_sales_per_gdp",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p2",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:growth_factor",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:truck_sales_2023",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p3",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:china_population_2024",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:truck_sales_per_capita",
+    "target": "path:p3",
+    "kind": "used_by"
+   }
+  ]
+ }
+}

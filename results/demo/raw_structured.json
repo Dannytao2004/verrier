@@ -1,0 +1,118 @@
+{
+ "qid": "demo_cn_hdt_2024",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of heavy-duty trucks sold in China in calendar year 2024",
+     "unit": "trucks"
+    },
+    "inputs": [
+     {
+      "name": "china_gdp_2024",
+      "description": "China's nominal GDP in 2024",
+      "value": 18500000000000.0,
+      "low": 17500000000000.0,
+      "high": 19500000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Approximate 2024 nominal GDP based on recent growth trends and exchange rates."
+      }
+     },
+     {
+      "name": "truck_sales_per_gdp",
+      "description": "Heavy-duty truck sales per unit of GDP in China",
+      "value": 4.5e-08,
+      "low": 3e-08,
+      "high": 6e-08,
+      "unit": "trucks/USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Derived from historical ratio: ~900k trucks sold in 2023 with GDP ~17.8T USD, giving ~5e-8; adjusted for 2024."
+      }
+     },
+     {
+      "name": "truck_sales_2023",
+      "description": "Heavy-duty truck sales in China in 2023",
+      "value": 910000,
+      "low": 850000,
+      "high": 970000,
+      "unit": "trucks",
+      "provenance": {
+       "type": "sourced",
+       "source": "China Association of Automobile Manufacturers (CAAM)",
+       "url": "",
+       "quote": "China's heavy truck sales reached 910,000 units in 2023."
+      }
+     },
+     {
+      "name": "growth_factor",
+      "description": "Year-over-year growth factor for heavy-duty truck sales from 2023 to 2024",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Expected modest growth due to economic recovery and infrastructure spending, but with uncertainty."
+      }
+     },
+     {
+      "name": "truck_sales_per_capita",
+      "description": "Heavy-duty truck sales per capita in China",
+      "value": 0.00065,
+      "low": 0.00055,
+      "high": 0.00075,
+      "unit": "trucks/person",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Based on ~900k trucks and 1.4B population, giving ~0.00064; adjusted for 2024."
+      }
+     },
+     {
+      "name": "china_population_2024",
+      "description": "Population of China in 2024",
+      "value": 1410000000.0,
+      "low": 1400000000.0,
+      "high": 1420000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent population estimates from UN and Chinese statistics."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate truck sales as a share of GDP.",
+      "formula": "china_gdp_2024 * truck_sales_per_gdp",
+      "output_unit": "trucks"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Project 2024 sales from 2023 sales using a growth factor.",
+      "formula": "truck_sales_2023 * growth_factor",
+      "output_unit": "trucks"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from per-capita truck sales.",
+      "formula": "china_population_2024 * truck_sales_per_capita",
+      "output_unit": "trucks"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

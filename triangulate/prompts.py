@@ -38,6 +38,7 @@ Rules for paths:
 
 Rules for inputs:
 - 0 < low <= value <= high. low and high are your honest 80% interval (10th and 90th percentiles); make it wide when unsure. A number stated in the question is used with low = value = high.
+- Every input must be positive. A quantity that can be negative or zero (a growth rate, a change) must be written as a positive factor instead, for example growth_factor = 1.05 with low = 0.95 and high = 1.15.
 - Units: use standard symbols (m, km, kg, t for metric tonne, s, h, day, year, L, J, W, USD, %, ...). Counted things (people, trucks, cups) may appear as unit words; they are treated as dimensionless. A rate over time keeps its time unit (for example "trucks/year"); if the target is a total over a period, add the period length as an input (for example period_length = 1 year) so that the time unit cancels. Write plain numbers such as 3.2e6 rather than scale words.
 - You have no search tool and no documents. Use "sourced" only if you can name a specific publication or dataset you remember; it will be treated as unverified. Otherwise use "assumption" with a one-line rationale. Most inputs will be assumptions: label them honestly.
 - Do not include the numeric result of any path or of the target."""

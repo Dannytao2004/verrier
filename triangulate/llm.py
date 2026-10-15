@@ -13,11 +13,17 @@ from datetime import datetime, timezone
 from .config import API_URL, CALLS, MODEL, read_key, usd_cost
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
+TOTAL_TIMEOUT_S = 1200
 _LOG_LOCK = threading.Lock()
 
 
 class KeyRejected(RuntimeError):
     pass
+
+
+class TransportError(RuntimeError):
+    """服务端没给出可解析的回复（超时、5xx、空 body）。不算模型的输出问题，不占用「输出无效重试一次」的名额；
+    runner 不保存这道题，之后再跑 run 会补上。"""
 
 
 class LLM:
@@ -27,8 +33,8 @@ class LLM:
         self._key = read_key()
 
     def json_call(self, messages: list, *, arm: str, qid: str, attempt: int, max_tokens: int = 4000):
-        """返回 (parsed_dict_or_None, raw_text, error_or_None)。HTTP 层面的瞬时错误内部重试最多 3 次；
-        这和「输出无效时重试一次」是两回事，后者由调用方决定。"""
+        """返回 (parsed_dict_or_None, raw_text, error_or_None)，error 只表示模型输出本身的问题。
+        传输层失败（超时、5xx、空 body）内部重试最多 3 次，仍失败则抛 TransportError。"""
         payload = {"model": self.model, "messages": messages,
                    "thinking": {"type": "disabled"}, "response_format": {"type": "json_object"},
                    "temperature": 0, "max_tokens": max_tokens, "stream": False}
@@ -40,8 +46,7 @@ class LLM:
             req = urllib.request.Request(API_URL, data=body, method="POST", headers={
                 "Content-Type": "application/json", "Authorization": f"Bearer {self._key}"})
             try:
-                with urllib.request.urlopen(req, timeout=180) as r:
-                    status, raw = r.status, r.read()
+                status, raw = self._post(req)
             except urllib.error.HTTPError as e:
                 status, raw = e.code, b""
             except (urllib.error.URLError, TimeoutError, OSError) as e:
@@ -66,7 +71,19 @@ class LLM:
                 choice = data["choices"][0]
                 usage = data.get("usage") or {}
             except (ValueError, KeyError, IndexError, TypeError):
-                rec.update(ok=False, error="bad_response_body")
+                # 只记诊断信息：长度、顶层键、服务端 error.message（不含回复内容，也不含 key）
+                rec.update(ok=False, error="bad_response_body", body_bytes=len(raw), body_head_is_ws=raw[:1].isspace())
+                try:
+                    d = json.loads(raw)
+                    rec["body_keys"] = sorted(d)[:10] if isinstance(d, dict) else type(d).__name__
+                    if isinstance(d, dict) and isinstance(d.get("error"), dict):
+                        rec["server_error"] = str(d["error"].get("message", ""))[:200]
+                except ValueError:
+                    rec["body_keys"] = "not_json"
+                if http_try < 3:
+                    self._log(dict(rec, will_retry=True))
+                    time.sleep(5 * http_try)
+                    continue
                 break
             rec.update(finish_reason=choice.get("finish_reason"),
                        prompt_tokens=usage.get("prompt_tokens", 0),
@@ -93,7 +110,23 @@ class LLM:
             self._log(rec)
             return out, text, None
         self._log(rec)
-        return None, "", rec.get("error", "request failed")
+        raise TransportError(f"{arm} {qid} attempt {attempt}: {rec.get('error', 'request failed')}")
+
+    @staticmethod
+    def _post(req, sock_timeout: float = 180, total_timeout: float = TOTAL_TIMEOUT_S):
+        """服务端排队时会先回 200 头，再每隔约 60 秒发一个换行保活，最后才给 body。
+        socket 超时管单次读，total_timeout 管整次请求。"""
+        t0 = time.time()
+        with urllib.request.urlopen(req, timeout=sock_timeout) as r:
+            chunks = []
+            while True:
+                c = r.read1(65536)
+                if not c:
+                    break
+                chunks.append(c)
+                if time.time() - t0 > total_timeout:
+                    raise TimeoutError(f"request exceeded {total_timeout}s")
+            return r.status, b"".join(chunks)
 
     def _log(self, rec: dict):
         self.calls_path.parent.mkdir(parents=True, exist_ok=True)

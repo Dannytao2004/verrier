@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from .arms import run_naive, run_structured
 from .config import MAX_CONCURRENCY
 from .data import load_backtest
-from .llm import LLM, KeyRejected
+from .llm import LLM, KeyRejected, TransportError
 from .report import DEMO, DEMO_RAW, raw_path
 
 
@@ -28,7 +28,11 @@ def run_backtest(force: bool = False, limit: int | None = None):
         try:
             for fut in as_completed(futs):
                 arm, qid = futs[fut]
-                rec = fut.result()
+                try:
+                    rec = fut.result()
+                except TransportError as e:
+                    print(f"[skip] {e} -- not saved; run again to retry", flush=True)
+                    continue
                 _save(raw_path(arm, qid), rec)
                 done += 1
                 last = rec["attempts"][-1]
