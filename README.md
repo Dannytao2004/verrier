@@ -31,6 +31,25 @@ The DeepSeek key is read at run time from the file in `TRIANGULATE_KEY_FILE` (de
 
 `run` and `demo` skip questions that already have saved replies. Use `--force` to call the model again (this costs money and changes results).
 
+## Web UI (local)
+
+```
+.venv/Scripts/python.exe -m triangulate serve               # http://127.0.0.1:8770/ (binds 127.0.0.1 only)
+.venv/Scripts/python.exe -m triangulate serve --port 8771   # another port
+```
+
+Browsing saved runs works offline. Starting a run needs the key file (`TRIANGULATE_KEY_FILE`) and network; set the variable in the environment of the server process. Code: `triangulate/web/` (FastAPI, `static/` is plain HTML + JS, no build step).
+
+| page | shows |
+|---|---|
+| 新问题 (`#/`) | form: question + optional as_of (empty = today, live use; earlier date = backtest mode). The run plans, then stops for approval. At most 2 unfinished runs per server. |
+| run progress (`#/run/<id>`) | status (planning / awaiting_approval / running / done / failed / cancelled), elapsed time, dollars spent (tokens + assumed search fee), the pinned target, the proposed directions with checkboxes (unchecked ones are dropped through the existing resume-with-directions path), per-direction progress (searching / fetching n pages / extracting / done: k points kept), judge rounds, input audit and repair, compute, final; cancel button. Results go to `results/agent/<qid>/web_<UTC time>/`. Runs live in server memory; after a restart only the saved files remain. |
+| 已保存的运行 (`#/saved`) | every `results/agent/**/state.json` (backtests, `--ask`, web runs) by question id and tag |
+| result (`#/result?qid=&tag=`) | estimate and 80% interval; final answer; "证据 vs 假设" (assumption share, warning above 50%); methods (formula, each input with its role and the evidence it points to, estimate, weight, errors incl. input-audit exclusions and repair rounds); assumptions (value, judge range, range used after widening, rationale, applies_when, falsified_by, used by); kept / discarded evidence with source and Wayback snapshot links; leakage audit; links to `graph.html` and `ledger.md`. Official value and error only for backtest questions. |
+| 回测 (`#/backtests`) | development set (Yellowstone Aug/Sep at v21b, JNTO and Korea at v21d) and held-out test (test1): official value, agent estimate, % error, interval, coverage, assumption share, and the naive / no-retrieval structured / last-year baselines |
+
+Assumption share (read-only, computed from the saved state, never written back): for each `formula_mc` method, sigma_ln = ln(P90/P10) / (2 x 1.2816) per sampled input; share = sum of assumption sigma_ln^2 / sum over all sampled inputs; series methods count 0; overall = weight average over the methods that produced an estimate. It is an exact log-variance split only for pure products / ratios with each input used once; with sums, `mean()` or powers it is an approximation.
+
 ## Layout
 
 | path | content |
