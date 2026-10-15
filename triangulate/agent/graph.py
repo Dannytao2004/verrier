@@ -48,6 +48,35 @@ def _clean_direction(d: dict, i: int, prefix: str) -> dict:
             "search_hints": [str(h)[:120] for h in (d.get("search_hints") or [])][:4]}
 
 
+_NUM_TOKEN = re.compile(r"\d(?:[\d,.]*\d)?%?")
+_YEAR_CONTEXT = re.compile(r"(?:\b(?:in|since|of|from|to|during|until|by|for|between|and|or|through|before|after|year|years|"
+                           r"fiscal|fy|jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|"
+                           r"june|july|august|september|october|november|december)\.?|[,(/-])\s*$", re.I)
+
+
+def scrub_digits(text: str, as_of_year: int, keep_ids=frozenset()) -> tuple:
+    """把模型自己写的数字换成 [n]，返回 (文字, 替换个数)。保留：年份上下文里（in / since / 月份名 / 逗号 ... 后面）、
+    离 as_of 不超过 10 年的四位年份；紧跟字母的已知方法 id（m1、m2）。其余一律替换，包括 [800,000、USD900,000、about900k。"""
+    out, n, pos = [], 0, 0
+    for m in _NUM_TOKEN.finditer(text):
+        tok, s0 = m.group(), m.start()
+        prev = text[s0 - 1] if s0 else ""
+        keep = False
+        if re.fullmatch(r"(?:19|20)\d{2}", tok) and abs(int(tok) - as_of_year) <= 10 and not prev.isalnum():
+            keep = bool(_YEAR_CONTEXT.search(text[max(0, s0 - 16):s0]))
+        elif prev.isalpha() and re.fullmatch(r"\d+", tok):
+            j = s0
+            while j > 0 and text[j - 1].isalpha():
+                j -= 1
+            keep = text[j:m.end()] in keep_ids
+        if keep:
+            continue
+        out.append(text[pos:s0] + "[n]")
+        pos, n = m.end(), n + 1
+    out.append(text[pos:])
+    return "".join(out), n
+
+
 def _fmt_num(v):
     if v is None or not isinstance(v, (int, float)) or not math.isfinite(v):
         return "n/a"
@@ -109,7 +138,11 @@ def build(ctx: Context):
         return {"results": [run_direction(ctx, task["target"], task["direction"], task["round"])]}
 
     def markets(task: dict):
-        rec = search_markets(task.get("keywords") or [], ctx.as_of)
+        try:
+            rec = search_markets(task.get("keywords") or [], ctx.as_of)
+        except Exception as e:  # noqa: BLE001  外部接口出任何意外都不能让整题崩掉
+            rec = {"keywords": task.get("keywords") or [], "markets": [], "points": [],
+                   "note": f"markets tool error {type(e).__name__}: {e}"[:200]}
         for p in rec["points"]:
             p.update(direction_id="markets", round=1, order=(0, 0), keep=True)
         return {"results": [{"direction_id": "markets", "round": 1, "markets": rec, "points": rec["points"],
@@ -177,7 +210,7 @@ def build(ctx: Context):
         comp = state.get("compute") or {}
         r = comp.get("result") or {}
         ph = {"estimate": _fmt_num(r.get("central")), "p10": _fmt_num(r.get("p10")), "p90": _fmt_num(r.get("p90")),
-              "interval_basis": str(r.get("basis", "")).replace("_", " "),
+              "interval_level": "80%", "interval_basis": str(r.get("basis", "")).replace("_", " "),
               "n_points_kept": str(sum(1 for p in state.get("points") or [] if p.get("keep"))),
               "n_methods": str(sum(1 for m in comp.get("methods") or [] if m.get("estimate")))}
         summary = []
@@ -190,7 +223,7 @@ def build(ctx: Context):
             summary.append(f"- {m['id']} {m['method']}: estimate {ph[f'{mid}_estimate']}, weight {ph[f'{mid}_weight']}, "
                            f"backtest mean error {ph[f'{mid}_backtest_error']}, error: {m.get('error', '')}; {m.get('rationale', '')}")
         summary.insert(0, f"combined estimate {ph['estimate']}, 80% interval {ph['p10']} to {ph['p90']} (basis: {ph['interval_basis']})")
-        default = ("Estimate: [[estimate]] (80% interval [[p10]] to [[p90]], basis: [[interval_basis]]), "
+        default = ("Estimate: [[estimate]] ([[interval_level]] interval [[p10]] to [[p90]], basis: [[interval_basis]]), "
                    "from [[n_methods]] method(s) over [[n_points_kept]] kept data points.")
         text, model_text, digits_removed, err = default, None, 0, None
         if r.get("central") is not None and not b.aborted:
@@ -202,13 +235,17 @@ def build(ctx: Context):
             except BudgetExceeded as e:
                 err = str(e)
         if isinstance(model_text, str) and model_text.strip():
-            # 模型不许写数字：占位符以外的数字（四位年份除外）一律换成 [n]
-            parts = PLACEHOLDER.split(model_text)
-            for i in range(0, len(parts), 2):
-                cleaned, n = re.subn(r"(?<![\w\[])(?!(?:19|20)\d{2}\b)\d[\d,.]*%?", "[n]", parts[i])
-                parts[i], digits_removed = cleaned, digits_removed + n
-            text = "".join(p if i % 2 == 0 else f"[[{p}]]" for i, p in enumerate(parts))
-        rendered = PLACEHOLDER.sub(lambda m: ph.get(m.group(1), "[unknown placeholder]"), text)
+            text = model_text
+        # 模型不许写数字：占位符以外的数字一律换成 [n]（只留年份上下文里、离 as_of 不超过 10 年的四位年份和方法 id）。
+        # 渲染按切分后的片段拼，不再对拼好的文字重新找占位符，"[" + "[n]" + "]" 不会被当成占位符。
+        parts = PLACEHOLDER.split(text)
+        year = int(state["as_of"][:4])
+        mids = {m["id"] for m in comp.get("methods") or []}
+        for i in range(0, len(parts), 2):
+            parts[i], n = scrub_digits(parts[i], year, mids)
+            digits_removed += n
+        text = "".join(p if i % 2 == 0 else f"[[{p}]]" for i, p in enumerate(parts))
+        rendered = "".join(p if i % 2 == 0 else ph.get(p, "[unknown placeholder]") for i, p in enumerate(parts))
         if r.get("central") is None:
             rendered = "No estimate: no estimation method could be computed from the verified evidence."
         return {"final": {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,

@@ -1,5 +1,6 @@
 """Agent MVP 的代码部分：URL 解析、快照选择、quote 核对、数字解析、哨兵、日期过滤、方法库、加权与区间、图的连线。
 需要 .venv（langgraph）；没有装时整组跳过。"""
+import json
 import math
 import unittest
 from datetime import date
@@ -440,6 +441,79 @@ class TestFetchLeakRules(unittest.TestCase):
                 mock.patch.object(self.F.net, "get", lambda *a, **k: (200, html, {"Content-Type": "text/html"}, ok)):
             rec = self.F.fetch_page("https://a.org/x", date(2026, 9, 6), "t", today=date(2026, 10, 15))
         self.assertEqual(rec["status"], "snapshot")
+
+
+class TestBudgetHold(unittest.TestCase):
+    def test_in_flight_calls_are_reserved(self):
+        from triangulate.agent import pipeline as P
+        b = P.Budget(usd=1.00)
+        with b.hold(0.5):
+            with b.hold(0.4):
+                with self.assertRaises(P.BudgetExceeded):  # 0.5 + 0.4 在途，再要 0.2 就超
+                    with b.hold(0.2):
+                        pass
+        self.assertAlmostEqual(b.reserved, 0.0)
+
+    def test_reservation_released_and_actual_kept(self):
+        from triangulate.agent import pipeline as P
+        b = P.Budget(usd=1.00)
+        with b.hold(b.search_reserve()):
+            b.add({"usd": 0.007, "usd_search_fee_assumed": 0.04})
+        self.assertAlmostEqual(b.usd, 0.047)
+        self.assertAlmostEqual(b.reserved, 0.0)
+        self.assertGreaterEqual(b.search_reserve(), 0.068)  # 实测单次搜索最高 $0.068
+
+    def test_directions_follow_budget(self):
+        from triangulate.agent import pipeline as P
+        self.assertEqual(P.Budget().directions, 10)                      # 40 页 / 每方向 4 页；$1 x 60% / $0.06
+        self.assertEqual(P.Budget(usd=0.30).directions, 3)
+        self.assertEqual(P.Budget(round1_pages=80, usd=5.0).directions, 16)  # 硬上限
+
+
+class TestMarketsGarbage(unittest.TestCase):
+    def test_bad_bodies_do_not_raise(self):
+        from triangulate.agent import markets as MK
+        from triangulate.agent import net
+        events = [{"markets": [{"question": "a b c", "createdAt": "2026-01-01T00:00:00Z", "clobTokenIds": "[\"1\"]",
+                                "outcomes": "[\"Yes\"]", "slug": "s"}, "junk"]}, "junk"]
+        cases = [
+            lambda u, **k: (200, b"<html>maintenance</html>", {}, u),
+            lambda u, **k: (200, b"[1, 2]", {}, u),
+            lambda u, **k: ((200, json.dumps({"events": events}).encode(), {}, u) if "gamma" in u
+                            else (200, json.dumps({"history": [{"t": "1786000000", "p": 0.4}, {"t": "x"}, {"p": 2}]}).encode(), {}, u)),
+            lambda u, **k: ((200, json.dumps({"events": events}).encode(), {}, u) if "gamma" in u else (200, b"not json", {}, u)),
+        ]
+        for fake in cases:
+            with mock.patch.object(net, "get", fake):
+                rec = MK.search_markets(["a", "b"], date(2026, 8, 15))
+            self.assertIsInstance(rec["points"], list)
+        self.assertEqual(rec["points"], [])
+
+    def test_string_timestamps_are_parsed(self):
+        from triangulate.agent import markets as MK
+        from triangulate.agent import net
+        events = [{"markets": [{"question": "a b c", "createdAt": "2026-01-01T00:00:00Z", "clobTokenIds": "[\"1\"]",
+                                "outcomes": "[\"Yes\"]", "slug": "s"}]}]
+
+        def fake(u, **k):
+            if "gamma" in u:
+                return 200, json.dumps({"events": events}).encode(), {}, u
+            return 200, json.dumps({"history": [{"t": "1786000000", "p": "0.4"}]}).encode(), {}, u
+        with mock.patch.object(net, "get", fake):
+            rec = MK.search_markets(["a", "b"], date(2026, 8, 15))
+        self.assertEqual([p["value"] for p in rec["points"]], [0.4])
+
+
+class TestFinalScrub(unittest.TestCase):
+    def test_model_digits_replaced(self):
+        from triangulate.agent.graph import scrub_digits
+        self.assertEqual(scrub_digits("My own range is [800,000, 900,000].", 2026)[0], "My own range is [[n], [n]].")
+        self.assertEqual(scrub_digits("USD900,000 or about900k", 2026)[0], "USD[n] or about[n]k")
+        self.assertEqual(scrub_digits("Roughly 2050 employees", 2026)[0], "Roughly [n] employees")
+        self.assertEqual(scrub_digits("Roughly 2030 employees", 2026)[0], "Roughly [n] employees")
+        t, n = scrub_digits("In August 2025, m1 used values from 2021, 2023 and 2024", 2026, {"m1"})
+        self.assertEqual((t, n), ("In August 2025, m1 used values from 2021, 2023 and 2024", 0))
+        self.assertEqual(scrub_digits("it used 2021", 2026)[1], 1)  # 没有年份上下文就替换（宁可多换）
 
 
 if __name__ == "__main__":

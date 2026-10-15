@@ -2,13 +2,15 @@
 import json
 import threading
 import time
+from contextlib import contextmanager
 from datetime import date
 
+from ..config import MODEL, PRICES
 from ..llm import LLM, TransportError
 from . import evidence as ev
 from .fetch import fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
-from .search import Searcher
+from .search import SEARCH_FEE_ASSUMED_USD, Searcher
 
 MAX_CHARS_TO_EXTRACTOR = 24_000
 QUOTE_STORE_CHARS = 200
@@ -19,15 +21,27 @@ class BudgetExceeded(RuntimeError):
 
 
 class Budget:
-    """每题的硬上限。USD 包括 token 成本和按假设单价记的搜索费；超了就抛 BudgetExceeded，各节点据此干净收尾。"""
+    """每题的上限。USD 包括 token 成本和按假设单价记的搜索费。
+    每次调用前在锁里按「最坏情况」预扣（hold），调用结束后退回预扣、只留实际花费；已花 + 在途预扣 + 这次预扣
+    超过上限就不发这次调用（抛 BudgetExceeded，各节点据此干净收尾）。预扣按上限估：LLM 按输入字符数 / 2 个 token
+    和 max_tokens 个输出 token、峰时价；搜索按 token 上限加 (2 x max_uses + 2) 次搜索费（实测最多 6 次 / max_uses 3）。
+    方向数不写死，由页面和美元预算推出来（max_directions）。"""
 
-    def __init__(self, usd: float = 1.00, pages: int = 40, round1_pages: int = 32, llm_concurrency: int = 8,
-                 directions: int = 8, extra_directions: int = 3, urls_per_direction: int = 5, search_max_uses: int = 3):
+    # 规划方向数用的「一个方向的典型花费」：实测搜索中位 $0.047（含假设的搜索费）+ 4 次抽取约 $0.006 + 挑页 $0.002
+    TYPICAL_DIRECTION_USD = 0.06
+    ROUND1_USD_SHARE = 0.6   # 第一轮方向最多用掉上限的 60%，其余留给 base-rate 方向、裁判、终稿
+
+    def __init__(self, usd: float = 1.00, pages: int = 48, round1_pages: int = 40, llm_concurrency: int = 8,
+                 extra_directions: int = 3, urls_per_direction: int = 4, search_max_uses: int = 3,
+                 max_directions_hard: int = 16):
         self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages
-        self.directions, self.extra_directions = directions, extra_directions
+        self.extra_directions = extra_directions
         self.urls_per_direction, self.search_max_uses = urls_per_direction, search_max_uses
+        self.directions = max(1, min(max_directions_hard, round1_pages // urls_per_direction,
+                                     int(self.ROUND1_USD_SHARE * usd / self.TYPICAL_DIRECTION_USD)))
         self.usd_tokens = 0.0
         self.usd_search_fee = 0.0
+        self.reserved = 0.0
         self.pages_used = 0
         self.n_calls = 0
         self.aborted = ""
@@ -46,10 +60,29 @@ class Budget:
             if self.usd > self.usd_cap and not self.aborted:
                 self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"
 
-    def check(self, reserve: float = 0.0):
-        if self.aborted or self.usd + reserve > self.usd_cap:
-            self.aborted = self.aborted or f"usd cap {self.usd_cap} would be exceeded"
-            raise BudgetExceeded(self.aborted)
+    @contextmanager
+    def hold(self, amount: float):
+        """预扣 amount；已花 + 在途预扣 + amount 超过上限就抛 BudgetExceeded。退出时退回预扣（实际花费已由 add 记入）。"""
+        with self._lock:
+            if self.aborted or self.usd + self.reserved + amount > self.usd_cap:
+                self.aborted = self.aborted or (f"usd cap {self.usd_cap} would be exceeded "
+                                                f"(spent {self.usd:.4f} + in flight {self.reserved:.4f} + {amount:.4f})")
+                raise BudgetExceeded(self.aborted)
+            self.reserved += amount
+        try:
+            yield
+        finally:
+            with self._lock:
+                self.reserved -= amount
+
+    @staticmethod
+    def llm_reserve(prompt_chars: int, max_tokens: int) -> float:
+        hit, miss, out = PRICES.get(MODEL, PRICES["deepseek-flash"])["peak"]
+        return (prompt_chars / 2 * miss + max_tokens * out) / 1e6
+
+    def search_reserve(self) -> float:
+        hit, miss, out = PRICES.get(MODEL, PRICES["deepseek-flash"])["peak"]
+        return (30_000 * miss + 2048 * out) / 1e6 + (2 * self.search_max_uses + 2) * SEARCH_FEE_ASSUMED_USD
 
     def reserve_page(self, round_no: int) -> bool:
         cap = self.round1_pages if round_no == 1 else self.pages_cap
@@ -66,8 +99,9 @@ class Budget:
     def snapshot(self):
         return {"usd_total_assumed": round(self.usd, 4), "usd_tokens": round(self.usd_tokens, 4),
                 "usd_search_fee_assumed": round(self.usd_search_fee, 4), "usd_cap": self.usd_cap,
-                "pages_used": self.pages_used, "pages_cap": self.pages_cap, "n_calls_logged": self.n_calls,
-                "aborted": self.aborted}
+                "pages_used": self.pages_used, "pages_cap": self.pages_cap, "round1_pages": self.round1_pages,
+                "max_directions": self.directions, "urls_per_direction": self.urls_per_direction,
+                "n_calls_logged": self.n_calls, "aborted": self.aborted}
 
 
 class AgentLLM(LLM):
@@ -87,8 +121,8 @@ class AgentLLM(LLM):
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         err = None
         for attempt in range(1, tries + 1):
-            self.budget.check(reserve=0.01)
-            with self.budget.sem:
+            need = Budget.llm_reserve(sum(len(m["content"]) for m in msgs), max_tokens)
+            with self.budget.hold(need), self.budget.sem:
                 try:
                     out, text, err = self.json_call(msgs, arm=role, qid=qid, attempt=attempt, max_tokens=max_tokens)
                 except TransportError as e:
@@ -155,12 +189,11 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
     b = ctx.budget
     out = {"direction_id": d["id"], "round": round_no, "search": {}, "pages": [], "points": [], "dropped_points": []}
     try:
-        b.check(reserve=0.05)
         prompt = SEARCH_USER.format(cap=b.urls_per_direction, as_of=ctx.as_of_s,
                                     hints="; ".join(map(str, d.get("search_hints") or []))[:400],
                                     **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end", "publisher")},
                                     **{k: str(d.get(k, ""))[:600] for k in ("category", "perspective", "hypothesis", "data_to_find")})
-        with b.sem:
+        with b.hold(b.search_reserve()), b.sem:
             s = ctx.searcher.search(prompt, role=f"search:{d['id']}", qid=ctx.qid, max_uses=b.search_max_uses,
                                     cap=b.urls_per_direction)
         out["search"] = s
@@ -183,7 +216,6 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
                 continue
             sent = text[:MAX_CHARS_TO_EXTRACTOR]
             page.update(chars_sent=len(sent), truncated=len(text) > len(sent))
-            b.check(reserve=0.01)
             res, err = ctx.llm.ask(EXTRACT_SYSTEM, EXTRACT_USER.format(
                 text=sent, **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end")},
                 hypothesis=str(d.get("hypothesis", ""))[:600], data_to_find=str(d.get("data_to_find", ""))[:600]),

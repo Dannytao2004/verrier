@@ -14,10 +14,29 @@ GAMMA = "https://gamma-api.polymarket.com/public-search"
 CLOB = "https://clob.polymarket.com/prices-history"
 
 
+def _json(body):
+    """外部接口的 body：解析失败返回 None，不抛异常。"""
+    try:
+        return json.loads(body)
+    except (ValueError, TypeError):
+        return None
+
+
+def _price_point(h):
+    """CLOB history 的一项 -> (t:int, p:float) 或 None（字段缺失、类型不对、价格不在 [0, 1]）。"""
+    if not isinstance(h, dict):
+        return None
+    try:
+        t, p = int(float(h["t"])), float(h["p"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    return (t, p) if 0.0 <= p <= 1.0 else None
+
+
 def _created(m: dict):
     for k in ("createdAt", "startDate"):
         v = m.get(k)
-        if v:
+        if isinstance(v, str) and v:
             try:
                 return datetime.fromisoformat(v.replace("Z", "+00:00")).date()
             except ValueError:
@@ -28,9 +47,11 @@ def _created(m: dict):
 def match_markets(events: list, keywords: list, as_of: date, cap: int = 3) -> list:
     kws = [k.lower() for k in keywords if k and k.strip()]
     out = []
-    for e in events or []:
-        for m in e.get("markets") or []:
-            q = (m.get("question") or "").lower()
+    for e in events if isinstance(events, list) else []:
+        for m in (e.get("markets") if isinstance(e, dict) else None) or []:
+            if not isinstance(m, dict):
+                continue
+            q = str(m.get("question") or "").lower()
             c = _created(m)
             if kws and all(k in q for k in kws) and c is not None and c <= as_of:
                 out.append(m)
@@ -54,17 +75,19 @@ def search_markets(keywords: list, as_of: date) -> dict:
     if status != 200:
         rec["note"] = f"gamma search http {status}"
         return rec
-    events = (json.loads(body) or {}).get("events") or []
+    d = _json(body)
+    if not isinstance(d, dict):
+        rec["note"] = "gamma search returned a non-JSON or non-object body"
+        return rec
+    events = d.get("events") if isinstance(d.get("events"), list) else []
     found = match_markets(events, keywords, as_of)
     rec["n_events_returned"] = len(events)
     end_ts = int(datetime.combine(as_of, time(23, 59, 59), tzinfo=timezone.utc).timestamp())
     for m in found:
-        mrec = {"question": (m.get("question") or "")[:200], "slug": m.get("slug"), "created": str(_created(m))}
-        try:
-            tokens = json.loads(m.get("clobTokenIds") or "[]")
-            outcomes = json.loads(m.get("outcomes") or "[]")
-        except ValueError:
-            tokens, outcomes = [], []
+        mrec = {"question": str(m.get("question") or "")[:200], "slug": str(m.get("slug") or ""), "created": str(_created(m))}
+        tokens, outcomes = _json(m.get("clobTokenIds") or "[]"), _json(m.get("outcomes") or "[]")
+        tokens = tokens if isinstance(tokens, list) else []
+        outcomes = outcomes if isinstance(outcomes, list) else []
         if not tokens:
             mrec["note"] = "no clob token"
             rec["markets"].append(mrec)
@@ -73,15 +96,16 @@ def search_markets(keywords: list, as_of: date) -> dict:
                                      "fidelity": 1440})
         try:
             status, body, _, _ = net.get(f"{CLOB}?{qs}", timeout=30)
-            hist = (json.loads(body) or {}).get("history") or [] if status == 200 else []
         except Exception:  # noqa: BLE001
-            hist = []
-        hist = [h for h in hist if isinstance(h, dict) and h.get("t", 1e18) <= end_ts]
+            status, body = 0, b""
+        h = _json(body) if status == 200 else None
+        raw_hist = h.get("history") if isinstance(h, dict) and isinstance(h.get("history"), list) else []
+        hist = [tp for tp in map(_price_point, raw_hist) if tp is not None and tp[0] <= end_ts]
         if hist:
-            last = max(hist, key=lambda h: h["t"])
-            d = datetime.fromtimestamp(last["t"], timezone.utc).date().isoformat()
+            t_last, p_last = max(hist)
+            d = datetime.fromtimestamp(t_last, timezone.utc).date().isoformat()
             name = f"Prediction market price of '{outcomes[0] if outcomes else 'first outcome'}' for: {mrec['question']}"
-            rec["points"].append({"name": name[:240], "value": float(last["p"]), "value_as_written": str(last["p"]),
+            rec["points"].append({"name": name[:240], "value": p_last, "value_as_written": str(p_last),
                                   "scale_word": "", "unit": "probability", "period_start": d, "period_end": d,
                                   "published_at_if_visible": d, "quote": name[:200], "verified_by": "api",
                                   "source_url": f"https://polymarket.com/event/{mrec['slug']}", "via": "api"})
