@@ -1,0 +1,122 @@
+[
+ {
+  "id": "fc_jnto_2026_08",
+  "as_of": "2026-08-16",
+  "answer_value": 3098900,
+  "source": "https://www.jnto.go.jp/en/news/20260916.pdf",
+  "estimate": null,
+  "p10": null,
+  "p90": null,
+  "basis": "no_method",
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": 0,
+  "ablation": true,
+  "pct_err": null,
+  "abs_log10_err": null,
+  "covered_80": null,
+  "arms": {
+   "agent": null,
+   "naive": {
+    "estimate": 3400000.0,
+    "pct_err": 0.09716350963245013,
+    "abs_log10_err": 0.040271355049150324
+   },
+   "structured_no_retrieval": {
+    "estimate": 3529083.4474705406,
+    "pct_err": 0.13881811206251915,
+    "abs_log10_err": 0.056454365663411006
+   },
+   "last_year_same_period": {
+    "estimate": 3428406,
+    "pct_err": 0.10632998806027949,
+    "abs_log10_err": 0.043884684489944
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": false,
+   "last_year_same_period": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": false
+  },
+  "usd_total_assumed": 0.4682,
+  "usd_tokens": 0.0582,
+  "wall_s": 383.1
+ },
+ {
+  "id": "fc_kr_births_2026_07",
+  "as_of": "2026-08-23",
+  "answer_value": 24275,
+  "source": "https://www.koreatimes.co.kr/southkorea/society/20260923/births-up-11-in-july-extending-gains-to-25th-consecutive-month",
+  "estimate": 28725.494785710125,
+  "p10": 19476.422357132044,
+  "p90": 42366.81848202463,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a1"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": true,
+  "pct_err": 0.1833365514195726,
+  "abs_log10_err": 0.07310827940179415,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 28725.494785710125,
+    "pct_err": 0.1833365514195726,
+    "abs_log10_err": 0.07310827940179415
+   },
+   "naive": {
+    "estimate": 19000.0,
+    "pct_err": -0.21730175077239955,
+    "abs_log10_err": 0.10640563762721349
+   },
+   "structured_no_retrieval": {
+    "estimate": 20209.9130731277,
+    "pct_err": -0.16745981161162926,
+    "abs_log10_err": 0.07959479304802192
+   },
+   "last_year_same_period": {
+    "estimate": 21854,
+    "pct_err": -0.0997322348094748,
+    "abs_log10_err": 0.04562829983938695
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": false
+  },
+  "usd_total_assumed": 0.4089,
+  "usd_tokens": 0.0489,
+  "wall_s": 357.7
+ }
+]
