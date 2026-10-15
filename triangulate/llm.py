@@ -92,16 +92,17 @@ class LLM:
                        completion_tokens=usage.get("completion_tokens", 0),
                        usd=round(usd_cost(usage, started, self.model), 6))
             text = (choice.get("message") or {}).get("content") or ""
+            # 先查截断：被截断的 JSON 几乎总是解析失败，先解析的话截断会被误报成「不是合法 JSON」
+            if choice.get("finish_reason") == "length":
+                rec.update(ok=False, error="truncated")
+                self._log(rec)
+                return None, text, "reply was truncated (finish_reason=length)"
             try:
                 out = json.loads(text)
             except json.JSONDecodeError:
                 rec.update(ok=False, error="invalid_json")
                 self._log(rec)
                 return None, text, "reply is not valid JSON"
-            if choice.get("finish_reason") == "length":
-                rec.update(ok=False, error="truncated")
-                self._log(rec)
-                return None, text, "reply was truncated (finish_reason=length)"
             if not isinstance(out, dict):
                 rec.update(ok=False, error="not_an_object")
                 self._log(rec)

@@ -650,5 +650,43 @@ class TestFinalScrub(unittest.TestCase):
         self.assertEqual(scrub_digits("it used 2021", 2026)[1], 1)  # 没有年份上下文就替换（宁可多换）
 
 
+class TestTruncatedReplies(unittest.TestCase):
+    """被 max_tokens 截断的回复要报成 truncated（v2 8 月第一次运行：两次都被报成 invalid_json，重试没说要写短）。"""
+
+    def _llm(self, tmp):
+        from triangulate.llm import LLM
+        llm = object.__new__(LLM)
+        llm.model, llm.calls_path, llm._key = "fake", tmp, "x"
+        return llm
+
+    def test_truncated_json_is_reported_as_truncated(self):
+        import tempfile
+        from pathlib import Path
+        body = json.dumps({"choices": [{"finish_reason": "length", "message": {"content": "{\"assessment\": [{\"ids\": "}}],
+                           "usage": {"completion_tokens": 6000}}).encode()
+        tmp = Path(tempfile.mkdtemp()) / "calls.jsonl"
+        llm = self._llm(tmp)
+        with mock.patch.object(type(llm), "_post", staticmethod(lambda req: (200, body))):
+            out, text, err = llm.json_call([{"role": "user", "content": "x"}], arm="judge:r1", qid="t", attempt=1)
+        self.assertIsNone(out)
+        self.assertIn("truncated", err)
+        self.assertEqual(json.loads(tmp.read_text(encoding="utf-8").splitlines()[-1])["error"], "truncated")
+
+    def test_agent_retry_asks_for_a_shorter_reply(self):
+        from triangulate.agent import pipeline as P
+        seen = []
+
+        class Fake(P.AgentLLM):
+            def __init__(self):
+                self.budget = P.Budget()
+
+            def json_call(self, msgs, **kw):
+                seen.append(msgs)
+                return (None, "{\"a\": ", "reply was truncated (finish_reason=length)") if len(seen) == 1 else ({"a": 1}, "", None)
+        out, err = Fake().ask("s", "u", role="judge:r1", qid="t")
+        self.assertEqual(out, {"a": 1})
+        self.assertIn("shorter", seen[1][-1]["content"])
+
+
 if __name__ == "__main__":
     unittest.main()

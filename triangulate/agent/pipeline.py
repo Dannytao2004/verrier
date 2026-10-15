@@ -129,8 +129,10 @@ class AgentLLM(LLM):
                     return None, f"transport: {e}"
             if out is not None:
                 return out, None
-            msgs = msgs[:2] + [{"role": "assistant", "content": (text or "")[:2000]},
-                               {"role": "user", "content": f"Your reply was rejected: {err}. Reply again with one valid JSON object."}]
+            ask_again = (f"Your reply was cut off at the output limit ({err}). Reply again with one complete, valid JSON "
+                         "object that is shorter: keep notes and reasons brief."
+                         if "truncated" in (err or "") else f"Your reply was rejected: {err}. Reply again with one valid JSON object.")
+            msgs = msgs[:2] + [{"role": "assistant", "content": (text or "")[:2000]}, {"role": "user", "content": ask_again}]
         return None, err
 
 
