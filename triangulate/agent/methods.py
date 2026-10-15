@@ -1,15 +1,19 @@
 """代码方法库：裁判只选方法、给参数（数据点 id），数字全部在这里算。
 
 序列对齐规则：一个序列 = 同一个量在不同年份的同一日历期间；按 period_end 的年份对齐（同一年有多个来源时取中位数）。
-回测：在目标的历史年份上逐年回测（series_naive / yoy_scaling 只用该年之前的数据；linear_fit / ratio 用留一年法，
-拟合时去掉被测年和目标年）。误差 = ln(预测 / 实际)。
+series_naive 取「目标年之前、有值的最近 k 个年份」，年份可以不连续（用到哪几年记在结果里）。
+回测：在目标的历史年份上逐年回测，所有方法都只用被测年之前的数据（扩展窗口；signal 另取被测年当年的值）。
+误差 = ln(预测 / 实际)。
 加权：有回测的方法权重 = 1 / (平均 |ln 误差| + EPS)；没回测的方法取有回测方法权重的中位数；全都没回测就等权。
-合并：加权几何平均。区间规则见 combine()。
+合并：加权几何平均（内部按列表下标，不按 id）。区间规则见 combine()。
+formula_mc：公式另过一道 agent 专用的白名单（整数指数、不许纯常数子式、常数 1 至多 3 个）；每个输入的不确定度由代码
+统一给 DEFAULT_REL_U，裁判填的值只记录、不使用。
 """
+import ast
 import math
 import statistics
 
-from ..expr import Formula, FormulaError
+from ..expr import Formula, FormulaError, _const
 from ..mc import sample_inputs, summarise
 
 EPS = 0.01            # 1% 的误差下限，防止某个方法回测碰巧几乎为 0 时独占权重
@@ -17,6 +21,10 @@ Z90 = 1.2815515655446004
 FALLBACK_SIGMA = 0.25  # 既无回测、也无方法分歧、也无 MC 时的区间宽度（ln 空间），报告里标为 no_basis
 MC_N = 20000
 MC_SEED = 20261015
+DEFAULT_REL_U = 0.2    # formula_mc 每个输入的 80% 相对不确定度（P10/P90 = v/1.2, v*1.2），由代码统一给
+MAX_EXP_AGENT = 3      # formula_mc 只许整数指数 -3..3（开方用 sqrt()）
+MAX_ONES = 3           # formula_mc 里常数 1 至多出现 3 次（1 - share、1 + growth 这类写法够用）
+MAX_NODES_AGENT = 60
 
 
 class MethodError(ValueError):
@@ -25,7 +33,7 @@ class MethodError(ValueError):
 
 # ---------- 单个方法：输入是 {year: value} ----------
 def series_naive(target: dict, year: int, k: int = 1) -> float:
-    prior = sorted(y for y in target if y < year)[-k:]
+    prior = prior_years(target, year, k)
     if len(prior) < k:
         raise MethodError(f"series_naive needs {k} earlier years, has {len(prior)}")
     return statistics.fmean(target[y] for y in prior)
@@ -41,17 +49,21 @@ def yoy_scaling(target: dict, signal: dict, year: int) -> float:
     return target[year - 1] * signal[year] / signal[year - 1]
 
 
-def _common(target, signal, year, exclude):
-    """正式预测（exclude=None）：只用 year 之前的年份。回测（exclude=被测年）：留一年法，用除被测年以外的所有年份
-    （调用方已去掉目标年）。"""
-    ys = sorted(y for y in set(target) & set(signal) if y != year and y != exclude and (exclude is not None or y < year))
+def prior_years(target: dict, year: int, k: int) -> list:
+    """series_naive 用到的年份：year 之前有值的最近 k 年（可以不连续）。"""
+    return sorted(y for y in target if y < year)[-k:]
+
+
+def _common(target, signal, year):
+    """只用 year 之前、target 和 signal 都有值的年份；signal 还必须有 year 当年的值。"""
+    ys = sorted(y for y in set(target) & set(signal) if y < year)
     if year not in signal:
         raise MethodError(f"signal has no value for {year}")
     return ys
 
 
-def linear_fit(target: dict, signal: dict, year: int, exclude=None) -> float:
-    ys = _common(target, signal, year, exclude)
+def linear_fit(target: dict, signal: dict, year: int) -> float:
+    ys = _common(target, signal, year)
     if len(ys) < 3:
         raise MethodError(f"linear_fit needs >= 3 aligned years, has {len(ys)}")
     xs = [signal[y] for y in ys]
@@ -64,19 +76,52 @@ def linear_fit(target: dict, signal: dict, year: int, exclude=None) -> float:
     return pred
 
 
-def ratio(target: dict, signal: dict, year: int, exclude=None) -> float:
-    ys = [y for y in _common(target, signal, year, exclude) if signal[y] > 0]
+def ratio(target: dict, signal: dict, year: int) -> float:
+    ys = [y for y in _common(target, signal, year) if signal[y] > 0]
     if not ys:
         raise MethodError("ratio needs >= 1 aligned year")
     return signal[year] * statistics.fmean(target[y] / signal[y] for y in ys)
 
 
+def _has_name(node) -> bool:
+    """子树里有没有输入名（min/max/sqrt 这些函数名不算）。"""
+    funcs = {id(c.func) for c in ast.walk(node) if isinstance(c, ast.Call)}
+    return any(isinstance(n, ast.Name) and id(n) not in funcs for n in ast.walk(node))
+
+
+def check_agent_formula(f: Formula):
+    """在通用白名单之上，再挡住「用常数拼出任意数」：指数只许 -3..3 的整数；每个二元运算和函数调用都必须含输入名
+    （不许 1+1、1/(1+1) 这类纯常数子式）；常数 1 至多 MAX_ONES 个；节点数有上限。"""
+    nodes = list(ast.walk(f.root))
+    if len(nodes) > MAX_NODES_AGENT:
+        raise MethodError(f"formula has more than {MAX_NODES_AGENT} nodes")
+    in_exponent = set()
+    for n in nodes:
+        if isinstance(n, ast.BinOp) and isinstance(n.op, ast.Pow):
+            e = _const(n.right)
+            if e is None or not float(e).is_integer() or abs(e) > MAX_EXP_AGENT:
+                raise MethodError(f"exponent must be an integer in [-{MAX_EXP_AGENT}, {MAX_EXP_AGENT}]; use sqrt() for roots")
+            in_exponent |= {id(x) for x in ast.walk(n.right)}
+    ones = 0
+    for n in nodes:
+        if id(n) in in_exponent:
+            continue
+        if isinstance(n, (ast.BinOp, ast.Call)) and not _has_name(n):
+            raise MethodError("constant-only sub-expression in formula")
+        if isinstance(n, ast.Constant):
+            ones += 1
+    if ones > MAX_ONES:
+        raise MethodError(f"formula uses the constant 1 more than {MAX_ONES} times")
+
+
 def formula_mc(formula: str, inputs: dict) -> dict:
-    """inputs: name -> (value, rel_uncertainty)。value 以 P10/P90 = value/(1+u), value*(1+u) 的 lognormal 采样。"""
+    """inputs: name -> (value, rel_uncertainty)。value 以 P10/P90 = value/(1+u), value*(1+u) 的 lognormal 采样。
+    agent 调用时 rel_uncertainty 一律是 DEFAULT_REL_U（compute.py 传入），不是裁判给的。"""
     try:
         f = Formula(formula)
     except FormulaError as e:
         raise MethodError(f"formula: {e}") from None
+    check_agent_formula(f)
     if f.names != set(inputs):
         raise MethodError(f"formula names {sorted(f.names)} != inputs {sorted(inputs)}")
     ranges = {}
@@ -102,9 +147,10 @@ def backtest(method: str, target: dict, signal: dict, year: int, k: int = 1) -> 
             elif method == "yoy_scaling":
                 pred = yoy_scaling(target, signal, y)
             elif method in ("linear_fit", "ratio"):
-                fit_t = {t: v for t, v in target.items() if t != year}
-                fit_s = {t: v for t, v in signal.items() if t != year}
-                pred = (linear_fit if method == "linear_fit" else ratio)(fit_t, fit_s, y, exclude=y)
+                # 扩展窗口：只用 y 之前的年份拟合，signal 另带 y 当年的值（和正式预测同一口径）
+                fit_t = {t: v for t, v in target.items() if t < y}
+                fit_s = {t: v for t, v in signal.items() if t <= y}
+                pred = (linear_fit if method == "linear_fit" else ratio)(fit_t, fit_s, y)
             else:
                 return []
         except MethodError:
@@ -116,48 +162,50 @@ def backtest(method: str, target: dict, signal: dict, year: int, k: int = 1) -> 
 
 # ---------- 合并与区间 ----------
 def combine(results: list) -> dict:
-    """results: [{id, estimate, backtest:[...], mc:{p10,p90}|None}]（只放算出了估计的方法）。
+    """results: [{id, estimate, backtest:[...], mc:{p10,p90}|None}]（只放算出了估计的方法）。id 必须互不相同
+    （compute.run 统一编号 m1..mN）；计算内部按列表下标，id 只用来给 weights 起名。
 
     区间规则（80%，ln 空间对称，central x exp(+-Z90 * sigma)）：
     1. 有回测（全部方法合计 >= 2 个回测年）：sigma_hist = sqrt(按权重平均的回测 ln 误差平方)；
        若方法之间的分歧 sigma_spread 更大，取更大的（历史误差小但方法互相打架时不该给窄区间）。
-    2. 否则，有 >= 2 个方法：sigma = max(sigma_spread, sigma_mc)。
-    3. 否则只有 formula_mc：用它自己的 MC 区间宽度。
-    4. 都没有：FALLBACK_SIGMA，basis = no_basis。
+    2. 没有回测：sigma = max(sigma_spread, sigma_mc, FALLBACK_SIGMA)。方法分歧和 MC 宽度只能把区间放宽，
+       不能把它压到 FALLBACK_SIGMA 以下（两个方法用同一份证据时分歧接近 0，不代表不确定性小）。
+       basis 记最大的那一项；FALLBACK_SIGMA 最大时记 no_basis。
     """
     ok = [r for r in results if r.get("estimate") and r["estimate"] > 0]
     if not ok:
         return {"central": None, "p10": None, "p90": None, "weights": {}, "basis": "no_method"}
-    bt = {r["id"]: [e["log_err"] for e in r.get("backtest") or []] for r in ok}
-    raw = {i: 1 / (statistics.fmean(abs(x) for x in errs) + EPS) for i, errs in bt.items() if errs}
+    ids = [str(r.get("id", "")) for r in ok]
+    if len(set(ids)) != len(ids):
+        raise MethodError(f"duplicate method ids {ids}")
+    bt = [[e["log_err"] for e in r.get("backtest") or []] for r in ok]
+    raw = {i: 1 / (statistics.fmean(abs(x) for x in errs) + EPS) for i, errs in enumerate(bt) if errs}
     if raw:
         fill = statistics.median(raw.values())
-        w = {r["id"]: raw.get(r["id"], fill) for r in ok}
+        w = [raw.get(i, fill) for i in range(len(ok))]
         rule = "inverse_backtest_error"
     else:
-        w = {r["id"]: 1.0 for r in ok}
+        w = [1.0] * len(ok)
         rule = "equal"
-    tot = sum(w.values())
-    w = {i: v / tot for i, v in w.items()}
-    logc = sum(w[r["id"]] * math.log(r["estimate"]) for r in ok)
+    tot = sum(w)
+    w = [v / tot for v in w]
+    logs = [math.log(r["estimate"]) for r in ok]
+    logc = sum(wi * li for wi, li in zip(w, logs))
     central = math.exp(logc)
-    spread = math.sqrt(sum(w[r["id"]] * (math.log(r["estimate"]) - logc) ** 2 for r in ok)) if len(ok) >= 2 else None
+    spread = math.sqrt(sum(wi * (li - logc) ** 2 for wi, li in zip(w, logs))) if len(ok) >= 2 else None
     mc = [(math.log(r["mc"]["p90"]) - math.log(r["mc"]["p10"])) / (2 * Z90) for r in ok
           if r.get("mc") and r["mc"].get("p10", 0) > 0]
     sig_mc = max(mc) if mc else None
-    n_folds = sum(len(e) for e in bt.values())
+    n_folds = sum(len(e) for e in bt)
     hist = None
     if n_folds >= 2:
-        ws = {i: w[i] for i in bt if bt[i]}
-        hist = math.sqrt(sum(ws[i] * statistics.fmean(x * x for x in bt[i]) for i in ws) / sum(ws.values()))
+        idx = [i for i, e in enumerate(bt) if e]
+        hist = math.sqrt(sum(w[i] * statistics.fmean(x * x for x in bt[i]) for i in idx) / sum(w[i] for i in idx))
     if hist is not None:
         sigma, basis = max(hist, spread or 0.0), "historical_errors" if hist >= (spread or 0) else "method_spread"
-    elif spread is not None:
-        sigma, basis = max(spread, sig_mc or 0.0), "method_spread" if spread >= (sig_mc or 0) else "monte_carlo"
-    elif sig_mc is not None:
-        sigma, basis = sig_mc, "monte_carlo"
     else:
-        sigma, basis = FALLBACK_SIGMA, "no_basis"
+        cands = [(FALLBACK_SIGMA, "no_basis"), (spread or 0.0, "method_spread"), (sig_mc or 0.0, "monte_carlo")]
+        sigma, basis = max(cands, key=lambda c: c[0])
     return {"central": central, "p10": central * math.exp(-Z90 * sigma), "p90": central * math.exp(Z90 * sigma),
             "sigma_ln": sigma, "sigma_hist": hist, "sigma_spread": spread, "sigma_mc": sig_mc, "n_backtest_folds": n_folds,
-            "weights": w, "weight_rule": rule, "basis": basis}
+            "weights": dict(zip(ids, w)), "weight_rule": rule, "basis": basis}

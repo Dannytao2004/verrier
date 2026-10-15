@@ -143,8 +143,18 @@ class TestMethods(unittest.TestCase):
         self.assertAlmostEqual(bt[0]["log_err"], math.log(100 / 110))
         bt = M.backtest("yoy_scaling", self.T, self.S, 2026)
         self.assertTrue(all(abs(b["log_err"]) < 1e-12 for b in bt))
+        # linear_fit / ratio 也只用被测年之前的年份（扩展窗口）：linear_fit 要 3 个更早的年份，只有 2025 能测
         bt = M.backtest("linear_fit", self.T, self.S, 2026)
-        self.assertEqual([b["year"] for b in bt], [2022, 2023, 2024, 2025])
+        self.assertEqual([b["year"] for b in bt], [2025])
+        bt = M.backtest("ratio", self.T, self.S, 2026)
+        self.assertEqual([b["year"] for b in bt], [2023, 2024, 2025])
+
+    def test_formula_rules_for_agent(self):
+        self.assertAlmostEqual(M.formula_mc("a * (1 - b)", {"a": (1000.0, 0.0), "b": (0.25, 0.0)})["median"], 750.0)
+        self.assertAlmostEqual(M.formula_mc("a ** 2 / b", {"a": (10.0, 0.0), "b": (4.0, 0.0)})["median"], 25.0)
+        for bad in ["a ** 0.97", "a * (1 - 1/(1+1+1+1+1+1+1+1+1+1))", "a * (1 + 1)", "a + 1 + 1 + 1 + 1", "a * max(1, 1)"]:
+            with self.assertRaises(M.MethodError, msg=bad):
+                M.formula_mc(bad, {"a": (881936.0, 0.0)})
 
 
 class TestCombine(unittest.TestCase):
@@ -167,9 +177,48 @@ class TestCombine(unittest.TestCase):
 
     def test_single_method_fallback_and_mc(self):
         self.assertEqual(M.combine([{"id": "m1", "estimate": 5.0}])["basis"], "no_basis")
-        c = M.combine([{"id": "m1", "estimate": 5.0, "mc": {"p10": 4.0, "p90": 6.25}}])
+        c = M.combine([{"id": "m1", "estimate": 5.0, "mc": {"p10": 2.0, "p90": 12.5}}])  # MC 比 FALLBACK 宽
         self.assertEqual(c["basis"], "monte_carlo")
         self.assertIsNone(M.combine([])["central"])
+
+    def test_no_backtest_interval_has_floor(self):
+        # 两个方法估计相同、没有回测：分歧为 0，区间不能退化成一个点
+        c = M.combine([{"id": "m1", "estimate": 850000.0}, {"id": "m2", "estimate": 850000.0}])
+        self.assertEqual(c["basis"], "no_basis")
+        self.assertAlmostEqual(c["sigma_ln"], M.FALLBACK_SIGMA)
+        self.assertLess(c["p10"], 850000.0 * 0.8)
+        c = M.combine([{"id": "m1", "estimate": 100.0, "mc": {"p10": 90.0, "p90": 110.0}}])
+        self.assertEqual(c["basis"], "no_basis")  # MC 比 FALLBACK 窄，不能拿来收窄
+
+    def test_duplicate_ids_rejected_and_compute_renumbers(self):
+        with self.assertRaises(M.MethodError):
+            M.combine([{"id": "m1", "estimate": 8e5}, {"id": "m1", "estimate": 9e5}])
+        from triangulate.agent import compute as C
+        pts = {f"p{i}": {"id": f"p{i}", "value": v, "period_start": f"{y}-08-01", "period_end": f"{y}-08-31", "keep": True,
+                         "unit": "visits"} for i, (y, v) in enumerate([(2023, 846389.0), (2024, 868259.0), (2025, 881936.0)], 1)}
+        tgt = {"period_start": "2026-08-01", "period_end": "2026-08-31"}
+        for ids in ([None, None], ["naive_last_year", "naive_last_two"], ["m1", "m1"]):
+            ms = [{"method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": k}} for k in (1, 2)]
+            for m, i in zip(ms, ids):
+                if i is not None:
+                    m["id"] = i
+            out = C.run(ms, pts, tgt)
+            self.assertEqual([m["id"] for m in out["methods"]], ["m1", "m2"])
+            self.assertTrue(860000 < out["result"]["central"] < 890000, out["result"]["central"])
+            self.assertEqual(out["methods"][1]["years_used"], [2024, 2025])
+
+    def test_formula_uncertainty_set_by_code(self):
+        from triangulate.agent import compute as C
+        pts = {"p1": {"id": "p1", "value": 881936.0, "period_end": "2025-08-31", "keep": True, "unit": "visits"}}
+        tgt = {"period_start": "2026-08-01", "period_end": "2026-08-31"}
+        widths = []
+        for u in (0.01, 1.0):
+            out = C.run([{"id": "x", "method": "formula_mc", "params": {"formula": "a", "inputs": {"a": {"id": "p1", "rel_uncertainty": u}}}}],
+                        pts, tgt)
+            m = out["methods"][0]
+            widths.append(m["mc"]["p90"] / m["mc"]["p10"])
+            self.assertEqual(m["rel_uncertainty_from_judge_ignored"], {"a": u})
+        self.assertAlmostEqual(widths[0], widths[1])
 
     def test_untested_method_gets_median_weight(self):
         a = {"id": "m1", "estimate": 100.0, "backtest": [{"log_err": 0.05}]}

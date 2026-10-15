@@ -68,8 +68,9 @@ def run(methods: list, pts: dict, target: dict) -> dict:
     tps = tps or tpe - timedelta(days=0)
     year = tpe.year
     results = []
-    for m in methods or []:
-        r = {"id": str(m.get("id", ""))[:10], "method": m.get("method"), "params": m.get("params") or {},
+    for n, m in enumerate(methods or [], start=1):
+        # id 由代码按列表顺序重编（m1..mN），保证唯一；裁判给的 id 只作为 label 保存
+        r = {"id": f"m{n}", "label": str(m.get("id", ""))[:40], "method": m.get("method"), "params": m.get("params") or {},
              "rationale": str(m.get("rationale", ""))[:400], "estimate": None, "backtest": [], "notes": []}
         prm = r["params"]
         try:
@@ -89,6 +90,8 @@ def run(methods: list, pts: dict, target: dict) -> dict:
                 fn = {"series_naive": lambda: M.series_naive(tgt, year, k), "yoy_scaling": lambda: M.yoy_scaling(tgt, sig, year),
                       "linear_fit": lambda: M.linear_fit(tgt, sig, year), "ratio": lambda: M.ratio(tgt, sig, year)}[r["method"]]
                 r["estimate"] = fn()
+                if r["method"] == "series_naive":
+                    r["years_used"] = M.prior_years(tgt, year, k)
                 r["backtest"] = M.backtest(r["method"], tgt, sig, year, k)
             elif r["method"] == "formula_mc":
                 inputs, used = {}, []
@@ -98,7 +101,10 @@ def run(methods: list, pts: dict, target: dict) -> dict:
                     if p is None or not p.get("keep", True):
                         raise M.MethodError(f"input {name}: id {spec.get('id')} unknown or discarded")
                     v = p["value"] / 100 if p.get("unit") == "%" else p["value"]
-                    inputs[name] = (v, float(spec.get("rel_uncertainty", 0.2) or 0.2))
+                    # 不确定度由代码统一给；裁判填的 rel_uncertainty 只记录，不使用
+                    inputs[name] = (v, M.DEFAULT_REL_U)
+                    if "rel_uncertainty" in spec:
+                        r.setdefault("rel_uncertainty_from_judge_ignored", {})[name] = spec.get("rel_uncertainty")
                     used.append(spec.get("id"))
                 s = M.formula_mc(str(prm.get("formula", "")), inputs)
                 r.update(estimate=s["median"], mc={"p10": s["p10"], "p90": s["p90"]}, used_ids=used)
@@ -113,4 +119,4 @@ def run(methods: list, pts: dict, target: dict) -> dict:
             r["backtest_mean_abs_log_err"] = statistics.fmean(errs)
         results.append(r)
     ok = [r for r in results if r.get("estimate")]
-    return {"target_year": year, "methods": results, "result": M.combine(ok)}
+    return {"target_year": year, "methods": results, "result": M.combine(ok), "rel_uncertainty_formula_inputs": M.DEFAULT_REL_U}
