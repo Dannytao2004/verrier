@@ -150,6 +150,17 @@ class Context:
         self.searcher = Searcher(log=self.llm._log)
         # 哨兵只在代码里用：真值（和其他 as_of 之后才公布的已知值）不进任何 prompt。可以是一个数或一组数
         self.leak_patterns = ev.leak_patterns(leak_value) if leak_value else []
+        self.progress = None  # 可选的进度回调 progress(event: dict)，网页用；只读通知，不影响运行
+
+
+def _emit(ctx, **event):
+    """把进度事件交给 ctx.progress（没有就跳过）。回调出任何错都吞掉：进度显示不能影响运行。"""
+    cb = getattr(ctx, "progress", None)
+    if cb is not None:
+        try:
+            cb(event)
+        except Exception:  # noqa: BLE001
+            pass
 
 
 def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period: bool, url: str = "") -> tuple:
@@ -196,6 +207,7 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
     t0 = time.time()
     b = ctx.budget
     out = {"direction_id": d["id"], "round": round_no, "search": {}, "pages": [], "points": [], "dropped_points": []}
+    _emit(ctx, kind="direction_start", direction_id=d["id"], round=round_no)
     try:
         prompt = SEARCH_USER.format(cap=b.urls_per_direction, as_of=ctx.as_of_s,
                                     hints="; ".join(map(str, d.get("search_hints") or []))[:400],
@@ -205,12 +217,14 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
             s = ctx.searcher.search(prompt, role=f"search:{d['id']}", qid=ctx.qid, max_uses=b.search_max_uses,
                                     cap=b.urls_per_direction)
         out["search"] = s
+        _emit(ctx, kind="searched", direction_id=d["id"], n_urls=len(s.get("urls", [])[: b.urls_per_direction]))
         allow_no_period = d.get("category") == "base_rates"
         for url in s.get("urls", [])[: b.urls_per_direction]:
             if not b.reserve_page(round_no):
                 out["pages"].append({"url": url, "status": "dropped", "reason": "page cap reached"})
                 continue
             page = fetch_page(url, ctx.as_of, ctx.qid)
+            _emit(ctx, kind="page", direction_id=d["id"], status=page.get("status"))
             text = page.pop("text", None)
             if page["status"] == "dropped":
                 b.release_page()
@@ -248,11 +262,14 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
                     kept += 1
             page["n_points_verified"] = kept
             out["pages"].append(page)
+            _emit(ctx, kind="extracted", direction_id=d["id"], n_verified=kept)
     except BudgetExceeded as e:
         out["aborted"] = str(e)
     except Exception as e:  # noqa: BLE001  一个方向的意外错误不拖垮整题，记下来
         out["error"] = f"{type(e).__name__}: {e}"[:300]
     out["wall_s"] = round(time.time() - t0, 1)
+    _emit(ctx, kind="direction_done", direction_id=d["id"], round=round_no, n_points=len(out["points"]),
+          stopped=out.get("error") or out.get("aborted"))
     return out
 
 

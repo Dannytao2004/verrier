@@ -106,7 +106,9 @@ def ablation_summary(state: dict) -> dict:
             "residual_risks": AB.RESIDUAL_RISKS}
 
 
-def run_question(q: dict, auto_approve: bool, tag: str = "", ablate_own_history: bool = False) -> dict:
+def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False) -> dict:
+    """建结果目录、上下文和图（不调模型）。返回运行句柄：g、cfg、ctx、out_dir、stamp、tag、leak_values、t0。
+    命令行（run_question）和网页（triangulate/web）共用；图的第一个输入是 initial_input(q)。"""
     if ablate_own_history:
         tag = ablation_tag(tag)
     out_dir = RES / q["id"] / tag if tag else RES / q["id"]
@@ -119,8 +121,18 @@ def run_question(q: dict, auto_approve: bool, tag: str = "", ablate_own_history:
     ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values, ablate_own_history=ablate_own_history)
     g = build(ctx)
     cfg = {"configurable": {"thread_id": f"{q['id']}-{stamp}"}, "max_concurrency": 12, "recursion_limit": 80}
-    t0 = time.time()
-    out = g.invoke({"qid": q["id"], "question": q["question"], "as_of": q["as_of"]}, cfg)
+    return {"q": q, "g": g, "cfg": cfg, "ctx": ctx, "out_dir": out_dir, "stamp": stamp, "tag": tag,
+            "leak_values": leak_values, "ablate": ablate_own_history, "t0": time.time()}
+
+
+def initial_input(q: dict) -> dict:
+    return {"qid": q["id"], "question": q["question"], "as_of": q["as_of"]}
+
+
+def run_question(q: dict, auto_approve: bool, tag: str = "", ablate_own_history: bool = False) -> dict:
+    h = prepare_run(q, tag, ablate_own_history)
+    g, cfg = h["g"], h["cfg"]
+    out = g.invoke(initial_input(q), cfg)
     approvals = []
     while out.get("__interrupt__"):
         payload = out["__interrupt__"][0].value
@@ -128,6 +140,13 @@ def run_question(q: dict, auto_approve: bool, tag: str = "", ablate_own_history:
         approvals.append(decision)
         print(f"[{q['id']}] plan: {len(payload['directions'])} directions -> approved={decision['approved']}", flush=True)
         out = g.invoke(Command(resume=decision), cfg)
+    return save_run(h, approvals)
+
+
+def save_run(h: dict, approvals: list) -> dict:
+    """图跑完以后：取最终 state，补上计量和泄漏审计，写 state.json、ledger.md、graph.html。"""
+    q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]
+    stamp, tag, leak_values, ablate_own_history, t0 = h["stamp"], h["tag"], h["leak_values"], h["ablate"], h["t0"]
     state = dict(g.get_state(cfg).values)
     state.update(started_at=stamp, wall_s=round(time.time() - t0, 1), budget=ctx.budget.snapshot(), approvals=approvals,
                  leakage=leakage_audit(state, q["as_of"], leak_values), model=ctx.llm.model, tag=tag)
