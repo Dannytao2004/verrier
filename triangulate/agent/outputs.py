@@ -130,12 +130,6 @@ def ledger(state: dict, score: dict | None = None) -> str:
             if s:
                 L.append(f"Queries issued by the searcher: {'; '.join(_md(q) for q in s.get('queries', [])) or '(none)'}")
                 L.append("")
-            if res.get("archive"):
-                ar = res["archive"]
-                L += [f"Page selection: archive index (captures <= as_of) of {', '.join(f'`{p}`' for p in ar.get('prefixes') or [])}"
-                      f" -> {ar.get('n_candidates', 0)} candidates -> picker chose {len(ar.get('picked') or [])}"
-                      + (f" ({_md(ar['picker_error'])})" if ar.get("picker_error") else "")
-                      + (f"; listing errors: {_md('; '.join(ar['errors']))}" if ar.get("errors") else ""), ""]
             if res.get("markets"):
                 mk = res["markets"]
                 L += [f"Market keywords {mk.get('keywords')}: {mk.get('note') or ''} markets={len(mk.get('markets', []))}", ""]

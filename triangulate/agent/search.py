@@ -107,10 +107,7 @@ class Searcher:
                        usd=round(usd, 6), usd_search_fee_assumed=round(n_req * SEARCH_FEE_ASSUMED_USD, 4))
             self._log(rec)
             # 返回给调用方的只有：查询词（只进 state.json 审计，不进任何分析 prompt）、URL、计量
-            # all_urls（它挑的在前、其余搜索结果在后，只有 URL）供回测的存档索引选页用：只用来推目录前缀
-            all_urls = list(text_urls) + [u for u in parse_urls("\n".join(result_urls), cap=50) if u not in text_urls]
-            return {"queries": queries, "urls": urls, "all_urls": all_urls, "n_text_urls": len(text_urls),
-                    "n_result_urls": len(result_urls),
+            return {"queries": queries, "urls": urls, "n_text_urls": len(text_urls), "n_result_urls": len(result_urls),
                     "web_search_requests": n_req, "usd": usd, "usd_search_fee_assumed": n_req * SEARCH_FEE_ASSUMED_USD}
         self._log(rec)
         return {"queries": [], "urls": [], "error": rec.get("error", "request failed"), "web_search_requests": 0,

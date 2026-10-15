@@ -46,17 +46,6 @@ Suggested queries: {hints}
 
 Prefer primary sources (official statistics, agency releases, operator reports, filings) and pages that show the actual numbers. The pages must have been published on or before {as_of}. After searching, reply with at most {cap} URLs, most useful first, one per line, and nothing else."""
 
-PICK_SYSTEM = """You choose which archived web pages a research team should read. You see only page addresses and the date each page was first archived; you have not seen the pages themselves. Reply with one JSON object only."""
-
-PICK_USER = """Target quantity: {what} (unit: {unit}; period {period_start} to {period_end}; published by {publisher}).
-Research direction ({category}, perspective: {perspective}): {hypothesis}
-Data wanted: {data_to_find}
-
-Today is {as_of}. Every page below was archived on or before today. Each line is: id | first archived | URL.
-{candidates}
-
-Choose at most {cap} pages that most likely show the data wanted as actual numbers (prefer official releases, statistical reports and articles that report figures, and the most recent values before today). Reply with JSON: {{"picks": ["c1", "c2"]}}"""
-
 EXTRACT_SYSTEM = """You copy numeric facts out of one document. You never calculate, convert, round, combine or infer numbers: you copy them exactly as written. Every data point carries a quote copied character for character from the document that contains the number. Reply with one JSON object only."""
 
 EXTRACT_USER = """Context: an analyst is estimating "{what}" (unit: {unit}; period {period_start} to {period_end}).
