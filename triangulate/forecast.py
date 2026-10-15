@@ -52,6 +52,32 @@ QUESTIONS += [
                  "as it will be first reported in the national statistics agency's monthly Population Trends release.",
      "unit_hint": "a count of live births", "leak_values": [24275, 170079]},
 ]
+# 留出测试集（2026-10-15 选定，在 agent 的任何修改都定型之后才第一次跑；见 EVAL_TEST_PLAN.md）。
+# 选题标准同上；last_year 里标「倒推」的是按官方同比变化率从真值倒算的。
+QUESTIONS += [
+    # 台湾内政部户籍统计（约 2026-10-08 公布）：9 月出生 7,704（同比 -10.45%），2025 年 9 月 8,603；
+    # 1-9 月累计 69,446、8 月 7,492（约 9 月 9-10 日公布）都晚于 as_of。
+    {"id": "fc_tw_births_2026_09", "set": "test", "as_of": "2026-09-08", "released": "2026-10-08", "answer_value": 7704,
+     "last_year": 8603, "source": "https://www.taipeitimes.com/News/taiwan/archives/2026/10/08/2003865628",
+     "question": _ASOF.format(as_of="2026-09-08") + "Estimate the number of births registered in Taiwan in September 2026, "
+                 "as reported in the Ministry of the Interior's monthly household registration statistics.",
+     "unit_hint": "a count of births", "leak_values": [7704, 69446, 7492]},
+    # 希思罗机场 2026-10-12 公布：9 月 7.18 百万（同比 -2.3%，公布值只有 3 位有效数字）；2025 年 9 月按同比倒推约 7.35 百万；
+    # 1-9 月累计 62.9 百万晚于 as_of。
+    {"id": "fc_lhr_pax_2026_09", "set": "test", "as_of": "2026-09-12", "released": "2026-10-12", "answer_value": 7180000,
+     "last_year": 7350000, "source": "https://www.sharecast.com/news/other-company-news/heathrow-airport-travel-tourism-london-passenger-traffic-uk--23819142.html",
+     "question": _ASOF.format(as_of="2026-09-12") + "Estimate the number of passengers at London Heathrow Airport in September 2026, "
+                 "as reported in Heathrow's monthly traffic statistics.",
+     "unit_hint": "a count of passengers", "leak_values": [7180000, 62900000]},
+    # 厚生劳动省人口动态统计速报（2026-09-25 公布）：7 月出生 62,479（同比 -1.5%，-936）；2025 年 7 月倒推 63,415。
+    # 速报含在日外国人和在外日本人，比日本人「概数」大。官方 PDF 解析不了，数值由两处汇总交叉核对。
+    {"id": "fc_jp_births_2026_07", "set": "test", "as_of": "2026-08-25", "released": "2026-09-25", "answer_value": 62479,
+     "last_year": 63415, "source": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/07.html",
+     "question": _ASOF.format(as_of="2026-08-25") + "Estimate the number of births in Japan in July 2026, as first reported in the "
+                 "Ministry of Health, Labour and Welfare's preliminary monthly vital statistics (which also count foreign "
+                 "nationals in Japan).",
+     "unit_hint": "a count of births", "leak_values": [62479]},
+]
 for _q in QUESTIONS[2:]:
     _q.update(answer_unit="", strict=False)
 FNS = {"naive": run_naive, "structured": run_structured}

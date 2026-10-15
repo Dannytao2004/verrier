@@ -26,11 +26,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default="v2")
     ap.add_argument("--arms", choices=["both", "full", "noown"], default="both")
+    ap.add_argument("--question", action="append", default=[], help="only these question ids (repeatable); default: all")
     a = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     fc = json.loads((FC / "summary.json").read_text(encoding="utf-8"))
     ablate = {"both": (False, True), "full": (False,), "noown": (True,)}[a.arms]
-    jobs = [(q, abl) for abl in ablate for q in QUESTIONS]
+    qs = [q for q in QUESTIONS if q["id"] in a.question] if a.question else QUESTIONS
+    jobs = [(q, abl) for abl in ablate for q in qs]
     t0 = time.time()
 
     def one(job):
