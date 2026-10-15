@@ -1,0 +1,94 @@
+[fc_yell_2026_08] plan: 8 directions -> approved=True
+[fc_yell_2026_08] done in 364.8s; estimate 918,713; usd 0.3859
+[fc_yell_2026_09] plan: 8 directions -> approved=True
+[fc_yell_2026_09] done in 1166.2s; estimate 851,530; usd 0.6362
+[
+ {
+  "id": "fc_yell_2026_08",
+  "as_of": "2026-08-15",
+  "answer_value": 856467,
+  "source": "https://www.nps.gov/yell/learn/news/26022.htm",
+  "estimate": 918712.5109822364,
+  "p10": 825786.183740093,
+  "p90": 1022095.9062460358,
+  "basis": "monte_carlo",
+  "pct_err": 0.07267706868126433,
+  "abs_log10_err": 0.030468996524675097,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 918712.5109822364,
+    "pct_err": 0.07267706868126433,
+    "abs_log10_err": 0.030468996524675097
+   },
+   "naive": {
+    "estimate": 850000.0,
+    "pct_err": -0.007550787128984493,
+    "abs_log10_err": 0.0032917083776597285
+   },
+   "structured_no_retrieval": {
+    "estimate": 1019095.3666571244,
+    "pct_err": 0.18988281703454346,
+    "abs_log10_err": 0.07550419297137347
+   },
+   "last_year_same_period": {
+    "estimate": 881936,
+    "pct_err": 0.02973728117954333,
+    "abs_log10_err": 0.012726436464674008
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "usd_total_assumed": 0.3859,
+  "usd_tokens": 0.0759,
+  "wall_s": 364.8
+ },
+ {
+  "id": "fc_yell_2026_09",
+  "as_of": "2026-09-06",
+  "answer_value": 868450,
+  "source": "https://www.nps.gov/yell/learn/news/26024.htm",
+  "estimate": 851529.8637455406,
+  "p10": 843741.5735131379,
+  "p90": 859390.0450245012,
+  "basis": "method_spread",
+  "pct_err": -0.01948314382458327,
+  "abs_log10_err": 0.008544935926798915,
+  "covered_80": false,
+  "arms": {
+   "agent": {
+    "estimate": 851529.8637455406,
+    "pct_err": -0.01948314382458327,
+    "abs_log10_err": 0.008544935926798915
+   },
+   "naive": {
+    "estimate": 720000.0,
+    "pct_err": -0.1709367263515459,
+    "abs_log10_err": 0.08141232307126964
+   },
+   "structured_no_retrieval": {
+    "estimate": 544261.9087225988,
+    "pct_err": -0.37329505587817513,
+    "abs_log10_err": 0.20293687910510852
+   },
+   "last_year_same_period": {
+    "estimate": 839579,
+    "pct_err": -0.033244285796534045,
+    "abs_log10_err": 0.014683252262707029
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "usd_total_assumed": 0.6362,
+  "usd_tokens": 0.1462,
+  "wall_s": 1166.2
+ }
+]

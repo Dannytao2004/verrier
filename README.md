@@ -7,7 +7,9 @@ A backtest **probe** for a triangulation / estimation agent. The LLM only propos
 - Every question gets a world-model state JSON and a dependency graph (target, paths, inputs). Node colour shows status, input node size shows sensitivity.
 - The probe compares this structured arm with a naive arm (the model gives one number) on 20 realFP Fermi questions. The pre-registered plan is in `PROBE_PLAN.md`; results, in Chinese, are in `PROBE.md`.
 
-Standard library only (Python 3.12+). No packages to install.
+The probe (`select`, `run`, `demo`, `report`, `forecast`) uses the standard library only (Python 3.12+).
+The research agent (`agent`, see `AGENT_MVP.md`) needs `langgraph` and `trafilatura`: create `.venv` with
+`py -3.14 -m venv .venv` and `.venv/Scripts/python.exe -m pip install -r requirements.txt`.
 
 ## Commands
 
@@ -16,7 +18,9 @@ python -m triangulate select      # pick the 20 questions from data/raw (see DAT
 python -m triangulate run         # both arms on the 20 questions, then the report
 python -m triangulate demo        # structured arm on the finance demo question, then the report
 python -m triangulate report      # offline: rebuild states, graphs and tables from saved replies
-python -m unittest                # tests: evaluator, Monte Carlo aggregation, graph sensitivity, units
+python -m unittest                # tests: evaluator, Monte Carlo aggregation, graph sensitivity, units, agent code
+.venv/Scripts/python.exe -m triangulate agent --auto-approve   # research agent on the two forecast questions
+.venv/Scripts/python.exe -m triangulate agent-score            # offline: score saved agent runs
 ```
 
 The DeepSeek key is read at run time from the file in `TRIANGULATE_KEY_FILE` (default `./.env`, git-ignored). The file must contain one line `DEEPSEEK_API_KEY=...`. The key is never printed or logged.
@@ -35,6 +39,8 @@ The DeepSeek key is read at run time from the file in `TRIANGULATE_KEY_FILE` (de
 | `triangulate/arms.py`, `prompts.py`, `llm.py` | the two arms, prompts, DeepSeek client with per-call logging |
 | `triangulate/report.py`, `viewer.py` | offline metrics, tables and HTML graph pages |
 | `results/` | `summary.json`, `per_question.json`, `report_tables.md`, `calls.jsonl`, `demo/` |
+| `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher, extractor checks, judge, method library |
+| `results/agent/<id>/` | `state.json`, `calls.jsonl`, `ledger.md`, `graph.html` per question; raw pages stay in `data/raw/agent/` (local only) |
 | `docs/graphs/` | `index.html`, the finance demo graph; realFP question pages under `realfp/` (local only) |
 
 ## Data and licence
