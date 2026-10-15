@@ -11,3 +11,6 @@ data/raw/
 data/backtest_realfp20.json
 results/realfp/
 docs/graphs/realfp/
+
+# probe raw outputs
+probes/out/
