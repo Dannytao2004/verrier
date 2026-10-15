@@ -19,8 +19,11 @@ python -m triangulate run         # both arms on the 20 questions, then the repo
 python -m triangulate demo        # structured arm on the finance demo question, then the report
 python -m triangulate report      # offline: rebuild states, graphs and tables from saved replies
 python -m unittest                # tests: evaluator, Monte Carlo aggregation, graph sensitivity, units, agent code
-.venv/Scripts/python.exe -m triangulate agent --auto-approve   # research agent on the two forecast questions
-.venv/Scripts/python.exe -m triangulate agent-score            # offline: score saved agent runs
+.venv/Scripts/python.exe -m triangulate agent --ask "How many ... in ...?"        # research agent on any question (as_of = today)
+.venv/Scripts/python.exe -m triangulate agent --ask "..." --as-of 2026-08-15      # same, standing on an earlier date (backtest mode)
+.venv/Scripts/python.exe -m triangulate agent --auto-approve --tag post_review    # backtest on the two forecast questions
+.venv/Scripts/python.exe -m triangulate agent-score [--tag post_review]           # offline: score saved backtest runs
+.venv/Scripts/python.exe probes/recompute_saved_runs.py                           # offline: saved runs under the current compute code
 ```
 
 The DeepSeek key is read at run time from the file in `TRIANGULATE_KEY_FILE` (default `./.env`, git-ignored). The file must contain one line `DEEPSEEK_API_KEY=...`. The key is never printed or logged.
@@ -40,7 +43,7 @@ The DeepSeek key is read at run time from the file in `TRIANGULATE_KEY_FILE` (de
 | `triangulate/report.py`, `viewer.py` | offline metrics, tables and HTML graph pages |
 | `results/` | `summary.json`, `per_question.json`, `report_tables.md`, `calls.jsonl`, `demo/` |
 | `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher, extractor checks, judge, method library |
-| `results/agent/<id>/` | `state.json`, `calls.jsonl`, `ledger.md`, `graph.html` per question; raw pages stay in `data/raw/agent/` (local only) |
+| `results/agent/<id>/[<tag>/]` | `state.json`, `calls.jsonl`, `ledger.md`, `graph.html` per run; raw pages stay in `data/raw/agent/` (local only) |
 | `docs/graphs/` | `index.html`, the finance demo graph; realFP question pages under `realfp/` (local only) |
 
 ## Data and licence
