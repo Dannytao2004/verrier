@@ -42,10 +42,34 @@ class AgentState(TypedDict, total=False):
 
 def _clean_direction(d: dict, i: int, prefix: str) -> dict:
     cat = str(d.get("category", "")).strip()
+    try:
+        info = min(max(int(d.get("expected_information", 3)), 1), 5)
+    except (TypeError, ValueError):
+        info = 3
     return {"id": f"{prefix}{i}", "category": cat if cat in CATEGORIES else "related_series",
             "perspective": str(d.get("perspective", ""))[:200], "hypothesis": str(d.get("hypothesis", ""))[:600],
             "data_to_find": str(d.get("data_to_find", ""))[:600],
-            "search_hints": [str(h)[:120] for h in (d.get("search_hints") or [])][:4]}
+            "search_hints": [str(h)[:120] for h in (d.get("search_hints") or [])][:4], "expected_information": info}
+
+
+def select_directions(cands: list, cap: int) -> list:
+    """plan 列出的全部候选 -> 实际要跑的方向（最多 cap 个，cap 由预算推出）。
+    排序 = 预期信息量从高到低（同分按 plan 给的顺序）。先保证每个出现过的类别至少一个（own_history 最先），
+    再按排序补满。这样一类出几个方向是允许的，排在清单后面的类别（例如 persona）也不会因为名额被整类挤掉。
+    返回的方向按排序重新编号 d1..dN；候选本身带 selected 标记，留在 state 里。"""
+    order = sorted(range(len(cands)), key=lambda i: (-cands[i]["expected_information"], i))
+    chosen, seen = [], set()
+    for i in sorted(order, key=lambda i: cands[i]["category"] != "own_history"):
+        if len(chosen) < cap and cands[i]["category"] not in seen:
+            chosen.append(i)
+            seen.add(cands[i]["category"])
+    for i in order:
+        if len(chosen) < cap and i not in chosen:
+            chosen.append(i)
+    chosen.sort(key=order.index)
+    for i, c in enumerate(cands):
+        c["selected"] = i in chosen
+    return [{**cands[i], "id": f"d{n}", "candidate_id": cands[i]["id"]} for n, i in enumerate(chosen, start=1)]
 
 
 _NUM_TOKEN = re.compile(r"\d(?:[\d,.]*\d)?%?")
@@ -101,21 +125,24 @@ def build(ctx: Context):
         notes = []
         try:
             out, err = ctx.llm.ask(PLAN_SYSTEM, PLAN_USER.format(question=state["question"], as_of=state["as_of"],
-                                                                checklist=CHECKLIST), role="plan", qid=ctx.qid)
+                                                                checklist=CHECKLIST), role="plan", qid=ctx.qid,
+                                   max_tokens=6000)
         except BudgetExceeded as e:
             return {"aborted": str(e), "plan": {}, "directions": []}
         if out is None:
             return {"aborted": f"plan failed: {err}", "plan": {}, "directions": []}
-        dirs = [d for d in (out.get("directions") or []) if isinstance(d, dict)]
-        if len(dirs) > b.directions:
-            notes.append(f"plan proposed {len(dirs)} directions; kept the first {b.directions} (soft cap)")
-        dirs = [_clean_direction(d, i + 1, "d") for i, d in enumerate(dirs[: b.directions])]
+        raw = [d for d in (out.get("directions") or []) if isinstance(d, dict)]
+        cands = [_clean_direction(d, i + 1, "c") for i, d in enumerate(raw)]
+        dirs = select_directions(cands, b.directions)
+        notes.append(f"plan proposed {len(cands)} candidate directions in {len({c['category'] for c in cands})} categories; "
+                     f"running {len(dirs)} (budget cap {b.directions})")
         if not any(d["category"] == "own_history" for d in dirs):
             notes.append("no own_history direction in plan")
         target = {k: str((out.get("target") or {}).get(k, ""))[:300]
                   for k in ("what", "unit", "period_start", "period_end", "publisher", "cadence", "caveats")}
         kws = [str(k).lower()[:30] for k in (out.get("market_keywords") or [])][:3]
-        return {"plan": {"target": target, "market_keywords": kws}, "directions": dirs, "plan_notes": notes}
+        return {"plan": {"target": target, "market_keywords": kws, "candidates": cands}, "directions": dirs,
+                "plan_notes": notes}
 
     def approve(state: AgentState):
         if state.get("aborted"):
@@ -175,10 +202,12 @@ def build(ctx: Context):
         if out is None:
             return {**upd, "judge_rounds": [{"round": rnd, "error": err}]}
         ids = {p["id"] for p in pts}
+        # 裁判只列要丢的点（逐点表态会让输出超过 max_tokens，9 月第二轮就是这样失败的）；没列的点 = 保留
         dec = {str(x.get("id")): x for x in out.get("decisions") or [] if isinstance(x, dict)}
         for p in pts:
+            p["judged_round"] = rnd
             if p["id"] in dec:
-                p["keep"] = bool(dec[p["id"]].get("keep", True))
+                p["keep"] = bool(dec[p["id"]].get("keep", False))
                 p["judge_reason"] = str(dec[p["id"]].get("reason", ""))[:300]
         extra = []
         if rnd == 1:
@@ -211,7 +240,7 @@ def build(ctx: Context):
         r = comp.get("result") or {}
         ph = {"estimate": _fmt_num(r.get("central")), "p10": _fmt_num(r.get("p10")), "p90": _fmt_num(r.get("p90")),
               "interval_level": "80%", "interval_basis": str(r.get("basis", "")).replace("_", " "),
-              "n_points_kept": str(sum(1 for p in state.get("points") or [] if p.get("keep"))),
+              "n_points_kept": str(sum(1 for p in state.get("points") or [] if p.get("keep") and p.get("judged_round"))),
               "n_methods": str(sum(1 for m in comp.get("methods") or [] if m.get("estimate")))}
         summary = []
         for m in comp.get("methods") or []:

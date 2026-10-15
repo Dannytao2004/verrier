@@ -114,7 +114,7 @@ def ledger(state: dict, score: dict | None = None) -> str:
     L = [f"# Evidence ledger: {state['qid']}", "", f"- Question: {state['question']}", f"- as_of: {state['as_of']}",
          f"- Pinned target: {_md(t.get('what'))} | unit {_md(t.get('unit'))} | period {t.get('period_start')}..{t.get('period_end')}"
          f" | publisher {_md(t.get('publisher'))}", ""]
-    if score:
+    if score and score.get("answer_value") is not None:
         L += [f"- Official value (scoring only, never shown to the agent): {score.get('answer_value'):,}", ""]
     L += ["## Directions and pages", ""]
     by_dir = {}

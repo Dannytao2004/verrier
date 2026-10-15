@@ -144,8 +144,8 @@ class Context:
         self.calls_path = calls_path
         self.llm = AgentLLM(calls_path, self.budget)
         self.searcher = Searcher(log=self.llm._log)
-        # 哨兵只在代码里用：真值不进任何 prompt
-        self.leak_patterns = ev.leak_patterns(leak_value) if leak_value is not None else []
+        # 哨兵只在代码里用：真值（和其他 as_of 之后才公布的已知值）不进任何 prompt。可以是一个数或一组数
+        self.leak_patterns = ev.leak_patterns(leak_value) if leak_value else []
 
 
 def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period: bool) -> tuple:
@@ -215,7 +215,8 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
                 out["pages"].append(page)
                 continue
             sent = text[:MAX_CHARS_TO_EXTRACTOR]
-            page.update(chars_sent=len(sent), truncated=len(text) > len(sent))
+            page.update(chars_sent=len(sent), truncated=len(text) > len(sent),
+                        late_dates_in_sent_text=[x.isoformat() for x in ev.late_dates(sent, ctx.as_of, date.today())][:10])
             res, err = ctx.llm.ask(EXTRACT_SYSTEM, EXTRACT_USER.format(
                 text=sent, **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end")},
                 hypothesis=str(d.get("hypothesis", ""))[:600], data_to_find=str(d.get("data_to_find", ""))[:600]),

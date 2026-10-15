@@ -340,6 +340,140 @@ class TestGraphOffline(unittest.TestCase):
 
 
 
+@unittest.skipUnless(HAVE_LG, "langgraph not installed (use .venv)")
+class TestGraphRound2AndBudget(unittest.TestCase):
+    """第二轮 base-rate 方向：Send round=2、点的续号、第二轮裁判失败时回退到第一轮的方法；预算中止路径。"""
+
+    def _ctx(self, budget=None):
+        from triangulate.agent import pipeline as P
+        ctx = object.__new__(P.Context)
+        ctx.qid, ctx.question, ctx.as_of_s, ctx.as_of = "t", "How many widgets in June 2026?", "2026-06-20", date(2026, 6, 20)
+        ctx.budget = budget or P.Budget()
+        ctx.leak_patterns = []
+        return ctx
+
+    def test_second_round_numbering_and_fallback(self):
+        from langgraph.types import Command
+
+        from triangulate.agent import graph as G
+        from triangulate.agent import pipeline as P
+        ctx = self._ctx()
+        calls = []
+
+        class FakeLLM:
+            model = "fake"
+
+            def ask(self, system, user, *, role, qid, max_tokens=4000, tries=2):
+                calls.append(role)
+                if role == "plan":
+                    return {"target": {"what": "widgets", "unit": "widgets", "period_start": "2026-06-01",
+                                       "period_end": "2026-06-30", "publisher": "X"}, "market_keywords": [],
+                            "directions": [{"category": "own_history", "hypothesis": "h", "data_to_find": "f"}]}, None
+                if role.startswith("extract"):
+                    if "BASE" in user:
+                        return {"points": [{"name": f"ratio {y}", "value_as_written": f"{v}%", "unit": "%",
+                                            "period_start": f"{y}-01-01", "period_end": f"{y}-12-31", "quote": f"{y} ratio {v}%"}
+                                           for y, v in ((2023, 10), (2024, 11), (2025, 12))]}, None
+                    return {"points": [{"name": f"widgets June {y}", "value_as_written": f"{v:,}", "unit": "widgets",
+                                        "period_start": f"{y}-06-01", "period_end": f"{y}-06-30", "quote": f"June {y}: {v:,} widgets"}
+                                       for y, v in ((2023, 1000), (2024, 1100), (2025, 1210))]}, None
+                if role == "judge:r1":
+                    return {"decisions": [{"id": "p1", "keep": False, "reason": "dup"}],
+                            "extra_directions": [{"id": "b1", "hypothesis": "base rate", "data_to_find": "ratio"}],
+                            "methods": [{"id": "x", "method": "series_naive", "params": {"target_history": ["p2", "p3"], "k": 1}}]}, None
+                if role == "judge:r2":
+                    return None, "reply is not valid JSON"
+                if role == "final":
+                    return {"answer": "About [[estimate]]."}, None
+                raise AssertionError(role)
+
+        class FakeSearcher:
+            def search(self, prompt, *, role, qid, max_uses=3, cap=5):
+                return {"queries": ["q"], "urls": ["https://base.org/1" if "base rate" in prompt else "https://a.org/1"],
+                        "web_search_requests": 1}
+
+        def fake_fetch(url, as_of, qid, **kw):
+            text = "BASE 2023 ratio 10% 2024 ratio 11% 2025 ratio 12%" if "base" in url else \
+                "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets."
+            return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01", "text": text}
+
+        ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
+        with mock.patch.object(P, "fetch_page", fake_fetch), \
+                mock.patch.object(G, "search_markets", lambda k, a: {"keywords": k, "markets": [], "points": [], "note": "x"}):
+            g = G.build(ctx)
+            cfg = {"configurable": {"thread_id": "t2"}}
+            g.invoke({"qid": "t", "question": ctx.question, "as_of": ctx.as_of_s}, cfg)
+            g.invoke(Command(resume={"approved": True}), cfg)
+            st = g.get_state(cfg).values
+        self.assertEqual(calls.count("judge:r1"), 1)
+        self.assertEqual(calls.count("judge:r2"), 1)
+        self.assertEqual([p["id"] for p in st["points"]], [f"p{i}" for i in range(1, 7)])
+        self.assertEqual({p["round"] for p in st["points"][3:]}, {2})
+        self.assertFalse(st["points"][0]["keep"])                    # 第一轮裁判丢掉的
+        self.assertTrue(all(p["keep"] for p in st["points"][1:3]))   # 没列出的 = 保留
+        self.assertEqual(st["compute"]["methods_from_round"], 1)     # 第二轮失败，回退到第一轮的方法
+        self.assertAlmostEqual(st["compute"]["result"]["central"], 1210.0, places=6)
+        self.assertEqual(st["compute"]["methods"][0]["label"], "x")
+        self.assertEqual(st["final"]["placeholders"]["n_points_kept"], "2")  # 只数经裁判看过、且保留的点
+
+    def test_budget_abort_in_sub_agent(self):
+        from triangulate.agent import pipeline as P
+        ctx = self._ctx(P.Budget(usd=0.05))
+
+        class NoSearch:
+            def search(self, *a, **k):
+                raise AssertionError("search must not run when the reservation does not fit")
+        ctx.searcher = NoSearch()
+        out = P.run_direction(ctx, {"what": "w"}, {"id": "d1", "category": "own_history"}, 1)
+        self.assertIn("usd cap", out["aborted"])
+
+
+class TestDirectionsAndGenericEntry(unittest.TestCase):
+    def test_select_directions(self):
+        if not HAVE_LG:
+            self.skipTest("langgraph not installed")
+        from triangulate.agent.graph import _clean_direction, select_directions
+        raw = ([{"category": "own_history", "expected_information": 5}, {"category": "own_history", "expected_information": 4}]
+               + [{"category": "related_series", "expected_information": 4} for _ in range(4)]
+               + [{"category": c, "expected_information": 2} for c in ("physical_flow", "attention", "shocks")]
+               + [{"category": "persona", "expected_information": 1}, {"category": "persona", "expected_information": 3}])
+        cands = [_clean_direction(d, i + 1, "c") for i, d in enumerate(raw)]
+        dirs = select_directions(cands, 8)
+        cats = [d["category"] for d in dirs]
+        self.assertEqual(len(dirs), 8)
+        self.assertEqual(cats[0], "own_history")
+        self.assertIn("persona", cats)                            # 排在清单后面的类别也有名额
+        self.assertGreaterEqual(cats.count("related_series"), 2)  # 一类可以出几个方向
+        self.assertEqual(sum(c["selected"] for c in cands), 8)
+        self.assertEqual([d["id"] for d in dirs], [f"d{i}" for i in range(1, 9)])
+
+    def test_question_without_answer_runs_offline_parts(self):
+        if not HAVE_LG:
+            self.skipTest("langgraph not installed")
+        from triangulate.agent import outputs, run
+        q = {"id": "ask_x", "question": "What share of men in country X have colour vision deficiency?", "as_of": "2026-10-15"}
+        st = {"qid": "ask_x", "question": q["question"], "as_of": q["as_of"], "plan": {"target": {}}, "directions": [],
+              "results": [], "points": [], "compute": {"methods": [], "result": {"central": 0.08, "p10": 0.06, "p90": 0.1}},
+              "final": {"text": "x"}, "judge_rounds": []}
+        sc = run.score_one(q, st)
+        self.assertFalse(sc["scored"])
+        self.assertNotIn("pct_err", sc)
+        self.assertIn("Evidence ledger", outputs.ledger(st, sc))
+        self.assertEqual(run.leakage_audit(st, q["as_of"], None)["sentinel_hits"], [])
+        self.assertNotIn("QUESTIONS", vars(run))  # agent 的运行代码不认识回测题库
+
+    def test_audit_uses_dates_not_strings(self):
+        if not HAVE_LG:
+            self.skipTest("langgraph not installed")
+        from triangulate.agent import run
+        st = {"points": [{"id": "p1", "period_end": "2026-09"}, {"id": "p2", "period_end": "2026-08"},
+                         {"id": "p3", "period_end": "2026-08-31", "published_at_if_visible": "2026-09-15"}],
+              "results": [{"search": {"queries": ["visits 856,467 report"]}, "pages": []}]}
+        a = run.leakage_audit(st, "2026-09-06", [856467])
+        self.assertEqual(a["points_dated_after_as_of"], ["p1", "p3"])  # '2026-09' 按月末算，晚于 as_of
+        self.assertEqual(a["searcher_queries_containing_registered_values"], ["visits 856,467 report"])
+
+
 class TestFetchDecoding(unittest.TestCase):
     def test_gzip_body_is_decompressed(self):
         import gzip

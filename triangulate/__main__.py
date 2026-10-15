@@ -16,16 +16,34 @@ def main(argv=None):
     sub.add_parser("report", help="offline: rebuild states, graphs and tables from saved replies")
     f = sub.add_parser("forecast", help="one-month-ahead forecast of Yellowstone visits (both arms), then score")
     f.add_argument("--force", action="store_true")
-    g = sub.add_parser("agent", help="research agent (LangGraph) on the forecast questions; needs .venv packages")
-    g.add_argument("--question", action="append", default=[], help="question id (repeatable); default: all")
+    g = sub.add_parser("agent", help="research agent (LangGraph): any question via --ask, or the backtest questions; "
+                                     "needs .venv packages")
+    g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+    g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+    g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+    g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+    g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
     g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
-    sub.add_parser("agent-score", help="offline: score saved agent runs against official values and the other arms")
+    s = sub.add_parser("agent-score", help="offline: score saved agent backtest runs against official values and the other arms")
+    s.add_argument("--tag", default="")
     a = ap.parse_args(argv)
 
     if a.cmd in ("agent", "agent-score"):
         from .agent import run as agent_run
         sys.stdout.reconfigure(encoding="utf-8")
-        rows = agent_run.main(a.question, a.auto_approve) if a.cmd == "agent" else agent_run.score_all()
+        if a.cmd == "agent" and a.ask:
+            import hashlib
+            from datetime import date
+            as_of = a.as_of or date.today().isoformat()
+            qid = a.id or "ask_" + hashlib.sha1(f"{a.ask}|{as_of}".encode("utf-8")).hexdigest()[:8]
+            state = agent_run.run_question({"id": qid, "question": a.ask, "as_of": as_of}, a.auto_approve, a.tag)
+            print((state.get("final") or {}).get("text", ""))
+            return
+        from .forecast import FC, QUESTIONS  # 回测题库只在这里接进来；agent 代码本身不认识它
+        fc = json.loads((FC / "summary.json").read_text(encoding="utf-8"))
+        picked = getattr(a, "question", None)
+        qs = [q for q in QUESTIONS if q["id"] in picked] if picked else QUESTIONS
+        rows = agent_run.main(qs, a.auto_approve, a.tag, fc) if a.cmd == "agent" else agent_run.score_all(QUESTIONS, a.tag, fc)
         print(json.dumps(rows, indent=1, ensure_ascii=False))
         return
 

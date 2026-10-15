@@ -20,7 +20,7 @@ Today is {as_of}. Nothing published after today may be used.
 
 Step 1. Pin the target: what exactly is counted or measured, the unit, the exact period it refers to (ISO dates), who publishes the official figure, how often it is published, and any definitional caveats.
 
-Step 2. Diverge. Think about the target along every dimension of the checklist below and propose investigation directions. The number of directions is not fixed (between 4 and 8). "Triangulation" here means many independent lines of evidence, not exactly three. Directions should differ in the kind of evidence, not only in wording.
+Step 2. Diverge. Think about the target along every dimension of the checklist below and list every investigation direction worth checking. The number of directions is not fixed, and a category may hold several directions (for example one per actor under persona, or several different related series). "Triangulation" here means many independent lines of evidence, not exactly three. Directions should differ in the kind of evidence, not only in wording. Code runs as many directions as the budget allows, starting with the most informative ones while covering as many categories as possible, so rate each direction honestly.
 {checklist}
 
 Rules for directions:
@@ -28,13 +28,14 @@ Rules for directions:
 - Every direction must name concrete, findable data, preferably a time series covering the 2-3 years before today plus its latest value before today, so that code can relate it to the target's history.
 - The hypothesis must say how the data are linked to the target and in which direction.
 - search_hints are 2-4 short web search queries.
+- expected_information is an integer from 1 to 5: how much this direction would narrow the estimate if its data were found.
 
 Also give market_keywords: 2-3 lowercase words that a prediction-market question about this exact target would have to contain (empty list if a market is implausible).
 
 Reply with JSON:
 {{"target": {{"what": "...", "unit": "...", "period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "publisher": "...", "cadence": "...", "caveats": "..."}},
  "market_keywords": ["..."],
- "directions": [{{"id": "d1", "category": "own_history", "perspective": "...", "hypothesis": "...", "data_to_find": "...", "search_hints": ["...", "..."]}}]}}"""
+ "directions": [{{"id": "d1", "category": "own_history", "perspective": "...", "hypothesis": "...", "data_to_find": "...", "search_hints": ["...", "..."], "expected_information": 5}}]}}"""
 
 SEARCH_USER = """You are a web research assistant. Use web search to find pages that contain the data described below.
 
@@ -94,13 +95,13 @@ Verified data points (value = code-parsed number in the stated unit; via = archi
 
 Tasks:
 1. assessment: group points that corroborate each other (independent sources agreeing) or conflict (same quantity, different values); note likely causes (different definitions, revisions, periods).
-2. decisions: keep or discard every point id, with a short reason (wrong quantity, wrong period, duplicate of another source, unreliable, not needed).
+2. decisions: list only the points you discard, each with a short reason (wrong quantity, wrong period, duplicate of another source, unreliable, not needed). Every point you do not list is kept.
 3. {extra_rule}
 4. methods: choose methods from the library, using only kept ids. Prefer several methods that rest on different evidence. Do not choose a method whose required data are missing. Give each method an id (m1, m2, ...) and a rationale.
 
 Reply with JSON:
 {{"assessment": [{{"ids": ["p1", "p4"], "relation": "corroborating", "note": "..."}}],
- "decisions": [{{"id": "p1", "keep": true, "reason": "..."}}],
+ "decisions": [{{"id": "p4", "keep": false, "reason": "..."}}],
  "extra_directions": [],
  "methods": [{{"id": "m1", "method": "series_naive", "params": {{"target_history": ["p1", "p2"], "k": 1}}, "rationale": "..."}}]}}"""
 
