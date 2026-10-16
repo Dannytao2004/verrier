@@ -36,27 +36,27 @@
 
 | 模块 / 函数 | 输入 | 输出 | 本轮谁会碰 |
 |---|---|---|---|
-| `search.Searcher.search` | 查询意图、as_of | `{queries, urls, usage…}` | S5：只修 n_search_errors 的计数，结构不变 |
-| `pipeline.run_direction` | 方向、ctx | 方向结果（search、pages、points） | S4 只换锁的顺序；S7 追加 `search.voided` |
-| `evidence.parse_value(value_as_written, scale_word)` | 原文数字、倍数词 | (数值, 是否有倍数) 或报错 | S9：多认中日韩倍数和复合写法，返回结构不变 |
-| `evidence.text_dates / parse_date` | 文本 / 日期串 | 日期列表 / date | S9：多认中日韩和纪年写法 |
-| `evidence.leak_forms / leak_patterns` | 登记值 | 写法列表 / 正则 | S7 加边界；S9 加中日韩写法 |
-| `fetch._decode`、`net.decompress` | body、HTTP 头 | 文本，或 undecodable | S10：解码顺序和 zstd |
-| `assumptions.validate / effective_range` | 裁判的假设列表、target | `{kept, rejected}`、(P10, P90, widened) | S3：只改百分数判断 |
-| `compute.run` | methods、points、target、assumptions | `{methods, result, …}` | S6：只改量纲报错的文字 |
+| `search.Searcher.search` | 查询意图、as_of | `{queries, urls, usage…}` | S4：只修 n_search_errors 的计数，结构不变 |
+| `pipeline.run_direction` | 方向、ctx | 方向结果（search、pages、points） | S3 只换锁的顺序；S6 追加 `search.voided` |
+| `evidence.parse_value(value_as_written, scale_word)` | 原文数字、倍数词 | (数值, 是否有倍数) 或报错 | S8：多认中日韩倍数和复合写法，返回结构不变 |
+| `evidence.text_dates / parse_date` | 文本 / 日期串 | 日期列表 / date | S8：多认中日韩和纪年写法 |
+| `evidence.leak_forms / leak_patterns` | 登记值 | 写法列表 / 正则 | S6 加边界；S8 加中日韩写法 |
+| `fetch._decode`、`net.decompress` | body、HTTP 头 | 文本，或 undecodable | S9：解码顺序和 zstd |
+| `assumptions.validate / effective_range` | 裁判的假设列表、target | `{kept, rejected}`、(P10, P90, widened) | S2：只改百分数判断 |
+| `compute.run` | methods、points、target、assumptions | `{methods, result, …}` | S5：只改量纲报错的文字 |
 | `methods.combine` | 方法结果 | central / p10 / p90 / basis… | 本轮不碰 |
-| `graph` 裁判表格 `_table` | points | 表格文字 | S6（D1） |
-| `graph` 终稿（final 节点） | compute、points、模型文字 | `state.final{template, text, placeholders…}` | S8：追加 model_text、basis 文字 |
-| `run.save_run` | 图的 state | state.json / ledger.md / graph.html | S1 追加 settings；S8 用 basis 文字 |
-| `run.score_all` | 已存 state | summary_<tag>.json | S8：去掉「去年同月」臂（用户已决定去掉这个对照） |
-| `web/results.py` | state.json、summary | 网页 JSON | S8：追加 basis_text |
-| `llm.py`、`jev.py` 的 HTTP | 请求 | 回复 | S11：不跟随跳转 |
+| `graph` 裁判表格 `_table` | points | 表格文字 | S5（D1） |
+| `graph` 终稿（final 节点） | compute、points、模型文字 | `state.final{template, text, placeholders…}` | S7：追加 model_text、basis 文字 |
+| `run.save_run` | 图的 state | state.json / ledger.md / graph.html | S1 追加 settings；S7 用 basis 文字 |
+| `run.score_all` | 已存 state | summary_<tag>.json | S7：去掉「去年同月」臂（用户已决定去掉这个对照） |
+| `web/results.py` | state.json、summary | 网页 JSON | S7：追加 basis_text |
+| `llm.py`、`jev.py` 的 HTTP | 请求 | 回复 | S10：不跟随跳转 |
 
 ## 4. 门槛（每个 tag 前都要过；各阶段的检查以它为底）
 
 - **G1** `./.venv/Scripts/python.exe -m unittest` 全过（S0 先跑一次记下基线；本来就失败的测试要列出来，不能变多）。
 - **G2** `probes/compare_continuous_prompts.py`（假模型跑一遍连续题的全部 prompt）的 sha256：预期不变的阶段必须仍是 `4a56d586…`；
-  会变的阶段（S6、S8）登记新值和原因。
+  会变的阶段（S5、S7）登记新值和原因。
 - **G3** 全量回归表（S0 做的工具）：当前代码对上一个 tag 的导出（`git archive <上一个tag> triangulate` 解到 `probes/out/_old_<tag>/`）逐行相同，
   或者逐行解释差异。
 - **G4** `probes/compare_continuous_paths.py` 两份代码逐 key 相同，或列出差异并解释。
