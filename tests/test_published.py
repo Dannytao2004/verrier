@@ -42,9 +42,50 @@ NEAR_MISSES = [
 
 class TestCandidates(unittest.TestCase):
     def test_terms(self):
-        self.assertEqual(PB.entity_terms(UK), ["smmt", "uk", "united kingdom"])
+        self.assertEqual(PB.entity_terms(UK), ["uk", "united kingdom"])          # v2.4.1：发布方 SMMT 不算实体
         self.assertEqual(PB.measure_stems(UK), {"car", "passe", "regis"})
         self.assertEqual(PB.publisher_terms(UK), ["society of motor manufacturers and traders", "smmt"])
+
+    def test_entity_terms_skip_the_measure_name_and_the_publisher(self):
+        """v2.4.1 审查：'Real GDP of France' 的 real / gdp、'as reported by SMMT' 的 smmt 曾让别的国家、别的范围的总数进候选。"""
+        fr = {"what": "Real GDP of France in the third quarter of 2026, as published by INSEE", "unit": "EUR billion",
+              "period_start": "2026-07-01", "period_end": "2026-09-30", "publisher": "INSEE"}
+        self.assertEqual(PB.entity_terms(fr), ["france"])
+        q3 = dict(unit="EUR billion", ps="2026-07-01")
+        c, _ = PB.candidates([_p("p1", "Germany real GDP, Q3 2026", 1000, **q3), _p("p2", "France real GDP, Q3 2026", 700, **q3)],
+                             fr, date(2026, 10, 16))
+        self.assertEqual([p["id"] for p in c], ["p2"])
+        sc = {**UK, "what": "New car registrations in Scotland, as reported by SMMT", "publisher": "SMMT"}
+        self.assertEqual(PB.entity_terms(sc), ["scotland"])
+        self.assertEqual(PB.candidates([_p("p1", "SMMT UK new car registrations, September 2026", 350518)], sc,
+                                       date(2026, 10, 16))[0], [])
+        # 第一个子句里的发布方是实体的一部分，保留；量的名字后面不是 of / in / for / at / on 时也保留（Bank Rate set by ...）
+        fomc = {"what": "Upper bound of the US federal funds target range after the next FOMC meeting", "publisher": "FOMC"}
+        self.assertEqual(PB.entity_terms(fomc), ["fomc", "us"])
+        boe = {"what": "Bank Rate set by the Bank of England at its September 2026 meeting", "publisher": "Bank of England"}
+        self.assertEqual(PB.entity_terms(boe), ["bank rate", "br", "england", "rate"])
+        bare = {**UK, "what": "New car registrations, as reported by SMMT", "publisher": "SMMT"}
+        self.assertEqual(PB.entity_terms(bare), [])
+        c, note = PB.candidates([_p("p1", TOTAL, 350518)], bare, date(2026, 10, 16))
+        self.assertEqual(len(c), 1)
+        self.assertIn("none (no entity constraint)", note)
+
+    def test_dated_before_the_period_end_or_quoted_as_a_forecast(self):
+        """v2.4.1 审查：页面日期 2026-08-20、quote 说 'SMMT expects around 340,000' 的点曾进候选。"""
+        q = "SMMT expects around 340,000 new cars to be registered in September"
+        fc = _p("p1", "UK new car registrations, September 2026", 340000, page_date="2026-08-20",
+                published_at_if_visible="2026-08-20", quote=q)
+        c, note = PB.candidates([fc], UK, date(2026, 10, 16))
+        self.assertEqual(c, [])
+        self.assertIn("1 point(s) for the target period excluded as dated before the period end", note)
+        for kw in ({"page_date": "2026-09-29"}, {"published_at_if_visible": "2026-09-15"},   # 只看日期
+                   {"quote": q}):                                                            # 只看 quote（页面日期在期末之后）
+            self.assertEqual(PB.candidates([_p("p1", TOTAL, 340000, **kw)], UK, date(2026, 10, 16))[0], [], kw)
+        keep = [_p("p2", TOTAL, 350518, page_date="2026-09-30"),                             # 期末当天不排除
+                _p("p3", TOTAL, 350518, published_at_if_visible="2026-09"),                  # 不完整日期取最晚
+                _p("p4", TOTAL, 350518, quote="Registrations rose 12% to 350,518, better than the 340,000 expected"),
+                _p("p5", TOTAL, 350518, quote="UK new car registrations unexpectedly rose to 350,518 units")]
+        self.assertEqual([p["id"] for p in PB.candidates(keep, UK, date(2026, 10, 16))[0]], ["p2", "p3", "p4", "p5"])
 
     def test_only_same_entity_measure_and_period(self):
         pts = [_p("p1", TOTAL, 350518), _p("p10", "UK private new car registrations, September 2026", 149158),

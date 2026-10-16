@@ -5,11 +5,14 @@
 1. 候选（代码，candidates）：裁判看过并保留的点里，同时满足
    - 期间 = 目标期间：同一年、期末差 <= 3 天、期长差 <= 3 天（compute._same_calendar）；
    - name 里有目标的实体词（entity_terms：目标 what 第一个子句里大写开头的专名词组——整个词组、首字母缩写、
-     其中不是通用类别词的词——以及 what / publisher 里的全大写缩写；一个都没有时不查这一条）；
+     其中不是通用类别词的词——以及 what 里的全大写缩写；不算量的名字和发布方，见 entity_terms；一个都没有时不查这一条，
+     说明里写 no entity constraint）；
    - name 或 unit 和目标量有共同词干（measure_stems：目标 unit 和 what 第一个子句里的实词）；
-   - 单位同为 % 或同不为 %；unit 不是百分点 / 基点（变化量）；name 不说概率、预测、预期、变化（NOT_VALUE）。
-   代码只做粗筛：漏掉的后果是照旧估计（v2.3 的行为），多放的由下一步的模型拒掉。name 和目标量共同词干多的排前面，
-   最多 MAX_CANDIDATES 个。
+   - 单位同为 % 或同不为 %；unit 不是百分点 / 基点（变化量）；name 不说概率、预测、预期、变化（NOT_VALUE）；
+   - v2.4.1：页面日期（快照 = 快照日期）和页面写明的发布日期都不早于目标期末（_dated_before）；quote 里数值所在的
+     那一段不说预测 / 预期（_forecast_quote）。
+   代码只做粗筛（实体词那一条尤其粗：别的实体仍可能通过）：漏掉的后果是照旧估计（v2.3 的行为），多放的由下一步的模型拒掉。
+   name 和目标量共同词干多的排前面，最多 MAX_CANDIDATES 个。
 2. 确认（模型，一次调用，形式同输入核对）：每个候选是不是目标本身；模型只回 id、verdict（target / different）和理由，
    数字一律取自数据点，不由模型写。
 3. 结果（代码，resolve）：确认的点数值一致（相对差 <= REL_TOL）= published，报其中一个
@@ -27,7 +30,7 @@ import urllib.parse
 from . import ablation as AB
 from . import compute as C
 from . import discrete as D
-from .evidence import parse_date
+from .evidence import find_value, parse_date
 from .prompts import PUBLISHED_SYSTEM, PUBLISHED_USER
 
 MAX_CANDIDATES = 20
@@ -35,6 +38,11 @@ REL_TOL = 0.005
 NOT_VALUE = re.compile(r"forecast|project(?:ed|ion)|predict|expect|consensus|outlook|guidance|scenario|probab|\bodds\b|"
                        r"\bchances?\b|likelihood|implied|\bpriced\b|\bchanges?\b|\bgrowth\b|\bincreases?\b|\bdecreases?\b|"
                        r"\bdeclines?\b|\bdifference\b|year[- ]on[- ]year|\byoy\b|\by/y\b", re.I)
+# quote 里数值所在那一段的预测 / 预期词（v2.4.1）。不含涨跌词：实际值的 quote 常写「rose 12% to 350,536」。
+FORECAST_NEAR = re.compile(r"\bforecast|\bproject(?:ed|ion)|\bpredict|\bexpect|\bconsensus|\banticipat|\boutlook|"
+                           r"\bwill be\b|\bon track\b", re.I)
+_CLAUSE = re.compile(r",\s|;|:|\(|\)|[.!?](?:\s|$)|\s[-–—]\s")   # 千分位逗号后面没有空格，不算分段
+PREPS = {"of", "in", "for", "at", "on"}
 NOT_CHECKED = ("not checked: backtest or scored question (as_of before today, or an official value is registered), so the "
                "target cannot have been published by as_of")
 POINT_KEYS = ("id", "name", "value", "value_as_written", "unit", "period_start", "period_end", "source_url", "via",
@@ -52,33 +60,44 @@ def _with_unit(v, unit: str) -> str:
 
 
 def _runs(text: str) -> list:
-    """大写开头的连续词组成的词组（去掉句首单个大写词）。"""
+    """大写开头的连续词组成的词组（去掉句首单个大写词）：[(起始位置, 词组, 词组后面那个词)]。"""
     toks = AB._tokens(text)
     runs, cur = [], []
-    for i, t in enumerate(toks):
+    for i, t in enumerate(toks + [""]):
         if t[:1].isupper():
-            cur.append((i, t))
+            cur.append(i)
             continue
         if cur:
-            runs.append(cur)
+            runs.append((cur[0], [toks[j] for j in cur], t))
         cur = []
-    if cur:
-        runs.append(cur)
-    return [[t for _, t in r] for r in runs if not (r[0][0] == 0 and len(r) == 1)]
+    return [r for r in runs if not (r[0] == 0 and len(r[1]) == 1)]
+
+
+def _run_terms(run: list) -> set:
+    words = [w for w in run if w.lower() not in AB.STOP and w.lower() not in AB._CALENDAR]
+    out = {w.lower() for w in words if len(w) >= 2 and w.lower() not in AB.DESIGNATORS}
+    if len(words) >= 2:
+        out |= {" ".join(words).lower(), "".join(w[0] for w in words).lower()}
+    return out
 
 
 def entity_terms(target: dict) -> list:
-    """目标的实体词（小写，按词边界在点的 name 里找）。'New passenger car registrations in the United Kingdom' +
-    publisher 'Society of Motor Manufacturers and Traders (SMMT)' -> ['smmt', 'uk', 'united kingdom']。"""
+    """目标的实体词（小写，按词边界在点的 name 里找）：what 第一个子句里的大写专名词组，加上 what 里的全大写缩写。
+    v2.4.1 去掉两类不是实体的词：
+    - 量的名字：句首的大写词组后面紧跟 of / in / for / at / on、后面还有别的专名词组时（'Real GDP of France'），
+      它的词、整个词组、缩写都不算，what 里同样的全大写缩写（GDP）也不算；
+    - 只从第一个子句以外来的发布方写法（publisher_terms）：发布方不是实体（'..., as reported by SMMT'：SMMT 也报苏格兰）。
+      第一个子句的专名词组里的不去（'the next FOMC meeting'、'Deliveries of Tesla vehicles'：发布方就是实体）。
+    'New passenger car registrations in the United Kingdom, as reported by SMMT' -> ['uk', 'united kingdom']。
+    仍只是粗筛：量的缩写不在句首词组里（'France real GDP' 的 GDP）、实体不大写或不写时，别的实体仍可能通过，由模型拒。"""
     what = str((target or {}).get("what", ""))
-    out = set()
-    for run in _runs(AB._head(what)):
-        words = [w for w in run if w.lower() not in AB.STOP and w.lower() not in AB._CALENDAR]
-        out |= {w.lower() for w in words if len(w) >= 2 and w.lower() not in AB.DESIGNATORS}
-        if len(words) >= 2:
-            out |= {" ".join(words).lower(), "".join(w[0] for w in words).lower()}
-    out |= {a.lower() for a in re.findall(r"\b[A-Z]{2,}\b", f"{what} {(target or {}).get('publisher', '')}")}
-    return sorted(out)
+    runs = [(s, _run_terms(r), nxt) for s, r, nxt in _runs(AB._head(what))]
+    measure = set()
+    if runs and runs[0][0] == 0 and runs[0][2].lower() in PREPS and runs[0][1] and any(t for _, t, _ in runs[1:]):
+        measure = runs.pop(0)[1]
+    heads = set().union(*(t for _, t, _ in runs))
+    caps = {a.lower() for a in re.findall(r"\b[A-Z]{2,}\b", what)}
+    return sorted(heads | (caps - measure - set(publisher_terms(target))))
 
 
 def publisher_terms(target: dict) -> list:
@@ -106,6 +125,25 @@ def _is_pct(unit: str) -> bool:
     return unit.strip() == "%" or bool(D.PCT_UNIT.search(unit))
 
 
+def _dated_before(p: dict, tpe) -> bool:
+    """页面日期（快照 = 快照日期）或页面写明的发布日期早于目标期末：那时目标值还不可能公布，这个数只能是预测 / 预告。
+    日期不完整时取最晚的可能日期（'2026-09' -> 9 月 30 日），只排除肯定早于期末的。"""
+    return any(d is not None and d < tpe
+               for d in (parse_date(p.get(k), end=True) for k in ("page_date", "published_at_if_visible")))
+
+
+def _forecast_quote(p: dict) -> bool:
+    """quote 里数值所在的那一段（逗号、分号、冒号、括号、句末标点、破折号之间）说预测 / 预期：
+    'SMMT expects around 340,000 new cars to be registered in September'。同一句别的段（'..., better than expected'）不算。"""
+    q, vw = str(p.get("quote") or ""), str(p.get("value_as_written") or "")
+    i = find_value(q, vw) if vw else -1
+    if i < 0:
+        return False
+    a = max((m.end() for m in _CLAUSE.finditer(q[:i])), default=0)
+    m = _CLAUSE.search(q, i + len(vw))
+    return bool(FORECAST_NEAR.search(q[a:m.start() if m else len(q)]))
+
+
 def candidates(points: list, target: dict, as_of) -> tuple:
     """(候选点, 说明)。只看裁判看过并保留的点；规则见模块说明。"""
     tps = parse_date((target or {}).get("period_start"))
@@ -117,7 +155,7 @@ def candidates(points: list, target: dict, as_of) -> tuple:
     tps = tps or tpe
     terms, stems_t = entity_terms(target), measure_stems(target)
     t_pct = _is_pct(str((target or {}).get("unit", "")))
-    out = []
+    out, early = [], 0
     for p in points or []:
         if not (p.get("keep") and p.get("judged_round")) or p.get("ablation_excluded"):
             continue
@@ -126,6 +164,9 @@ def candidates(points: list, target: dict, as_of) -> tuple:
             continue
         ps, pe = C._span(p)
         if pe is None or pe.year != tpe.year or not C._same_calendar(ps, pe, tps, tpe):
+            continue
+        if _dated_before(p, tpe) or _forecast_quote(p):
+            early += 1
             continue
         low = name.lower()
         if terms and not any(re.search(rf"(?<![a-z]){re.escape(t)}(?![a-z])", low) for t in terms):
@@ -137,7 +178,11 @@ def candidates(points: list, target: dict, as_of) -> tuple:
         out.append((len({_mstem(t) for t in AB._tokens(name)} & stems_t), p))
     # 和目标量共同词干多的排前面（「UK new car registrations」先于「UK fleet registrations」），一样多按编号
     out = [p for _, p in sorted(out, key=lambda x: (-x[0], _order(x[1])))]
-    note = f"{len(out)} candidate(s); entity terms {terms}; measure stems {sorted(stems_t)}"
+    note = (f"{len(out)} candidate(s); entity terms {terms or 'none (no entity constraint)'}; "
+            f"measure stems {sorted(stems_t)}")
+    if early:
+        note += (f"; {early} point(s) for the target period excluded as dated before the period end or quoted "
+                 f"as a forecast")
     if len(out) > MAX_CANDIDATES:
         note += f"; only the first {MAX_CANDIDATES} sent to the check"
     return out[:MAX_CANDIDATES], note
