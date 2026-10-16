@@ -1,0 +1,178 @@
+{
+ "qid": "fc_jnto_2026_09",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of foreign visitor arrivals to Japan in September 2026, as first reported in JNTO's monthly estimate.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_visitors_2025",
+      "description": "Total foreign visitor arrivals to Japan in calendar year 2025.",
+      "value": 40000000,
+      "low": 35000000,
+      "high": 45000000,
+      "unit": "visitors",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Extrapolates recent strong growth from 2024 levels (~36.9M) and recovery trends."
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Year-over-year growth factor for foreign visitor arrivals from 2025 to 2026.",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.15,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Assumes continued but moderating growth, with uncertainty due to economic and geopolitical factors."
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual foreign visitor arrivals that occur in September.",
+      "value": 0.08,
+      "low": 0.07,
+      "high": 0.09,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a shoulder month; historical monthly shares typically range 7-9%."
+      }
+     },
+     {
+      "name": "september_2025_visitors",
+      "description": "Foreign visitor arrivals to Japan in September 2025.",
+      "value": 3200000,
+      "low": 2800000,
+      "high": 3600000,
+      "unit": "visitors",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Based on recent monthly levels around 3-3.5 million in 2025."
+      }
+     },
+     {
+      "name": "september_yoy_growth_factor",
+      "description": "Year-over-year growth factor for September foreign visitor arrivals from 2025 to 2026.",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.15,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Similar to annual growth, but with slightly higher uncertainty for a single month."
+      }
+     },
+     {
+      "name": "daily_arrivals_peak",
+      "description": "Average daily foreign visitor arrivals during peak season (e.g., summer).",
+      "value": 120000,
+      "low": 100000,
+      "high": 140000,
+      "unit": "visitors/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Peak daily arrivals in 2025 estimated from monthly totals and seasonal patterns."
+      }
+     },
+     {
+      "name": "september_seasonality_factor",
+      "description": "Ratio of September daily arrivals to peak-season daily arrivals.",
+      "value": 0.85,
+      "low": 0.75,
+      "high": 0.95,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is less busy than peak summer; factor reflects typical seasonal dip."
+      }
+     },
+     {
+      "name": "days_in_september",
+      "description": "Number of days in September.",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "days",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "September has 30 days."
+      }
+     },
+     {
+      "name": "japan_outbound_2025",
+      "description": "Number of Japanese outbound travelers in 2025.",
+      "value": 15000000,
+      "low": 12000000,
+      "high": 18000000,
+      "unit": "travelers",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Japanese outbound travel has been recovering; 2025 estimate based on trends."
+      }
+     },
+     {
+      "name": "inbound_outbound_ratio",
+      "description": "Ratio of foreign visitor arrivals to Japanese outbound travelers.",
+      "value": 2.7,
+      "low": 2.0,
+      "high": 3.5,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "In recent years, inbound has significantly exceeded outbound; ratio around 2.5-3."
+      }
+     },
+     {
+      "name": "september_share_of_outbound",
+      "description": "Fraction of annual Japanese outbound travelers that occur in September.",
+      "value": 0.08,
+      "low": 0.07,
+      "high": 0.09,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Similar seasonality to inbound, with September being a shoulder month."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual 2026 visitors from 2025 total and growth, then allocate to September using seasonal share.",
+      "formula": "annual_visitors_2025 * annual_growth_factor * september_share_of_annual",
+      "output_unit": "visitors"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Start from September 2025 actuals and apply year-over-year growth factor.",
+      "formula": "september_2025_visitors * september_yoy_growth_factor",
+      "output_unit": "visitors"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Use peak daily arrivals scaled by September seasonality factor and days in month.",
+      "formula": "daily_arrivals_peak * september_seasonality_factor * days_in_september",
+      "output_unit": "visitors"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

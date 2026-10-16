@@ -1,0 +1,796 @@
+{
+ "qid": "fc_jp_movers_2026_08",
+ "question": "Assume today is 2026-08-29. You know nothing published after this date. Estimate the number of people who moved between municipalities within Japan in August 2026 (Japanese and foreign residents combined), as first reported in the Statistics Bureau of Japan's monthly Report on Internal Migration in Japan Derived from the Basic Resident Registration.",
+ "target": {
+  "unit": "",
+  "dims": "dimensionless",
+  "definition": "Number of people (Japanese and foreign residents combined) who moved between municipalities within Japan in August 2026, as first reported in the Statistics Bureau of Japan's monthly Report on Internal Migration in Japan Derived from the Basic Resident Registration."
+ },
+ "inputs": [
+  {
+   "name": "japan_population",
+   "description": "Total population of Japan (Japanese and foreign residents) in 2026.",
+   "value": 123000000,
+   "low": 120000000,
+   "high": 126000000,
+   "unit": "people",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Recent population estimates around 123–124 million, with slight decline; foreign residents included."
+   },
+   "count_nouns": [
+    "people"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 120000000.0,
+    "high": 126000000.0,
+    "value": 123000000.0
+   },
+   "median": 122963409.19151518,
+   "used_by": [
+    "p1",
+    "p2"
+   ],
+   "n_dependents": 2,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "annual_movers_per_1000",
+   "description": "Annual number of people who move between municipalities per 1,000 population.",
+   "value": 40,
+   "low": 30,
+   "high": 50,
+   "unit": "people per 1000 people per year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Internal migration rate in Japan has been around 3–5% of population per year in recent years."
+   },
+   "count_nouns": [
+    "people",
+    "people"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 9.506426344208685e-10,
+    "high": 1.5844043907014474e-09,
+    "value": 1.2675235125611579e-09
+   },
+   "median": 38.72983346207417,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "august_share_of_annual",
+   "description": "Fraction of annual internal migration moves that occur in August.",
+   "value": 0.1,
+   "low": 0.08,
+   "high": 0.12,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "August is a peak month; share slightly above 1/12."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.08,
+    "high": 0.12,
+    "value": 0.1
+   },
+   "median": 0.09797958971132711,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "movers_per_1000_august",
+   "description": "August-specific number of people who move between municipalities per 1,000 population.",
+   "value": 4.0,
+   "low": 3.0,
+   "high": 5.0,
+   "unit": "people per 1000 people per month",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "August rate adjusted upward from monthly average due to seasonal peak."
+   },
+   "count_nouns": [
+    "people",
+    "people"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.1407711613050422e-09,
+    "high": 1.901285268841737e-09,
+    "value": 1.5210282150733896e-09
+   },
+   "median": 3.872983346207417,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "japan_households",
+   "description": "Number of households in Japan.",
+   "value": 55000000,
+   "low": 53000000,
+   "high": 57000000,
+   "unit": "households",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Recent household estimates around 54–56 million."
+   },
+   "count_nouns": [
+    "households"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 53000000.0,
+    "high": 57000000.0,
+    "value": 55000000.0
+   },
+   "median": 54963624.33464518,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "annual_household_move_rate",
+   "description": "Annual rate of household moves between municipalities.",
+   "value": 0.05,
+   "low": 0.04,
+   "high": 0.06,
+   "unit": "moves per household per year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "About 5% of households move annually, consistent with migration statistics."
+   },
+   "count_nouns": [
+    "moves",
+    "household"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.2675235125611579e-09,
+    "high": 1.9012852688417366e-09,
+    "value": 1.5844043907014474e-09
+   },
+   "median": 0.04898979485566356,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "august_household_share",
+   "description": "Share of annual household moves occurring in August.",
+   "value": 0.1,
+   "low": 0.08,
+   "high": 0.12,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "August is a peak moving month; share slightly above 1/12."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.08,
+    "high": 0.12,
+    "value": 0.1
+   },
+   "median": 0.09797958971132711,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "people_per_household_move",
+   "description": "Average number of people per household move.",
+   "value": 1.8,
+   "low": 1.5,
+   "high": 2.2,
+   "unit": "people per household move",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Average household size in Japan is about 2.2, but movers tend to be smaller households; 1.8 is a reasonable average."
+   },
+   "count_nouns": [
+    "people",
+    "household",
+    "move"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.5,
+    "high": 2.2,
+    "value": 1.8
+   },
+   "median": 1.8165902124584952,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "people_per_1000",
+   "description": "Conversion factor from per-1000 rates to per-person rates.",
+   "value": 1000,
+   "low": 1000,
+   "high": 1000,
+   "unit": "people per 1000 people",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Definitional constant for per-1000 rates."
+   },
+   "count_nouns": [
+    "people",
+    "people"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.0,
+    "high": 1.0,
+    "value": 1.0
+   },
+   "median": 1000.0,
+   "used_by": [
+    "p1",
+    "p2"
+   ],
+   "n_dependents": 2,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "months_per_year",
+   "description": "Number of months in a year.",
+   "value": 12,
+   "low": 12,
+   "high": 12,
+   "unit": "months per year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Definitional constant."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.0,
+    "high": 1.0,
+    "value": 1.0
+   },
+   "median": 12.0,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  }
+ ],
+ "paths": [
+  {
+   "id": "p1",
+   "method": "top_down",
+   "description": "Estimate annual internal migration from population and annual mover rate, then allocate to August using seasonal share.",
+   "formula": "japan_population * (annual_movers_per_1000 / people_per_1000) * august_share_of_annual",
+   "output_unit": "people",
+   "issues": [
+    "dimension mismatch: formula gives s**-1, target is dimensionless"
+   ],
+   "uses": [
+    "annual_movers_per_1000",
+    "august_share_of_annual",
+    "japan_population",
+    "people_per_1000"
+   ],
+   "dims": "s**-1",
+   "status": "invalid"
+  },
+  {
+   "id": "p2",
+   "method": "bottom_up",
+   "description": "Estimate August moves from population and August-specific mover rate per 1000.",
+   "formula": "japan_population * (movers_per_1000_august / people_per_1000)",
+   "output_unit": "people",
+   "issues": [
+    "dimension mismatch: formula gives s**-1, target is dimensionless"
+   ],
+   "uses": [
+    "japan_population",
+    "movers_per_1000_august",
+    "people_per_1000"
+   ],
+   "dims": "s**-1",
+   "status": "invalid"
+  },
+  {
+   "id": "p3",
+   "method": "proxy",
+   "description": "Estimate August moves from household moves: households × annual move rate × August share × people per move.",
+   "formula": "japan_households * annual_household_move_rate * august_household_share * people_per_household_move",
+   "output_unit": "people",
+   "issues": [
+    "dimension mismatch: formula gives s**-1, target is dimensionless"
+   ],
+   "uses": [
+    "annual_household_move_rate",
+    "august_household_share",
+    "japan_households",
+    "people_per_household_move"
+   ],
+   "dims": "s**-1",
+   "status": "invalid"
+  }
+ ],
+ "errors": [
+  "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+  "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
+  "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+ ],
+ "warnings": [
+  "path p1: declared output_unit 'people' (dimensionless) differs from computed s**-1; computed one is used",
+  "path p2: declared output_unit 'people' (dimensionless) differs from computed s**-1; computed one is used",
+  "path p3: declared output_unit 'people' (dimensionless) differs from computed s**-1; computed one is used"
+ ],
+ "mc": {
+  "samples": 20000,
+  "seed": "20261015:fc_jp_movers_2026_08",
+  "input_distribution": "lognormal, low/high = P10/P90"
+ },
+ "result": {
+  "central": null,
+  "p10": null,
+  "p90": null,
+  "unit": "",
+  "n_valid_paths": 0,
+  "outliers": [],
+  "path_spread_oom": null
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "target",
+    "kind": "target",
+    "label": "target",
+    "status": "failed",
+    "definition": "Number of people (Japanese and foreign residents combined) who moved between municipalities within Japan in August 2026, as first reported in the Statistics Bureau of Japan's monthly Report on Internal Migration in Japan Derived from the Basic Resident Registration.",
+    "unit": "",
+    "central": null,
+    "p10": null,
+    "p90": null,
+    "n_valid_paths": 0,
+    "outliers": []
+   },
+   {
+    "id": "path:p1",
+    "kind": "path",
+    "label": "p1 top_down",
+    "status": "invalid",
+    "method": "top_down",
+    "description": "Estimate annual internal migration from population and annual mover rate, then allocate to August using seasonal share.",
+    "formula": "japan_population * (annual_movers_per_1000 / people_per_1000) * august_share_of_annual",
+    "output_unit": "people",
+    "issues": [
+     "dimension mismatch: formula gives s**-1, target is dimensionless"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p2",
+    "kind": "path",
+    "label": "p2 bottom_up",
+    "status": "invalid",
+    "method": "bottom_up",
+    "description": "Estimate August moves from population and August-specific mover rate per 1000.",
+    "formula": "japan_population * (movers_per_1000_august / people_per_1000)",
+    "output_unit": "people",
+    "issues": [
+     "dimension mismatch: formula gives s**-1, target is dimensionless"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p3",
+    "kind": "path",
+    "label": "p3 proxy",
+    "status": "invalid",
+    "method": "proxy",
+    "description": "Estimate August moves from household moves: households × annual move rate × August share × people per move.",
+    "formula": "japan_households * annual_household_move_rate * august_household_share * people_per_household_move",
+    "output_unit": "people",
+    "issues": [
+     "dimension mismatch: formula gives s**-1, target is dimensionless"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "input:japan_population",
+    "kind": "input",
+    "label": "japan_population",
+    "status": "assumption",
+    "description": "Total population of Japan (Japanese and foreign residents) in 2026.",
+    "value": 123000000,
+    "low": 120000000,
+    "high": 126000000,
+    "unit": "people",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Recent population estimates around 123–124 million, with slight decline; foreign residents included."
+    },
+    "issues": [],
+    "count_nouns": [
+     "people"
+    ],
+    "used_by": [
+     "p1",
+     "p2"
+    ],
+    "n_dependents": 2,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:annual_movers_per_1000",
+    "kind": "input",
+    "label": "annual_movers_per_1000",
+    "status": "assumption",
+    "description": "Annual number of people who move between municipalities per 1,000 population.",
+    "value": 40,
+    "low": 30,
+    "high": 50,
+    "unit": "people per 1000 people per year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Internal migration rate in Japan has been around 3–5% of population per year in recent years."
+    },
+    "issues": [],
+    "count_nouns": [
+     "people",
+     "people"
+    ],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:august_share_of_annual",
+    "kind": "input",
+    "label": "august_share_of_annual",
+    "status": "assumption",
+    "description": "Fraction of annual internal migration moves that occur in August.",
+    "value": 0.1,
+    "low": 0.08,
+    "high": 0.12,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "August is a peak month; share slightly above 1/12."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:movers_per_1000_august",
+    "kind": "input",
+    "label": "movers_per_1000_august",
+    "status": "assumption",
+    "description": "August-specific number of people who move between municipalities per 1,000 population.",
+    "value": 4.0,
+    "low": 3.0,
+    "high": 5.0,
+    "unit": "people per 1000 people per month",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "August rate adjusted upward from monthly average due to seasonal peak."
+    },
+    "issues": [],
+    "count_nouns": [
+     "people",
+     "people"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:japan_households",
+    "kind": "input",
+    "label": "japan_households",
+    "status": "assumption",
+    "description": "Number of households in Japan.",
+    "value": 55000000,
+    "low": 53000000,
+    "high": 57000000,
+    "unit": "households",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Recent household estimates around 54–56 million."
+    },
+    "issues": [],
+    "count_nouns": [
+     "households"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:annual_household_move_rate",
+    "kind": "input",
+    "label": "annual_household_move_rate",
+    "status": "assumption",
+    "description": "Annual rate of household moves between municipalities.",
+    "value": 0.05,
+    "low": 0.04,
+    "high": 0.06,
+    "unit": "moves per household per year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "About 5% of households move annually, consistent with migration statistics."
+    },
+    "issues": [],
+    "count_nouns": [
+     "moves",
+     "household"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:august_household_share",
+    "kind": "input",
+    "label": "august_household_share",
+    "status": "assumption",
+    "description": "Share of annual household moves occurring in August.",
+    "value": 0.1,
+    "low": 0.08,
+    "high": 0.12,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "August is a peak moving month; share slightly above 1/12."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:people_per_household_move",
+    "kind": "input",
+    "label": "people_per_household_move",
+    "status": "assumption",
+    "description": "Average number of people per household move.",
+    "value": 1.8,
+    "low": 1.5,
+    "high": 2.2,
+    "unit": "people per household move",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Average household size in Japan is about 2.2, but movers tend to be smaller households; 1.8 is a reasonable average."
+    },
+    "issues": [],
+    "count_nouns": [
+     "people",
+     "household",
+     "move"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:people_per_1000",
+    "kind": "input",
+    "label": "people_per_1000",
+    "status": "assumption",
+    "description": "Conversion factor from per-1000 rates to per-person rates.",
+    "value": 1000,
+    "low": 1000,
+    "high": 1000,
+    "unit": "people per 1000 people",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Definitional constant for per-1000 rates."
+    },
+    "issues": [],
+    "count_nouns": [
+     "people",
+     "people"
+    ],
+    "used_by": [
+     "p1",
+     "p2"
+    ],
+    "n_dependents": 2,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:months_per_year",
+    "kind": "input",
+    "label": "months_per_year",
+    "status": "assumption",
+    "description": "Number of months in a year.",
+    "value": 12,
+    "low": 12,
+    "high": 12,
+    "unit": "months per year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Definitional constant."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   }
+  ],
+  "edges": [
+   {
+    "source": "path:p1",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:annual_movers_per_1000",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:august_share_of_annual",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:japan_population",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:people_per_1000",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p2",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:japan_population",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:movers_per_1000_august",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:people_per_1000",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p3",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:annual_household_move_rate",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:august_household_share",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:japan_households",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:people_per_household_move",
+    "target": "path:p3",
+    "kind": "used_by"
+   }
+  ]
+ }
+}

@@ -1,0 +1,806 @@
+{
+ "qid": "fc_nhs_ae_2026_09",
+ "question": "Assume today is 2026-09-08. You know nothing published after this date. Estimate the total number of A&E attendances in England in September 2026 (all A&E types, including minor injury units and walk-in centres), as reported in NHS England's monthly A&E Attendances and Emergency Admissions statistics.",
+ "target": {
+  "unit": "",
+  "dims": "dimensionless",
+  "definition": "Total number of A&E attendances in England during September 2026, all A&E types, as reported in NHS England's monthly A&E Attendances and Emergency Admissions statistics."
+ },
+ "inputs": [
+  {
+   "name": "england_population",
+   "description": "Mid-2026 population of England.",
+   "value": 57500000,
+   "low": 56500000,
+   "high": 58500000,
+   "unit": "people",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "ONS mid-2024 estimate ~57.0m, projected forward with modest growth."
+   },
+   "count_nouns": [
+    "people"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 56500000.0,
+    "high": 58500000.0,
+    "value": 57500000.0
+   },
+   "median": 57491303.6902104,
+   "used_by": [
+    "p1",
+    "p3"
+   ],
+   "n_dependents": 2,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "annual_attendances_per_person",
+   "description": "Annual A&E attendances per person in England.",
+   "value": 0.46,
+   "low": 0.42,
+   "high": 0.5,
+   "unit": "attendances/person/year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "NHS England reported ~26-27 million attendances per year recently; divided by population gives ~0.46."
+   },
+   "count_nouns": [
+    "attendances",
+    "person"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.3308996881892157e-08,
+    "high": 1.5844043907014474e-08,
+    "value": 1.4576520394453317e-08
+   },
+   "median": 0.458257569495584,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "september_share_of_annual",
+   "description": "Fraction of annual A&E attendances occurring in September.",
+   "value": 0.0833,
+   "low": 0.08,
+   "high": 0.087,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September has 30 days; monthly share is roughly 1/12, with slight seasonal variation."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.08,
+    "high": 0.087,
+    "value": 0.0833
+   },
+   "median": 0.08342661445845684,
+   "used_by": [
+    "p1",
+    "p3"
+   ],
+   "n_dependents": 2,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "daily_attendances_per_type1",
+   "description": "Average daily A&E attendances at a major (type 1) A&E department.",
+   "value": 300,
+   "low": 250,
+   "high": 350,
+   "unit": "attendances/day",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Typical large hospital A&E sees a few hundred patients per day."
+   },
+   "count_nouns": [
+    "attendances"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.0028935185185185184,
+    "high": 0.004050925925925926,
+    "value": 0.003472222222222222
+   },
+   "median": 295.8039891549808,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.14612803567823818,
+   "sensitivity_path_max": 0.14612803567823818
+  },
+  {
+   "name": "type1_departments",
+   "description": "Number of major (type 1) A&E departments in England.",
+   "value": 220,
+   "low": 200,
+   "high": 240,
+   "unit": "departments",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "NHS England lists around 220 type 1 A&E departments."
+   },
+   "count_nouns": [
+    "departments"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 200.0,
+    "high": 240.0,
+    "value": 220.0
+   },
+   "median": 219.08902300206645,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.07918124604762511,
+   "sensitivity_path_max": 0.07918124604762511
+  },
+  {
+   "name": "other_ae_share",
+   "description": "Share of total A&E attendances that are at non-type-1 facilities (type 2, 3, 4: minor injury units, walk-in centres, etc.).",
+   "value": 0.2,
+   "low": 0.15,
+   "high": 0.25,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "NHS England data show roughly 15-25% of attendances are at non-type-1 facilities."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.15,
+    "high": 0.25,
+    "value": 0.2
+   },
+   "median": 0.19364916731037085,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.05435766232259276,
+   "sensitivity_path_max": 0.05435766232259276
+  },
+  {
+   "name": "days_in_september",
+   "description": "Number of days in September.",
+   "value": 30,
+   "low": 30,
+   "high": 30,
+   "unit": "days",
+   "provenance": {
+    "type": "sourced",
+    "source": "Gregorian calendar",
+    "url": "",
+    "quote": "September has 30 days."
+   },
+   "count_nouns": [],
+   "dims": "s",
+   "issues": [],
+   "status": "sourced_unverified",
+   "usable": true,
+   "si": {
+    "low": 2592000.0,
+    "high": 2592000.0,
+    "value": 2592000.0
+   },
+   "median": 30.0,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0,
+   "sensitivity_path_max": 0.0
+  },
+  {
+   "name": "annual_gp_consultations_per_person",
+   "description": "Annual GP consultations per person in England.",
+   "value": 5,
+   "low": 4,
+   "high": 6,
+   "unit": "consultations/person/year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Commonly cited figure of about 5 GP consultations per person per year."
+   },
+   "count_nouns": [
+    "consultations",
+    "person"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.267523512561158e-07,
+    "high": 1.9012852688417367e-07,
+    "value": 1.5844043907014474e-07
+   },
+   "median": 4.898979485566356,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "ae_to_gp_consultation_ratio",
+   "description": "Ratio of A&E attendances to GP consultations.",
+   "value": 0.09,
+   "low": 0.07,
+   "high": 0.11,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "A&E attendances are roughly 9% of GP consultations (26m vs 300m)."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.07,
+    "high": 0.11,
+    "value": 0.09
+   },
+   "median": 0.08774964387392123,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "days_per_year",
+   "description": "Number of days in a year.",
+   "value": 365,
+   "low": 365,
+   "high": 365,
+   "unit": "days/year",
+   "provenance": {
+    "type": "sourced",
+    "source": "Gregorian calendar",
+    "url": "",
+    "quote": "A common year has 365 days."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "sourced_unverified",
+   "usable": true,
+   "si": {
+    "low": 0.999315537303217,
+    "high": 0.999315537303217,
+    "value": 0.999315537303217
+   },
+   "median": 365.0,
+   "used_by": [
+    "p1",
+    "p3"
+   ],
+   "n_dependents": 2,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  }
+ ],
+ "paths": [
+  {
+   "id": "p1",
+   "method": "top_down",
+   "description": "Estimate annual attendances from population and per-capita rate, then allocate to September.",
+   "formula": "england_population * annual_attendances_per_person * september_share_of_annual * days_per_year",
+   "output_unit": "attendances",
+   "issues": [
+    "dimension mismatch: formula gives s**-1, target is dimensionless"
+   ],
+   "uses": [
+    "annual_attendances_per_person",
+    "days_per_year",
+    "england_population",
+    "september_share_of_annual"
+   ],
+   "dims": "s**-1",
+   "status": "invalid"
+  },
+  {
+   "id": "p2",
+   "method": "bottom_up",
+   "description": "Count type 1 departments, multiply by daily attendances and days, then scale up for other A&E types.",
+   "formula": "type1_departments * daily_attendances_per_type1 * days_in_september / (1 - other_ae_share)",
+   "output_unit": "attendances",
+   "issues": [],
+   "uses": [
+    "daily_attendances_per_type1",
+    "days_in_september",
+    "other_ae_share",
+    "type1_departments"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 2423248.5696216607,
+   "p10": 1980569.8174449734,
+   "p90": 2963797.4647247563,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": 2.8929823996598605e-16
+  },
+  {
+   "id": "p3",
+   "method": "proxy",
+   "description": "Scale from annual GP consultations using the ratio of A&E attendances to GP consultations, then allocate to September.",
+   "formula": "england_population * annual_gp_consultations_per_person * ae_to_gp_consultation_ratio * september_share_of_annual * days_per_year",
+   "output_unit": "attendances",
+   "issues": [
+    "dimension mismatch: formula gives s**-1, target is dimensionless"
+   ],
+   "uses": [
+    "ae_to_gp_consultation_ratio",
+    "annual_gp_consultations_per_person",
+    "days_per_year",
+    "england_population",
+    "september_share_of_annual"
+   ],
+   "dims": "s**-1",
+   "status": "invalid"
+  }
+ ],
+ "errors": [
+  "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+  "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+ ],
+ "warnings": [
+  "path p1: declared output_unit 'attendances' (dimensionless) differs from computed s**-1; computed one is used",
+  "path p3: declared output_unit 'attendances' (dimensionless) differs from computed s**-1; computed one is used"
+ ],
+ "mc": {
+  "samples": 20000,
+  "seed": "20261015:fc_nhs_ae_2026_09",
+  "input_distribution": "lognormal, low/high = P10/P90"
+ },
+ "result": {
+  "central": 2423248.5696216593,
+  "p10": 1980569.8174449734,
+  "p90": 2963797.4647247563,
+  "unit": "",
+  "n_valid_paths": 1,
+  "outliers": [],
+  "path_spread_oom": 0.0
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "target",
+    "kind": "target",
+    "label": "target",
+    "status": "estimated",
+    "definition": "Total number of A&E attendances in England during September 2026, all A&E types, as reported in NHS England's monthly A&E Attendances and Emergency Admissions statistics.",
+    "unit": "",
+    "central": 2423248.5696216593,
+    "p10": 1980569.8174449734,
+    "p90": 2963797.4647247563,
+    "n_valid_paths": 1,
+    "outliers": []
+   },
+   {
+    "id": "path:p1",
+    "kind": "path",
+    "label": "p1 top_down",
+    "status": "invalid",
+    "method": "top_down",
+    "description": "Estimate annual attendances from population and per-capita rate, then allocate to September.",
+    "formula": "england_population * annual_attendances_per_person * september_share_of_annual * days_per_year",
+    "output_unit": "attendances",
+    "issues": [
+     "dimension mismatch: formula gives s**-1, target is dimensionless"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p2",
+    "kind": "path",
+    "label": "p2 bottom_up",
+    "status": "valid",
+    "method": "bottom_up",
+    "description": "Count type 1 departments, multiply by daily attendances and days, then scale up for other A&E types.",
+    "formula": "type1_departments * daily_attendances_per_type1 * days_in_september / (1 - other_ae_share)",
+    "output_unit": "attendances",
+    "issues": [],
+    "median": 2423248.5696216607,
+    "p10": 1980569.8174449734,
+    "p90": 2963797.4647247563,
+    "log10_vs_central": 2.8929823996598605e-16,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p3",
+    "kind": "path",
+    "label": "p3 proxy",
+    "status": "invalid",
+    "method": "proxy",
+    "description": "Scale from annual GP consultations using the ratio of A&E attendances to GP consultations, then allocate to September.",
+    "formula": "england_population * annual_gp_consultations_per_person * ae_to_gp_consultation_ratio * september_share_of_annual * days_per_year",
+    "output_unit": "attendances",
+    "issues": [
+     "dimension mismatch: formula gives s**-1, target is dimensionless"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "input:england_population",
+    "kind": "input",
+    "label": "england_population",
+    "status": "assumption",
+    "description": "Mid-2026 population of England.",
+    "value": 57500000,
+    "low": 56500000,
+    "high": 58500000,
+    "unit": "people",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "ONS mid-2024 estimate ~57.0m, projected forward with modest growth."
+    },
+    "issues": [],
+    "count_nouns": [
+     "people"
+    ],
+    "used_by": [
+     "p1",
+     "p3"
+    ],
+    "n_dependents": 2,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:annual_attendances_per_person",
+    "kind": "input",
+    "label": "annual_attendances_per_person",
+    "status": "assumption",
+    "description": "Annual A&E attendances per person in England.",
+    "value": 0.46,
+    "low": 0.42,
+    "high": 0.5,
+    "unit": "attendances/person/year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "NHS England reported ~26-27 million attendances per year recently; divided by population gives ~0.46."
+    },
+    "issues": [],
+    "count_nouns": [
+     "attendances",
+     "person"
+    ],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:september_share_of_annual",
+    "kind": "input",
+    "label": "september_share_of_annual",
+    "status": "assumption",
+    "description": "Fraction of annual A&E attendances occurring in September.",
+    "value": 0.0833,
+    "low": 0.08,
+    "high": 0.087,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September has 30 days; monthly share is roughly 1/12, with slight seasonal variation."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1",
+     "p3"
+    ],
+    "n_dependents": 2,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:daily_attendances_per_type1",
+    "kind": "input",
+    "label": "daily_attendances_per_type1",
+    "status": "assumption",
+    "description": "Average daily A&E attendances at a major (type 1) A&E department.",
+    "value": 300,
+    "low": 250,
+    "high": 350,
+    "unit": "attendances/day",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Typical large hospital A&E sees a few hundred patients per day."
+    },
+    "issues": [],
+    "count_nouns": [
+     "attendances"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.14612803567823818,
+    "sensitivity_path_max": 0.14612803567823818
+   },
+   {
+    "id": "input:type1_departments",
+    "kind": "input",
+    "label": "type1_departments",
+    "status": "assumption",
+    "description": "Number of major (type 1) A&E departments in England.",
+    "value": 220,
+    "low": 200,
+    "high": 240,
+    "unit": "departments",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "NHS England lists around 220 type 1 A&E departments."
+    },
+    "issues": [],
+    "count_nouns": [
+     "departments"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.07918124604762511,
+    "sensitivity_path_max": 0.07918124604762511
+   },
+   {
+    "id": "input:other_ae_share",
+    "kind": "input",
+    "label": "other_ae_share",
+    "status": "assumption",
+    "description": "Share of total A&E attendances that are at non-type-1 facilities (type 2, 3, 4: minor injury units, walk-in centres, etc.).",
+    "value": 0.2,
+    "low": 0.15,
+    "high": 0.25,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "NHS England data show roughly 15-25% of attendances are at non-type-1 facilities."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.05435766232259276,
+    "sensitivity_path_max": 0.05435766232259276
+   },
+   {
+    "id": "input:days_in_september",
+    "kind": "input",
+    "label": "days_in_september",
+    "status": "sourced_unverified",
+    "description": "Number of days in September.",
+    "value": 30,
+    "low": 30,
+    "high": 30,
+    "unit": "days",
+    "provenance": {
+     "type": "sourced",
+     "source": "Gregorian calendar",
+     "url": "",
+     "quote": "September has 30 days."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0,
+    "sensitivity_path_max": 0.0
+   },
+   {
+    "id": "input:annual_gp_consultations_per_person",
+    "kind": "input",
+    "label": "annual_gp_consultations_per_person",
+    "status": "assumption",
+    "description": "Annual GP consultations per person in England.",
+    "value": 5,
+    "low": 4,
+    "high": 6,
+    "unit": "consultations/person/year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Commonly cited figure of about 5 GP consultations per person per year."
+    },
+    "issues": [],
+    "count_nouns": [
+     "consultations",
+     "person"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:ae_to_gp_consultation_ratio",
+    "kind": "input",
+    "label": "ae_to_gp_consultation_ratio",
+    "status": "assumption",
+    "description": "Ratio of A&E attendances to GP consultations.",
+    "value": 0.09,
+    "low": 0.07,
+    "high": 0.11,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "A&E attendances are roughly 9% of GP consultations (26m vs 300m)."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:days_per_year",
+    "kind": "input",
+    "label": "days_per_year",
+    "status": "sourced_unverified",
+    "description": "Number of days in a year.",
+    "value": 365,
+    "low": 365,
+    "high": 365,
+    "unit": "days/year",
+    "provenance": {
+     "type": "sourced",
+     "source": "Gregorian calendar",
+     "url": "",
+     "quote": "A common year has 365 days."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1",
+     "p3"
+    ],
+    "n_dependents": 2,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   }
+  ],
+  "edges": [
+   {
+    "source": "path:p1",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:annual_attendances_per_person",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:days_per_year",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:england_population",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:september_share_of_annual",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p2",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:daily_attendances_per_type1",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:days_in_september",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:other_ae_share",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:type1_departments",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p3",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:ae_to_gp_consultation_ratio",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:annual_gp_consultations_per_person",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:days_per_year",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:england_population",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:september_share_of_annual",
+    "target": "path:p3",
+    "kind": "used_by"
+   }
+  ]
+ }
+}

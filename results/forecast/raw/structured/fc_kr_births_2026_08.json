@@ -1,0 +1,254 @@
+{
+ "qid": "fc_kr_births_2026_08",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of live births in South Korea during August 2026, as first reported in the national statistics agency's monthly Population Trends release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_births_2025",
+      "description": "Total live births in South Korea in calendar year 2025.",
+      "value": 240000,
+      "low": 230000,
+      "high": 250000,
+      "unit": "births",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent monthly counts around 20k imply roughly 240k annual births, with a slight recent uptick."
+      }
+     },
+     {
+      "name": "august_share_of_annual_births",
+      "description": "Fraction of annual live births that occur in August.",
+      "value": 0.085,
+      "low": 0.08,
+      "high": 0.09,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is near the annual average; seasonal share typically 8–9%."
+      }
+     },
+     {
+      "name": "monthly_births_recent",
+      "description": "Average monthly live births in South Korea in the most recent months before August 2026.",
+      "value": 20000,
+      "low": 19000,
+      "high": 21000,
+      "unit": "births/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent monthly counts have hovered around 20k."
+      }
+     },
+     {
+      "name": "august_seasonal_factor",
+      "description": "Multiplicative factor for August relative to an average month.",
+      "value": 1.02,
+      "low": 0.96,
+      "high": 1.08,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August births are close to average, with modest seasonal variation."
+      }
+     },
+     {
+      "name": "births_per_woman_annual",
+      "description": "Annual live births per woman of reproductive age (15–49) in South Korea.",
+      "value": 0.035,
+      "low": 0.033,
+      "high": 0.037,
+      "unit": "births/woman/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by ~240k births and ~7 million women aged 15–49."
+      }
+     },
+     {
+      "name": "women_15_49",
+      "description": "Number of women aged 15–49 in South Korea.",
+      "value": 7000000,
+      "low": 6800000,
+      "high": 7200000,
+      "unit": "women",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Approximate size of the reproductive-age female population."
+      }
+     },
+     {
+      "name": "august_fraction_of_year",
+      "description": "Fraction of the year represented by August.",
+      "value": 0.0847,
+      "low": 0.0847,
+      "high": 0.0847,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August has 31 days; 31/366 ≈ 0.0847 for a leap year."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate annual births to August using the seasonal share.",
+      "formula": "annual_births_2025 * august_share_of_annual_births",
+      "output_unit": "births"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Scale recent monthly births by the August seasonal factor.",
+      "formula": "monthly_births_recent * august_seasonal_factor",
+      "output_unit": "births"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Estimate from reproductive-age women and per-woman birth rate, prorated to August.",
+      "formula": "women_15_49 * births_per_woman_annual * august_fraction_of_year",
+      "output_unit": "births"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Number of live births in South Korea during August 2026, as first reported in the national statistics agency's monthly Population Trends release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_births_2025",
+      "description": "Total live births in South Korea in calendar year 2025.",
+      "value": 240000,
+      "low": 230000,
+      "high": 250000,
+      "unit": "births",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent monthly counts around 20k imply roughly 240k annual births, with a slight recent uptick."
+      }
+     },
+     {
+      "name": "august_share_of_annual_births",
+      "description": "Fraction of annual live births that occur in August.",
+      "value": 0.085,
+      "low": 0.08,
+      "high": 0.09,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is near the annual average; seasonal share typically 8–9%."
+      }
+     },
+     {
+      "name": "monthly_births_recent",
+      "description": "Average monthly live births in South Korea in the most recent months before August 2026.",
+      "value": 20000,
+      "low": 19000,
+      "high": 21000,
+      "unit": "births/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent monthly counts have hovered around 20k."
+      }
+     },
+     {
+      "name": "august_seasonal_factor",
+      "description": "Multiplicative factor for August relative to an average month.",
+      "value": 1.02,
+      "low": 0.96,
+      "high": 1.08,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August births are close to average, with modest seasonal variation."
+      }
+     },
+     {
+      "name": "births_per_woman_annual",
+      "description": "Annual live births per woman of reproductive age (15–49) in South Korea.",
+      "value": 0.035,
+      "low": 0.033,
+      "high": 0.037,
+      "unit": "births/woman/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by ~240k births and ~7 million women aged 15–49."
+      }
+     },
+     {
+      "name": "women_15_49",
+      "description": "Number of women aged 15–49 in South Korea.",
+      "value": 7000000,
+      "low": 6800000,
+      "high": 7200000,
+      "unit": "women",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Approximate size of the reproductive-age female population."
+      }
+     },
+     {
+      "name": "august_fraction_of_year",
+      "description": "Fraction of the year represented by August.",
+      "value": 0.0847,
+      "low": 0.0847,
+      "high": 0.0847,
+      "unit": "",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August has 31 days; 31/366 ≈ 0.0847 for a leap year."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate annual births to August using the seasonal share.",
+      "formula": "annual_births_2025 * august_share_of_annual_births",
+      "output_unit": "births"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Scale recent monthly births by the August seasonal factor.",
+      "formula": "monthly_births_recent * august_seasonal_factor",
+      "output_unit": "births"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Estimate from reproductive-age women and per-woman birth rate, prorated to August.",
+      "formula": "women_15_49 * births_per_woman_annual * august_fraction_of_year",
+      "output_unit": "births"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  }
+ ],
+ "final_attempt": 2
+}

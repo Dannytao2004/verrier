@@ -312,5 +312,100 @@
    },
    "remaining_errors": []
   }
+ },
+ {
+  "id": "fc_nhs_ae_2026_09",
+  "month": null,
+  "as_of": "2026-09-08",
+  "released": "2026-10-08",
+  "answer_value": 2440000,
+  "source": "https://www.gov.uk/government/statistics/ae-attendances-and-emergency-admissions-for-september-2026-and-quarterly-report-q2",
+  "last_year_same_month": {
+   "estimate": 2309154,
+   "pct_err": -0.05362540983606556
+  },
+  "naive": {
+   "status": "ok",
+   "estimate": 2100000.0,
+   "pct_err": -0.139344262295082,
+   "log10_err": -0.06517053160481018,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": 2423248.5696216593,
+   "pct_err": -0.006865340318992108,
+   "log10_err": -0.0029918612816411103,
+   "p10": 1980569.8174449734,
+   "p90": 2963797.4647247563,
+   "covered_80": true,
+   "n_valid_paths": 1,
+   "attempts": 2,
+   "paths": {
+    "p1": [
+     "top_down",
+     null
+    ],
+    "p2": [
+     "bottom_up",
+     2423248.5696216607
+    ],
+    "p3": [
+     "proxy",
+     null
+    ]
+   },
+   "remaining_errors": [
+    "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  }
+ },
+ {
+  "id": "fc_jp_movers_2026_08",
+  "month": null,
+  "as_of": "2026-08-29",
+  "released": "2026-09-29",
+  "answer_value": 356920,
+  "source": "https://www.stat.go.jp/data/idou/sokuhou/tsuki/index.html",
+  "last_year_same_month": {
+   "estimate": 348602,
+   "pct_err": -0.023304942283985164
+  },
+  "naive": {
+   "status": "ok",
+   "estimate": 400000.0,
+   "pct_err": 0.12069931637341691,
+   "log10_err": 0.049489107014003365,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": null,
+   "pct_err": null,
+   "log10_err": null,
+   "p10": null,
+   "p90": null,
+   "covered_80": false,
+   "n_valid_paths": 0,
+   "attempts": 2,
+   "paths": {
+    "p1": [
+     "top_down",
+     null
+    ],
+    "p2": [
+     "bottom_up",
+     null
+    ],
+    "p3": [
+     "proxy",
+     null
+    ]
+   },
+   "remaining_errors": [
+    "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  }
  }
 ]

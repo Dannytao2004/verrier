@@ -1,0 +1,376 @@
+{
+ "qid": "fc_jp_movers_2026_08",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of people (Japanese and foreign residents combined) who moved between municipalities within Japan in August 2026, as first reported in the Statistics Bureau of Japan's monthly Report on Internal Migration in Japan Derived from the Basic Resident Registration.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "japan_population",
+      "description": "Total population of Japan (Japanese and foreign residents) in 2026.",
+      "value": 123000000,
+      "low": 120000000,
+      "high": 126000000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent population estimates around 123–124 million, with slight decline; foreign residents included."
+      }
+     },
+     {
+      "name": "annual_movers_per_1000",
+      "description": "Annual number of people who move between municipalities per 1,000 population.",
+      "value": 40,
+      "low": 30,
+      "high": 50,
+      "unit": "people per 1000 people per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Internal migration rate in Japan has been around 3–5% of population per year in recent years."
+      }
+     },
+     {
+      "name": "august_seasonal_factor",
+      "description": "Ratio of August internal migration volume to the average monthly volume.",
+      "value": 1.2,
+      "low": 1.1,
+      "high": 1.3,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August typically sees higher moves due to summer relocations and job changes."
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Number of months in a year.",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Definitional constant."
+      }
+     },
+     {
+      "name": "movers_per_1000_per_month",
+      "description": "Monthly number of people who move between municipalities per 1,000 population.",
+      "value": 3.3,
+      "low": 2.5,
+      "high": 4.2,
+      "unit": "people per 1000 people per month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual rate divided by 12, consistent with 40 per 1000 per year."
+      }
+     },
+     {
+      "name": "movers_per_1000_august",
+      "description": "August-specific number of people who move between municipalities per 1,000 population.",
+      "value": 4.0,
+      "low": 3.0,
+      "high": 5.0,
+      "unit": "people per 1000 people per month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August rate adjusted upward from monthly average due to seasonal peak."
+      }
+     },
+     {
+      "name": "annual_moves_per_mover",
+      "description": "Average number of municipality-to-municipality moves per person who moves at least once in a year.",
+      "value": 1.1,
+      "low": 1.0,
+      "high": 1.3,
+      "unit": "moves per mover per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Most movers move once; a small fraction move multiple times."
+      }
+     },
+     {
+      "name": "share_movers_in_august",
+      "description": "Share of annual internal migration moves that occur in August.",
+      "value": 0.1,
+      "low": 0.08,
+      "high": 0.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is one of the busier months; roughly 1/12 to 1/8 of annual moves."
+      }
+     },
+     {
+      "name": "annual_movers",
+      "description": "Total number of people who moved between municipalities within Japan in a year.",
+      "value": 5000000,
+      "low": 4000000,
+      "high": 6000000,
+      "unit": "people per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Roughly 4–5% of population moves annually, consistent with recent migration reports."
+      }
+     },
+     {
+      "name": "august_share_of_annual",
+      "description": "Fraction of annual internal migration moves that occur in August.",
+      "value": 0.1,
+      "low": 0.08,
+      "high": 0.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is a peak month; share slightly above 1/12."
+      }
+     },
+     {
+      "name": "japan_households",
+      "description": "Number of households in Japan.",
+      "value": 55000000,
+      "low": 53000000,
+      "high": 57000000,
+      "unit": "households",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent household estimates around 54–56 million."
+      }
+     },
+     {
+      "name": "annual_household_move_rate",
+      "description": "Annual rate of household moves between municipalities.",
+      "value": 0.05,
+      "low": 0.04,
+      "high": 0.06,
+      "unit": "moves per household per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "About 5% of households move annually, consistent with migration statistics."
+      }
+     },
+     {
+      "name": "august_household_share",
+      "description": "Share of annual household moves occurring in August.",
+      "value": 0.1,
+      "low": 0.08,
+      "high": 0.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is a peak moving month; share slightly above 1/12."
+      }
+     },
+     {
+      "name": "people_per_household_move",
+      "description": "Average number of people per household move.",
+      "value": 1.8,
+      "low": 1.5,
+      "high": 2.2,
+      "unit": "people per household move",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Average household size in Japan is about 2.2, but movers tend to be smaller households; 1.8 is a reasonable average."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual internal migration from population and annual mover rate, then allocate to August using seasonal share.",
+      "formula": "japan_population * (annual_movers_per_1000 / 1000) * august_share_of_annual",
+      "output_unit": "people"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Estimate August moves from population and August-specific mover rate per 1000.",
+      "formula": "japan_population * (movers_per_1000_august / 1000)",
+      "output_unit": "people"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Estimate August moves from household moves: households × annual move rate × August share × people per move.",
+      "formula": "japan_households * annual_household_move_rate * august_household_share * people_per_household_move",
+      "output_unit": "people"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p1: formula: numeric constant 1000 not allowed (only 1 and exponents); make it a named input",
+    "path p2: formula: numeric constant 1000 not allowed (only 1 and exponents); make it a named input",
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Number of people (Japanese and foreign residents combined) who moved between municipalities within Japan in August 2026, as first reported in the Statistics Bureau of Japan's monthly Report on Internal Migration in Japan Derived from the Basic Resident Registration.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "japan_population",
+      "description": "Total population of Japan (Japanese and foreign residents) in 2026.",
+      "value": 123000000,
+      "low": 120000000,
+      "high": 126000000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent population estimates around 123–124 million, with slight decline; foreign residents included."
+      }
+     },
+     {
+      "name": "annual_movers_per_1000",
+      "description": "Annual number of people who move between municipalities per 1,000 population.",
+      "value": 40,
+      "low": 30,
+      "high": 50,
+      "unit": "people per 1000 people per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Internal migration rate in Japan has been around 3–5% of population per year in recent years."
+      }
+     },
+     {
+      "name": "august_share_of_annual",
+      "description": "Fraction of annual internal migration moves that occur in August.",
+      "value": 0.1,
+      "low": 0.08,
+      "high": 0.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is a peak month; share slightly above 1/12."
+      }
+     },
+     {
+      "name": "movers_per_1000_august",
+      "description": "August-specific number of people who move between municipalities per 1,000 population.",
+      "value": 4.0,
+      "low": 3.0,
+      "high": 5.0,
+      "unit": "people per 1000 people per month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August rate adjusted upward from monthly average due to seasonal peak."
+      }
+     },
+     {
+      "name": "japan_households",
+      "description": "Number of households in Japan.",
+      "value": 55000000,
+      "low": 53000000,
+      "high": 57000000,
+      "unit": "households",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent household estimates around 54–56 million."
+      }
+     },
+     {
+      "name": "annual_household_move_rate",
+      "description": "Annual rate of household moves between municipalities.",
+      "value": 0.05,
+      "low": 0.04,
+      "high": 0.06,
+      "unit": "moves per household per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "About 5% of households move annually, consistent with migration statistics."
+      }
+     },
+     {
+      "name": "august_household_share",
+      "description": "Share of annual household moves occurring in August.",
+      "value": 0.1,
+      "low": 0.08,
+      "high": 0.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is a peak moving month; share slightly above 1/12."
+      }
+     },
+     {
+      "name": "people_per_household_move",
+      "description": "Average number of people per household move.",
+      "value": 1.8,
+      "low": 1.5,
+      "high": 2.2,
+      "unit": "people per household move",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Average household size in Japan is about 2.2, but movers tend to be smaller households; 1.8 is a reasonable average."
+      }
+     },
+     {
+      "name": "people_per_1000",
+      "description": "Conversion factor from per-1000 rates to per-person rates.",
+      "value": 1000,
+      "low": 1000,
+      "high": 1000,
+      "unit": "people per 1000 people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Definitional constant for per-1000 rates."
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Number of months in a year.",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Definitional constant."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual internal migration from population and annual mover rate, then allocate to August using seasonal share.",
+      "formula": "japan_population * (annual_movers_per_1000 / people_per_1000) * august_share_of_annual",
+      "output_unit": "people"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Estimate August moves from population and August-specific mover rate per 1000.",
+      "formula": "japan_population * (movers_per_1000_august / people_per_1000)",
+      "output_unit": "people"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Estimate August moves from household moves: households × annual move rate × August share × people per move.",
+      "formula": "japan_households * annual_household_move_rate * august_household_share * people_per_household_move",
+      "output_unit": "people"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  }
+ ],
+ "final_attempt": 2
+}

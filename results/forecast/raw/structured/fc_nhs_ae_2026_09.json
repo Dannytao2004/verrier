@@ -1,0 +1,320 @@
+{
+ "qid": "fc_nhs_ae_2026_09",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total number of A&E attendances in England during September 2026, all A&E types, as reported in NHS England's monthly A&E Attendances and Emergency Admissions statistics.",
+     "unit": "attendances"
+    },
+    "inputs": [
+     {
+      "name": "england_population",
+      "description": "Mid-2026 population of England.",
+      "value": 57500000,
+      "low": 56500000,
+      "high": 58500000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "ONS mid-2024 estimate ~57.0m, projected forward with modest growth."
+      }
+     },
+     {
+      "name": "annual_attendances_per_person",
+      "description": "Annual A&E attendances per person in England.",
+      "value": 0.46,
+      "low": 0.42,
+      "high": 0.5,
+      "unit": "attendances/person/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "NHS England reported ~26-27 million attendances per year recently; divided by population gives ~0.46."
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual A&E attendances occurring in September.",
+      "value": 0.0833,
+      "low": 0.08,
+      "high": 0.087,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September has 30 days; monthly share is roughly 1/12, with slight seasonal variation."
+      }
+     },
+     {
+      "name": "daily_attendances_per_type1",
+      "description": "Average daily A&E attendances at a major (type 1) A&E department.",
+      "value": 300,
+      "low": 250,
+      "high": 350,
+      "unit": "attendances/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Typical large hospital A&E sees a few hundred patients per day."
+      }
+     },
+     {
+      "name": "type1_departments",
+      "description": "Number of major (type 1) A&E departments in England.",
+      "value": 220,
+      "low": 200,
+      "high": 240,
+      "unit": "departments",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "NHS England lists around 220 type 1 A&E departments."
+      }
+     },
+     {
+      "name": "other_ae_share",
+      "description": "Share of total A&E attendances that are at non-type-1 facilities (type 2, 3, 4: minor injury units, walk-in centres, etc.).",
+      "value": 0.2,
+      "low": 0.15,
+      "high": 0.25,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "NHS England data show roughly 15-25% of attendances are at non-type-1 facilities."
+      }
+     },
+     {
+      "name": "days_in_september",
+      "description": "Number of days in September.",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "days",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "September has 30 days."
+      }
+     },
+     {
+      "name": "annual_gp_consultations_per_person",
+      "description": "Annual GP consultations per person in England.",
+      "value": 5,
+      "low": 4,
+      "high": 6,
+      "unit": "consultations/person/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Commonly cited figure of about 5 GP consultations per person per year."
+      }
+     },
+     {
+      "name": "ae_to_gp_consultation_ratio",
+      "description": "Ratio of A&E attendances to GP consultations.",
+      "value": 0.09,
+      "low": 0.07,
+      "high": 0.11,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "A&E attendances are roughly 9% of GP consultations (26m vs 300m)."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual attendances from population and per-capita rate, then allocate to September.",
+      "formula": "england_population * annual_attendances_per_person * september_share_of_annual",
+      "output_unit": "attendances"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Count type 1 departments, multiply by daily attendances and days, then scale up for other A&E types.",
+      "formula": "type1_departments * daily_attendances_per_type1 * days_in_september / (1 - other_ae_share)",
+      "output_unit": "attendances"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from annual GP consultations using the ratio of A&E attendances to GP consultations, then allocate to September.",
+      "formula": "england_population * annual_gp_consultations_per_person * ae_to_gp_consultation_ratio * september_share_of_annual",
+      "output_unit": "attendances"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Total number of A&E attendances in England during September 2026, all A&E types, as reported in NHS England's monthly A&E Attendances and Emergency Admissions statistics.",
+     "unit": "attendances"
+    },
+    "inputs": [
+     {
+      "name": "england_population",
+      "description": "Mid-2026 population of England.",
+      "value": 57500000,
+      "low": 56500000,
+      "high": 58500000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "ONS mid-2024 estimate ~57.0m, projected forward with modest growth."
+      }
+     },
+     {
+      "name": "annual_attendances_per_person",
+      "description": "Annual A&E attendances per person in England.",
+      "value": 0.46,
+      "low": 0.42,
+      "high": 0.5,
+      "unit": "attendances/person/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "NHS England reported ~26-27 million attendances per year recently; divided by population gives ~0.46."
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual A&E attendances occurring in September.",
+      "value": 0.0833,
+      "low": 0.08,
+      "high": 0.087,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September has 30 days; monthly share is roughly 1/12, with slight seasonal variation."
+      }
+     },
+     {
+      "name": "daily_attendances_per_type1",
+      "description": "Average daily A&E attendances at a major (type 1) A&E department.",
+      "value": 300,
+      "low": 250,
+      "high": 350,
+      "unit": "attendances/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Typical large hospital A&E sees a few hundred patients per day."
+      }
+     },
+     {
+      "name": "type1_departments",
+      "description": "Number of major (type 1) A&E departments in England.",
+      "value": 220,
+      "low": 200,
+      "high": 240,
+      "unit": "departments",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "NHS England lists around 220 type 1 A&E departments."
+      }
+     },
+     {
+      "name": "other_ae_share",
+      "description": "Share of total A&E attendances that are at non-type-1 facilities (type 2, 3, 4: minor injury units, walk-in centres, etc.).",
+      "value": 0.2,
+      "low": 0.15,
+      "high": 0.25,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "NHS England data show roughly 15-25% of attendances are at non-type-1 facilities."
+      }
+     },
+     {
+      "name": "days_in_september",
+      "description": "Number of days in September.",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "days",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "September has 30 days."
+      }
+     },
+     {
+      "name": "annual_gp_consultations_per_person",
+      "description": "Annual GP consultations per person in England.",
+      "value": 5,
+      "low": 4,
+      "high": 6,
+      "unit": "consultations/person/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Commonly cited figure of about 5 GP consultations per person per year."
+      }
+     },
+     {
+      "name": "ae_to_gp_consultation_ratio",
+      "description": "Ratio of A&E attendances to GP consultations.",
+      "value": 0.09,
+      "low": 0.07,
+      "high": 0.11,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "A&E attendances are roughly 9% of GP consultations (26m vs 300m)."
+      }
+     },
+     {
+      "name": "days_per_year",
+      "description": "Number of days in a year.",
+      "value": 365,
+      "low": 365,
+      "high": 365,
+      "unit": "days/year",
+      "provenance": {
+       "type": "sourced",
+       "source": "Gregorian calendar",
+       "url": "",
+       "quote": "A common year has 365 days."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate annual attendances from population and per-capita rate, then allocate to September.",
+      "formula": "england_population * annual_attendances_per_person * september_share_of_annual * days_per_year",
+      "output_unit": "attendances"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Count type 1 departments, multiply by daily attendances and days, then scale up for other A&E types.",
+      "formula": "type1_departments * daily_attendances_per_type1 * days_in_september / (1 - other_ae_share)",
+      "output_unit": "attendances"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from annual GP consultations using the ratio of A&E attendances to GP consultations, then allocate to September.",
+      "formula": "england_population * annual_gp_consultations_per_person * ae_to_gp_consultation_ratio * september_share_of_annual * days_per_year",
+      "output_unit": "attendances"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+   ]
+  }
+ ],
+ "final_attempt": 2
+}
