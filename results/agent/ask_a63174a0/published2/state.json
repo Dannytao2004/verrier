@@ -1,0 +1,5273 @@
+{
+ "qid": "ask_a63174a0",
+ "question": "How many new cars were registered in the UK in September 2026, as reported by SMMT?",
+ "as_of": "2026-10-16",
+ "plan": {
+  "target": {
+   "what": "New car registrations in the United Kingdom, as reported by SMMT",
+   "unit": "number of new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "publisher": "Society of Motor Manufacturers and Traders (SMMT)",
+   "cadence": "monthly",
+   "caveats": "SMMT reports new car registrations monthly for the UK. The figure counts new cars registered for the first time, not used cars, and is a flow over the calendar month. The target period is September 2026, which is completed relative to the 2026-10-16 cutoff, but the SMMT September 2026 release may no",
+   "outcome_type": "continuous"
+  },
+  "market_keywords": [
+   "uk car registrations",
+   "smmt september 2026",
+   "new car sales"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "SMMT historical monthly registrations",
+    "hypothesis": "September is typically a high-volume month due to the new number plate change. The September 2026 figure can be estimated by applying the historical September share of annual registrations or by extrapolating from recent monthly trends. The relationship is direct: target = September registrations. Historical September values and year-to-date 2026 data provide a baseline.",
+    "data_to_find": "SMMT new car registrations for September in previous years (e.g., 2023, 2024, 2025) and monthly registrations for 2026 up to August or September if available. Minimum evidence: September 2025 figure and 2026 year-to-date total or monthly trend. Substitute: SMMT annual forecasts or monthly press releases.",
+    "search_hints": [
+     "SMMT new car registrations September 2025",
+     "SMMT UK car registrations monthly 2026",
+     "SMMT September 2026 registrations"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "Broader UK new vehicle market including LCVs",
+    "hypothesis": "SMMT also reports LCV registrations. If the target is specifically cars, the car share of total new vehicle registrations can be used to derive the car figure from a total vehicle figure. Alternatively, if only total vehicles are available, apply the historical car share. The relationship: target = total new vehicle registrations * car share.",
+    "data_to_find": "SMMT total new vehicle registrations (cars + LCVs) for September 2026 or recent months, and the historical car share of total registrations. Minimum evidence: total vehicle registrations for September 2026 and car share from a recent month. Substitute: SMMT LCV registrations to subtract from total.",
+    "search_hints": [
+     "SMMT total vehicle registrations September 2026",
+     "SMMT car and LCV registrations September 2026",
+     "UK new car LCV registrations September 2026"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "related_series",
+    "perspective": "European comparable markets",
+    "hypothesis": "UK new car registrations often correlate with other European markets (e.g., Germany, France, Italy, Spain) due to similar economic conditions and model cycles. If September 2026 data for these markets are available, the UK figure can be estimated by applying the historical UK-to-comparator ratio. The relationship: target = comparator registrations * (UK/comparator ratio).",
+    "data_to_find": "New car registrations for September 2026 in Germany, France, Italy, Spain, or EU total, and historical UK-to-comparator ratios for September. Minimum evidence: one comparator's September 2026 figure and a stable ratio. Substitute: European Automobile Manufacturers Association (ACEA) data.",
+    "search_hints": [
+     "September 2026 new car registrations Germany France",
+     "ACEA new car registrations September 2026",
+     "European car sales September 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "forecasts_markets",
+    "perspective": "Industry forecasts and analyst expectations",
+    "hypothesis": "SMMT or other forecasters (e.g., AutoAnalysis, LMC Automotive) may publish forecasts for UK 2026 car registrations, including monthly or quarterly breakdowns. These forecasts can serve as a direct estimate or as a constraint. The relationship: target = forecast for September 2026 or derived from annual forecast and seasonal share.",
+    "data_to_find": "Published forecasts for UK new car registrations in 2026, especially any September 2026 or Q3 2026 forecasts. Minimum evidence: an annual forecast and historical September share. Substitute: SMMT's own annual forecast updated in 2026.",
+    "search_hints": [
+     "UK new car registrations forecast 2026",
+     "SMMT 2026 forecast car registrations",
+     "UK car market forecast September 2026"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "physical_flow",
+    "perspective": "Vehicle production and imports",
+    "hypothesis": "UK car registrations are supplied by domestic production and imports. If production and import data for September 2026 are available, registrations can be estimated by adjusting for inventory changes and exports. The relationship: registrations = domestic production + imports - exports - inventory change. This is a flow accounting identity.",
+    "data_to_find": "UK car production for September 2026 (SMMT), UK car imports and exports for September 2026 (HMRC trade data), and inventory changes if available. Minimum evidence: production and net trade figures. Substitute: production data alone with historical import/export ratios.",
+    "search_hints": [
+     "UK car production September 2026 SMMT",
+     "UK car imports exports September 2026",
+     "HMRC car trade data September 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "administrative",
+    "perspective": "DVLA registration data",
+    "hypothesis": "DVLA records vehicle registrations and may publish monthly data. SMMT figures are based on DVLA data but may differ slightly due to timing and definitions. DVLA data can provide a cross-check or substitute. The relationship: target ≈ DVLA new car registrations for September 2026, adjusted for SMMT methodology.",
+    "data_to_find": "DVLA new car registration statistics for September 2026, or monthly vehicle licensing data. Minimum evidence: DVLA monthly new car registrations for September 2026. Substitute: DVLA quarterly data or vehicle licensing statistics.",
+    "search_hints": [
+     "DVLA new car registrations September 2026",
+     "DVLA vehicle licensing statistics September 2026",
+     "UK vehicle registrations September 2026 DVLA"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "attention",
+    "perspective": "Search and media attention on new car sales",
+    "hypothesis": "Media coverage and search interest around the September 2026 plate change may correlate with registration volume, but without a quantitative bridge this is weak. Could be used to gauge whether September 2026 was unusually strong or weak. The relationship: attention proxy -> relative change vs historical September.",
+    "data_to_find": "Google Trends data for 'new car registrations UK' or 'SMMT' for September 2026, and news articles about September 2026 car sales. Minimum evidence: a clear signal of unusually high or low activity. Substitute: social media mentions or automotive news headlines.",
+    "search_hints": [
+     "UK new car sales September 2026 news",
+     "September 2026 car registrations UK media",
+     "SMMT September 2026 press release"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c8",
+    "category": "shocks",
+    "perspective": "Economic and policy shocks affecting UK car market",
+    "hypothesis": "Shocks such as changes in vehicle tax (VED), electric vehicle incentives, supply chain disruptions, or interest rates can materially affect registrations. Identifying and quantifying such shocks in September 2026 can adjust a baseline estimate. The relationship: target = baseline * shock adjustment factor.",
+    "data_to_find": "News about UK car market shocks in 2026 (e.g., VED changes, EV mandate, supply issues), and their expected impact on September registrations. Minimum evidence: a measurable policy change or disruption with estimated effect. Substitute: expert commentary on market conditions.",
+    "search_hints": [
+     "UK car market September 2026 VED changes",
+     "UK electric vehicle mandate September 2026",
+     "UK car supply chain September 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 8 candidate directions in 7 categories; running 8 (budget cap 10)"
+ ],
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "SMMT historical monthly registrations",
+   "hypothesis": "September is typically a high-volume month due to the new number plate change. The September 2026 figure can be estimated by applying the historical September share of annual registrations or by extrapolating from recent monthly trends. The relationship is direct: target = September registrations. Historical September values and year-to-date 2026 data provide a baseline.",
+   "data_to_find": "SMMT new car registrations for September in previous years (e.g., 2023, 2024, 2025) and monthly registrations for 2026 up to August or September if available. Minimum evidence: September 2025 figure and 2026 year-to-date total or monthly trend. Substitute: SMMT annual forecasts or monthly press releases.",
+   "search_hints": [
+    "SMMT new car registrations September 2025",
+    "SMMT UK car registrations monthly 2026",
+    "SMMT September 2026 registrations"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "related_series",
+   "perspective": "Broader UK new vehicle market including LCVs",
+   "hypothesis": "SMMT also reports LCV registrations. If the target is specifically cars, the car share of total new vehicle registrations can be used to derive the car figure from a total vehicle figure. Alternatively, if only total vehicles are available, apply the historical car share. The relationship: target = total new vehicle registrations * car share.",
+   "data_to_find": "SMMT total new vehicle registrations (cars + LCVs) for September 2026 or recent months, and the historical car share of total registrations. Minimum evidence: total vehicle registrations for September 2026 and car share from a recent month. Substitute: SMMT LCV registrations to subtract from total.",
+   "search_hints": [
+    "SMMT total vehicle registrations September 2026",
+    "SMMT car and LCV registrations September 2026",
+    "UK new car LCV registrations September 2026"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d3",
+   "category": "forecasts_markets",
+   "perspective": "Industry forecasts and analyst expectations",
+   "hypothesis": "SMMT or other forecasters (e.g., AutoAnalysis, LMC Automotive) may publish forecasts for UK 2026 car registrations, including monthly or quarterly breakdowns. These forecasts can serve as a direct estimate or as a constraint. The relationship: target = forecast for September 2026 or derived from annual forecast and seasonal share.",
+   "data_to_find": "Published forecasts for UK new car registrations in 2026, especially any September 2026 or Q3 2026 forecasts. Minimum evidence: an annual forecast and historical September share. Substitute: SMMT's own annual forecast updated in 2026.",
+   "search_hints": [
+    "UK new car registrations forecast 2026",
+    "SMMT 2026 forecast car registrations",
+    "UK car market forecast September 2026"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d4",
+   "category": "administrative",
+   "perspective": "DVLA registration data",
+   "hypothesis": "DVLA records vehicle registrations and may publish monthly data. SMMT figures are based on DVLA data but may differ slightly due to timing and definitions. DVLA data can provide a cross-check or substitute. The relationship: target ≈ DVLA new car registrations for September 2026, adjusted for SMMT methodology.",
+   "data_to_find": "DVLA new car registration statistics for September 2026, or monthly vehicle licensing data. Minimum evidence: DVLA monthly new car registrations for September 2026. Substitute: DVLA quarterly data or vehicle licensing statistics.",
+   "search_hints": [
+    "DVLA new car registrations September 2026",
+    "DVLA vehicle licensing statistics September 2026",
+    "UK vehicle registrations September 2026 DVLA"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "d5",
+   "category": "related_series",
+   "perspective": "European comparable markets",
+   "hypothesis": "UK new car registrations often correlate with other European markets (e.g., Germany, France, Italy, Spain) due to similar economic conditions and model cycles. If September 2026 data for these markets are available, the UK figure can be estimated by applying the historical UK-to-comparator ratio. The relationship: target = comparator registrations * (UK/comparator ratio).",
+   "data_to_find": "New car registrations for September 2026 in Germany, France, Italy, Spain, or EU total, and historical UK-to-comparator ratios for September. Minimum evidence: one comparator's September 2026 figure and a stable ratio. Substitute: European Automobile Manufacturers Association (ACEA) data.",
+   "search_hints": [
+    "September 2026 new car registrations Germany France",
+    "ACEA new car registrations September 2026",
+    "European car sales September 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d6",
+   "category": "physical_flow",
+   "perspective": "Vehicle production and imports",
+   "hypothesis": "UK car registrations are supplied by domestic production and imports. If production and import data for September 2026 are available, registrations can be estimated by adjusting for inventory changes and exports. The relationship: registrations = domestic production + imports - exports - inventory change. This is a flow accounting identity.",
+   "data_to_find": "UK car production for September 2026 (SMMT), UK car imports and exports for September 2026 (HMRC trade data), and inventory changes if available. Minimum evidence: production and net trade figures. Substitute: production data alone with historical import/export ratios.",
+   "search_hints": [
+    "UK car production September 2026 SMMT",
+    "UK car imports exports September 2026",
+    "HMRC car trade data September 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d7",
+   "category": "shocks",
+   "perspective": "Economic and policy shocks affecting UK car market",
+   "hypothesis": "Shocks such as changes in vehicle tax (VED), electric vehicle incentives, supply chain disruptions, or interest rates can materially affect registrations. Identifying and quantifying such shocks in September 2026 can adjust a baseline estimate. The relationship: target = baseline * shock adjustment factor.",
+   "data_to_find": "News about UK car market shocks in 2026 (e.g., VED changes, EV mandate, supply issues), and their expected impact on September registrations. Minimum evidence: a measurable policy change or disruption with estimated effect. Substitute: expert commentary on market conditions.",
+   "search_hints": [
+    "UK car market September 2026 VED changes",
+    "UK electric vehicle mandate September 2026",
+    "UK car supply chain September 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c8"
+  },
+  {
+   "id": "d8",
+   "category": "attention",
+   "perspective": "Search and media attention on new car sales",
+   "hypothesis": "Media coverage and search interest around the September 2026 plate change may correlate with registration volume, but without a quantitative bridge this is weak. Could be used to gauge whether September 2026 was unusually strong or weak. The relationship: attention proxy -> relative change vs historical September.",
+   "data_to_find": "Google Trends data for 'new car registrations UK' or 'SMMT' for September 2026, and news articles about September 2026 car sales. Minimum evidence: a clear signal of unusually high or low activity. Substitute: social media mentions or automotive news headlines.",
+   "search_hints": [
+    "UK new car sales September 2026 news",
+    "September 2026 car registrations UK media",
+    "SMMT September 2026 press release"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c7"
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "SMMT new car registrations September 2025",
+     "SMMT UK car registrations monthly 2026 year to date",
+     "SMMT September 2026 new car registrations 350,518",
+     "SMMT new car registrations September 2023 2024 history annual total"
+    ],
+    "urls": [
+     "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "https://cardealermagazine.co.uk/uk-new-car-market-surges-12-in-september-as-private-buyers-return-to-showrooms/327903",
+     "https://www.am-online.com/news/dealers-gain-september-sales-boost-as-discount-led-growth-tests-margins",
+     "https://www.smmt.co.uk/best-month-ever-for-new-ev-registrations-as-market-grows-in-all-important-plate-change-march/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007584875999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "status": "live_dated",
+     "reason": "",
+     "snapshot_ts": null,
+     "page_date": "2026-10-02",
+     "live_dates": [
+      "2026-10-02"
+     ],
+     "raw_path": "data/raw/agent/ask_a63174a0/fe51a8674b1fcd71.raw",
+     "text_chars": 5064,
+     "fetch_at": "2026-10-16T07:30:34+00:00",
+     "fetch_s": 1.38,
+     "leak_hits": [],
+     "chars_sent": 5064,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 11
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      0
+     ],
+     "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+     "value": 350518.0,
+     "value_as_written": "350,518",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "registrations up 12.1% to 350,518 units, according to preliminary figures published today by the Society of Motor Manufacturers and Traders (SMMT)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      1
+     ],
+     "name": "UK new car market growth rate, September 2026 vs prior year",
+     "value": 12.1,
+     "value_as_written": "12.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "New car market grows 12.1% to 350,518 units in plate-change September",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      2
+     ],
+     "name": "UK battery electric car registrations, September 2026",
+     "value": 99199.0,
+     "value_as_written": "99,199",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "battery electric cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Record 99,199 battery electric cars join the road almost five every minute",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      3
+     ],
+     "name": "UK BEV market share of new car registrations, September 2026",
+     "value": 28.3,
+     "value_as_written": "28.3%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "climbed 36.3% to a record high volume of 99,199 units with market share up five percentage points to 28.3%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      4
+     ],
+     "name": "UK BEV registrations, year-to-date first nine months of 2026",
+     "value": 454945.0,
+     "value_as_written": "454,945",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "battery electric cars registered (units)",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "454,945 new BEVs have now been registered in the first nine months of the year, accounting for 26.2% of registrations",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      5
+     ],
+     "name": "UK BEV share of new car registrations, year-to-date first nine months of 2026",
+     "value": 26.2,
+     "value_as_written": "26.2%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Year-to-date BEV share reaches 26.2%, showing strong progress but still below last year's 28% mandate target and the 33% required in 2026.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      10
+     ],
+     "name": "UK fleet registrations, September 2026",
+     "value": 190988.0,
+     "value_as_written": "190,988",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet registrations rose 9.6% to 190,988 units, representing 54.5% of the market",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      11
+     ],
+     "name": "UK private demand registrations, September 2026",
+     "value": 149158.0,
+     "value_as_written": "149,158",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "private demand increased 13.9% to 149,158 units and a 42.6% share",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      12
+     ],
+     "name": "UK business sector registrations, September 2026",
+     "value": 10372.0,
+     "value_as_written": "10,372",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Registrations by the smaller business sector grew 37.6% to 10,372 units.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      13
+     ],
+     "name": "UK new car market, September 2017",
+     "value": 426170.0,
+     "value_as_written": "426,170",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2017-09-01",
+     "period_end": "2017-09-30",
+     "published_at_if_visible": "",
+     "quote": "September 2017 new car market was 426,170 units, 2019 was 343,255 units.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      14
+     ],
+     "name": "UK new car market, September 2019",
+     "value": 343255.0,
+     "value_as_written": "343,255",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2019-09-01",
+     "period_end": "2019-09-30",
+     "published_at_if_visible": "",
+     "quote": "September 2017 new car market was 426,170 units, 2019 was 343,255 units.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      6
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "UK BEV mandate target share for 2026",
+     "value_as_written": "33%"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      7
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "UK BEV mandate target share for prior year",
+     "value_as_written": "28%"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      8
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT market outlook: forecast UK new car market size (2026)",
+     "value_as_written": "2.183"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      9
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Additional BEV registrations required in final quarter of 2026 to reach 33% share",
+     "value_as_written": "265,000"
+    }
+   ],
+   "stopped": "stopped early: the published target value was confirmed",
+   "wall_s": 15.4
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "SMMT new car registrations September 2026",
+     "SMMT total vehicle registrations September 2026 cars LCVs",
+     "smmt.co.uk September 2026 new car registrations record electric car market",
+     "SMMT LCV registrations September 2026 49,704 new van market"
+    ],
+    "urls": [
+     "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "https://www.am-online.com/news/ev-registrations-hit-record-99-201-as-byd-takes-second-place-after-vw",
+     "https://www.bodyshopmag.com/2026/news/new-lcv-market-hit-2026-high-in-september/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007260132000000001,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "status": "live_dated",
+     "reason": "",
+     "snapshot_ts": null,
+     "page_date": "2026-10-05",
+     "live_dates": [
+      "2026-10-02",
+      "2026-10-05"
+     ],
+     "raw_path": "data/raw/agent/ask_a63174a0/02da71950dfcce99.raw",
+     "text_chars": 3810,
+     "fetch_at": "2026-10-16T07:30:34+00:00",
+     "fetch_s": 0.95,
+     "leak_hits": [],
+     "chars_sent": 3810,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 12
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      0
+     ],
+     "name": "UK new car registrations, September 2026 (SMMT preliminary)",
+     "value": 350536.0,
+     "value_as_written": "350,536",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      2
+     ],
+     "name": "Fleet and business registrations, September 2026",
+     "value": 201370.0,
+     "value_as_written": "201,370",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      3
+     ],
+     "name": "Fleet and business share of all UK new car registrations, September 2026",
+     "value": 57.4,
+     "value_as_written": "57.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      4
+     ],
+     "name": "Fleet registrations, September 2026",
+     "value": 190988.0,
+     "value_as_written": "190,988",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      5
+     ],
+     "name": "Smaller business registrations, September 2026",
+     "value": 10372.0,
+     "value_as_written": "10,372",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      6
+     ],
+     "name": "Fleet and business car registrations, first nine months of 2026 (cumulative)",
+     "value": 1043306.0,
+     "value_as_written": "1,043,306",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The combined business market has now passed the one-million mark for the year, with 1,043,306 fleet and business cars registered during the first nine months of 2026.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      8
+     ],
+     "name": "Fleet and business share of UK new car market, first nine months of 2026",
+     "value": 60.0,
+     "value_as_written": "60%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations accounted for 60% of new cars registered in the UK during the first nine months of 2026, as the market recorded its strongest September since 2017.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      9
+     ],
+     "name": "Private registrations, first nine months of 2026 (cumulative)",
+     "value": 695965.0,
+     "value_as_written": "695,965",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Private registrations have also grown during the year, rising 12.8% to 695,965, but business demand remains the dominant source of new-car registrations.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      10
+     ],
+     "name": "BEV registrations, September 2026",
+     "value": 99201.0,
+     "value_as_written": "99,201",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "battery electric cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      11
+     ],
+     "name": "BEV share of September 2026 UK new car registrations",
+     "value": 28.3,
+     "value_as_written": "28.3%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      12
+     ],
+     "name": "Electrified vehicles share of September 2026 UK registrations",
+     "value": 58.4,
+     "value_as_written": "58.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Electrified vehicles accounted for a record 58.4% of September registrations, with battery electric vehicles (BEVs) and plug-in hybrids (PHEVs) recording particularly strong growth.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      13
+     ],
+     "name": "BEV registrations, first nine months of 2026 (cumulative)",
+     "value": 454945.0,
+     "value_as_written": "454,945",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "battery electric cars registered",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "A total of 454,945 BEVs have now been registered during the first nine months of 2026, giving them a 26.2% market share.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      1
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK new car registrations, September 2025 (comparison month)",
+     "value_as_written": "312,891"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      7
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Fleet and business car registrations, first nine months of 2025 (comparison cumulative)",
+     "value_as_written": "961,200"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      14
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK annual new car market 2026",
+     "value_as_written": "2.183"
+    }
+   ],
+   "stopped": "stopped early: the published target value was confirmed",
+   "wall_s": 15.4
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "UK new car registrations forecast 2026 SMMT",
+     "SMMT 2026 forecast car registrations September",
+     "SMMT September 2026 new car market grows 12.1% 350,518 registrations smmt.co.uk",
+     "September share of annual UK new car registrations typical one in seven SMMT"
+    ],
+    "urls": [
+     "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "https://www.motortrader.com/motor-trader-news/automotive-news/uk-car-market-hit-10-7-million-the-highest-since-2019-06-10-2026",
+     "https://tradingeconomics.com/united-kingdom/car-registrations"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007757856,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "status": "live_dated",
+     "reason": "",
+     "snapshot_ts": null,
+     "page_date": "2026-08-05",
+     "live_dates": [
+      "2026-08-05"
+     ],
+     "raw_path": "data/raw/agent/ask_a63174a0/12258a9d84b1afe1.raw",
+     "text_chars": 2899,
+     "fetch_at": "2026-10-16T07:30:37+00:00",
+     "fetch_s": 0.55,
+     "leak_hits": [],
+     "chars_sent": 2899,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 5
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      3
+     ],
+     "name": "SMMT reported UK BEV car market share 2025",
+     "value": 23.4,
+     "value_as_written": "23.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "BEV car market to grow by 26.2%, pushing market share to 27.4% (from 23.4% in '25)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      5
+     ],
+     "name": "SMMT reported UK PHEV car market share 2025",
+     "value": 11.1,
+     "value_as_written": "11.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "PHEV market to rise by 28.5% and push market share to 13.3% (vs 11.1% in '25)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      7
+     ],
+     "name": "SMMT reported UK HEV car market share 2025",
+     "value": 13.9,
+     "value_as_written": "13.9%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "HEV market to rise by 10.8% in volume terms, and to a 14.2% market share (13.9% in '25)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      9
+     ],
+     "name": "SMMT reported UK petrol car market share 2025",
+     "value": 46.4,
+     "value_as_written": "46.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "Petrol to decline -4.9%, pushing market share down to 40.9% (from 46.4% in '25)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      11
+     ],
+     "name": "SMMT reported UK diesel car market share 2025",
+     "value": 5.1,
+     "value_as_written": "5.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "Diesel market share to fall to 4.3% (from 5.1% in '25) after a -9.5% fall in volumes",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      0
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK new car market 2026 annual units",
+     "value_as_written": "2.183"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      1
+     ],
+     "reason": "period_end 2027-12-31 after as_of",
+     "name": "SMMT forecast UK new car market 2027 annual units",
+     "value_as_written": "2.245"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      2
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK BEV car market share 2026",
+     "value_as_written": "27.4%"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      4
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK PHEV car market share 2026",
+     "value_as_written": "13.3%"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      6
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK HEV car market share 2026",
+     "value_as_written": "14.2%"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      8
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK petrol car market share 2026",
+     "value_as_written": "40.9%"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      10
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK diesel car market share 2026",
+     "value_as_written": "4.3%"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      12
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK LCV market 2026 annual units",
+     "value_as_written": "316,000"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      13
+     ],
+     "reason": "period_end 2027-12-31 after as_of",
+     "name": "SMMT forecast UK LCV market 2027 annual units",
+     "value_as_written": "318,000"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "via": "live_dated",
+     "page_date": "2026-08-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      14
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK LCV BEV market share 2026",
+     "value_as_written": "11.5%"
+    }
+   ],
+   "stopped": "stopped early: the published target value was confirmed",
+   "wall_s": 17.0
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "SMMT new car registrations September 2026",
+     "DVLA vehicle licensing statistics September 2026 new car registrations",
+     "SMMT September 2026 new car registrations final figures 5 October 350,536",
+     "DfT vehicle licensing statistics Q2 2026 DVLA first time registrations cars"
+    ],
+    "urls": [
+     "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "https://tradingeconomics.com/united-kingdom/car-registrations",
+     "https://www.bognor.news/transport/uk-vehicle-registrations-rise-as-zero-emission-car-market-share-reaches-27-per-c/",
+     "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 28,
+    "web_search_requests": 4,
+    "usd": 0.007591367999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "status": "live_dated",
+     "reason": "",
+     "snapshot_ts": null,
+     "page_date": "2026-10-02",
+     "live_dates": [
+      "2026-10-02"
+     ],
+     "raw_path": "data/raw/agent/ask_a63174a0/fe51a8674b1fcd71.raw",
+     "text_chars": 5064,
+     "fetch_at": "2026-10-16T07:30:35+00:00",
+     "fetch_s": 0.95,
+     "leak_hits": [],
+     "chars_sent": 5064,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 16,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [],
+   "dropped_points": [
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      0
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK new car registrations, September 2025 (SMMT preliminary)",
+     "value_as_written": "350,518"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      1
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK new car market growth rate, September 2025 vs September 2024",
+     "value_as_written": "12.1%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      2
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK battery electric car registrations, September 2025 (record volume)",
+     "value_as_written": "99,199"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      3
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK BEV market share of new car registrations, September 2025",
+     "value_as_written": "28.3%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      4
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK BEV registrations growth rate, September 2025 vs September 2024",
+     "value_as_written": "36.3%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      5
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK fleet registrations, September 2025",
+     "value_as_written": "190,988"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      6
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK fleet share of new car registrations, September 2025",
+     "value_as_written": "54.5%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      7
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK private demand registrations, September 2025",
+     "value_as_written": "149,158"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      8
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK private demand share of new car registrations, September 2025",
+     "value_as_written": "42.6%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      9
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK business sector registrations, September 2025",
+     "value_as_written": "10,372"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      10
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK electrified vehicles share of registrations, September 2025 (record)",
+     "value_as_written": "58.4%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      11
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK plug-in hybrid (PHEV) market share, September 2025 (record)",
+     "value_as_written": "17.0%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      12
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK hybrid electric vehicle (HEV) market share, September 2025",
+     "value_as_written": "13.1%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      13
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK cumulative BEV registrations, first nine months of 2025",
+     "value_as_written": "454,945"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      14
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK year-to-date BEV share of registrations, first nine months of 2025",
+     "value_as_written": "26.2%"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      15
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "UK BEV mandate target share for 2026",
+     "value_as_written": "33%"
+    }
+   ],
+   "stopped": "stopped early: the published target value was confirmed",
+   "wall_s": 16.9
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "September 2026 new car registrations Germany France ACEA",
+     "ACEA new car registrations September 2026 European car sales",
+     "new car registrations September 2026 Germany KBA 212,000",
+     "ACEA September 2026 new car registrations EU",
+     "SMMT September 2026 new car registrations UK",
+     "immatriculations voitures neuves septembre 2026 France"
+    ],
+    "urls": [
+     "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "https://www.automobilwoche.de/automarktdaten/amw-neuzulassungen-im-september-elektroautos-erreichen-rekordanteil/",
+     "https://www.hurriyet.de/news/wirtschaft-finanzen/deutschland-bleibt-groesster-automarkt-europas-tuerkei-auf-platz-sechs-133742383",
+     "https://ch.zonebourse.com/actualite-bourse/le-marche-automobile-europeen-continue-de-s-electrifier-ce785adeda89f727"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 6,
+    "usd": 0.009428675999999999,
+    "usd_search_fee_assumed": 0.06
+   },
+   "pages": [
+    {
+     "url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "status": "live_dated",
+     "reason": "",
+     "snapshot_ts": null,
+     "page_date": "2026-10-05",
+     "live_dates": [
+      "2026-10-05"
+     ],
+     "raw_path": "data/raw/agent/ask_a63174a0/258e7ee2721fd58a.raw",
+     "text_chars": 10689,
+     "fetch_at": "2026-10-16T07:30:39+00:00",
+     "fetch_s": 3.78,
+     "leak_hits": [],
+     "chars_sent": 10689,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 7
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      0
+     ],
+     "name": "Germany new passenger car registrations (Pkw Neuzulassungen), September 2026",
+     "value": 256.774,
+     "value_as_written": "256.774",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "passenger cars (Pkw)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "2026-10-05",
+     "quote": "256.774 Personenkraftwagen (Pkw) wurden im September 2026 neu zugelassen.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      8
+     ],
+     "name": "Germany battery electric (BEV) new passenger car registrations, September 2026",
+     "value": 88.599,
+     "value_as_written": "88.599",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "passenger cars (BEV)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "2026-10-05",
+     "quote": "Elektro (BEV) Neuwagen machten mit 88.599 Einheiten und einem Anteil von 34,5 Prozent mehr als ein Drittel der Neuzulassungen im September 2026 aus.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      10
+     ],
+     "name": "Germany hybrid new passenger car registrations, September 2026",
+     "value": 98.871,
+     "value_as_written": "98.871",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "passenger cars (hybrid)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "2026-10-05",
+     "quote": "98.871 Pkw und damit +1,7 Prozent mehr als im Vergleichsmonat waren mit hybridem Antrieb ausgestattet (38,5 %), darunter 27.681 Plug-in-Hybride",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      11
+     ],
+     "name": "Germany plug-in hybrid new passenger car registrations, September 2026",
+     "value": 27.681,
+     "value_as_written": "27.681",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "passenger cars (plug-in hybrid)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "2026-10-05",
+     "quote": "darunter 27.681 Plug-in-Hybride, deren Anzahl damit auf dem Niveau des Vorjahresmonats lag (+0,0 %/10,8 %).",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      12
+     ],
+     "name": "Germany petrol new passenger car registrations, September 2026",
+     "value": 44.632,
+     "value_as_written": "44.632",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "passenger cars (petrol)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "2026-10-05",
+     "quote": "44.632 Pkw waren mit Benzinantrieb ausgestattet, -29,2 Prozent weniger als im September des Vorjahres.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      13
+     ],
+     "name": "Germany diesel new passenger car registrations, September 2026",
+     "value": 23.058,
+     "value_as_written": "23.058",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "passenger cars (diesel)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "2026-10-05",
+     "quote": "Mit 23.058 zugelassenen Diesel-Neuwagen lag das Ergebnis bei dieser Antriebsart um -20,1 Prozent unterhalb des Vergleichswertes.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      14
+     ],
+     "name": "Germany total motor vehicles (Kfz) new registrations, September 2026",
+     "value": 306.292,
+     "value_as_written": "306.292",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "motor vehicles (Kfz)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "2026-10-05",
+     "quote": "Insgesamt wurden 306.292 Kfz (+8,1 %) und 20.215 Kfz-Anhänger (-10,2 %) neu zugelassen.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      1
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Germany new passenger car registrations, September 2026, change vs September 2025",
+     "value_as_written": "+9,0"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      2
+     ],
+     "reason": "number: ambiguous separators: '.' used as a thousands separator",
+     "name": "Germany new passenger car registrations, January to September 2026 cumulative",
+     "value_as_written": "2.221.798"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      3
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Germany new passenger car registrations, January to September 2026 cumulative, change vs same period 2025",
+     "value_as_written": "+5,3"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      4
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Germany new passenger car registrations, September 2026, change vs previous month",
+     "value_as_written": "+20,8"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      5
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Germany private new passenger car registrations, September 2026, change vs September 2025",
+     "value_as_written": "+28,5"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      6
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Share of private new passenger car registrations in total German Pkw registrations, September 2026",
+     "value_as_written": "40,3"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      7
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Germany commercial new passenger car registrations, September 2026, change vs September 2025",
+     "value_as_written": "-1,2"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      9
+     ],
+     "reason": "number: more than one number in value_as_written",
+     "name": "Share of BEV in total German new passenger car registrations, September 2026",
+     "value_as_written": "34,5"
+    }
+   ],
+   "stopped": "stopped early: the published target value was confirmed",
+   "wall_s": 24.2
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "UK car production September 2026 SMMT",
+     "SMMT new car registrations September 2026"
+    ],
+    "urls": [
+     "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/uknewvehicleregistrationsandproduction/2026",
+     "https://www.electrifying.com/blog/article/smmt-new-car-sales-up-september-2026"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 20,
+    "web_search_requests": 2,
+    "usd": 0.005223444000000001,
+    "usd_search_fee_assumed": 0.02
+   },
+   "pages": [
+    {
+     "url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "status": "live_dated",
+     "reason": "",
+     "snapshot_ts": null,
+     "page_date": "2026-10-02",
+     "live_dates": [
+      "2026-10-02"
+     ],
+     "raw_path": "data/raw/agent/ask_a63174a0/fe51a8674b1fcd71.raw",
+     "text_chars": 5064,
+     "fetch_at": "2026-10-16T07:30:32+00:00",
+     "fetch_s": 1.66,
+     "leak_hits": [],
+     "chars_sent": 5064,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 13
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      0
+     ],
+     "name": "UK new car registrations, September 2026 (SMMT preliminary)",
+     "value": 350518.0,
+     "value_as_written": "350,518",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "registrations up 12.1% to 350,518 units, according to preliminary figures published today by the Society of Motor Manufacturers and Traders (SMMT)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      1
+     ],
+     "name": "UK new car market growth rate, September 2026 vs September 2025",
+     "value": 12.1,
+     "value_as_written": "12.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "New car market grows 12.1% to 350,518 units in plate-change September",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      2
+     ],
+     "name": "UK fleet new car registrations, September 2026",
+     "value": 190988.0,
+     "value_as_written": "190,988",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet registrations rose 9.6% to 190,988 units, representing 54.5% of the market",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      3
+     ],
+     "name": "UK private new car registrations, September 2026",
+     "value": 149158.0,
+     "value_as_written": "149,158",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "private demand increased 13.9% to 149,158 units and a 42.6% share",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      4
+     ],
+     "name": "UK business sector new car registrations, September 2026",
+     "value": 10372.0,
+     "value_as_written": "10,372",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Registrations by the smaller business sector grew 37.6% to 10,372 units.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      5
+     ],
+     "name": "UK battery electric vehicle (BEV) registrations, September 2026",
+     "value": 99199.0,
+     "value_as_written": "99,199",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "climbed 36.3% to a record high volume of 99,199 units with market share up five percentage points to 28.3%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      6
+     ],
+     "name": "UK BEV share of new car registrations, September 2026",
+     "value": 28.3,
+     "value_as_written": "28.3%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "with market share up five percentage points to 28.3%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      7
+     ],
+     "name": "UK plug-in hybrid (PHEV) share of new car registrations, September 2026",
+     "value": 17.0,
+     "value_as_written": "17.0%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "plug-in hybrid (PHEV) registrations surged 55.7% to take a record volume and share at 17.0%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      8
+     ],
+     "name": "UK hybrid electric vehicle (HEV) share of new car registrations, September 2026",
+     "value": 13.1,
+     "value_as_written": "13.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Hybrid electric vehicle (HEV) uptake dipped -4.2% reducing market share to 13.1%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      9
+     ],
+     "name": "UK electrified vehicles share of new car registrations, September 2026",
+     "value": 58.4,
+     "value_as_written": "58.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Electrified vehicles helped power growth, taking a record 58.4% of registrations.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      10
+     ],
+     "name": "UK cumulative BEV registrations, first nine months of 2026",
+     "value": 454945.0,
+     "value_as_written": "454,945",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "454,945 new BEVs have now been registered in the first nine months of the year, accounting for 26.2% of registrations",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      11
+     ],
+     "name": "UK year-to-date BEV share of registrations, first nine months of 2026",
+     "value": 26.2,
+     "value_as_written": "26.2%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "accounting for 26.2% of registrations, significantly below the 33% mandated for 2026",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      14
+     ],
+     "name": "UK new car market, September 2017 (comparison year)",
+     "value": 426170.0,
+     "value_as_written": "426,170",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered (units)",
+     "period_start": "2017-09-01",
+     "period_end": "2017-09-30",
+     "published_at_if_visible": "",
+     "quote": "September 2017 new car market was 426,170 units, 2019 was 343,255 units.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      12
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "UK BEV mandate target share for 2026",
+     "value_as_written": "33%"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "via": "live_dated",
+     "page_date": "2026-10-02",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      13
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT Market Outlook forecast UK new car market, 2026 (full year)",
+     "value_as_written": "2.183"
+    }
+   ],
+   "stopped": "stopped early: the published target value was confirmed",
+   "wall_s": 15.4
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "UK car market September 2026 VED changes impact registrations SMMT",
+     "UK electric vehicle mandate 2026 changes ZEV",
+     "SMMT September 2026 new car registrations 350,536 press release",
+     "VED vehicle excise duty changes April 2026 electric cars UK"
+    ],
+    "urls": [
+     "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+     "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+     "https://www.gov.uk/government/news/review-launched-to-shape-pathway-to-reach-zero-emission-driving-by-2035"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.009298439999999998,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "status": "live_dated",
+     "reason": "",
+     "snapshot_ts": null,
+     "page_date": "2026-10-05",
+     "live_dates": [
+      "2026-10-02",
+      "2026-10-05"
+     ],
+     "raw_path": "data/raw/agent/ask_a63174a0/02da71950dfcce99.raw",
+     "text_chars": 3810,
+     "fetch_at": "2026-10-16T07:30:37+00:00",
+     "fetch_s": 0.24,
+     "leak_hits": [],
+     "chars_sent": 3810,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 13
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      0
+     ],
+     "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+     "value": 350536.0,
+     "value_as_written": "350,536",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      2
+     ],
+     "name": "UK new car market growth rate, September 2026 year-on-year",
+     "value": 12.0,
+     "value_as_written": "12%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The UK new car market grew by 12% in September, with registrations to fleets and businesses continuing to provide the majority of new car demand.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      3
+     ],
+     "name": "UK fleet and business registrations, September 2026",
+     "value": 201370.0,
+     "value_as_written": "201,370",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      4
+     ],
+     "name": "Fleet and business share of UK September 2026 registrations",
+     "value": 57.4,
+     "value_as_written": "57.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      5
+     ],
+     "name": "UK fleet registrations, September 2026",
+     "value": 190988.0,
+     "value_as_written": "190,988",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      6
+     ],
+     "name": "UK smaller business registrations, September 2026",
+     "value": 10372.0,
+     "value_as_written": "10,372",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      7
+     ],
+     "name": "UK fleet and business registrations, first nine months of 2026 (cumulative)",
+     "value": 1043306.0,
+     "value_as_written": "1,043,306",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The combined business market has now passed the one-million mark for the year, with 1,043,306 fleet and business cars registered during the first nine months of 2026.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      9
+     ],
+     "name": "UK fleet and business share of new car market, first nine months of 2026",
+     "value": 60.0,
+     "value_as_written": "60%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations accounted for 60% of new cars registered in the UK during the first nine months of 2026, as the market recorded its strongest September since 2017.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      10
+     ],
+     "name": "UK private registrations, first nine months of 2026 (cumulative)",
+     "value": 695965.0,
+     "value_as_written": "695,965",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Private registrations have also grown during the year, rising 12.8% to 695,965, but business demand remains the dominant source of new-car registrations.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      11
+     ],
+     "name": "Electrified vehicles share of UK September 2026 registrations",
+     "value": 58.4,
+     "value_as_written": "58.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Electrified vehicles accounted for a record 58.4% of September registrations, with battery electric vehicles (BEVs) and plug-in hybrids (PHEVs) recording particularly strong growth.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      12
+     ],
+     "name": "UK BEV registrations, September 2026",
+     "value": 99201.0,
+     "value_as_written": "99,201",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "battery electric vehicles registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      13
+     ],
+     "name": "UK BEV share of September 2026 registrations",
+     "value": 28.3,
+     "value_as_written": "28.3%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      14
+     ],
+     "name": "UK BEV registrations, first nine months of 2026 (cumulative)",
+     "value": 454945.0,
+     "value_as_written": "454,945",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "battery electric vehicles registered",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "A total of 454,945 BEVs have now been registered during the first nine months of 2026, giving them a 26.2% market share.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      1
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK new car registrations, September 2025 (comparison month)",
+     "value_as_written": "312,891"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      8
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK fleet and business registrations, first nine months of 2025 (comparison cumulative)",
+     "value_as_written": "961,200"
+    }
+   ],
+   "stopped": "stopped early: the published target value was confirmed",
+   "wall_s": 17.3
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "search": {
+    "queries": [
+     "SMMT September 2026 new car registrations UK",
+     "UK new car sales September 2026 news"
+    ],
+    "urls": [
+     "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "https://www.carmagazine.co.uk/car-news/industry-news/september-2026-car-registrations/",
+     "https://www.carwow.co.uk/news/11362/smmt-new-car-registrations-september-2026",
+     "https://tradingeconomics.com/united-kingdom/car-registrations"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 20,
+    "web_search_requests": 2,
+    "usd": 0.004697544,
+    "usd_search_fee_assumed": 0.02
+   },
+   "pages": [
+    {
+     "url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "status": "live_dated",
+     "reason": "",
+     "snapshot_ts": null,
+     "page_date": "2026-10-05",
+     "live_dates": [
+      "2026-10-02",
+      "2026-10-05"
+     ],
+     "raw_path": "data/raw/agent/ask_a63174a0/02da71950dfcce99.raw",
+     "text_chars": 3810,
+     "fetch_at": "2026-10-16T07:30:31+00:00",
+     "fetch_s": 1.39,
+     "leak_hits": [],
+     "chars_sent": 3810,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 12
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      0
+     ],
+     "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+     "value": 350536.0,
+     "value_as_written": "350,536",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      2
+     ],
+     "name": "UK new car market growth rate, September 2026 vs September 2025",
+     "value": 12.0,
+     "value_as_written": "12%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The UK new car market grew by 12% in September, with registrations to fleets and businesses continuing to provide the majority of new car demand.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      3
+     ],
+     "name": "UK fleet and business registrations, September 2026",
+     "value": 201370.0,
+     "value_as_written": "201,370",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered to fleets and businesses",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      4
+     ],
+     "name": "Fleet and business share of all UK registrations, September 2026",
+     "value": 57.4,
+     "value_as_written": "57.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      5
+     ],
+     "name": "UK fleet registrations, September 2026",
+     "value": 190988.0,
+     "value_as_written": "190,988",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered to fleets",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      6
+     ],
+     "name": "UK smaller business registrations, September 2026",
+     "value": 10372.0,
+     "value_as_written": "10,372",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered by smaller businesses",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      7
+     ],
+     "name": "UK fleet and business registrations, first nine months of 2026 (cumulative)",
+     "value": 1043306.0,
+     "value_as_written": "1,043,306",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered to fleets and businesses",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "The combined business market has now passed the one-million mark for the year, with 1,043,306 fleet and business cars registered during the first nine months of 2026.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      9
+     ],
+     "name": "Fleet and business share of UK new car market, first nine months of 2026",
+     "value": 60.0,
+     "value_as_written": "60%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Fleet and business registrations accounted for 60% of new cars registered in the UK during the first nine months of 2026, as the market recorded its strongest September since 2017.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      10
+     ],
+     "name": "UK private registrations, first nine months of 2026 (cumulative)",
+     "value": 695965.0,
+     "value_as_written": "695,965",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "new cars registered privately",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Private registrations have also grown during the year, rising 12.8% to 695,965, but business demand remains the dominant source of new-car registrations.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      11
+     ],
+     "name": "Electrified vehicles share of UK September 2026 registrations",
+     "value": 58.4,
+     "value_as_written": "58.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "Electrified vehicles accounted for a record 58.4% of September registrations, with battery electric vehicles (BEVs) and plug-in hybrids (PHEVs) recording particularly strong growth.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      12
+     ],
+     "name": "UK BEV registrations, September 2026",
+     "value": 99201.0,
+     "value_as_written": "99,201",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "battery electric vehicles registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      13
+     ],
+     "name": "UK BEV registrations, first nine months of 2026 (cumulative)",
+     "value": 454945.0,
+     "value_as_written": "454,945",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "battery electric vehicles registered",
+     "period_start": "2026-01-01",
+     "period_end": "2026-09-30",
+     "published_at_if_visible": "",
+     "quote": "A total of 454,945 BEVs have now been registered during the first nine months of 2026, giving them a 26.2% market share.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      1
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK new car registrations, September 2025 (comparison month)",
+     "value_as_written": "312,891"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      8
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "UK fleet and business registrations, first nine months of 2025 (comparison cumulative)",
+     "value_as_written": "961,200"
+    },
+    {
+     "direction_id": "d8",
+     "round": 1,
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "snapshot_ts": null,
+     "order": [
+      0,
+      14
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "SMMT forecast UK annual new car market 2026 (forecast)",
+     "value_as_written": "2.183"
+    }
+   ],
+   "stopped": "stopped early: the published target value was confirmed",
+   "wall_s": 15.4
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "uk car registrations",
+     "smmt september 2026",
+     "new car sales"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 20
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "skipped": "published value confirmed early; judge not called"
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    0
+   ],
+   "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+   "value": 350518.0,
+   "value_as_written": "350,518",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "registrations up 12.1% to 350,518 units, according to preliminary figures published today by the Society of Motor Manufacturers and Traders (SMMT)",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    1
+   ],
+   "name": "UK new car market growth rate, September 2026 vs prior year",
+   "value": 12.1,
+   "value_as_written": "12.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "New car market grows 12.1% to 350,518 units in plate-change September",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    2
+   ],
+   "name": "UK battery electric car registrations, September 2026",
+   "value": 99199.0,
+   "value_as_written": "99,199",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "battery electric cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Record 99,199 battery electric cars join the road almost five every minute",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    3
+   ],
+   "name": "UK BEV market share of new car registrations, September 2026",
+   "value": 28.3,
+   "value_as_written": "28.3%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "climbed 36.3% to a record high volume of 99,199 units with market share up five percentage points to 28.3%",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    4
+   ],
+   "name": "UK BEV registrations, year-to-date first nine months of 2026",
+   "value": 454945.0,
+   "value_as_written": "454,945",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "battery electric cars registered (units)",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "454,945 new BEVs have now been registered in the first nine months of the year, accounting for 26.2% of registrations",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    5
+   ],
+   "name": "UK BEV share of new car registrations, year-to-date first nine months of 2026",
+   "value": 26.2,
+   "value_as_written": "26.2%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Year-to-date BEV share reaches 26.2%, showing strong progress but still below last year's 28% mandate target and the 33% required in 2026.",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    10
+   ],
+   "name": "UK fleet registrations, September 2026",
+   "value": 190988.0,
+   "value_as_written": "190,988",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet registrations rose 9.6% to 190,988 units, representing 54.5% of the market",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    11
+   ],
+   "name": "UK private demand registrations, September 2026",
+   "value": 149158.0,
+   "value_as_written": "149,158",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "private demand increased 13.9% to 149,158 units and a 42.6% share",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    12
+   ],
+   "name": "UK business sector registrations, September 2026",
+   "value": 10372.0,
+   "value_as_written": "10,372",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Registrations by the smaller business sector grew 37.6% to 10,372 units.",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    13
+   ],
+   "name": "UK new car market, September 2017",
+   "value": 426170.0,
+   "value_as_written": "426,170",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2017-09-01",
+   "period_end": "2017-09-30",
+   "published_at_if_visible": "",
+   "quote": "September 2017 new car market was 426,170 units, 2019 was 343,255 units.",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": true
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    14
+   ],
+   "name": "UK new car market, September 2019",
+   "value": 343255.0,
+   "value_as_written": "343,255",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2019-09-01",
+   "period_end": "2019-09-30",
+   "published_at_if_visible": "",
+   "quote": "September 2017 new car market was 426,170 units, 2019 was 343,255 units.",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    0
+   ],
+   "name": "UK new car registrations, September 2026 (SMMT preliminary)",
+   "value": 350536.0,
+   "value_as_written": "350,536",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    2
+   ],
+   "name": "Fleet and business registrations, September 2026",
+   "value": 201370.0,
+   "value_as_written": "201,370",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    3
+   ],
+   "name": "Fleet and business share of all UK new car registrations, September 2026",
+   "value": 57.4,
+   "value_as_written": "57.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    4
+   ],
+   "name": "Fleet registrations, September 2026",
+   "value": 190988.0,
+   "value_as_written": "190,988",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    5
+   ],
+   "name": "Smaller business registrations, September 2026",
+   "value": 10372.0,
+   "value_as_written": "10,372",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    6
+   ],
+   "name": "Fleet and business car registrations, first nine months of 2026 (cumulative)",
+   "value": 1043306.0,
+   "value_as_written": "1,043,306",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The combined business market has now passed the one-million mark for the year, with 1,043,306 fleet and business cars registered during the first nine months of 2026.",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    8
+   ],
+   "name": "Fleet and business share of UK new car market, first nine months of 2026",
+   "value": 60.0,
+   "value_as_written": "60%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations accounted for 60% of new cars registered in the UK during the first nine months of 2026, as the market recorded its strongest September since 2017.",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    9
+   ],
+   "name": "Private registrations, first nine months of 2026 (cumulative)",
+   "value": 695965.0,
+   "value_as_written": "695,965",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Private registrations have also grown during the year, rising 12.8% to 695,965, but business demand remains the dominant source of new-car registrations.",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    10
+   ],
+   "name": "BEV registrations, September 2026",
+   "value": 99201.0,
+   "value_as_written": "99,201",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "battery electric cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    11
+   ],
+   "name": "BEV share of September 2026 UK new car registrations",
+   "value": 28.3,
+   "value_as_written": "28.3%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    12
+   ],
+   "name": "Electrified vehicles share of September 2026 UK registrations",
+   "value": 58.4,
+   "value_as_written": "58.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Electrified vehicles accounted for a record 58.4% of September registrations, with battery electric vehicles (BEVs) and plug-in hybrids (PHEVs) recording particularly strong growth.",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    13
+   ],
+   "name": "BEV registrations, first nine months of 2026 (cumulative)",
+   "value": 454945.0,
+   "value_as_written": "454,945",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "battery electric cars registered",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "A total of 454,945 BEVs have now been registered during the first nine months of 2026, giving them a 26.2% market share.",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": true
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+   "via": "live_dated",
+   "page_date": "2026-08-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    3
+   ],
+   "name": "SMMT reported UK BEV car market share 2025",
+   "value": 23.4,
+   "value_as_written": "23.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "BEV car market to grow by 26.2%, pushing market share to 27.4% (from 23.4% in '25)",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": true
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+   "via": "live_dated",
+   "page_date": "2026-08-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    5
+   ],
+   "name": "SMMT reported UK PHEV car market share 2025",
+   "value": 11.1,
+   "value_as_written": "11.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "PHEV market to rise by 28.5% and push market share to 13.3% (vs 11.1% in '25)",
+   "verified_by": "quote_in_page",
+   "id": "p25",
+   "keep": true
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+   "via": "live_dated",
+   "page_date": "2026-08-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    7
+   ],
+   "name": "SMMT reported UK HEV car market share 2025",
+   "value": 13.9,
+   "value_as_written": "13.9%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "HEV market to rise by 10.8% in volume terms, and to a 14.2% market share (13.9% in '25)",
+   "verified_by": "quote_in_page",
+   "id": "p26",
+   "keep": true
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+   "via": "live_dated",
+   "page_date": "2026-08-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    9
+   ],
+   "name": "SMMT reported UK petrol car market share 2025",
+   "value": 46.4,
+   "value_as_written": "46.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "Petrol to decline -4.9%, pushing market share down to 40.9% (from 46.4% in '25)",
+   "verified_by": "quote_in_page",
+   "id": "p27",
+   "keep": true
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "https://www.smmt.co.uk/vehicle-data/uk-new-car-and-van-outlook/",
+   "via": "live_dated",
+   "page_date": "2026-08-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    11
+   ],
+   "name": "SMMT reported UK diesel car market share 2025",
+   "value": 5.1,
+   "value_as_written": "5.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "Diesel market share to fall to 4.3% (from 5.1% in '25) after a -9.5% fall in volumes",
+   "verified_by": "quote_in_page",
+   "id": "p28",
+   "keep": true
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    0
+   ],
+   "name": "Germany new passenger car registrations (Pkw Neuzulassungen), September 2026",
+   "value": 256.774,
+   "value_as_written": "256.774",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "passenger cars (Pkw)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "2026-10-05",
+   "quote": "256.774 Personenkraftwagen (Pkw) wurden im September 2026 neu zugelassen.",
+   "verified_by": "quote_in_page",
+   "id": "p29",
+   "keep": true
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    8
+   ],
+   "name": "Germany battery electric (BEV) new passenger car registrations, September 2026",
+   "value": 88.599,
+   "value_as_written": "88.599",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "passenger cars (BEV)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "2026-10-05",
+   "quote": "Elektro (BEV) Neuwagen machten mit 88.599 Einheiten und einem Anteil von 34,5 Prozent mehr als ein Drittel der Neuzulassungen im September 2026 aus.",
+   "verified_by": "quote_in_page",
+   "id": "p30",
+   "keep": true
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    10
+   ],
+   "name": "Germany hybrid new passenger car registrations, September 2026",
+   "value": 98.871,
+   "value_as_written": "98.871",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "passenger cars (hybrid)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "2026-10-05",
+   "quote": "98.871 Pkw und damit +1,7 Prozent mehr als im Vergleichsmonat waren mit hybridem Antrieb ausgestattet (38,5 %), darunter 27.681 Plug-in-Hybride",
+   "verified_by": "quote_in_page",
+   "id": "p31",
+   "keep": true
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    11
+   ],
+   "name": "Germany plug-in hybrid new passenger car registrations, September 2026",
+   "value": 27.681,
+   "value_as_written": "27.681",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "passenger cars (plug-in hybrid)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "2026-10-05",
+   "quote": "darunter 27.681 Plug-in-Hybride, deren Anzahl damit auf dem Niveau des Vorjahresmonats lag (+0,0 %/10,8 %).",
+   "verified_by": "quote_in_page",
+   "id": "p32",
+   "keep": true
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    12
+   ],
+   "name": "Germany petrol new passenger car registrations, September 2026",
+   "value": 44.632,
+   "value_as_written": "44.632",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "passenger cars (petrol)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "2026-10-05",
+   "quote": "44.632 Pkw waren mit Benzinantrieb ausgestattet, -29,2 Prozent weniger als im September des Vorjahres.",
+   "verified_by": "quote_in_page",
+   "id": "p33",
+   "keep": true
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    13
+   ],
+   "name": "Germany diesel new passenger car registrations, September 2026",
+   "value": 23.058,
+   "value_as_written": "23.058",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "passenger cars (diesel)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "2026-10-05",
+   "quote": "Mit 23.058 zugelassenen Diesel-Neuwagen lag das Ergebnis bei dieser Antriebsart um -20,1 Prozent unterhalb des Vergleichswertes.",
+   "verified_by": "quote_in_page",
+   "id": "p34",
+   "keep": true
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    14
+   ],
+   "name": "Germany total motor vehicles (Kfz) new registrations, September 2026",
+   "value": 306.292,
+   "value_as_written": "306.292",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "motor vehicles (Kfz)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "2026-10-05",
+   "quote": "Insgesamt wurden 306.292 Kfz (+8,1 %) und 20.215 Kfz-Anhänger (-10,2 %) neu zugelassen.",
+   "verified_by": "quote_in_page",
+   "id": "p35",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    0
+   ],
+   "name": "UK new car registrations, September 2026 (SMMT preliminary)",
+   "value": 350518.0,
+   "value_as_written": "350,518",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "registrations up 12.1% to 350,518 units, according to preliminary figures published today by the Society of Motor Manufacturers and Traders (SMMT)",
+   "verified_by": "quote_in_page",
+   "id": "p36",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    1
+   ],
+   "name": "UK new car market growth rate, September 2026 vs September 2025",
+   "value": 12.1,
+   "value_as_written": "12.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "New car market grows 12.1% to 350,518 units in plate-change September",
+   "verified_by": "quote_in_page",
+   "id": "p37",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    2
+   ],
+   "name": "UK fleet new car registrations, September 2026",
+   "value": 190988.0,
+   "value_as_written": "190,988",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet registrations rose 9.6% to 190,988 units, representing 54.5% of the market",
+   "verified_by": "quote_in_page",
+   "id": "p38",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    3
+   ],
+   "name": "UK private new car registrations, September 2026",
+   "value": 149158.0,
+   "value_as_written": "149,158",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "private demand increased 13.9% to 149,158 units and a 42.6% share",
+   "verified_by": "quote_in_page",
+   "id": "p39",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    4
+   ],
+   "name": "UK business sector new car registrations, September 2026",
+   "value": 10372.0,
+   "value_as_written": "10,372",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Registrations by the smaller business sector grew 37.6% to 10,372 units.",
+   "verified_by": "quote_in_page",
+   "id": "p40",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    5
+   ],
+   "name": "UK battery electric vehicle (BEV) registrations, September 2026",
+   "value": 99199.0,
+   "value_as_written": "99,199",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "climbed 36.3% to a record high volume of 99,199 units with market share up five percentage points to 28.3%",
+   "verified_by": "quote_in_page",
+   "id": "p41",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    6
+   ],
+   "name": "UK BEV share of new car registrations, September 2026",
+   "value": 28.3,
+   "value_as_written": "28.3%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "with market share up five percentage points to 28.3%",
+   "verified_by": "quote_in_page",
+   "id": "p42",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    7
+   ],
+   "name": "UK plug-in hybrid (PHEV) share of new car registrations, September 2026",
+   "value": 17.0,
+   "value_as_written": "17.0%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "plug-in hybrid (PHEV) registrations surged 55.7% to take a record volume and share at 17.0%",
+   "verified_by": "quote_in_page",
+   "id": "p43",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    8
+   ],
+   "name": "UK hybrid electric vehicle (HEV) share of new car registrations, September 2026",
+   "value": 13.1,
+   "value_as_written": "13.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Hybrid electric vehicle (HEV) uptake dipped -4.2% reducing market share to 13.1%",
+   "verified_by": "quote_in_page",
+   "id": "p44",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    9
+   ],
+   "name": "UK electrified vehicles share of new car registrations, September 2026",
+   "value": 58.4,
+   "value_as_written": "58.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Electrified vehicles helped power growth, taking a record 58.4% of registrations.",
+   "verified_by": "quote_in_page",
+   "id": "p45",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    10
+   ],
+   "name": "UK cumulative BEV registrations, first nine months of 2026",
+   "value": 454945.0,
+   "value_as_written": "454,945",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "454,945 new BEVs have now been registered in the first nine months of the year, accounting for 26.2% of registrations",
+   "verified_by": "quote_in_page",
+   "id": "p46",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    11
+   ],
+   "name": "UK year-to-date BEV share of registrations, first nine months of 2026",
+   "value": 26.2,
+   "value_as_written": "26.2%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "accounting for 26.2% of registrations, significantly below the 33% mandated for 2026",
+   "verified_by": "quote_in_page",
+   "id": "p47",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www.parliamenttoday.com/free/viewnews.html?id=178134",
+   "via": "live_dated",
+   "page_date": "2026-10-02",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    14
+   ],
+   "name": "UK new car market, September 2017 (comparison year)",
+   "value": 426170.0,
+   "value_as_written": "426,170",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered (units)",
+   "period_start": "2017-09-01",
+   "period_end": "2017-09-30",
+   "published_at_if_visible": "",
+   "quote": "September 2017 new car market was 426,170 units, 2019 was 343,255 units.",
+   "verified_by": "quote_in_page",
+   "id": "p48",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    0
+   ],
+   "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+   "value": 350536.0,
+   "value_as_written": "350,536",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+   "verified_by": "quote_in_page",
+   "id": "p49",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    2
+   ],
+   "name": "UK new car market growth rate, September 2026 year-on-year",
+   "value": 12.0,
+   "value_as_written": "12%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The UK new car market grew by 12% in September, with registrations to fleets and businesses continuing to provide the majority of new car demand.",
+   "verified_by": "quote_in_page",
+   "id": "p50",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    3
+   ],
+   "name": "UK fleet and business registrations, September 2026",
+   "value": 201370.0,
+   "value_as_written": "201,370",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+   "verified_by": "quote_in_page",
+   "id": "p51",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    4
+   ],
+   "name": "Fleet and business share of UK September 2026 registrations",
+   "value": 57.4,
+   "value_as_written": "57.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+   "verified_by": "quote_in_page",
+   "id": "p52",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    5
+   ],
+   "name": "UK fleet registrations, September 2026",
+   "value": 190988.0,
+   "value_as_written": "190,988",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+   "verified_by": "quote_in_page",
+   "id": "p53",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    6
+   ],
+   "name": "UK smaller business registrations, September 2026",
+   "value": 10372.0,
+   "value_as_written": "10,372",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+   "verified_by": "quote_in_page",
+   "id": "p54",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    7
+   ],
+   "name": "UK fleet and business registrations, first nine months of 2026 (cumulative)",
+   "value": 1043306.0,
+   "value_as_written": "1,043,306",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The combined business market has now passed the one-million mark for the year, with 1,043,306 fleet and business cars registered during the first nine months of 2026.",
+   "verified_by": "quote_in_page",
+   "id": "p55",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    9
+   ],
+   "name": "UK fleet and business share of new car market, first nine months of 2026",
+   "value": 60.0,
+   "value_as_written": "60%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations accounted for 60% of new cars registered in the UK during the first nine months of 2026, as the market recorded its strongest September since 2017.",
+   "verified_by": "quote_in_page",
+   "id": "p56",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    10
+   ],
+   "name": "UK private registrations, first nine months of 2026 (cumulative)",
+   "value": 695965.0,
+   "value_as_written": "695,965",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Private registrations have also grown during the year, rising 12.8% to 695,965, but business demand remains the dominant source of new-car registrations.",
+   "verified_by": "quote_in_page",
+   "id": "p57",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    11
+   ],
+   "name": "Electrified vehicles share of UK September 2026 registrations",
+   "value": 58.4,
+   "value_as_written": "58.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Electrified vehicles accounted for a record 58.4% of September registrations, with battery electric vehicles (BEVs) and plug-in hybrids (PHEVs) recording particularly strong growth.",
+   "verified_by": "quote_in_page",
+   "id": "p58",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    12
+   ],
+   "name": "UK BEV registrations, September 2026",
+   "value": 99201.0,
+   "value_as_written": "99,201",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "battery electric vehicles registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+   "verified_by": "quote_in_page",
+   "id": "p59",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    13
+   ],
+   "name": "UK BEV share of September 2026 registrations",
+   "value": 28.3,
+   "value_as_written": "28.3%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+   "verified_by": "quote_in_page",
+   "id": "p60",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    14
+   ],
+   "name": "UK BEV registrations, first nine months of 2026 (cumulative)",
+   "value": 454945.0,
+   "value_as_written": "454,945",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "battery electric vehicles registered",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "A total of 454,945 BEVs have now been registered during the first nine months of 2026, giving them a 26.2% market share.",
+   "verified_by": "quote_in_page",
+   "id": "p61",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    0
+   ],
+   "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+   "value": 350536.0,
+   "value_as_written": "350,536",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+   "verified_by": "quote_in_page",
+   "id": "p62",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    2
+   ],
+   "name": "UK new car market growth rate, September 2026 vs September 2025",
+   "value": 12.0,
+   "value_as_written": "12%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The UK new car market grew by 12% in September, with registrations to fleets and businesses continuing to provide the majority of new car demand.",
+   "verified_by": "quote_in_page",
+   "id": "p63",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    3
+   ],
+   "name": "UK fleet and business registrations, September 2026",
+   "value": 201370.0,
+   "value_as_written": "201,370",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered to fleets and businesses",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+   "verified_by": "quote_in_page",
+   "id": "p64",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    4
+   ],
+   "name": "Fleet and business share of all UK registrations, September 2026",
+   "value": 57.4,
+   "value_as_written": "57.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+   "verified_by": "quote_in_page",
+   "id": "p65",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    5
+   ],
+   "name": "UK fleet registrations, September 2026",
+   "value": 190988.0,
+   "value_as_written": "190,988",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered to fleets",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+   "verified_by": "quote_in_page",
+   "id": "p66",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    6
+   ],
+   "name": "UK smaller business registrations, September 2026",
+   "value": 10372.0,
+   "value_as_written": "10,372",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered by smaller businesses",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+   "verified_by": "quote_in_page",
+   "id": "p67",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    7
+   ],
+   "name": "UK fleet and business registrations, first nine months of 2026 (cumulative)",
+   "value": 1043306.0,
+   "value_as_written": "1,043,306",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered to fleets and businesses",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "The combined business market has now passed the one-million mark for the year, with 1,043,306 fleet and business cars registered during the first nine months of 2026.",
+   "verified_by": "quote_in_page",
+   "id": "p68",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    9
+   ],
+   "name": "Fleet and business share of UK new car market, first nine months of 2026",
+   "value": 60.0,
+   "value_as_written": "60%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Fleet and business registrations accounted for 60% of new cars registered in the UK during the first nine months of 2026, as the market recorded its strongest September since 2017.",
+   "verified_by": "quote_in_page",
+   "id": "p69",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    10
+   ],
+   "name": "UK private registrations, first nine months of 2026 (cumulative)",
+   "value": 695965.0,
+   "value_as_written": "695,965",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "new cars registered privately",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Private registrations have also grown during the year, rising 12.8% to 695,965, but business demand remains the dominant source of new-car registrations.",
+   "verified_by": "quote_in_page",
+   "id": "p70",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    11
+   ],
+   "name": "Electrified vehicles share of UK September 2026 registrations",
+   "value": 58.4,
+   "value_as_written": "58.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "Electrified vehicles accounted for a record 58.4% of September registrations, with battery electric vehicles (BEVs) and plug-in hybrids (PHEVs) recording particularly strong growth.",
+   "verified_by": "quote_in_page",
+   "id": "p71",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    12
+   ],
+   "name": "UK BEV registrations, September 2026",
+   "value": 99201.0,
+   "value_as_written": "99,201",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "battery electric vehicles registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+   "verified_by": "quote_in_page",
+   "id": "p72",
+   "keep": true
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "snapshot_ts": null,
+   "order": [
+    0,
+    13
+   ],
+   "name": "UK BEV registrations, first nine months of 2026 (cumulative)",
+   "value": 454945.0,
+   "value_as_written": "454,945",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "battery electric vehicles registered",
+   "period_start": "2026-01-01",
+   "period_end": "2026-09-30",
+   "published_at_if_visible": "",
+   "quote": "A total of 454,945 BEVs have now been registered during the first nine months of 2026, giving them a 26.2% market share.",
+   "verified_by": "quote_in_page",
+   "id": "p73",
+   "keep": true
+  }
+ ],
+ "compute": {
+  "result": {
+   "central": 350536.0,
+   "p10": null,
+   "p90": null,
+   "weights": {},
+   "weight_basis": {},
+   "basis": "published",
+   "assumption_weight_share": 0,
+   "published": {
+    "id": "p62",
+    "value": 350536.0,
+    "unit": "new cars registered",
+    "date": "2026-10-05",
+    "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121"
+   },
+   "weight_rule": "none: published value confirmed early (no estimate was made)"
+  },
+  "methods": [],
+  "estimate_result": null,
+  "skipped": "published value confirmed early; no estimate was made"
+ },
+ "published": {
+  "status": "published",
+  "confirmed_ids": [
+   "p62"
+  ],
+  "candidates": [
+   {
+    "id": "p62",
+    "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+    "value": 350536.0,
+    "value_as_written": "350,536",
+    "unit": "new cars registered",
+    "period_start": "2026-09-01",
+    "period_end": "2026-09-30",
+    "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+    "via": "live_dated",
+    "page_date": "2026-10-05",
+    "published_at_if_visible": "",
+    "quote": "Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+    "domain": "www.fleetnews.co.uk",
+    "verdict": "target",
+    "reason": "Same entity/scope (UK total new car registrations), same measure and unit, same period (September 2026), reported actual preliminary SMMT figure.",
+    "early_id": "e1"
+   },
+   {
+    "id": "p64",
+    "name": "UK fleet and business registrations, September 2026",
+    "value": 201370.0,
+    "value_as_written": "201,370",
+    "unit": "new cars registered to fleets and businesses",
+    "period_start": "2026-09-01",
+    "period_end": "2026-09-30",
+    "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+    "via": "live_dated",
+    "page_date": "2026-10-05",
+    "published_at_if_visible": "",
+    "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+    "domain": "www.fleetnews.co.uk",
+    "verdict": "different",
+    "reason": "Segment only: fleet and business registrations, not total UK new car registrations.",
+    "early_id": "e3"
+   },
+   {
+    "id": "p66",
+    "name": "UK fleet registrations, September 2026",
+    "value": 190988.0,
+    "value_as_written": "190,988",
+    "unit": "new cars registered to fleets",
+    "period_start": "2026-09-01",
+    "period_end": "2026-09-30",
+    "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+    "via": "live_dated",
+    "page_date": "2026-10-05",
+    "published_at_if_visible": "",
+    "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+    "domain": "www.fleetnews.co.uk",
+    "verdict": "different",
+    "reason": "Segment only: fleet registrations, not total UK new car registrations.",
+    "early_id": "e5"
+   },
+   {
+    "id": "p67",
+    "name": "UK smaller business registrations, September 2026",
+    "value": 10372.0,
+    "value_as_written": "10,372",
+    "unit": "new cars registered by smaller businesses",
+    "period_start": "2026-09-01",
+    "period_end": "2026-09-30",
+    "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+    "via": "live_dated",
+    "page_date": "2026-10-05",
+    "published_at_if_visible": "",
+    "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+    "domain": "www.fleetnews.co.uk",
+    "verdict": "different",
+    "reason": "Segment only: smaller business registrations, not total UK new car registrations.",
+    "early_id": "e6"
+   },
+   {
+    "id": "p72",
+    "name": "UK BEV registrations, September 2026",
+    "value": 99201.0,
+    "value_as_written": "99,201",
+    "unit": "battery electric vehicles registered",
+    "period_start": "2026-09-01",
+    "period_end": "2026-09-30",
+    "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+    "via": "live_dated",
+    "page_date": "2026-10-05",
+    "published_at_if_visible": "",
+    "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+    "domain": "www.fleetnews.co.uk",
+    "verdict": "different",
+    "reason": "Segment only: BEV registrations, not total UK new car registrations.",
+    "early_id": "e11"
+   }
+  ],
+  "id": "p62",
+  "value": 350536.0,
+  "unit": "new cars registered",
+  "date": "2026-10-05",
+  "point": {
+   "id": "p62",
+   "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+   "value": 350536.0,
+   "value_as_written": "350,536",
+   "unit": "new cars registered",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+   "via": "live_dated",
+   "page_date": "2026-10-05",
+   "published_at_if_visible": "",
+   "quote": "Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+   "domain": "www.fleetnews.co.uk",
+   "early_id": "e1"
+  },
+  "reason": "Same entity/scope (UK total new car registrations), same measure and unit, same period (September 2026), reported actual preliminary SMMT figure.",
+  "outcome": null,
+  "note": "confirmed early, while the sub-agents were running; 5 candidate(s); entity terms ['uk', 'united kingdom']; measure stems ['car', 'regis']",
+  "early_stop": true
+ },
+ "published_early": {
+  "status": "published",
+  "off": "",
+  "n_checks": 1,
+  "checks": [
+   {
+    "at": "2026-10-16T07:30:39+00:00",
+    "n_points": 12,
+    "direction_id": "d8",
+    "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+    "note": "5 candidate(s); entity terms ['uk', 'united kingdom']; measure stems ['car', 'regis']",
+    "wall_s": 2.01,
+    "status": "published",
+    "confirmed_ids": [
+     "p62"
+    ],
+    "candidates": [
+     {
+      "id": "p62",
+      "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+      "value": 350536.0,
+      "value_as_written": "350,536",
+      "unit": "new cars registered",
+      "period_start": "2026-09-01",
+      "period_end": "2026-09-30",
+      "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+      "via": "live_dated",
+      "page_date": "2026-10-05",
+      "published_at_if_visible": "",
+      "quote": "Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+      "domain": "www.fleetnews.co.uk",
+      "verdict": "target",
+      "reason": "Same entity/scope (UK total new car registrations), same measure and unit, same period (September 2026), reported actual preliminary SMMT figure.",
+      "early_id": "e1"
+     },
+     {
+      "id": "p64",
+      "name": "UK fleet and business registrations, September 2026",
+      "value": 201370.0,
+      "value_as_written": "201,370",
+      "unit": "new cars registered to fleets and businesses",
+      "period_start": "2026-09-01",
+      "period_end": "2026-09-30",
+      "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+      "via": "live_dated",
+      "page_date": "2026-10-05",
+      "published_at_if_visible": "",
+      "quote": "Fleet and business registrations combined rose by more than 10% to 201,370, accounting for 57.4% of all registrations during the important September plate-change month.",
+      "domain": "www.fleetnews.co.uk",
+      "verdict": "different",
+      "reason": "Segment only: fleet and business registrations, not total UK new car registrations.",
+      "early_id": "e3"
+     },
+     {
+      "id": "p66",
+      "name": "UK fleet registrations, September 2026",
+      "value": 190988.0,
+      "value_as_written": "190,988",
+      "unit": "new cars registered to fleets",
+      "period_start": "2026-09-01",
+      "period_end": "2026-09-30",
+      "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+      "via": "live_dated",
+      "page_date": "2026-10-05",
+      "published_at_if_visible": "",
+      "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+      "domain": "www.fleetnews.co.uk",
+      "verdict": "different",
+      "reason": "Segment only: fleet registrations, not total UK new car registrations.",
+      "early_id": "e5"
+     },
+     {
+      "id": "p67",
+      "name": "UK smaller business registrations, September 2026",
+      "value": 10372.0,
+      "value_as_written": "10,372",
+      "unit": "new cars registered by smaller businesses",
+      "period_start": "2026-09-01",
+      "period_end": "2026-09-30",
+      "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+      "via": "live_dated",
+      "page_date": "2026-10-05",
+      "published_at_if_visible": "",
+      "quote": "The figures include 190,988 fleet registrations, up 9.6%, alongside 10,372 registrations by smaller businesses, which increased by a much stronger 37.3%.",
+      "domain": "www.fleetnews.co.uk",
+      "verdict": "different",
+      "reason": "Segment only: smaller business registrations, not total UK new car registrations.",
+      "early_id": "e6"
+     },
+     {
+      "id": "p72",
+      "name": "UK BEV registrations, September 2026",
+      "value": 99201.0,
+      "value_as_written": "99,201",
+      "unit": "battery electric vehicles registered",
+      "period_start": "2026-09-01",
+      "period_end": "2026-09-30",
+      "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+      "via": "live_dated",
+      "page_date": "2026-10-05",
+      "published_at_if_visible": "",
+      "quote": "BEV registrations rose by 36.3% to 99,201, giving them a 28.3% share of the September market, while PHEV registrations increased by 55.5% to reach a record 17% share.",
+      "domain": "www.fleetnews.co.uk",
+      "verdict": "different",
+      "reason": "Segment only: BEV registrations, not total UK new car registrations.",
+      "early_id": "e11"
+     }
+    ],
+    "id": "p62",
+    "value": 350536.0,
+    "unit": "new cars registered",
+    "date": "2026-10-05",
+    "point": {
+     "id": "p62",
+     "name": "UK new car registrations, September 2026 (preliminary SMMT figure)",
+     "value": 350536.0,
+     "value_as_written": "350,536",
+     "unit": "new cars registered",
+     "period_start": "2026-09-01",
+     "period_end": "2026-09-30",
+     "source_url": "https://www.fleetnews.co.uk/news/fleet-registrations-pass-one-million-as-september-market-grows-121",
+     "via": "live_dated",
+     "page_date": "2026-10-05",
+     "published_at_if_visible": "",
+     "quote": "Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.",
+     "domain": "www.fleetnews.co.uk",
+     "early_id": "e1"
+    },
+    "reason": "Same entity/scope (UK total new car registrations), same measure and unit, same period (September 2026), reported actual preliminary SMMT figure.",
+    "outcome": null
+   }
+  ]
+ },
+ "final": {
+  "template": "Published value: 350,536 new cars registered. This is the pinned target itself (period 2026-09-01..2026-09-30) as already published, not an estimate.\n\nSource: data point p62 \"UK new car registrations, September 2026 (preliminary SMMT figure)\" (period 2026-09-01..2026-09-30), from www.fleetnews.co.uk (live_dated page dated 2026-10-05), quoting: \"Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.\"\nA separate model check confirmed that this data point has the pinned target's entity, measure and period and is a reported value, not a forecast; the number is taken from the data point by code.\n\nNo estimate was made: the run stopped as soon as this published value was confirmed, so the remaining sub-agents, the judge and the estimation methods were skipped.\n\nA published figure can be revised later; this answer reports it as published by 2026-10-16.",
+  "text": "Published value: 350,536 new cars registered. This is the pinned target itself (period 2026-09-01..2026-09-30) as already published, not an estimate.\n\nSource: data point p62 \"UK new car registrations, September 2026 (preliminary SMMT figure)\" (period 2026-09-01..2026-09-30), from www.fleetnews.co.uk (live_dated page dated 2026-10-05), quoting: \"Preliminary figures from the Society of Motor Manufacturers and Traders (SMMT) show that 350,536 new cars were registered in September, up from 312,891 during the same month last year.\"\nA separate model check confirmed that this data point has the pinned target's entity, measure and period and is a reported value, not a forecast; the number is taken from the data point by code.\n\nNo estimate was made: the run stopped as soon as this published value was confirmed, so the remaining sub-agents, the judge and the estimation methods were skipped.\n\nA published figure can be revised later; this answer reports it as published by 2026-10-16.",
+  "placeholders": {},
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": false,
+  "written_by": "code (published value)"
+ },
+ "started_at": "20261016T073012Z",
+ "wall_s": 37.7,
+ "budget": {
+  "usd_total_assumed": 0.3845,
+  "usd_tokens": 0.0845,
+  "usd_search_fee_assumed": 0.3,
+  "usd_cap": 1.0,
+  "pages_used": 8,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 18,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 8,
+  "pages_snapshot": 0,
+  "pages_live_dated": 8,
+  "pages_dropped": 0,
+  "pages_sent_to_extractor": {
+   "total": 8,
+   "snapshot": 0,
+   "live_dated": 8
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "published2"
+}
