@@ -48,6 +48,12 @@ When the agent runs on today's date and the question has no registered official 
 
 Live check (2026-10-16, `results/agent/ask_a63174a0/published1`): "How many new cars were registered in the UK in September 2026, as reported by SMMT?" was reported as published, 350,536 (SMMT preliminary figure via fleetnews.co.uk and tradingeconomics.com; the estimation methods gave 352,638 for reference), $0.46, 27 minutes. An earlier snapshot of the same article said 350,518; which figure is SMMT's final one was not checked. Open problems are in `NEXT.md`.
 
+## Live use: direct page fetch and early stop (v2.5)
+
+In live use (as_of today, no registered answer) every URL is fetched as the live page only (`fetch.fetch_live`): no Wayback Machine request at all, short timeouts (15 s per page, 10 s for robots.txt), no retries. A direction's URLs are fetched at the same time; the per-host limit (request starts at least 1 s apart, or the robots.txt Crawl-delay) and robots.txt still apply, and the live-page checks are unchanged (a readable date <= as_of, no later explicit date in the text), as are the quote, number, scale and period-year checks. After each page, its verified points go through the already-published candidate rules and, when there are candidates, the same confirmation call (`published.EarlyWatch`, continuous targets only). The first check that confirms a published value stops the other sub-agents; the judge and the estimation methods are skipped, and the final answer, written by code, reports the value with its source and says that no estimate was made. If the confirmed values disagree, the early check is switched off and the run continues as before. Backtests (as_of before today, or a registered answer) keep the snapshot-only fetcher unchanged (prompt hash and the 7 dev/test recomputations identical).
+
+Live check (2026-10-16, `results/agent/ask_a63174a0/published2`, code v2.5): the same UK question was reported as published, 350,536 (fleetnews.co.uk live page dated 2026-10-05, "Preliminary figures from the Society of Motor Manufacturers and Traders"), stopped after the first confirming page: 37.7 s and $0.38 (of which $0.30 is the assumed search fee), against 1,632 s and $0.46 for published1. Most of the remaining time is the plan (13.5 s) and search (13 s) model calls. Which page's version is reported depends on which extraction finishes first (another page in the same run said 350,518); see `NEXT.md`.
+
 ## Web UI (local)
 
 ```
@@ -79,7 +85,7 @@ Assumption share (read-only, computed from the saved state, never written back):
 | `triangulate/arms.py`, `prompts.py`, `llm.py` | the two arms, prompts, DeepSeek client with per-call logging |
 | `triangulate/report.py`, `viewer.py` | offline metrics, tables and HTML graph pages |
 | `results/` | `summary.json`, `per_question.json`, `report_tables.md`, `calls.jsonl`, `demo/` |
-| `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher, extractor checks, judge, method library, assumption inputs for formula_mc (`assumptions.py`), own-history ablation (`ablation.py`), discrete targets (`discrete.py`), optional Jev arm (`jev.py`), already-published targets in live use (`published.py`) |
+| `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher (backtests) and live fetcher (live use, v2.5), extractor checks, judge, method library, assumption inputs for formula_mc (`assumptions.py`), own-history ablation (`ablation.py`), discrete targets (`discrete.py`), optional Jev arm (`jev.py`), already-published targets in live use (`published.py`) |
 | `results/agent/<id>/[<tag>/]` | `state.json`, `calls.jsonl`, `ledger.md`, `graph.html` per run; raw pages stay in `data/raw/agent/` (local only) |
 | `docs/graphs/` | `index.html`, the finance demo graph; realFP question pages under `realfp/` (local only) |
 

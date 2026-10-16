@@ -1,7 +1,73 @@
 # 断点（2026-10-16）
 
-当前代码：tag `v2.4.1`（agent，4165105：「答案已公布」候选规则的两条审查修复）+ `web-v0.2`（前端，75521a8，没改）。测试 206 个全过。
-上一版 `v2.4`（c80036b）、`v2.3.1`（4982c8f）的记录在下面。
+当前代码：tag `v2.5.1`（agent，ed077f0）+ `web-v0.2`（前端，75521a8，没改）。测试 221 个全过。
+`v2.5`（f5b3c79）是 published2 实测用的代码；v2.5.1 只多一处提前停的检查（见下）。上一版 `v2.4.1`（4165105）的记录在下面。
+
+## v2.5：真实使用直接抓 live 页 + 确认已公布就提前停（2026-10-16 批准的范围）
+
+- 抓取（`fetch.fetch_live`、`net.get_live`）：真实使用（as_of 是今天、没有登记真值，条件同 `run.checks_published`）时只抓 live 页，
+  不调 `cdx_lookup`、不请求 web.archive.org。页面超时 15 s、robots.txt 10 s，连接失败和 429/503 都不重试、不退避（回测仍是 90 / 45 s
+  加 10 / 30 s 退避）。一个方向的 URL 同时开抓（`pipeline._live_pages`），按 URL 顺序抽取（点的编号可复现）；每个 host 请求开始
+  至少隔 1 秒（或 Crawl-delay）、每个 host 最多 4 个连接、robots 规则都没改（`net.LIMITER`）。live 页的收下条件不变：读得出日期且
+  <= as_of、正文没有晚于 as_of 的显式日期；quote、数字、倍数词、期间年份的核对不变。
+- 提前停（`published.EarlyWatch`，真实使用、连续值目标、非消融）：每页核对完，把这一页的新点（临时 id e1 ...）按 v2.4 的候选规则
+  （`candidates(judged_only=False)`，不要求裁判看过）选候选，有候选就调一次 v2.4 的确认（role `published:early`）。第一次 resolve 出
+  published 就停：其余子 agent 不再搜索 / 抽取，裁判节点只编号（临时 id 换成 p 编号），不调裁判、不算 compute，直接 final；终稿由代码写，
+  末尾写明「No estimate was made ...」。确认的值互相矛盾（conflict）就关掉提前检查，照常走裁判、估计和 v2.4 的检查。
+  记录：`state.json` -> `published`（`early_stop: true`）和 `published_early`（每次检查）。离散目标不提前停（结果列表由裁判定义）。
+- 回测：`fetch_page` 的快照路径没改。`probes/compare_continuous_prompts.py` sha256 仍是 4a56d586…，`probes/recheck_continuous.py` 7/7。
+- 离线测试 15 个（`tests/test_live.py`）：live 路径不请求 Wayback、不调 cdx_lookup、超时短、不重试；日期 / robots / http 状态的丢弃
+  原因；回测的 fetch_page 只请求 web.archive.org（有快照、没快照两种）；一个方向里不同 host 同时抓、同一 host 的请求开始间隔不小于
+  限速间隔、robots 禁止的 URL 不请求；回测方向走 fetch_page；提前停（裁判 / 核对 / 终稿模型 / 别的方向的抽取都没调）；没确认时
+  裁判之后的 prompt、points、judge_rounds、compute、published、final 与关掉提前检查逐字相同；conflict 关掉提前检查；回测、离散不提前停；
+  只送新点；prepare_run 的开关。
+- v2.5.1（ed077f0）：published2 里 d5 在提前停时正在等第一页，取回后照样抽取了（多 1 次抽取、约 7 s，跑在最后）。现在取页返回后再查
+  一次。新测试在 v2.5 上失败、在 v2.5.1 上通过。**v2.5.1 没有真实运行复测**；按 published2 的调用记录估计会省掉这 1 次抽取
+  （$0.004）和约 6 s（未实测）。
+
+### 实测 published2（2026-10-16，代码 f5b3c79 = v2.5，--auto-approve）
+
+| | published1（v2.4） | published2（v2.5） |
+|---|---|---|
+| 结果 | published 350,536（p52 fleetnews live 页） | published 350,536（p62，同一篇 fleetnews live 页，页面日期 2026-10-05）；没有做估计 |
+| 总用时 | 1631.9 s | **37.7 s** |
+| 成本 | $0.4601（token $0.1401 + 假设搜索费 $0.32） | $0.3845（token $0.0845 + 假设搜索费 $0.30） |
+| 调用 | 41 | 18（plan 1、search 8、extract 8、published:early 1） |
+| 抽取的页 | 29（13 快照 + 16 live） | 8（全是 live；每个方向 1 页） |
+
+用时拆分（`probes/time_split.py`；各方向并行，「跨度」= 这一阶段第一次开始到最后一次结束，括号里是从运行开始算的秒数）：
+
+| 阶段 | published1 | published2 |
+|---|---|---|
+| plan | 14.2 s | 13.5 s |
+| search（8 次） | 跨度 14.7 s（合计 76.0 s） | 跨度 12.9 s（合计 70.1 s；14.0–26.9） |
+| fetch | 没有逐页记录；最后一次搜索结束到最后一次抽取开始 1558 s（CDX 多次 503 / 504、Wayback 单连接） | 8 页记录：跨度 11.8 s（19.0–30.8），合计 10.9 s，最慢 3.78 s（kba.de） |
+| extract | 29 次，合计 151.7 s，跨度 1342.6 s | 8 次，合计 51.9 s，跨度 17.4 s（21.0–38.4） |
+| 已公布检查 | 1 次 2.7 s（裁判之后） | 1 次 2.0 s（27.0–29.0，d8 的第一页） |
+| judge / audit / final | 34.2 s / 1.7 s / 不调 | 都不调 |
+
+- 第一次检查（d8 的 fleetnews 页）有 5 个候选：总数 350,536 判 target，fleet / business / BEV 分项 4 个判 different；确认后约 9 s
+  全部方向停下（最后是 d5 的那次多余抽取，见 v2.5.1）。
+- 取页数：每个方向搜完就把它的 4 个 URL 同时开抓，共 32 个（20 个不同 URL）；state.json 只记了抽取过的 8 页；停下后别的取页在后台跑完，
+  data/raw 里这次运行写入了 18 个不同的已收下页面（按文件修改时间数）。HTTP 请求总数（含 robots 和重定向）没有记录。
+- 报的版本取决于谁先抽取完：d6 的 parliamenttoday 页（页面日期 2026-10-02，350,518，「preliminary figures published today by SMMT」）
+  的抽取比 d8 晚结束（calls.jsonl 的开始时刻只到秒，差多少算不准），交给检查时 d8 的检查正在进行，确认后就停了，没被检查。两个值相差 0.005%，同一次检查里也会判一致；**哪个是 SMMT 的正式数，仍未核实**。
+
+### v2.5 的未解决问题（open problems）
+
+1. 先到先得：提前停报的是第一页确认的值，之后到的版本（published2 的 350,518）不再看；v2.4 那种「所有保留的点一起看、相差 > 0.5% 记
+   conflict」在提前停时只覆盖第一页之内。可能的做法：确认后再等几秒收齐已在抽取的页，或停下前把已核对的候选一起送一次。要先定。
+2. 停下后的取页不进 state.json：published2 的 32 个 URL 只记了 8 页，其余后台跑完（每个最多 15 s 超时），页面写进 data/raw。
+   可能的做法：停下时把没抽取的 URL 记成「stopped early before extraction」并带上取页结果。
+3. 同一个 URL 被几个方向各抓一次：published2 里 parliamenttoday 6 次、fleetnews 5 次（限速排队，但多占请求和时间）。没有每次运行的
+   live 页缓存（v2.5 范围外，没做）。
+4. live 页必须读得出日期（沿用的规则）：以前没日期的 live 页可能由 Wayback 快照救回，现在直接丢。published2 记录的 8 页都有日期；
+   对别的题漏了多少，没有测。
+5. 网页进度页：提前停时 compute 卡片不更新（compute 由裁判节点写，进度页只看 compute 节点），裁判一栏显示「没有完成：published value
+   confirmed early; judge not called」；停下的方向显示 stopped。网页没改。
+6. 离散目标不提前停（结果列表要裁判定义）；离散题的已公布值仍要等到裁判之后的 v2.4 检查。
+7. markets 节点（Polymarket）在真实使用时仍用默认的 60 s 超时和重试，裁判要等它；published2 里没拖慢（没有逐项计时）。
+8. 现在最慢的是两次模型调用：plan 13.5 s、search 跨度 12.9 s（最慢一次 12.95 s），合起来约占 published2 的 70%。
 
 ## v2.4.1：「答案已公布」候选规则的审查修复（离线，未调模型）
 
