@@ -144,6 +144,7 @@ class Context:
         self.qid, self.question, self.as_of_s = qid, question, as_of
         self.as_of = date.fromisoformat(as_of)
         self.ablate_own_history = ablate_own_history  # 回测消融：见 ablation.py
+        self.check_published = False  # v2.4「答案已公布」检查（published.py）：只有 run.prepare_run 在真实使用时打开
         self.budget = budget or Budget()
         self.calls_path = calls_path
         self.llm = AgentLLM(calls_path, self.budget)

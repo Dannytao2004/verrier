@@ -31,10 +31,12 @@ def dep_graph(state: dict) -> dict:
     dirs = {d["id"]: d for d in state.get("directions") or []}
     comp = state.get("compute") or {}
     res = comp.get("result") or {}
+    pub = res.get("published") if res.get("basis") == "published" else None   # v2.4：结果是已公布的值（published.py）
     if res.get("mode") == "discrete":   # 离散目标：目标节点显示最可能的结果和它的概率；Jev 对照臂放在详情里
-        tlabel = f"target\n{str(res.get('most_likely') or 'n/a')[:28]}\n{_pct(res.get('most_likely_prob'))}"
+        tlabel = (f"target\n{str(res.get('most_likely') or 'n/a')[:28]}\nresolved (published)" if pub else
+                  f"target\n{str(res.get('most_likely') or 'n/a')[:28]}\n{_pct(res.get('most_likely_prob'))}")
     else:
-        tlabel = f"target\n{_num(res.get('central'))}"
+        tlabel = f"target\n{_num(res.get('central'))}" + ("\npublished" if pub else "")
     tdetail = {"target": (state.get("plan") or {}).get("target"), "result": res}
     if state.get("jev"):
         tdetail["jev_arm_not_pooled"] = state["jev"]
@@ -83,6 +85,8 @@ def dep_graph(state: dict) -> dict:
             edges.append({"from": s["id"], "to": f"P:{p['id']}"})
         for mid in used.get(p["id"], []):
             edges.append({"from": f"P:{p['id']}", "to": mid})
+        if pub and pub.get("id") == p["id"]:   # 已公布的值直接连到目标（方法只作参考）
+            edges.append({"from": f"P:{p['id']}", "to": "target"})
     nodes += list(srcs.values())
     return {"nodes": nodes, "edges": edges}
 
@@ -195,8 +199,9 @@ def ledger(state: dict, score: dict | None = None) -> str:
     L += ["## Methods (computed by code)", "",
           "| id | method | estimate | inputs (points / assumptions) | backtest years | mean abs ln err | weight | weight basis | "
           "notes / error |", "|---|---|---|---|---|---|---|---|---|"]
-    w = r.get("weights") or {}
-    wb = r.get("weight_basis") or {}
+    est = comp.get("estimate_result") or {} if r.get("basis") == "published" else r   # v2.4：已公布时估计只作参考
+    w = est.get("weights") or {}
+    wb = est.get("weight_basis") or {}
     for m in comp.get("methods") or []:
         e = m.get("backtest_mean_abs_log_err")
         es = "" if e is None else f"{e:.3f}"
@@ -208,11 +213,41 @@ def ledger(state: dict, score: dict | None = None) -> str:
     tail = "" if share is None else f", weight on methods that use assumptions {share:.2f}"
     if r.get("mode") == "discrete":
         L += [""] + outcomes_md(state, score)
+    elif r.get("basis") == "published":
+        L += ["", f"Result: **published value {_num(r.get('central'))}** (data point {(r.get('published') or {}).get('id')}). "
+                  f"Estimation methods for reference only, not blended (weights above are theirs): central "
+                  f"{_num(est.get('central'))}, 80% interval [{_num(est.get('p10'))}, {_num(est.get('p90'))}], basis "
+                  f"{est.get('basis')}, weight rule {est.get('weight_rule')}"]
     else:
         L += ["", f"Result: central **{_num(r.get('central'))}**, 80% interval [{_num(r.get('p10'))}, {_num(r.get('p90'))}], "
                   f"basis {r.get('basis')}, weight rule {r.get('weight_rule')}{tail}"]
+    L += [""] + published_md(state)
     L += ["", "## Final answer", "", (state.get("final") or {}).get("text", ""), ""]
     return "\n".join(L)
+
+
+def published_md(state: dict) -> list:
+    """账本里「答案已公布」检查（v2.4，published.py）一节：状态、候选点和模型的判定。旧运行没有这条记录，不写。"""
+    pub = state.get("published")
+    if not pub:
+        return []
+    L = ["## Published-value check (live use only)", "", f"Status: **{pub.get('status')}**. {_md(pub.get('note'))}"]
+    if pub.get("error"):
+        L.append(f"Error: {_md(pub['error'])}")
+    if pub.get("status") == "published":
+        pt = pub.get("point") or {}
+        L.append(f"Published value: **{_num(pub.get('value'))}** {_md(pub.get('unit'))} = data point {pub.get('id')} from "
+                 f"{_md(pt.get('domain'))} ({pt.get('via')}, dated {pub.get('date')}); confirmed ids {pub.get('confirmed_ids')}"
+                 + (f"; resolves to outcome **{_md(pub.get('outcome'))}**" if pub.get("outcome") else ""))
+    if pub.get("status") == "conflict":
+        L.append(f"Confirmed values disagree: {pub.get('values')}; the estimate is reported instead.")
+    if pub.get("candidates"):
+        L += ["", "| id | name | value | unit | period | source | verdict | reason |", "|---|---|---|---|---|---|---|---|"]
+        for c in pub["candidates"]:
+            L.append(f"| {c.get('id')} | {_md(c.get('name'))[:90]} | {_num(c.get('value'))} | {_md(c.get('unit'))[:30]} | "
+                     f"{c.get('period_start')}..{c.get('period_end')} | {_md(c.get('domain'))} | {_md(c.get('verdict', ''))} | "
+                     f"{_md(c.get('reason', ''))[:160]} |")
+    return L + [""]
 
 
 def outcome_rows(state: dict) -> tuple:
@@ -250,6 +285,12 @@ def outcomes_md(state: dict, score: dict | None = None) -> list:
          f"over {len(mids)} method(s); weight on methods that use assumptions {r.get('assumption_weight_share') or 0:.2f}.", "",
          "| outcome | value | agent (pooled) | " + "".join(f"{m} | " for m in mids) + "Jev (not pooled) |",
          "|---|---|---|" + "---|" * len(mids) + "---|"]
+    if r.get("resolved"):   # v2.4：已公布的结果（published.py）；方法的列是估计，只作参考
+        ref = ((state.get("compute") or {}).get("estimate_result") or {}).get("outcomes") or []
+        ref_txt = "; ".join(f"{_md(o.get('label'))} {_pct(o.get('prob'))}" for o in ref) or "none"
+        L[2] = (f"Resolved by a published value: **{_md(r.get('most_likely'))}** (data point "
+                f"{(r.get('published') or {}).get('id')}). The agent column shows the resolved outcome; the method columns are "
+                f"the estimation methods, for reference only (pooled estimate: {ref_txt}).")
     orec = state.get("outcomes") or {}
     if orec.get("list"):   # v2.3：结果列表由裁判根据证据定义（可能修订过一次）
         rev = (f"; revised in round {orec['revised_round']} ({_md(orec.get('revision_reason'))[:200]})"
@@ -275,7 +316,10 @@ def outcome_table_html(state: dict) -> str:
     body = "".join(f"<tr><td>{e(str(lab))}</td><td>{e(_num(v))}</td><td><b>{e(_pct(p))}</b></td>"
                    + "".join(f"<td>{e(_pct(per.get(m)))}</td>" for m in mids) + f"<td>{e(_pct(jp))}</td></tr>"
                    for lab, v, p, per, jp in rows)
-    return (f"most likely <b>{e(str(r.get('most_likely') or 'n/a'))}</b> ({e(_pct(r.get('most_likely_prob')))})"
+    top = (f"resolved <b>{e(str(r.get('most_likely') or 'n/a'))}</b> (published value, data point "
+           f"{e(str((r.get('published') or {}).get('id')))}; method columns are estimates for reference)" if r.get("resolved") else
+           f"most likely <b>{e(str(r.get('most_likely') or 'n/a'))}</b> ({e(_pct(r.get('most_likely_prob')))})")
+    return (top +
             f'<table style="font-size:12px;border-collapse:collapse;margin-top:4px" border="1" cellpadding="3">'
             f"<tr><th>outcome</th><th>value</th><th>agent (pooled)</th>{head}<th>Jev (not pooled)</th></tr>{body}</table>"
             f'<div style="font-size:12px">{e(jev_note(jv))}</div>')

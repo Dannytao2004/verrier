@@ -4,6 +4,7 @@
 真值，以及同一题里所有公布日晚于 as_of 的已知官方值）、"last_year"、"source"。
 agent 只拿到题目文字和 as_of。真值和哨兵值只交给代码，不进任何 prompt。没有真值（真实使用）时不打分、不显示官方值。
 """
+import html
 import json
 import math
 import time
@@ -107,6 +108,12 @@ def ablation_summary(state: dict) -> dict:
             "residual_risks": AB.RESIDUAL_RISKS}
 
 
+def checks_published(q: dict, today=None) -> bool:
+    """v2.4「答案已公布」检查（published.py）只在真实使用时做：as_of 是今天（或更晚）、题目没有登记真值。
+    回测和留出测试的目标值在 as_of 之后才公布，不可能是保留的点，所以不检查、不调模型。"""
+    return q.get("answer_value") is None and date.fromisoformat(q["as_of"]) >= (today or date.today())
+
+
 def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False) -> dict:
     """建结果目录、上下文和图（不调模型）。返回运行句柄：g、cfg、ctx、out_dir、stamp、tag、leak_values、t0。
     命令行（run_question）和网页（triangulate/web）共用；图的第一个输入是 initial_input(q)。"""
@@ -122,6 +129,7 @@ def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False) -> dic
     ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values, ablate_own_history=ablate_own_history)
     # 有真值的题（回测 / 留出测试，--auto-approve 没人把关）只在题目明确标了 outcome_type = discrete 时才接受离散目标
     ctx.allow_discrete = q.get("answer_value") is None or q.get("outcome_type") == "discrete"
+    ctx.check_published = checks_published(q)
     g = build(ctx)
     cfg = {"configurable": {"thread_id": f"{q['id']}-{stamp}"}, "max_concurrency": 12, "recursion_limit": 80}
     return {"q": q, "g": g, "cfg": cfg, "ctx": ctx, "out_dir": out_dir, "stamp": stamp, "tag": tag,
@@ -162,6 +170,14 @@ def save_run(h: dict, approvals: list) -> dict:
     if r.get("mode") == "discrete":   # 离散目标：页头放结果概率表（含 Jev 对照臂）
         meta = f"as_of <b>{q['as_of']}</b> &middot; " + outcome_table_html(state)
         est = f"most likely {r.get('most_likely')} ({'n/a' if r.get('most_likely_prob') is None else f'{100 * r['most_likely_prob']:.1f}%'})"
+        if r.get("resolved"):
+            est = f"resolved {r.get('most_likely')} (published value)"
+    elif r.get("basis") == "published":   # v2.4：结果是已公布的值（published.py）；组合估计只作参考
+        e, pub = (state.get("compute") or {}).get("estimate_result") or {}, r.get("published") or {}
+        meta = (f"as_of <b>{q['as_of']}</b> &middot; published value <b>{_n(r.get('central'))}</b> (data point "
+                f"{html.escape(str(pub.get('id')))}, dated {html.escape(str(pub.get('date')))}) &middot; estimate for reference "
+                f"{_n(e.get('central'))}, 80% [{_n(e.get('p10'))}, {_n(e.get('p90'))}] (not blended)")
+        est = f"published value {_n(r.get('central'))}"
     else:
         meta = (f"as_of <b>{q['as_of']}</b> &middot; estimate <b>{_n(r.get('central'))}</b> &middot; 80% [{_n(r.get('p10'))}, "
                 f"{_n(r.get('p90'))}] ({r.get('basis')})")

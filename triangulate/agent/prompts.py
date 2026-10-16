@@ -335,3 +335,23 @@ AUDIT_OUTCOMES = """Outcome list of this discrete target, defined by the analyst
 __OUTCOMES__
 Kept data points the list relies on:
 __BASIS__"""
+
+# 「答案已公布」的确认（v2.4，只在真实使用时：as_of = 今天、题目没有真值）：候选由代码挑出（published.py），
+# 模型只回每个候选的 verdict，不写数字；形式同输入核对
+PUBLISHED_SYSTEM = """You check whether a data point already is the value an estimation question asks for. You do not estimate or compute anything and you do not write numbers. Reply with one JSON object only."""
+
+PUBLISHED_USER = """Pinned target: {target}
+Information cutoff (today): {as_of}
+
+Code selected the kept data points below because their name mentions the target's entity and measure and their period matches the target period. For each one, decide whether it already is the target value: the number the question asks for, published on or before the cutoff.
+
+Mark "target" only when all of these hold:
+- the same entity or place and the same scope: not one segment, channel, region or product type of it, and not a broader total;
+- the same measure, unit and period;
+- a reported actual value (a preliminary or first release counts), from the publisher named in the target or reported by another source as that publisher's figure; evidence that names a different publisher or definition is "different";
+- not a forecast, projection, plan, market expectation, scenario, or a bound of an estimated range; not a change, growth rate or share; not a cumulative total or average over a different span.
+Otherwise mark "different" and name the condition that fails. Judge only from the evidence shown.
+
+{candidates}
+
+Reply with JSON: {{"candidates": [{{"id": "p1", "verdict": "target", "reason": "..."}}]}}"""

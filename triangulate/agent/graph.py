@@ -1,8 +1,9 @@
 """LangGraph 状态图：plan -> approve(interrupt) -> [Send: 每个方向一个 subagent + markets] -> judge
--> (可选一轮 base-rate 方向 -> judge) -> compute -> [离散目标：jev 对照臂] -> final。
+-> (可选一轮 base-rate 方向 -> judge) -> compute -> published -> [离散目标：jev 对照臂] -> final。
 裁判可以为 formula_mc 提出假设输入（assumptions.py 校验）；--ablate-own-history 时按 ablation.py 去掉目标自身的历史。
 离散目标（plan 给出 outcome_type = discrete）只用 outcome_probs；结果列表由裁判第一轮根据证据定义（v2.3，state["outcomes"]），
 规则在 discrete.py；Jev 对照臂在 jev.py。
+published（v2.4，只在真实使用时）：保留的点里有目标本身（已公布）时，结果就是这个值，估计方法只作参考（published.py）。
 
 图里只放可序列化的数据；预算、LLM、哨兵等放在 Context 里，通过闭包交给节点。
 """
@@ -21,6 +22,7 @@ from . import assumptions as AS
 from . import compute as C
 from . import discrete as D
 from . import jev as J
+from . import published as PB
 from .markets import search_markets
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
 from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
@@ -48,6 +50,7 @@ class AgentState(TypedDict, total=False):
     assumptions: dict
     outcomes: dict   # 离散目标：裁判定义的结果列表（discrete.accept_outcomes 的记录）
     jev: dict
+    published: dict   # v2.4：「答案已公布」检查的记录（published.py）
     final: dict
     aborted: str
 
@@ -613,6 +616,31 @@ def build(ctx: Context):
                   max_per_method=AS.MAX_PER_METHOD)
         return {"compute": out, "assumptions": av}
 
+    def published(state: AgentState):
+        """「答案已公布」（v2.4，规则在 published.py）：只在真实使用时检查（ctx.check_published 由 run.prepare_run 设定：
+        as_of 是今天、题目没有登记真值）；回测不调模型。确认了就把 compute.result 换成这个值，原来的估计留作参考。"""
+        if not getattr(ctx, "check_published", False):
+            return {"published": {"status": "not_checked", "note": PB.NOT_CHECKED}}
+        target = state["plan"]["target"]
+        cands, note = PB.candidates(state.get("points") or [], target, ctx.as_of)
+        if not cands:
+            return {"published": {"status": "no_candidates", "note": note, "candidates": []}}
+        system, user = PB.prompt(target, state["as_of"], cands)
+        try:
+            out, err = ctx.llm.ask(system, user, role="published", qid=ctx.qid, max_tokens=3000)
+        except BudgetExceeded as e:
+            return {"published": {"status": "skipped", "note": f"{note}; {e}", "candidates": [PB._summary(p) for p in cands]}}
+        if out is None:
+            return {"published": {"status": "error", "error": err, "note": note, "candidates": [PB._summary(p) for p in cands]}}
+        tw = D.with_outcomes(target, state.get("outcomes"))
+        rec = {**PB.resolve(out, cands, tw), "note": note}
+        upd = {"published": rec}
+        if rec["status"] == "published":
+            comp = state.get("compute") or {}
+            upd["compute"] = {**comp, "result": PB.result(rec, comp.get("result") or {}, tw),
+                              "estimate_result": comp.get("result")}
+        return upd
+
     def after_compute(state: AgentState):
         return "jev" if D.is_discrete(state["plan"]["target"]) else "final"
 
@@ -631,6 +659,17 @@ def build(ctx: Context):
             return {"jev": {"arm": "jev", "status": "error", "error": f"jev arm error {type(e).__name__}"[:200]}}
 
     def final(state: AgentState):
+        """已公布（published.py）：终稿由代码写；确认的点互相矛盾：照常写估计的终稿，后面附一句。"""
+        pub = state.get("published") or {}
+        if pub.get("status") == "published":
+            return {"final": PB.final_text(state)}
+        out = final_estimate(state)
+        if pub.get("status") == "conflict":
+            note = "\n\n" + PB.conflict_note(pub)
+            out["final"] = {**out["final"], "text": out["final"]["text"] + note, "template": out["final"]["template"] + note}
+        return out
+
+    def final_estimate(state: AgentState):
         comp = state.get("compute") or {}
         r = comp.get("result") or {}
         if r.get("mode") == "discrete":
@@ -754,7 +793,7 @@ def build(ctx: Context):
 
     g = StateGraph(AgentState)
     for name, fn in [("plan", plan), ("approve", approve), ("subagent", subagent), ("markets", markets),
-                     ("judge", judge), ("compute", compute), ("jev", jev), ("final", final)]:
+                     ("judge", judge), ("compute", compute), ("published", published), ("jev", jev), ("final", final)]:
         g.add_node(name, fn)
     g.add_edge(START, "plan")
     g.add_edge("plan", "approve")
@@ -762,7 +801,8 @@ def build(ctx: Context):
     g.add_edge("subagent", "judge")
     g.add_edge("markets", "judge")
     g.add_conditional_edges("judge", after_judge, ["subagent", "compute"])
-    g.add_conditional_edges("compute", after_compute, ["jev", "final"])
+    g.add_edge("compute", "published")
+    g.add_conditional_edges("published", after_compute, ["jev", "final"])
     g.add_edge("jev", "final")
     g.add_edge("final", END)
     return g.compile(checkpointer=InMemorySaver())
