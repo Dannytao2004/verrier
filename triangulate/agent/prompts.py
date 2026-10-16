@@ -203,7 +203,7 @@ Group points that genuinely corroborate or conflict with each other.
 - For imperfect evidence you keep, state its intended role and the conversion or transfer assumption it requires.
 
 2. decisions:
-List only the points you discard, each with a short reason. Every point you do not list is kept.
+List only the points you discard, each with a short reason. Every point in the data-point table above that you do not list is kept.
 - Keep useful observations, conversion factors, analogues, bounds, and contextual checks.
 - Do not discard a point solely because it lacks a time series, comes from an older period, covers a different scope, or cannot directly enter a historical-series method.
 - Keeping a point does not mean it is suitable for direct numerical substitution.
@@ -246,7 +246,7 @@ Reply with JSON:
  "extra_directions": [],
  "assumptions": [{{"id": "a1", "name": "...", "value": <number>, "low": <number>, "high": <number>, "unit": "...", "rationale": "...", "applies_when": "...", "falsified_by": "...", "route": "m2"}}],
  "methods": [{{"id": "m1", "method": "series_naive", "params": {{"target_history": ["p1", "p2"], "k": 1}}, "rationale": "..."}},
-             {{"id": "m2", "method": "formula_mc", "params": {{"formula": "a * b", "inputs": {{"a": {{"id": "p3"}}, "b": {{"id": "a1"}}}}}}, "rationale": "..."}}]}}"""
+             {{"id": "m2", "method": "formula_mc", "params": {{"formula": "a * b", "inputs": {{"a": {{"id": "p3", "role": "..."}}, "b": {{"id": "a1", "role": "..."}}}}}}, "rationale": "..."}}]}}"""
 
 EXTRA_RULE_R1 = """extra_directions: propose up to 3 targeted follow-up directions that would most improve the estimate.
 

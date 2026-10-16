@@ -212,8 +212,15 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                 # 目标本身是百分比 / 比率（利率、占比）时不适用：那时百分比输入就是「量」（FOMC 题里这条把所有路线都挡掉了）
                 if not is_ratio_unit(target.get("unit", "")) and \
                         not any(d["kind"] in ("point", "assumption") and not is_ratio_unit(d.get("unit", "")) for d in detail):
+                    # v2.6b（B5 的一部分）：点名每个观测点 / 假设输入（id、unit、name 的前 60 个字符），修正轮才知道是哪个输入被当成了比率
+                    checked = [d for d in detail if d["kind"] in ("point", "assumption")]
+                    names = {d["id"]: (kept_a if d["kind"] == "assumption" else pts)[d["id"]].get("name", "") for d in checked}
+                    named = "; ".join(f'{d["name"]} = {d["id"]} (unit "{d["unit"]}", name "{str(names[d["id"]])[:60]}")'
+                                      for d in checked)
+                    # 输入写在说明前面：ledger 的方法表只显示报错的前 200 个字符（outputs.ledger）
                     raise M.MethodError("formula_mc needs at least one input that is a quantity (not a share, ratio or %); "
-                                        "a product of ratios cannot produce the target")
+                                        f"a product of ratios cannot produce the target. Inputs: {named}. Code reads each of "
+                                        "these units as a share, ratio, % or empty unit")
                 if len(set(used_a)) > A.MAX_PER_METHOD:
                     raise M.MethodError(f"formula_mc uses {len(set(used_a))} assumptions (at most {A.MAX_PER_METHOD})")
                 s = M.formula_mc_samples(str(prm.get("formula", "")), env)

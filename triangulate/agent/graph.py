@@ -137,6 +137,24 @@ def _table(points: list) -> str:
     return "\n".join(rows)
 
 
+# D1（v2.6b，N11）：之前轮次已丢弃的点不进完整表格，接在表格后面，每个一行（不带 quote）；__ROWS__ 由代码替换
+DISCARDED_EARLIER = """
+
+Points discarded in earlier judge rounds (left out of the table above):
+id | name | value | discarded in round
+__ROWS__
+These points stay discarded. To restore one, list it in decisions with "keep": true and a short reason."""
+
+
+def _discarded_rows(points: list) -> str:
+    """之前轮次已丢弃的点 -> 接在裁判表格后面的一段（id | name | value | 第几轮丢弃）；没有这样的点时返回空串。
+    第几轮 = 点的 judged_round（只有两轮裁判：第 2 轮开始时它就是第 1 轮）。"""
+    if not points:
+        return ""
+    return DISCARDED_EARLIER.replace("__ROWS__", "\n".join(
+        " | ".join([p["id"], p["name"][:90], _fmt_num(p["value"]), str(p.get("judged_round"))]) for p in points))
+
+
 def assumption_placeholders(a: dict) -> dict:
     """一条假设的占位符：value 是裁判提的值，low / high 是代码实际采样用的 P10 / P90（已放宽、% 按原写法显示）。
     is_pct 只决定乘回 100；后缀 % 只给 unit 就是 "%" 的（「% of annual live births」这类由 key_assumptions_template 写出单位）。"""
@@ -498,11 +516,16 @@ def build(ctx: Context):
         dirs = "\n".join(f"- {d['id']} [{d['category']}] {d['hypothesis']}" for d in state["directions"])
         target0 = state["plan"]["target"]
         disc, orec = D.is_discrete(target0), state.get("outcomes")   # orec：之前的轮次定下的结果列表（离散目标）
+        # D1（v2.6b）：完整表格只列仍保留的点和新点，之前轮次丢掉的点另起一段（判定规则不变：没列出的点沿用原状态，
+        # keep:true 恢复）。表格在这一轮的判定之前算好，修正轮（包括离散目标修订列表后重写的那份）用同一张表
+        gone_before = {p["id"] for p in shown if p.get("judged_round") and not p.get("keep")}
+        table = (_table([p for p in shown if p["id"] not in gone_before]) +
+                 _discarded_rows([p for p in shown if p["id"] in gone_before]) if shown else "(no verified data points)")
 
         def judge_prompt(rec):
             return JUDGE_USER.format(
                 question=state["question"], as_of=state["as_of"], target=dumps(target0),
-                directions=dirs, table=_table(shown) if shown else "(no verified data points)",
+                directions=dirs, table=table,
                 methods_spec=(_discrete_spec(target0, rec) if disc else AB.methods_spec() if ablate else METHODS_SPEC),
                 extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2)
         judge_user = judge_prompt(orec)
