@@ -1,4 +1,4 @@
-"""离散结果模式（v2.2）和 Jev 对照臂：plan 解析和退回、outcome_probs 校验、等权平均、输入核对的行、终稿模板、打分、
+"""离散结果模式（v2.2；v2.3 起结果列表由裁判定义）和 Jev 对照臂：plan 解析和退回、裁判定义的结果列表、outcome_probs 校验、等权平均、输入核对的行、终稿模板、打分、
 Jev 客户端（假 HTTP 层）、离散运行的网页结果 JSON。全部离线：假模型、假搜索、假网页、假 HTTP。"""
 import json
 import os
@@ -54,26 +54,33 @@ def _run(probs, remainder=None, assumptions=(), method="outcome_probs", target=T
 
 
 class TestPlanOutcomes(unittest.TestCase):
-    def test_discrete_parsed(self):
-        kind, note = D.parse_outcomes({"outcome_type": "Discrete", "outcomes": [{"label": " yes ", "value": None},
-                                                                                {"label": "no", "value": "0"}]})
-        self.assertEqual(note, "")
-        self.assertEqual(kind, {"outcome_type": "discrete", "outcomes": [{"label": "yes", "value": None},
-                                                                          {"label": "no", "value": 0.0}]})
-        self.assertTrue(D.is_discrete(kind))
+    """v2.3：plan 只给 outcome_type 和可选的 outcome_kind，不列结果（结果列表由裁判根据证据定义）。"""
 
-    def test_fallbacks(self):
-        bad = {"one outcome": [{"label": "a"}], "eleven": [{"label": str(i)} for i in range(11)],
-               "duplicate": [{"label": "A"}, {"label": "a "}], "no label": [{"label": "a"}, {"value": 1}],
-               "not a list": "a, b"}
-        for why, outs in bad.items():
-            kind, note = D.parse_outcomes({"outcome_type": "discrete", "outcomes": outs})
-            self.assertEqual(kind, {"outcome_type": "continuous"}, why)
-            self.assertIn("fell back to continuous", note, why)
-        self.assertEqual(D.parse_outcomes({"outcome_type": "continuous", "outcomes": OUTS}), ({"outcome_type": "continuous"}, ""))
-        self.assertEqual(D.parse_outcomes({})[0], {"outcome_type": "continuous"})
-        self.assertIn("not recognised", D.parse_outcomes({"outcome_type": "categorical"})[1])
+    def test_plan_without_outcomes(self):
+        kind, note = D.parse_outcome_type({"outcome_type": "Discrete", "outcome_kind": "  policy rate \n in fixed steps "})
+        self.assertEqual(note, "")
+        self.assertEqual(kind, {"outcome_type": "discrete", "outcome_kind": "policy rate in fixed steps"})
+        self.assertTrue(D.is_discrete(kind))                                   # 没有结果列表也是离散目标
+        self.assertEqual(D.parse_outcome_type({"outcome_type": "discrete"})[0], {"outcome_type": "discrete", "outcome_kind": ""})
+        # plan 还列了结果：忽略，记一条说明（结果列表只能由裁判定义）
+        kind, note = D.parse_outcome_type({"outcome_type": "discrete", "outcome_kind": "yes/no", "outcomes": OUTS})
+        self.assertEqual(kind, {"outcome_type": "discrete", "outcome_kind": "yes/no"})
+        self.assertIn("plan listed outcomes; ignored", note)
+
+    def test_continuous_and_fallbacks(self):
+        self.assertEqual(D.parse_outcome_type({"outcome_type": "continuous", "outcome_kind": "x", "outcomes": OUTS}),
+                         ({"outcome_type": "continuous"}, ""))                 # 连续值 target 不多任何字段
+        self.assertEqual(D.parse_outcome_type({})[0], {"outcome_type": "continuous"})
+        self.assertEqual(D.parse_outcome_type("junk")[0], {"outcome_type": "continuous"})
+        self.assertIn("not recognised", D.parse_outcome_type({"outcome_type": "categorical"})[1])
         self.assertFalse(D.is_discrete({"outcome_type": "continuous"}))
+
+    def test_plan_prompt_has_no_outcome_list(self):
+        from triangulate.agent import prompts as PR
+        self.assertIn('"outcome_kind": ""', PR.PLAN_USER)
+        self.assertIn("Do not list the outcomes", PR.PLAN_USER)
+        self.assertNotIn('"outcomes"', PR.PLAN_USER)
+        self.assertNotIn("__OUTCOMES__", PR.DISCRETE_METHODS_SPEC)          # 方法说明不再带 plan 的列表
 
 
 class TestOutcomeProbs(unittest.TestCase):
@@ -353,9 +360,34 @@ class TestJevClient(unittest.TestCase):
             shutil.rmtree(tmp, ignore_errors=True)
 
 
-def discrete_graph_run(jev_post=None, allow_discrete=None):
+# v2.3：裁判第一轮定义的结果列表（两个合并尾部用 le / ge 标出）和依据的点
+JUDGE_OUTS = [{"label": CUT, "value": 3.75, "le": 3.75}, {"label": HOLD, "value": 4.0}, {"label": HIKE, "value": 4.25, "ge": 4.25}]
+BASIS = {"ids": ["p1", "p2"], "note": "p1 and p2 price a hold at the current 4.00% upper bound and a hike to 4.25%"}
+GOOD_METHODS = [{"id": "m1", "method": "outcome_probs", "rationale": "market odds",
+                 "params": {"probs": {HOLD: {"id": "p1", "role": "prob unchanged"},
+                                      HIKE: {"id": "p2", "role": "prob hike"}}, "remainder": CUT}},
+                {"id": "m2", "method": "outcome_probs", "rationale": "market odds plus a small cut",
+                 "params": {"probs": {HOLD: {"id": "p1", "role": "prob unchanged"},
+                                      HIKE: {"id": "p2", "role": "prob hike"},
+                                      CUT: {"id": "a1", "role": "prob cut"}}}}]
+
+
+def judge_reply(outcomes=JUDGE_OUTS, basis=BASIS, methods=None, **kw):
+    """假裁判的一次回复；outcomes / basis 为 None 时不带这个字段。"""
+    r = {"decisions": [], "extra_directions": [], "assumptions": [_a(route="m2")],
+         "methods": GOOD_METHODS if methods is None else methods}
+    if outcomes is not None:
+        r["outcomes"] = outcomes
+    if basis is not None:
+        r["outcomes_basis"] = basis
+    r.update(kw)
+    return r
+
+
+def discrete_graph_run(jev_post=None, allow_discrete=None, judge=None):
     """假模型跑一遍离散目标的整张图，返回最终 state 和看到的 prompt。jev_post 给了就配置一个临时 key 文件和假 HTTP 层。
-    allow_discrete 给了就设到 ctx 上（run.prepare_run 对有真值的题的做法）。"""
+    allow_discrete 给了就设到 ctx 上（run.prepare_run 对有真值的题的做法）。
+    judge：裁判各次调用（r1、r1:repair、r2 ...）依次给的回复；默认每次都是 judge_reply()。"""
     from langgraph.types import Command
 
     from triangulate.agent import graph as G
@@ -366,6 +398,7 @@ def discrete_graph_run(jev_post=None, allow_discrete=None):
     if allow_discrete is not None:
         ctx.allow_discrete = allow_discrete
     seen = {}
+    replies = list(judge or [judge_reply()])
 
     class FakeLLM:
         model = "fake"
@@ -373,7 +406,8 @@ def discrete_graph_run(jev_post=None, allow_discrete=None):
         def ask(self, system, user, *, role, qid, max_tokens=4000, tries=2):
             if role == "plan":
                 seen["plan_user"] = user
-                return {"target": {k: v for k, v in TARGET.items()} | {"publisher": "X"}, "market_keywords": [],
+                t = {k: v for k, v in TARGET.items() if k != "outcomes"}
+                return {"target": t | {"publisher": "X", "outcome_kind": "policy rate in fixed steps"}, "market_keywords": [],
                         "directions": [{"category": "forecasts_markets", "hypothesis": "market odds", "data_to_find": "f"}]}, None
             if role.startswith("extract"):
                 return {"points": [
@@ -385,19 +419,14 @@ def discrete_graph_run(jev_post=None, allow_discrete=None):
                      "quote": "hike 4.00-4.25: 43.6%"}]}, None
             if role == "audit":
                 seen["audit_user"] = user
+                seen["n_audit"] = seen.get("n_audit", 0) + 1
                 return {"methods": []}, None
             if role.startswith("judge"):
-                seen.setdefault("judge_roles", []).append(role)
+                n = len(seen.setdefault("judge_roles", []))
+                seen["judge_roles"].append(role)
                 seen["judge_user"] = user
-                return {"decisions": [], "extra_directions": [],
-                        "assumptions": [_a(route="m2")],
-                        "methods": [{"id": "m1", "method": "outcome_probs", "rationale": "market odds",
-                                     "params": {"probs": {HOLD: {"id": "p1", "role": "prob unchanged"},
-                                                          HIKE: {"id": "p2", "role": "prob hike"}}, "remainder": CUT}},
-                                    {"id": "m2", "method": "outcome_probs", "rationale": "market odds plus a small cut",
-                                     "params": {"probs": {HOLD: {"id": "p1", "role": "prob unchanged"},
-                                                          HIKE: {"id": "p2", "role": "prob hike"},
-                                                          CUT: {"id": "a1", "role": "prob cut"}}}}]}, None
+                seen.setdefault("judge_users", []).append(user)
+                return replies[min(n, len(replies) - 1)], None
             if role == "final":
                 seen["final_user"] = user
                 return {"answer": "Markets put about 56% on [[o2_label]] ([[o2_prob]]); m1 uses p1."}, None
@@ -440,9 +469,16 @@ class TestDiscreteGraph(unittest.TestCase):
         st, seen = discrete_graph_run()
         self.assertEqual(st["plan"]["target"]["outcome_type"], "discrete")
         self.assertIn("outcome_type", seen["plan_user"])
+        self.assertEqual(st["plan"]["target"]["outcome_kind"], "policy rate in fixed steps")
+        self.assertNotIn("outcomes", st["plan"]["target"])                   # v2.3：plan 不列结果
         self.assertIn("Only outcome_probs is available", seen["judge_user"])
-        self.assertIn(f'"{HOLD}" (value 4 percent per annum)', seen["judge_user"])
+        self.assertIn("kind of outcome, from the plan: policy rate in fixed steps", seen["judge_user"])
+        self.assertIn("Its outcome list is not fixed yet", seen["judge_user"])
+        self.assertEqual((st["outcomes"]["list"], st["outcomes"]["defined_round"]), (JUDGE_OUTS, 1))
         self.assertIn("outcome_probs", seen["audit_user"])
+        self.assertIn("Outcome list of this discrete target, defined by the analyst from the evidence", seen["audit_user"])
+        self.assertIn(f'- "{HIKE}" (value 4.25 percent per annum or higher)', seen["audit_user"])
+        self.assertIn('  - data point p1: "Market-implied probability the range is unchanged', seen["audit_user"])
         self.assertIn('prob hike"; evidence = data point p2', seen["audit_user"])
         self.assertEqual(seen["judge_roles"], ["judge:r1"])                    # 两个方法都能跑：没有修正轮
         r = st["compute"]["result"]
@@ -461,6 +497,7 @@ class TestDiscreteGraph(unittest.TestCase):
         self.assertEqual(st["jev"]["status"], "not_configured")
         led = outputs.ledger(st, None)
         self.assertIn("## Outcome probabilities (computed by code)", led)
+        self.assertIn("Outcome list defined by the judge in round 1, from kept points ['p1', 'p2']: p1 and p2 price", led)
         self.assertIn("| outcome | value | agent (pooled) | m1 | m2 | Jev (not pooled) |", led)
         self.assertIn("Jev arm (TypeSafe, not pooled): not_configured", led)
         dg = outputs.dep_graph(st)
@@ -531,6 +568,208 @@ class TestDiscreteGraph(unittest.TestCase):
                     self.assertIs(R.prepare_run(q)["ctx"].allow_discrete, want, q["id"])
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestJudgeDefinedOutcomes(unittest.TestCase):
+    """v2.3：结果列表由裁判第一轮根据保留的证据定义；代码校验（label 唯一、2-6 个、数值型用 le / ge 两个尾部覆盖全部、
+    依据的 id 都是保留的点），不合格交回修正轮；之后沿用，最多修订一次；outcome_probs 按裁判的列表算。"""
+    KEPT = {"p1", "p2", "p5"}
+
+    def _v(self, outs, basis=None):
+        return D.validate_outcomes(outs, {"ids": ["p5"], "note": "current level"} if basis is None else basis, self.KEPT)
+
+    def test_good_lists(self):
+        clean, basis, errs = self._v(JUDGE_OUTS)
+        self.assertEqual(errs, [])
+        self.assertEqual(clean, JUDGE_OUTS)
+        self.assertEqual(basis, {"ids": ["p5"], "note": "current level"})
+        # 尾部只给界、不给 value：value 取界；字符串数字照样解析；非数值的结果（是 / 否）不需要尾部
+        clean, _, errs = self._v([{"label": "3.75% or lower", "le": "3.75"}, {"label": "4.00%", "value": "4.00%"},
+                                  {"label": "4.25% or higher", "value": None, "ge": 4.25}])
+        self.assertEqual(errs, [])
+        self.assertEqual([(c["value"], c.get("le"), c.get("ge")) for c in clean], [(3.75, 3.75, None), (4.0, None, None),
+                                                                                   (4.25, None, 4.25)])
+        self.assertEqual(self._v([{"label": "yes", "value": None}, {"label": "no"}])[2], [])
+        self.assertEqual(self._v(JUDGE_OUTS, ["p1", "p2"])[1]["ids"], ["p1", "p2"])     # 依据可以直接给 id 列表
+
+    def test_bad_lists_rejected(self):
+        tail_lo, mid, tail_hi = JUDGE_OUTS
+        bad = {
+            "need 2 to 6": [tail_lo],
+            "7 outcomes": [{"label": "3.00% or lower", "value": 3.0, "le": 3.0}] +
+                          [{"label": f"{v:.2f}%", "value": v} for v in (3.25, 3.5, 3.75, 4.0, 4.25)] +
+                          [{"label": "4.50% or higher", "value": 4.5, "ge": 4.5}],
+            "duplicate outcome label": [tail_lo, mid, {**mid, "label": HOLD.upper()}, tail_hi],
+            "has no label": [tail_lo, {"value": 4.0}, tail_hi],
+            "the lowest outcome 'cut to 3.75%' must be a merged tail": [{"label": CUT, "value": 3.75}, mid, tail_hi],
+            "the highest outcome 'hike to 4.25%' must be a merged tail": [tail_lo, mid, {"label": HIKE, "value": 4.25}],
+            "only the lowest outcome may carry le": [tail_lo, {**mid, "le": 4.0}, tail_hi],
+            "must equal its value": [{**tail_lo, "le": 3.5}, mid, tail_hi],
+            "has both le and ge": [tail_lo, mid, {**tail_hi, "le": 4.25}],
+            "le must be a number": [{**tail_lo, "le": "low"}, mid, tail_hi],
+            "either every outcome has a numeric value or none has": [tail_lo, {"label": "other", "value": None}, tail_hi],
+            "two outcomes have the same value": [tail_lo, mid, {"label": "hold again", "value": 4.0}, tail_hi],
+            "either every outcome has a numeric": [{"label": "yes"}, {"label": "no", "le": 0}],   # 界给了数值
+            "must be a list": "3.75%, 4.00%",
+        }
+        for why, outs in bad.items():
+            errs = self._v(outs)[2]
+            self.assertTrue(any(why in e for e in errs), f"{why}: {errs}")
+
+    def test_basis_ids_must_be_kept_points(self):
+        for basis, why in ((None, "outcomes_basis"), ({"ids": []}, "outcomes_basis"), ({"note": "x"}, "outcomes_basis"),
+                           ({"ids": ["p6"]}, "['p6'] are not kept data points"),        # 丢掉的点
+                           ({"ids": ["p5", "a1"]}, "['a1'] are not kept data points"),   # 假设不能当依据
+                           ({"ids": ["p99"]}, "['p99'] are not kept data points")):
+            errs = D.validate_outcomes(JUDGE_OUTS, basis, self.KEPT)[2]
+            self.assertTrue(any(why in e for e in errs), f"{basis}: {errs}")
+
+    def test_accept_define_reuse_revise(self):
+        r1 = {"outcomes": JUDGE_OUTS, "outcomes_basis": BASIS}
+        rec, errs = D.accept_outcomes(r1, None, 1, self.KEPT)
+        self.assertEqual(errs, [])
+        self.assertEqual((rec["list"], rec["basis"]["ids"], rec["defined_round"], rec["revised_round"]),
+                         (JUDGE_OUTS, ["p1", "p2"], 1, None))
+        self.assertIn("no outcome list yet", D.accept_outcomes({}, None, 1, self.KEPT)[1][0])
+        bad = D.accept_outcomes({"outcomes": JUDGE_OUTS[:1], "outcomes_basis": BASIS}, None, 1, self.KEPT)
+        self.assertIsNone(bad[0])
+        self.assertTrue(bad[1][0].startswith("outcome list: 1 outcomes"))
+        # 之后的轮次：不给、或给一样的列表 = 沿用（不算修订）
+        self.assertIs(D.accept_outcomes({}, rec, 2, self.KEPT)[0], rec)
+        self.assertIs(D.accept_outcomes({"outcomes": [dict(o) for o in JUDGE_OUTS]}, rec, 2, self.KEPT)[0], rec)
+        # 修订：要理由；有理由且合格才换，记下原来的列表
+        new = [{"label": "4.00% or lower", "value": 4.0, "le": 4.0}, {"label": "4.25%", "value": 4.25},
+               {"label": "4.50% or higher", "value": 4.5, "ge": 4.5}]
+        same, errs = D.accept_outcomes({"outcomes": new, "outcomes_basis": {"ids": ["p5"]}}, rec, 2, self.KEPT)
+        self.assertIs(same, rec)
+        self.assertIn("needs \"outcomes_revision_reason\"", errs[-1])
+        rev, errs = D.accept_outcomes({"outcomes": new, "outcomes_basis": {"ids": ["p5"]},
+                                       "outcomes_revision_reason": "p5 shows the current level is 4.25%"}, rec, 2, self.KEPT)
+        self.assertEqual(errs, [])
+        self.assertEqual((rev["list"], rev["defined_round"], rev["revised_round"], rev["previous_list"]), (new, 1, 2, JUDGE_OUTS))
+        again, errs = D.accept_outcomes({"outcomes": JUDGE_OUTS, "outcomes_basis": BASIS, "outcomes_revision_reason": "x"},
+                                        rev, 3, self.KEPT)
+        self.assertIs(again, rev)
+        self.assertIn("already revised in round 2", errs[0])
+
+    def test_outcome_probs_against_judge_defined_outcomes(self):
+        plan_target = {k: v for k, v in TARGET.items() if k != "outcomes"}
+        rec = D.accept_outcomes({"outcomes": JUDGE_OUTS, "outcomes_basis": BASIS}, None, 1, self.KEPT)[0]
+        t = D.with_outcomes(plan_target, rec)
+        self.assertEqual((t["outcomes"], t["outcomes_basis"]["ids"]), (JUDGE_OUTS, ["p1", "p2"]))
+        self.assertIs(D.with_outcomes(plan_target, None), plan_target)
+        out = C.run([{"method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p1"}, HIKE: {"id": "p2"}}, "remainder": CUT}},
+                     {"method": "outcome_probs", "params": {"probs": {"4.00%": {"id": "p1"}}, "remainder": HIKE}}],
+                    dict(PTS), t)
+        self.assertNotIn("error", out["methods"][0])
+        self.assertIn("unknown outcome label '4.00%'", out["methods"][1]["error"])   # 只认裁判列表里的 label
+        r = out["result"]
+        self.assertEqual([o["label"] for o in r["outcomes"]], [CUT, HOLD, HIKE])
+        self.assertEqual((r["outcomes"][0]["le"], r["outcomes"][2]["ge"]), (3.75, 4.25))   # 尾部的界跟着结果走
+        self.assertEqual(r["most_likely"], HOLD)
+        # 没有合格的列表：每个方法都报 no outcome list，没有结果
+        none = C.run([{"method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p1"}}, "remainder": HIKE}}], dict(PTS), plan_target)
+        self.assertIn("no outcome list", none["methods"][0]["error"])
+        self.assertIsNone(none["result"]["most_likely"])
+        # 打分：le / ge 标的尾部认超出它的真值（label 不必写 or lower）
+        s = D.score({"outcomes": [{**o, "prob": p} for o, p in zip(JUDGE_OUTS, (0.1, 0.6, 0.3))], "most_likely": HOLD}, 3.5)
+        self.assertEqual((s["true_outcome"], s["prob_true"]), (CUT, 0.1))
+        self.assertEqual(D.score({"outcomes": [{**o, "prob": 0.3} for o in JUDGE_OUTS]}, 5.0)["true_outcome"], HIKE)
+
+    @unittest.skipUnless(HAVE_LG, "langgraph not installed")
+    def test_audit_rows_check_the_judge_defined_outcome(self):
+        from triangulate.agent import graph as G
+        t = D.with_outcomes({k: v for k, v in TARGET.items() if k != "outcomes"},
+                            {"list": JUDGE_OUTS, "basis": {"ids": ["p5"], "note": "n"}})
+        mi = {"method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p1", "role": "prob unchanged"}}, "remainder": CUT}}
+        out = C.run([{**mi, "params": {**mi["params"], "probs": {**mi["params"]["probs"], HIKE: {"id": "p2", "role": "r"}}}}],
+                    dict(PTS), t)["methods"][0]
+        rows = G.audit_rows(mi, out, {p["id"]: p for p in PTS.values()}, {}, t)
+        self.assertEqual(rows[0][2], "probability that the target resolves to outcome 'unchanged at 4.00%' (value 4 percent "
+                                     "per annum); analyst's role: prob unchanged")
+        self.assertEqual(rows[-1][2], "probability that the target resolves to outcome 'cut to 3.75%' (value 3.75 percent "
+                                      "per annum or lower), taken as the rest (1 minus the other inputs)")
+
+
+@unittest.skipUnless(HAVE_LG, "langgraph not installed")
+class TestJudgeDefinedOutcomesGraph(unittest.TestCase):
+    """整张图（假模型）：列表不合格交回修正轮、修正后仍不合格就没有结果、第二轮沿用或修订第一轮的列表。"""
+    EXTRA = [{"id": "b1", "category": "forecasts_markets", "hypothesis": "more odds", "data_to_find": "f",
+              "search_hints": ["q"]}]
+
+    def test_bad_list_goes_back_to_the_repair_round(self):
+        seven = [{"label": "3.00% or lower", "value": 3.0, "le": 3.0}] + \
+                [{"label": f"{v:.2f}%", "value": v} for v in (3.25, 3.5, 3.75, 4.0, 4.25)] + \
+                [{"label": "4.50% or higher", "value": 4.5, "ge": 4.5}]
+        # 第一次：7 个结果、依据里有一个这一轮丢掉的点（p2 被丢，方法也只用 p1）；修正：合格的列表
+        one = [{"id": "m1", "method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p1", "role": "r"}}, "remainder": HIKE}}]
+        bad = judge_reply(outcomes=seven, basis={"ids": ["p1", "p2"]}, methods=one,
+                          decisions=[{"id": "p2", "keep": False, "reason": "duplicate"}])
+        good = judge_reply(basis={"ids": ["p1"], "note": "p1"}, methods=one, decisions=bad["decisions"])
+        st, seen = discrete_graph_run(judge=[bad, good])
+        self.assertEqual(seen["judge_roles"], ["judge:r1", "judge:r1:repair"])
+        jr = st["judge_rounds"][0]
+        errs = jr["repair"]["errors"]
+        self.assertTrue(any(e.startswith("outcome list: 7 outcomes") for e in errs), errs)
+        self.assertTrue(any("['p2'] are not kept data points" in e for e in errs), errs)
+        self.assertTrue(any("no outcome list" in e for e in errs), errs)      # 方法因为没有列表也算不出
+        self.assertIn("Code rejected the outcome list in your previous reply", seen["judge_users"][1])
+        self.assertIn('"3.00% or lower"', seen["judge_users"][1])              # 修正轮看得到被拒的列表
+        self.assertEqual(jr["repair"]["outcome_errors_after"], [])
+        self.assertEqual(st["outcomes"]["list"], JUDGE_OUTS)
+        self.assertEqual(st["outcomes"]["basis"]["ids"], ["p1"])
+        r = st["compute"]["result"]
+        self.assertEqual(r["most_likely"], HOLD)
+        self.assertAlmostEqual({o["label"]: o["prob"] for o in r["outcomes"]}[HIKE], 1 - 0.564)
+
+    def test_still_invalid_after_repair_ends_without_estimate(self):
+        bad = judge_reply(outcomes=[{"label": CUT, "value": 3.75}, {"label": HOLD, "value": 4.0}])   # 没有尾部
+        st, seen = discrete_graph_run(judge=[bad, bad])
+        self.assertEqual(seen["judge_roles"], ["judge:r1", "judge:r1:repair"])
+        self.assertIsNone(st["outcomes"])
+        self.assertTrue(st["judge_rounds"][0]["repair"]["outcome_errors_after"])
+        self.assertTrue(all("no outcome list" in m["error"] for m in st["compute"]["methods"]))
+        self.assertIsNone(st["compute"]["result"]["most_likely"])
+        self.assertEqual(st["jev"]["status"], "skipped")
+        self.assertEqual(st["final"]["text"], "No estimate: the judge did not define a valid outcome list for this discrete target.")
+        self.assertNotIn("n_audit", seen)                                        # 方法都没跑通：没有输入核对
+
+    def test_round_two_reuses_the_round_one_list(self):
+        # 第一轮还要再搜：列表不合格也立刻修（只修列表，方法不核对）；第二轮不给 outcomes = 沿用第一轮的列表
+        bad = judge_reply(basis={"ids": ["a1"]}, extra_directions=self.EXTRA)
+        fixed = judge_reply(extra_directions=self.EXTRA)
+        r2 = judge_reply(outcomes=None, basis=None)
+        st, seen = discrete_graph_run(judge=[bad, fixed, r2])
+        self.assertEqual(seen["judge_roles"], ["judge:r1", "judge:r1:repair", "judge:r2"])
+        j1, j2 = st["judge_rounds"]
+        self.assertEqual(j1["repair"]["errors"], ["outcome list: outcomes_basis ids ['a1'] are not kept data points "
+                                                  "(assumptions, discarded or unknown ids cannot ground the outcome list)"])
+        self.assertNotIn("audit_failed", j1)                                     # 第一轮的方法不核对（第二轮才是最终的）
+        self.assertIn("Its outcome list is not fixed yet", seen["judge_users"][0])
+        self.assertIn("which you defined in judge round 1 from kept points p1, p2", seen["judge_users"][2])
+        self.assertIn(f'- "{CUT}" (value 3.75 percent per annum or lower)', seen["judge_users"][2])
+        self.assertIn("you may revise it once", seen["judge_users"][2])
+        self.assertEqual(j2["outcome_errors"], [])
+        self.assertEqual((st["outcomes"]["defined_round"], st["outcomes"]["revised_round"]), (1, None))
+        self.assertEqual(st["compute"]["methods_from_round"], 2)
+        self.assertEqual(st["compute"]["result"]["most_likely"], HOLD)
+
+    def test_round_two_may_revise_once(self):
+        new = [{"label": "4.00% or lower", "value": 4.0, "le": 4.0}, {"label": "4.25% or higher", "value": 4.25, "ge": 4.25}]
+        ms = [{"id": "m1", "method": "outcome_probs",
+               "params": {"probs": {"4.00% or lower": {"id": "p3", "role": "r"}, "4.25% or higher": {"id": "p4", "role": "r"}}}}]
+        r2 = judge_reply(outcomes=new, basis={"ids": ["p3", "p4"], "note": "new odds"}, methods=ms,
+                         outcomes_revision_reason="p3 and p4 show only a hold or a hike are priced")
+        st, seen = discrete_graph_run(judge=[judge_reply(extra_directions=self.EXTRA), r2])
+        self.assertEqual(seen["judge_roles"], ["judge:r1", "judge:r2"])
+        o = st["outcomes"]
+        self.assertEqual((o["list"], o["defined_round"], o["revised_round"], o["previous_list"]), (new, 1, 2, JUDGE_OUTS))
+        self.assertIn("p3 and p4 show", o["revision_reason"])
+        r = st["compute"]["result"]
+        self.assertEqual([x["label"] for x in r["outcomes"]], ["4.00% or lower", "4.25% or higher"])
+        self.assertEqual(r["most_likely"], "4.00% or lower")
+        from triangulate.agent import outputs
+        self.assertIn("Outcome list defined by the judge in round 1; revised in round 2 (p3 and p4 show", outputs.ledger(st, None))
 
 
 class TestV221Fixes(unittest.TestCase):

@@ -1,13 +1,17 @@
-"""离散结果模式（v2.2）：目标只能是几个互斥结果之一（一次会议后的政策利率、选举赢家、是 / 否事件）。
+"""离散结果模式：目标只能是几个互斥结果之一（一次会议后的政策利率、选举赢家、是 / 否事件）。
 
-- plan：target 带 outcome_type 和 outcomes（2-10 个，label 唯一，value 是数或 null）；不合格就退回 continuous，原因进 plan_notes。
+- plan（v2.3 起）：target 只带 outcome_type 和可选的 outcome_kind（「policy rate in fixed steps」这类提示），不列结果。
+  v2.2 由 plan 在搜索前定结果列表，规划模型的先验错了就无法纠正（FOMC discrete5：列表 4.50%-5.75%，当前值 4.00% 不在里面）。
+- 裁判第一轮（v2.3）：根据保留的证据定义结果列表 outcomes（2-6 个，label 唯一；数值型时最低的带 le、最高的带 ge，
+  两个合并尾部保证覆盖全部可能），并在 outcomes_basis 里给出依据的点 id（都必须是保留的点）。不合格的列表交回裁判的修正轮。
+  之后的轮次沿用这个列表；新证据和它矛盾时，裁判可以修订一次（要给 outcomes_revision_reason）。记录在 state["outcomes"]。
 - 裁判：只能用 outcome_probs，每个结果的概率引用一个保留的数据点或一条假设；可以指定一个结果取「余下的概率」。
 - 代码（这里）：% 转小数；每个概率在 [0, 1]；有余下结果时其余之和 <= 1 + SUM_TOL_REMAINDER，余下 = 1 - 和（截到 0）；
   没有余下结果时和必须在 SUM_RANGE 内；最后都归一化到 1。没有输入、也不是余下结果的结果概率为 0（记进 notes）；未知 label 拒绝。
   （live 运行 discrete1/2/4 都因为「每个结果都要有输入」这条没出数：证据只给有概率的结果，比如 FedWatch 只报维持和加息。）
   v2.2.1 起另有：每个方法至少一个保留的观测点（同 formula_mc）；一个 id 只能给一个结果；当概率用的观测点 name 或 unit
   要说明是概率（PROB_WORDS）；百分点 / 基点（变化量）拒绝。
-  多个方法等权线性平均（linear pool）；最可能的结果 = 概率最大的（并列时取 plan 里排在前面的）。
+  多个方法等权线性平均（linear pool）；最可能的结果 = 概率最大的（并列时取列表里排在前面的）。
 - 假设输入用裁判给的 value（离散结果是点分布，不做 Monte Carlo）；low / high 只记录。
 连续值模式（compute.run 的其余部分）不经过这里。
 """
@@ -17,7 +21,8 @@ import re
 from . import compute as C
 from .methods import MethodError
 
-MIN_OUTCOMES, MAX_OUTCOMES = 2, 10
+MIN_OUTCOMES, MAX_OUTCOMES = 2, 6   # 裁判定义的结果个数（v2.2 由 plan 定时是 2-10）
+KIND_CHARS = 120
 SUM_TOL_REMAINDER = 0.02
 SUM_RANGE = (0.9, 1.1)
 LABEL_CHARS = 80
@@ -47,43 +52,138 @@ def _value(v):
     return None
 
 
-def parse_outcomes(raw: dict) -> tuple:
-    """plan 回复里的 target -> ({"outcome_type": ..., 离散时另有 "outcomes": [...]}, 说明)。说明为空 = 没有问题。"""
-    kind = str((raw or {}).get("outcome_type") or "continuous").strip().lower()
+def parse_outcome_type(raw: dict) -> tuple:
+    """plan 回复里的 target -> ({"outcome_type": ..., 离散时另有 "outcome_kind": ...}, 说明)。说明为空 = 没有问题。
+    plan 不再列结果（v2.3）：回复里还带着 outcomes 就忽略，记一条说明。"""
+    raw = raw if isinstance(raw, dict) else {}
+    kind = str(raw.get("outcome_type") or "continuous").strip().lower()
     if kind != "discrete":
         note = "" if kind == "continuous" else f"outcome_type {kind!r} not recognised; treated as continuous"
         return {"outcome_type": "continuous"}, note
-    outs, clean, seen, why = (raw or {}).get("outcomes"), [], set(), ""
-    if not isinstance(outs, list):
-        why = "outcomes is not a list"
-    elif not MIN_OUTCOMES <= len(outs) <= MAX_OUTCOMES:
-        why = f"{len(outs)} outcomes (need {MIN_OUTCOMES} to {MAX_OUTCOMES})"
-    else:
-        for o in outs:
-            label = _norm_label(o.get("label")) if isinstance(o, dict) else ""
-            if not label:
-                why = "an outcome has no label"
-                break
-            if label.casefold() in seen:
-                why = f"duplicate outcome label {label!r}"
-                break
-            seen.add(label.casefold())
-            clean.append({"label": label, "value": _value(o.get("value"))})
-    if why:
-        return {"outcome_type": "continuous"}, f"discrete outcomes rejected ({why}); fell back to continuous"
-    return {"outcome_type": "discrete", "outcomes": clean}, ""
+    note = "plan listed outcomes; ignored (the judge defines them from the evidence)" if raw.get("outcomes") else ""
+    return {"outcome_type": "discrete", "outcome_kind": " ".join(str(raw.get("outcome_kind") or "").split())[:KIND_CHARS]}, note
 
 
 def is_discrete(target: dict) -> bool:
-    t = target or {}
-    return t.get("outcome_type") == "discrete" and len(t.get("outcomes") or []) >= MIN_OUTCOMES
+    return (target or {}).get("outcome_type") == "discrete"
+
+
+def with_outcomes(target: dict, rec) -> dict:
+    """plan 的 target 加上裁判定义的结果列表（rec = state["outcomes"]）。没有记录时原样返回（旧运行的 plan 自带 outcomes）。"""
+    if not rec or not rec.get("list"):
+        return target
+    return {**(target or {}), "outcomes": rec["list"], "outcomes_basis": rec.get("basis") or {}}
+
+
+def value_text(o: dict, unit: str) -> str:
+    """结果的数值说明：「 (value 4 percent)」；合并尾部加 or lower / or higher；没有数值时为空。"""
+    if o.get("value") is None:
+        return ""
+    tail = " or lower" if o.get("le") is not None else " or higher" if o.get("ge") is not None else ""
+    return f" (value {o['value']:g} {unit}{tail})"
 
 
 def outcomes_text(target: dict) -> str:
     """给裁判看的结果列表（每行一个 label，带数值和单位）。"""
     unit = (target or {}).get("unit", "")
-    return "\n".join(f'- "{o["label"]}"' + ("" if o.get("value") is None else f" (value {o['value']:g} {unit})")
-                     for o in (target or {}).get("outcomes") or [])
+    return "\n".join(f'- "{o["label"]}"' + value_text(o, unit) for o in (target or {}).get("outcomes") or [])
+
+
+def validate_outcomes(raw, basis, kept_ids) -> tuple:
+    """裁判给的结果列表 -> (干净的列表, 依据 {"ids", "note"}, 问题清单)。问题清单为空 = 通过。
+    规则：2-6 个；label 非空且唯一；数值要么全有要么全没有；数值型时数值不重复，最低的带 le、最高的带 ge（等于它的 value），
+    中间的不带界（两个合并尾部保证覆盖全部可能的结果）；带界的结果 value 取界，所以非数值列表里带界会被「全有或全没有」挡下；
+    依据至少一个 id，每个都是这一轮保留的数据点。"""
+    errs, clean, seen = [], [], set()
+    if not isinstance(raw, list):
+        return [], {}, ['"outcomes" must be a list of {"label", "value"} objects (with "le" / "ge" on the two tails)']
+    if not MIN_OUTCOMES <= len(raw) <= MAX_OUTCOMES:
+        errs.append(f"{len(raw)} outcomes (need {MIN_OUTCOMES} to {MAX_OUTCOMES}; merge unlikely results into the tails)")
+    for n, o in enumerate(raw, start=1):
+        label = _norm_label(o.get("label")) if isinstance(o, dict) else ""
+        if not label:
+            errs.append(f"outcome {n} has no label")
+            continue
+        if label.casefold() in seen:
+            errs.append(f"duplicate outcome label {label!r}")
+            continue
+        seen.add(label.casefold())
+        v = _value(o.get("value"))
+        c = {"label": label, "value": v}
+        for k in ("le", "ge"):
+            if o.get(k) is None:
+                continue
+            b = _value(o.get(k))
+            if b is None:
+                errs.append(f"outcome {label!r}: {k} must be a number")
+            elif v is not None and abs(v - b) > 1e-9 * max(1.0, abs(b)):
+                errs.append(f"outcome {label!r}: {k} = {b:g} must equal its value {v:g}")
+            else:
+                c["value"], c[k] = b, b
+        if "le" in c and "ge" in c:
+            errs.append(f"outcome {label!r} has both le and ge")
+        clean.append(c)
+    nums = [c for c in clean if c["value"] is not None]
+    if nums and len(nums) != len(clean):
+        errs.append(f"either every outcome has a numeric value or none has (no value: "
+                    f"{[c['label'] for c in clean if c['value'] is None]})")
+    elif nums:
+        vals = sorted(c["value"] for c in nums)
+        if len(set(vals)) != len(vals):
+            errs.append("two outcomes have the same value")
+        lo, hi = min(nums, key=lambda c: c["value"]), max(nums, key=lambda c: c["value"])
+        if "le" not in lo:
+            errs.append(f"the lowest outcome {lo['label']!r} must be a merged tail with \"le\": {lo['value']:g} "
+                        f"(\"... or lower\"), so that the outcomes cover every possible result")
+        if "ge" not in hi:
+            errs.append(f"the highest outcome {hi['label']!r} must be a merged tail with \"ge\": {hi['value']:g} "
+                        f"(\"... or higher\"), so that the outcomes cover every possible result")
+        inner = [c["label"] for c in nums if ("le" in c and c is not lo) or ("ge" in c and c is not hi)]
+        if inner:
+            errs.append(f"only the lowest outcome may carry le and only the highest ge (also bounded: {inner})")
+    b = basis if isinstance(basis, dict) else {"ids": basis} if isinstance(basis, list) else {}
+    ids = [str(i) for i in b.get("ids")] if isinstance(b.get("ids"), list) else []
+    if not ids:
+        errs.append('"outcomes_basis" must give {"ids": [...], "note": "..."}: the kept data-point ids the list relies on')
+    bad = [i for i in ids if i not in kept_ids]
+    if bad:
+        errs.append(f"outcomes_basis ids {bad} are not kept data points (assumptions, discarded or unknown ids cannot "
+                    f"ground the outcome list)")
+    return clean, {"ids": ids, "note": str(b.get("note") or "")[:400]}, errs
+
+
+def _list_key(lst) -> list:
+    return [(_norm_label(o.get("label")).casefold(), _value(o.get("value")), _value(o.get("le")), _value(o.get("ge")))
+            if isinstance(o, dict) else None for o in lst or []] if isinstance(lst, list) else [lst]
+
+
+def accept_outcomes(reply: dict, current, rnd: int, kept_ids) -> tuple:
+    """裁判一轮回复 -> (这一轮之后在用的结果记录, 交回裁判的问题清单)。current = 之前在用的记录（None = 还没定）。
+    还没定：回复必须给 outcomes 和 outcomes_basis，校验通过就是新记录。已定：没给 outcomes、或给的和现在的一样，就沿用；
+    给了不同的 = 修订：只许一次、要 outcomes_revision_reason，校验通过才换。没通过时沿用 current（可能是 None）。
+    记录 = {"list", "basis": {"ids", "note"}, "defined_round", "revised_round", "revision_reason", "previous_list"}。"""
+    reply = reply if isinstance(reply, dict) else {}
+    raw = reply.get("outcomes")
+    if current and (not raw or _list_key(raw) == _list_key(current["list"])):
+        return current, []
+    if not raw:
+        return current, ['outcome list: this discrete target has no outcome list yet; add "outcomes" and "outcomes_basis" '
+                         'to the reply']
+    clean, basis, errs = validate_outcomes(raw, reply.get("outcomes_basis"), kept_ids)
+    reason = " ".join(str(reply.get("outcomes_revision_reason") or "").split())[:400]
+    if current and current.get("revised_round"):
+        errs = [f"the outcome list was already revised in round {current['revised_round']}; keep it and leave "
+                f"\"outcomes\" out of the reply"]
+    elif current and not reason:
+        errs.append("a revised outcome list needs \"outcomes_revision_reason\" (the kept points that contradict the "
+                    "current list)")
+    if errs:
+        return current, [f"outcome list: {e}" for e in errs]
+    if current:
+        return {**current, "list": clean, "basis": basis, "revised_round": rnd, "revision_reason": reason,
+                "previous_list": current["list"], "previous_basis": current.get("basis")}, []
+    return {"list": clean, "basis": basis, "defined_round": rnd, "revised_round": None, "revision_reason": "",
+            "previous_list": None}, []
 
 
 def _probability(label: str, spec, pts: dict, kept_a: dict, rejected_a: dict) -> dict:
@@ -190,7 +290,7 @@ def pool(ok: list, outcomes: list) -> dict:
                 "central": None, "weights": {}, "basis": "no_method", "assumption_weight_share": 0}
     w = 1 / len(ok)
     outs = [{**o, "prob": sum(w * r["distribution"][o["label"]] for r in ok)} for o in outcomes]
-    top = max(outs, key=lambda o: o["prob"])   # max 取第一个最大值：并列时取 plan 里排在前面的
+    top = max(outs, key=lambda o: o["prob"])   # max 取第一个最大值：并列时取结果列表里排在前面的
     return {**base, "outcomes": outs, "most_likely": top["label"], "most_likely_prob": top["prob"], "central": top["value"],
             "weights": {r["id"]: w for r in ok}, "basis": "outcome_probabilities",
             "assumption_weight_share": sum(w for r in ok if r.get("used_assumptions"))}
@@ -207,6 +307,8 @@ def run(methods: list, pts: dict, target: dict, assumptions=None) -> dict:
         r = {"id": f"m{n}", "label": str(m.get("id", ""))[:40], "method": m.get("method"), "params": m.get("params") or {},
              "rationale": str(m.get("rationale", ""))[:400], "estimate": None, "backtest": [], "notes": []}
         try:
+            if not outcomes:   # v2.3：结果列表由裁判定义；列表被拒（修正后仍不合格）时没有可算的结果
+                raise MethodError("no outcome list: the judge did not define a valid outcome list for this discrete target")
             if r["method"] != "outcome_probs":
                 raise MethodError(f"method {r['method']!r} is not available for a discrete target (outcome_type 'discrete'); "
                                   f"use outcome_probs with one probability per outcome")
@@ -235,14 +337,16 @@ TAIL_GE = re.compile(r"\bor (?:higher|above|more|greater)\b", re.I)
 
 
 def _matches(o: dict, ans, tails: bool = False) -> bool:
-    """tails=False：数值相等或 label 相同。tails=True：合并的尾部结果（label 带 or lower / or higher 等）
-    认超出它的数值真值（真值 3.75 落在「4.00% or lower」里）。"""
+    """tails=False：数值相等或 label 相同。tails=True：合并的尾部结果认超出它的数值真值（真值 3.75 落在「4.00% or lower」里）；
+    裁判定义的列表（v2.3）用 le / ge 标尾部，旧列表没有时看 label 里的 or lower / or higher 等。"""
     if isinstance(ans, (int, float)) and not isinstance(ans, bool):
         v = o.get("value")
         if v is None:
             return False
         if not tails:
             return abs(v - ans) <= 1e-9 * max(1.0, abs(ans))
+        if o.get("le") is not None or o.get("ge") is not None:
+            return bool(o.get("le") is not None and ans < o["le"] or o.get("ge") is not None and ans > o["ge"])
         return bool(TAIL_LE.search(o["label"]) and ans < v or TAIL_GE.search(o["label"]) and ans > v)
     return not tails and _norm_label(ans).casefold() == o["label"].casefold()
 

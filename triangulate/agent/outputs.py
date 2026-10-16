@@ -250,6 +250,12 @@ def outcomes_md(state: dict, score: dict | None = None) -> list:
          f"over {len(mids)} method(s); weight on methods that use assumptions {r.get('assumption_weight_share') or 0:.2f}.", "",
          "| outcome | value | agent (pooled) | " + "".join(f"{m} | " for m in mids) + "Jev (not pooled) |",
          "|---|---|---|" + "---|" * len(mids) + "---|"]
+    orec = state.get("outcomes") or {}
+    if orec.get("list"):   # v2.3：结果列表由裁判根据证据定义（可能修订过一次）
+        rev = (f"; revised in round {orec['revised_round']} ({_md(orec.get('revision_reason'))[:200]})"
+               if orec.get("revised_round") else "")
+        L[2:2] = [f"Outcome list defined by the judge in round {orec.get('defined_round')}{rev}, from kept points "
+                  f"{(orec.get('basis') or {}).get('ids')}: {_md((orec.get('basis') or {}).get('note'))[:300]}", ""]
     for lab, v, p, per, jp in rows:
         L.append(f"| {_md(lab)} | {_num(v)} | **{_pct(p)}** | " + "".join(f"{_pct(per.get(m))} | " for m in mids)
                  + f"{_pct(jp)} |")

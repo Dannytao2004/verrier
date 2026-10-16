@@ -1,7 +1,8 @@
 """LangGraph 状态图：plan -> approve(interrupt) -> [Send: 每个方向一个 subagent + markets] -> judge
 -> (可选一轮 base-rate 方向 -> judge) -> compute -> [离散目标：jev 对照臂] -> final。
 裁判可以为 formula_mc 提出假设输入（assumptions.py 校验）；--ablate-own-history 时按 ablation.py 去掉目标自身的历史。
-离散目标（plan 给出 outcome_type = discrete 和 outcomes）只用 outcome_probs，规则在 discrete.py；Jev 对照臂在 jev.py。
+离散目标（plan 给出 outcome_type = discrete）只用 outcome_probs；结果列表由裁判第一轮根据证据定义（v2.3，state["outcomes"]），
+规则在 discrete.py；Jev 对照臂在 jev.py。
 
 图里只放可序列化的数据；预算、LLM、哨兵等放在 Context 里，通过闭包交给节点。
 """
@@ -22,8 +23,10 @@ from . import discrete as D
 from . import jev as J
 from .markets import search_markets
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
-from .prompts import (AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, EXTRA_RULE_R1, EXTRA_RULE_R2, FINAL_SYSTEM,
-                      FINAL_USER, FINAL_USER_DISCRETE, JUDGE_SYSTEM, JUDGE_USER, METHODS_SPEC, PLAN_SYSTEM, PLAN_USER)
+from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
+                      DISCRETE_OUTCOMES_GIVEN, DISCRETE_REVISE, DISCRETE_REVISE_DONE, EXTRA_RULE_R1, EXTRA_RULE_R2,
+                      FINAL_SYSTEM, FINAL_USER, FINAL_USER_DISCRETE, JUDGE_SYSTEM, JUDGE_USER, METHODS_SPEC, PLAN_SYSTEM,
+                      PLAN_USER)
 
 CATEGORIES = {"own_history", "related_series", "physical_flow", "capacity_consumption", "administrative", "attention",
               "shocks", "persona", "forecasts_markets", "base_rates"}
@@ -43,6 +46,7 @@ class AgentState(TypedDict, total=False):
     points: list
     compute: dict
     assumptions: dict
+    outcomes: dict   # 离散目标：裁判定义的结果列表（discrete.accept_outcomes 的记录）
     jev: dict
     final: dict
     aborted: str
@@ -173,6 +177,15 @@ Code found these problems:
 {errors}
 
 Return the complete JSON object again. Keep your assessment and decisions unless the problems show they were wrong. Fix or drop each failing method. Where methods that do execute disagree strongly, decide which input or assumption is wrong and fix or drop that method instead of letting the methods be averaged. Keep at least one credible method that executes under the rules above. Do not repeat a rejected assumption in another wording."""
+# 离散目标的修正轮（v2.3）：这一轮的结果列表通过了就固定不变；被拒了就要裁判在修正回复里给改好的列表
+REPAIR_OUTCOMES_KEPT = """
+
+The outcome list was accepted by code: keep it unchanged and copy its labels exactly."""
+REPAIR_OUTCOMES_REJECTED = """
+
+Code rejected the outcome list in your previous reply (see the problems above): return a corrected "outcomes" and "outcomes_basis"."""
+REPAIR_OUTCOMES_REJECTED_KEEP = """ To keep the current list instead, leave "outcomes" out."""
+OUTCOME_KEYS = ("outcomes", "outcomes_basis", "outcomes_revision_reason")
 
 
 SERIES_METHODS = ("series_naive", "yoy_scaling", "linear_fit", "ratio")
@@ -256,9 +269,21 @@ def _evidence(iid: str, by_id: dict, kept_a: dict) -> str:
 
 
 def _outcome_role(label: str, target: dict) -> str:
+    """核对行里代码写的 role：target 取这个结果（裁判定义的列表里的那个，合并尾部带 or lower / or higher）的概率。"""
     o = next((o for o in (target or {}).get("outcomes") or [] if o["label"] == label), {})
-    val = "" if o.get("value") is None else f" (value {o['value']:g} {(target or {}).get('unit', '')})"
-    return f"probability that the target resolves to outcome '{label}'{val}"
+    return f"probability that the target resolves to outcome '{label}'{D.value_text(o, (target or {}).get('unit', ''))}"
+
+
+def _discrete_spec(target: dict, rec) -> str:
+    """离散目标交给裁判的方法说明：结果列表一段（还没有 = 请裁判定义；已有 = 列出来、说明能否修订）+ outcome_probs。"""
+    if rec and rec.get("list"):
+        head = (DISCRETE_OUTCOMES_GIVEN.replace("__ROUND__", str(rec.get("revised_round") or rec.get("defined_round")))
+                .replace("__IDS__", ", ".join((rec.get("basis") or {}).get("ids") or []) or "(none)")
+                .replace("__OUTCOMES__", D.outcomes_text(D.with_outcomes(target, rec)))
+                .replace("__REVISE__", DISCRETE_REVISE_DONE if rec.get("revised_round") else DISCRETE_REVISE))
+    else:
+        head = DISCRETE_OUTCOMES_DEFINE.replace("__KIND__", (target or {}).get("outcome_kind") or "not given")
+    return head + "\n" + DISCRETE_METHODS_SPEC
 
 
 def audit_rows(m_in: dict, m_out: dict, by_id: dict, kept_a: dict, target=None) -> list:
@@ -326,6 +351,10 @@ def audit_methods(llm, qid: str, jr: dict, out: dict, av: dict, pts: list, faile
                           "\n".join(f'  - {n}: role = "{role}"; evidence = {ev}' for n, _, role, ev in rows))
     if not blocks:
         return res
+    basis = (target or {}).get("outcomes_basis") or {}
+    if index and D.is_discrete(target) and (target or {}).get("outcomes"):   # 离散：先说明结果列表和它依据的点
+        blocks.insert(0, AUDIT_OUTCOMES.replace("__OUTCOMES__", D.outcomes_text(target)).replace(
+            "__BASIS__", "\n".join(f"  - {_evidence(i, by_id, {})}" for i in basis.get("ids") or []) or "  (not recorded)"))
     try:
         out_a, err = llm.ask(AUDIT_SYSTEM, AUDIT_USER.format(target=dumps(target), methods="\n\n".join(blocks)),
                                  role="audit", qid=qid, max_tokens=4000)
@@ -373,7 +402,7 @@ def build(ctx: Context):
             notes.append("no own_history direction in plan")
         target = {k: str((out.get("target") or {}).get(k, ""))[:300]
                   for k in ("what", "unit", "period_start", "period_end", "publisher", "cadence", "caveats")}
-        kind, note = D.parse_outcomes(out.get("target") if isinstance(out.get("target"), dict) else {})
+        kind, note = D.parse_outcome_type(out.get("target") if isinstance(out.get("target"), dict) else {})
         if kind["outcome_type"] == "discrete" and not getattr(ctx, "allow_discrete", True):   # 见 run.prepare_run
             kind, note = {"outcome_type": "continuous"}, ("plan chose a discrete target, but this scored question is not "
                                                           "marked outcome_type 'discrete'; treated as continuous")
@@ -440,11 +469,12 @@ def build(ctx: Context):
         if state.get("aborted") or b.aborted:
             return {**upd, "judge_rounds": [{"round": rnd, "skipped": b.aborted or state.get("aborted")}]}
         dirs = "\n".join(f"- {d['id']} [{d['category']}] {d['hypothesis']}" for d in state["directions"])
+        target0 = state["plan"]["target"]
+        disc, orec = D.is_discrete(target0), state.get("outcomes")   # orec：之前的轮次定下的结果列表（离散目标）
         judge_user = JUDGE_USER.format(
-            question=state["question"], as_of=state["as_of"], target=dumps(state["plan"]["target"]),
+            question=state["question"], as_of=state["as_of"], target=dumps(target0),
             directions=dirs, table=_table(shown) if shown else "(no verified data points)",
-            methods_spec=(DISCRETE_METHODS_SPEC.replace("__OUTCOMES__", D.outcomes_text(state["plan"]["target"]))
-                          if D.is_discrete(state["plan"]["target"]) else AB.methods_spec() if ablate else METHODS_SPEC),
+            methods_spec=(_discrete_spec(target0, orec) if disc else AB.methods_spec() if ablate else METHODS_SPEC),
             extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2)
         try:
             out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=JUDGE_MAX_TOKENS)
@@ -472,44 +502,70 @@ def build(ctx: Context):
               "assumptions": raw_a[:20], "unknown_ids_in_decisions": sorted(set(dec) - ids)}
         if dropped_extra:
             jr["ablation_dropped_extra_directions"] = dropped_extra
-        if rnd == 2 or not extra:
+        oerrs, orec_new = [], orec
+        if disc:   # 离散目标（v2.3）：裁判这一轮的结果列表（定义 / 沿用 / 修订）先过代码校验；依据的 id 必须是这一轮保留的点
+            kept_ids = {p["id"] for p in shown if p.get("keep")}
+            jr["outcomes_reply"] = {k: out[k] for k in OUTCOME_KEYS if k in out}
+            orec_new, oerrs = D.accept_outcomes(out, orec, rnd, kept_ids)
+            jr["outcome_errors"] = oerrs
+        need_check = rnd == 2 or not extra
+        if need_check or oerrs:
             # 这一轮的方法就是 compute 要用的：代码试跑 + 输入核对（另一次模型调用：每个输入实际是什么 vs 公式需要它是什么），
-            # 一个方法都过不了就把原因交回裁判修一次；核对没过的方法 compute 不用
-            target, only = state["plan"]["target"], (AB.ALLOWED_METHODS if ablate else None)
-            if D.is_discrete(target):   # 消融只针对连续值目标；离散目标只认 outcome_probs
-                only = None
+            # 一个方法都过不了就把原因交回裁判修一次；核对没过的方法 compute 不用。
+            # 离散目标的结果列表被拒时也交回修正轮（第一轮还要再搜时只修列表，方法留到第二轮再核对）
+            only = None if disc else (AB.ALLOWED_METHODS if ablate else None)   # 消融只针对连续值目标
 
-            def check():
-                out_c, av_c, failed = _code_check(jr, pts, target, only)
-                aud = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, target)
+            def check(t):
+                out_c, av_c, failed = _code_check(jr, pts, t, only)
+                aud = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)
                 failed.update(aud)
                 return (aud, *_problems(jr, out_c, av_c, failed))
 
+            target = D.with_outcomes(target0, orec_new) if disc else target0
             # 有方法失败、或能跑的方法互相打架，就交回裁判修一次；修完一个都跑不了而原来能跑，就退回原方案
-            aud, n_ok, errs = check()
+            aud, n_ok, errs = check(target) if need_check else ({}, 0, [])
+            errs = oerrs + errs
             if errs:
                 jr["repair"] = {"errors": errs}
+                prev_reply = {"methods": jr["methods"], "assumptions": jr["assumptions"]}
+                note = ""
+                if disc:
+                    prev_reply = {**jr["outcomes_reply"], **prev_reply}
+                    note = (REPAIR_OUTCOMES_REJECTED + (REPAIR_OUTCOMES_REJECTED_KEEP if orec else "")
+                            if oerrs else REPAIR_OUTCOMES_KEPT)
                 try:
                     out2, err2 = ctx.llm.ask(JUDGE_SYSTEM, judge_user + REPAIR.format(
-                        previous=dumps({"methods": jr["methods"], "assumptions": jr["assumptions"]}),
-                        errors="\n".join(f"- {e}" for e in errs)), role=f"judge:r{rnd}:repair", qid=ctx.qid,
-                        max_tokens=JUDGE_MAX_TOKENS)
+                        previous=dumps(prev_reply), errors="\n".join(f"- {e}" for e in errs)) + note,
+                        role=f"judge:r{rnd}:repair", qid=ctx.qid, max_tokens=JUDGE_MAX_TOKENS)
                 except BudgetExceeded as e:
                     out2, err2 = None, str(e)
                 if out2 is None:
                     jr["repair"]["error"] = err2
                 else:
-                    prev = (jr["methods"], jr["assumptions"], aud)
+                    prev = (jr["methods"], jr["assumptions"], aud, orec_new)
                     jr["repair"]["previous_methods"], jr["repair"]["previous_assumptions"] = prev[0], prev[1]
                     jr["methods"] = [m for m in out2.get("methods") or [] if isinstance(m, dict)]
                     a2 = out2.get("assumptions")
                     jr["assumptions"] = (a2 if isinstance(a2, list) else [])[:20]
-                    aud, n_ok2, jr["repair"]["errors_after"] = check()
-                    if n_ok2 == 0 and n_ok > 0:
-                        jr["methods"], jr["assumptions"], aud = prev
-                        jr["repair"]["reverted"] = "repaired methods could not execute; kept the original ones"
-            jr["audit_failed"] = {str(i): r for i, r in aud.items()}
+                    oerrs2 = []
+                    if oerrs:   # 离散目标的列表被拒过：修正回复里的列表重新校验（通过了的列表在这一轮里不再改）
+                        jr["repair"]["outcomes_reply"] = {k: out2[k] for k in OUTCOME_KEYS if k in out2}
+                        orec_new, oerrs2 = D.accept_outcomes(out2, orec, rnd, kept_ids)
+                        jr["repair"]["outcome_errors_after"] = oerrs2
+                        target = D.with_outcomes(target0, orec_new)
+                    if need_check:
+                        aud, n_ok2, errs_after = check(target)
+                        jr["repair"]["errors_after"] = oerrs2 + errs_after
+                        if n_ok2 == 0 and n_ok > 0:
+                            jr["methods"], jr["assumptions"], aud, orec_new = prev
+                            jr["repair"]["reverted"] = "repaired methods could not execute; kept the original ones"
+                    else:
+                        jr["repair"]["errors_after"] = oerrs2
+            if need_check:
+                jr["audit_failed"] = {str(i): r for i, r in aud.items()}
         upd.update(points=pts, judge_rounds=[jr])
+        if disc:
+            upd["outcomes"] = orec_new
         if extra:
             upd["directions"] = state["directions"] + extra
         return upd
@@ -524,7 +580,7 @@ def build(ctx: Context):
     def compute(state: AgentState):
         jr = next((j for j in reversed(state.get("judge_rounds") or []) if j.get("methods")), {})
         pts = {p["id"]: p for p in state.get("points") or []}
-        target = state["plan"]["target"]
+        target = D.with_outcomes(state["plan"]["target"], state.get("outcomes"))   # 离散：裁判定义的结果列表
         av = AS.validate(jr.get("assumptions") or [], target)
         bad = jr.get("audit_failed") or {}
         methods = [m for i, m in enumerate(jr.get("methods") or []) if str(i) not in bad]
@@ -549,8 +605,11 @@ def build(ctx: Context):
         if b.aborted:
             return {"jev": {"arm": "jev", "status": "skipped", "note": f"run aborted: {b.aborted}"}}
         kept = [p for p in state.get("points") or [] if p.get("keep") and p.get("judged_round")]
+        target = D.with_outcomes(state["plan"]["target"], state.get("outcomes"))
+        if not target.get("outcomes"):
+            return {"jev": {"arm": "jev", "status": "skipped", "note": "no outcome list (the judge did not define a valid one)"}}
         try:
-            return {"jev": J.run_arm(state["plan"]["target"], kept, state["as_of"], qid=ctx.qid,
+            return {"jev": J.run_arm(target, kept, state["as_of"], qid=ctx.qid,
                                      log=getattr(ctx.llm, "_log", None))}
         except Exception as e:  # noqa: BLE001  对照臂出任何意外都不能让整题崩掉（同 markets 节点）
             return {"jev": {"arm": "jev", "status": "error", "error": f"jev arm error {type(e).__name__}"[:200]}}
@@ -649,7 +708,7 @@ def build(ctx: Context):
         if r.get("most_likely") is not None and not b.aborted:
             try:
                 out, err = ctx.llm.ask(FINAL_SYSTEM, FINAL_USER_DISCRETE.format(
-                    question=state["question"], as_of=state["as_of"], target=dumps(state["plan"]["target"]),
+                    question=state["question"], as_of=state["as_of"], target=dumps(D.with_outcomes(state["plan"]["target"], state.get("outcomes"))),
                     summary="\n".join(summary), placeholders=", ".join(f"[[{k}]]" for k in ph)), role="final", qid=ctx.qid)
                 model_text = (out or {}).get("answer") if out else None
             except BudgetExceeded as e:
@@ -671,7 +730,9 @@ def build(ctx: Context):
         rendered = "\n\n".join("".join(p if i % 2 == 0 else ph.get(p, "[unknown placeholder]")
                                        for i, p in enumerate(PLACEHOLDER.split(s))) for s in segs)
         if r.get("most_likely") is None:
-            rendered = "No estimate: no outcome-probability method could be computed from the verified evidence."
+            rendered = ("No estimate: no outcome-probability method could be computed from the verified evidence."
+                        if r.get("outcomes") else "No estimate: the judge did not define a valid outcome list for this "
+                                                  "discrete target.")
         return {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
                 "model_error": err, "used_model_text": model_text is not None}
 
