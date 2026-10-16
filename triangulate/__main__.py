@@ -16,6 +16,8 @@ def main(argv=None):
     sub.add_parser("report", help="offline: rebuild states, graphs and tables from saved replies")
     f = sub.add_parser("forecast", help="one-month-ahead forecast questions (naive and no-retrieval structured arms), then score")
     f.add_argument("--force", action="store_true")
+    f.add_argument("--search-direct", action="store_true",
+                   help="also run arm (3), DeepSeek with web search answering directly, on the unpublished (live) questions")
     g = sub.add_parser("agent", help="research agent (LangGraph): any question via --ask, or the backtest questions; "
                                      "needs .venv packages")
     g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
@@ -64,6 +66,9 @@ def main(argv=None):
     if a.cmd == "forecast":
         from .forecast import report, run
         run(force=a.force)
+        if a.search_direct:
+            from .forecast import run_search
+            run_search(force=a.force)
         sys.stdout.reconfigure(encoding="utf-8")
         print(json.dumps(report(), indent=1, ensure_ascii=False))
         return

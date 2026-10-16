@@ -144,6 +144,33 @@ def run(force: bool = False):
         list(ex.map(one, tasks))
 
 
+def run_search(force: bool = False):
+    """arm (3) 联网直接答：只跑未公布题（set = live），每题一次；已有保存的回复就跳过。传输失败不保存，记一行到屏幕。"""
+    import json
+    import threading
+    from .search_direct import ARM, DirectClient, run_search_direct
+    qs = [q for q in QUESTIONS if q.get("set") == "live" and (force or not _raw(ARM, q["id"]).exists())]
+    if not qs:
+        return
+    lock = threading.Lock()
+
+    def log(rec):
+        with lock, (FC / "calls.jsonl").open("a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    client = DirectClient(log)
+
+    def one(q):
+        try:
+            rec = run_search_direct(client, q)
+        except TransportError as e:
+            print(f"[skip] {ARM} {q['id']}: {e}", flush=True)
+            return
+        _write(_raw(ARM, q["id"]), rec)
+        print(f"{ARM} {q['id']} attempts={len(rec['attempts'])} status={rec['status']} estimate={rec['estimate']}", flush=True)
+    with ThreadPoolExecutor(len(qs)) as ex:
+        list(ex.map(one, qs))
+
+
 def _pct(est, ans):
     return None if est is None else est / ans - 1
 
