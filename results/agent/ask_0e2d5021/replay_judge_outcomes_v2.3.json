@@ -1,0 +1,170 @@
+{
+ "discrete4": {
+  "plan_list": [
+   "4.00% or lower",
+   "4.25%",
+   "4.50%",
+   "4.75%",
+   "5.00%",
+   "5.25%",
+   "5.50% or higher"
+  ],
+  "round1_kept": 16,
+  "current_level_ids_round1": [
+   "p3"
+  ],
+  "probability_ids_round1": [],
+  "1_plan_list_as_is": [
+   "7 outcomes (need 2 to 6; merge unlikely results into the tails)",
+   "the lowest outcome '4.00% or lower' must be a merged tail with \"le\": 4 (\"... or lower\"), so that the outcomes cover every possible result",
+   "the highest outcome '5.50% or higher' must be a merged tail with \"ge\": 5.5 (\"... or higher\"), so that the outcomes cover every possible result",
+   "\"outcomes_basis\" must give {\"ids\": [...], \"note\": \"...\"}: the kept data-point ids the list relies on"
+  ],
+  "2_plan_list_with_tails_and_basis": [
+   "7 outcomes (need 2 to 6; merge unlikely results into the tails)"
+  ],
+  "3_grounded_list": [
+   "3.75% or lower",
+   "4.00%",
+   "4.25%",
+   "4.50% or higher"
+  ],
+  "3_grounded_list_errors_round1": [],
+  "3_basis_ids_still_kept_after_round2": [],
+  "4_r2_final_original_labels": [
+   {
+    "id": "m1",
+    "error": "remainder '4.50%' is not one of the outcomes ['3.75% or lower', '4.00%', '4.25%', '4.50% or higher']"
+   },
+   {
+    "pooled_most_likely": null,
+    "prob": null
+   }
+  ],
+  "4_r2_final_relabelled_by_value": [
+   {
+    "id": "m1",
+    "error": "outcome '4.50% or higher' has a probability input and is also the remainder"
+   },
+   {
+    "pooled_most_likely": null,
+    "prob": null
+   }
+  ],
+  "4_r2_before_repair_original_labels": [
+   {
+    "id": "m1",
+    "error": "unknown outcome label '4.00% or lower'; use one of ['3.75% or lower', '4.00%', '4.25%', '4.50% or higher']; probabilities sum to 0.437; without a remainder outcome they must sum to between 0.9 and 1.1 (outcomes without an input count as 0: ['3.75% or lower', '4.00%', '4.50% or higher'])"
+   },
+   {
+    "id": "m2",
+    "error": "unknown outcome label '4.00% or lower'; use one of ['3.75% or lower', '4.00%', '4.25%', '4.50% or higher']; outcome_probs needs at least one kept data point among its inputs; a method made only of assumptions and the remainder is rejected; probabilities sum to 0.500; without a remainder outcome they"
+   },
+   {
+    "pooled_most_likely": null,
+    "prob": null
+   }
+  ],
+  "4_r2_before_repair_relabelled_by_value": [
+   {
+    "id": "m1",
+    "distribution": {
+     "3.75% or lower": 0.0,
+     "4.00%": 0.563,
+     "4.25%": 0.437,
+     "4.50% or higher": 0.0
+    }
+   },
+   {
+    "id": "m2",
+    "error": "id a2 is used for outcomes '4.00%' and '4.25%'; one probability denotes one outcome; outcome_probs needs at least one kept data point among its inputs; a method made only of assumptions and the remainder is rejected"
+   },
+   {
+    "pooled_most_likely": "4.00%",
+    "prob": 0.563
+   }
+  ]
+ },
+ "discrete5": {
+  "plan_list": [
+   "4.50% or lower",
+   "4.75%",
+   "5.00%",
+   "5.25%",
+   "5.50%",
+   "5.75% or higher"
+  ],
+  "round1_kept": 14,
+  "current_level_ids_round1": [
+   "p1",
+   "p4",
+   "p76"
+  ],
+  "probability_ids_round1": [
+   "p14",
+   "p15",
+   "p74",
+   "p75"
+  ],
+  "1_plan_list_as_is": [
+   "the lowest outcome '4.50% or lower' must be a merged tail with \"le\": 4.5 (\"... or lower\"), so that the outcomes cover every possible result",
+   "the highest outcome '5.75% or higher' must be a merged tail with \"ge\": 5.75 (\"... or higher\"), so that the outcomes cover every possible result",
+   "\"outcomes_basis\" must give {\"ids\": [...], \"note\": \"...\"}: the kept data-point ids the list relies on"
+  ],
+  "2_plan_list_with_tails_and_basis": [],
+  "3_grounded_list": [
+   "3.75% or lower",
+   "4.00%",
+   "4.25%",
+   "4.50% or higher"
+  ],
+  "3_grounded_list_errors_round1": [],
+  "3_basis_ids_still_kept_after_round2": [
+   "p1",
+   "p4",
+   "p76",
+   "p14",
+   "p15"
+  ],
+  "4_r2_final_original_labels": [
+   {
+    "id": "m1",
+    "error": "remainder '5.00%' is not one of the outcomes ['3.75% or lower', '4.00%', '4.25%', '4.50% or higher']"
+   },
+   {
+    "pooled_most_likely": null,
+    "prob": null
+   }
+  ],
+  "4_r2_final_relabelled_by_value": [
+   {
+    "id": "m1",
+    "error": "outcome '4.50% or higher' has a probability input and is also the remainder; outcome_probs needs at least one kept data point among its inputs; a method made only of assumptions and the remainder is rejected"
+   },
+   {
+    "pooled_most_likely": null,
+    "prob": null
+   }
+  ],
+  "4_r2_before_repair_original_labels": [
+   {
+    "id": "m1",
+    "error": "remainder '5.00%' is not one of the outcomes ['3.75% or lower', '4.00%', '4.25%', '4.50% or higher']"
+   },
+   {
+    "pooled_most_likely": null,
+    "prob": null
+   }
+  ],
+  "4_r2_before_repair_relabelled_by_value": [
+   {
+    "id": "m1",
+    "error": "outcome '4.50% or higher' has a probability input and is also the remainder; outcome_probs needs at least one kept data point among its inputs; a method made only of assumptions and the remainder is rejected"
+   },
+   {
+    "pooled_most_likely": null,
+    "prob": null
+   }
+  ]
+ }
+}

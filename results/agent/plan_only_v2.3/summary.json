@@ -1,0 +1,182 @@
+{
+ "n": 7,
+ "all_continuous": true,
+ "usd_total": 0.0179,
+ "rows": [
+  {
+   "id": "fc_yell_2026_08",
+   "set": "dev",
+   "interrupted_at_approve": true,
+   "outcome_type": "continuous",
+   "outcome_kind": null,
+   "target_keys": [
+    "cadence",
+    "caveats",
+    "outcome_type",
+    "period_end",
+    "period_start",
+    "publisher",
+    "unit",
+    "what"
+   ],
+   "what": "Recreation visits to Yellowstone National Park as reported in the National Park Service's official monthly visitation statistics",
+   "unit": "recreation visits",
+   "plan_notes": [
+    "plan proposed 8 candidate directions in 8 categories; running 8 (budget cap 10)"
+   ],
+   "aborted": null,
+   "usd": 0.0029,
+   "wall_s": 11.7
+  },
+  {
+   "id": "fc_yell_2026_09",
+   "set": "dev",
+   "interrupted_at_approve": true,
+   "outcome_type": "continuous",
+   "outcome_kind": null,
+   "target_keys": [
+    "cadence",
+    "caveats",
+    "outcome_type",
+    "period_end",
+    "period_start",
+    "publisher",
+    "unit",
+    "what"
+   ],
+   "what": "Recreation visits to Yellowstone National Park as reported in the National Park Service's official monthly visitation statistics",
+   "unit": "recreation visits",
+   "plan_notes": [
+    "plan proposed 8 candidate directions in 8 categories; running 8 (budget cap 10)"
+   ],
+   "aborted": null,
+   "usd": 0.0022,
+   "wall_s": 8.9
+  },
+  {
+   "id": "fc_jnto_2026_08",
+   "set": "dev",
+   "interrupted_at_approve": true,
+   "outcome_type": "continuous",
+   "outcome_kind": null,
+   "target_keys": [
+    "cadence",
+    "caveats",
+    "outcome_type",
+    "period_end",
+    "period_start",
+    "publisher",
+    "unit",
+    "what"
+   ],
+   "what": "Number of foreign visitor arrivals to Japan (inbound international visitors) as estimated by the Japan National Tourism Organization (JNTO) for the calendar month of August 2026. This is the headline monthly estimate of visitor arrivals, counting foreign nationals entering Japan for tourism, busines",
+   "unit": "persons (arrivals, not unique individuals; a person entering multiple times in the month may be counted multiple times)",
+   "plan_notes": [
+    "plan proposed 8 candidate directions in 8 categories; running 8 (budget cap 10)"
+   ],
+   "aborted": null,
+   "usd": 0.003,
+   "wall_s": 12.6
+  },
+  {
+   "id": "fc_kr_births_2026_07",
+   "set": "dev",
+   "interrupted_at_approve": true,
+   "outcome_type": "continuous",
+   "outcome_kind": null,
+   "target_keys": [
+    "cadence",
+    "caveats",
+    "outcome_type",
+    "period_end",
+    "period_start",
+    "publisher",
+    "unit",
+    "what"
+   ],
+   "what": "Number of live births occurring in South Korea during July 2026, as first reported in Statistics Korea's monthly Population Trends release (population trend, live births by month).",
+   "unit": "live births (persons)",
+   "plan_notes": [
+    "plan proposed 8 candidate directions in 7 categories; running 8 (budget cap 10)"
+   ],
+   "aborted": null,
+   "usd": 0.0027,
+   "wall_s": 12.0
+  },
+  {
+   "id": "fc_tw_births_2026_09",
+   "set": "test",
+   "interrupted_at_approve": true,
+   "outcome_type": "continuous",
+   "outcome_kind": null,
+   "target_keys": [
+    "cadence",
+    "caveats",
+    "outcome_type",
+    "period_end",
+    "period_start",
+    "publisher",
+    "unit",
+    "what"
+   ],
+   "what": "Number of live births registered in Taiwan during September 2026, as reported in the Ministry of the Interior's monthly household registration statistics (戶籍登記出生人數).",
+   "unit": "births (persons)",
+   "plan_notes": [
+    "plan proposed 8 candidate directions in 7 categories; running 8 (budget cap 10)"
+   ],
+   "aborted": null,
+   "usd": 0.0024,
+   "wall_s": 9.7
+  },
+  {
+   "id": "fc_lhr_pax_2026_09",
+   "set": "test",
+   "interrupted_at_approve": true,
+   "outcome_type": "continuous",
+   "outcome_kind": null,
+   "target_keys": [
+    "cadence",
+    "caveats",
+    "outcome_type",
+    "period_end",
+    "period_start",
+    "publisher",
+    "unit",
+    "what"
+   ],
+   "what": "Total passengers at London Heathrow Airport during September 2026, as reported in Heathrow's monthly traffic statistics. This is the sum of terminal and transit passengers (arrivals + departures) for the calendar month.",
+   "unit": "passengers (count of passenger movements, i.e., arrivals plus departures)",
+   "plan_notes": [
+    "plan proposed 6 candidate directions in 6 categories; running 6 (budget cap 10)"
+   ],
+   "aborted": null,
+   "usd": 0.0025,
+   "wall_s": 10.6
+  },
+  {
+   "id": "fc_jp_births_2026_07",
+   "set": "test",
+   "interrupted_at_approve": true,
+   "outcome_type": "continuous",
+   "outcome_kind": null,
+   "target_keys": [
+    "cadence",
+    "caveats",
+    "outcome_type",
+    "period_end",
+    "period_start",
+    "publisher",
+    "unit",
+    "what"
+   ],
+   "what": "Number of live births in Japan during July 2026, as first reported in the Ministry of Health, Labour and Welfare's preliminary monthly vital statistics (which include foreign nationals residing in Japan).",
+   "unit": "births",
+   "plan_notes": [
+    "plan proposed 6 candidate directions in 5 categories; running 6 (budget cap 10)"
+   ],
+   "aborted": null,
+   "usd": 0.0022,
+   "wall_s": 8.6
+  }
+ ]
+}
