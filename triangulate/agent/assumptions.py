@@ -5,6 +5,9 @@
 1. id 必须是 a1..a8 且不重复；每次运行最多 MAX_PER_RUN = 8 条（超出的丢弃）。
 2. name、unit、rationale 不能为空；value / low / high 都是有限数字（布尔、字符串不算），且 0 < low <= value <= high。
 3. 百分数和数据点一样处理：unit 是 % / percent / per cent / pct / percentage 时记为 "%"，代码使用时除以 100。
+   v2.5.4（N17）：是不是百分数由 is_pct(unit) 判断：unit 里含 %、percent、per cent、pct、percentage 的都除以 100
+   （如 "% of annual live births"），百分点 / 基点（percentage points、pp、bp）不算。只有上面这几种写法改记为 "%"，
+   其余保留原文用于显示。
 4. 不能是目标量的水平值（target_reason）：name 和 unit 都没有比率类的词（RATIO_WORDS），并且 unit 的实词词干全部落在
    目标 unit 的词干里，或者 name 指向目标实体 + 目标量（ablation.refers_to_target）。v2 还按「提到目标年份」「是目标的
    变化」拒绝，v2.1 去掉了这两条：它们挡住了「去年同期 × 今年变化倍数」这类正常路线（见 AGENT_MVP.md v2.1 节）。
@@ -27,6 +30,10 @@ MIN_WIDTH = 2.0
 MIN_WIDTH_CHANGE = 1.25
 ID_RE = re.compile(r"a[1-8]")
 PCT_UNITS = {"%", "percent", "per cent", "pct", "percentage", "percent (%)"}
+# 百分数单位和百分点 / 基点（N17）：和 discrete.PCT_UNIT / CHANGE_UNIT 同一套写法（测试比对两边的 pattern）。
+# 不从 discrete 导入：discrete 导入 compute，compute 导入这里
+PCT_RE = re.compile(r"%|\bper ?cent\b|\bpercentage\b|\bpct\b", re.I)
+PCT_CHANGE_RE = re.compile(r"\bpercentage[- ]?points?\b|\bpp\b|\bp\.p\.|\bbps?\b|\bbasis[- ]?points?\b", re.I)
 RATIO_WORDS = re.compile(r"%|/|\b(?:share|shares|ratio|ratios|rate|rates|per|fraction|proportion|percent|percentage|"
                          r"factor|multiplier|elasticity|coefficient|conversion)\b", re.I)
 CHANGE_WORDS = re.compile(r"\b(?:growth|grow|change|changes|yoy|year[- ]over[- ]year|year[- ]on[- ]year|increase|"
@@ -41,6 +48,12 @@ def _num(x):
     return x if math.isfinite(x) else None
 
 
+def is_pct(unit) -> bool:
+    """unit 是百分数（代码使用时除以 100）：含 %、percent、per cent、pct、percentage；百分点、基点（变化量）不算。
+    只决定换算，不改 unit 的文字。"""
+    u = str(unit or "")
+    return bool(PCT_RE.search(u)) and not PCT_CHANGE_RE.search(u)
+
 
 def target_reason(a: dict, target: dict) -> str:
     """返回「这条假设就是目标或它的变相复制」的原因；空串 = 不是。
@@ -49,7 +62,7 @@ def target_reason(a: dict, target: dict) -> str:
     任何 formula_mc 仍至少要有一个观测点，所以假设不能单独构成答案。"""
     name, unit = a.get("name", ""), a.get("unit", "")
     both = f"{name} {unit}"
-    ratio_like = bool(RATIO_WORDS.search(both)) or a.get("unit") == "%"
+    ratio_like = bool(RATIO_WORDS.search(both)) or is_pct(unit)
     tu, au = stems((target or {}).get("unit", "")), stems(unit)
     if not ratio_like and ((au and tu and au <= tu) or refers_to_target(name, unit, target)):
         return "a level of the target quantity (unit or name matches the target, no ratio wording)"
@@ -59,7 +72,7 @@ def target_reason(a: dict, target: dict) -> str:
 def is_change_factor(a: dict) -> bool:
     """「相对已观测期间的变化倍数」（如 2026 相对 2025 的倍数）：比率类、名字里有变化词。"""
     both = f"{a.get('name', '')} {a.get('unit', '')}"
-    return (bool(RATIO_WORDS.search(both)) or a.get("unit") == "%") and bool(CHANGE_WORDS.search(both))
+    return (bool(RATIO_WORDS.search(both)) or is_pct(a.get("unit"))) and bool(CHANGE_WORDS.search(both))
 
 
 def validate(raw, target: dict) -> dict:
@@ -97,14 +110,14 @@ def validate(raw, target: dict) -> dict:
             continue
         seen.add(a["id"])
         lo, hi, widened = effective_range(a)
-        kept.append({**a, "is_pct": a["unit"] == "%", "p10_used": lo, "p90_used": hi, "widened_by_floor": widened})
+        kept.append({**a, "is_pct": is_pct(a["unit"]), "p10_used": lo, "p90_used": hi, "widened_by_floor": widened})
     return {"kept": kept, "rejected": rejected}
 
 
 def effective_range(a: dict) -> tuple:
     """(P10, P90, 是否被下限放宽)，单位换算后（% 已除以 100）。
     变化倍数用 MIN_WIDTH_CHANGE（1.25，约 ±11%）：它围绕 1 附近，2 倍下限会把区间撑到 ±40%，失去意义；其余用 MIN_WIDTH。"""
-    f = 0.01 if a.get("unit") == "%" else 1.0
+    f = 0.01 if is_pct(a.get("unit")) else 1.0
     lo, hi = a["low"] * f, a["high"] * f
     w = MIN_WIDTH_CHANGE if is_change_factor(a) else MIN_WIDTH
     if hi / lo >= w:

@@ -23,18 +23,21 @@ def is_ratio_unit(unit: str) -> bool:
 
 
 def restated_point(a: dict, pts: dict, rel_tol: float = 0.005) -> str:
-    """假设的值和某个保留观测点的值相同（相对差 <= 0.5%）、单位也对得上（都是 %，或单位词干有交集）时，返回那个点的 id。
-    只比数值会误伤：黄石 9 月的「变化倍数 1.0（ratio）」撞上了「道路开放日 1（day of month）」。"""
+    """假设的值和某个保留观测点的值相同（相对差 <= 0.5%）、单位也对得上（都是 %，或点不是 % 且单位词干有交集）时，返回那个点的 id。
+    只比数值会误伤：黄石 9 月的「变化倍数 1.0（ratio）」撞上了「道路开放日 1（day of month）」。
+    v2.5.4（N17）：假设是不是百分数用 assumptions.is_pct（「% of annual live births」也算）；点仍按 compute 对点的规则
+    （unit == "%"，同 formula_mc 的点）。点也改用 is_pct 会误伤：discrete7 的 a2「降息概率 2 %」撞上 p31「核心 CPI 2.0 percent」。
+    以前第二个条件还要求假设不是 %：unit 为 "%" 时词干本来就是空的，去掉不改变结果，「% of ...」的假设照旧按词干比。"""
     v = a.get("value")
     if not v:
         return ""
-    a_pct, a_st = a.get("unit") == "%", A.stems(a.get("unit", ""))
+    a_pct, a_st = A.is_pct(a.get("unit")), A.stems(a.get("unit", ""))
     for p in pts.values():
         pv = p.get("value")
         if not (p.get("keep", True) and pv and abs(pv - v) <= rel_tol * abs(v)):
             continue
         p_pct = p.get("unit") == "%"
-        if (a_pct and p_pct) or (not a_pct and not p_pct and a_st & A.stems(p.get("unit", ""))):
+        if (a_pct and p_pct) or (not p_pct and a_st & A.stems(p.get("unit", ""))):
             return p["id"]
     return ""
 

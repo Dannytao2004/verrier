@@ -138,9 +138,10 @@ def _table(points: list) -> str:
 
 
 def assumption_placeholders(a: dict) -> dict:
-    """一条假设的占位符：value 是裁判提的值，low / high 是代码实际采样用的 P10 / P90（已放宽、% 按原写法显示）。"""
+    """一条假设的占位符：value 是裁判提的值，low / high 是代码实际采样用的 P10 / P90（已放宽、% 按原写法显示）。
+    is_pct 只决定乘回 100；后缀 % 只给 unit 就是 "%" 的（「% of annual live births」这类由 key_assumptions_template 写出单位）。"""
     f = 100.0 if a.get("is_pct") else 1.0
-    pct = "%" if a.get("is_pct") else ""
+    pct = "%" if a.get("unit") == "%" else ""
     return {f"{a['id']}_value": _fmt_num(a["value"]) + pct, f"{a['id']}_low": _fmt_num(a["p10_used"] * f) + pct,
             f"{a['id']}_high": _fmt_num(a["p90_used"] * f) + pct}
 
@@ -163,7 +164,7 @@ def key_assumptions_template(used: list, year: int, keep_ids=frozenset(), discre
         return scrub_digits(t, year, keep_ids)[0].replace("[[", "[ [").replace("]]", "] ]")
 
     for a in used:
-        unit = "" if a.get("is_pct") else " " + clean(a["unit"])
+        unit = "" if a.get("unit") == "%" else " " + clean(a["unit"])   # 单位原文照写（只有 "%" 由占位符带出）
         widened = " (range widened by code)" if a.get("widened_by_floor") else ""
         line = (f"- {a['id']} {clean(a['name'])}: [[{a['id']}_value]]{unit}; used by {', '.join(a['used_by'])}." if discrete else
                 f"- {a['id']} {clean(a['name'])}: [[{a['id']}_value]]{unit}, range [[{a['id']}_low]] to "

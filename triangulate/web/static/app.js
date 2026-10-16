@@ -199,7 +199,7 @@ async function pageSaved() {
 // ---------- 结果页 ----------
 function evidenceText(e) {
   if (!e) return "";
-  if (e.kind === "assumption") return `<span class="k-assumption">假设 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)}${e.is_pct ? "%" : " " + esc(e.unit)}`;
+  if (e.kind === "assumption") return `<span class="k-assumption">假设 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)}${e.unit === "%" ? "%" : " " + esc(e.unit)}`;
   if (e.kind === "constant") return `<span class="k-constant">常数 ${esc(e.id)}（代码给）</span>`;
   if (e.kind === "unknown") return `<span class="bad">${esc(e.id)}：未知 id</span>`;
   return `<span class="k-point">数据点 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)} ${esc(e.unit)}，期间 ${esc(e.period_start || "?")}..${esc(e.period_end || "?")}，
