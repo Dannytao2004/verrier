@@ -117,7 +117,7 @@ class WebRun:
             self.result = {"qid": self.q["id"], "tag": self.h["tag"]}
             if self.cancel_requested:
                 self.status = "cancelled"
-            elif (state or {}).get("aborted") and r.get("central") is None:
+            elif (state or {}).get("aborted") and r.get("central") is None and r.get("most_likely") is None:
                 self.status, self.error = "failed", str(state["aborted"])[:500]
             else:
                 self.status = "done"
@@ -244,8 +244,10 @@ class WebRun:
                     r = c.get("result") or {}
                     ms = c.get("methods") or []
                     self.compute = {"central": r.get("central"), "p10": r.get("p10"), "p90": r.get("p90"),
-                                    "basis": r.get("basis"), "n_methods": len(ms),
-                                    "n_computed": sum(1 for m in ms if m.get("estimate") is not None),
+                                    "basis": r.get("basis"), "n_methods": len(ms), "mode": r.get("mode") or "continuous",
+                                    "most_likely": r.get("most_likely"), "most_likely_prob": r.get("most_likely_prob"),
+                                    "outcomes": r.get("outcomes"),
+                                    "n_computed": sum(1 for m in ms if m.get("estimate") is not None or m.get("distribution")),
                                     "n_excluded_by_input_audit": len(c.get("excluded_by_input_audit") or [])}
                 elif node == "final":
                     self.final_done = True

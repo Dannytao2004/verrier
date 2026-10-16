@@ -131,6 +131,8 @@ def list_runs(res: Path = RES) -> list:
         r = (st.get("compute") or {}).get("result") or {}
         row = {"qid": qid, "tag": tag, "kind": _run_kind(qid, tag), "question": st.get("question", ""),
                "as_of": st.get("as_of"), "started_at": st.get("started_at"), "model": st.get("model"),
+               "mode": r.get("mode") or "continuous", "most_likely": r.get("most_likely"),
+               "most_likely_prob": r.get("most_likely_prob"),
                "estimate": r.get("central"), "p10": r.get("p10"), "p90": r.get("p90"),
                "usd": (st.get("budget") or {}).get("usd_total_assumed"), "wall_s": st.get("wall_s"),
                "share": assumption_share(st.get("compute")).get("overall")}
@@ -175,7 +177,7 @@ def _evidence(iid: str, pts: dict, kept_a: dict) -> dict:
         return {"kind": "assumption", "id": iid, "name": a.get("name"), "value": a.get("value"), "unit": a.get("unit"),
                 "is_pct": a.get("is_pct")}
     if iid.startswith("k_"):
-        return {"kind": "constant", "id": iid, "name": "calendar constant (code)"}
+        return {"kind": "constant", "id": iid, "name": "calendar or unit constant (code)"}
     p = pts.get(iid)
     if p is None:
         return {"kind": "unknown", "id": iid}
@@ -189,7 +191,14 @@ def _inputs(m: dict, pts: dict, kept_a: dict) -> list:
     prm = m.get("params") or {}
     det = {d.get("name"): d for d in m.get("inputs_detail") or []}
     rows = []
-    if m.get("method") == "formula_mc":
+    if m.get("method") == "outcome_probs":   # 离散目标：每个结果的概率输入（余下的结果没有输入）
+        det = {d.get("label"): d for d in m.get("inputs_detail") or []}
+        for label, spec in (prm.get("probs") or {}).items():
+            spec = spec if isinstance(spec, dict) else {"id": spec}
+            iid = str(spec.get("id"))
+            rows.append({"name": str(label), "id": iid, "role": str(spec.get("role") or ""),
+                         "evidence": _evidence(iid, pts, kept_a), "prob": (det.get(label) or {}).get("prob")})
+    elif m.get("method") == "formula_mc":
         for name, spec in (prm.get("inputs") or {}).items():
             spec = spec if isinstance(spec, dict) else {"id": spec}
             iid = str(spec.get("id"))
@@ -212,6 +221,9 @@ def _formula(m: dict) -> str:
         return str(prm.get("formula") or "")
     if m.get("method") == "series_naive":
         return f"mean of the last k={prm.get('k', 1)} years of the target"
+    if m.get("method") == "outcome_probs":
+        rem = prm.get("remainder")
+        return "probability of each outcome from its input" + (f"; remainder {rem!r} = 1 minus the others" if rem else "")
     return {"yoy_scaling": "target[last year] x signal[this year] / signal[last year]",
             "linear_fit": "linear regression of target on signal", "ratio": "signal[this year] x historical target/signal ratio"
             }.get(m.get("method"), str(m.get("method")))
@@ -267,7 +279,8 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
                         "target_series": m.get("target_series"), "signal_series": m.get("signal_series"),
                         "mc": m.get("mc"), "error": m.get("error"), "notes": m.get("notes") or [],
                         "rationale": m.get("rationale"), "assumption_share": ms.get("share"),
-                        "status": "computed" if m.get("estimate") is not None else "failed"})
+                        "distribution": m.get("distribution"), "remainder": m.get("remainder"),
+                        "status": "computed" if m.get("estimate") is not None or m.get("distribution") else "failed"})
     # 输入核对没过、compute 没有用的方法：公式和输入从裁判那一轮的原始方法列表里取
     jr = next((j for j in st.get("judge_rounds") or [] if j.get("round") == comp.get("methods_from_round")), {})
     for i, reason in sorted((jr.get("audit_failed") or {}).items(), key=lambda x: int(x[0])):
@@ -298,6 +311,7 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
            "directions": [{k: d.get(k) for k in ("id", "category", "perspective", "hypothesis")} for d in st.get("directions") or []],
            "approvals": st.get("approvals") or [],
            "estimate": {k: r.get(k) for k in ("central", "p10", "p90", "basis", "weight_rule", "sigma_ln")},
+           "mode": r.get("mode") or "continuous", "discrete": discrete_view(st),
            "final_text": (st.get("final") or {}).get("text", ""), "methods": methods,
            "repairs": [x for x in (_repair_view(j) for j in st.get("judge_rounds") or []) if x],
            "audit_errors": [j.get("audit_error") for j in st.get("judge_rounds") or [] if j.get("audit_error")],
@@ -316,7 +330,29 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
         out["official"] = {"answer_value": q["answer_value"], "source": q.get("source"), "released": q.get("released"),
                            "last_year": q.get("last_year"), "pct_err": s.get("pct_err"),
                            "abs_log10_err": s.get("abs_log10_err"), "covered_80": s.get("covered_80")}
+        if s.get("mode") == "discrete":
+            out["official"].update({k: s.get(k) for k in ("true_outcome", "prob_true", "brier", "most_likely_correct")})
     return out
+
+
+def discrete_view(st: dict):
+    """离散目标的结果表：每个结果的 agent 概率（等权平均）、每个方法的概率、Jev 对照臂（不并入）。连续值目标返回 None。"""
+    comp = st.get("compute") or {}
+    r = comp.get("result") or {}
+    if r.get("mode") != "discrete":
+        return None
+    ms = [m for m in comp.get("methods") or [] if m.get("distribution")]
+    jv = st.get("jev") or {}
+    jp = jv.get("probabilities") if jv.get("status") == "ok" else None
+    rows = [{"label": o.get("label"), "value": o.get("value"), "prob": o.get("prob"),
+             "per_method": {m["id"]: m["distribution"].get(o.get("label")) for m in ms},
+             "jev": None if not jp else jp.get(o.get("label"))} for o in r.get("outcomes") or []]
+    jev = {k: jv.get(k) for k in ("status", "note", "error", "model", "choice", "confidence", "usage", "usd_estimated",
+                                  "price_source", "n_points_in_brief", "brief_chars", "latency_s", "endpoint")} if jv else None
+    return {"outcomes": rows, "methods": [m["id"] for m in ms], "most_likely": r.get("most_likely"),
+            "most_likely_prob": r.get("most_likely_prob"), "weight_rule": r.get("weight_rule"),
+            "assumption_weight_share": r.get("assumption_weight_share"), "jev": jev,
+            "jev_brief": jv.get("brief") if jv else None}
 
 
 def load_result(qid: str, tag: str = "", res: Path = RES) -> dict:

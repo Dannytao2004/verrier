@@ -19,6 +19,7 @@ function pct(x, signed = true) {
   return signed && x > 0 ? "+" + s : s;
 }
 function share(x) { return x === null || x === undefined ? "—" : Math.round(x * 100) + "%"; }
+function prob(x) { return x === null || x === undefined || !isFinite(x) ? "—" : (x * 100).toFixed(1) + "%"; }
 function yesno(b) { return b === true ? '<span class="good">是</span>' : b === false ? '<span class="bad">否</span>' : "—"; }
 function resultHref(qid, tag) { return `#/result?qid=${encodeURIComponent(qid)}&tag=${encodeURIComponent(tag || "")}`; }
 function fileHref(qid, tag, name) {
@@ -100,7 +101,9 @@ function targetTable(t) {
   if (!t) return '<p class="muted">还没有。</p>';
   const rows = [["what", "是什么"], ["unit", "单位"], ["period_start", "期间开始"], ["period_end", "期间结束"], ["publisher", "谁公布"],
     ["cadence", "公布节奏"], ["caveats", "注意"]];
-  return `<table>${rows.map(([k, l]) => `<tr><th style="width:110px">${l}</th><td>${esc(t[k])}</td></tr>`).join("")}</table>`;
+  const outs = t.outcome_type === "discrete" ? `<tr><th>结果类型</th><td>离散：${(t.outcomes || []).map(o =>
+    `${esc(o.label)}${o.value === null || o.value === undefined ? "" : `（${fmt(o.value)}）`}`).join("；")}</td></tr>` : "";
+  return `<table>${rows.map(([k, l]) => `<tr><th style="width:110px">${l}</th><td>${esc(t[k])}</td></tr>`).join("")}${outs}</table>`;
 }
 
 function schedule(id, ms) {
@@ -142,7 +145,9 @@ async function pageRun(id) {
   <td style="white-space:nowrap">${dirStatus(d)}</td><td class="num">${d.pages.snapshot} / ${d.pages.live_dated} / ${d.pages.dropped}</td>
   <td class="num">${d.n_extracted}</td><td class="num">${d.n_points ?? d.n_verified}</td></tr>`).join("")}</table>
   ${r.markets ? `<p class="muted">预测市场工具：${r.markets.n_markets} 个市场，${r.markets.n_points} 个点。${esc(r.markets.note || "")}</p>` : ""}` : ""}
-  ${r.compute ? `<h2>计算结果</h2><p>估计 <b>${fmt(r.compute.central)}</b>，80% 区间 [${fmt(r.compute.p10)}, ${fmt(r.compute.p90)}]（${esc(r.compute.basis)}）</p>` : ""}
+  ${r.compute ? (r.compute.mode === "discrete" ? `<h2>计算结果（离散目标）</h2><p>最可能的结果 <b>${esc(r.compute.most_likely ?? "—")}</b>（${prob(r.compute.most_likely_prob)}）：
+     ${(r.compute.outcomes || []).map(o => `${esc(o.label)} ${prob(o.prob)}`).join("；")}</p>` :
+    `<h2>计算结果</h2><p>估计 <b>${fmt(r.compute.central)}</b>，80% 区间 [${fmt(r.compute.p10)}, ${fmt(r.compute.p90)}]（${esc(r.compute.basis)}）</p>`) : ""}
   ${r.calls && Object.keys(r.calls).length ? `<details><summary>calls.jsonl 里的调用（按 role）</summary><p class="small">
      ${Object.entries(r.calls).map(([k, v]) => `${esc(k)} × ${v}`).join("；")}</p></details>` : ""}`;
   if (picking) wireApproval(r);
@@ -184,7 +189,8 @@ async function pageSaved() {
   <table><tr><th>题 id</th><th>tag</th><th>类型</th><th>as_of</th><th class="num">估计</th><th class="num">80% 区间</th><th class="num">假设占比</th>
   <th class="num">花费</th><th class="num">用时</th><th>开始（UTC）</th><th></th></tr>
   ${d.runs.map(r => `<tr><td>${esc(r.qid)}</td><td>${esc(r.tag || "(无)")}</td><td>${esc(KIND[r.kind] || r.kind)}</td><td>${esc(r.as_of)}</td>
-  <td class="num">${fmt(r.estimate)}</td><td class="num">${r.estimate === null ? "—" : `[${fmt(r.p10)}, ${fmt(r.p90)}]`}</td>
+  ${r.mode === "discrete" ? `<td class="num">${esc(r.most_likely ?? "—")}<div class="muted small">离散：最可能 ${prob(r.most_likely_prob)}</div></td><td class="num">—</td>` :
+  `<td class="num">${fmt(r.estimate)}</td><td class="num">${r.estimate === null ? "—" : `[${fmt(r.p10)}, ${fmt(r.p90)}]`}</td>`}
   <td class="num">${share(r.share)}${r.share > 0.5 ? ' <span class="badge b-warn">假设为主</span>' : ""}</td>
   <td class="num">${r.usd === null || r.usd === undefined ? "—" : "$" + r.usd.toFixed(3)}</td><td class="num">${r.wall_s ? Math.round(r.wall_s / 60) + " 分钟" : "—"}</td>
   <td class="small">${esc(r.started_at)}</td><td><a href="${resultHref(r.qid, r.tag)}">查看</a></td></tr>`).join("")}</table>`;
@@ -194,7 +200,7 @@ async function pageSaved() {
 function evidenceText(e) {
   if (!e) return "";
   if (e.kind === "assumption") return `<span class="k-assumption">假设 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)}${e.is_pct ? "%" : " " + esc(e.unit)}`;
-  if (e.kind === "constant") return `<span class="k-constant">日历常数 ${esc(e.id)}（代码给）</span>`;
+  if (e.kind === "constant") return `<span class="k-constant">常数 ${esc(e.id)}（代码给）</span>`;
   if (e.kind === "unknown") return `<span class="bad">${esc(e.id)}：未知 id</span>`;
   return `<span class="k-point">数据点 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)} ${esc(e.unit)}，期间 ${esc(e.period_start || "?")}..${esc(e.period_end || "?")}，
     来源 ${link(e.source_url, e.domain)}${e.snapshot_url ? `（${link(e.snapshot_url, "快照 " + e.snapshot_date)}）` : e.page_date ? `（${esc(e.via)} ${esc(e.page_date)}）` : ""}`;
@@ -206,9 +212,11 @@ function methodRows(ms) {
   ${m.target_series ? `<div class="small muted">目标序列：${Object.entries(m.target_series).map(([y, v]) => `${y}: ${fmt(v)}`).join("，")}</div>` : ""}
   ${m.signal_series ? `<div class="small muted">信号序列：${Object.entries(m.signal_series).map(([y, v]) => `${y}: ${fmt(v)}`).join("，")}</div>` : ""}</td>
   <td><ul class="inputs">${(m.inputs || []).map(i => `<li><b>${esc(i.name)}</b> = ${esc(i.id)}${i.p10 !== undefined && i.p10 !== null && i.p10 !== i.p90 ? `
-    <span class="muted small">采样 P10..P90 ${fmt(i.p10)}..${fmt(i.p90)}</span>` : ""}<div class="small">role：${esc(i.role) || '<span class="bad">（没写）</span>'}</div>
-    <div class="small">证据：${evidenceText(i.evidence)}</div></li>`).join("")}</ul></td>
-  <td class="num">${fmt(m.estimate)}</td><td class="num">${m.status === "computed" ? Math.round(100 * (m.weight || 0)) + "%" : "—"}
+    <span class="muted small">采样 P10..P90 ${fmt(i.p10)}..${fmt(i.p90)}</span>` : ""}${i.prob !== undefined && i.prob !== null ? ` <span class="muted small">概率 ${prob(i.prob)}</span>` : ""}
+    <div class="small">role：${esc(i.role) || '<span class="bad">（没写）</span>'}</div>
+    <div class="small">证据：${evidenceText(i.evidence)}</div></li>`).join("")}${m.remainder ? `<li class="small">余下的结果 <b>${esc(m.remainder)}</b> = 1 − 其余之和（代码算）</li>` : ""}</ul></td>
+  <td class="num">${m.distribution ? Object.entries(m.distribution).map(([k, v]) => `<div class="small">${esc(k)}：${prob(v)}</div>`).join("") : fmt(m.estimate)}</td>
+  <td class="num">${m.status === "computed" ? Math.round(100 * (m.weight || 0)) + "%" : "—"}
   ${m.weight_basis ? `<div class="muted small">${esc(m.weight_basis)}</div>` : ""}</td>
   <td class="num">${m.status === "computed" ? share(m.assumption_share) : "—"}</td>
   <td class="small">${(m.backtest || []).length ? "回测 " + m.backtest.map(b => `${b.year}: ${pct(Math.exp(b.log_err) - 1)}`).join("，") + "<br>" : ""}
@@ -237,7 +245,7 @@ async function pageResult(qid, tag) {
    · <a href="${fileHref(r.qid, r.tag, "graph.html")}" target="_blank">依赖图 graph.html</a>（需要联网加载 vis-network）
    · <a href="${fileHref(r.qid, r.tag, "ledger.md")}" target="_blank">证据账本 ledger.md</a></p>
   ${r.aborted ? `<div class="err">中止：${esc(r.aborted)}</div>` : ""}
-  <div class="row">
+  ${r.discrete ? discreteBlock(r.discrete, o) : `<div class="row">
     <div class="card"><div class="muted">估计</div><div class="big">${fmt(e.central)}</div>
       <div>80% 区间 [${fmt(e.p10)}, ${fmt(e.p90)}]</div><div class="muted small">区间依据 ${esc(e.basis)} · 加权规则 ${esc(e.weight_rule)}</div></div>
     ${o ? `<div class="card"><div class="muted">官方值（只用于打分，agent 看不到）</div><div class="big">${fmt(o.answer_value)}</div>
@@ -250,7 +258,7 @@ async function pageResult(qid, tag) {
       ${sh.warning ? `<div class="bad"><b>注意：这个估计的不确定性主要来自假设（超过 ${share(sh.threshold)}），不是观测证据。</b></div>` : ""}
       <div class="small">各方法：${Object.entries(sh.per_method || {}).map(([k, v]) => `${esc(k)} ${share(v.share)}（权重 ${Math.round(100 * v.weight)}%）`).join("，")}</div>`}
       <details><summary class="small">怎么算的</summary><p class="small">${esc(sh.definition)}</p></details></div>
-  </div>
+  </div>`}
   <h2>最终答案</h2><pre class="answer">${esc(r.final_text || "（没有）")}</pre>
   <h2>钉死的目标</h2>${targetTable(r.target)}
   <h2>方法（代码计算）</h2><p class="muted small">裁判从第 ${esc(r.methods_from_round ?? "?")} 轮给出的方法。权重为 0 的方法没有进入合并。</p>
@@ -280,6 +288,23 @@ async function pageResult(qid, tag) {
   <h2>泄漏审计</h2>${leakTable(r.leakage)}
   <details><summary>方向（${r.directions.length}）</summary><table>${r.directions.map(d => `<tr><td>${esc(d.id)}</td><td>${esc(d.category)}</td>
     <td>${esc(d.perspective)}</td><td class="small">${esc(d.hypothesis)}</td></tr>`).join("")}</table></details>`;
+}
+function discreteBlock(d, o) {
+  // 离散目标：结果概率表（agent 的等权平均 + 每个方法 + Jev 对照臂，Jev 不并入 agent 的答案）
+  const j = d.jev, jok = j && j.status === "ok";
+  const jnote = !j ? "没有运行" : jok ? `${esc(j.model)} · 选择 ${esc(j.choice)} · confidence ${fmt(j.confidence)} · 输入 token ${esc((j.usage || {}).input_tokens)}
+     · 输出 token ${esc((j.usage || {}).output_tokens)}${j.usd_estimated !== null && j.usd_estimated !== undefined ? ` · 估算费用 $${j.usd_estimated.toFixed(6)}` : ""}
+     · 简报 ${esc(j.n_points_in_brief)} 个保留的点` : `${esc(j.status === "not_configured" ? "未配置（没设 TYPESAFE_KEY_FILE）" : j.status)}${j.error ? "：" + esc(j.error) : ""}`;
+  return `<div class="row"><div class="card"><div class="muted">离散目标：最可能的结果</div><div class="big">${esc(d.most_likely ?? "—")}</div>
+    <div>概率 ${prob(d.most_likely_prob)} · ${esc(d.methods.length)} 个方法等权平均（${esc(d.weight_rule)}）</div>
+    <div class="muted small">用到假设的方法的权重 ${share(d.assumption_weight_share)}</div></div>
+    ${o ? `<div class="card"><div class="muted">真实结果（只用于打分，agent 看不到）</div><div class="big">${esc(o.true_outcome ?? fmt(o.answer_value))}</div>
+      <div>真实结果得到的概率 <b>${prob(o.prob_true)}</b> · Brier ${fmt(o.brier)} · 最可能的结果对不对：${yesno(o.most_likely_correct)}</div></div>` : ""}</div>
+  <table><tr><th>结果</th><th class="num">数值</th><th class="num">agent（等权平均）</th>${d.methods.map(m => `<th class="num">${esc(m)}</th>`).join("")}<th class="num">Jev（对照，不并入）</th></tr>
+  ${d.outcomes.map(x => `<tr><td>${esc(x.label)}</td><td class="num">${fmt(x.value)}</td><td class="num"><b>${prob(x.prob)}</b></td>
+    ${d.methods.map(m => `<td class="num">${prob((x.per_method || {})[m])}</td>`).join("")}<td class="num">${prob(x.jev)}</td></tr>`).join("")}</table>
+  <p class="muted small">Jev 对照臂（TypeSafe 官方端点，代码把保留的数据点写成简报、问一次）：${jnote}</p>
+  ${d.jev_brief ? `<details><summary class="small">发给 Jev 的简报</summary><pre class="answer small">${esc(d.jev_brief)}</pre></details>` : ""}`;
 }
 function leakTable(l) {
   const rows = [["页面（快照 / live / 丢弃）", `${l.pages_total ?? "—"}（${l.pages_snapshot ?? "—"} / ${l.pages_live_dated ?? "—"} / ${l.pages_dropped ?? "—"}）`],

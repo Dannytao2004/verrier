@@ -478,5 +478,41 @@ class TestApiSaved(unittest.TestCase):
         self.assertEqual(len(bt["test"]), 3)
 
 
+@unittest.skipUnless(HAVE_WEB, "fastapi / langgraph not installed (use .venv)")
+class TestWebDiscrete(unittest.TestCase):
+    def test_result_json_for_discrete_run(self):
+        from tests.test_discrete import CUT, HIKE, HOLD, discrete_graph_run
+        from triangulate.web import results as R
+        st, _ = discrete_graph_run()
+        st.update(qid="ask_d", question="q", as_of="2026-10-15", budget={"usd_total_assumed": 0.1}, wall_s=1.0, tag="t")
+        st["jev"] = {"status": "ok", "model": "jev-1.13.0", "choice": HOLD, "confidence": 0.3,
+                     "probabilities": {CUT: 0.1, HOLD: 0.5, HIKE: 0.4}, "usage": {"input_tokens": 900, "output_tokens": 5},
+                     "usd_estimated": 900 * 0.042 / 1e6, "brief": "Target: ...", "n_points_in_brief": 2}
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            d = tmp / "ask_d" / "web_1"
+            d.mkdir(parents=True)
+            (d / "state.json").write_text(json.dumps(st, default=str), encoding="utf-8")
+            v = R.load_result("ask_d", "web_1", tmp)
+            self.assertEqual(v["mode"], "discrete")
+            dv = v["discrete"]
+            self.assertEqual(dv["most_likely"], HOLD)
+            self.assertEqual(dv["methods"], ["m1", "m2"])
+            row = {x["label"]: x for x in dv["outcomes"]}[HIKE]
+            self.assertAlmostEqual(row["jev"], 0.4)
+            self.assertAlmostEqual(row["per_method"]["m1"], 0.436)
+            self.assertEqual(dv["jev"]["status"], "ok")
+            m1 = next(m for m in v["methods"] if m["id"] == "m1")
+            self.assertEqual(m1["status"], "computed")
+            self.assertEqual([i["name"] for i in m1["inputs"]], [HOLD, HIKE])
+            self.assertAlmostEqual(m1["inputs"][0]["prob"], 0.564)
+            self.assertEqual(m1["inputs"][0]["evidence"]["kind"], "point")
+            self.assertEqual(m1["remainder"], CUT)
+            runs = R.list_runs(tmp)
+            self.assertEqual((runs[0]["mode"], runs[0]["most_likely"]), ("discrete", HOLD))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 if __name__ == "__main__":
     unittest.main()
