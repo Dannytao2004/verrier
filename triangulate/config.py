@@ -40,7 +40,7 @@ MAX_TOKENS = {
     "published": 3000,       # 「答案已公布」确认
     "early": 3000,           # 提前停确认：同 published（同一个 prompt）
     "final": 4000,           # 终稿
-    "search": 2048,          # agent 的 SEARCHER（Anthropic 兼容接口）
+    "search": 8192,          # agent 的 SEARCHER（Anthropic 兼容接口）。v2.6a 从 2048 调到 8192：已存 493 次搜索里 39 次在 2048 截断
     "naive": 500,            # arm (1) 直接问
     "structured": 6000,      # arm (2) 不联网结构化
     "search_direct": 4096,   # arm (3) 联网直接答的正式运行（预注册结果用的值；补充运行的 32000 在 probes/search_direct_supp.py）

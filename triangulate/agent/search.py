@@ -87,6 +87,8 @@ class Searcher:
                     c = b.get("content")
                     if isinstance(c, list):
                         result_urls += [x.get("url") for x in c if isinstance(x, dict) and x.get("url")]
+                        # DeepSeek 把错误也放在 list 里：[{"type": "web_search_tool_result_error", "error_code": "max_uses_exceeded"}]
+                        n_err += sum(1 for x in c if isinstance(x, dict) and x.get("type") == "web_search_tool_result_error")
                     else:
                         n_err += 1
                 elif b.get("type") == "text":
