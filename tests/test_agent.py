@@ -692,10 +692,6 @@ class TestTruncatedReplies(unittest.TestCase):
         self.assertIn("shorter", seen[1][-1]["content"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestPeriodYearCheck(unittest.TestCase):
     """v2.1b：数据点的期间年份必须出现在页面正文或网址里（旧页面上的「当年 7 月」被标成目标年份的情况）。"""
 
@@ -711,3 +707,7 @@ class TestPeriodYearCheck(unittest.TestCase):
         self.assertIn("does not appear", why)
         p, why = verify_point(raw, ev.norm(text), date(2026, 8, 23), None, False, url="https://x.example/news/2026-08-01/births")
         self.assertIsNotNone(p, why)
+
+
+if __name__ == "__main__":
+    unittest.main()
