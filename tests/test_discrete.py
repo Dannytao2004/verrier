@@ -108,8 +108,8 @@ class TestOutcomeProbs(unittest.TestCase):
         self.assertAlmostEqual(sum(m["methods"][0]["distribution"].values()), 1.0)    # 没有余下：1.015 归一化
         m = _run({HOLD: {"id": "p1"}, CUT: {"id": "p2"}}, remainder=HIKE)["methods"][0]
         self.assertAlmostEqual(m["distribution"][HIKE], 0.0)
-        over = _run({HOLD: {"id": "p1"}, CUT: {"id": "p1"}}, remainder=HIKE)["methods"][0]
-        self.assertIn("would be negative", over["error"])
+        over = _run({HOLD: {"id": "p1"}, CUT: {"id": "a1"}}, remainder=HIKE, assumptions=[_a(value=50, low=40, high=60)])
+        self.assertIn("would be negative", over["methods"][0]["error"])
         low = _run({HOLD: {"id": "p1"}, HIKE: {"id": "p6"}, CUT: {"id": "a1"}}, assumptions=[_a()])["methods"][0]
         self.assertIn("unknown or discarded", low["error"])
         short = _run({HOLD: {"id": "p1"}, HIKE: {"id": "a2"}, CUT: {"id": "a1"}},
@@ -141,7 +141,7 @@ class TestOutcomeProbs(unittest.TestCase):
         both = _run({HOLD: {"id": "p1"}, CUT: {"id": "p2"}}, remainder=CUT)["methods"][0]
         self.assertIn("also the remainder", both["error"])
         not_p = _run({HOLD: {"id": "p5"}, HIKE: {"id": "p3"}}, remainder=CUT)["methods"][0]
-        self.assertNotIn("error", not_p)                                      # 4.0 percent per annum -> 0.04（核对交给输入核对）
+        self.assertIn("p5 ('current upper bound', unit 'percent per annum') is not stated as a probability", not_p["error"])
         big = _run({HOLD: {"id": "p1"}, HIKE: {"id": "x"}}, remainder=CUT)["methods"][0]
         self.assertIn("unknown or discarded", big["error"])
         raw = dict(PTS)
@@ -240,7 +240,21 @@ class TestAuditRowsAndProblems(unittest.TestCase):
         mi = {"method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p1", "role": "prob unchanged"},
                                                               HIKE: {"id": "a1", "role": "prob hike"}}, "remainder": CUT}}
         rows = G.audit_rows(mi, {"method": "outcome_probs"}, {p["id"]: p for p in PTS.values()}, {"a1": _a(value=40)})
-        self.assertEqual([(r[0], r[1], r[2]) for r in rows], [(HOLD, "p1", "prob unchanged"), (HIKE, "a1", "prob hike")])
+        self.assertEqual([(r[0], r[1]) for r in rows], [(HOLD, "p1"), (HIKE, "a1")])
+        self.assertEqual(rows[1][2], "probability that the target resolves to outcome 'hike to 4.25%'; analyst's role: prob hike")
+        # v2.2.1：role 由代码写成「target 取这个结果的概率」（有 target 时带数值和单位），余下结果也核对一行
+        out = C.run([mi], dict(PTS), TARGET, assumptions=AS.validate([_a(value=40, low=30, high=50)], TARGET))["methods"][0]
+        rows = G.audit_rows(mi, out, {p["id"]: p for p in PTS.values()}, {"a1": _a(value=40)}, TARGET)
+        self.assertEqual(rows[0][2], "probability that the target resolves to outcome 'unchanged at 4.00%' (value 4 percent "
+                                     "per annum); analyst's role: prob unchanged")
+        self.assertEqual(rows[2][:3], (CUT, "remainder", "probability that the target resolves to outcome 'cut to 3.75%' "
+                                                         "(value 3.75 percent per annum), taken as the rest (1 minus the other inputs)"))
+        self.assertEqual(rows[2][3], "computed by code: 1 - 0.964 = 0.036; the other inputs cover 'unchanged at 4.00%' from "
+                                     "p1, 'hike to 4.25%' from a1; outcomes with no input get 0: []")
+        no_role = {"method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p1"}}, "remainder": HIKE}}
+        out = C.run([no_role], dict(PTS), TARGET)["methods"][0]
+        self.assertEqual(G.audit_rows(no_role, out, {p["id"]: p for p in PTS.values()}, {}, TARGET)[0][2], "")   # 照旧拦下
+        self.assertIn('mark it "mismatch" when the probability left over', G._audit_header(mi, {"id": "m1", "method": "outcome_probs"}))
         self.assertIn("56.4 %", rows[0][3])
         self.assertIn("analyst assumption a1", rows[1][3])
         self.assertIn("remainder outcome", G._audit_header(mi, {"id": "m1", "method": "outcome_probs"}))
@@ -339,8 +353,9 @@ class TestJevClient(unittest.TestCase):
             shutil.rmtree(tmp, ignore_errors=True)
 
 
-def discrete_graph_run(jev_post=None):
-    """假模型跑一遍离散目标的整张图，返回最终 state 和看到的 prompt。jev_post 给了就配置一个临时 key 文件和假 HTTP 层。"""
+def discrete_graph_run(jev_post=None, allow_discrete=None):
+    """假模型跑一遍离散目标的整张图，返回最终 state 和看到的 prompt。jev_post 给了就配置一个临时 key 文件和假 HTTP 层。
+    allow_discrete 给了就设到 ctx 上（run.prepare_run 对有真值的题的做法）。"""
     from langgraph.types import Command
 
     from triangulate.agent import graph as G
@@ -348,6 +363,8 @@ def discrete_graph_run(jev_post=None):
     ctx = object.__new__(P.Context)
     ctx.qid, ctx.question, ctx.as_of_s, ctx.as_of = "t", "Upper bound after the next meeting?", "2026-10-15", date(2026, 10, 15)
     ctx.budget, ctx.leak_patterns, ctx.ablate_own_history = P.Budget(), [], False
+    if allow_discrete is not None:
+        ctx.allow_discrete = allow_discrete
     seen = {}
 
     class FakeLLM:
@@ -480,6 +497,132 @@ class TestDiscreteGraph(unittest.TestCase):
         self.assertNotIn("mode", r)
         self.assertIsNotNone(r["p10"])
         self.assertIn("code samples each one between the bounds shown", st["final"]["text"])
+
+    def test_jev_node_error_does_not_crash_the_run(self):
+        with mock.patch.object(J, "run_arm", side_effect=RuntimeError("boom tsk-secret")):
+            st, _ = discrete_graph_run()
+        self.assertEqual(st["jev"], {"arm": "jev", "status": "error", "error": "jev arm error RuntimeError"})
+        self.assertEqual(st["compute"]["result"]["most_likely"], HOLD)
+        self.assertIn("Most likely outcome", st["final"]["text"])
+
+    def test_scored_question_not_marked_discrete_stays_continuous(self):
+        st, _ = discrete_graph_run(allow_discrete=False)
+        self.assertEqual(st["plan"]["target"]["outcome_type"], "continuous")
+        self.assertNotIn("outcomes", st["plan"]["target"])
+        self.assertIn("plan chose a discrete target, but this scored question is not marked outcome_type 'discrete'; "
+                      "treated as continuous", st["plan_notes"])
+        self.assertNotIn("jev", st)
+        self.assertNotEqual((st["compute"]["result"] or {}).get("mode"), "discrete")
+
+    def test_prepare_run_sets_allow_discrete(self):
+        from triangulate.agent import run as R
+
+        class FakeCtx:   # 真的 Context 会读 DeepSeek key：测试里换掉
+            def __init__(self, *a, **kw):
+                pass
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            with mock.patch.object(R, "RES", tmp), mock.patch.object(R, "Context", FakeCtx), \
+                    mock.patch.object(R, "build", lambda ctx: None):
+                for q, want in (({"id": "a", "question": "?", "as_of": "2026-10-15"}, True),
+                                ({"id": "b", "question": "?", "as_of": "2026-10-15", "answer_value": 4.0}, False),
+                                ({"id": "c", "question": "?", "as_of": "2026-10-15", "answer_value": 4.0,
+                                  "outcome_type": "discrete"}, True)):
+                    self.assertIs(R.prepare_run(q)["ctx"].allow_discrete, want, q["id"])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestV221Fixes(unittest.TestCase):
+    """v2.2.1 审查意见的修复：只有假设的方法、一个 id 给两个结果、不是概率的点、离散方法互相打架、尾部结果打分、
+    离散运行的 score_all、Jev 的 HTTPException。"""
+
+    def test_method_needs_a_kept_point(self):
+        av = [_a(value=25, low=15, high=35, name="probability of a hike"), _a(id="a2", value=5, low=2, high=8)]
+        m = _run({HIKE: {"id": "a1"}, CUT: {"id": "a2"}}, remainder=HOLD, assumptions=av)["methods"][0]   # discrete4 第 1 轮
+        self.assertIn("needs at least one kept data point", m["error"])
+        self.assertIsNone(_run({HIKE: {"id": "a1"}, CUT: {"id": "a2"}}, remainder=HOLD, assumptions=av)["result"]["most_likely"])
+        ok = _run({HIKE: {"id": "p2"}, CUT: {"id": "a2"}}, remainder=HOLD, assumptions=av)["methods"][0]
+        self.assertNotIn("error", ok)
+
+    def test_one_id_one_outcome(self):
+        m = _run({HOLD: {"id": "p1"}, HIKE: {"id": "p1"}}, remainder=CUT)["methods"][0]
+        self.assertIn("id p1 is used for outcomes 'unchanged at 4.00%' and 'hike to 4.25%'; one probability denotes one "
+                      "outcome", m["error"])
+        a = _run({HOLD: {"id": "p1"}, HIKE: {"id": "a1"}, CUT: {"id": "a1"}}, assumptions=[_a(value=40, low=30, high=50)])
+        self.assertIn("id a1 is used for outcomes", a["methods"][0]["error"])
+
+    def test_points_must_be_probabilities(self):
+        pts = dict(PTS)
+        pts["p8"] = _pt("p8", 22.1, unit="percentage points", name="change in implied probability of a hike")
+        pts["p9"] = _pt("p9", 4.1, unit="percent", name="unemployment rate")
+        pts["p10"] = _pt("p10", 25.0, unit="bp", name="probability-weighted expected move")
+        for pid, want in (("p8", "is a change or difference"), ("p9", "is not stated as a probability"),
+                          ("p10", "is a change or difference")):
+            m = C.run([{"method": "outcome_probs", "params": {"probs": {HIKE: {"id": pid}}, "remainder": HOLD}}], pts, TARGET)
+            self.assertIn(want, m["methods"][0]["error"], pid)
+        a = _run({HOLD: {"id": "p1"}, HIKE: {"id": "a1"}}, remainder=CUT,
+                 assumptions=[_a(value=20, low=10, high=30, unit="percentage points")])["methods"][0]
+        self.assertIn("is a change or difference", a["error"])
+        # 名字带 probability（FedWatch）、unit = probability（markets.py）、percent probability：照旧通过
+        for pid in ("p1", "p3", "p4"):
+            self.assertNotIn("error", _run({HIKE: {"id": pid}}, remainder=HOLD)["methods"][0], pid)
+
+    @unittest.skipUnless(HAVE_LG, "langgraph not installed")
+    def test_discrete_methods_that_disagree_go_back_to_the_judge(self):
+        from triangulate.agent import graph as G
+        jr = {"methods": [{"id": "m1", "method": "outcome_probs",
+                           "params": {"probs": {HOLD: {"id": "p1"}, HIKE: {"id": "p2"}}, "remainder": CUT}},
+                          {"id": "m2", "method": "outcome_probs",
+                           "params": {"probs": {CUT: {"id": "p1"}, HIKE: {"id": "p2"}}, "remainder": HOLD}}]}
+        out, av, failed = G._code_check(jr, list(PTS.values()), TARGET)
+        n_ok, probs = G._problems(jr, out, av, failed)
+        self.assertEqual(n_ok, 2)
+        self.assertEqual(len(probs), 1)
+        self.assertIn("methods disagree: m1 gives most likely 'unchanged at 4.00%' (56.4%) but m2 gives most likely "
+                      "'cut to 3.75%' (56.4%) (total variation distance 0.56, more than 0.5)", probs[0])
+
+    def test_scoring_merged_tails(self):
+        r = {"outcomes": [{"label": "4.00% or lower", "value": 4.0, "prob": 0.6}, {"label": "4.25%", "value": 4.25, "prob": 0.4},
+                          {"label": "4.50% or higher", "value": 4.5, "prob": 0.0}], "most_likely": "4.00% or lower"}
+        s = D.score(r, 3.75)
+        self.assertEqual((s["true_outcome"], s["most_likely_correct"]), ("4.00% or lower", True))
+        self.assertAlmostEqual(s["prob_true"], 0.6)
+        self.assertAlmostEqual(s["brier"], 0.16 + 0.16)
+        self.assertEqual(D.score(r, 4.0)["true_outcome"], "4.00% or lower")
+        self.assertEqual(D.score(r, 4.25)["true_outcome"], "4.25%")
+        self.assertEqual(D.score(r, 5.0)["true_outcome"], "4.50% or higher")
+        self.assertIsNone(D.score({"outcomes": r["outcomes"][1:2]}, 3.75)["true_outcome"])   # 没有尾部：照旧不在列表里
+
+    @unittest.skipUnless(HAVE_LG, "langgraph not installed")
+    def test_score_all_discrete_has_no_point_estimate_arms(self):
+        from triangulate.agent import run as R
+        tmp = Path(tempfile.mkdtemp())
+        st = {"compute": {"result": {"mode": "discrete", "central": 0.0, "most_likely": "no",
+                                     "outcomes": [{"label": "yes", "value": 1.0, "prob": 0.3}, {"label": "no", "value": 0.0, "prob": 0.7}]}},
+              "budget": {"usd_total_assumed": 0.1, "usd_tokens": 0.05}, "wall_s": 1.0}
+        try:
+            (tmp / "q").mkdir()
+            (tmp / "q" / "state.json").write_text(json.dumps(st), encoding="utf-8")
+            with mock.patch.object(R, "RES", tmp):
+                rows = R.score_all([{"id": "q", "as_of": "2026-10-15", "answer_value": 0.0}])   # 真值 0：以前除零
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        self.assertEqual(rows[0]["true_outcome"], "no")
+        self.assertAlmostEqual(rows[0]["prob_true"], 0.7)
+        self.assertNotIn("arms", rows[0])
+        self.assertNotIn("within_20pct", rows[0])
+        self.assertEqual(rows[0]["usd_total_assumed"], 0.1)
+
+    def test_jev_http_exception_is_an_error_not_a_crash(self):
+        import http.client
+
+        def broken(url, body, headers, timeout):
+            raise http.client.IncompleteRead(b"{", 10)
+        out = J.run_arm(TARGET, TestJevClient.PTS, "2026-10-15",
+                        client=J.JevClient("k", post=broken, sleep=lambda s: None))
+        self.assertEqual(out["status"], "error")
+        self.assertIn("IncompleteRead", out["error"])
 
 
 if __name__ == "__main__":

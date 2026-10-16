@@ -1,6 +1,6 @@
 # 断点（2026-10-15）
 
-当前代码：tag `v2.2`（agent，d914126）+ `web-v0.2`（前端，75521a8）。测试 164 个全过。
+当前代码：tag `v2.2.1`（agent，审查修复）+ `web-v0.2`（前端，75521a8）。测试 174 个全过。
 
 ## 已完成：「离散结果」模式（v2.2，按 2026-10-15 批准的设计）
 
@@ -12,7 +12,28 @@
 - Jev 对照臂（`jev.py`，官方端点，只在设了 `TYPESAFE_KEY_FILE` 时跑，不并入 agent 的答案）。价格 $0.042 / 百万输入 token、输出免费
   （docs.typesafe.ai/models，2026-10-15 核对）。**还没有真实调用过**（没有 key）。
 - 和设计的出入：没有输入、也不是余下结果的结果概率记为 0（写进方法 notes），不再报错。原因见下表 discrete1/2/4。
-- 连续模式没变：7 次保存的开发 / 测试运行离线重算，中心估计和 P10/P90 全部相同（`probes/recheck_continuous.py`，7/7）。
+- 连续模式：**只有 compute 离线重算相同**。7 次保存的开发 / 测试运行，中心估计和 P10/P90 全部相同（`probes/recheck_continuous.py`，7/7）；
+  v2.2.1 另比了 35 个连续目标 state.json 的 129 个裁判轮次，compute.run、假设校验、`_problems`、输入核对的行和表头与 v2.2 逐字节相同。
+  但规划和裁判的 prompt 变了（PLAN_USER 加了 outcome_type 说明和模板字段，METHODS_SPEC 加了两个单位换算常数，target JSON 多了
+  `"outcome_type": "continuous"`），**真实运行没有复测**。
+
+## v2.2.1：审查修复（离线，未调模型）
+
+- 每个 outcome_probs 方法至少一个保留的观测点（同 formula_mc）；只有假设加余下结果的方法拒绝（discrete1/4 第 1 轮）。
+- 一个 id 只能给一个结果（discrete2 的 p87、discrete4 的 a2）。
+- 当概率用的观测点 name 或 unit 必须带 probability / odds / chance / likelihood；单位是百分点或基点（变化量）的点和假设拒绝
+  （discrete4 的 p95「概率变化 22.1 percentage points」、p117 失业率）。没收 implied / priced：「market-implied rate」是水平。
+  没做「数值等于某个结果的值、单位是目标单位就拒绝」：利率题里「降息概率 4.0%」会和结果 4.00% 撞上，误伤。
+- 离散方法之间的冲突检查：两个分布的 total variation distance > 0.5 就交回裁判（对应连续值的 3 倍规则）。没用「最可能的结果不同」：
+  56/44 对 45/55 这种接近五五开的两个来源也会触发修正轮。
+- 输入核对：离散方法每行的 role 由代码写成「target 取结果 X（数值、单位）的概率」再附上裁判的 role；余下结果也核对一行
+  （代码算的 1 − 其余之和、其余输入覆盖了哪些结果）；表头要求核对证据是不是这个结果的概率。连续值的核对 prompt 没动。
+- 有真值的题（回测 / 留出）只有题目标了 `outcome_type: "discrete"` 才接受离散目标，否则代码改回 continuous 并记 plan note。
+- 打分：合并的尾部结果（label 带 or lower / or higher 等）认超出它的真值；`score_all` 对离散运行不再算点估计误差（真值 0 不再除零）。
+- Jev 臂：`http.client.HTTPException`（IncompleteRead 等）记为错误；jev 节点出任何异常都记 status = error，不让整题崩掉。
+- 重放（`probes/replay_discrete_rules.py`）：discrete1/4 第 1 轮只有假设的方法、discrete2 第 1 轮 m2、discrete4 第 2 轮修正前的 m2
+  现在都被代码拒绝；discrete4 第 2 轮修正前只剩 FedWatch 方法：4.00% or lower 56.3%。构造的「{4.25%: p22}，余下给 3.25%」
+  代码仍然接受，只能靠新的余下结果核对行（模型判断，**没有用真实模型验证**）。
 
 ## FOMC 真实运行（`results/agent/ask_0e2d5021/`），全部没出数
 
@@ -30,9 +51,19 @@
 
 1. 结果列表在规划时（还没证据）就定死：规划模型对当前利率的先验错了，后面无法纠正（discrete5）。可能的做法：第一轮证据后由代码或裁判
    重定结果列表，或要求结果按「相对当前值的变化」列出。要先定方案。
-2. 同一个 id 给两个结果（discrete2 的 p87、discrete4 的 a2）：代码不拦，输入核对不一定拦。
+2. ~~同一个 id 给两个结果~~：v2.2.1 代码拦下。
 3. 规划不确定「下一次会议」是哪天（caveats 里写了 10 月或 12 月），裁判因此造了「如果是 12 月」的假设方法。
 4. Jev 臂只有离线测试。
+5. 余下结果放错桶（构造的「{4.25%: p22}，余下给 3.25%」）代码仍接受，只靠输入核对。更强的代码规则（余下概率不超过观测点的最大值、
+   或余下结果必须和某个有输入的结果相邻）会误伤合法用法（FedWatch 只报加息 43.6%、余下给维持 56.4%），要先定方案。
+6. 网页「已保存的运行」列表的假设占比只算有 estimate 的方法，离散运行总是「—」。直接用 `assumption_weight_share` 会让
+   「FedWatch + 1% 尾部假设」显示「假设为主」；离散运行的假设占比怎么定义（假设给的概率质量？算不算余下结果？）要先定。
+7. 离散题的字符串真值（answer_value = "4.25%" 或人名）会让 `prepare_run`（泄漏哨兵）和 `save_run` / ledger（`{:,}` 格式化）崩掉。
+8. `render_graph` 用链式 `str.replace` 填模板：meta 里模型写的 outcome label 或 Jev 返回的文字含 `__GRAPH__` 时，图 JSON 会被插进
+   页头 HTML；从磁盘 file:// 打开没有 CSP 保护。
+9. `jev._urllib_post` 跟随 301/302/303 时会把 `Authorization` 头带到跳转后的地址（需要官方端点自己返回跳转）。可以换成不跟随跳转的 opener。
+10. 下一次跑留出测试前，先用新 prompt 只跑 plan 节点，看 outcome_type 是不是都是 continuous（v2.2.1 的代码规则只管有真值的题）。
+11. 两个单位换算常数只能在 formula_mc 里用，而离散题禁用 formula_mc，所以它们实际只影响连续题的 prompt。
 
 ## 之后的清单（demo 收尾）
 

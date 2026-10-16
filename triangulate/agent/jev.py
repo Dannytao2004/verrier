@@ -11,6 +11,7 @@ domain, date」），问 Jev 一个 choice 问题（官方建议：能算的在�
 回复 answers.outcome = {type, choice, probabilities（覆盖全部选项、和为 1）, confidence}，另有 usage.{input_tokens, output_tokens}。
 价格按 https://docs.typesafe.ai/models（2026-10-15 查看）：输入 $0.042 / 百万 token，输出免费。
 """
+import http.client
 import json
 import math
 import os
@@ -144,7 +145,7 @@ class JevClient:
         for attempt in range(1, self.tries + 1):
             try:
                 status, raw = self._post(API_URL, body, headers, TIMEOUT_S)
-            except (urllib.error.URLError, TimeoutError, OSError) as e:
+            except (urllib.error.URLError, TimeoutError, OSError, http.client.HTTPException) as e:   # IncompleteRead 等不是 OSError
                 status, raw = None, f"{type(e).__name__}".encode()
             if status in RETRY_STATUS or status is None:
                 if attempt < self.tries:

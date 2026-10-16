@@ -5,6 +5,8 @@
 - 代码（这里）：% 转小数；每个概率在 [0, 1]；有余下结果时其余之和 <= 1 + SUM_TOL_REMAINDER，余下 = 1 - 和（截到 0）；
   没有余下结果时和必须在 SUM_RANGE 内；最后都归一化到 1。没有输入、也不是余下结果的结果概率为 0（记进 notes）；未知 label 拒绝。
   （live 运行 discrete1/2/4 都因为「每个结果都要有输入」这条没出数：证据只给有概率的结果，比如 FedWatch 只报维持和加息。）
+  v2.2.1 起另有：每个方法至少一个保留的观测点（同 formula_mc）；一个 id 只能给一个结果；当概率用的观测点 name 或 unit
+  要说明是概率（PROB_WORDS）；百分点 / 基点（变化量）拒绝。
   多个方法等权线性平均（linear pool）；最可能的结果 = 概率最大的（并列时取 plan 里排在前面的）。
 - 假设输入用裁判给的 value（离散结果是点分布，不做 Monte Carlo）；low / high 只记录。
 连续值模式（compute.run 的其余部分）不经过这里。
@@ -20,6 +22,11 @@ SUM_TOL_REMAINDER = 0.02
 SUM_RANGE = (0.9, 1.1)
 LABEL_CHARS = 80
 PCT_UNIT = re.compile(r"%|\bper ?cent\b|\bpercentage\b|\bpct\b", re.I)
+# 变化量的单位（百分点、基点）不是概率（v2.2.1；FOMC discrete4 的「FedWatch 概率变化 22.1 percentage points」曾被当成 0.221）
+CHANGE_UNIT = re.compile(r"\bpercentage[- ]?points?\b|\bpp\b|\bp\.p\.|\bbps?\b|\bbasis[- ]?points?\b", re.I)
+# 当概率用的观测点，name 或 unit 必须说明它是概率（markets.py 的点 unit = "probability"；FedWatch 的点 name 都带 probability）。
+# 不收 implied / priced：「market-implied rate 4.0%」是水平，不是概率
+PROB_WORDS = re.compile(r"probab|\bodds\b|\bchances?\b|likelihood", re.I)
 
 
 def _norm_label(x) -> str:
@@ -99,6 +106,13 @@ def _probability(label: str, spec, pts: dict, kept_a: dict, rejected_a: dict) ->
             raise MethodError(f"outcome {label!r}: id {iid} unknown or discarded")
         v, unit, kind = p["value"], p.get("unit") or "", "point"
         pct = bool(PCT_UNIT.search(unit))
+        if not PROB_WORDS.search(f"{p.get('name') or ''} {unit}"):
+            raise MethodError(f"outcome {label!r}: data point {iid} ({str(p.get('name') or '')[:80]!r}, unit {unit!r}) is not "
+                              f"stated as a probability: its name or unit must say probability, odds, chance or likelihood "
+                              f"(a rate, a level or a share of something else is not the probability of an outcome)")
+    if CHANGE_UNIT.search(unit):
+        raise MethodError(f"outcome {label!r}: {iid} = {v:g} {unit} is a change or difference (percentage points or basis "
+                          f"points), not a probability")
     prob = v / 100 if pct else v
     if not (isinstance(prob, (int, float)) and math.isfinite(prob) and 0 <= prob <= 1):
         hint = "" if pct else " (only a unit with % or percent is converted from a percentage)"
@@ -121,7 +135,7 @@ def outcome_probs(prm: dict, pts: dict, kept_a: dict, rejected_a: dict, outcomes
         if rem is None:
             raise MethodError(f"remainder {rem_raw!r} is not one of the outcomes {labels}")
     # 一个方法的问题全部收齐再报（修正轮一次看到全部问题；live 运行 discrete2 里只报了第一个，漏掉的结果没被修）
-    given, detail, errs, seen = {}, [], [], set()
+    given, detail, errs, seen, id_label = {}, [], [], set(), {}
     for k, spec in probs.items():
         lab = canon.get(_norm_label(k).casefold())
         if lab is None:
@@ -139,8 +153,15 @@ def outcome_probs(prm: dict, pts: dict, kept_a: dict, rejected_a: dict, outcomes
         except MethodError as e:
             errs.append(str(e))
             continue
+        if d["id"] in id_label:   # 一个概率只对应一个结果（discrete2 的 p87、discrete4 的 a2 曾同时给两个互斥结果）
+            errs.append(f"id {d['id']} is used for outcomes {id_label[d['id']]!r} and {lab!r}; one probability denotes one outcome")
+            continue
+        id_label[d["id"]] = lab
         given[lab] = d["prob"]
         detail.append(d)
+    if not any(d["kind"] == "point" for d in detail):   # 和 formula_mc 一样：至少一个保留的观测点（discrete1/4 第 1 轮只有假设）
+        errs.append("outcome_probs needs at least one kept data point among its inputs; a method made only of assumptions "
+                    "and the remainder is rejected")
     zero = [lab for lab in labels if lab not in seen and lab != rem]   # 没有输入的结果：概率 0（和的检查管住漏掉的概率）
     s = sum(given.values())   # 求和检查也并进同一条消息（有输入失败时只按通过的输入算，不查和）
     if rem is not None and s > 1 + SUM_TOL_REMAINDER:
@@ -209,17 +230,28 @@ def run(methods: list, pts: dict, target: dict, assumptions=None) -> dict:
     return {"mode": "discrete", "methods": results, "result": pool(ok, outcomes), "assumptions_used_by": used_by}
 
 
-def _matches(o: dict, ans) -> bool:
+TAIL_LE = re.compile(r"\bor (?:lower|below|less|fewer)\b", re.I)
+TAIL_GE = re.compile(r"\bor (?:higher|above|more|greater)\b", re.I)
+
+
+def _matches(o: dict, ans, tails: bool = False) -> bool:
+    """tails=False：数值相等或 label 相同。tails=True：合并的尾部结果（label 带 or lower / or higher 等）
+    认超出它的数值真值（真值 3.75 落在「4.00% or lower」里）。"""
     if isinstance(ans, (int, float)) and not isinstance(ans, bool):
-        return o.get("value") is not None and abs(o["value"] - ans) <= 1e-9 * max(1.0, abs(ans))
-    return _norm_label(ans).casefold() == o["label"].casefold()
+        v = o.get("value")
+        if v is None:
+            return False
+        if not tails:
+            return abs(v - ans) <= 1e-9 * max(1.0, abs(ans))
+        return bool(TAIL_LE.search(o["label"]) and ans < v or TAIL_GE.search(o["label"]) and ans > v)
+    return not tails and _norm_label(ans).casefold() == o["label"].casefold()
 
 
 def score(res: dict, ans) -> dict:
     """离散目标的打分（有真值时）：真结果得到的概率、Brier 分数（各结果 (p - 是否发生)^2 之和；真值不在结果列表里时，
-    相当于多一个概率为 0 的「其他」结果，加 1）、最可能的结果对不对。"""
+    相当于多一个概率为 0 的「其他」结果，加 1）、最可能的结果对不对。先找精确相等的结果，没有再找合并的尾部结果。"""
     outs = res.get("outcomes") or []
-    true = next((o["label"] for o in outs if _matches(o, ans)), None)
+    true = next((o["label"] for t in (False, True) for o in outs if _matches(o, ans, t)), None)
     if not outs or any(o.get("prob") is None for o in outs):
         return {"true_outcome": true, "prob_true": None, "brier": None, "most_likely_correct": None}
     brier = sum((o["prob"] - (1.0 if o["label"] == true else 0.0)) ** 2 for o in outs) + (0.0 if true else 1.0)

@@ -120,6 +120,8 @@ def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False) -> dic
         calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
     leak_values = q.get("leak_values") or ([q["answer_value"]] if q.get("answer_value") is not None else None)
     ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values, ablate_own_history=ablate_own_history)
+    # 有真值的题（回测 / 留出测试，--auto-approve 没人把关）只在题目明确标了 outcome_type = discrete 时才接受离散目标
+    ctx.allow_discrete = q.get("answer_value") is None or q.get("outcome_type") == "discrete"
     g = build(ctx)
     cfg = {"configurable": {"thread_id": f"{q['id']}-{stamp}"}, "max_concurrency": 12, "recursion_limit": 80}
     return {"q": q, "g": g, "cfg": cfg, "ctx": ctx, "out_dir": out_dir, "stamp": stamp, "tag": tag,
@@ -211,11 +213,12 @@ def score_all(questions: list, tag: str = "", forecast_summary=None) -> list:
 
         def arm(est):
             return None if est is None else {"estimate": est, "pct_err": est / ans - 1, "abs_log10_err": abs(math.log10(est / ans))}
-        s["arms"] = {"agent": arm(s["estimate"]), "naive": arm((f.get("naive") or {}).get("estimate")),
-                     "structured_no_retrieval": arm((f.get("structured") or {}).get("estimate")),
-                     "last_year_same_period": arm(q.get("last_year"))}
-        for lim in (20, 10, 5):
-            s[f"within_{lim}pct"] = {k: (v is not None and abs(v["pct_err"]) <= lim / 100) for k, v in s["arms"].items()}
+        if s.get("mode") != "discrete":   # 离散目标没有点估计（central 只是最可能结果的数值）：只留 D.score 的打分
+            s["arms"] = {"agent": arm(s["estimate"]), "naive": arm((f.get("naive") or {}).get("estimate")),
+                         "structured_no_retrieval": arm((f.get("structured") or {}).get("estimate")),
+                         "last_year_same_period": arm(q.get("last_year"))}
+            for lim in (20, 10, 5):
+                s[f"within_{lim}pct"] = {k: (v is not None and abs(v["pct_err"]) <= lim / 100) for k, v in s["arms"].items()}
         s["usd_total_assumed"] = st["budget"]["usd_total_assumed"]
         s["usd_tokens"] = st["budget"]["usd_tokens"]
         s["wall_s"] = st["wall_s"]

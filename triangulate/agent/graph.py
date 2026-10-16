@@ -199,10 +199,12 @@ def _repair_errors(jr: dict, out: dict, av: dict, failed: dict) -> list:
 
 
 CONFLICT_RATIO = 3.0   # 能跑的方法之间差到这个倍数以上，就当作「至少一条路线的输入或假设错了」交回裁判
+CONFLICT_TVD = 0.5     # 离散方法的对应规则：两个分布的 total variation distance 超过它（一半以上的概率换了结果）就交回裁判
 
 
 def _problems(jr: dict, out: dict, av: dict, failed: dict) -> tuple:
-    """(能跑的方法数, 交给裁判的问题清单)：失败的方法和原因、被拒的假设、能跑的方法之间差 CONFLICT_RATIO 倍以上。
+    """(能跑的方法数, 交给裁判的问题清单)：失败的方法和原因、被拒的假设、能跑的方法之间差 CONFLICT_RATIO 倍以上
+    （离散方法：分布的 total variation distance 超过 CONFLICT_TVD）。
     已有两条以上能跑而且互相吻合的方法时返回空清单。"""
     ms = out.get("methods") or []
     ok = [(i, m) for i, m in enumerate(ms) if i not in failed and C.produced(m)]
@@ -216,6 +218,18 @@ def _problems(jr: dict, out: dict, av: dict, failed: dict) -> tuple:
             probs.append(f"methods disagree: {hi[1].get('label') or hi[1]['id']} gives {hi[1]['estimate']:,.0f} but "
                          f"{lo[1].get('label') or lo[1]['id']} gives {lo[1]['estimate']:,.0f} (more than {CONFLICT_RATIO:g}x apart); "
                          f"at least one route's input or assumption is wrong")
+    dist = [(i, m) for i, m in ok if m.get("distribution")]   # 离散方法：分布之间的 total variation distance（连续值时为空）
+    pairs = [(0.5 * sum(abs(a[1]["distribution"][k] - b[1]["distribution"].get(k, 0.0)) for k in a[1]["distribution"]), a, b)
+             for n, a in enumerate(dist) for b in dist[n + 1:]]
+    if pairs and max(pairs, key=lambda x: x[0])[0] > CONFLICT_TVD:
+        tv, a, b = max(pairs, key=lambda x: x[0])
+
+        def top(m):
+            k = max(m["distribution"], key=m["distribution"].get)
+            return f"most likely {k!r} ({100 * m['distribution'][k]:.1f}%)"
+        probs.append(f"methods disagree: {a[1].get('label') or a[1]['id']} gives {top(a[1])} but {b[1].get('label') or b[1]['id']} "
+                     f"gives {top(b[1])} (total variation distance {tv:.2f}, more than {CONFLICT_TVD:g}); at least one route's "
+                     f"input, outcome assignment or remainder is wrong")
     if not ms:
         probs = ["no methods were proposed"]
     if len(ok) >= 2 and not any(x.startswith("methods disagree") for x in probs):
@@ -241,8 +255,16 @@ def _evidence(iid: str, by_id: dict, kept_a: dict) -> str:
             f'{p.get("period_start") or "?"}..{p.get("period_end") or "?"}, source {dom}')
 
 
-def audit_rows(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
-    """一个方法里要核对的输入：[(输入名, id, 裁判写的 role, 证据描述)]。日历常数不核对；序列方法核对 target_history。"""
+def _outcome_role(label: str, target: dict) -> str:
+    o = next((o for o in (target or {}).get("outcomes") or [] if o["label"] == label), {})
+    val = "" if o.get("value") is None else f" (value {o['value']:g} {(target or {}).get('unit', '')})"
+    return f"probability that the target resolves to outcome '{label}'{val}"
+
+
+def audit_rows(m_in: dict, m_out: dict, by_id: dict, kept_a: dict, target=None) -> list:
+    """一个方法里要核对的输入：[(输入名, id, 裁判写的 role, 证据描述)]。日历常数不核对；序列方法核对 target_history。
+    outcome_probs：role 由代码写成「target 取这个结果的概率」再附上裁判的 role（裁判没写 role 时留空，照旧拦下）；
+    余下结果也核对一行（代码算的 1 - 其余之和、其余输入覆盖了哪些结果）。"""
     prm = m_in.get("params") or {}
     if m_out.get("method") == "formula_mc":
         rows = []
@@ -254,12 +276,21 @@ def audit_rows(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
         return rows
     if m_out.get("method") in SERIES_METHODS:
         return [(str(i), str(i), TARGET_HISTORY_ROLE, _evidence(str(i), by_id, kept_a)) for i in prm.get("target_history") or []]
-    if m_out.get("method") == "outcome_probs":   # 每个结果的概率输入各核对一次；余下的结果没有输入，不核对
-        rows = []
+    if m_out.get("method") == "outcome_probs":   # 每个结果的概率输入各核对一次，余下结果另核对一次
+        rows, covered = [], []
         for label, spec in (prm.get("probs") or {}).items():
             spec = spec if isinstance(spec, dict) else {"id": spec}
-            iid = str(spec.get("id"))
-            rows.append((str(label), iid, str(spec.get("role") or "").strip(), _evidence(iid, by_id, kept_a)))
+            iid, role = str(spec.get("id")), str(spec.get("role") or "").strip()
+            lab = next((d["label"] for d in m_out.get("inputs_detail") or [] if d["id"] == iid), str(label))
+            covered.append(f"'{lab}' from {iid}")
+            rows.append((str(label), iid, f"{_outcome_role(lab, target)}; analyst's role: {role}" if role else "",
+                         _evidence(iid, by_id, kept_a)))
+        rem = m_out.get("remainder")
+        if rem and m_out.get("remainder_prob_before_normalising") is not None:
+            rows.append((rem, "remainder", f"{_outcome_role(rem, target)}, taken as the rest (1 minus the other inputs)",
+                         f"computed by code: 1 - {m_out.get('sum_given', 0):.3f} = {m_out['remainder_prob_before_normalising']:.3f}; "
+                         f"the other inputs cover {', '.join(covered)}; outcomes with no input get 0: "
+                         f"{m_out.get('zero_outcomes') or []}"))
         return rows
     return []
 
@@ -268,8 +299,11 @@ def _audit_header(mi: dict, mo: dict) -> str:
     prm = mi.get("params") or {}
     if mo.get("method") == "outcome_probs":
         rem = prm.get("remainder")
-        return (f"{mo['id']} (outcome_probs): each input is the probability of the named outcome" +
-                (f"; the remainder outcome {rem!r} gets 1 minus the others" if rem else ""))
+        return (f"{mo['id']} (outcome_probs): each input must be the probability of the named outcome. Mark it \"mismatch\" "
+                f"when the evidence is the probability of a different outcome or event, or is not a probability at all (a "
+                f"level, a rate, a change)" +
+                (f"; the remainder outcome {rem!r} gets 1 minus the others: mark it \"mismatch\" when the probability left "
+                 f"over by the other inputs does not belong to that outcome" if rem else ""))
     return f"{mo['id']} ({mo.get('method')}): {prm.get('formula') or mo.get('method')}"
 
 
@@ -281,7 +315,7 @@ def audit_methods(llm, qid: str, jr: dict, out: dict, av: dict, pts: list, faile
     for i, (mi, mo) in enumerate(zip(jr.get("methods") or [], out.get("methods") or [])):
         if i in failed:
             continue
-        rows = audit_rows(mi, mo, by_id, kept_a)
+        rows = audit_rows(mi, mo, by_id, kept_a, target)
         no_role = [r[0] for r in rows if not r[2]]
         if no_role:
             res[i] = f"input audit: no role stated for {', '.join(no_role)}"
@@ -340,6 +374,9 @@ def build(ctx: Context):
         target = {k: str((out.get("target") or {}).get(k, ""))[:300]
                   for k in ("what", "unit", "period_start", "period_end", "publisher", "cadence", "caveats")}
         kind, note = D.parse_outcomes(out.get("target") if isinstance(out.get("target"), dict) else {})
+        if kind["outcome_type"] == "discrete" and not getattr(ctx, "allow_discrete", True):   # 见 run.prepare_run
+            kind, note = {"outcome_type": "continuous"}, ("plan chose a discrete target, but this scored question is not "
+                                                          "marked outcome_type 'discrete'; treated as continuous")
         target.update(kind)
         if note:
             notes.append(note)
@@ -512,8 +549,11 @@ def build(ctx: Context):
         if b.aborted:
             return {"jev": {"arm": "jev", "status": "skipped", "note": f"run aborted: {b.aborted}"}}
         kept = [p for p in state.get("points") or [] if p.get("keep") and p.get("judged_round")]
-        return {"jev": J.run_arm(state["plan"]["target"], kept, state["as_of"], qid=ctx.qid,
-                                 log=getattr(ctx.llm, "_log", None))}
+        try:
+            return {"jev": J.run_arm(state["plan"]["target"], kept, state["as_of"], qid=ctx.qid,
+                                     log=getattr(ctx.llm, "_log", None))}
+        except Exception as e:  # noqa: BLE001  对照臂出任何意外都不能让整题崩掉（同 markets 节点）
+            return {"jev": {"arm": "jev", "status": "error", "error": f"jev arm error {type(e).__name__}"[:200]}}
 
     def final(state: AgentState):
         comp = state.get("compute") or {}
