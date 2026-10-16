@@ -3,7 +3,8 @@
 - plan：target 带 outcome_type 和 outcomes（2-10 个，label 唯一，value 是数或 null）；不合格就退回 continuous，原因进 plan_notes。
 - 裁判：只能用 outcome_probs，每个结果的概率引用一个保留的数据点或一条假设；可以指定一个结果取「余下的概率」。
 - 代码（这里）：% 转小数；每个概率在 [0, 1]；有余下结果时其余之和 <= 1 + SUM_TOL_REMAINDER，余下 = 1 - 和（截到 0）；
-  没有余下结果时和必须在 SUM_RANGE 内；最后都归一化到 1。每个结果都要有概率，未知 label 拒绝。
+  没有余下结果时和必须在 SUM_RANGE 内；最后都归一化到 1。没有输入、也不是余下结果的结果概率为 0（记进 notes）；未知 label 拒绝。
+  （live 运行 discrete1/2/4 都因为「每个结果都要有输入」这条没出数：证据只给有概率的结果，比如 FedWatch 只报维持和加息。）
   多个方法等权线性平均（linear pool）；最可能的结果 = 概率最大的（并列时取 plan 里排在前面的）。
 - 假设输入用裁判给的 value（离散结果是点分布，不做 Monte Carlo）；low / high 只记录。
 连续值模式（compute.run 的其余部分）不经过这里。
@@ -140,22 +141,21 @@ def outcome_probs(prm: dict, pts: dict, kept_a: dict, rejected_a: dict, outcomes
             continue
         given[lab] = d["prob"]
         detail.append(d)
-    missing = [lab for lab in labels if lab not in seen and lab != rem]
-    if missing:
-        errs.append(f"outcomes without a probability: {missing} (give each one an input, or name one as the remainder)")
-    s = sum(given.values())   # 求和检查也并进同一条消息（有输入失败时只按通过的输入算；没有余下结果又缺结果时不查和）
+    zero = [lab for lab in labels if lab not in seen and lab != rem]   # 没有输入的结果：概率 0（和的检查管住漏掉的概率）
+    s = sum(given.values())   # 求和检查也并进同一条消息（有输入失败时只按通过的输入算，不查和）
     if rem is not None and s > 1 + SUM_TOL_REMAINDER:
         errs.append(f"the given probabilities sum to {s:.3f} (more than 1 + {SUM_TOL_REMAINDER:g}), so the remainder "
                     f"{rem!r} would be negative; drop the remainder or lower the other inputs")
-    elif rem is None and not missing and len(given) == len(labels) and not SUM_RANGE[0] <= s <= SUM_RANGE[1]:
+    elif rem is None and len(given) == len(seen) and not SUM_RANGE[0] <= s <= SUM_RANGE[1]:
         errs.append(f"probabilities sum to {s:.3f}; without a remainder outcome they must sum to between "
-                    f"{SUM_RANGE[0]:g} and {SUM_RANGE[1]:g}")
+                    f"{SUM_RANGE[0]:g} and {SUM_RANGE[1]:g}" + (f" (outcomes without an input count as 0: {zero})" if zero else ""))
     if errs:
         raise MethodError("; ".join(errs))
     if rem is not None:
         given[rem] = max(0.0, 1.0 - s)
     total = sum(given.values())
-    return {"distribution": {lab: given[lab] / total for lab in labels}, "inputs_detail": detail, "sum_given": s,
+    return {"distribution": {lab: given.get(lab, 0.0) / total for lab in labels}, "inputs_detail": detail, "sum_given": s,
+            "zero_outcomes": zero,
             "remainder": rem, "remainder_prob_before_normalising": None if rem is None else given[rem],
             "normalised_by": total, "used_ids": [d["id"] for d in detail if d["kind"] == "point"],
             "used_assumptions": sorted({d["id"] for d in detail if d["kind"] == "assumption"})}
@@ -190,6 +190,8 @@ def run(methods: list, pts: dict, target: dict, assumptions=None) -> dict:
                 raise MethodError(f"method {r['method']!r} is not available for a discrete target (outcome_type 'discrete'); "
                                   f"use outcome_probs with one probability per outcome")
             r.update(outcome_probs(r["params"], pts, kept_a, rejected_a, outcomes))
+            if r["zero_outcomes"]:
+                r["notes"].append(f"no input for {r['zero_outcomes']}: probability 0")
         except MethodError as e:
             r["error"] = str(e)
         except (TypeError, ValueError, KeyError, AttributeError) as e:

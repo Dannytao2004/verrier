@@ -93,7 +93,11 @@ class TestOutcomeProbs(unittest.TestCase):
 
     def test_remainder_takes_the_rest(self):
         m = _run({HIKE: {"id": "p2"}}, remainder=HOLD, assumptions=[_a()])["methods"][0]
-        self.assertIn("outcomes without a probability", m["error"])          # cut 没有概率
+        self.assertNotIn("error", m)                                          # cut 没有输入：概率 0（记进 notes）
+        self.assertAlmostEqual(m["distribution"][CUT], 0.0)
+        self.assertAlmostEqual(m["distribution"][HOLD], 1 - 0.436)
+        self.assertEqual(m["zero_outcomes"], [CUT])
+        self.assertIn(f"no input for ['{CUT}']: probability 0", m["notes"])
         m = _run({HIKE: {"id": "p2"}, CUT: {"id": "a1"}}, remainder=HOLD, assumptions=[_a()])["methods"][0]
         self.assertAlmostEqual(m["distribution"][HOLD], 1 - 0.436 - 0.01)
         self.assertEqual(m["used_assumptions"], ["a1"])
@@ -115,6 +119,20 @@ class TestOutcomeProbs(unittest.TestCase):
                   assumptions=[_a(), _a(id="a2", name="probability of a hike", value=40, low=30, high=50)])["methods"][0]
         self.assertAlmostEqual(sum(ok["distribution"].values()), 1.0)
         self.assertAlmostEqual(ok["distribution"][HOLD], 0.564 / 0.974)
+
+    def test_outcomes_without_input_get_zero(self):
+        # live 运行 discrete4：FedWatch 只报维持和加息（和 = 1），其余结果没有输入 -> 概率 0，不再整题没出数
+        m = _run({HOLD: {"id": "p1"}, HIKE: {"id": "p2"}})["methods"][0]
+        self.assertNotIn("error", m)
+        self.assertEqual((m["distribution"][CUT], m["zero_outcomes"]), (0.0, [CUT]))
+        self.assertAlmostEqual(m["distribution"][HOLD], 0.564)
+        # 没有余下结果时和的检查照旧：只给 56.4% 不够
+        short = _run({HOLD: {"id": "p1"}})["methods"][0]
+        self.assertIn("must sum to between 0.9 and 1.1", short["error"])
+        self.assertIn("count as 0", short["error"])
+        # 每个结果都有输入或是余下结果：没有概率 0 的结果
+        z = _run({HOLD: {"id": "p1"}, CUT: {"id": "p2"}}, remainder=HIKE)["methods"][0]
+        self.assertEqual(z["zero_outcomes"], [])
 
     def test_rejections(self):
         unknown = _run({"hold": {"id": "p1"}, HIKE: {"id": "p2"}}, remainder=CUT)["methods"][0]
@@ -138,7 +156,7 @@ class TestOutcomeProbs(unittest.TestCase):
         # 一个方法的全部问题一次报出（修正轮要一次看到）：被拒的假设和漏掉的结果
         both = _run({HIKE: {"id": "a1"}}, remainder=CUT, assumptions=[_a(low=0)])["methods"][0]
         self.assertIn("was rejected", both["error"])
-        self.assertIn(f"outcomes without a probability: ['{HOLD}']", both["error"])
+        self.assertNotIn("without", both["error"])                           # 没有输入的结果不是错误（概率 0）
         over = _run({HOLD: {"id": "p1"}, HIKE: {"id": "p2"}, CUT: {"id": "a1"}, "x": {"id": "p1"}}, remainder=HOLD,
                     assumptions=[_a(value=5, low=2, high=8)])["methods"][0]
         self.assertIn("unknown outcome label 'x'", over["error"])
