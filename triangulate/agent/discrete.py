@@ -143,17 +143,17 @@ def outcome_probs(prm: dict, pts: dict, kept_a: dict, rejected_a: dict, outcomes
     missing = [lab for lab in labels if lab not in seen and lab != rem]
     if missing:
         errs.append(f"outcomes without a probability: {missing} (give each one an input, or name one as the remainder)")
+    s = sum(given.values())   # 求和检查也并进同一条消息（有输入失败时只按通过的输入算；没有余下结果又缺结果时不查和）
+    if rem is not None and s > 1 + SUM_TOL_REMAINDER:
+        errs.append(f"the given probabilities sum to {s:.3f} (more than 1 + {SUM_TOL_REMAINDER:g}), so the remainder "
+                    f"{rem!r} would be negative; drop the remainder or lower the other inputs")
+    elif rem is None and not missing and len(given) == len(labels) and not SUM_RANGE[0] <= s <= SUM_RANGE[1]:
+        errs.append(f"probabilities sum to {s:.3f}; without a remainder outcome they must sum to between "
+                    f"{SUM_RANGE[0]:g} and {SUM_RANGE[1]:g}")
     if errs:
         raise MethodError("; ".join(errs))
-    s = sum(given.values())
     if rem is not None:
-        if s > 1 + SUM_TOL_REMAINDER:
-            raise MethodError(f"the given probabilities sum to {s:.3f} (more than 1 + {SUM_TOL_REMAINDER:g}), "
-                              f"so the remainder {rem!r} would be negative")
         given[rem] = max(0.0, 1.0 - s)
-    elif not SUM_RANGE[0] <= s <= SUM_RANGE[1]:
-        raise MethodError(f"probabilities sum to {s:.3f}; without a remainder outcome they must sum to between "
-                          f"{SUM_RANGE[0]:g} and {SUM_RANGE[1]:g}")
     total = sum(given.values())
     return {"distribution": {lab: given[lab] / total for lab in labels}, "inputs_detail": detail, "sum_given": s,
             "remainder": rem, "remainder_prob_before_normalising": None if rem is None else given[rem],

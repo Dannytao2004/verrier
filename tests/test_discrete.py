@@ -139,6 +139,10 @@ class TestOutcomeProbs(unittest.TestCase):
         both = _run({HIKE: {"id": "a1"}}, remainder=CUT, assumptions=[_a(low=0)])["methods"][0]
         self.assertIn("was rejected", both["error"])
         self.assertIn(f"outcomes without a probability: ['{HOLD}']", both["error"])
+        over = _run({HOLD: {"id": "p1"}, HIKE: {"id": "p2"}, CUT: {"id": "a1"}, "x": {"id": "p1"}}, remainder=HOLD,
+                    assumptions=[_a(value=5, low=2, high=8)])["methods"][0]
+        self.assertIn("unknown outcome label 'x'", over["error"])
+        self.assertIn("also the remainder", over["error"])
 
     def test_continuous_methods_rejected_for_discrete_and_vice_versa(self):
         for method in ("formula_mc", "series_naive"):
