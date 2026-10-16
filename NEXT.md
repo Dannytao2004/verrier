@@ -1,7 +1,33 @@
 # 断点（2026-10-16）
 
-当前代码：tag `v2.4`（agent，c80036b：「答案已公布」检查，只在真实使用时）+ `web-v0.2`（前端，75521a8，没改）。测试 204 个全过。
-上一版 `v2.3.1`（4982c8f）的记录在下面。
+当前代码：tag `v2.4.1`（agent，4165105：「答案已公布」候选规则的两条审查修复）+ `web-v0.2`（前端，75521a8，没改）。测试 206 个全过。
+上一版 `v2.4`（c80036b）、`v2.3.1`（4982c8f）的记录在下面。
+
+## v2.4.1：「答案已公布」候选规则的审查修复（离线，未调模型）
+
+审查 v2.4 的 9 条意见：2 条中等已修（下面两条），7 条低的记进下面「答案已公布」的未解决问题 10–16。
+
+- 候选不看日期和 quote（中等，已修）：页面日期（快照 = 快照日期）或页面写明的发布日期早于目标期末的点直接排除
+  （`_dated_before`；日期不完整时取最晚可能的日期，期末当天不排除）；quote 里数值所在的那一段（逗号 + 空格、分号、冒号、括号、
+  句末标点、破折号之间）有预测 / 预期词（forecast、projected、predict、expect、consensus、anticipat、outlook、will be、on track，
+  按词首匹配，所以 unexpectedly 不算）也排除（`_forecast_quote`）。涨跌词不看（实际值的 quote 常写「rose 12% to 350,536」）。
+  说明里记「k point(s) ... excluded as dated before the period end or quoted as a forecast」。
+  审查的复现（页面日期 2026-08-20、「SMMT expects around 340,000 ...」）现在不进候选；只改日期或只改 quote 的两种也不进。
+- 实体词把量词和发布方当实体（中等，已修）：句首的大写词组后面紧跟 of / in / for / at / on、后面还有别的专名词组时，它算量的名字，
+  它的词、整个词组、缩写和 what 里同样的全大写缩写都不算实体词（'Real GDP of France ...' -> ['france']）；发布方的写法
+  （publisher_terms）只从第一个子句以外来的全大写缩写里去掉（'..., as reported by SMMT' 的 smmt；第一个子句里的
+  'the next FOMC meeting' 的 fomc 保留）。一个实体词都没有时说明写「none (no entity constraint)」。README 改成如实描述：这一条只是粗筛。
+  审查的两个复现（Germany real GDP 进了 France 的候选；SMMT UK 总数进了 Scotland 的候选）现在都不进。
+- 已保存目标的实体词变化（33 个不同的 what / publisher）：UK 题去掉 smmt，日本两题去掉 jnto / mhlw，韩国题去掉 kostat，
+  Yellowstone 题去掉 nps；FOMC 题不变（['fomc', 'us']）。published1 的 35 个候选和送去确认的前 20 个（id、顺序）与 v2.4 相同，
+  确认 prompt 只由 target、as_of 和候选决定，所以也相同（calls.jsonl 不存 prompt，没有逐字节比）。
+- 全部保存运行的 1827 个保留点里，quote 规则命中 19 个不同的 quote：经济学家预期（90,000 / 3.6% / 0.2%）、「markets ... expect
+  the FOMC to hold ... 3.75% and 4%」、施工延误「expect delays of ...」、问卷「81% expect ...」，以及两个误伤：
+  「18 participants submitted projections」（不是目标值）和韩国总和生育率的定义句「The number of babies a woman is expected to have
+  ... increased to 0.8」（见未解决问题 4）。
+- 离线：`probes/recheck_continuous.py` 7/7 相同；`probes/compare_continuous_prompts.py` 的 sha256 仍是 4a56d586…（回测路径不变；
+  回测不调这一检查）。新测试 2 个（`tests/test_published.py`），在 v2.4 代码上失败、在 v2.4.1 上通过；`test_terms` 的期望改成
+  ['uk', 'united kingdom']。
 
 ## v2.4：答案已公布（只在真实使用时）
 
@@ -47,12 +73,42 @@
 3. 修订 / 多版本：确认的值相差 > 0.5% 记 conflict、照常报估计；没有「取最新一版」的规则。相差 <= 0.5% 时报的那个不一定是最新的。
 4. 实体词只认大写专名和缩写：point name 里没写实体（「New car registrations, September 2026」）、或写成形容词（British）、
    或别的语言，都会漏；漏的后果 = 照旧估计。what 第一个子句全是通用类别词时（United Kingdom）只剩整个词组和缩写（uk）。
+   v2.4.1 后仍是粗筛：量的缩写不在句首词组里（'France real GDP' 的 GDP）、量的名字后面不是介词（'Bank Rate set by the Bank of
+   England' 仍有 rate / bank rate）时，别的实体仍会通过；反过来，'Real GDP of France' 这类目标的点 name 只写「real GDP」不写
+   France 时会漏。日期规则：文章写明的发布日期早于期末、内容后来更新过的页面会被排除（漏）；quote 规则会误伤定义里带
+   expected 的量（总和生育率「expected to have over her lifetime」）。
 5. 分项（私人 / 车队 / 某个燃料类型）代码放过，只靠模型拒；published1 里拒对了 17 个，没有更多实测。
 6. 离散目标只有数值结果能 resolved：数据点只有数字，人名、是 / 否这类结果判不了；只有离线测试，没有真实运行。
 7. 网页没改：运行进度页的 compute 卡片显示的是估计（published 节点的更新没接）；结果页的估计卡片显示已公布值、区间「—」、
    basis published，没有专门的「已公布」标记（终稿文字里有）。
 8. 已公布时终稿全由代码写，没有模型写的说明段（例如「这是初值，可能修订」只有一句通用的话）。
 9. 目标期间还没结束（period_end > as_of）时不检查；as_of 当天才公布、页面还没被抓到的情况照旧估计。
+
+v2.4 审查的低优先级意见（2026-10-16，都已对着代码或保存的数据核实，没改；第 11 条的计数和第 13 条的 graph.html 复现数字引自审查，没有重算）：
+
+10. 单日 / 时点目标的期间容差：期间比较沿用 `compute._same_calendar`（期末、期长各差 <= 3 天）。目标 Bank Rate 2026-09-17..2026-09-17，
+    点「Bank of England Bank Rate before the September 2026 decision」（期间 2026-09-15，4.0）会进候选；模型判成 target 时，离散目标会落到
+    议息前的旧利率上、记 resolved。可能的做法：目标期长为 0 天时要求期末完全相等；或 NOT_VALUE 加 before / prior / ahead of。
+11. 终稿里点的 name / unit 没经过 `graph.scrub_digits`（`published.py` 的 `_evidence_lines`、`final_text`）：抽取模型写的数字原样进终稿，
+    破坏「模型写的数字换成 [n]」的约定。审查统计保存的运行里有 86 个点的 name 带数值（口径没有复核；例如 discrete2「... target range 3.50% to 3.75% at
+    June 17, 2026」）。可能的做法：name / unit 先 scrub（保留年份），或终稿只用已核对的 quote 和 value_as_written。
+12. 终稿和冲突说明的已公布值用 `_fmt`（>= 100 取整，其余 4 位有效数字）：101.3 index 写成「Published value: 101 index.」，2850.46 写成
+    2,850，却说这是「the pinned target itself as already published」。可能的做法：写 value_as_written（加已核对的 scale_word），或按它的小数位数格式化。
+13. 离散 resolved 后 graph.html 页头的列名仍是「agent (pooled)」、显示 100% / 0%，pooled 估计本身（estimate_result）在 graph.html 里不出现
+    （离线复现：m1 50/50、m2 24/76，pooled 37% / 63%，用 3.75% resolve 后页头只有 100.0% / 0.0%）；网页结果页对已公布的运行，各方法 weight
+    一律 0.0、assumption_share None，参考估计和区间只在终稿文字里（published1：estimate 卡片 350536 / None / None）。上面第 7 条只提到连续值的
+    估计卡片。可能的做法：resolved 时列名改「result (published)」并另写 estimate_result 的 pooled 概率；web 的 result_view 在 basis 为 published
+    时读 estimate_result 的 weights 和区间，作为参考字段返回。
+14. 「先取提到发布方的点」用子串匹配（`resolve` 里 `t in text`）：publisher「Office for National Statistics (ONS)」的 ons 会命中 registrations、
+    operations、nations。只影响 0.5% 以内互相一致的点选哪一个。可能的做法：和 candidates 一样按词边界匹配。
+15. 确认 prompt 带着规划写的 caveats（`PB.prompt` 把 plan.target 整个 JSON 发出去）：published1 的 caveats 写着「No official SMMT data for
+    September 2026 can exist on or before the cutoff ... Any estimate must be a forecast」，和这次检查的前提相反，会推着模型判 different（漏检）；
+    这次没被带偏。可能的做法：只发 what / unit / period / publisher / outcome_type。
+16. README 对 published1 的描述不完整（只记在这里，README 那句没改）：350,518 有 7 个点、来自 5 个域名——fleetnews 2026-10-02 快照 3 个
+    （p17、p116、p186）、cardealermagazine 快照（p39）、parliamenttoday 页面日期 2026-10-02 的 live 页（p197，「preliminary figures published
+    today by the Society of Motor Manufacturers and Traders」）、bmmagazine 和 am-online 2026-10-07 的快照（p81、p209）——都被裁判以「被后一版
+    取代 / 重复」丢掉；350,536 只来自 fleetnews 改过的 live 页（p52、p152）和 tradingeconomics（p91，quote 里没有 SMMT 也没有 preliminary）。
+    README 的「SMMT preliminary figure via fleetnews.co.uk and tradingeconomics.com」因此不准。哪个数是 SMMT 的正式数，仍未核实。
 
 ## v2.3.1：审查修复（离线，未调模型）
 
