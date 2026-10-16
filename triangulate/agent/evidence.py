@@ -243,10 +243,12 @@ def leak_forms(true_value: float) -> list:
 
 
 def leak_patterns(values) -> list:
-    """values：一个数或一组数（目标真值，以及同一题里所有「公布日晚于 as_of」的已知官方值）。"""
+    """values：一个数或一组数（目标真值，以及同一题里所有「公布日晚于 as_of」的已知官方值）。
+    v2.6c：以 k 或 M 结尾的缩写写法后面不能接字母（「7.27 M」不再命中「7.27 miles」）；thousand、million 这类写法不变。"""
     vals = values if isinstance(values, (list, tuple, set)) else [values]
     forms = sorted({f for v in vals if v is not None for f in leak_forms(v)})
-    return [re.compile(rf"(?<![\d.,]){re.escape(f)}(?!\d|[.,]\d)", re.I) for f in forms]
+    return [re.compile(rf"(?<![\d.,]){re.escape(f)}(?!\d|[.,]\d)" + ("(?![A-Za-z])" if f.endswith(("k", "M")) else ""), re.I)
+            for f in forms]
 
 
 def leak_scan(text: str, patterns: list) -> list:

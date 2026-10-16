@@ -162,6 +162,8 @@ def ledger(state: dict, score: dict | None = None) -> str:
             if s:
                 L.append(f"Queries issued by the searcher: {'; '.join(_md(q) for q in s.get('queries', [])) or '(none)'}")
                 L.append("")
+            if s.get("voided"):   # v2.6c 回测泄漏护栏（pipeline.run_direction）
+                L += [f"**DIRECTION VOIDED: a searcher query contains a registered value {s['voided']}; no pages fetched**", ""]
             if res.get("markets"):
                 mk = res["markets"]
                 L += [f"Market keywords {mk.get('keywords')}: {mk.get('note') or ''} markets={len(mk.get('markets', []))}", ""]

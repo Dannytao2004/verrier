@@ -82,6 +82,9 @@ def leakage_audit(state: dict, as_of: str, leak_values=None) -> dict:
             "sentinel_hits": [{"url": pg["url"], "hits": pg["leak_hits"]} for pg in pages if pg.get("leak_hits")],
             "points_dated_after_as_of": late_points, "snapshots_after_as_of": late_snaps,
             "searcher_queries_containing_registered_values": [q for q in queries if ev.leak_scan(q, pats)],
+            # v2.6c：运行时因为查询词命中登记值而作废的方向（pipeline.run_direction 记的 search.voided）
+            "directions_voided": [{"direction_id": r.get("direction_id"), "round": r.get("round"), "hits": r["search"]["voided"]}
+                                  for r in state.get("results") or [] if (r.get("search") or {}).get("voided")],
             "assumptions_containing_registered_values": [i for i, t in a_text if ev.leak_scan(t, pats)],
             "page_selection": sorted({(r.get("search") or {}).get("selection", "searcher_urls")
                                       for r in state.get("results") or [] if r.get("search")}),

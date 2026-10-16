@@ -320,7 +320,12 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
         _emit(ctx, kind="searched", direction_id=d["id"], n_urls=len(s.get("urls", [])[: b.urls_per_direction]))
         allow_no_period = d.get("category") == "base_rates"
         urls = s.get("urls", [])[: b.urls_per_direction]
-        if w is not None and w.stop.is_set():
+        # v2.6c 回测泄漏护栏（D3）：查询词里出现登记值（哨兵的写法），这个方向作废：不取页、不重搜，命中的写法记进
+        # search.voided。真实使用没有登记值（ctx.leak_patterns 为空），不受影响
+        voided = sorted({h for q in s.get("queries") or [] for h in ev.leak_scan(str(q), ctx.leak_patterns)})
+        if voided:
+            out["search"] = {**s, "voided": voided}
+        elif w is not None and w.stop.is_set():
             out["stopped"] = w.stop_reason
         elif getattr(ctx, "live_fetch", False):
             _live_pages(ctx, target, d, round_no, urls, out, allow_no_period)
