@@ -18,17 +18,37 @@ def _num(v):
     return "n/a" if v is None else (f"{v:,.0f}" if abs(v) >= 100 else f"{v:.4g}")
 
 
+def _pct(p):
+    return "n/a" if p is None else f"{100 * p:.1f}%"
+
+
+def _top(dist: dict):
+    """一个方法的分布里概率最大的结果（并列取先出现的）。"""
+    return max(dist.items(), key=lambda kv: kv[1]) if dist else (None, None)
+
+
 def dep_graph(state: dict) -> dict:
     dirs = {d["id"]: d for d in state.get("directions") or []}
     comp = state.get("compute") or {}
     res = comp.get("result") or {}
-    nodes = [{"id": "target", "kind": "target", "label": f"target\n{_num(res.get('central'))}", "colour": COL["target"],
-              "detail": {"target": (state.get("plan") or {}).get("target"), "result": res}}]
+    if res.get("mode") == "discrete":   # 离散目标：目标节点显示最可能的结果和它的概率；Jev 对照臂放在详情里
+        tlabel = f"target\n{str(res.get('most_likely') or 'n/a')[:28]}\n{_pct(res.get('most_likely_prob'))}"
+    else:
+        tlabel = f"target\n{_num(res.get('central'))}"
+    tdetail = {"target": (state.get("plan") or {}).get("target"), "result": res}
+    if state.get("jev"):
+        tdetail["jev_arm_not_pooled"] = state["jev"]
+    nodes = [{"id": "target", "kind": "target", "label": tlabel, "colour": COL["target"], "detail": tdetail}]
     edges = []
     used = {}
     for m in comp.get("methods") or []:
-        ok = m.get("estimate") is not None
-        nodes.append({"id": f"M:{m['id']}", "kind": "method", "label": f"{m['id']} {m['method']}\n{_num(m.get('estimate'))}",
+        ok = m.get("estimate") is not None or bool(m.get("distribution"))
+        if m.get("distribution"):
+            lab, pr = _top(m["distribution"])
+            mlabel = f"{m['id']} {m['method']}\n{str(lab)[:24]} {_pct(pr)}"
+        else:
+            mlabel = f"{m['id']} {m['method']}\n{_num(m.get('estimate'))}"
+        nodes.append({"id": f"M:{m['id']}", "kind": "method", "label": mlabel,
                       "colour": COL["method" if ok else "method_failed"], "detail": m})
         if ok:
             edges.append({"from": f"M:{m['id']}", "to": "target"})
@@ -186,10 +206,72 @@ def ledger(state: dict, score: dict | None = None) -> str:
                  f"{_md(m.get('error') or '; '.join(m.get('notes') or []))[:200]} |")
     share = r.get("assumption_weight_share")
     tail = "" if share is None else f", weight on methods that use assumptions {share:.2f}"
-    L += ["", f"Result: central **{_num(r.get('central'))}**, 80% interval [{_num(r.get('p10'))}, {_num(r.get('p90'))}], "
-              f"basis {r.get('basis')}, weight rule {r.get('weight_rule')}{tail}", "", "## Final answer", "",
-          (state.get("final") or {}).get("text", ""), ""]
+    if r.get("mode") == "discrete":
+        L += [""] + outcomes_md(state, score)
+    else:
+        L += ["", f"Result: central **{_num(r.get('central'))}**, 80% interval [{_num(r.get('p10'))}, {_num(r.get('p90'))}], "
+                  f"basis {r.get('basis')}, weight rule {r.get('weight_rule')}{tail}"]
+    L += ["", "## Final answer", "", (state.get("final") or {}).get("text", ""), ""]
     return "\n".join(L)
+
+
+def outcome_rows(state: dict) -> tuple:
+    """离散目标的结果表：([(label, value, agent 概率, {方法 id: 概率}, Jev 概率)], 算出分布的方法 id, Jev 记录)。"""
+    comp = state.get("compute") or {}
+    r = comp.get("result") or {}
+    ms = [m for m in comp.get("methods") or [] if m.get("distribution")]
+    jv = state.get("jev") or {}
+    jp = jv.get("probabilities") if jv.get("status") == "ok" else None
+    rows = [(o["label"], o.get("value"), o.get("prob"), {m["id"]: m["distribution"].get(o["label"]) for m in ms},
+             None if not jp else jp.get(o["label"])) for o in r.get("outcomes") or []]
+    return rows, [m["id"] for m in ms], jv
+
+
+def jev_note(jv: dict) -> str:
+    if not jv:
+        return "Jev arm: not run."
+    if jv.get("status") != "ok":
+        return f"Jev arm (TypeSafe, not pooled): {jv.get('status')}: {jv.get('error') or jv.get('note') or ''}"
+    u = jv.get("usage") or {}
+    usd = jv.get("usd_estimated")
+    return (f"Jev arm (TypeSafe {jv.get('model')}, asked once with a code-built brief of {jv.get('n_points_in_brief')} kept "
+            f"points; not pooled into the agent's answer): choice {jv.get('choice')}, confidence {jv.get('confidence')}, "
+            f"input tokens {u.get('input_tokens')}, output tokens {u.get('output_tokens')}"
+            + ("" if usd is None else f", estimated cost ${usd:.6f}") + ".")
+
+
+def outcomes_md(state: dict, score: dict | None = None) -> list:
+    """账本里离散目标的「结果概率」表（agent 的等权平均、每个方法、Jev 对照臂）。"""
+    r = (state.get("compute") or {}).get("result") or {}
+    rows, mids, jv = outcome_rows(state)
+    L = ["## Outcome probabilities (computed by code)", "",
+         f"Most likely: **{_md(r.get('most_likely'))}** ({_pct(r.get('most_likely_prob'))}); pooling {r.get('weight_rule')} "
+         f"over {len(mids)} method(s); weight on methods that use assumptions {r.get('assumption_weight_share') or 0:.2f}.", "",
+         "| outcome | value | agent (pooled) | " + "".join(f"{m} | " for m in mids) + "Jev (not pooled) |",
+         "|---|---|---|" + "---|" * len(mids) + "---|"]
+    for lab, v, p, per, jp in rows:
+        L.append(f"| {_md(lab)} | {_num(v)} | **{_pct(p)}** | " + "".join(f"{_pct(per.get(m))} | " for m in mids)
+                 + f"{_pct(jp)} |")
+    L += ["", jev_note(jv)]
+    if score and score.get("prob_true") is not None:
+        L += ["", f"Scoring: true outcome {score.get('true_outcome')}, probability on it {_pct(score.get('prob_true'))}, "
+                  f"Brier {score.get('brier'):.3f}, most likely correct {score.get('most_likely_correct')}"]
+    return L
+
+
+def outcome_table_html(state: dict) -> str:
+    """graph.html 页头里离散目标的结果表（代码算的概率 + Jev 对照臂）。"""
+    r = (state.get("compute") or {}).get("result") or {}
+    rows, mids, jv = outcome_rows(state)
+    e = html.escape
+    head = "".join(f"<th>{e(m)}</th>" for m in mids)
+    body = "".join(f"<tr><td>{e(str(lab))}</td><td>{e(_num(v))}</td><td><b>{e(_pct(p))}</b></td>"
+                   + "".join(f"<td>{e(_pct(per.get(m)))}</td>" for m in mids) + f"<td>{e(_pct(jp))}</td></tr>"
+                   for lab, v, p, per, jp in rows)
+    return (f"most likely <b>{e(str(r.get('most_likely') or 'n/a'))}</b> ({e(_pct(r.get('most_likely_prob')))})"
+            f'<table style="font-size:12px;border-collapse:collapse;margin-top:4px" border="1" cellpadding="3">'
+            f"<tr><th>outcome</th><th>value</th><th>agent (pooled)</th>{head}<th>Jev (not pooled)</th></tr>{body}</table>"
+            f'<div style="font-size:12px">{e(jev_note(jv))}</div>')
 
 
 def assumptions_md(state: dict) -> list:

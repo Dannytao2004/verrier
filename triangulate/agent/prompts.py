@@ -40,6 +40,8 @@ Distinguish definitions that could materially change the answer, including:
 
 If the question is ambiguous, choose an explicit working interpretation and record the important alternative in caveats. Also note whether the target period is completed, ongoing, or future relative to the cutoff.
 
+Set outcome_type. Use "discrete" only when the answer must be exactly one of a small set of mutually exclusive outcomes (for example a policy rate set at one meeting, an election winner, or whether an event happens). Then list 2-10 outcomes that together cover every realistic result, each as {{"label": "...", "value": <number or null>}}: a short unique label and the outcome's numeric value in the target unit (null if the outcome is not a number). Otherwise use "continuous" with an empty outcomes list.
+
 Step 2. Design estimation routes before designing searches.
 
 Consider practical relationships such as:
@@ -73,7 +75,7 @@ Rules for directions:
 Also give market_keywords: 2-3 lowercase words for a plausible prediction market about this exact target, or an empty list if a useful market is unlikely. Do not force a market-based route.
 
 Reply with JSON:
-{{"target": {{"what": "...", "unit": "...", "period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "publisher": "...", "cadence": "...", "caveats": "..."}},
+{{"target": {{"what": "...", "unit": "...", "period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "publisher": "...", "cadence": "...", "caveats": "...", "outcome_type": "continuous", "outcomes": []}},
  "market_keywords": ["..."],
  "directions": [{{"id": "d1", "category": "related_series", "perspective": "...", "hypothesis": "...", "data_to_find": "...", "search_hints": ["...", "..."], "expected_information": 4}}]}}"""
 
@@ -144,8 +146,17 @@ METHODS_SPEC = """Code method library (you choose methods and parameters; code c
 - yoy_scaling: {"target_history": [ids], "signal_history": [ids]}. Target last year x signal(this year) / signal(last year). The signal must have a value for the target's year and the year before.
 - linear_fit: {"target_history": [ids], "signal_history": [ids]}. OLS of target on signal across aligned years (needs >= 3 aligned earlier years and the signal's value for the target's year).
 - ratio: {"target_history": [ids], "signal_history": [ids]}. Signal(target's year) x mean historical ratio target / signal.
-- formula_mc: {"formula": "a * b", "inputs": {"a": {"id": "p3", "role": "..."}, "b": {"id": "a1", "role": "..."}}}. Every input needs a role: the quantity, entity and period it must denote for the formula to estimate the target (for example "July 2025 live births in country X"). An independent check compares each role with the evidence the id points to and drops methods whose inputs do not match (a change used as a level, another entity's total used as the target entity's, a different kind of count). A formula over inputs that each reference a kept data-point id, an assumption id, or a calendar constant supplied by code (k_days_target = days in the target period, k_days_per_week, k_days_per_year, k_weeks_per_year, k_months_per_year); at least one input must be a kept data point, and at least one input must be a quantity rather than a share, ratio or percentage (a product of ratios cannot produce the target). Code converts percentages to fractions and runs Monte Carlo: every data-point input gets the same lognormal uncertainty (set by code); an assumption input is sampled lognormally with P10/P90 = its low/high, widened by code to at least high/low = 2 (1.25 for a change factor relative to an observed period). Formulas may use + - * / ( ) min max mean sqrt (mean(a, b, c) averages its arguments), input names, ** with an integer exponent from -3 to 3, and the number 1 (at most 3 times, never in a sub-expression without an input name).
+- formula_mc: {"formula": "a * b", "inputs": {"a": {"id": "p3", "role": "..."}, "b": {"id": "a1", "role": "..."}}}. Every input needs a role: the quantity, entity and period it must denote for the formula to estimate the target (for example "July 2025 live births in country X"). An independent check compares each role with the evidence the id points to and drops methods whose inputs do not match (a change used as a level, another entity's total used as the target entity's, a different kind of count). A formula over inputs that each reference a kept data-point id, an assumption id, or a constant supplied by code: calendar constants (k_days_target = days in the target period, k_days_per_week, k_days_per_year, k_weeks_per_year, k_months_per_year) and unit-conversion constants (k_bp_per_pct_point = 100 basis points per percentage point, k_percent_per_unit = 100 percent per whole); at least one input must be a kept data point, and at least one input must be a quantity rather than a share, ratio or percentage (a product of ratios cannot produce the target). Code converts percentages to fractions and runs Monte Carlo: every data-point input gets the same lognormal uncertainty (set by code); an assumption input is sampled lognormally with P10/P90 = its low/high, widened by code to at least high/low = 2 (1.25 for a change factor relative to an observed period). Formulas may use + - * / ( ) min max mean sqrt (mean(a, b, c) averages its arguments), input names, ** with an integer exponent from -3 to 3, and the number 1 (at most 3 times, never in a sub-expression without an input name).
 Series rules: a series is the same quantity for the same calendar period in different years; code aligns series by the year of period_end and takes the median when a year has several values. target_history must be the target's own values for the same calendar period as the target in earlier years. signal_history must be one signal for one fixed calendar period in several years, including the target's year (with data available before today). Code backtests each method on earlier years (using only data from before each tested year) and weights methods by their historical error."""
+
+# 离散目标（outcome_type = "discrete"）时代替 METHODS_SPEC 交给裁判；__OUTCOMES__ 由代码换成 plan 给出的结果列表
+DISCRETE_METHODS_SPEC = """This target is discrete: it resolves to exactly one of these mutually exclusive outcomes (labels and values from the pinned target):
+__OUTCOMES__
+Code method library for this target (you choose inputs; code computes everything). Only outcome_probs is available; formula_mc and the series methods are not, and the rules and the reply example below that mention them do not apply to this target.
+- outcome_probs: {"probs": {"<outcome label>": {"id": "p3", "role": "..."}}, "remainder": "<outcome label or null>"}. Each probability input references a kept data-point id or an assumption id whose value is the probability of that outcome (as a percentage or a fraction; code converts percentages to fractions). Every input needs a role: the event, meeting or date and the source type the probability must denote (for example "market-implied probability, as of the stated date, that <outcome A> is the result of the event in the target"). An independent check compares each role with the evidence the id points to and drops methods whose inputs do not match. Every outcome must get a probability, directly or as the remainder: code gives the remainder outcome 1 minus the sum of the others. Without a remainder, the probabilities must sum to between 0.9 and 1.1 and code normalises them. Copy labels exactly from the list above.
+- Prefer observed probabilities for this exact event: market-implied probabilities, published odds, or survey probabilities. Use an assumption (declared under assumptions with rationale, applies_when and falsified_by; value, low and high are the probability and your 10th and 90th percentiles) only for an outcome that no kept point covers, for example a small probability for an outcome the evidence gives no weight. Never restate a kept point as an assumption.
+- Several outcome_probs methods (for example from different underlying sources) are averaged with equal weights by code. Do not submit the same inputs twice.
+Example method: {"id": "m1", "method": "outcome_probs", "params": {"probs": {"<label A>": {"id": "p3", "role": "..."}, "<label B>": {"id": "p4", "role": "..."}}, "remainder": "<label C>"}, "rationale": "..."}"""
 
 JUDGE_SYSTEM = """You are the lead analyst of a Fermi-estimation team.
 
@@ -274,6 +285,26 @@ If code produced no usable estimate, state the specific limitation rather than f
 
 Reply with JSON: {{"answer": "..."}}"""
 
+
+FINAL_USER_DISCRETE = """Question: {question}
+Information cutoff: {as_of}.
+Pinned target: {target}
+
+What code computed (for your understanding only; do not copy these numbers):
+{summary}
+
+Available placeholders: {placeholders}
+
+Code prints every outcome with its probability above your text. Write a short rationale of at most 120 words in English that explains:
+- which evidence each probability comes from (observed market-implied or published probabilities versus analyst assumptions);
+- the most important reason these probabilities could be wrong;
+- the missing evidence that would most improve them.
+
+Refer to outcomes and numbers only through the available placeholders. Do not present the probabilities as your own forecast and do not invent source details.
+
+If code produced no probabilities, state the specific limitation instead.
+
+Reply with JSON: {{"answer": "..."}}"""
 
 AUDIT_SYSTEM = """You check estimation formulas for one thing only: whether each input's evidence actually denotes what the formula needs it to denote. You do not judge whether the estimate is good and you do not compute anything. Reply with one JSON object only."""
 

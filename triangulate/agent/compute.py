@@ -39,10 +39,20 @@ def restated_point(a: dict, pts: dict, rel_tol: float = 0.005) -> str:
     return ""
 
 
+# 单位换算常数（v2.2）：和日历常数一样由代码给。FOMC 题里裁判只能把「25 基点 = 0.25 个百分点」写成假设或常数 1 的组合
+UNIT_CONSTANTS = {"k_bp_per_pct_point": 100.0, "k_percent_per_unit": 100.0}
+
+
 def calendar_constants(tps, tpe) -> dict:
-    """formula_mc 里可以引用的日历常数（k_ 开头，由代码给，不采样，不算观测点）：天数、周数这类精确数不该让模型写进公式。"""
+    """formula_mc 里可以引用的常数（k_ 开头，由代码给，不采样，不算观测点）：天数、周数这类精确数不该让模型写进公式；
+    另加单位换算常数 UNIT_CONSTANTS。"""
     return {"k_days_target": float((tpe - tps).days + 1), "k_days_per_week": 7.0, "k_days_per_year": 365.25,
-            "k_weeks_per_year": 365.25 / 7, "k_months_per_year": 12.0}
+            "k_weeks_per_year": 365.25 / 7, "k_months_per_year": 12.0, **UNIT_CONSTANTS}
+
+
+def produced(m: dict) -> bool:
+    """一个方法算出了结果：连续值方法有正的 estimate，离散方法（outcome_probs）有 distribution。"""
+    return bool(m.get("estimate")) or bool(m.get("distribution"))
 
 
 class Draws:
@@ -113,6 +123,9 @@ def build_series(ids, pts: dict, ref=None) -> tuple:
 def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=None) -> dict:
     """assumptions：assumptions.validate() 的结果（{"kept": [...], "rejected": [...]}），没有就当空。
     only_methods：只允许这些方法（消融 --ablate-own-history 时 = {"formula_mc"}），其余记错误、不计算。"""
+    if (target or {}).get("outcome_type") == "discrete":   # 离散目标走 discrete.py（只有 outcome_probs）；连续值路径不变
+        from . import discrete
+        return discrete.run(methods, pts, target, assumptions)
     av = assumptions or {"kept": [], "rejected": []}
     kept_a = {a["id"]: a for a in av.get("kept") or []}
     rejected_a = {a.get("id"): a.get("reason", "") for a in av.get("rejected") or [] if a.get("id") and a.get("id") not in kept_a}
@@ -202,6 +215,9 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                     raise M.MethodError(f"formula_mc uses {len(set(used_a))} assumptions (at most {A.MAX_PER_METHOD})")
                 s = M.formula_mc_samples(str(prm.get("formula", "")), env)
                 r.update(estimate=s["median"], mc={"p10": s["p10"], "p90": s["p90"]})
+            elif r["method"] == "outcome_probs":
+                raise M.MethodError("outcome_probs is only available for a discrete target (outcome_type 'discrete'); "
+                                    "this target is continuous")
             else:
                 raise M.MethodError(f"unknown method {r['method']!r}")
         except M.MethodError as e:

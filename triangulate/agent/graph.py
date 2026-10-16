@@ -1,6 +1,7 @@
 """LangGraph 状态图：plan -> approve(interrupt) -> [Send: 每个方向一个 subagent + markets] -> judge
--> (可选一轮 base-rate 方向 -> judge) -> compute -> final。
+-> (可选一轮 base-rate 方向 -> judge) -> compute -> [离散目标：jev 对照臂] -> final。
 裁判可以为 formula_mc 提出假设输入（assumptions.py 校验）；--ablate-own-history 时按 ablation.py 去掉目标自身的历史。
+离散目标（plan 给出 outcome_type = discrete 和 outcomes）只用 outcome_probs，规则在 discrete.py；Jev 对照臂在 jev.py。
 
 图里只放可序列化的数据；预算、LLM、哨兵等放在 Context 里，通过闭包交给节点。
 """
@@ -17,10 +18,12 @@ from langgraph.types import Send, interrupt
 from . import ablation as AB
 from . import assumptions as AS
 from . import compute as C
+from . import discrete as D
+from . import jev as J
 from .markets import search_markets
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
-from .prompts import (AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, EXTRA_RULE_R1, EXTRA_RULE_R2, FINAL_SYSTEM, FINAL_USER, JUDGE_SYSTEM, JUDGE_USER,
-                      METHODS_SPEC, PLAN_SYSTEM, PLAN_USER)
+from .prompts import (AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, EXTRA_RULE_R1, EXTRA_RULE_R2, FINAL_SYSTEM,
+                      FINAL_USER, FINAL_USER_DISCRETE, JUDGE_SYSTEM, JUDGE_USER, METHODS_SPEC, PLAN_SYSTEM, PLAN_USER)
 
 CATEGORIES = {"own_history", "related_series", "physical_flow", "capacity_consumption", "administrative", "attention",
               "shocks", "persona", "forecasts_markets", "base_rates"}
@@ -40,6 +43,7 @@ class AgentState(TypedDict, total=False):
     points: list
     compute: dict
     assumptions: dict
+    jev: dict
     final: dict
     aborted: str
 
@@ -130,11 +134,19 @@ def assumption_placeholders(a: dict) -> dict:
             f"{a['id']}_high": _fmt_num(a["p90_used"] * f) + pct}
 
 
-def key_assumptions_template(used: list, year: int, keep_ids=frozenset()) -> str:
-    """最终答案末尾的「Key assumptions」：由代码按校验后的假设生成，数字只通过占位符出现。"""
+def _pct(p) -> str:
+    """概率 -> 「56.4%」（离散目标的占位符值）。"""
+    return "n/a" if p is None or not isinstance(p, (int, float)) or not math.isfinite(p) else f"{100 * p:.1f}%"
+
+
+def key_assumptions_template(used: list, year: int, keep_ids=frozenset(), discrete: bool = False) -> str:
+    """最终答案末尾的「Key assumptions」：由代码按校验后的假设生成，数字只通过占位符出现。
+    discrete：离散目标的假设是某个结果的概率，代码直接用它的值（不采样），所以不列范围。"""
     if not used:
-        return "Key assumptions: none (every formula input is an observed data point)."
-    lines = ["Key assumptions (proposed by the analyst model, not observed; code samples each one between the "
+        return ("Key assumptions: none (every probability input is an observed data point)." if discrete else
+                "Key assumptions: none (every formula input is an observed data point).")
+    lines = ["Key assumptions (proposed by the analyst model, not observed; code uses each value as given):" if discrete else
+             "Key assumptions (proposed by the analyst model, not observed; code samples each one between the "
              "bounds shown):"]
     def clean(t):  # 模型写的文字：数字换成 [n]，不许拼出占位符
         return scrub_digits(t, year, keep_ids)[0].replace("[[", "[ [").replace("]]", "] ]")
@@ -142,7 +154,8 @@ def key_assumptions_template(used: list, year: int, keep_ids=frozenset()) -> str
     for a in used:
         unit = "" if a.get("is_pct") else " " + clean(a["unit"])
         widened = " (range widened by code)" if a.get("widened_by_floor") else ""
-        line = (f"- {a['id']} {clean(a['name'])}: [[{a['id']}_value]]{unit}, range [[{a['id']}_low]] to "
+        line = (f"- {a['id']} {clean(a['name'])}: [[{a['id']}_value]]{unit}; used by {', '.join(a['used_by'])}." if discrete else
+                f"- {a['id']} {clean(a['name'])}: [[{a['id']}_value]]{unit}, range [[{a['id']}_low]] to "
                 f"[[{a['id']}_high]]{widened}; used by {', '.join(a['used_by'])}.")
         if a.get("falsified_by"):
             line += f" Overturned by: {clean(a['falsified_by'])}"
@@ -171,7 +184,7 @@ def _code_check(jr: dict, pts: list, target: dict, only_methods=None) -> tuple:
     by_id = {p["id"]: p for p in pts}
     av = AS.validate(jr.get("assumptions") or [], target)
     out = C.run(jr.get("methods") or [], by_id, target, assumptions=av, only_methods=only_methods)
-    failed = {i: (m.get("error") or "no estimate") for i, m in enumerate(out.get("methods") or []) if not m.get("estimate")}
+    failed = {i: (m.get("error") or "no estimate") for i, m in enumerate(out.get("methods") or []) if not C.produced(m)}
     return out, av, failed
 
 
@@ -192,12 +205,13 @@ def _problems(jr: dict, out: dict, av: dict, failed: dict) -> tuple:
     """(能跑的方法数, 交给裁判的问题清单)：失败的方法和原因、被拒的假设、能跑的方法之间差 CONFLICT_RATIO 倍以上。
     已有两条以上能跑而且互相吻合的方法时返回空清单。"""
     ms = out.get("methods") or []
-    ok = [(i, m) for i, m in enumerate(ms) if i not in failed and m.get("estimate")]
+    ok = [(i, m) for i, m in enumerate(ms) if i not in failed and C.produced(m)]
+    num = [(i, m) for i, m in ok if m.get("estimate")]   # 离散方法没有 estimate，不做倍数冲突检查（连续值时 num == ok）
     probs = [f"method {m.get('label') or m.get('id')} ({m.get('method')}): {failed[i]}" for i, m in enumerate(ms) if i in failed]
     if probs:
         probs += [f"assumption {a.get('id')} rejected: {a.get('reason')}" for a in av["rejected"]]
-    if len(ok) >= 2:
-        hi, lo = max(ok, key=lambda x: x[1]["estimate"]), min(ok, key=lambda x: x[1]["estimate"])
+    if len(num) >= 2:
+        hi, lo = max(num, key=lambda x: x[1]["estimate"]), min(num, key=lambda x: x[1]["estimate"])
         if hi[1]["estimate"] / lo[1]["estimate"] > CONFLICT_RATIO:
             probs.append(f"methods disagree: {hi[1].get('label') or hi[1]['id']} gives {hi[1]['estimate']:,.0f} but "
                          f"{lo[1].get('label') or lo[1]['id']} gives {lo[1]['estimate']:,.0f} (more than {CONFLICT_RATIO:g}x apart); "
@@ -240,7 +254,23 @@ def audit_rows(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
         return rows
     if m_out.get("method") in SERIES_METHODS:
         return [(str(i), str(i), TARGET_HISTORY_ROLE, _evidence(str(i), by_id, kept_a)) for i in prm.get("target_history") or []]
+    if m_out.get("method") == "outcome_probs":   # 每个结果的概率输入各核对一次；余下的结果没有输入，不核对
+        rows = []
+        for label, spec in (prm.get("probs") or {}).items():
+            spec = spec if isinstance(spec, dict) else {"id": spec}
+            iid = str(spec.get("id"))
+            rows.append((str(label), iid, str(spec.get("role") or "").strip(), _evidence(iid, by_id, kept_a)))
+        return rows
     return []
+
+
+def _audit_header(mi: dict, mo: dict) -> str:
+    prm = mi.get("params") or {}
+    if mo.get("method") == "outcome_probs":
+        rem = prm.get("remainder")
+        return (f"{mo['id']} (outcome_probs): each input is the probability of the named outcome" +
+                (f"; the remainder outcome {rem!r} gets 1 minus the others" if rem else ""))
+    return f"{mo['id']} ({mo.get('method')}): {prm.get('formula') or mo.get('method')}"
 
 
 def audit_methods(llm, qid: str, jr: dict, out: dict, av: dict, pts: list, failed: dict, target: dict) -> dict:
@@ -258,8 +288,7 @@ def audit_methods(llm, qid: str, jr: dict, out: dict, av: dict, pts: list, faile
             continue
         if rows:
             index[mo["id"]] = i
-            formula = (mi.get("params") or {}).get("formula") or mo.get("method")
-            blocks.append(f"{mo['id']} ({mo.get('method')}): {formula}\n" +
+            blocks.append(_audit_header(mi, mo) + "\n" +
                           "\n".join(f'  - {n}: role = "{role}"; evidence = {ev}' for n, _, role, ev in rows))
     if not blocks:
         return res
@@ -310,6 +339,10 @@ def build(ctx: Context):
             notes.append("no own_history direction in plan")
         target = {k: str((out.get("target") or {}).get(k, ""))[:300]
                   for k in ("what", "unit", "period_start", "period_end", "publisher", "cadence", "caveats")}
+        kind, note = D.parse_outcomes(out.get("target") if isinstance(out.get("target"), dict) else {})
+        target.update(kind)
+        if note:
+            notes.append(note)
         kws = [str(k).lower()[:30] for k in (out.get("market_keywords") or [])][:3]
         return {"plan": {"target": target, "market_keywords": kws, "candidates": cands}, "directions": dirs,
                 "plan_notes": notes}
@@ -373,7 +406,8 @@ def build(ctx: Context):
         judge_user = JUDGE_USER.format(
             question=state["question"], as_of=state["as_of"], target=dumps(state["plan"]["target"]),
             directions=dirs, table=_table(shown) if shown else "(no verified data points)",
-            methods_spec=AB.methods_spec() if ablate else METHODS_SPEC,
+            methods_spec=(DISCRETE_METHODS_SPEC.replace("__OUTCOMES__", D.outcomes_text(state["plan"]["target"]))
+                          if D.is_discrete(state["plan"]["target"]) else AB.methods_spec() if ablate else METHODS_SPEC),
             extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2)
         try:
             out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=JUDGE_MAX_TOKENS)
@@ -405,6 +439,8 @@ def build(ctx: Context):
             # 这一轮的方法就是 compute 要用的：代码试跑 + 输入核对（另一次模型调用：每个输入实际是什么 vs 公式需要它是什么），
             # 一个方法都过不了就把原因交回裁判修一次；核对没过的方法 compute 不用
             target, only = state["plan"]["target"], (AB.ALLOWED_METHODS if ablate else None)
+            if D.is_discrete(target):   # 消融只针对连续值目标；离散目标只认 outcome_probs
+                only = None
 
             def check():
                 out_c, av_c, failed = _code_check(jr, pts, target, only)
@@ -455,7 +491,8 @@ def build(ctx: Context):
         av = AS.validate(jr.get("assumptions") or [], target)
         bad = jr.get("audit_failed") or {}
         methods = [m for i, m in enumerate(jr.get("methods") or []) if str(i) not in bad]
-        out = C.run(methods, pts, target, assumptions=av, only_methods=AB.ALLOWED_METHODS if ablate else None)
+        out = C.run(methods, pts, target, assumptions=av,
+                    only_methods=AB.ALLOWED_METHODS if ablate and not D.is_discrete(target) else None)
         out["excluded_by_input_audit"] = [{"label": str(m.get("id", "")), "method": m.get("method"), "reason": bad[str(i)]}
                                           for i, m in enumerate(jr.get("methods") or []) if str(i) in bad]
         out["methods_from_round"] = jr.get("round")
@@ -467,9 +504,22 @@ def build(ctx: Context):
                   max_per_method=AS.MAX_PER_METHOD)
         return {"compute": out, "assumptions": av}
 
+    def after_compute(state: AgentState):
+        return "jev" if D.is_discrete(state["plan"]["target"]) else "final"
+
+    def jev(state: AgentState):
+        """离散目标的 Jev 对照臂（代码写简报、问一次；不并入 agent 的答案）。没配置 key 文件就记 not_configured。"""
+        if b.aborted:
+            return {"jev": {"arm": "jev", "status": "skipped", "note": f"run aborted: {b.aborted}"}}
+        kept = [p for p in state.get("points") or [] if p.get("keep") and p.get("judged_round")]
+        return {"jev": J.run_arm(state["plan"]["target"], kept, state["as_of"], qid=ctx.qid,
+                                 log=getattr(ctx.llm, "_log", None))}
+
     def final(state: AgentState):
         comp = state.get("compute") or {}
         r = comp.get("result") or {}
+        if r.get("mode") == "discrete":
+            return {"final": final_discrete(state, comp, r)}
         ph = {"estimate": _fmt_num(r.get("central")), "p10": _fmt_num(r.get("p10")), "p90": _fmt_num(r.get("p90")),
               "interval_level": "80%", "interval_basis": str(r.get("basis", "")).replace("_", " "),
               "n_points_kept": str(sum(1 for p in state.get("points") or [] if p.get("keep") and p.get("judged_round"))),
@@ -527,9 +577,67 @@ def build(ctx: Context):
         return {"final": {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
                           "model_error": err, "used_model_text": model_text is not None}}
 
+    def final_discrete(state: AgentState, comp: dict, r: dict) -> dict:
+        """离散目标的终稿：代码生成「每个结果 + 概率」的几行（数字只走占位符），后面接模型写的简短理由（数字换成 [n]），
+        再接代码生成的假设清单。"""
+        ok = [m for m in comp.get("methods") or [] if m.get("distribution")]
+        ph = {"n_methods": str(len(ok)), "most_likely": str(r.get("most_likely") or "n/a"),
+              "most_likely_prob": _pct(r.get("most_likely_prob")),
+              "n_points_kept": str(sum(1 for p in state.get("points") or [] if p.get("keep") and p.get("judged_round")))}
+        lines = ["Outcome probabilities for the pinned target (computed by code from the cited evidence; equal-weight "
+                 "average of [[n_methods]] method(s) over [[n_points_kept]] kept data points):"]
+        for i, o in enumerate(r.get("outcomes") or [], start=1):
+            ph[f"o{i}_label"], ph[f"o{i}_prob"], ph[f"o{i}_value"] = o["label"], _pct(o.get("prob")), _fmt_num(o.get("value"))
+            lines.append(f"- [[o{i}_label]]: [[o{i}_prob]]")
+        lines.append("Most likely outcome: [[most_likely]] ([[most_likely_prob]]).")
+        summary = [f"pooled outcome probabilities: " + "; ".join(f"{o['label']} {_pct(o.get('prob'))}" for o in r.get("outcomes") or [])]
+        for m in comp.get("methods") or []:
+            mid = re.sub(r"[^a-z0-9]", "", m["id"].lower()) or "m"
+            if m.get("distribution"):
+                for i, o in enumerate(r.get("outcomes") or [], start=1):
+                    ph[f"{mid}_o{i}_prob"] = _pct(m["distribution"].get(o["label"]))
+                src = "; ".join(f"{d['label']} <- {d['kind']} {d['id']}" for d in m.get("inputs_detail") or [])
+                summary.append(f"- {m['id']} outcome_probs: inputs {src}; remainder {m.get('remainder')}; {m.get('rationale', '')}")
+            else:
+                summary.append(f"- {m['id']} {m.get('method')}: failed: {m.get('error', '')}")
+        used_a = [a for a in (state.get("assumptions") or {}).get("kept") or [] if a.get("used_by")]
+        for a in used_a:
+            ph.update(assumption_placeholders(a))
+            summary.append(f"- assumption {a['id']} (proposed by the analyst, not observed; used by {a['used_by']}): "
+                           f"{a['name']}, value {ph[a['id'] + '_value']}; rationale: {a['rationale']}")
+        model_text, err = None, None
+        if r.get("most_likely") is not None and not b.aborted:
+            try:
+                out, err = ctx.llm.ask(FINAL_SYSTEM, FINAL_USER_DISCRETE.format(
+                    question=state["question"], as_of=state["as_of"], target=dumps(state["plan"]["target"]),
+                    summary="\n".join(summary), placeholders=", ".join(f"[[{k}]]" for k in ph)), role="final", qid=ctx.qid)
+                model_text = (out or {}).get("answer") if out else None
+            except BudgetExceeded as e:
+                err = str(e)
+        year = int(state["as_of"][:4])
+        # 保留方法 id、假设 id，以及方法实际引用的数据点 id（理由里要说概率来自哪个点）；其余数字一律换成 [n]
+        mids = ({m["id"] for m in comp.get("methods") or []} | {a["id"] for a in used_a} |
+                {i for m in ok for i in m.get("used_ids") or []})
+        segs, digits_removed = ["\n".join(lines)], 0
+        if isinstance(model_text, str) and model_text.strip():
+            parts = PLACEHOLDER.split(model_text)
+            for i in range(0, len(parts), 2):   # 模型写的数字一律换成 [n]（规则同连续值的终稿）
+                parts[i], n = scrub_digits(parts[i], year, mids)
+                digits_removed += n
+            segs.append("".join(p if i % 2 == 0 else f"[[{p}]]" for i, p in enumerate(parts)))
+        segs.append(key_assumptions_template(used_a, year, mids, discrete=True))
+        text = "\n\n".join(segs)
+        # 渲染：先切好每一段再拼，"[" + "[n]" + "]" 不会被当成占位符（同连续值的终稿）
+        rendered = "\n\n".join("".join(p if i % 2 == 0 else ph.get(p, "[unknown placeholder]")
+                                       for i, p in enumerate(PLACEHOLDER.split(s))) for s in segs)
+        if r.get("most_likely") is None:
+            rendered = "No estimate: no outcome-probability method could be computed from the verified evidence."
+        return {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
+                "model_error": err, "used_model_text": model_text is not None}
+
     g = StateGraph(AgentState)
     for name, fn in [("plan", plan), ("approve", approve), ("subagent", subagent), ("markets", markets),
-                     ("judge", judge), ("compute", compute), ("final", final)]:
+                     ("judge", judge), ("compute", compute), ("jev", jev), ("final", final)]:
         g.add_node(name, fn)
     g.add_edge(START, "plan")
     g.add_edge("plan", "approve")
@@ -537,6 +645,7 @@ def build(ctx: Context):
     g.add_edge("subagent", "judge")
     g.add_edge("markets", "judge")
     g.add_conditional_edges("judge", after_judge, ["subagent", "compute"])
-    g.add_edge("compute", "final")
+    g.add_conditional_edges("compute", after_compute, ["jev", "final"])
+    g.add_edge("jev", "final")
     g.add_edge("final", END)
     return g.compile(checkpointer=InMemorySaver())

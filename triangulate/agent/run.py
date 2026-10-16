@@ -13,10 +13,11 @@ from langgraph.types import Command
 
 from ..config import RESULTS
 from . import ablation as AB
+from . import discrete as D
 from . import evidence as ev
 from .evidence import parse_date
 from .graph import build
-from .outputs import ledger, render_graph
+from .outputs import ledger, outcome_table_html, render_graph
 from .pipeline import Context
 
 RES = RESULTS / "agent"
@@ -156,13 +157,17 @@ def save_run(h: dict, approvals: list) -> dict:
     score = score_one(q, state)
     (out_dir / "ledger.md").write_text(ledger(state, score), encoding="utf-8")
     r = (state.get("compute") or {}).get("result") or {}
-    meta = (f"as_of <b>{q['as_of']}</b> &middot; estimate <b>{_n(r.get('central'))}</b> &middot; 80% [{_n(r.get('p10'))}, "
-            f"{_n(r.get('p90'))}] ({r.get('basis')})")
+    if r.get("mode") == "discrete":   # 离散目标：页头放结果概率表（含 Jev 对照臂）
+        meta = f"as_of <b>{q['as_of']}</b> &middot; " + outcome_table_html(state)
+        est = f"most likely {r.get('most_likely')} ({'n/a' if r.get('most_likely_prob') is None else f'{100 * r['most_likely_prob']:.1f}%'})"
+    else:
+        meta = (f"as_of <b>{q['as_of']}</b> &middot; estimate <b>{_n(r.get('central'))}</b> &middot; 80% [{_n(r.get('p10'))}, "
+                f"{_n(r.get('p90'))}] ({r.get('basis')})")
+        est = f"estimate {_n(r.get('central'))}"
     if q.get("answer_value") is not None:
         meta += f" &middot; official value (scoring only) <b>{q['answer_value']:,}</b>"
     (out_dir / "graph.html").write_text(render_graph(state, f"Agent: {q['id']}", meta), encoding="utf-8")
-    print(f"[{q['id']}] done in {state['wall_s']}s; estimate {_n(r.get('central'))}; usd {state['budget']['usd_total_assumed']}",
-          flush=True)
+    print(f"[{q['id']}] done in {state['wall_s']}s; {est}; usd {state['budget']['usd_total_assumed']}", flush=True)
     return state
 
 
@@ -178,6 +183,11 @@ def score_one(q: dict, state: dict) -> dict:
            "p10": r.get("p10"), "p90": r.get("p90"), "basis": r.get("basis"), "scored": ans is not None,
            "n_assumptions_used": len(used_a), "assumptions_used": [a["id"] for a in used_a],
            "assumption_weight_share": r.get("assumption_weight_share"), "ablation": bool(state.get("ablation"))}
+    if r.get("mode") == "discrete":   # 离散目标：各结果的概率；有真值时打分 = 真结果的概率、Brier、最可能的结果对不对
+        row.update(mode="discrete", outcomes=r.get("outcomes"), most_likely=r.get("most_likely"))
+        if ans is not None:
+            row.update(D.score(r, ans))
+        return row
     if ans is None:  # 真实使用：没有真值，不打分
         return row
     row.update(pct_err=None if est is None else est / ans - 1,
