@@ -1,0 +1,65 @@
+[
+ {
+  "id": "fc_yell_2026_09",
+  "as_of": "2026-09-06",
+  "answer_value": 868450,
+  "source": "https://www.nps.gov/yell/learn/news/26024.htm",
+  "estimate": 834910.1713523516,
+  "p10": 561206.6201017285,
+  "p90": 1242100.4479620287,
+  "basis": "historical_errors",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a1"
+  ],
+  "assumption_weight_share": 0.5,
+  "ablation": false,
+  "pct_err": -0.03862033352253835,
+  "abs_log10_err": 0.017105067593290394,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 834910.1713523516,
+    "pct_err": -0.03862033352253835,
+    "abs_log10_err": 0.017105067593290394
+   },
+   "naive": {
+    "estimate": 720000.0,
+    "pct_err": -0.1709367263515459,
+    "abs_log10_err": 0.08141232307126964
+   },
+   "structured_no_retrieval": {
+    "estimate": 544261.9087225988,
+    "pct_err": -0.37329505587817513,
+    "abs_log10_err": 0.20293687910510852
+   },
+   "last_year_same_period": {
+    "estimate": 839579,
+    "pct_err": -0.033244285796534045,
+    "abs_log10_err": 0.014683252262707029
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "usd_total_assumed": 0.5654,
+  "usd_tokens": 0.1054,
+  "wall_s": 782.3
+ }
+]

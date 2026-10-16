@@ -1,0 +1,10 @@
+[ask_a63174a0] plan: 8 directions -> approved=True
+[ask_a63174a0] done in 1631.9s; published value 350,536; usd 0.4601
+Published value: 350,536 new car registrations. This is the pinned target itself (period 2026-09-01..2026-09-30) as already published, not an estimate.
+
+Source: data point p52 "UK new car registrations, September 2026 (SMMT preliminary)" (period 2026-09-01..2026-09-30), from www.fleetnews.co.uk (live_dated page dated 2026-10-05), quoting: "350,536 new cars were registered in September, up from 312,891 during the same month last year"
+A separate model check confirmed that this data point has the pinned target's entity, measure and period and is a reported value, not a forecast; the number is taken from the data point by code. Also confirmed with the same value: p91, p152.
+
+For reference only (not blended with the published value): the estimation methods gave 352,638 (80% interval 255,968 to 485,816) from 2 method(s).
+
+A published figure can be revised later; this answer reports it as published by 2026-10-16.
