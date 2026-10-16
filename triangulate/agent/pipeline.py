@@ -28,6 +28,7 @@ class Budget:
     每次调用前在锁里按「最坏情况」预扣（hold），调用结束后退回预扣、只留实际花费；已花 + 在途预扣 + 这次预扣
     超过上限就不发这次调用（抛 BudgetExceeded，各节点据此干净收尾）。预扣按上限估：LLM 按输入字符数 / 2 个 token
     和 max_tokens 个输出 token、峰时价；搜索按 token 上限加 (2 x max_uses + 2) 次搜索费（实测最多 6 次 / max_uses 3）。
+    v2.5.5：先拿并发名额（sem）再预扣，排队等名额的调用不占预扣，在途预扣最多 llm_concurrency 份。
     方向数不写死，由页面和美元预算推出来（max_directions）。"""
 
     # 规划方向数用的「一个方向的典型花费」：实测搜索中位 $0.047（含假设的搜索费）+ 4 次抽取约 $0.006 + 挑页 $0.002
@@ -108,7 +109,7 @@ class Budget:
 
 
 class AgentLLM(LLM):
-    """llm.LLM 加两件事：调用前查预算并占一个并发名额；每条日志同时计入预算。"""
+    """llm.LLM 加两件事：调用前先占一个并发名额、再查预算；每条日志同时计入预算。"""
 
     def __init__(self, calls_path, budget: Budget):
         super().__init__(calls_path=calls_path)
@@ -125,7 +126,7 @@ class AgentLLM(LLM):
         err = None
         for attempt in range(1, tries + 1):
             need = Budget.llm_reserve(sum(len(m["content"]) for m in msgs), max_tokens)
-            with self.budget.hold(need), self.budget.sem:
+            with self.budget.sem, self.budget.hold(need):
                 try:
                     out, text, err = self.json_call(msgs, arm=role, qid=qid, attempt=attempt, max_tokens=max_tokens)
                 except TransportError as e:
@@ -312,7 +313,7 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
                                     hints="; ".join(map(str, d.get("search_hints") or []))[:400],
                                     **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end", "publisher")},
                                     **{k: str(d.get(k, ""))[:600] for k in ("category", "perspective", "hypothesis", "data_to_find")})
-        with b.hold(b.search_reserve()), b.sem:
+        with b.sem, b.hold(b.search_reserve()):
             s = ctx.searcher.search(prompt, role=f"search:{d['id']}", qid=ctx.qid, max_uses=b.search_max_uses,
                                     cap=b.urls_per_direction)
         out["search"] = s
