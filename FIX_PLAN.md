@@ -38,7 +38,7 @@
 |---|---|---|---|
 | `search.Searcher.search` | 查询意图、as_of | `{queries, urls, usage…}` | S4：只修 n_search_errors 的计数，结构不变 |
 | `pipeline.run_direction` | 方向、ctx | 方向结果（search、pages、points） | S3 只换锁的顺序；S6 追加 `search.voided` |
-| `evidence.parse_value(value_as_written, scale_word)` | 原文数字、倍数词 | (数值, 是否有倍数) 或报错 | S8：多认中日韩倍数和复合写法，返回结构不变 |
+| `evidence.parse_value(value_as_written, scale_word)` | 原文数字、倍数词 | (数值, 是否百分数) 或报错（`evidence.py:83`） | S8：多认中日韩倍数和复合写法，返回结构不变 |
 | `evidence.text_dates / parse_date` | 文本 / 日期串 | 日期列表 / date | S8：多认中日韩和纪年写法 |
 | `evidence.leak_forms / leak_patterns` | 登记值 | 写法列表 / 正则 | S6 加边界；S8 加中日韩写法 |
 | `fetch._decode`、`net.decompress` | body、HTTP 头 | 文本，或 undecodable | S9：解码顺序和 zstd |
