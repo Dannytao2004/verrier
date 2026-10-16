@@ -180,7 +180,13 @@ Return the complete JSON object again. Keep your assessment and decisions unless
 # 离散目标的修正轮（v2.3）：这一轮的结果列表通过了就固定不变；被拒了就要裁判在修正回复里给改好的列表
 REPAIR_OUTCOMES_KEPT = """
 
-The outcome list was accepted by code: keep it unchanged and copy its labels exactly."""
+The outcome list was accepted by code: keep it unchanged and copy its labels exactly:
+__OUTCOMES__"""
+# v2.3.1：修正轮看不到第一次回复的 decisions（表格里也不标），而代码按第一次回复的 decisions 校验依据 id
+# （discrete6 两轮的修正列表都因此被拒）；修正回复里的 decisions 代码不采用，这里由代码列出已丢弃的点
+REPAIR_DISCARDED = """
+
+These points are discarded (by your decisions in the previous reply or in an earlier round), and decisions in this reply do not change that: do not use them in "outcomes_basis" or as method inputs: __IDS__"""
 REPAIR_OUTCOMES_REJECTED = """
 
 Code rejected the outcome list in your previous reply (see the problems above): return a corrected "outcomes" and "outcomes_basis"."""
@@ -471,11 +477,14 @@ def build(ctx: Context):
         dirs = "\n".join(f"- {d['id']} [{d['category']}] {d['hypothesis']}" for d in state["directions"])
         target0 = state["plan"]["target"]
         disc, orec = D.is_discrete(target0), state.get("outcomes")   # orec：之前的轮次定下的结果列表（离散目标）
-        judge_user = JUDGE_USER.format(
-            question=state["question"], as_of=state["as_of"], target=dumps(target0),
-            directions=dirs, table=_table(shown) if shown else "(no verified data points)",
-            methods_spec=(_discrete_spec(target0, orec) if disc else AB.methods_spec() if ablate else METHODS_SPEC),
-            extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2)
+
+        def judge_prompt(rec):
+            return JUDGE_USER.format(
+                question=state["question"], as_of=state["as_of"], target=dumps(target0),
+                directions=dirs, table=_table(shown) if shown else "(no verified data points)",
+                methods_spec=(_discrete_spec(target0, rec) if disc else AB.methods_spec() if ablate else METHODS_SPEC),
+                extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2)
+        judge_user = judge_prompt(orec)
         try:
             out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=JUDGE_MAX_TOKENS)
         except BudgetExceeded as e:
@@ -528,13 +537,18 @@ def build(ctx: Context):
             if errs:
                 jr["repair"] = {"errors": errs}
                 prev_reply = {"methods": jr["methods"], "assumptions": jr["assumptions"]}
-                note = ""
+                note, repair_user = "", judge_user
                 if disc:
                     prev_reply = {**jr["outcomes_reply"], **prev_reply}
-                    note = (REPAIR_OUTCOMES_REJECTED + (REPAIR_OUTCOMES_REJECTED_KEEP if orec else "")
-                            if oerrs else REPAIR_OUTCOMES_KEPT)
+                    note = (REPAIR_OUTCOMES_REJECTED + (REPAIR_OUTCOMES_REJECTED_KEEP if orec else "") if oerrs else
+                            REPAIR_OUTCOMES_KEPT.replace("__OUTCOMES__", D.outcomes_text(D.with_outcomes(target0, orec_new))))
+                    gone = [p["id"] for p in shown if not p.get("keep")]
+                    if gone:
+                        note += REPAIR_DISCARDED.replace("__IDS__", ", ".join(gone))
+                    if orec and orec_new is not orec:   # 这一轮修订了列表、已通过：方法说明按新列表重写（不再写旧列表和「可以修订」）
+                        repair_user = judge_prompt(orec_new)
                 try:
-                    out2, err2 = ctx.llm.ask(JUDGE_SYSTEM, judge_user + REPAIR.format(
+                    out2, err2 = ctx.llm.ask(JUDGE_SYSTEM, repair_user + REPAIR.format(
                         previous=dumps(prev_reply), errors="\n".join(f"- {e}" for e in errs)) + note,
                         role=f"judge:r{rnd}:repair", qid=ctx.qid, max_tokens=JUDGE_MAX_TOKENS)
                 except BudgetExceeded as e:
@@ -548,6 +562,8 @@ def build(ctx: Context):
                     a2 = out2.get("assumptions")
                     jr["assumptions"] = (a2 if isinstance(a2, list) else [])[:20]
                     oerrs2 = []
+                    if disc:   # 修正回复里的 decisions 只记录、不采用（保留的点仍按第一次回复定）
+                        jr["repair"]["decisions_in_reply"] = [x for x in out2.get("decisions") or [] if isinstance(x, dict)]
                     if oerrs:   # 离散目标的列表被拒过：修正回复里的列表重新校验（通过了的列表在这一轮里不再改）
                         jr["repair"]["outcomes_reply"] = {k: out2[k] for k in OUTCOME_KEYS if k in out2}
                         orec_new, oerrs2 = D.accept_outcomes(out2, orec, rnd, kept_ids)

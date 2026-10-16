@@ -22,6 +22,8 @@ import urllib.request
 from datetime import date
 from pathlib import Path
 
+from . import discrete as D
+
 API_URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-latest"
 KEY_ENV = "TYPESAFE_KEY_FILE"
@@ -80,7 +82,7 @@ def evidence_brief(target: dict, points: list, as_of: str) -> str:
         lines.append(f"Definition notes: {target['caveats']}")
     lines.append("Possible outcomes (mutually exclusive):")
     for o in target.get("outcomes") or []:
-        lines.append(f"- {o['label']}" + ("" if o.get("value") is None else f" (value {_fmt(o['value'])} {unit})"))
+        lines.append(f"- {o['label']}" + D.value_text(o, unit))   # 合并尾部带 or lower / or higher（v2.3.1）
     lines.append("Evidence (name = value unit, period, source domain, date available):")
     for p in points[:MAX_POINTS]:
         dom = urllib.parse.urlsplit(p.get("source_url") or "").netloc or "unknown source"
@@ -94,8 +96,7 @@ def evidence_brief(target: dict, points: list, as_of: str) -> str:
 
 def criteria(target: dict) -> dict:
     unit = target.get("unit", "")
-    return {o["label"]: f"The target resolves to: {o['label']}" +
-            ("" if o.get("value") is None else f" (value {_fmt(o['value'])} {unit})") for o in target.get("outcomes") or []}
+    return {o["label"]: f"The target resolves to: {o['label']}" + D.value_text(o, unit) for o in target.get("outcomes") or []}
 
 
 def request_body(state_text: str, crit: dict) -> dict:

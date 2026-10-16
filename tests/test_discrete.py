@@ -20,8 +20,8 @@ try:
 except ImportError:
     HAVE_LG = False
 
-OUTS = [{"label": "cut to 3.75%", "value": 3.75}, {"label": "unchanged at 4.00%", "value": 4.0},
-        {"label": "hike to 4.25%", "value": 4.25}]
+OUTS = [{"label": "cut to 3.75% or lower", "value": 3.75}, {"label": "unchanged at 4.00%", "value": 4.0},
+        {"label": "hike to 4.25% or higher", "value": 4.25}]
 TARGET = {"what": "Upper bound of the policy rate range after the next meeting", "unit": "percent per annum",
           "period_start": "2026-10-28", "period_end": "2026-10-28", "outcome_type": "discrete", "outcomes": OUTS}
 CUT, HOLD, HIKE = (o["label"] for o in OUTS)
@@ -210,10 +210,11 @@ class TestOutcomeProbs(unittest.TestCase):
         self.assertEqual(none["basis"], "no_method")
 
     def test_scoring(self):
-        r = {"outcomes": [{"label": CUT, "value": 3.75, "prob": 0.0}, {"label": HOLD, "value": 4.0, "prob": 0.6},
-                          {"label": HIKE, "value": 4.25, "prob": 0.4}], "most_likely": HOLD}
+        hike = "hike to 4.25%"   # 不带尾部的旧式 label（CUT / HIKE 带 or lower / or higher，会被当作尾部）
+        r = {"outcomes": [{"label": "cut to 3.75%", "value": 3.75, "prob": 0.0}, {"label": HOLD, "value": 4.0, "prob": 0.6},
+                          {"label": hike, "value": 4.25, "prob": 0.4}], "most_likely": HOLD}
         s = D.score(r, 4.25)
-        self.assertEqual(s["true_outcome"], HIKE)
+        self.assertEqual(s["true_outcome"], hike)
         self.assertAlmostEqual(s["prob_true"], 0.4)
         self.assertAlmostEqual(s["brier"], 0.36 + 0.36)
         self.assertFalse(s["most_likely_correct"])
@@ -248,16 +249,16 @@ class TestAuditRowsAndProblems(unittest.TestCase):
                                                               HIKE: {"id": "a1", "role": "prob hike"}}, "remainder": CUT}}
         rows = G.audit_rows(mi, {"method": "outcome_probs"}, {p["id"]: p for p in PTS.values()}, {"a1": _a(value=40)})
         self.assertEqual([(r[0], r[1]) for r in rows], [(HOLD, "p1"), (HIKE, "a1")])
-        self.assertEqual(rows[1][2], "probability that the target resolves to outcome 'hike to 4.25%'; analyst's role: prob hike")
+        self.assertEqual(rows[1][2], "probability that the target resolves to outcome 'hike to 4.25% or higher'; analyst's role: prob hike")
         # v2.2.1：role 由代码写成「target 取这个结果的概率」（有 target 时带数值和单位），余下结果也核对一行
         out = C.run([mi], dict(PTS), TARGET, assumptions=AS.validate([_a(value=40, low=30, high=50)], TARGET))["methods"][0]
         rows = G.audit_rows(mi, out, {p["id"]: p for p in PTS.values()}, {"a1": _a(value=40)}, TARGET)
         self.assertEqual(rows[0][2], "probability that the target resolves to outcome 'unchanged at 4.00%' (value 4 percent "
                                      "per annum); analyst's role: prob unchanged")
-        self.assertEqual(rows[2][:3], (CUT, "remainder", "probability that the target resolves to outcome 'cut to 3.75%' "
+        self.assertEqual(rows[2][:3], (CUT, "remainder", "probability that the target resolves to outcome 'cut to 3.75% or lower' "
                                                          "(value 3.75 percent per annum), taken as the rest (1 minus the other inputs)"))
         self.assertEqual(rows[2][3], "computed by code: 1 - 0.964 = 0.036; the other inputs cover 'unchanged at 4.00%' from "
-                                     "p1, 'hike to 4.25%' from a1; outcomes with no input get 0: []")
+                                     "p1, 'hike to 4.25% or higher' from a1; outcomes with no input get 0: []")
         no_role = {"method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p1"}}, "remainder": HIKE}}
         out = C.run([no_role], dict(PTS), TARGET)["methods"][0]
         self.assertEqual(G.audit_rows(no_role, out, {p["id"]: p for p in PTS.values()}, {}, TARGET)[0][2], "")   # 照旧拦下
@@ -362,7 +363,7 @@ class TestJevClient(unittest.TestCase):
 
 # v2.3：裁判第一轮定义的结果列表（两个合并尾部用 le / ge 标出）和依据的点
 JUDGE_OUTS = [{"label": CUT, "value": 3.75, "le": 3.75}, {"label": HOLD, "value": 4.0}, {"label": HIKE, "value": 4.25, "ge": 4.25}]
-BASIS = {"ids": ["p1", "p2"], "note": "p1 and p2 price a hold at the current 4.00% upper bound and a hike to 4.25%"}
+BASIS = {"ids": ["p1", "p2"], "note": "p1 and p2 price a hold at the current 4.00% upper bound and a hike to 4.25% or higher"}
 GOOD_METHODS = [{"id": "m1", "method": "outcome_probs", "rationale": "market odds",
                  "params": {"probs": {HOLD: {"id": "p1", "role": "prob unchanged"},
                                       HIKE: {"id": "p2", "role": "prob hike"}}, "remainder": CUT}},
@@ -601,8 +602,8 @@ class TestJudgeDefinedOutcomes(unittest.TestCase):
                           [{"label": "4.50% or higher", "value": 4.5, "ge": 4.5}],
             "duplicate outcome label": [tail_lo, mid, {**mid, "label": HOLD.upper()}, tail_hi],
             "has no label": [tail_lo, {"value": 4.0}, tail_hi],
-            "the lowest outcome 'cut to 3.75%' must be a merged tail": [{"label": CUT, "value": 3.75}, mid, tail_hi],
-            "the highest outcome 'hike to 4.25%' must be a merged tail": [tail_lo, mid, {"label": HIKE, "value": 4.25}],
+            "the lowest outcome 'cut to 3.75% or lower' must be a merged tail": [{"label": CUT, "value": 3.75}, mid, tail_hi],
+            "the highest outcome 'hike to 4.25% or higher' must be a merged tail": [tail_lo, mid, {"label": HIKE, "value": 4.25}],
             "only the lowest outcome may carry le": [tail_lo, {**mid, "le": 4.0}, tail_hi],
             "must equal its value": [{**tail_lo, "le": 3.5}, mid, tail_hi],
             "has both le and ge": [tail_lo, mid, {**tail_hi, "le": 4.25}],
@@ -687,7 +688,7 @@ class TestJudgeDefinedOutcomes(unittest.TestCase):
         rows = G.audit_rows(mi, out, {p["id"]: p for p in PTS.values()}, {}, t)
         self.assertEqual(rows[0][2], "probability that the target resolves to outcome 'unchanged at 4.00%' (value 4 percent "
                                      "per annum); analyst's role: prob unchanged")
-        self.assertEqual(rows[-1][2], "probability that the target resolves to outcome 'cut to 3.75%' (value 3.75 percent "
+        self.assertEqual(rows[-1][2], "probability that the target resolves to outcome 'cut to 3.75% or lower' (value 3.75 percent "
                                       "per annum or lower), taken as the rest (1 minus the other inputs)")
 
 
@@ -786,7 +787,7 @@ class TestV221Fixes(unittest.TestCase):
 
     def test_one_id_one_outcome(self):
         m = _run({HOLD: {"id": "p1"}, HIKE: {"id": "p1"}}, remainder=CUT)["methods"][0]
-        self.assertIn("id p1 is used for outcomes 'unchanged at 4.00%' and 'hike to 4.25%'; one probability denotes one "
+        self.assertIn("id p1 is used for outcomes 'unchanged at 4.00%' and 'hike to 4.25% or higher'; one probability denotes one "
                       "outcome", m["error"])
         a = _run({HOLD: {"id": "p1"}, HIKE: {"id": "a1"}, CUT: {"id": "a1"}}, assumptions=[_a(value=40, low=30, high=50)])
         self.assertIn("id a1 is used for outcomes", a["methods"][0]["error"])
@@ -819,7 +820,7 @@ class TestV221Fixes(unittest.TestCase):
         self.assertEqual(n_ok, 2)
         self.assertEqual(len(probs), 1)
         self.assertIn("methods disagree: m1 gives most likely 'unchanged at 4.00%' (56.4%) but m2 gives most likely "
-                      "'cut to 3.75%' (56.4%) (total variation distance 0.56, more than 0.5)", probs[0])
+                      "'cut to 3.75% or lower' (56.4%) (total variation distance 0.56, more than 0.5)", probs[0])
 
     def test_scoring_merged_tails(self):
         r = {"outcomes": [{"label": "4.00% or lower", "value": 4.0, "prob": 0.6}, {"label": "4.25%", "value": 4.25, "prob": 0.4},
@@ -862,6 +863,63 @@ class TestV221Fixes(unittest.TestCase):
                         client=J.JevClient("k", post=broken, sleep=lambda s: None))
         self.assertEqual(out["status"], "error")
         self.assertIn("IncompleteRead", out["error"])
+
+
+class TestV231Fixes(unittest.TestCase):
+    """v2.3.1 审查修复：修正轮列出已丢弃的点、修订后的修正轮按新列表写方法说明、尾部的含义写进 label 和 Jev 的选项。"""
+    ONE = [{"id": "m1", "method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p1", "role": "r"}}, "remainder": HIKE}}]
+
+    @unittest.skipUnless(HAVE_LG, "langgraph not installed")
+    def test_repair_round_names_the_discarded_points(self):
+        # discrete6 的路径：第一次回复丢掉 p2、没给列表；修正轮原来看不到 p2 被丢了
+        drop = [{"id": "p2", "keep": False, "reason": "duplicate"}]
+        first = judge_reply(outcomes=None, basis=None, methods=self.ONE, decisions=drop)
+        undo = [{"id": "p2", "keep": True, "reason": "needed for the list"}]
+        rep = judge_reply(basis={"ids": ["p1"], "note": "p1"}, methods=self.ONE, decisions=undo)
+        st, seen = discrete_graph_run(judge=[first, rep])
+        self.assertIn('decisions in this reply do not change that: do not use them in "outcomes_basis" or as method '
+                      'inputs: p2', seen["judge_users"][1])
+        jr = st["judge_rounds"][0]
+        self.assertEqual(jr["repair"]["decisions_in_reply"], undo)                 # 修正回复的 decisions 记下来
+        self.assertFalse(next(p for p in st["points"] if p["id"] == "p2")["keep"])  # 但不采用
+        self.assertEqual((jr["repair"]["outcome_errors_after"], st["outcomes"]["basis"]["ids"]), ([], ["p1"]))
+        self.assertEqual(st["compute"]["result"]["most_likely"], HOLD)
+        # 依据的规则没变：修正回复仍引用丢掉的点就照旧被拒
+        st, _ = discrete_graph_run(judge=[first, judge_reply(basis={"ids": ["p1", "p2"]}, methods=self.ONE)])
+        self.assertIn("['p2'] are not kept data points", st["judge_rounds"][0]["repair"]["outcome_errors_after"][0])
+
+    @unittest.skipUnless(HAVE_LG, "langgraph not installed")
+    def test_repair_after_an_accepted_revision_shows_the_revised_list(self):
+        new = [{"label": "4.00% or lower", "value": 4.0, "le": 4.0}, {"label": "4.25% or higher", "value": 4.25, "ge": 4.25}]
+        bad_m = [{"id": "m1", "method": "outcome_probs",
+                  "params": {"probs": {"4.00% or lower": {"id": "p99", "role": "r"}}, "remainder": "4.25% or higher"}}]
+        ok_m = [{"id": "m1", "method": "outcome_probs",
+                 "params": {"probs": {"4.00% or lower": {"id": "p1", "role": "r"}}, "remainder": "4.25% or higher"}}]
+        r2 = judge_reply(outcomes=new, basis={"ids": ["p1"], "note": "n"}, methods=bad_m, outcomes_revision_reason="p1 shows")
+        rep = judge_reply(outcomes=None, basis=None, methods=ok_m)
+        st, seen = discrete_graph_run(judge=[judge_reply(extra_directions=TestJudgeDefinedOutcomesGraph.EXTRA), r2, rep])
+        self.assertEqual(seen["judge_roles"], ["judge:r1", "judge:r2", "judge:r2:repair"])
+        u = seen["judge_users"][2]
+        self.assertIn("which you defined in judge round 2 from kept points p1:", u)
+        self.assertIn("The list was already revised once", u)
+        self.assertNotIn("you may revise it once", u)
+        self.assertNotIn(f'- "{HOLD}"', u)                                         # 方法说明里不再有旧列表
+        self.assertIn('copy its labels exactly:\n- "4.00% or lower" (value 4 percent per annum or lower)', u)
+        self.assertEqual(st["outcomes"]["revised_round"], 2)
+        self.assertEqual(st["compute"]["result"]["most_likely"], "4.00% or lower")
+
+    def test_tail_labels_say_so_and_jev_options_carry_the_tail(self):
+        lst = [{"label": "4.00", "value": 4, "le": 4}, {"label": "4.25", "value": 4.25}, {"label": "4.50", "value": 4.5, "ge": 4.5}]
+        errs = D.validate_outcomes(lst, {"ids": ["p1"]}, {"p1"})[2]   # discrete6 第 2 轮修正列表的形状
+        self.assertTrue(any("'4.00' carries le, so its label must say so" in e for e in errs), errs)
+        self.assertTrue(any("'4.50' carries ge, so its label must say so" in e for e in errs), errs)
+        ok = [{**lst[0], "label": "4.00 or lower"}, lst[1], {**lst[2], "label": "4.50 or higher"}]
+        self.assertEqual(D.validate_outcomes(ok, {"ids": ["p1"]}, {"p1"})[2], [])
+        t = D.with_outcomes({k: v for k, v in TARGET.items() if k != "outcomes"}, {"list": JUDGE_OUTS, "basis": {"ids": ["p1"]}})
+        crit = J.criteria(t)
+        self.assertEqual(crit[CUT], f"The target resolves to: {CUT} (value 3.75 percent per annum or lower)")
+        self.assertEqual(crit[HOLD], f"The target resolves to: {HOLD} (value 4 percent per annum)")
+        self.assertIn(f"- {HIKE} (value 4.25 percent per annum or higher)", J.evidence_brief(t, [], "2026-10-15"))
 
 
 if __name__ == "__main__":

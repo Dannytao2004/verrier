@@ -91,8 +91,9 @@ def outcomes_text(target: dict) -> str:
 
 def validate_outcomes(raw, basis, kept_ids) -> tuple:
     """裁判给的结果列表 -> (干净的列表, 依据 {"ids", "note"}, 问题清单)。问题清单为空 = 通过。
-    规则：2-6 个；label 非空且唯一；数值要么全有要么全没有；数值型时数值不重复，最低的带 le、最高的带 ge（等于它的 value），
-    中间的不带界（两个合并尾部保证覆盖全部可能的结果）；带界的结果 value 取界，所以非数值列表里带界会被「全有或全没有」挡下；
+    规则：2-6 个；label 非空且唯一；数值要么全有要么全没有；数值型时数值不重复，最低的带 le、最高的带 ge（等于它的 value，
+    label 里写 or lower / or higher 等，见 TAIL_LE / TAIL_GE），中间的不带界（两个合并尾部保证覆盖全部可能的结果）；
+    带界的结果 value 取界，所以非数值列表里带界会被「全有或全没有」挡下；
     依据至少一个 id，每个都是这一轮保留的数据点。"""
     errs, clean, seen = [], [], set()
     if not isinstance(raw, list):
@@ -122,6 +123,11 @@ def validate_outcomes(raw, basis, kept_ids) -> tuple:
                 c["value"], c[k] = b, b
         if "le" in c and "ge" in c:
             errs.append(f"outcome {label!r} has both le and ge")
+        # v2.3.1：尾部的含义要写进 label（终稿、账本、网页、打分结果只显示 label；discrete6 第 2 轮的「4.00」带 le）
+        elif "le" in c and not TAIL_LE.search(label):
+            errs.append(f"outcome {label!r} carries le, so its label must say so (for example \"{label} or lower\")")
+        elif "ge" in c and not TAIL_GE.search(label):
+            errs.append(f"outcome {label!r} carries ge, so its label must say so (for example \"{label} or higher\")")
         clean.append(c)
     nums = [c for c in clean if c["value"] is not None]
     if nums and len(nums) != len(clean):
