@@ -11,6 +11,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
+from . import config
 from .agent.search import SEARCH_FEE_ASSUMED_USD, SEARCH_URL, Searcher, anthropic_usage_to_cost
 from .arms import _messages, check_naive
 from .llm import TransportError
@@ -20,7 +21,7 @@ ARM = "search_direct"
 SYSTEM = NAIVE_SYSTEM + ("\nYou can use the web_search tool before you answer. "
                          "Your final message must contain only the JSON object.")
 MAX_USES = 5
-MAX_TOKENS = 4096   # 这个接口默认带 thinking 块（probes/out/deepseek_search_probe.json），比 arm (1) 的 500 留得宽
+MAX_TOKENS = config.MAX_TOKENS["search_direct"]   # 这个接口默认带 thinking 块（probes/out/deepseek_search_probe.json），比 arm (1) 留得宽
 
 
 class DirectClient(Searcher):

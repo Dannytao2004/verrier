@@ -5,6 +5,7 @@
 agent 只拿到题目文字和 as_of。真值和哨兵值只交给代码，不进任何 prompt。没有真值（真实使用）时不打分、不显示官方值。
 """
 import html
+import inspect
 import json
 import math
 import time
@@ -12,15 +13,17 @@ from datetime import date, datetime, timezone
 
 from langgraph.types import Command
 
-from ..config import RESULTS
+from ..config import MAX_TOKENS, RESULTS
 from . import ablation as AB
+from . import assumptions as AS
 from . import discrete as D
 from . import evidence as ev
+from . import methods as M
 from . import published as PB
 from .evidence import parse_date
 from .graph import build
 from .outputs import ledger, outcome_table_html, render_graph
-from .pipeline import Context
+from .pipeline import Budget, Context
 
 RES = RESULTS / "agent"
 RESIDUAL_RISKS = [
@@ -158,13 +161,24 @@ def run_question(q: dict, auto_approve: bool, tag: str = "", ablate_own_history:
     return save_run(h, approvals)
 
 
+def run_settings() -> dict:
+    """v2.5.3：这次运行用的基础设置，save_run 记进 state.json 的 settings（只记录，不参与计算；值都从定义处读）：
+    各角色的 max_tokens、Budget 的默认参数、区间常数。"""
+    budget = {k: p.default for k, p in inspect.signature(Budget.__init__).parameters.items()
+              if p.default is not inspect.Parameter.empty}
+    return {"max_tokens": dict(MAX_TOKENS), "budget_defaults": budget,
+            "interval": {"MIN_WIDTH": AS.MIN_WIDTH, "MIN_WIDTH_CHANGE": AS.MIN_WIDTH_CHANGE,
+                         "FALLBACK_SIGMA": M.FALLBACK_SIGMA, "DEFAULT_REL_U": M.DEFAULT_REL_U, "EPS": M.EPS}}
+
+
 def save_run(h: dict, approvals: list) -> dict:
-    """图跑完以后：取最终 state，补上计量和泄漏审计，写 state.json、ledger.md、graph.html。"""
+    """图跑完以后：取最终 state，补上计量、泄漏审计和 settings（run_settings），写 state.json、ledger.md、graph.html。"""
     q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]
     stamp, tag, leak_values, ablate_own_history, t0 = h["stamp"], h["tag"], h["leak_values"], h["ablate"], h["t0"]
     state = dict(g.get_state(cfg).values)
     state.update(started_at=stamp, wall_s=round(time.time() - t0, 1), budget=ctx.budget.snapshot(), approvals=approvals,
-                 leakage=leakage_audit(state, q["as_of"], leak_values), model=ctx.llm.model, tag=tag)
+                 leakage=leakage_audit(state, q["as_of"], leak_values), model=ctx.llm.model, tag=tag,
+                 settings=run_settings())
     if ablate_own_history:
         state["ablation"] = ablation_summary(state)
     (out_dir / "state.json").write_text(json.dumps(state, indent=1, ensure_ascii=False, default=str), encoding="utf-8")

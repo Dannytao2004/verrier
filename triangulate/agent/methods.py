@@ -16,14 +16,12 @@ import ast
 import math
 import statistics
 
+from ..config import MC_SAMPLES as MC_N, MC_SEED   # Monte Carlo 样本数和种子：和 structured 基线同一来源
 from ..expr import Formula, FormulaError, _const
-from ..mc import sample_inputs, summarise
+from ..mc import Z90, sample_inputs, summarise
 
 EPS = 0.01            # 1% 的误差下限，防止某个方法回测碰巧几乎为 0 时独占权重
-Z90 = 1.2815515655446004
 FALLBACK_SIGMA = 0.25  # 既无回测、也无方法分歧、也无 MC 时的区间宽度（ln 空间），报告里标为 no_basis
-MC_N = 20000
-MC_SEED = 20261015
 DEFAULT_REL_U = 0.2    # formula_mc 每个输入的 80% 相对不确定度（P10/P90 = v/1.2, v*1.2），由代码统一给
 MAX_EXP_AGENT = 3      # formula_mc 只许整数指数 -3..3（开方用 sqrt()）
 MAX_ONES = 3           # formula_mc 里常数 1 至多出现 3 次（1 - share、1 + growth 这类写法够用）

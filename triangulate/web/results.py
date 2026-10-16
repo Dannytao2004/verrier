@@ -11,8 +11,8 @@ from pathlib import Path
 from ..agent.graph import TARGET_HISTORY_ROLE
 from ..agent.run import RES, score_one
 from ..forecast import QUESTIONS
+from ..mc import Z90
 
-Z90 = 1.2815515655446004
 SHARE_WARN = 0.5
 QUESTIONS_BY_ID = {q["id"]: q for q in QUESTIONS}
 # 回测页的两张表（用户指定）：开发集每题取最新的 agent 版本；留出测试集是 test1（EVAL_TEST_PLAN.md）

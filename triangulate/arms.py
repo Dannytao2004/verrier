@@ -4,6 +4,7 @@
 """
 import math
 
+from .config import MAX_TOKENS
 from .engine import evaluate_structured
 from .prompts import NAIVE_SYSTEM, RETRY, STRUCTURED_SYSTEM, USER, unit_display
 from .units import UnitError, UnitMismatch, convert, dims_str, parse_unit
@@ -54,7 +55,7 @@ def _run(llm, q: dict, arm: str, system: str, check, max_tokens: int) -> dict:
 def run_naive(llm, q: dict) -> dict:
     strict = q.get("strict", True)
     return _run(llm, q, "naive", NAIVE_SYSTEM,
-                lambda r: check_naive(r, q["answer_unit"], strict)[2], max_tokens=500)
+                lambda r: check_naive(r, q["answer_unit"], strict)[2], max_tokens=MAX_TOKENS["naive"])
 
 
 def run_structured(llm, q: dict) -> dict:
@@ -62,4 +63,4 @@ def run_structured(llm, q: dict) -> dict:
 
     def check(reply):
         return evaluate_structured(reply, q["answer_unit"], q["id"], strict_target=strict, n=200)["errors"]
-    return _run(llm, q, "structured", STRUCTURED_SYSTEM, check, max_tokens=6000)
+    return _run(llm, q, "structured", STRUCTURED_SYSTEM, check, max_tokens=MAX_TOKENS["structured"])

@@ -29,6 +29,23 @@ API_URL = "https://api.deepseek.com/chat/completions"
 MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
 MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
 
+# 每个角色一次调用的输出上限（max_tokens）。只有这一个来源：各调用处和预算预扣（agent/pipeline.Budget）都查这张表，
+# 每次 agent 运行的 state.json 里也记一份（agent/run.save_run 的 settings）。v2.5.3 只是收拢，值和收拢前各处写的相同。
+MAX_TOKENS = {
+    "plan": 6000,
+    "extract": 4000,         # 抽取员，每页一次
+    "judge": 12000,          # v2 的 6000 在 167 个数据点时被截断过
+    "repair": 12000,         # 裁判修正轮：同 judge
+    "audit": 4000,           # 输入核对
+    "published": 3000,       # 「答案已公布」确认
+    "early": 3000,           # 提前停确认：同 published（同一个 prompt）
+    "final": 4000,           # 终稿
+    "search": 2048,          # agent 的 SEARCHER（Anthropic 兼容接口）
+    "naive": 500,            # arm (1) 直接问
+    "structured": 6000,      # arm (2) 不联网结构化
+    "search_direct": 4096,   # arm (3) 联网直接答的正式运行（预注册结果用的值；补充运行的 32000 在 probes/search_direct_supp.py）
+}
+
 # USD / 1M tokens：(cache hit, cache miss, output)。来源 https://api-docs.deepseek.com/quick_start/pricing（2026-10-15 查看）。
 # 峰时 = UTC 周一至周五 01:00-04:00、06:00-10:00；中国法定假日也算闲时，这里忽略（只会高估成本）。
 PRICES = {"deepseek-flash": {"offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20)}}

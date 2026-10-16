@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
 
-from ..config import MODEL, PRICES
+from ..config import MAX_TOKENS, MODEL, PRICES
 from ..llm import LLM, TransportError
 from . import evidence as ev
 from .fetch import fetch_live, fetch_page
@@ -85,7 +85,7 @@ class Budget:
 
     def search_reserve(self) -> float:
         hit, miss, out = PRICES.get(MODEL, PRICES["deepseek-flash"])["peak"]
-        return (30_000 * miss + 2048 * out) / 1e6 + (2 * self.search_max_uses + 2) * SEARCH_FEE_ASSUMED_USD
+        return (30_000 * miss + MAX_TOKENS["search"] * out) / 1e6 + (2 * self.search_max_uses + 2) * SEARCH_FEE_ASSUMED_USD
 
     def reserve_page(self, round_no: int) -> bool:
         cap = self.round1_pages if round_no == 1 else self.pages_cap
@@ -119,7 +119,7 @@ class AgentLLM(LLM):
         if "usd" in rec:
             self.budget.add(rec)
 
-    def ask(self, system: str, user: str, *, role: str, qid: str, max_tokens: int = 4000, tries: int = 2):
+    def ask(self, system: str, user: str, *, role: str, qid: str, max_tokens: int = MAX_TOKENS["final"], tries: int = 2):
         """返回 (dict|None, error)。输出无效时带着错误信息重试一次。"""
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         err = None
@@ -228,7 +228,7 @@ def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict
     res, err = ctx.llm.ask(EXTRACT_SYSTEM, EXTRACT_USER.format(
         text=sent, **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end")},
         hypothesis=str(d.get("hypothesis", ""))[:600], data_to_find=str(d.get("data_to_find", ""))[:600]),
-        role=f"extract:{d['id']}", qid=ctx.qid, max_tokens=4000)
+        role=f"extract:{d['id']}", qid=ctx.qid, max_tokens=MAX_TOKENS["extract"])
     page["extract_error"] = err
     text_n = ev.norm(sent)
     raws = (res or {}).get("points") or []

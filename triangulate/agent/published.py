@@ -34,6 +34,7 @@ import time
 import urllib.parse
 from datetime import datetime, timezone
 
+from ..config import MAX_TOKENS
 from . import ablation as AB
 from . import compute as C
 from . import discrete as D
@@ -367,7 +368,7 @@ class EarlyWatch:
             system, user = prompt(target, as_of_s, cands)
             t0 = time.time()
             try:
-                out, err = llm.ask(system, user, role=EARLY_ROLE, qid=qid, max_tokens=3000)
+                out, err = llm.ask(system, user, role=EARLY_ROLE, qid=qid, max_tokens=MAX_TOKENS["early"])
             except BudgetExceeded as e:
                 out, err = None, str(e)
             chk["wall_s"] = round(time.time() - t0, 2)

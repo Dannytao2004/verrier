@@ -10,7 +10,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-from ..config import MODEL, read_key, usd_cost
+from ..config import MAX_TOKENS, MODEL, read_key, usd_cost
 
 SEARCH_URL = "https://api.deepseek.com/anthropic/v1/messages"
 # DeepSeek 价格页（2026-10-15 查看）没有列 web search 的单价。预算里按 Anthropic 公开价 $10 / 1000 次 记账，
@@ -46,7 +46,7 @@ class Searcher:
         self._log = log  # callable(rec)
 
     def search(self, prompt: str, *, role: str, qid: str, max_uses: int = 3, cap: int = 5) -> dict:
-        body = json.dumps({"model": self.model, "max_tokens": 2048,
+        body = json.dumps({"model": self.model, "max_tokens": MAX_TOKENS["search"],
                            "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": max_uses}],
                            "messages": [{"role": "user", "content": prompt}]}).encode("utf-8")
         rec = {"arm": role, "qid": qid, "model": self.model, "kind": "search"}

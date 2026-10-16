@@ -19,6 +19,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send, interrupt
 
+from ..config import MAX_TOKENS
 from . import ablation as AB
 from . import assumptions as AS
 from . import compute as C
@@ -173,7 +174,6 @@ def key_assumptions_template(used: list, year: int, keep_ids=frozenset(), discre
     return "\n".join(lines)
 
 
-JUDGE_MAX_TOKENS = 12000   # v2 的 6000 在 167 个数据点时被截断过
 REPAIR = """
 
 Your previous reply proposed these methods and assumptions:
@@ -369,7 +369,7 @@ def audit_methods(llm, qid: str, jr: dict, out: dict, av: dict, pts: list, faile
             "__BASIS__", "\n".join(f"  - {_evidence(i, by_id, {})}" for i in basis.get("ids") or []) or "  (not recorded)"))
     try:
         out_a, err = llm.ask(AUDIT_SYSTEM, AUDIT_USER.format(target=dumps(target), methods="\n\n".join(blocks)),
-                                 role="audit", qid=qid, max_tokens=4000)
+                                 role="audit", qid=qid, max_tokens=MAX_TOKENS["audit"])
     except BudgetExceeded as e:
         out_a, err = None, str(e)
     if out_a is None:
@@ -393,7 +393,7 @@ def build(ctx: Context):
         try:
             out, err = ctx.llm.ask(PLAN_SYSTEM, PLAN_USER.format(question=state["question"], as_of=state["as_of"],
                                                                 checklist=CHECKLIST), role="plan", qid=ctx.qid,
-                                   max_tokens=6000)
+                                   max_tokens=MAX_TOKENS["plan"])
         except BudgetExceeded as e:
             return {"aborted": str(e), "plan": {}, "directions": []}
         if out is None:
@@ -506,7 +506,7 @@ def build(ctx: Context):
                 extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2)
         judge_user = judge_prompt(orec)
         try:
-            out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=JUDGE_MAX_TOKENS)
+            out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=MAX_TOKENS["judge"])
         except BudgetExceeded as e:
             return {**upd, "aborted": str(e), "judge_rounds": [{"round": rnd, "skipped": str(e)}]}
         if out is None:
@@ -570,7 +570,7 @@ def build(ctx: Context):
                 try:
                     out2, err2 = ctx.llm.ask(JUDGE_SYSTEM, repair_user + REPAIR.format(
                         previous=dumps(prev_reply), errors="\n".join(f"- {e}" for e in errs)) + note,
-                        role=f"judge:r{rnd}:repair", qid=ctx.qid, max_tokens=JUDGE_MAX_TOKENS)
+                        role=f"judge:r{rnd}:repair", qid=ctx.qid, max_tokens=MAX_TOKENS["repair"])
                 except BudgetExceeded as e:
                     out2, err2 = None, str(e)
                 if out2 is None:
@@ -646,7 +646,7 @@ def build(ctx: Context):
             return {"published": {"status": "no_candidates", "note": note, "candidates": []}}
         system, user = PB.prompt(target, state["as_of"], cands)
         try:
-            out, err = ctx.llm.ask(system, user, role="published", qid=ctx.qid, max_tokens=3000)
+            out, err = ctx.llm.ask(system, user, role="published", qid=ctx.qid, max_tokens=MAX_TOKENS["published"])
         except BudgetExceeded as e:
             return {"published": {"status": "skipped", "note": f"{note}; {e}", "candidates": [PB._summary(p) for p in cands]}}
         if out is None:
@@ -723,7 +723,8 @@ def build(ctx: Context):
             try:
                 out, err = ctx.llm.ask(FINAL_SYSTEM, FINAL_USER.format(
                     question=state["question"], as_of=state["as_of"], target=dumps(state["plan"]["target"]),
-                    summary="\n".join(summary), placeholders=", ".join(f"[[{k}]]" for k in ph)), role="final", qid=ctx.qid)
+                    summary="\n".join(summary), placeholders=", ".join(f"[[{k}]]" for k in ph)), role="final", qid=ctx.qid,
+                    max_tokens=MAX_TOKENS["final"])
                 model_text = (out or {}).get("answer") if out else None
             except BudgetExceeded as e:
                 err = str(e)
@@ -783,7 +784,8 @@ def build(ctx: Context):
             try:
                 out, err = ctx.llm.ask(FINAL_SYSTEM, FINAL_USER_DISCRETE.format(
                     question=state["question"], as_of=state["as_of"], target=dumps(D.with_outcomes(state["plan"]["target"], state.get("outcomes"))),
-                    summary="\n".join(summary), placeholders=", ".join(f"[[{k}]]" for k in ph)), role="final", qid=ctx.qid)
+                    summary="\n".join(summary), placeholders=", ".join(f"[[{k}]]" for k in ph)), role="final", qid=ctx.qid,
+                    max_tokens=MAX_TOKENS["final"])
                 model_text = (out or {}).get("answer") if out else None
             except BudgetExceeded as e:
                 err = str(e)
