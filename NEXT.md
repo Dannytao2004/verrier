@@ -1,7 +1,7 @@
 # 断点（2026-10-16）
 
-当前代码：tag `v2.5.1`（agent，ed077f0）+ `web-v0.2`（前端，75521a8，没改）。测试 221 个全过。
-`v2.5`（f5b3c79）是 published2 实测用的代码；v2.5.1 只多一处提前停的检查（见下）。上一版 `v2.4.1`（4165105）的记录在下面。
+当前代码：tag `v2.5.2`（agent，1bd2077）+ `web-v0.2`（前端，75521a8，没改）。测试 223 个全过。
+`v2.5`（f5b3c79）是 published2 实测用的代码；v2.5.1 多一处提前停的检查，v2.5.2 修了审查的两条中等意见（见下）。上一版 `v2.4.1`（4165105）的记录在下面。
 
 ## v2.5：真实使用直接抓 live 页 + 确认已公布就提前停（2026-10-16 批准的范围）
 
@@ -24,6 +24,20 @@
 - v2.5.1（ed077f0）：published2 里 d5 在提前停时正在等第一页，取回后照样抽取了（多 1 次抽取、约 7 s，跑在最后）。现在取页返回后再查
   一次。新测试在 v2.5 上失败、在 v2.5.1 上通过。**v2.5.1 没有真实运行复测**；按 published2 的调用记录估计会省掉这 1 次抽取
   （$0.004）和约 6 s（未实测）。
+- v2.5.2（1bd2077）：审查 v2.5 / v2.5.1 的 10 条意见，2 条中等已修（下面两条），8 条低的记进下面未解决问题 9–16。**没有真实运行复测。**
+  - 走不走 live 只在 prepare_run 时定一次（中等，已修）：`fetch_live` 自己不查 as_of >= 今天，运行跨过午夜、网页上隔天才批准
+    （awaiting_approval 没有超时）、命令行停在 input() 过夜时，as_of 已早于取页当天仍抓 live 页（fetch.py 文件头说的那种泄漏）。
+    现在 `fetch_live` 每次取页再判断，as_of 早于今天就按回测走 `fetch_page` 的快照路径（同 v2.4.1 每次取页的 allow_live），
+    页面记录带 `live_skipped`。审查的复现（今天 10-17、as_of 10-16、页面日期 10-05）不再收成 live_dated。批准时没有重算
+    check_published / live_fetch：取页这一层已经挡住；这时的提前检查和 v2.4 检查看的是日期 <= as_of 的快照页，前提仍成立。
+  - 提前检查出错后另一页一确认就停（中等，已修）：出错（transport、两次输出无效、预算）那次的候选不算送过，和下一页的候选一起
+    再送一次，resolve 因此看得到矛盾的值（审查复现：340,000 那次出错、350,536 确认，现在判 conflict、关掉提前检查；值一致时照样停，
+    note 写「re-sent k candidate(s) from failed early check(s)」）。`published_early` 加 `by_status`、`n_error`，每次检查加
+    `resent_ids`；有检查出错时账本那一行写出每种状态的次数。终稿没改：停下的那次检查已经看过出错页的候选。最后一次检查出错时
+    没有下一次，照旧由裁判之后的 v2.4 检查兜底。
+  - 新测试 2 个（在 v2.5.1 上失败、现在通过）；`tests/test_live.py` 里已有的 fetch_live 调用改为显式给「今天」，并发测试的 as_of
+    用真的今天（否则日期一过就走快照路径）。223 个测试全过；`probes/compare_continuous_prompts.py` sha256 仍是 4a56d586…，
+    `probes/recheck_continuous.py` 7/7（回测路径不变）。
 
 ### 实测 published2（2026-10-16，代码 f5b3c79 = v2.5，--auto-approve）
 
@@ -35,7 +49,8 @@
 | 调用 | 41 | 18（plan 1、search 8、extract 8、published:early 1） |
 | 抽取的页 | 29（13 快照 + 16 live） | 8（全是 live；每个方向 1 页） |
 
-用时拆分（`probes/time_split.py`；各方向并行，「跨度」= 这一阶段第一次开始到最后一次结束，括号里是从运行开始算的秒数）：
+用时拆分（`probes/time_split.py`；各方向并行，「跨度」= 这一阶段第一次开始到最后一次结束，括号里是从运行开始算的秒数；
+原点和 wall_s 的原点不同、时刻只到秒，括号里的数和跨度误差约 ±1 s，见未解决问题 16）：
 
 | 阶段 | published1 | published2 |
 |---|---|---|
@@ -57,7 +72,7 @@
 
 1. 先到先得：提前停报的是第一页确认的值，之后到的版本（published2 的 350,518）不再看；v2.4 那种「所有保留的点一起看、相差 > 0.5% 记
    conflict」在提前停时只覆盖第一页之内。可能的做法：确认后再等几秒收齐已在抽取的页，或停下前把已核对的候选一起送一次。要先定。
-2. 停下后的取页不进 state.json：published2 的 32 个 URL 只记了 8 页，其余后台跑完（每个最多 15 s 超时），页面写进 data/raw。
+2. 停下后的取页不进 state.json：published2 的 32 个 URL 只记了 8 页，其余后台跑完（15 s 是 socket 超时，不是每页总时限，见 12），页面写进 data/raw。
    可能的做法：停下时把没抽取的 URL 记成「stopped early before extraction」并带上取页结果。
 3. 同一个 URL 被几个方向各抓一次：published2 里 parliamenttoday 6 次、fleetnews 5 次（限速排队，但多占请求和时间）。没有每次运行的
    live 页缓存（v2.5 范围外，没做）。
@@ -68,6 +83,37 @@
 6. 离散目标不提前停（结果列表要裁判定义）；离散题的已公布值仍要等到裁判之后的 v2.4 检查。
 7. markets 节点（Polymarket）在真实使用时仍用默认的 60 s 超时和重试，裁判要等它；published2 里没拖慢（没有逐项计时）。
 8. 现在最慢的是两次模型调用：plan 13.5 s、search 跨度 12.9 s（最慢一次 12.95 s），合起来约占 published2 的 70%。
+
+v2.5 / v2.5.1 审查的低优先级意见（2026-10-16；机制都对着代码核实过，没改；探针的计时、published2 的页数和文件时刻引自审查，没有重跑）：
+
+9. 提前检查的汇总状态只有 published / off / not_confirmed：全部检查出错也记 not_confirmed（v2.4 检查照常跑，结果不受影响）。
+   v2.5.2 起账本那一行会附上「by status: error k」，状态词本身没改。可能的做法：有 error 且没确认时记 error。
+10. Crawl-delay 的第一跳：取 robots.txt 时 `LIMITER.wait` 已按 1 秒排好这个 host 的下一次，`set_interval` 只改间隔、不往后推，
+    所以 robots.txt 和第一次页面请求只隔 1 秒（审查探针，Crawl-delay 3：0.0 / 1.0 / 4.0 / 7.0 s）。v2.4.1 以前就有，v2.5 每次 live
+    取页都经过这里；README 的「or the robots.txt Crawl-delay」这一跳做不到。可能的做法：HostLimiter 记每个 host 上次开始的时刻，
+    set_interval 时把下一次推到 上次开始 + Crawl-delay。
+11. 停下后的取页并没有取消：线程池大小 = 预留的 URL 数，submit 时每个任务都已有线程，`shutdown(cancel_futures=True)` 一个也取消
+    不了（停下后所有 URL 照样发 robots 和页面请求，照样限速）；方向线程在 `fut.result()` 上等当前这页，期间不看 stop，图的屏障要等
+    最慢的那次取页（published2 的 d5 在停下后又等 kba.de 约 1.8 s）。`pipeline._live_pages` 的 docstring「没开始的抓取取消」不准。
+    可能的做法：`_timed_live` 开头查 stop；主循环用 `concurrent.futures.wait(timeout=0.5)` 轮询 stop；net 每一跳前接受取消回调。
+12. `LIVE_TIMEOUT_S = 15` 是 urllib 的 socket 超时（连接、每次 recv 各算），不是整页总时限：慢慢吐字节的服务器（最多 6 MB）一页可以
+    远超 15 s（审查探针：每 0.5 s 写 10 字节共 8 次，timeout 1 s，用时 4.01 s），再加最多 4 跳重定向和每个新 host 先取 robots.txt
+    （10 s）。README 的「short timeouts (15 s per page ...)」不准。可能的做法：分块读、每块后查总截止时间；get_live 对整次调用
+    （含重定向）加总时限，再改 README。
+13. 一个方向的页名额在开头全部预留，只有提前停那条路会退还；`_process_page` 抛异常（BudgetExceeded，或取页 / 转文字里没捕获的
+    异常）时剩下的不退，`budget.pages_used` 偏高（审查复现：4 个 URL、抽取抛 BudgetExceeded，pages_used = 4，旧的顺序循环为 1）。
+    运行已中止，只影响 state.json 的 pages_used 和用它的统计。可能的做法：finally 里退还还没进 `_process_page` 的名额。
+14. live 模式的 robots.txt 只试一次（10 s），取不到（599 / 5xx）就全部禁止，并且永久写进进程级缓存 `_ROBOTS`（没有 TTL）：网页
+    服务这种长进程里，一次网络抖动会让这个 host 在之后所有运行里都记「live fetch blocked by robots.txt」，直到重启。保守，不违反
+    robots。可能的做法：599 / 5xx 只缓存约 10 分钟，200 / 404 照旧长期缓存。
+15. live 页的存盘文件名只由 url + 'live' 决定：几个方向（或同一方向的并发线程）抓同一 URL 时后写的覆盖先写的，同时写还可能互相截断；
+    各方向 state.json 的 raw_path 不一定是它当时抽取的那份字节（live 页在一次运行里可能改过数）。published2：fleetnews 的
+    02da71950dfcce99.raw 由 d8、d2、d7 先后写入，文件时刻是 d7 那次；三份 text_chars 都是 3810，没看到损坏。可能的做法：文件名加
+    sha1(body)，临时文件 + os.replace 原子写，raw_path 记实际写入的文件。
+16. `probes/time_split.py` 的原点：from_start_s 以 started_at 为原点（prepare_run 开头取、截到整秒），wall_s 却从 prepare_run 结束时的
+    t0 算起；calls.jsonl 的 at 和 fetch_at 也只到秒。所以上面用时拆分表的「extract 21.0–38.4」超过了总用时 37.7 s，跨度写到 0.1 s，
+    误差其实约 1 s（审查反推：原点比 wall_s 的原点早约 0.74–1.0 s；其余数字审查逐项对过文件）。可能的做法：state 记毫秒精度的 t0，
+    at / fetch_at 用 timespec='milliseconds'，time_split 用同一原点。
 
 ## v2.4.1：「答案已公布」候选规则的审查修复（离线，未调模型）
 
