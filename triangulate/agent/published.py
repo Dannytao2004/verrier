@@ -24,6 +24,7 @@
 4. v2.5 提前停（EarlyWatch，只在真实使用、连续值目标时）：子 agent 每核对完一页，就把这一页的新点按上面 1–3 检查一次
    （候选不要求裁判看过；只送新点，送过的不再送）。第一次确认出 published 就停下其余子 agent，跳过裁判和估计，
    终稿写明没有做估计；确认的值互相矛盾就不再提前检查，照常走裁判、估计和上面的检查。
+   v2.5.2：一次检查出错（transport / 输出无效 / 预算），它的候选和下一页的候选一起再送一次。
 """
 import json
 import math
@@ -328,7 +329,8 @@ class EarlyWatch:
     """v2.5 提前停（只在真实使用时由 run.prepare_run 放进 ctx.early；回测没有它）。子 agent 每核对完一页调 offer：
     这一页的新点编临时 id（e1, e2 ...），按 candidates(judged_only=False) 选候选，有候选就问一次确认模型（prompt 同 v2.4），
     resolve 判定。published：记下、stop.set()，其余子 agent 看到就停；conflict：不再提前检查（照常走裁判、估计和 v2.4 的
-    检查）。离散目标不提前停（结果列表由裁判定义）。检查一个接一个做（锁），已送过的点不再送。"""
+    检查）。离散目标不提前停（结果列表由裁判定义）。检查一个接一个做（锁），已送过的点不再送；
+    v2.5.2：出错的那次检查的候选不算送过，下一次检查一起送（否则后一页一确认就停，出错页上矛盾的值没人看）。"""
 
     def __init__(self):
         self.stop = threading.Event()
@@ -339,6 +341,7 @@ class EarlyWatch:
         self.checks = []
         self.rec = None     # 确认出 published 的那次 resolve 记录（临时 id）
         self.off = ""       # 不再提前检查的原因
+        self.pending = []   # v2.5.2：出错（transport / 输出无效 / 预算）的检查的候选，下一次检查一起重送
 
     def offer(self, llm, qid: str, target: dict, as_of_s: str, as_of, points: list):
         if not points or self.stop.is_set() or self.off or D.is_discrete(target):
@@ -352,11 +355,15 @@ class EarlyWatch:
                 self.n += 1
                 self.keys[f"e{self.n}"] = (p["direction_id"], tuple(p["order"]), p["source_url"])
                 tagged.append({**p, "id": f"e{self.n}"})
-            cands, note = candidates(tagged, target, as_of, judged_only=False)
+            resent = [p["id"] for p in self.pending]
+            cands, note = candidates(self.pending + tagged, target, as_of, judged_only=False)
             if not cands:
                 return
+            if resent:
+                note += f"; re-sent {len(resent)} candidate(s) from failed early check(s)"
             chk = {"at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "n_points": len(tagged),
-                   "direction_id": tagged[0]["direction_id"], "source_url": tagged[0]["source_url"], "note": note}
+                   "direction_id": tagged[0]["direction_id"], "source_url": tagged[0]["source_url"], "note": note,
+                   "resent_ids": resent}
             system, user = prompt(target, as_of_s, cands)
             t0 = time.time()
             try:
@@ -364,9 +371,11 @@ class EarlyWatch:
             except BudgetExceeded as e:
                 out, err = None, str(e)
             chk["wall_s"] = round(time.time() - t0, 2)
-            if out is None:
+            if out is None:   # 这些候选没人看过：留到下一次检查一起送，让 resolve 看得到互相矛盾的值
+                self.pending = cands
                 self.checks.append({**chk, "status": "error", "error": err, "candidates": [_summary(p) for p in cands]})
                 return
+            self.pending = []
             rec = resolve(out, cands, target)
             self.checks.append({**chk, **rec})
             if rec["status"] == "published":
@@ -379,8 +388,11 @@ class EarlyWatch:
     def record(self, idmap: dict) -> dict:
         """写进 state["published_early"]：每次检查（临时 id 换成 p 编号，原 id 留在 early_id）。"""
         status = "published" if self.rec else ("off" if self.off else "not_confirmed")
-        return {"status": status, "off": self.off, "n_checks": len(self.checks),
-                "checks": [renumber(c, idmap) for c in self.checks]}
+        by = {}
+        for c in self.checks:
+            by[c["status"]] = by.get(c["status"], 0) + 1
+        return {"status": status, "off": self.off, "n_checks": len(self.checks), "by_status": by,
+                "n_error": by.get("error", 0), "checks": [renumber(c, idmap) for c in self.checks]}
 
 
 def renumber(rec: dict, idmap: dict) -> dict:
@@ -391,6 +403,8 @@ def renumber(rec: dict, idmap: dict) -> dict:
            "candidates": [{**c, "id": f(c.get("id")), "early_id": c.get("id")} for c in rec.get("candidates") or []]}
     if "id" in rec:
         out["id"] = f(rec["id"])
+    if rec.get("resent_ids"):
+        out["resent_ids"] = [f(i) for i in rec["resent_ids"]]
     if rec.get("point"):
         out["point"] = {**rec["point"], "id": f(rec["point"].get("id")), "early_id": rec["point"].get("id")}
     if rec.get("values"):

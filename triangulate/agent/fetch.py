@@ -9,7 +9,8 @@
 3. 都不行就丢弃并记原因。
 原件和文字存 data/raw/agent/<qid>/（不进 git）；CDX 结果和快照按 URL + 时间戳缓存，重跑不重复打 Wayback。
 v2.5：真实使用（as_of = 今天、题目没有登记真值）走 fetch_live：直接抓 live 页，完全不查 Wayback；收下的条件同上面第 2 条。
-回测（as_of 早于今天，或登记了真值）仍走 fetch_page，没有改。
+回测（as_of 早于今天，或登记了真值）仍走 fetch_page，没有改。v2.5.2：fetch_live 每次取页再判断 as_of >= 今天，
+已早于今天就改走 fetch_page（不抓 live 页）。
 """
 import hashlib
 import json
@@ -200,8 +201,12 @@ def fetch_page(url: str, as_of: date, qid: str, allow_live=None, today=None) -> 
 def fetch_live(url: str, as_of: date, qid: str, today=None) -> dict:
     """v2.5 真实使用（pipeline 在 ctx.live_fetch 时用它，代替 fetch_page）：直接抓 live 页，不调 cdx_lookup、不请求
     web.archive.org。超时短、不重试（net.get_live）；robots、每个 host 的限速照旧。收下的条件与 fetch_page 的 live 分支相同：
-    读得出日期且 <= as_of、正文没有晚于 as_of 的显式日期；标 live_dated。"""
+    读得出日期且 <= as_of、正文没有晚于 as_of 的显式日期；标 live_dated。
+    v2.5.2：真实使用只在 prepare_run 时判断一次，所以这里每次取页再判断：取页这天 as_of 已早于今天（运行跨过午夜、
+    网页上隔天才批准）就不抓 live 页，按回测走 fetch_page 的快照路径（同 v2.4.1 每次取页的 allow_live）。"""
     today = today or date.today()
+    if as_of < today:
+        return {**fetch_page(url, as_of, qid, today=today), "live_skipped": "as_of before fetch day: snapshot path"}
     url = clean_url(url)
     rec = {"url": url, "status": "dropped", "reason": _unsupported(url), "snapshot_ts": None, "page_date": None}
     if rec["reason"]:

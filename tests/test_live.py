@@ -10,7 +10,7 @@ import threading
 import time
 import unittest
 import urllib.parse
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from unittest import mock
 
@@ -86,7 +86,7 @@ class TestLiveFetch(NetCase):
         fake = FakeNet(lambda u: (200, HTML, {"Content-Type": "text/html"}))
         self.use(fake, 0.01)
         with mock.patch.object(F, "cdx_lookup", side_effect=AssertionError("cdx_lookup in live use")):
-            rec = F.fetch_live("https://web.archive.org/web/20261001000000/https://news.example.co.uk/sep#x", AS_OF, "t")
+            rec = F.fetch_live("https://web.archive.org/web/20261001000000/https://news.example.co.uk/sep#x", AS_OF, "t", today=AS_OF)
         self.assertEqual((rec["status"], rec["page_date"], rec["snapshot_ts"]), ("live_dated", "2026-10-05", None))
         self.assertEqual([x["url"] for x in fake.log], ["https://news.example.co.uk/robots.txt", "https://news.example.co.uk/sep"])
         self.assertEqual([x["timeout"] for x in fake.log], [net.LIVE_ROBOTS_TIMEOUT_S, net.LIVE_TIMEOUT_S])
@@ -97,13 +97,13 @@ class TestLiveFetch(NetCase):
         fake = FakeNet(lambda u: (404 if u.endswith("/gone") else 200, pages[urllib.parse.urlsplit(u).path],
                                   {"Content-Type": "text/html"}))
         self.use(fake, 0.01)
-        got = {k: F.fetch_live(f"https://a.example.org{k}", date(2026, 10, 1), "t")["reason"] for k in pages}
+        got = {k: F.fetch_live(f"https://a.example.org{k}", date(2026, 10, 1), "t", today=date(2026, 10, 1))["reason"] for k in pages}
         self.assertEqual(got, {"/undated": "live page has no readable date", "/later": "live page dated 2026-10-05 > as_of",
                                "/gone": "live http 404"})
-        rec = F.fetch_live("https://c.example.org/private/x", AS_OF, "t")
+        rec = F.fetch_live("https://c.example.org/private/x", AS_OF, "t", today=AS_OF)
         self.assertEqual(rec["reason"], "live fetch blocked by robots.txt")
         self.assertNotIn("https://c.example.org/private/x", [x["url"] for x in fake.log])
-        self.assertEqual(F.fetch_live("https://a.example.org/r.pdf", AS_OF, "t")["reason"], "binary file type not supported in MVP")
+        self.assertEqual(F.fetch_live("https://a.example.org/r.pdf", AS_OF, "t", today=AS_OF)["reason"], "binary file type not supported in MVP")
 
     def test_live_does_not_retry_or_back_off(self):
         import urllib.error
@@ -116,7 +116,7 @@ class TestLiveFetch(NetCase):
             raise urllib.error.URLError(ConnectionRefusedError(10061, "refused"))
         self.use(mock.Mock(open=boom), 0.01)
         with mock.patch.object(net.time, "sleep", lambda s: sleeps.append(s)):
-            rec = F.fetch_live("https://slow.example.org/a", AS_OF, "t")
+            rec = F.fetch_live("https://slow.example.org/a", AS_OF, "t", today=AS_OF)
         self.assertEqual(rec["reason"], "live fetch error URLError")
         self.assertEqual(n, ["https://slow.example.org/robots.txt", "https://slow.example.org/a"])   # 一次，不重试
         self.assertFalse([s for s in sleeps if s >= 1])                                             # 没有 10 / 30 秒退避
@@ -153,6 +153,32 @@ class TestBacktestFetchPath(NetCase):
         self.assertIn("live pages not used in backtests", rec["reason"])
         self.assertEqual({x["host"] for x in log}, {"web.archive.org"})
 
+    def test_live_fetch_after_the_as_of_day_uses_the_archive(self):
+        """v2.5.2（审查复现）：真实使用的运行跨过午夜或隔天才批准，取页这天 as_of 已早于今天：fetch_live 不抓 live 页，
+        走 fetch_page 的快照路径。live 页日期 2026-10-05、正文没有更晚的日期，v2.5.1 会把它收成 live_dated。"""
+        head = ["timestamp", "original", "statuscode", "mimetype"]
+        rows = {"/none": [head], "/snap": [head, ["20261015000000", "https://news.example.co.uk/snap", "200", "text/html"]],
+                "/today": [head]}
+
+        def routes(u):
+            if u.startswith(F.CDX):
+                orig = urllib.parse.parse_qs(urllib.parse.urlsplit(u).query)["url"][0]
+                return 200, json.dumps(rows[urllib.parse.urlsplit(orig).path]).encode(), {"Content-Type": "application/json"}
+            return 200, HTML, {"Content-Type": "text/html"}   # 快照和 live 页都是这一页
+        fake = FakeNet(routes)
+        self.use(fake, 0.01)
+        with mock.patch.dict(net.HOST_INTERVAL, {"web.archive.org": 0.01}):
+            none = F.fetch_live("https://news.example.co.uk/none", AS_OF, "t", today=date(2026, 10, 17))
+            snap = F.fetch_live("https://news.example.co.uk/snap", AS_OF, "t", today=date(2026, 10, 17))
+            dflt = F.fetch_live("https://news.example.co.uk/today", date.today() - timedelta(days=1), "t")   # 默认的「今天」
+        self.assertEqual(none["status"], "dropped")
+        self.assertIn("live pages not used in backtests (as_of before fetch day)", none["reason"])
+        self.assertEqual((snap["status"], snap["snapshot_ts"]), ("snapshot", "20261015000000"))
+        self.assertEqual(dflt["status"], "dropped")
+        self.assertTrue(all(r["live_skipped"] for r in (none, snap, dflt)))
+        self.assertEqual({x["host"] for x in fake.log}, {"web.archive.org"})                # 从不请求原网站
+        self.assertEqual(len([x for x in fake.log if x["url"].startswith(F.CDX)]), 3)
+
 
 def _ctx(live, early=None, as_of="2026-10-16", check=None):
     from triangulate.agent import pipeline as P
@@ -178,7 +204,7 @@ class TestLiveConcurrency(NetCase):
         from triangulate.agent import pipeline as P
         fake = FakeNet(lambda u: (200, HTML, {"Content-Type": "text/html"}), delay=0.3)
         self.use(fake, 0.5)
-        ctx = _ctx(True)
+        ctx = _ctx(True, as_of=date.today().isoformat())   # 取页用真的「今天」（v2.5.2 每次取页判断 as_of >= 今天）
         urls = ["https://a.example.org/1", "https://a.example.org/2", "https://b.example.org/1", "https://c.example.org/private/x"]
         ctx.searcher = _Searcher(urls)
         ctx.llm = mock.Mock(ask=lambda *a, **k: ({"points": []}, None))
@@ -438,6 +464,40 @@ class TestEarlyStop(unittest.TestCase):
         w.stop.set()
         w.offer(llm, "t", UK, "2026-10-16", AS_OF, page(2))
         self.assertEqual(len(sent), 2)
+
+    def test_failed_check_candidates_are_resent(self):
+        """v2.5.2（审查复现）：第一次提前检查出错（transport），第二页的检查确认了。v2.5.1 只送第二页的点、确认就停，
+        出错页上的 340,000 没人看；现在出错那次的候选和下一页的一起送，相差 2.9% 判 conflict、关掉提前检查。"""
+        from triangulate.agent import outputs
+
+        def run(second):
+            w, sent = PB.EarlyWatch(), []
+
+            def ask(system, user, *, role, qid, max_tokens):
+                sent.append(re.findall(r"^- (e\d+): ", user, re.M))
+                if len(sent) == 1:
+                    return None, "transport: timeout"
+                return {"candidates": [{"id": i, "verdict": "target", "reason": "r"} for i in sent[-1]]}, None
+            for n, (d, v) in enumerate((("d1", 340000), ("d2", second))):
+                pts = [{**p, "direction_id": d, "order": (n, 0), "source_url": f"u{n}", "via": "live_dated",
+                        "page_date": "2026-10-05", "value": float(v), "published_at_if_visible": ""}
+                       for p in _pts([(TOTAL, v, "2026-09-01", "2026-09-30")])]
+                w.offer(mock.Mock(ask=ask), "t", UK, "2026-10-16", AS_OF, pts)
+            return w, sent
+        w, sent = run(350536)
+        self.assertEqual(sent, [["e1"], ["e1", "e2"]])
+        self.assertFalse(w.stop.is_set())
+        self.assertIn("disagree", w.off)
+        rec = w.record({"e1": "p1", "e2": "p2"})
+        self.assertEqual((rec["status"], rec["n_error"], rec["by_status"]), ("off", 1, {"error": 1, "conflict": 1}))
+        self.assertEqual(rec["checks"][1]["resent_ids"], ["p1"])
+        w, sent = run(340100)   # 两个值一致（相差 0.03%）：照样停，记录写明重送过
+        self.assertEqual((sent, w.stop.is_set()), ([["e1"], ["e1", "e2"]], True))
+        self.assertIn("re-sent 1 candidate(s) from failed early check(s)", w.rec["note"])
+        led = "\n".join(outputs.published_md({"published": {"status": "published", "note": w.rec["note"]},
+                                              "published_early": w.record({})}))
+        self.assertIn("Early checks while the sub-agents were running: 2 (published; by status: error 1, published 1; "
+                      "candidates of a failed check are re-sent with the next check)", led)
 
     def test_prepare_run_flags(self):
         from triangulate.agent import run as R

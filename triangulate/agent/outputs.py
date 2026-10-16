@@ -238,8 +238,12 @@ def published_md(state: dict) -> list:
     L = ["## Published-value check (live use only)", "", f"Status: **{pub.get('status')}**. {_md(pub.get('note'))}"]
     pe = state.get("published_early") or {}
     if pe:   # v2.5：子 agent 运行中的提前检查
+        by = pe.get("by_status") or {}   # v2.5.2：有检查出错时写出每种状态的次数
         L.append(f"Early checks while the sub-agents were running: {pe.get('n_checks')} ({pe.get('status')}"
-                 + (f"; {_md(pe.get('off'))}" if pe.get("off") else "") + "); details in state.json -> published_early.")
+                 + (f"; {_md(pe.get('off'))}" if pe.get("off") else "")
+                 + (f"; by status: {', '.join(f'{k} {v}' for k, v in sorted(by.items()))}; candidates of a failed check "
+                    f"are re-sent with the next check" if pe.get("n_error") else "")
+                 + "); details in state.json -> published_early.")
     if pub.get("error"):
         L.append(f"Error: {_md(pub['error'])}")
     if pub.get("status") == "published":
