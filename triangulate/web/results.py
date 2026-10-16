@@ -19,6 +19,8 @@ QUESTIONS_BY_ID = {q["id"]: q for q in QUESTIONS}
 DEV_SET = [("fc_yell_2026_08", "v21b"), ("fc_yell_2026_09", "v21b"), ("fc_jnto_2026_08", "v21d"),
            ("fc_kr_births_2026_07", "v21d")]
 TEST_SET = [("fc_tw_births_2026_09", "test1"), ("fc_lhr_pax_2026_09", "test1"), ("fc_jp_births_2026_07", "test1")]
+# 展示集（EVAL_SHOWCASE_PLAN.md）：python -m triangulate showcase 写的汇总。「去年同月」不是对照（2026-10-16 的决定），网页不显示。
+SHOWCASE_FILE = RES.parent / "showcase" / "summary.json"
 SHARE_DEFINITION = ("每个输入 sigma_ln = ln(P90/P10) / (2 x 1.2816)；一个 formula_mc 方法的假设占比 = 假设输入的 sigma_ln^2 之和 / "
                     "全部采样输入的 sigma_ln^2 之和；序列方法记 0；总体 = 按方法权重平均。每个输入只出现一次、指数为 ±1 的纯乘除"
                     "公式，这就是 ln 方差的精确分解；有加减、mean() 或幂次时只是近似。观测点的 P10/P90 由代码统一给（v/1.2 .. v*1.2），假设用代码放宽后的范围。")
@@ -328,7 +330,7 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
     if q is not None and q.get("answer_value") is not None:   # 只有回测题才显示官方值和误差
         s = score_one(q, st)
         out["official"] = {"answer_value": q["answer_value"], "source": q.get("source"), "released": q.get("released"),
-                           "last_year": q.get("last_year"), "pct_err": s.get("pct_err"),
+                           "pct_err": s.get("pct_err"),
                            "abs_log10_err": s.get("abs_log10_err"), "covered_80": s.get("covered_80")}
         if s.get("mode") == "discrete":
             out["official"].update({k: s.get(k) for k in ("true_outcome", "prob_true", "brier", "most_likely_correct")})
@@ -365,7 +367,7 @@ def _arm(x):
 
 
 def backtest_row(qid: str, tag: str, summary_rows: list, res: Path = RES) -> dict:
-    """一行：官方值、agent 估计和误差、80% 区间是否盖住、三个基线、假设占比。数字取自 summary_<tag>.json，
+    """一行：官方值、agent 估计和误差、80% 区间是否盖住、两个基线（直接问、不联网结构化）、假设占比。数字取自 summary_<tag>.json，
     假设占比由同一次运行的 state.json 算出。"""
     s = next((r for r in summary_rows if r.get("id") == qid), None)
     q = QUESTIONS_BY_ID.get(qid) or {}
@@ -376,7 +378,7 @@ def backtest_row(qid: str, tag: str, summary_rows: list, res: Path = RES) -> dic
     row.update(answer_value=s.get("answer_value"), estimate=s.get("estimate"), p10=s.get("p10"), p90=s.get("p90"),
                pct_err=s.get("pct_err"), abs_log10_err=s.get("abs_log10_err"), covered_80=s.get("covered_80"),
                naive=_arm(arms.get("naive")), structured=_arm(arms.get("structured_no_retrieval")),
-               last_year=_arm(arms.get("last_year_same_period")), usd=s.get("usd_total_assumed"))
+               usd=s.get("usd_total_assumed"))
     try:
         share = assumption_share(load_state(qid, tag, res).get("compute"))
         row.update(share=share["overall"], share_warning=share["warning"])
@@ -390,7 +392,39 @@ def _summary(tag: str, res: Path) -> list:
     return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else []
 
 
-def backtests(res: Path = RES) -> dict:
+def _sc_arm(x, keys=()):
+    return None if not x else {k: x.get(k) for k in ("estimate", "pct_err", "abs_log10_err", "status", *keys)}
+
+
+def showcase_view(path: Path = SHOWCASE_FILE):
+    """展示集一节：每题每个 arm 的数（已公布题带误差），agent 的区间、覆盖、成本、方法和市场工具的结果，预注册标准的判定。
+    联网直接答的补充运行（不在预注册里）单列。没有汇总文件时返回 None。"""
+    if not path.is_file():
+        return None
+    d = json.loads(path.read_text(encoding="utf-8"))
+    rows = []
+    for r in d.get("rows") or []:
+        a = r.get("arms") or {}
+        ag = a.get("agent")
+        agent = None if not ag else dict(_sc_arm(ag, ("p10", "p90", "basis", "usd_total_assumed", "wall_s",
+                                                      "assumption_weight_share", "n_points_kept", "aborted")),
+                                         covered_80=(r.get("covered_80") or {}).get("agent"),
+                                         methods=[{k: m.get(k) for k in ("id", "formula", "estimate", "weight")}
+                                                  for m in ag.get("methods") or []],
+                                         markets=ag.get("markets"))
+        st = _sc_arm(a.get("structured"), ("p10", "p90"))
+        if st is not None:
+            st["covered_80"] = (r.get("covered_80") or {}).get("structured")
+        rows.append({"qid": r.get("id"), "tag": d.get("tag"), "kind": r.get("kind"), "as_of": r.get("as_of"),
+                     "answer_value": r.get("answer_value"), "released": r.get("released"),
+                     "expected_release": r.get("expected_release"), "question": r.get("question"),
+                     "agent": agent, "naive": _sc_arm(a.get("naive")), "structured": st,
+                     "search_direct": _sc_arm(a.get("search_direct")) if "search_direct" in a else None,
+                     "search_direct_supp": _sc_arm(r.get("search_direct_supplementary"))})
+    return {"tag": d.get("tag"), "rows": rows, "criteria": d.get("criteria")}
+
+
+def backtests(res: Path = RES, showcase_path: Path = SHOWCASE_FILE) -> dict:
     tables = {}
     for name, rows in (("dev", DEV_SET), ("test", TEST_SET)):
         cache = {}
@@ -400,5 +434,5 @@ def backtests(res: Path = RES) -> dict:
                 cache[tag] = _summary(tag, res)
             out.append(backtest_row(qid, tag, cache[tag], res))
         tables[name] = out
-    return clean({"dev": tables["dev"], "test": tables["test"], "share_threshold": SHARE_WARN,
-                  "share_definition": SHARE_DEFINITION})
+    return clean({"dev": tables["dev"], "test": tables["test"], "showcase": showcase_view(showcase_path),
+                  "share_threshold": SHARE_WARN, "share_definition": SHARE_DEFINITION})

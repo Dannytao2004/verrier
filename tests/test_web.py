@@ -191,13 +191,40 @@ class TestBacktestTables(unittest.TestCase):
         self.assertAlmostEqual(jp["estimate"], summ["fc_jp_births_2026_07"]["estimate"])
         self.assertEqual(jp["covered_80"], summ["fc_jp_births_2026_07"]["covered_80"])
         self.assertEqual(jp["naive"]["estimate"], summ["fc_jp_births_2026_07"]["arms"]["naive"]["estimate"])
-        self.assertEqual(jp["last_year"]["estimate"], 63415)
+        self.assertNotIn("last_year", jp)           # 「去年同月」不再是对照（2026-10-16），网页不显示
         self.assertGreater(jp["share"], 0.5)        # 日本题的估计主要靠假设（births per clinic delivery）
         self.assertTrue(jp["share_warning"])
         lhr = next(r for r in b["test"] if r["qid"] == "fc_lhr_pax_2026_09")
         self.assertLess(lhr["share"], 0.5)
         tw = next(r for r in b["test"] if r["qid"] == "fc_tw_births_2026_09")
         self.assertIsNone(tw["structured"])         # 台湾题的不联网结构化 arm 没有估计
+
+    def test_showcase_section(self):
+        from triangulate.web import results as R
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            self.assertIsNone(R.backtests(showcase_path=tmp / "none.json")["showcase"])
+            d = {"tag": "showcase1", "criteria": {"n_scored": 1, "final": False},
+                 "rows": [{"id": "fc_nhs_ae_2026_09", "kind": "published", "as_of": "2026-09-08", "answer_value": 100,
+                           "covered_80": {"agent": True, "structured": None},
+                           "arms": {"agent": {"estimate": 110, "pct_err": 0.1, "p10": 90, "p90": 130, "methods": [
+                               {"id": "m1", "formula": "p1 * a1", "estimate": 110, "weight": 1, "rationale": "x"}],
+                               "markets": {"note": "no matching market"}},
+                               "naive": {"estimate": 150, "pct_err": 0.5}, "structured": {"estimate": None}}},
+                          {"id": "fc_jnto_2026_09", "kind": "unpublished", "as_of": "2026-10-16", "answer_value": None,
+                           "expected_release": "2026-10-21", "covered_80": {},
+                           "arms": {"agent": {"estimate": 5}, "search_direct": {"estimate": None, "status": "invalid_output"}},
+                           "search_direct_supplementary": {"estimate": 6, "status": "ok"}}]}
+            (tmp / "s.json").write_text(json.dumps(d), encoding="utf-8")
+            v = R.backtests(showcase_path=tmp / "s.json")["showcase"]
+            pub, un = v["rows"]
+            self.assertEqual((pub["agent"]["covered_80"], pub["agent"]["methods"][0]), (True, {"id": "m1", "formula": "p1 * a1",
+                                                                                              "estimate": 110, "weight": 1}))
+            self.assertIsNone(pub["search_direct"])
+            self.assertEqual((un["search_direct"]["status"], un["search_direct_supp"]["estimate"]), ("invalid_output", 6))
+            self.assertNotIn("last_year", json.dumps(v))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
 
     def test_row_builder_on_synthetic_summary(self):
         from triangulate.web import results as R

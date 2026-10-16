@@ -250,7 +250,7 @@ async function pageResult(qid, tag) {
       <div>80% 区间 [${fmt(e.p10)}, ${fmt(e.p90)}]</div><div class="muted small">区间依据 ${esc(e.basis)} · 加权规则 ${esc(e.weight_rule)}</div></div>
     ${o ? `<div class="card"><div class="muted">官方值（只用于打分，agent 看不到）</div><div class="big">${fmt(o.answer_value)}</div>
       <div>误差 <b>${pct(o.pct_err)}</b> · 80% 区间盖住：${yesno(o.covered_80)}</div>
-      <div class="muted small">去年同月 ${fmt(o.last_year)} · 公布 ${esc(o.released)} · ${link(o.source, "来源")}</div></div>` : ""}
+      <div class="muted small">公布 ${esc(o.released)} · ${link(o.source, "来源")}</div></div>` : ""}
     <div class="card ${sh.warning ? "warn" : ""}"><div class="muted">证据 vs 假设</div>
       ${ov === null || ov === undefined ? '<div class="big">—</div><div class="muted">没有算出估计</div>' : `
       <div class="big">证据 ${share(1 - ov)} · 假设 ${share(ov)}</div>
@@ -321,14 +321,59 @@ function leakTable(l) {
 function btTable(rows) {
   const arm = a => a ? `${fmt(a.estimate)}<div class="small ${Math.abs(a.pct_err) > 0.2 ? "bad" : ""}">${pct(a.pct_err)}</div>` : "—";
   return `<table><tr><th>题</th><th>tag</th><th>as_of</th><th class="num">官方值</th><th class="num">agent 估计</th><th class="num">误差</th>
-  <th class="num">80% 区间</th><th>盖住</th><th class="num">假设占比</th><th class="num">直接问（naive）</th><th class="num">不联网结构化</th><th class="num">去年同月</th><th></th></tr>
-  ${rows.map(r => !r.found ? `<tr><td>${esc(r.qid)}</td><td>${esc(r.tag)}</td><td colspan="11" class="bad">summary_${esc(r.tag)}.json 里没有这题</td></tr>` :
+  <th class="num">80% 区间</th><th>盖住</th><th class="num">假设占比</th><th class="num">直接问（naive）</th><th class="num">不联网结构化</th><th></th></tr>
+  ${rows.map(r => !r.found ? `<tr><td>${esc(r.qid)}</td><td>${esc(r.tag)}</td><td colspan="10" class="bad">summary_${esc(r.tag)}.json 里没有这题</td></tr>` :
   `<tr><td>${esc(r.qid)}</td><td>${esc(r.tag)}</td><td>${esc(r.as_of)}</td><td class="num">${fmt(r.answer_value)}</td>
   <td class="num"><b>${fmt(r.estimate)}</b></td><td class="num ${Math.abs(r.pct_err) > 0.2 ? "bad" : ""}">${pct(r.pct_err)}</td>
   <td class="num small">${r.estimate === null ? "—" : `[${fmt(r.p10)}, ${fmt(r.p90)}]`}</td><td>${yesno(r.covered_80)}</td>
   <td class="num">${share(r.share)}${r.share_warning ? '<div><span class="badge b-warn">注意：估计主要靠假设</span></div>' : ""}</td>
-  <td class="num">${arm(r.naive)}</td><td class="num">${arm(r.structured)}</td><td class="num">${arm(r.last_year)}</td>
+  <td class="num">${arm(r.naive)}</td><td class="num">${arm(r.structured)}</td>
   <td><a href="${resultHref(r.qid, r.tag)}">详情</a></td></tr>`).join("")}</table>`;
+}
+// ---------- 展示集（EVAL_SHOWCASE_PLAN.md） ----------
+function scArm(a, scored) {
+  if (!a) return "—";
+  if (a.estimate === null || a.estimate === undefined) return `<span class="bad">没有估计</span>${a.status ? `<div class="small muted">${esc(a.status)}</div>` : ""}`;
+  return `${fmt(a.estimate)}${scored ? `<div class="small ${Math.abs(a.pct_err) > 0.2 ? "bad" : ""}">${pct(a.pct_err)}</div>` : ""}`;
+}
+function scMarket(m) {
+  if (!m) return "—";
+  return m.price_points && m.price_points.length ? m.price_points.map(x => `${esc(x.name)}：${prob(x.value)}`).join("<br>")
+    : `<span class="muted small">无匹配市场${m.note ? "（" + esc(m.note) + "）" : ""}</span>`;
+}
+function scInterval(a) { return !a || a.estimate === null || a.estimate === undefined ? "—" : `[${fmt(a.p10)}, ${fmt(a.p90)}]`; }
+function scMed(x) { return x === "inf" ? "∞（过半没有估计）" : x === null || x === undefined ? "—" : Number(x).toFixed(4); }
+function scBlock(s) {
+  if (!s) return '<p class="muted">还没有展示集汇总（.venv/Scripts/python.exe -m triangulate showcase）。</p>';
+  const pub = s.rows.filter(r => r.kind === "published"), un = s.rows.filter(r => r.kind === "unpublished"), c = s.criteria || {};
+  const tf = b => b === true ? '<span class="good">满足</span>' : b === false ? '<span class="bad">不满足</span>' : "待定";
+  return `<h3>已公布题（回测：只用 as_of 之前的 Wayback 快照）</h3>
+  <table><tr><th>题</th><th>as_of</th><th class="num">官方值</th><th class="num">agent 估计</th><th class="num">80% 区间</th><th>盖住</th>
+  <th class="num">直接问（naive）</th><th class="num">不联网结构化</th><th>结构化区间盖住</th><th>预测市场</th><th class="num">agent 成本 / 用时</th><th></th></tr>
+  ${pub.map(r => `<tr><td>${esc(r.qid)}</td><td>${esc(r.as_of)}</td><td class="num">${fmt(r.answer_value)}<div class="muted small">公布 ${esc(r.released)}</div></td>
+  <td class="num"><b>${scArm(r.agent, true)}</b></td><td class="num small">${scInterval(r.agent)}</td><td>${yesno(r.agent && r.agent.covered_80)}</td>
+  <td class="num">${scArm(r.naive, true)}</td><td class="num">${scArm(r.structured, true)}</td><td>${yesno(r.structured && r.structured.covered_80)}</td>
+  <td class="small">${scMarket(r.agent && r.agent.markets)}</td>
+  <td class="num small">${r.agent ? `$${fmt(r.agent.usd_total_assumed)} / ${fmt(r.agent.wall_s)} s` : "—"}</td>
+  <td>${r.agent ? `<a href="${resultHref(r.qid, r.tag)}">详情</a>` : ""}</td></tr>`).join("")}</table>
+  <h3>未公布题（真实使用：as_of = 运行当天，公布后再打分）</h3>
+  <table><tr><th>题</th><th>as_of</th><th>预计公布</th><th class="num">agent 估计</th><th class="num">80% 区间</th><th class="num">直接问（naive）</th>
+  <th class="num">不联网结构化</th><th class="num">联网直接答（预注册）</th><th class="num">联网直接答（补充，不计分）</th><th>预测市场</th><th class="num">agent 成本 / 用时</th><th></th></tr>
+  ${un.map(r => `<tr><td>${esc(r.qid)}</td><td>${esc(r.as_of)}</td><td>${esc(r.expected_release)}</td>
+  <td class="num"><b>${scArm(r.agent, false)}</b></td><td class="num small">${scInterval(r.agent)}</td><td class="num">${scArm(r.naive, false)}</td>
+  <td class="num">${scArm(r.structured, false)}<div class="muted small">${scInterval(r.structured)}</div></td>
+  <td class="num">${scArm(r.search_direct, false)}</td><td class="num">${scArm(r.search_direct_supp, false)}</td>
+  <td class="small">${scMarket(r.agent && r.agent.markets)}</td>
+  <td class="num small">${r.agent ? `$${fmt(r.agent.usd_total_assumed)} / ${fmt(r.agent.wall_s)} s` : "—"}</td>
+  <td>${r.agent ? `<a href="${resultHref(r.qid, r.tag)}">详情</a>` : ""}</td></tr>`).join("")}</table>
+  <div class="card small"><b>预注册的成功标准（${c.final ? "最终" : `中期：${esc(c.n_scored)} / ${esc(c.n_questions)} 题已打分`}）</b><br>
+  ${c.final ? "" : "标准按全部 4 题定义；下面的数只算已打分的题，判定要等未公布题公布。<br>"}
+  1. agent 中位百分比误差绝对值 ≤ 20%：${c.c1_agent_median_abs_pct_err === "inf" ? "∞" : pct(c.c1_agent_median_abs_pct_err, false)} → ${tf(c.c1_pass)}<br>
+  2. agent 的中位 |log10 误差| 低于直接问和结构化：agent ${scMed((c.median_abs_log10 || {}).agent)} · 直接问 ${scMed((c.median_abs_log10 || {}).naive)}
+   · 结构化 ${scMed((c.median_abs_log10 || {}).structured)} → ${tf(c.c2_vs_naive_structured_pass)}；未公布题上低于联网直接答（预注册那次）：${tf(c.c2_vs_search_direct_pass)}<br>
+  两条都满足 = 达标：${c.final ? tf(c.met) : "待定（未公布题公布后才能判定）"}。n = 4，只能说明方向，不是统计结论。</div>
+  <p class="muted small">联网直接答（同一模型 + 服务端 web_search，一次调用）预注册那次两题都在 max_tokens = 4096 处截断、没有给出数字，按规则记为失败；
+  补充运行只把 max_tokens 提到 32000，不在预注册里、不进成功标准。「去年同月」不再是对照，不显示。详见 SHOWCASE.md。</p>`;
 }
 async function pageBacktests() {
   const d = await api("/api/backtests");
@@ -337,7 +382,10 @@ async function pageBacktests() {
   <p class="muted">v2.1 的几处修正是看着这 4 题的失败做出来的，所以这里的成绩是开发数据，不能当测试成绩（EVAL_TEST_PLAN.md）。</p>${btTable(d.dev)}
   <h2>留出测试（test1，3 题）</h2>
   <p class="muted">代码在跑之前定型（v2.1c），每题一次，跑完不为这三题改代码。n = 3，只能说明方向，不是统计结论。</p>${btTable(d.test)}
+  <h2>展示集（${esc((d.showcase || {}).tag || "showcase1")}，4 题，2026-10-16 预注册）</h2>
+  <p class="muted">题目、arm、成功标准在任何模型调用之前提交（tag showcase-prereg）；每题每个 arm 只跑一次，全部报告。</p>${scBlock(d.showcase)}
   <div class="card small"><b>假设占比</b>：${esc(d.share_definition)} 超过 ${share(d.share_threshold)} 的行标「注意：估计主要靠假设」：
   这次估计的不确定性主要来自裁判提出的假设输入，而不是观测到的证据。</div>
-  <p class="muted small">数字来自 results/agent/summary_&lt;tag&gt;.json（agent 和三个基线；基线来自 results/forecast/summary.json）；假设占比由同一次运行的 state.json 算出。</p>`;
+  <p class="muted small">数字来自 results/agent/summary_&lt;tag&gt;.json（agent 和两个基线：直接问、不联网结构化；基线来自 results/forecast/summary.json）；假设占比由同一次运行的 state.json 算出。
+  展示集的数字来自 results/showcase/summary.json。</p>`;
 }

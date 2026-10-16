@@ -63,22 +63,37 @@
 
 <p class="note"><b>Held-out test</b> (3 questions the agent had never seen; code frozen and success criteria committed before the runs)</p>
 <table>
-  <tr><th>Question</th><th>Official</th><th>Agent</th><th>Same month last year</th><th>Ask the model directly</th><th>Structured, no retrieval</th></tr>
-  <tr><td>Taiwan registered births, Sep 2026</td><td>7,704</td><td class="best">+1.1%</td><td>+11.7%</td><td>+42.8%</td><td>no estimate</td></tr>
-  <tr><td>London Heathrow passengers, Sep 2026</td><td>7.18 m</td><td>+3.0%</td><td>+2.4%</td><td class="best">+0.3%</td><td>&minus;2.5%</td></tr>
-  <tr><td>Japan births (preliminary), Jul 2026</td><td>62,479</td><td class="best">+0.8%</td><td>+1.5%</td><td>+4.0%</td><td>&minus;2.4%</td></tr>
-  <tr><td><b>Median absolute error</b></td><td></td><td class="best"><b>1.1%</b></td><td>2.4%</td><td>4.0%</td><td>2.5%</td></tr>
+  <tr><th>Question</th><th>Official</th><th>Agent</th><th>Ask the model directly</th><th>Structured, no retrieval</th></tr>
+  <tr><td>Taiwan registered births, Sep 2026</td><td>7,704</td><td class="best">+1.1%</td><td>+42.8%</td><td>no estimate</td></tr>
+  <tr><td>London Heathrow passengers, Sep 2026</td><td>7.18 m</td><td>+3.0%</td><td class="best">+0.3%</td><td>&minus;2.5%</td></tr>
+  <tr><td>Japan births (preliminary), Jul 2026</td><td>62,479</td><td class="best">+0.8%</td><td>+4.0%</td><td>&minus;2.4%</td></tr>
+  <tr><td><b>Median absolute error</b></td><td></td><td class="best"><b>1.1%</b></td><td>4.0%</td><td>2.5%</td></tr>
 </table>
 <p class="note"><b>Development set</b> (4 questions used while building the agent, so not a test)</p>
 <table>
-  <tr><th>Question</th><th>Official</th><th>Agent</th><th>Same month last year</th><th>Ask the model directly</th><th>Structured, no retrieval</th></tr>
-  <tr><td>Yellowstone recreation visits, Aug 2026</td><td>856,467</td><td class="best">+0.6%</td><td>+3.0%</td><td>&minus;0.8%</td><td>+19.0%</td></tr>
-  <tr><td>Yellowstone recreation visits, Sep 2026</td><td>868,450</td><td class="best">&minus;2.4%</td><td>&minus;3.3%</td><td>&minus;17.1%</td><td>&minus;37.3%</td></tr>
-  <tr><td>Foreign visitor arrivals to Japan, Aug 2026</td><td>3,098,900</td><td class="best">+3.3%</td><td>+10.6%</td><td>+9.7%</td><td>+13.9%</td></tr>
-  <tr><td>South Korea live births, Jul 2026</td><td>24,275</td><td class="best">&minus;6.1%</td><td>&minus;10.0%</td><td>&minus;21.7%</td><td>&minus;16.7%</td></tr>
+  <tr><th>Question</th><th>Official</th><th>Agent</th><th>Ask the model directly</th><th>Structured, no retrieval</th></tr>
+  <tr><td>Yellowstone recreation visits, Aug 2026</td><td>856,467</td><td class="best">+0.6%</td><td>&minus;0.8%</td><td>+19.0%</td></tr>
+  <tr><td>Yellowstone recreation visits, Sep 2026</td><td>868,450</td><td class="best">&minus;2.4%</td><td>&minus;17.1%</td><td>&minus;37.3%</td></tr>
+  <tr><td>Foreign visitor arrivals to Japan, Aug 2026</td><td>3,098,900</td><td class="best">+3.3%</td><td>+9.7%</td><td>+13.9%</td></tr>
+  <tr><td>South Korea live births, Jul 2026</td><td>24,275</td><td class="best">&minus;6.1%</td><td>&minus;21.7%</td><td>&minus;16.7%</td></tr>
 </table>
 
 <div class="callout"><b>Read with care.</b> Three held-out questions are a demonstration, not a statistical result. In the Japan question the agent found no official series and scaled one clinic's deliveries by an assumed factor, so that estimate mostly reflects the model's prior; counting it as a failure, the agent's held-out median (3.0%) would no longer beat the no-retrieval baseline (2.5%). A larger held-out set is the next step.</div>
+
+<p class="note"><b>Showcase</b> (4 questions pre-registered on 16 October 2026 before any run: two already published, backtested from one month before release; two not yet published, forecast live; every arm run once, every result reported)</p>
+<table>
+  <tr><th>Published</th><th>Official</th><th>Agent</th><th>Ask the model directly</th><th>Structured, no retrieval</th></tr>
+  <tr><td>NHS England A&amp;E attendances, Sep 2026</td><td>2.44 m</td><td class="best">+0.3%</td><td>&minus;13.9%</td><td>&minus;0.7%</td></tr>
+  <tr><td>Japan inter-municipal movers, Aug 2026</td><td>356,920</td><td>no estimate</td><td class="best">+12.1%</td><td>no estimate</td></tr>
+</table>
+<table>
+  <tr><th>Not yet published (forecast 16 Oct)</th><th>Release</th><th>Agent (80% interval)</th><th>Ask directly</th><th>Structured</th><th>Model + web search*</th></tr>
+  <tr><td>Foreign visitor arrivals to Japan, Sep 2026</td><td>21 Oct</td><td>3.15 m (2.11&ndash;4.68 m)</td><td>3.10 m</td><td>3.29 m</td><td>3.05 m</td></tr>
+  <tr><td>South Korea live births, Aug 2026</td><td>28 Oct</td><td>21,881 (15,883&ndash;30,144)</td><td>19,000</td><td>20,343</td><td>23,300</td></tr>
+</table>
+<p class="note">* Same model with server-side web search, asked once for a number. The pre-registered run of this arm hit a too-small output limit on both questions and gave no number, which counts as a failure; the rerun with only that limit raised is shown for information and is outside the success criteria. No matching prediction market was found for any of the four questions.</p>
+
+<div class="callout"><b>Interim, and not all wins.</b> On the Japanese migration question the agent produced no estimate: only 3 of 44 pages were usable (the rest were PDFs, official pages the fetcher could not decode, or pages with no archived copy before the cutoff), and the judge then treated a percentage change as an annual level, which code rejected; the direct answer won there. On the NHS question the search step wrote the published figure into one query, because web search cannot be limited by date; only archived pages from before the cutoff were read, but which pages were chosen may have been influenced. The pre-registered success criteria cover all four questions and are judged after 28 October.</div>
 
 <h2>What building it taught me</h2>
 <ul>
@@ -94,7 +109,7 @@
   <li>Runs take 5&ndash;40 minutes and cost roughly US$0.3&ndash;0.6 each.</li>
 </ul>
 
-<footer>Figures as of 15 October 2026. Official values are taken from the publishers' releases or, where noted in the repository, cross-checked secondary reports. This is a research prototype; nothing here is investment advice.</footer>
+<footer>Figures as of 16 October 2026. Official values are taken from the publishers' releases or, where noted in the repository, cross-checked secondary reports. This is a research prototype; nothing here is investment advice.</footer>
 </main>
 </body>
 </html>
