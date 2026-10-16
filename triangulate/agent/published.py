@@ -21,11 +21,17 @@
    终稿里作参考列出、不混合。离散：值落在裁判的结果列表里（先找相等，再找合并的尾部）就报这个结果 resolved。
    终稿由代码写（final_text），不调终稿模型。
 回测和留出测试（as_of 早于今天，或题目登记了真值）不检查（status not_checked），不调模型：那时目标值不可能在 as_of 前公布。
+4. v2.5 提前停（EarlyWatch，只在真实使用、连续值目标时）：子 agent 每核对完一页，就把这一页的新点按上面 1–3 检查一次
+   （候选不要求裁判看过；只送新点，送过的不再送）。第一次确认出 published 就停下其余子 agent，跳过裁判和估计，
+   终稿写明没有做估计；确认的值互相矛盾就不再提前检查，照常走裁判、估计和上面的检查。
 """
 import json
 import math
 import re
+import threading
+import time
 import urllib.parse
+from datetime import datetime, timezone
 
 from . import ablation as AB
 from . import compute as C
@@ -144,8 +150,8 @@ def _forecast_quote(p: dict) -> bool:
     return bool(FORECAST_NEAR.search(q[a:m.start() if m else len(q)]))
 
 
-def candidates(points: list, target: dict, as_of) -> tuple:
-    """(候选点, 说明)。只看裁判看过并保留的点；规则见模块说明。"""
+def candidates(points: list, target: dict, as_of, judged_only: bool = True) -> tuple:
+    """(候选点, 说明)。只看裁判看过并保留的点（judged_only=False：v2.5 提前停，裁判还没看过）；规则见模块说明。"""
     tps = parse_date((target or {}).get("period_start"))
     tpe = parse_date((target or {}).get("period_end"), end=True)
     if tpe is None:
@@ -157,7 +163,7 @@ def candidates(points: list, target: dict, as_of) -> tuple:
     t_pct = _is_pct(str((target or {}).get("unit", "")))
     out, early = [], 0
     for p in points or []:
-        if not (p.get("keep") and p.get("judged_round")) or p.get("ablation_excluded"):
+        if (judged_only and not (p.get("keep") and p.get("judged_round"))) or p.get("ablation_excluded"):
             continue
         v, name, unit = p.get("value"), str(p.get("name") or ""), str(p.get("unit") or "")
         if not isinstance(v, (int, float)) or isinstance(v, bool) or not math.isfinite(v):
@@ -298,6 +304,8 @@ def final_text(state: dict) -> dict:
                f"{_fmt(est.get('central'))} (80% interval {_fmt(est.get('p10'))} to {_fmt(est.get('p90'))}) from {n} "
                f"method(s)." if est.get("central") is not None else
                "For reference: the estimation methods produced no estimate.")
+        if rec.get("early_stop"):   # v2.5 提前停：没有做估计
+            ref = EARLY_NO_ESTIMATE
     text = "\n\n".join([head, "\n".join(_evidence_lines(rec)), ref,
                         f"A published figure can be revised later; this answer reports it as published by {state.get('as_of')}."])
     return {"template": text, "text": text, "placeholders": {}, "digits_removed": 0, "model_error": None,
@@ -309,3 +317,82 @@ def conflict_note(rec: dict) -> str:
     return (f"Note: kept data points {', '.join(rec.get('confirmed_ids') or [])} were each confirmed as the published "
             f"target value, but their values disagree ({vals}); code reports the estimate above instead of choosing "
             f"between them.")
+
+
+EARLY_NO_ESTIMATE = ("No estimate was made: the run stopped as soon as this published value was confirmed, so the remaining "
+                     "sub-agents, the judge and the estimation methods were skipped.")
+EARLY_ROLE = "published:early"
+
+
+class EarlyWatch:
+    """v2.5 提前停（只在真实使用时由 run.prepare_run 放进 ctx.early；回测没有它）。子 agent 每核对完一页调 offer：
+    这一页的新点编临时 id（e1, e2 ...），按 candidates(judged_only=False) 选候选，有候选就问一次确认模型（prompt 同 v2.4），
+    resolve 判定。published：记下、stop.set()，其余子 agent 看到就停；conflict：不再提前检查（照常走裁判、估计和 v2.4 的
+    检查）。离散目标不提前停（结果列表由裁判定义）。检查一个接一个做（锁），已送过的点不再送。"""
+
+    def __init__(self):
+        self.stop = threading.Event()
+        self.stop_reason = "stopped early: the published target value was confirmed"
+        self._lock = threading.Lock()
+        self.n = 0
+        self.keys = {}      # 临时 id -> (direction_id, order, source_url)：裁判节点用它换成 p 编号
+        self.checks = []
+        self.rec = None     # 确认出 published 的那次 resolve 记录（临时 id）
+        self.off = ""       # 不再提前检查的原因
+
+    def offer(self, llm, qid: str, target: dict, as_of_s: str, as_of, points: list):
+        if not points or self.stop.is_set() or self.off or D.is_discrete(target):
+            return
+        from .pipeline import BudgetExceeded
+        with self._lock:
+            if self.stop.is_set() or self.off:
+                return
+            tagged = []
+            for p in points:
+                self.n += 1
+                self.keys[f"e{self.n}"] = (p["direction_id"], tuple(p["order"]), p["source_url"])
+                tagged.append({**p, "id": f"e{self.n}"})
+            cands, note = candidates(tagged, target, as_of, judged_only=False)
+            if not cands:
+                return
+            chk = {"at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "n_points": len(tagged),
+                   "direction_id": tagged[0]["direction_id"], "source_url": tagged[0]["source_url"], "note": note}
+            system, user = prompt(target, as_of_s, cands)
+            t0 = time.time()
+            try:
+                out, err = llm.ask(system, user, role=EARLY_ROLE, qid=qid, max_tokens=3000)
+            except BudgetExceeded as e:
+                out, err = None, str(e)
+            chk["wall_s"] = round(time.time() - t0, 2)
+            if out is None:
+                self.checks.append({**chk, "status": "error", "error": err, "candidates": [_summary(p) for p in cands]})
+                return
+            rec = resolve(out, cands, target)
+            self.checks.append({**chk, **rec})
+            if rec["status"] == "published":
+                self.rec = {**rec, "note": note}
+                self.stop.set()
+            elif rec["status"] == "conflict":
+                self.off = (f"early check off: confirmed values disagree ({rec.get('values')}); the judge, the estimate "
+                            f"and the v2.4 check run as usual")
+
+    def record(self, idmap: dict) -> dict:
+        """写进 state["published_early"]：每次检查（临时 id 换成 p 编号，原 id 留在 early_id）。"""
+        status = "published" if self.rec else ("off" if self.off else "not_confirmed")
+        return {"status": status, "off": self.off, "n_checks": len(self.checks),
+                "checks": [renumber(c, idmap) for c in self.checks]}
+
+
+def renumber(rec: dict, idmap: dict) -> dict:
+    """resolve 记录里的临时 id（e1 ...）换成裁判节点编的 p 编号。"""
+    def f(i):
+        return idmap.get(i, i)
+    out = {**rec, "confirmed_ids": [f(i) for i in rec.get("confirmed_ids") or []],
+           "candidates": [{**c, "id": f(c.get("id")), "early_id": c.get("id")} for c in rec.get("candidates") or []]}
+    if "id" in rec:
+        out["id"] = f(rec["id"])
+    if rec.get("point"):
+        out["point"] = {**rec["point"], "id": f(rec["point"].get("id")), "early_id": rec["point"].get("id")}
+    if rec.get("values"):
+        out["values"] = {f(i): v for i, v in rec["values"].items()}
+    return out

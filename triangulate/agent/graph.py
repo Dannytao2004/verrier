@@ -4,6 +4,8 @@
 离散目标（plan 给出 outcome_type = discrete）只用 outcome_probs；结果列表由裁判第一轮根据证据定义（v2.3，state["outcomes"]），
 规则在 discrete.py；Jev 对照臂在 jev.py。
 published（v2.4，只在真实使用时）：保留的点里有目标本身（已公布）时，结果就是这个值，估计方法只作参考（published.py）。
+v2.5 提前停（只在真实使用、连续值目标时）：子 agent 运行中就确认了已公布的值（published.EarlyWatch）时，裁判节点只编号、
+不调裁判，直接到 final（不估计）。
 
 图里只放可序列化的数据；预算、LLM、哨兵等放在 Context 里，通过闭包交给节点。
 """
@@ -51,6 +53,7 @@ class AgentState(TypedDict, total=False):
     outcomes: dict   # 离散目标：裁判定义的结果列表（discrete.accept_outcomes 的记录）
     jev: dict
     published: dict   # v2.4：「答案已公布」检查的记录（published.py）
+    published_early: dict   # v2.5：子 agent 运行中的提前检查（published.EarlyWatch，只在真实使用时）
     final: dict
     aborted: str
 
@@ -475,6 +478,20 @@ def build(ctx: Context):
                     p.update(keep=False, ablation_excluded=why)
         shown = [p for p in pts if not p.get("ablation_excluded")]
         upd = {"points": pts}
+        w = getattr(ctx, "early", None)   # v2.5 提前检查（只在真实使用时有）：临时 id 换成上面编的 p 编号
+        if w is not None and (w.checks or w.rec):
+            pid = {(p["direction_id"], tuple(p["order"]), p["source_url"]): p["id"] for p in pts}
+            idmap = {e: pid[k] for e, k in w.keys.items() if k in pid}
+            upd["published_early"] = w.record(idmap)
+            if w.rec is not None:   # 已确认已公布的值：不调裁判、不估计，终稿由代码写（published.final_text）
+                rec = {**PB.renumber(w.rec, idmap), "early_stop": True,
+                       "note": f"confirmed early, while the sub-agents were running; {w.rec.get('note')}"}
+                res = {**PB.result(rec, {}, state["plan"]["target"]),
+                       "weight_rule": "none: published value confirmed early (no estimate was made)"}
+                return {**upd, "published": rec,
+                        "judge_rounds": [{"round": rnd, "skipped": "published value confirmed early; judge not called"}],
+                        "compute": {"result": res, "methods": [], "estimate_result": None,
+                                    "skipped": "published value confirmed early; no estimate was made"}}
         if state.get("aborted") or b.aborted:
             return {**upd, "judge_rounds": [{"round": rnd, "skipped": b.aborted or state.get("aborted")}]}
         dirs = "\n".join(f"- {d['id']} [{d['category']}] {d['hypothesis']}" for d in state["directions"])
@@ -590,6 +607,8 @@ def build(ctx: Context):
         return upd
 
     def after_judge(state: AgentState):
+        if (state.get("published") or {}).get("early_stop"):   # v2.5 提前停：跳过后面的搜索轮和估计
+            return "final"
         jr = state["judge_rounds"][-1]
         if jr.get("round") == 1 and jr.get("extra_directions") and not b.aborted:
             t = state["plan"]["target"]
@@ -800,7 +819,7 @@ def build(ctx: Context):
     g.add_conditional_edges("approve", fan_out, ["subagent", "markets", END])
     g.add_edge("subagent", "judge")
     g.add_edge("markets", "judge")
-    g.add_conditional_edges("judge", after_judge, ["subagent", "compute"])
+    g.add_conditional_edges("judge", after_judge, ["subagent", "compute", "final"])
     g.add_edge("compute", "published")
     g.add_conditional_edges("published", after_compute, ["jev", "final"])
     g.add_edge("jev", "final")

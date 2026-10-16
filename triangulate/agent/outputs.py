@@ -165,8 +165,8 @@ def ledger(state: dict, score: dict | None = None) -> str:
             if res.get("markets"):
                 mk = res["markets"]
                 L += [f"Market keywords {mk.get('keywords')}: {mk.get('note') or ''} markets={len(mk.get('markets', []))}", ""]
-            if res.get("error") or res.get("aborted"):
-                L += [f"Sub-agent stopped: {_md(res.get('error') or res.get('aborted'))}", ""]
+            if res.get("error") or res.get("aborted") or res.get("stopped"):
+                L += [f"Sub-agent stopped: {_md(res.get('error') or res.get('aborted') or res.get('stopped'))}", ""]
             for pg in res.get("pages") or []:
                 via = pg.get("status")
                 extra = f"snapshot {pg.get('snapshot_ts')}" if via == "snapshot" else f"page date {pg.get('page_date')}" if via == "live_dated" else _md(pg.get("reason"))
@@ -213,6 +213,10 @@ def ledger(state: dict, score: dict | None = None) -> str:
     tail = "" if share is None else f", weight on methods that use assumptions {share:.2f}"
     if r.get("mode") == "discrete":
         L += [""] + outcomes_md(state, score)
+    elif r.get("basis") == "published" and (state.get("published") or {}).get("early_stop"):   # v2.5 提前停
+        L += ["", f"Result: **published value {_num(r.get('central'))}** (data point {(r.get('published') or {}).get('id')}), "
+                  f"confirmed while the sub-agents were running. No estimate was made: the judge and the estimation methods "
+                  f"were skipped."]
     elif r.get("basis") == "published":
         L += ["", f"Result: **published value {_num(r.get('central'))}** (data point {(r.get('published') or {}).get('id')}). "
                   f"Estimation methods for reference only, not blended (weights above are theirs): central "
@@ -232,6 +236,10 @@ def published_md(state: dict) -> list:
     if not pub:
         return []
     L = ["## Published-value check (live use only)", "", f"Status: **{pub.get('status')}**. {_md(pub.get('note'))}"]
+    pe = state.get("published_early") or {}
+    if pe:   # v2.5：子 agent 运行中的提前检查
+        L.append(f"Early checks while the sub-agents were running: {pe.get('n_checks')} ({pe.get('status')}"
+                 + (f"; {_md(pe.get('off'))}" if pe.get("off") else "") + "); details in state.json -> published_early.")
     if pub.get("error"):
         L.append(f"Error: {_md(pub['error'])}")
     if pub.get("status") == "published":

@@ -1,14 +1,17 @@
-"""子 agent 流水线与运行上下文：预算、带日志的 LLM、SEARCHER -> FETCHER -> EXTRACTOR -> 代码核对。"""
+"""子 agent 流水线与运行上下文：预算、带日志的 LLM、SEARCHER -> FETCHER -> EXTRACTOR -> 代码核对。
+v2.5 真实使用（ctx.live_fetch）：一个方向的几个 URL 同时直接抓 live 页（fetch_live，不查 Wayback），按 URL 顺序抽取；
+每页核对完的点交给 ctx.early（published.EarlyWatch），确认了已公布的目标值就停下其余子 agent。回测的流程没有改。"""
 import json
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
-from datetime import date
+from datetime import date, datetime, timezone
 
 from ..config import MODEL, PRICES
 from ..llm import LLM, TransportError
 from . import evidence as ev
-from .fetch import fetch_page
+from .fetch import fetch_live, fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
 from .search import SEARCH_FEE_ASSUMED_USD, Searcher
 
@@ -145,6 +148,8 @@ class Context:
         self.as_of = date.fromisoformat(as_of)
         self.ablate_own_history = ablate_own_history  # 回测消融：见 ablation.py
         self.check_published = False  # v2.4「答案已公布」检查（published.py）：只有 run.prepare_run 在真实使用时打开
+        self.live_fetch = False  # v2.5 直接抓 live 页（fetch_live）：同上，只在真实使用时打开
+        self.early = None        # v2.5 提前停（published.EarlyWatch）：同上
         self.budget = budget or Budget()
         self.calls_path = calls_path
         self.llm = AgentLLM(calls_path, self.budget)
@@ -203,13 +208,99 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
             "quote": q[lo:lo + QUOTE_STORE_CHARS]}, ""
 
 
+def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict, text, out: dict,
+                  allow_no_period: bool) -> list:
+    """取到的一页：哨兵 -> 抽取 -> 代码核对，记进 out。返回这一页核对通过的点（v2.5 提前停检查用）。"""
+    _emit(ctx, kind="page", direction_id=d["id"], status=page.get("status"))
+    if page["status"] == "dropped":
+        ctx.budget.release_page()
+        out["pages"].append(page)
+        return []
+    hits = ev.leak_scan(text, ctx.leak_patterns)
+    page["leak_hits"] = hits
+    if hits:
+        page["status_detail"] = "excluded: leak sentinel hit"
+        out["pages"].append(page)
+        return []
+    sent = text[:MAX_CHARS_TO_EXTRACTOR]
+    page.update(chars_sent=len(sent), truncated=len(text) > len(sent),
+                late_dates_in_sent_text=[x.isoformat() for x in ev.late_dates(sent, ctx.as_of, date.today())][:10])
+    res, err = ctx.llm.ask(EXTRACT_SYSTEM, EXTRACT_USER.format(
+        text=sent, **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end")},
+        hypothesis=str(d.get("hypothesis", ""))[:600], data_to_find=str(d.get("data_to_find", ""))[:600]),
+        role=f"extract:{d['id']}", qid=ctx.qid, max_tokens=4000)
+    page["extract_error"] = err
+    text_n = ev.norm(sent)
+    raws = (res or {}).get("points") or []
+    page["n_points_raw"] = len(raws) if isinstance(raws, list) else 0
+    new = []
+    for j, r in enumerate(raws if isinstance(raws, list) else []):
+        pd = date.fromisoformat(page["page_date"]) if page.get("page_date") else None
+        p, why = verify_point(r, text_n, ctx.as_of, pd, allow_no_period, url=page["url"])
+        base = {"direction_id": d["id"], "round": round_no, "source_url": page["url"], "via": page["status"],
+                "page_date": page.get("page_date"), "snapshot_ts": page.get("snapshot_ts"), "order": (len(out["pages"]), j)}
+        if p is None:
+            out["dropped_points"].append({**base, "reason": why, "name": str((r or {}).get("name", ""))[:120]
+                                          if isinstance(r, dict) else "", "value_as_written": str((r or {}).get("value_as_written", ""))[:40]
+                                          if isinstance(r, dict) else ""})
+        else:
+            new.append({**base, **p, "verified_by": "quote_in_page"})
+            out["points"].append(new[-1])
+    page["n_points_verified"] = len(new)
+    out["pages"].append(page)
+    _emit(ctx, kind="extracted", direction_id=d["id"], n_verified=len(new))
+    return new
+
+
+def _timed_live(url: str, as_of: date, qid: str) -> dict:
+    """fetch_live 加计时（fetch_at = 开始时刻 UTC，fetch_s = 用时，含按 host 限速排队的时间）。"""
+    t0, at = time.time(), datetime.now(timezone.utc).isoformat(timespec="seconds")
+    page = fetch_live(url, as_of, qid)
+    page.update(fetch_at=at, fetch_s=round(time.time() - t0, 2))
+    return page
+
+
+def _live_pages(ctx: Context, target: dict, d: dict, round_no: int, urls: list, out: dict, allow_no_period: bool):
+    """v2.5 真实使用：这个方向的 URL 同时开抓（fetch_live；同一 host 的请求由 net 的限速排队，robots 照旧），按 URL 顺序
+    抽取（点的编号因此可复现）。每页核对完的点交给 ctx.early；确认了已公布的值就不再抽取，没开始的抓取取消。"""
+    b, w = ctx.budget, getattr(ctx, "early", None)
+    ok = [b.reserve_page(round_no) for _ in urls]
+    pool = ThreadPoolExecutor(max_workers=max(1, sum(ok)), thread_name_prefix=f"fetch-{d['id']}")
+    futs = [pool.submit(_timed_live, u, ctx.as_of, ctx.qid) if k else None for u, k in zip(urls, ok)]
+    try:
+        for i, (url, fut) in enumerate(zip(urls, futs)):
+            if fut is None:
+                out["pages"].append({"url": url, "status": "dropped", "reason": "page cap reached"})
+                continue
+            if w is not None and w.stop.is_set():
+                for _ in [f for f in futs[i:] if f is not None]:
+                    b.release_page()
+                out["stopped"] = w.stop_reason
+                break
+            page = fut.result()
+            new = _process_page(ctx, target, d, round_no, page, page.pop("text", None), out, allow_no_period)
+            if w is not None and new:
+                w.offer(ctx.llm, ctx.qid, target, ctx.as_of_s, ctx.as_of, new)
+    finally:
+        pool.shutdown(wait=False, cancel_futures=True)
+
+
+class _Stopped(Exception):
+    """v2.5 提前停：这个方向开始搜索之前，已经确认了已公布的值。"""
+
+
 def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
-    """一个子 agent：搜索（只取 URL）-> 逐个取快照 -> 哨兵 -> 抽取 -> 代码核对。异常和预算耗尽都在这里收住。"""
+    """一个子 agent：搜索（只取 URL）-> 逐个取快照 -> 哨兵 -> 抽取 -> 代码核对。异常和预算耗尽都在这里收住。
+    v2.5 真实使用：同时直接抓 live 页（_live_pages）；ctx.early 确认了已公布的值以后，还没做的步骤不再做（out["stopped"]）。"""
     t0 = time.time()
     b = ctx.budget
+    w = getattr(ctx, "early", None)
     out = {"direction_id": d["id"], "round": round_no, "search": {}, "pages": [], "points": [], "dropped_points": []}
     _emit(ctx, kind="direction_start", direction_id=d["id"], round=round_no)
     try:
+        if w is not None and w.stop.is_set():
+            out["stopped"] = w.stop_reason
+            raise _Stopped
         prompt = SEARCH_USER.format(cap=b.urls_per_direction, as_of=ctx.as_of_s,
                                     hints="; ".join(map(str, d.get("search_hints") or []))[:400],
                                     **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end", "publisher")},
@@ -220,57 +311,27 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
         out["search"] = s
         _emit(ctx, kind="searched", direction_id=d["id"], n_urls=len(s.get("urls", [])[: b.urls_per_direction]))
         allow_no_period = d.get("category") == "base_rates"
-        for url in s.get("urls", [])[: b.urls_per_direction]:
-            if not b.reserve_page(round_no):
-                out["pages"].append({"url": url, "status": "dropped", "reason": "page cap reached"})
-                continue
-            page = fetch_page(url, ctx.as_of, ctx.qid)
-            _emit(ctx, kind="page", direction_id=d["id"], status=page.get("status"))
-            text = page.pop("text", None)
-            if page["status"] == "dropped":
-                b.release_page()
-                out["pages"].append(page)
-                continue
-            hits = ev.leak_scan(text, ctx.leak_patterns)
-            page["leak_hits"] = hits
-            if hits:
-                page["status_detail"] = "excluded: leak sentinel hit"
-                out["pages"].append(page)
-                continue
-            sent = text[:MAX_CHARS_TO_EXTRACTOR]
-            page.update(chars_sent=len(sent), truncated=len(text) > len(sent),
-                        late_dates_in_sent_text=[x.isoformat() for x in ev.late_dates(sent, ctx.as_of, date.today())][:10])
-            res, err = ctx.llm.ask(EXTRACT_SYSTEM, EXTRACT_USER.format(
-                text=sent, **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end")},
-                hypothesis=str(d.get("hypothesis", ""))[:600], data_to_find=str(d.get("data_to_find", ""))[:600]),
-                role=f"extract:{d['id']}", qid=ctx.qid, max_tokens=4000)
-            page["extract_error"] = err
-            text_n = ev.norm(sent)
-            raws = (res or {}).get("points") or []
-            page["n_points_raw"] = len(raws) if isinstance(raws, list) else 0
-            kept = 0
-            for j, r in enumerate(raws if isinstance(raws, list) else []):
-                pd = date.fromisoformat(page["page_date"]) if page.get("page_date") else None
-                p, why = verify_point(r, text_n, ctx.as_of, pd, allow_no_period, url=page["url"])
-                base = {"direction_id": d["id"], "round": round_no, "source_url": page["url"], "via": page["status"],
-                        "page_date": page.get("page_date"), "snapshot_ts": page.get("snapshot_ts"), "order": (len(out["pages"]), j)}
-                if p is None:
-                    out["dropped_points"].append({**base, "reason": why, "name": str((r or {}).get("name", ""))[:120]
-                                                  if isinstance(r, dict) else "", "value_as_written": str((r or {}).get("value_as_written", ""))[:40]
-                                                  if isinstance(r, dict) else ""})
-                else:
-                    out["points"].append({**base, **p, "verified_by": "quote_in_page"})
-                    kept += 1
-            page["n_points_verified"] = kept
-            out["pages"].append(page)
-            _emit(ctx, kind="extracted", direction_id=d["id"], n_verified=kept)
+        urls = s.get("urls", [])[: b.urls_per_direction]
+        if w is not None and w.stop.is_set():
+            out["stopped"] = w.stop_reason
+        elif getattr(ctx, "live_fetch", False):
+            _live_pages(ctx, target, d, round_no, urls, out, allow_no_period)
+        else:
+            for url in urls:
+                if not b.reserve_page(round_no):
+                    out["pages"].append({"url": url, "status": "dropped", "reason": "page cap reached"})
+                    continue
+                page = fetch_page(url, ctx.as_of, ctx.qid)
+                _process_page(ctx, target, d, round_no, page, page.pop("text", None), out, allow_no_period)
+    except _Stopped:
+        pass
     except BudgetExceeded as e:
         out["aborted"] = str(e)
     except Exception as e:  # noqa: BLE001  一个方向的意外错误不拖垮整题，记下来
         out["error"] = f"{type(e).__name__}: {e}"[:300]
     out["wall_s"] = round(time.time() - t0, 1)
     _emit(ctx, kind="direction_done", direction_id=d["id"], round=round_no, n_points=len(out["points"]),
-          stopped=out.get("error") or out.get("aborted"))
+          stopped=out.get("error") or out.get("aborted") or out.get("stopped"))
     return out
 
 

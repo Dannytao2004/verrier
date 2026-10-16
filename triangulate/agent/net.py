@@ -20,6 +20,11 @@ DEFAULT_CONCURRENCY = 4
 CONNECT_BACKOFF_S = (10, 30)
 MAX_ROBOTS_REDIRECTS = 5
 MAX_CRAWL_DELAY_S = 30   # robots.txt 的 Crawl-delay 照办（取 max(它, 1 秒)）；超过 30 秒的 host 不抓
+# v2.5 真实使用直接抓 live 页（fetch.fetch_live）：超时短、不重试、不退避；robots 只取一次（取不到按全部禁止）。
+# 限速（每个 host 两次请求的开始至少隔 1 秒、Crawl-delay）和 robots 规则与回测相同
+LIVE_TIMEOUT_S = 15
+LIVE_ROBOTS_TIMEOUT_S = 10
+ROBOTS_WAITS = (0, 10)   # 取 robots.txt：连接失败重试一次（等 10 秒）
 
 
 class HostLimiter:
@@ -105,15 +110,15 @@ def _raw_get_inner(url: str, host: str, timeout: float):
         return e.code, body, dict(e.headers or {})
 
 
-def _fetch_robots(url: str):
+def _fetch_robots(url: str, timeout: float = 30, waits=ROBOTS_WAITS):
     """取 robots.txt，跟随重定向（RFC 9309：至少跟 5 跳；每一跳都过限速）。返回 (status, body)。
     超过 5 跳按「取不到」处理，返回 599（下面按全部禁止）。"""
     for _ in range(MAX_ROBOTS_REDIRECTS + 1):
         status, body = 599, b""
-        for wait_s in (0, 10):  # 连接失败重试一次，再失败按 RFC 9309 视为全部禁止
+        for wait_s in waits:  # 连接失败重试一次，再失败按 RFC 9309 视为全部禁止
             time.sleep(wait_s)
             try:
-                status, body, headers = _raw_get(url, timeout=30)
+                status, body, headers = _raw_get(url, timeout=timeout)
                 break
             except (urllib.error.URLError, TimeoutError, OSError):
                 headers = {}
@@ -125,7 +130,7 @@ def _fetch_robots(url: str):
     return 599, b""
 
 
-def _robots_for(scheme: str, host: str):
+def _robots_for(scheme: str, host: str, timeout: float = 30, waits=ROBOTS_WAITS):
     key = (scheme, host)  # http 和 https 分开缓存：http 的 robots.txt 可能只是 301 到 https
     with _ROBOTS_LOCK:
         lock = _HOST_LOCKS.setdefault(key, threading.Lock())
@@ -133,7 +138,7 @@ def _robots_for(scheme: str, host: str):
         if key in _ROBOTS:
             return _ROBOTS[key]
         rp = urllib.robotparser.RobotFileParser()
-        status, body = _fetch_robots(f"{scheme}://{host}/robots.txt")
+        status, body = _fetch_robots(f"{scheme}://{host}/robots.txt", timeout, waits)
         if status == 200:
             rp.parse(body.decode("utf-8", "replace").splitlines())
         elif status in (401, 403) or status >= 500:
@@ -152,22 +157,23 @@ def _robots_for(scheme: str, host: str):
         return rp
 
 
-def robots_allowed(url: str) -> bool:
+def robots_allowed(url: str, timeout: float = 30, waits=ROBOTS_WAITS) -> bool:
     p = urllib.parse.urlsplit(url)
-    return _robots_for(p.scheme or "https", p.netloc.lower()).can_fetch(UA, url)
+    return _robots_for(p.scheme or "https", p.netloc.lower(), timeout, waits).can_fetch(UA, url)
 
 
-def get(url: str, timeout: float = 60, max_redirects: int = 4, retries: int = 2):
+def get(url: str, timeout: float = 60, max_redirects: int = 4, retries: int = 2, backoff=CONNECT_BACKOFF_S,
+        robots_timeout: float = 30, robots_waits=ROBOTS_WAITS):
     """返回 (status, body, headers, final_url)。robots 不允许时抛 Blocked。429/503 退避重试。"""
     for _ in range(max_redirects + 1):
-        if not robots_allowed(url):
+        if not robots_allowed(url, robots_timeout, robots_waits):
             raise Blocked(url)
         for attempt in range(retries + 1):
             try:
                 status, body, headers = _raw_get(url, timeout)
             except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
-                if attempt < len(CONNECT_BACKOFF_S) and not isinstance(getattr(e, "reason", None), str):
-                    time.sleep(CONNECT_BACKOFF_S[attempt])
+                if attempt < len(backoff) and not isinstance(getattr(e, "reason", None), str):
+                    time.sleep(backoff[attempt])
                     continue
                 raise
             if status in (429, 503) and attempt < retries:
@@ -180,3 +186,9 @@ def get(url: str, timeout: float = 60, max_redirects: int = 4, retries: int = 2)
             continue
         return status, body, headers, url
     return status, body, headers, url
+
+
+def get_live(url: str):
+    """v2.5 真实使用的 live 页：超时短（LIVE_TIMEOUT_S）、连接失败和 429/503 都不重试；robots 取一次、超时
+    LIVE_ROBOTS_TIMEOUT_S。robots 规则、手动跟随重定向（每一跳都过 robots 和限速）、每个 host 的限速与 get 相同。"""
+    return get(url, timeout=LIVE_TIMEOUT_S, retries=0, backoff=(), robots_timeout=LIVE_ROBOTS_TIMEOUT_S, robots_waits=(0,))

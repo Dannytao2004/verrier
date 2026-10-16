@@ -16,6 +16,7 @@ from ..config import RESULTS
 from . import ablation as AB
 from . import discrete as D
 from . import evidence as ev
+from . import published as PB
 from .evidence import parse_date
 from .graph import build
 from .outputs import ledger, outcome_table_html, render_graph
@@ -130,6 +131,9 @@ def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False) -> dic
     # 有真值的题（回测 / 留出测试，--auto-approve 没人把关）只在题目明确标了 outcome_type = discrete 时才接受离散目标
     ctx.allow_discrete = q.get("answer_value") is None or q.get("outcome_type") == "discrete"
     ctx.check_published = checks_published(q)
+    # v2.5 真实使用（同上的条件）：直接抓 live 页、不查 Wayback；子 agent 运行中确认了已公布的值就提前停（消融运行不停）
+    ctx.live_fetch = ctx.check_published
+    ctx.early = PB.EarlyWatch() if ctx.check_published and not ablate_own_history else None
     g = build(ctx)
     cfg = {"configurable": {"thread_id": f"{q['id']}-{stamp}"}, "max_concurrency": 12, "recursion_limit": 80}
     return {"q": q, "g": g, "cfg": cfg, "ctx": ctx, "out_dir": out_dir, "stamp": stamp, "tag": tag,
@@ -175,8 +179,10 @@ def save_run(h: dict, approvals: list) -> dict:
     elif r.get("basis") == "published":   # v2.4：结果是已公布的值（published.py）；组合估计只作参考
         e, pub = (state.get("compute") or {}).get("estimate_result") or {}, r.get("published") or {}
         meta = (f"as_of <b>{q['as_of']}</b> &middot; published value <b>{_n(r.get('central'))}</b> (data point "
-                f"{html.escape(str(pub.get('id')))}, dated {html.escape(str(pub.get('date')))}) &middot; estimate for reference "
-                f"{_n(e.get('central'))}, 80% [{_n(e.get('p10'))}, {_n(e.get('p90'))}] (not blended)")
+                f"{html.escape(str(pub.get('id')))}, dated {html.escape(str(pub.get('date')))}) &middot; " +
+                ("no estimate was made (stopped early once the published value was confirmed)"
+                 if (state.get("published") or {}).get("early_stop") else
+                 f"estimate for reference {_n(e.get('central'))}, 80% [{_n(e.get('p10'))}, {_n(e.get('p90'))}] (not blended)"))
         est = f"published value {_n(r.get('central'))}"
     else:
         meta = (f"as_of <b>{q['as_of']}</b> &middot; estimate <b>{_n(r.get('central'))}</b> &middot; 80% [{_n(r.get('p10'))}, "

@@ -8,6 +8,8 @@
    正文里也不能有晚于 as_of 的显式日期；标 live_dated。
 3. 都不行就丢弃并记原因。
 原件和文字存 data/raw/agent/<qid>/（不进 git）；CDX 结果和快照按 URL + 时间戳缓存，重跑不重复打 Wayback。
+v2.5：真实使用（as_of = 今天、题目没有登记真值）走 fetch_live：直接抓 live 页，完全不查 Wayback；收下的条件同上面第 2 条。
+回测（as_of 早于今天，或登记了真值）仍走 fetch_page，没有改。
 """
 import hashlib
 import json
@@ -144,11 +146,8 @@ def fetch_page(url: str, as_of: date, qid: str, allow_live=None, today=None) -> 
         allow_live = as_of >= today
     url = clean_url(url)
     rec = {"url": url, "status": "dropped", "reason": "", "snapshot_ts": None, "page_date": None}
-    if not url.startswith(("http://", "https://")):
-        rec["reason"] = "not an http url"
-        return rec
-    if url.lower().split("?")[0].endswith((".pdf", ".xls", ".xlsx", ".zip", ".doc", ".docx", ".ppt", ".pptx")):
-        rec["reason"] = "binary file type not supported in MVP"
+    rec["reason"] = _unsupported(url)
+    if rec["reason"]:
         return rec
     out_dir = RAW_AGENT / qid
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -195,32 +194,62 @@ def fetch_page(url: str, as_of: date, qid: str, allow_live=None, today=None) -> 
     if not allow_live:
         rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + "; live pages not used in backtests (as_of before fetch day)"
         return rec
+    return _live(rec, out_dir, url, as_of, today, rec["reason"] or "no snapshot <= as_of", lambda u: net.get(u, timeout=45))
+
+
+def fetch_live(url: str, as_of: date, qid: str, today=None) -> dict:
+    """v2.5 真实使用（pipeline 在 ctx.live_fetch 时用它，代替 fetch_page）：直接抓 live 页，不调 cdx_lookup、不请求
+    web.archive.org。超时短、不重试（net.get_live）；robots、每个 host 的限速照旧。收下的条件与 fetch_page 的 live 分支相同：
+    读得出日期且 <= as_of、正文没有晚于 as_of 的显式日期；标 live_dated。"""
+    today = today or date.today()
+    url = clean_url(url)
+    rec = {"url": url, "status": "dropped", "reason": _unsupported(url), "snapshot_ts": None, "page_date": None}
+    if rec["reason"]:
+        return rec
+    out_dir = RAW_AGENT / qid
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return _live(rec, out_dir, url, as_of, today, "", net.get_live)
+
+
+def _unsupported(url: str) -> str:
+    if not url.startswith(("http://", "https://")):
+        return "not an http url"
+    if url.lower().split("?")[0].endswith((".pdf", ".xls", ".xlsx", ".zip", ".doc", ".docx", ".ppt", ".pptx")):
+        return "binary file type not supported in MVP"
+    return ""
+
+
+def _live(rec: dict, out_dir, url: str, as_of: date, today: date, pre: str, get) -> dict:
+    """抓 live 页并检查：http 200、文字类型、读得出日期且 <= as_of、正文没有晚于 as_of 的显式日期。
+    pre = 丢弃原因的前缀（fetch_page：快照为什么没用上；fetch_live：空）。"""
+    def why(msg):
+        return f"{pre}; {msg}" if pre else msg
     try:
-        status, body, headers, final = net.get(url, timeout=45)
+        status, body, headers, final = get(url)
     except net.Blocked:
-        rec["reason"] = (rec["reason"] + "; " if rec["reason"] else "no snapshot <= as_of; ") + "live fetch blocked by robots.txt"
+        rec["reason"] = why("live fetch blocked by robots.txt")
         return rec
     except Exception as e:  # noqa: BLE001
-        rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + f"; live fetch error {type(e).__name__}"
+        rec["reason"] = why(f"live fetch error {type(e).__name__}")
         return rec
     if status != 200:
-        rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + f"; live http {status}"
+        rec["reason"] = why(f"live http {status}")
         return rec
-    text, why = _to_text(body, headers)
+    text, w = _to_text(body, headers)
     if text is None:
-        rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + f"; {why}"
+        rec["reason"] = why(w)
         return rec
     dates = page_dates(final, _decode(body, headers))
     if not dates:
-        rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + "; live page has no readable date"
+        rec["reason"] = why("live page has no readable date")
         return rec
     latest = max(dates)
     if latest > as_of:
-        rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + f"; live page dated {latest} > as_of"
+        rec["reason"] = why(f"live page dated {latest} > as_of")
         return rec
     late = late_dates(text, as_of, today)
     if late:
-        rec["reason"] = (rec["reason"] or "no snapshot <= as_of") + f"; live page text mentions {late[-1]} > as_of"
+        rec["reason"] = why(f"live page text mentions {late[-1]} > as_of")
         return rec
     rec.update(status="live_dated", page_date=latest.isoformat(), live_dates=sorted({d.isoformat() for d in dates}),
                reason="")
