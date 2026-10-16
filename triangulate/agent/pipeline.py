@@ -267,17 +267,24 @@ def _live_pages(ctx: Context, target: dict, d: dict, round_no: int, urls: list, 
     ok = [b.reserve_page(round_no) for _ in urls]
     pool = ThreadPoolExecutor(max_workers=max(1, sum(ok)), thread_name_prefix=f"fetch-{d['id']}")
     futs = [pool.submit(_timed_live, u, ctx.as_of, ctx.qid) if k else None for u, k in zip(urls, ok)]
+    def stopped(i):   # 已确认已公布的值：这一页和后面的页不再抽取，名额退回
+        if w is None or not w.stop.is_set():
+            return False
+        for _ in [f for f in futs[i:] if f is not None]:
+            b.release_page()
+        out["stopped"] = w.stop_reason
+        return True
+
     try:
         for i, (url, fut) in enumerate(zip(urls, futs)):
             if fut is None:
                 out["pages"].append({"url": url, "status": "dropped", "reason": "page cap reached"})
                 continue
-            if w is not None and w.stop.is_set():
-                for _ in [f for f in futs[i:] if f is not None]:
-                    b.release_page()
-                out["stopped"] = w.stop_reason
+            if stopped(i):
                 break
             page = fut.result()
+            if stopped(i):   # v2.5.1：等这一页的时候别的子 agent 已经确认了（published2 的 d5 多抽了一页）
+                break
             new = _process_page(ctx, target, d, round_no, page, page.pop("text", None), out, allow_no_period)
             if w is not None and new:
                 w.offer(ctx.llm, ctx.qid, target, ctx.as_of_s, ctx.as_of, new)

@@ -236,16 +236,16 @@ PAGES = {"https://news.example.co.uk/sep": _pts(HIST + SEP),
          "https://other.example.org/x": _pts([("UK used car sales, September 2026", 600000, "2026-09-01", "2026-09-30")])}
 
 
-def live_graph(live=True, early=True, verdict="target", block_d2=False, extra=(), target=None):
+def live_graph(live=True, early=True, verdict="target", block_d2=None, extra=(), target=None):
     """假模型跑整张图。live：ctx.live_fetch / check_published；early：ctx.early = EarlyWatch()。
     verdict：假确认模型的回答方式（published 和 published:early 都按它答，见 _verdict）。
-    block_d2：d2 的搜索等到提前检查有了结论（停下或关掉，最多 5 秒）才返回。返回 (state, [(role, user)], ctx, g, cfg)。"""
+    block_d2："search" / "fetch"：d2 的搜索 / 取页等到提前检查有了结论（停下或关掉，最多 5 秒）才返回。返回 (state, [(role, user)], ctx, g, cfg)。"""
     from langgraph.types import Command
 
     from triangulate.agent import graph as G
     from triangulate.agent import pipeline as P
     ctx = _ctx(live, PB.EarlyWatch() if early else None, as_of="2026-10-16" if live else "2026-10-10")
-    calls, lock = [], threading.Lock()
+    calls, lock, d2_fetching = [], threading.Lock(), threading.Event()
     pages = {k: v + (_pts(extra) if "news" in k else []) for k, v in PAGES.items()}
     texts = {u: " ".join(p["quote"] for p in pts) + " 2023 2024 2025 2026" for u, pts in pages.items()}
 
@@ -266,6 +266,9 @@ def live_graph(live=True, early=True, verdict="target", block_d2=False, extra=()
                         "methods": [{"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}]}, None
             if role == "audit":
                 return {"methods": []}, None
+            if role == PB.EARLY_ROLE and block_d2 == "fetch":   # 等 d2 进了取页等待（过了取页前的检查）再确认
+                d2_fetching.wait(5)
+                time.sleep(0.2)
             if role in ("published", PB.EARLY_ROLE):
                 rows = re.findall(r"^- ([ep]\d+): (.*)$", user, re.M)
                 return {"candidates": [{"id": i, "reason": "r", "verdict": _verdict(verdict, line)} for i, line in rows]}, None
@@ -276,13 +279,20 @@ def live_graph(live=True, early=True, verdict="target", block_d2=False, extra=()
     class Searcher:
         def search(self, prompt, *, role, qid, max_uses=3, cap=5):
             if role == "search:d2":
-                t_end = time.monotonic() + 5
-                while block_d2 and not (ctx.early.stop.is_set() or ctx.early.off) and time.monotonic() < t_end:
-                    time.sleep(0.01)
+                if block_d2 == "search":
+                    wait_early()
                 return {"queries": ["q"], "urls": ["https://other.example.org/x"], "web_search_requests": 1}
             return {"queries": ["q"], "urls": ["https://news.example.co.uk/sep"], "web_search_requests": 1}
 
+    def wait_early():
+        t_end = time.monotonic() + 5
+        while not (ctx.early.stop.is_set() or ctx.early.off) and time.monotonic() < t_end:
+            time.sleep(0.01)
+
     def fake_live(url, as_of, qid):
+        if block_d2 == "fetch" and "other" in url:
+            d2_fetching.set()
+            wait_early()
         return {"url": url, "status": "live_dated", "snapshot_ts": None, "page_date": "2026-10-05", "text": texts[url]}
 
     def fake_snap(url, as_of, qid):
@@ -320,7 +330,7 @@ class TestEarlyStop(unittest.TestCase):
     def test_confirmed_value_stops_the_run(self):
         from triangulate.agent import outputs
         from triangulate.agent import run as R
-        st, calls, ctx, g, cfg = live_graph(block_d2=True)
+        st, calls, ctx, g, cfg = live_graph(block_d2="search")
         roles = _roles(calls)
         self.assertEqual(roles.count(PB.EARLY_ROLE), 1)
         for r in ("judge:r1", "audit", "published", "final", "extract:d2"):
@@ -358,6 +368,14 @@ class TestEarlyStop(unittest.TestCase):
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
+    def test_page_fetched_after_the_stop_is_not_extracted(self):
+        st, calls, ctx, *_ = live_graph(block_d2="fetch")   # d2 已经在等取页时，提前停发生了
+        self.assertNotIn("extract:d2", _roles(calls))
+        d2 = next(r for r in st["results"] if r["direction_id"] == "d2")
+        self.assertIn("stopped early", d2["stopped"])
+        self.assertEqual(d2["pages"], [])
+        self.assertEqual(ctx.budget.pages_used, 1)                       # d2 的名额退回
+
     def test_not_confirmed_runs_as_without_the_early_check(self):
         a, ca, *_ = live_graph(verdict="different")
         b, cb, *_ = live_graph(verdict="different", early=False)
@@ -374,7 +392,7 @@ class TestEarlyStop(unittest.TestCase):
         self.assertNotEqual(a["compute"]["result"]["basis"], "published")
 
     def test_conflict_turns_the_early_check_off(self):
-        st, calls, *_ = live_graph(verdict="conflict", block_d2=True, extra=[("UK new car registrations, September 2026 (revised)", 300000,
+        st, calls, *_ = live_graph(verdict="conflict", block_d2="search", extra=[("UK new car registrations, September 2026 (revised)", 300000,
                                                                "2026-09-01", "2026-09-30")])
         roles = _roles(calls)
         self.assertEqual(roles.count(PB.EARLY_ROLE), 1)
