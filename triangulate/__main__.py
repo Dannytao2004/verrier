@@ -29,6 +29,8 @@ def main(argv=None):
     g.add_argument("--ablate-own-history", action="store_true",
                    help="backtest ablation: no own_history directions, own earlier values excluded before the judge, "
                         "only formula_mc; results go under a tag ending in 'noown'")
+    sub.add_parser("showcase", help="offline: build results/showcase/summary.json (all arms on the showcase questions, "
+                                    "errors, coverage, pre-registered criteria)")
     s = sub.add_parser("agent-score", help="offline: score saved agent backtest runs against official values and the other arms")
     s.add_argument("--tag", default="")
     w = sub.add_parser("serve", help="local web UI on 127.0.0.1: start runs (stops for approval), browse saved runs and "
@@ -61,6 +63,12 @@ def main(argv=None):
         rows = (agent_run.main(qs, a.auto_approve, a.tag, fc, a.ablate_own_history) if a.cmd == "agent"
                 else agent_run.score_all(QUESTIONS, a.tag, fc))
         print(json.dumps(rows, indent=1, ensure_ascii=False))
+        return
+
+    if a.cmd == "showcase":
+        from .showcase import write
+        sys.stdout.reconfigure(encoding="utf-8")
+        print(json.dumps(write()["criteria"], indent=1, ensure_ascii=False))
         return
 
     if a.cmd == "forecast":
