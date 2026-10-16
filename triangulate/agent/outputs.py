@@ -12,6 +12,24 @@ LEGEND = [("snapshot", "verified in archived snapshot <= as_of"), ("live_dated",
           ("discarded", "discarded by judge"), ("leak", "page excluded: leak sentinel hit"),
           ("base_rate", "base-rate direction (kept)"), ("assumption", "assumption proposed by the judge (not observed)"),
           ("method_failed", "method failed"), ("target", "target")]
+# v2.6d（F2，D4）：区间依据（methods.combine / published.result 给的 basis）-> 一句给读者看的英文说明。终稿的 [[interval_basis]]
+# 占位符、ledger、graph.html 页头（run.save_run）、网页结果页（web/results.py 的 basis_text）共用这一张表。
+# 终稿模板常把它嵌在句中（括号里、「basis:」后面），所以小写开头、不带句号、不用括号；不写数字（数字只从代码字段出来）。
+BASIS_TEXT = {
+    "historical_errors": "interval width set from the methods' backtest errors on earlier years of the target",
+    "method_spread": "interval width set from the disagreement between the methods' estimates",
+    "monte_carlo": "too few backtest years, so the interval width comes from Monte Carlo sampling of the formula inputs "
+                   "and reflects input uncertainty only",
+    "no_basis": "too few backtest years, and neither method disagreement nor Monte Carlo sampling gave a wider interval, "
+                "so code used its fixed default width",
+    "no_method": "no method produced an estimate, so there is no interval",
+    "published": "the value is already published, so there is no interval",
+}
+
+
+def basis_text(basis) -> str:
+    """basis -> BASIS_TEXT 里的说明；表里没有的值（离散目标的 outcome_probabilities 等）照旧把下划线换成空格，None 返回空串。"""
+    return BASIS_TEXT.get(basis) or str(basis or "").replace("_", " ")
 
 
 def _num(v):
@@ -220,13 +238,15 @@ def ledger(state: dict, score: dict | None = None) -> str:
                   f"confirmed while the sub-agents were running. No estimate was made: the judge and the estimation methods "
                   f"were skipped."]
     elif r.get("basis") == "published":
+        bt = basis_text(est.get("basis"))
         L += ["", f"Result: **published value {_num(r.get('central'))}** (data point {(r.get('published') or {}).get('id')}). "
                   f"Estimation methods for reference only, not blended (weights above are theirs): central "
                   f"{_num(est.get('central'))}, 80% interval [{_num(est.get('p10'))}, {_num(est.get('p90'))}], basis "
-                  f"{est.get('basis')}, weight rule {est.get('weight_rule')}"]
-    else:
+                  f"{est.get('basis')}" + (f" ({bt})" if bt else "") + f", weight rule {est.get('weight_rule')}"]
+    else:   # v2.6d：basis 后面附 BASIS_TEXT 的说明（没有 basis 时说明是空串，不加括号）
+        bt = basis_text(r.get("basis"))
         L += ["", f"Result: central **{_num(r.get('central'))}**, 80% interval [{_num(r.get('p10'))}, {_num(r.get('p90'))}], "
-                  f"basis {r.get('basis')}, weight rule {r.get('weight_rule')}{tail}"]
+                  f"basis {r.get('basis')}" + (f" ({bt})" if bt else "") + f", weight rule {r.get('weight_rule')}{tail}"]
     L += [""] + published_md(state)
     L += ["", "## Final answer", "", (state.get("final") or {}).get("text", ""), ""]
     return "\n".join(L)

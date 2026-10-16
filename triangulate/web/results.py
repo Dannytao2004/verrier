@@ -9,6 +9,7 @@ import urllib.parse
 from pathlib import Path
 
 from ..agent.graph import TARGET_HISTORY_ROLE
+from ..agent.outputs import basis_text
 from ..agent.run import RES, score_one
 from ..forecast import QUESTIONS
 from ..mc import Z90
@@ -312,7 +313,8 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
            "budget": st.get("budget") or {}, "target": (st.get("plan") or {}).get("target") or {},
            "directions": [{k: d.get(k) for k in ("id", "category", "perspective", "hypothesis")} for d in st.get("directions") or []],
            "approvals": st.get("approvals") or [],
-           "estimate": {k: r.get(k) for k in ("central", "p10", "p90", "basis", "weight_rule", "sigma_ln")},
+           "estimate": {k: r.get(k) for k in ("central", "p10", "p90", "basis", "weight_rule", "sigma_ln")}
+                       | {"basis_text": basis_text(r.get("basis"))},   # v2.6d：区间依据的说明（outputs.BASIS_TEXT）
            "mode": r.get("mode") or "continuous", "discrete": discrete_view(st),
            "final_text": (st.get("final") or {}).get("text", ""), "methods": methods,
            "repairs": [x for x in (_repair_view(j) for j in st.get("judge_rounds") or []) if x],

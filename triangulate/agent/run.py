@@ -1,7 +1,7 @@
 """运行一题或多题、写出结果、离线打分。题库不在这里：调用方（__main__）传题目列表进来。
 
 题目 = {"id", "question", "as_of"}，可选 "answer_value"（有真值才打分）、"leak_values"（泄漏哨兵要认的值：
-真值，以及同一题里所有公布日晚于 as_of 的已知官方值）、"last_year"、"source"。
+真值，以及同一题里所有公布日晚于 as_of 的已知官方值）、"last_year"（v2.6d 起打分不再用）、"source"。
 agent 只拿到题目文字和 as_of。真值和哨兵值只交给代码，不进任何 prompt。没有真值（真实使用）时不打分、不显示官方值。
 """
 import html
@@ -22,7 +22,7 @@ from . import methods as M
 from . import published as PB
 from .evidence import parse_date
 from .graph import build
-from .outputs import ledger, outcome_table_html, render_graph
+from .outputs import basis_text, ledger, outcome_table_html, render_graph
 from .pipeline import Budget, Context
 
 RES = RESULTS / "agent"
@@ -202,8 +202,9 @@ def save_run(h: dict, approvals: list) -> dict:
                  f"estimate for reference {_n(e.get('central'))}, 80% [{_n(e.get('p10'))}, {_n(e.get('p90'))}] (not blended)"))
         est = f"published value {_n(r.get('central'))}"
     else:
+        bt = basis_text(r.get("basis"))   # v2.6d：附 BASIS_TEXT 的说明（没有 basis 时说明是空串，只写键，同 v2.6c）
         meta = (f"as_of <b>{q['as_of']}</b> &middot; estimate <b>{_n(r.get('central'))}</b> &middot; 80% [{_n(r.get('p10'))}, "
-                f"{_n(r.get('p90'))}] ({r.get('basis')})")
+                f"{_n(r.get('p90'))}] ({r.get('basis')}" + (f": {html.escape(bt)}" if bt else "") + ")")
         est = f"estimate {_n(r.get('central'))}"
     if q.get("answer_value") is not None:
         meta += f" &middot; official value (scoring only) <b>{q['answer_value']:,}</b>"
@@ -253,9 +254,9 @@ def score_all(questions: list, tag: str = "", forecast_summary=None) -> list:
         def arm(est):
             return None if est is None else {"estimate": est, "pct_err": est / ans - 1, "abs_log10_err": abs(math.log10(est / ans))}
         if s.get("mode") != "discrete":   # 离散目标没有点估计（central 只是最可能结果的数值）：只留 D.score 的打分
+            # v2.6d（N44）：「去年同月」不再是对照（2026-10-16 的决定），不再写 last_year_same_period；旧的 summary 文件照旧能读
             s["arms"] = {"agent": arm(s["estimate"]), "naive": arm((f.get("naive") or {}).get("estimate")),
-                         "structured_no_retrieval": arm((f.get("structured") or {}).get("estimate")),
-                         "last_year_same_period": arm(q.get("last_year"))}
+                         "structured_no_retrieval": arm((f.get("structured") or {}).get("estimate"))}
             for lim in (20, 10, 5):
                 s[f"within_{lim}pct"] = {k: (v is not None and abs(v["pct_err"]) <= lim / 100) for k, v in s["arms"].items()}
         s["usd_total_assumed"] = st["budget"]["usd_total_assumed"]

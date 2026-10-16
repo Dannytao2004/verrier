@@ -27,6 +27,7 @@ from . import discrete as D
 from . import jev as J
 from . import published as PB
 from .markets import search_markets
+from .outputs import basis_text
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
 from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
                       DISCRETE_OUTCOMES_GIVEN, DISCRETE_REVISE, DISCRETE_REVISE_DONE, EXTRA_RULE_R1, EXTRA_RULE_R2,
@@ -92,26 +93,26 @@ def select_directions(cands: list, cap: int) -> list:
 
 
 _NUM_TOKEN = re.compile(r"\d(?:[\d,.]*\d)?%?")
-_YEAR_CONTEXT = re.compile(r"(?:\b(?:in|since|of|from|to|during|until|by|for|between|and|or|through|before|after|year|years|"
-                           r"fiscal|fy|jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|"
-                           r"june|july|august|september|october|november|december)\.?|[,(/-])\s*$", re.I)
+_PERIOD_LABEL = re.compile(r"Q[1-4]|H[12]")   # 季度 / 半年写法（v2.6d，D4）
 
 
 def scrub_digits(text: str, as_of_year: int, keep_ids=frozenset()) -> tuple:
-    """把模型自己写的数字换成 [n]，返回 (文字, 替换个数)。保留：年份上下文里（in / since / 月份名 / 逗号 ... 后面）、
-    离 as_of 不超过 10 年的四位年份；紧跟字母的已知方法 id（m1、m2）。其余一律替换，包括 [800,000、USD900,000、about900k。"""
+    """把模型自己写的数字换成 [n]，返回 (文字, 替换个数)。保留（v2.6d，D4，和 FINAL_SYSTEM 的说法一致）：离 as_of 不超过
+    10 年、前后都不贴字母或数字的四位年份（不再要求前面有 in / since 这类词）；季度 / 半年写法 Q1–Q4、H1–H2；紧跟字母的已知 id
+    （keep_ids：方法 m1、假设 a1、方法用到的点 p12）。其余一律替换，包括 [800,000、USD900,000、about900k、FY2025。"""
     out, n, pos = [], 0, 0
     for m in _NUM_TOKEN.finditer(text):
         tok, s0 = m.group(), m.start()
         prev = text[s0 - 1] if s0 else ""
+        nxt = text[m.end()] if m.end() < len(text) else ""
         keep = False
         if re.fullmatch(r"(?:19|20)\d{2}", tok) and abs(int(tok) - as_of_year) <= 10 and not prev.isalnum():
-            keep = bool(_YEAR_CONTEXT.search(text[max(0, s0 - 16):s0]))
+            keep = not nxt.isalnum()
         elif prev.isalpha() and re.fullmatch(r"\d+", tok):
             j = s0
             while j > 0 and text[j - 1].isalpha():
                 j -= 1
-            keep = text[j:m.end()] in keep_ids
+            keep = text[j:m.end()] in keep_ids or bool(_PERIOD_LABEL.fullmatch(text[j:m.end()]))
         if keep:
             continue
         out.append(text[pos:s0] + "[n]")
@@ -162,6 +163,27 @@ def assumption_placeholders(a: dict) -> dict:
     pct = "%" if a.get("unit") == "%" else ""
     return {f"{a['id']}_value": _fmt_num(a["value"]) + pct, f"{a['id']}_low": _fmt_num(a["p10_used"] * f) + pct,
             f"{a['id']}_high": _fmt_num(a["p90_used"] * f) + pct}
+
+
+def point_placeholders(points: list, methods: list) -> tuple:
+    """v2.6d（D4）：methods 用到的观测点（used_ids，按第一次出现的顺序；不在 points 里的 id 跳过）-> (占位符, summary 行)。
+    占位符 {点 id}_value = 代码格式化的值（_fmt_num）+ 点的单位（unit 是 "%" 时直接接在数字后面），例如 p12_value = "1,210 widgets"；
+    summary 行给终稿模型看这个点是什么（名字、值、期间）、是哪个方法的输入。"""
+    by_id = {p.get("id"): p for p in points}
+    users = {}
+    for m in methods:
+        for i in m.get("used_ids") or []:
+            if i in by_id and m["id"] not in users.setdefault(i, []):
+                users[i].append(m["id"])
+    ph, lines = {}, []
+    for i, ms in users.items():
+        p = by_id[i]
+        unit = str(p.get("unit") or "").strip()
+        key = f"{re.sub(r'[^a-z0-9]', '', str(i).lower()) or 'p'}_value"
+        ph[key] = _fmt_num(p.get("value")) + ("%" if unit == "%" else f" {unit}" if unit else "")
+        lines.append(f"- observed point {i} (input of {', '.join(ms)}): {p.get('name', '')}, value {ph[key]}, "
+                     f"period {p.get('period_start') or '?'}..{p.get('period_end') or '?'}")
+    return ph, lines
 
 
 def _pct(p) -> str:
@@ -717,8 +739,9 @@ def build(ctx: Context):
         r = comp.get("result") or {}
         if r.get("mode") == "discrete":
             return {"final": final_discrete(state, comp, r)}
+        # v2.6d（F2，D4）：区间标签如实写成 model-based；区间依据用 outputs.BASIS_TEXT 的说明（ledger、graph.html、网页共用）
         ph = {"estimate": _fmt_num(r.get("central")), "p10": _fmt_num(r.get("p10")), "p90": _fmt_num(r.get("p90")),
-              "interval_level": "80%", "interval_basis": str(r.get("basis", "")).replace("_", " "),
+              "interval_level": "80% model-based", "interval_basis": basis_text(r.get("basis")),
               "n_points_kept": str(sum(1 for p in state.get("points") or [] if p.get("keep") and p.get("judged_round"))),
               "n_methods": str(sum(1 for m in comp.get("methods") or [] if m.get("estimate")))}
         summary = []
@@ -733,13 +756,18 @@ def build(ctx: Context):
             if m.get("inputs_detail"):
                 summary.append(f"  inputs of {m['id']}: observed points {m.get('used_ids') or []}, "
                                f"assumptions {m.get('used_assumptions') or []}")
+        # v2.6d（D4）：方法用到的观测点各给一个 p{n}_value 占位符，列进 summary（模型要说观测值时只能走占位符）
+        p_ph, p_lines = point_placeholders(state.get("points") or [], comp.get("methods") or [])
+        ph.update(p_ph)
+        summary += p_lines
         used_a = [a for a in (state.get("assumptions") or {}).get("kept") or [] if a.get("used_by")]
         for a in used_a:
             ph.update(assumption_placeholders(a))
             summary.append(f"- assumption {a['id']} (proposed by the analyst, not observed; used by {a['used_by']}): "
                            f"{a['name']}, value {ph[a['id'] + '_value']}, range used by code {ph[a['id'] + '_low']} to "
                            f"{ph[a['id'] + '_high']} ({a['unit']}); rationale: {a['rationale']}")
-        summary.insert(0, f"combined estimate {ph['estimate']}, 80% interval {ph['p10']} to {ph['p90']} (basis: {ph['interval_basis']})")
+        summary.insert(0, f"combined estimate {ph['estimate']}, {ph['interval_level']} interval {ph['p10']} to {ph['p90']} "
+                          f"(basis: {ph['interval_basis']})")
         default = ("Estimate: [[estimate]] ([[interval_level]] interval [[p10]] to [[p90]], basis: [[interval_basis]]), "
                    "from [[n_methods]] method(s) over [[n_points_kept]] kept data points.")
         text, model_text, digits_removed, err = default, None, 0, None
@@ -754,11 +782,13 @@ def build(ctx: Context):
                 err = str(e)
         if isinstance(model_text, str) and model_text.strip():
             text = model_text
-        # 模型不许写数字：占位符以外的数字一律换成 [n]（只留年份上下文里、离 as_of 不超过 10 年的四位年份和方法 id）。
+        # 模型不许写数字：占位符以外的数字一律换成 [n]（只留离 as_of 不超过 10 年的四位年份、Q1–Q4 / H1–H2，和方法、假设、
+        # 方法用到的点的 id，见 scrub_digits）。
         # 渲染按切分后的片段拼，不再对拼好的文字重新找占位符，"[" + "[n]" + "]" 不会被当成占位符。
         parts = PLACEHOLDER.split(text)
         year = int(state["as_of"][:4])
-        mids = {m["id"] for m in comp.get("methods") or []} | {a["id"] for a in used_a}
+        mids = ({m["id"] for m in comp.get("methods") or []} | {a["id"] for a in used_a} |
+                {i for m in comp.get("methods") or [] for i in m.get("used_ids") or []})
         for i in range(0, len(parts), 2):
             parts[i], n = scrub_digits(parts[i], year, mids)
             digits_removed += n
@@ -772,8 +802,9 @@ def build(ctx: Context):
         rendered = "".join(p if i % 2 == 0 else ph.get(p, "[unknown placeholder]") for i, p in enumerate(parts))
         if r.get("central") is None:
             rendered = "No estimate: no estimation method could be computed from the verified evidence."
+        # model_text（v2.6d，N34）：模型回复的原文（清洗之前），只存进 state，不进终稿
         return {"final": {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
-                          "model_error": err, "used_model_text": model_text is not None}}
+                          "model_error": err, "used_model_text": model_text is not None, "model_text": model_text}}
 
     def final_discrete(state: AgentState, comp: dict, r: dict) -> dict:
         """离散目标的终稿：代码生成「每个结果 + 概率」的几行（数字只走占位符），后面接模型写的简短理由（数字换成 [n]），
@@ -798,6 +829,10 @@ def build(ctx: Context):
                 summary.append(f"- {m['id']} outcome_probs: inputs {src}; remainder {m.get('remainder')}; {m.get('rationale', '')}")
             else:
                 summary.append(f"- {m['id']} {m.get('method')}: failed: {m.get('error', '')}")
+        # v2.6d（D4）：算出了分布的方法用到的观测点各给一个 p{n}_value 占位符（同连续值的终稿；点 id 集合同下面的 mids）
+        p_ph, p_lines = point_placeholders(state.get("points") or [], ok)
+        ph.update(p_ph)
+        summary += p_lines
         used_a = [a for a in (state.get("assumptions") or {}).get("kept") or [] if a.get("used_by")]
         for a in used_a:
             ph.update(assumption_placeholders(a))
@@ -834,7 +869,7 @@ def build(ctx: Context):
                         if r.get("outcomes") else "No estimate: the judge did not define a valid outcome list for this "
                                                   "discrete target.")
         return {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
-                "model_error": err, "used_model_text": model_text is not None}
+                "model_error": err, "used_model_text": model_text is not None, "model_text": model_text}
 
     g = StateGraph(AgentState)
     for name, fn in [("plan", plan), ("approve", approve), ("subagent", subagent), ("markets", markets),

@@ -247,7 +247,7 @@ async function pageResult(qid, tag) {
   ${r.aborted ? `<div class="err">中止：${esc(r.aborted)}</div>` : ""}
   ${r.discrete ? discreteBlock(r.discrete, o) : `<div class="row">
     <div class="card"><div class="muted">估计</div><div class="big">${fmt(e.central)}</div>
-      <div>80% 区间 [${fmt(e.p10)}, ${fmt(e.p90)}]</div><div class="muted small">区间依据 ${esc(e.basis)} · 加权规则 ${esc(e.weight_rule)}</div></div>
+      <div>80% 区间 [${fmt(e.p10)}, ${fmt(e.p90)}]</div><div class="muted small">区间依据 ${esc(e.basis)}${e.basis_text ? "：" + esc(e.basis_text) : ""} · 加权规则 ${esc(e.weight_rule)}</div></div>
     ${o ? `<div class="card"><div class="muted">官方值（只用于打分，agent 看不到）</div><div class="big">${fmt(o.answer_value)}</div>
       <div>误差 <b>${pct(o.pct_err)}</b> · 80% 区间盖住：${yesno(o.covered_80)}</div>
       <div class="muted small">公布 ${esc(o.released)} · ${link(o.source, "来源")}</div></div>` : ""}

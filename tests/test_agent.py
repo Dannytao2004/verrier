@@ -648,10 +648,11 @@ class TestFinalScrub(unittest.TestCase):
         self.assertEqual(scrub_digits("My own range is [800,000, 900,000].", 2026)[0], "My own range is [[n], [n]].")
         self.assertEqual(scrub_digits("USD900,000 or about900k", 2026)[0], "USD[n] or about[n]k")
         self.assertEqual(scrub_digits("Roughly 2050 employees", 2026)[0], "Roughly [n] employees")
-        self.assertEqual(scrub_digits("Roughly 2030 employees", 2026)[0], "Roughly [n] employees")
+        # v2.6d（D4）：离 as_of 不超过 10 年、不贴字母数字的四位数一律当年份保留，不再看前面的词（代价：2030 这类计数也会留下）
+        self.assertEqual(scrub_digits("Roughly 2030 employees", 2026)[0], "Roughly 2030 employees")
         t, n = scrub_digits("In August 2025, m1 used values from 2021, 2023 and 2024", 2026, {"m1"})
         self.assertEqual((t, n), ("In August 2025, m1 used values from 2021, 2023 and 2024", 0))
-        self.assertEqual(scrub_digits("it used 2021", 2026)[1], 1)  # 没有年份上下文就替换（宁可多换）
+        self.assertEqual(scrub_digits("it used 2021", 2026)[1], 0)  # v2.6d（D4）：不再要求年份上下文
 
 
 class TestTruncatedReplies(unittest.TestCase):

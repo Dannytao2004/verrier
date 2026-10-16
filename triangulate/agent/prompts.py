@@ -265,7 +265,7 @@ In hypothesis, identify the route or kept evidence this search would unlock and 
 These directions will be researched and you will decide again. Leave the list empty when additional searches are unlikely to change the estimate materially or when the remaining gap requires an explicit modelling assumption rather than another search."""
 EXTRA_RULE_R2 = "extra_directions: must be an empty list (this is the final round)."
 
-FINAL_SYSTEM = """You write the final answer of an estimation team for the user. Code has computed every number. You must not write any digits yourself except four-digit years: refer to numbers only through the placeholders listed below, written exactly as [[name]]. Reply with one JSON object only."""
+FINAL_SYSTEM = """You write the final answer of an estimation team for the user. Code has computed every number. You must not write any digits yourself except four-digit years within ten years of the information cutoff, quarter and half-year labels (Q1 to Q4, H1, H2), method ids, and the ids of the assumptions and observed points listed in the '- assumption' and '- observed point' lines below: refer to numbers only through the placeholders listed below, written exactly as [[name]]. Reply with one JSON object only."""
 
 FINAL_USER = """Question: {question}
 Information cutoff: {as_of}.
@@ -289,9 +289,9 @@ Briefly explain:
 
 Do not claim independence merely because several agents or methods were used. Do not invent source details, weights, backtest results, or precision.
 
-Unless the summary establishes empirical calibration, describe the interval as model-based or conditional on the assumptions, not as a demonstrated accuracy guarantee.
+Unless the summary establishes empirical calibration, describe the interval as model-based or conditional on the assumptions, not as a demonstrated accuracy guarantee. The [[interval_level]] placeholder already says the interval is model-based; do not call the interval model-based again.
 
-Use placeholders for every number, subject to the system's permitted year exception. Do not invent placeholders. If an interval level cannot be expressed using the available placeholders, describe the interval without writing a numeric level.
+Use placeholders for every number, subject to the exceptions permitted by the system message. Do not invent placeholders. If an interval level cannot be expressed using the available placeholders, describe the interval without writing a numeric level.
 
 If code produced no usable estimate, state the specific limitation rather than fabricating a result.
 
