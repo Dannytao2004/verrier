@@ -1,0 +1,14 @@
+[ask_0e2d5021] plan: 5 directions -> approved=True
+[ask_0e2d5021] done in 383.8s; most likely 4.00 (53.6%); usd 0.3771
+Outcome probabilities for the pinned target (computed by code from the cited evidence; equal-weight average of 2 method(s) over 85 kept data points):
+- 3.75 or lower: 1.9%
+- 4.00: 53.6%
+- 4.25: 41.6%
+- 4.50 or higher: 2.9%
+Most likely outcome: 4.00 (53.6%).
+
+The probabilities for 4.00 and 4.25 come from observed market-implied probabilities for the next meeting, while 3.75 or lower and 4.50 or higher rest on analyst assumptions because no kept point prices those tails. The most important reason these could be wrong is venue dispersion: different prediction markets imply materially different odds of a hike, so the observed distribution may not reflect the true consensus. The missing evidence that would most improve the estimate is an explicit, dated FOMC meeting schedule plus a broader set of market-implied probabilities covering the tails, which would replace the assumptions with observed data.
+
+Key assumptions (proposed by the analyst model, not observed; code uses each value as given):
+- a1 Probability the next meeting delivers a [n] bp hike: 3%; used by m1, m2. Overturned by: A market distribution or Fed communication explicitly pricing a [n] bp move, or evidence the next meeting is an emergency/intermeeting action.
+- a2 Probability the next meeting cuts the target range: 2%; used by m1, m2. Overturned by: A sharp deterioration in activity or a market distribution pricing meaningful cut odds for the next meeting.
