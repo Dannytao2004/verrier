@@ -1,0 +1,38 @@
+== discrete1: outcomes ['3.00%', '3.25%', '3.50%', '3.75%', '4.00%', '4.25%', '4.50%', '4.75%', '5.00%', '5.25%']
+  r1 m1: ERROR outcome_probs needs at least one kept data point among its inputs; a method made only of assumptions and the remainder is rejected
+  r1 pooled: None (n/a)
+  r2 before repair m1: ok, points 2, assumptions 0, top 4.00% 56.3%
+  r2 before repair pooled: 4.00% (56.3%)
+  r2 m1: ERROR outcome '3.75%': assumption a1 was rejected (need 0 < low <= value <= high)
+  r2 pooled: None (n/a)
+== discrete2: outcomes ['3.00% or lower', '3.25%', '3.50%', '3.75%', '4.00%', '4.25%', '4.50% or higher']
+  r1 m1: ERROR the given probabilities sum to 1.055 (more than 1 + 0.02), so the remainder '3.25%' would be negative; drop the remainder or lower the other inputs
+  r1 m2: ERROR id p87 is used for outcomes '4.00%' and '4.25%'; one probability denotes one outcome
+  r1 pooled: None (n/a)
+  r2 before repair m1: ERROR outcome '4.50% or higher': assumption a1 was rejected (need 0 < low <= value <= high); outcome '3.75%': assumption a2 was rejected (need 0 < low <= value <= high); outcome '3.50%': assumption a3 was rejected (need 0 < low <= value
+  r2 before repair m2: ERROR outcome '4.50% or higher': assumption a1 was rejected (need 0 < low <= value <= high); outcome '3.75%': assumption a2 was rejected (need 0 < low <= value <= high); outcome '3.50%': assumption a3 was rejected (need 0 < low <= value
+  r2 before repair pooled: None (n/a)
+  r2 m1: ERROR the given probabilities sum to 1.035 (more than 1 + 0.02), so the remainder '3.00% or lower' would be negative; drop the remainder or lower the other inputs
+  r2 m2: ERROR the given probabilities sum to 1.035 (more than 1 + 0.02), so the remainder '3.00% or lower' would be negative; drop the remainder or lower the other inputs
+  r2 pooled: None (n/a)
+== discrete4: outcomes ['4.00% or lower', '4.25%', '4.50%', '4.75%', '5.00%', '5.25%', '5.50% or higher']
+  r1 m1: ERROR outcome_probs needs at least one kept data point among its inputs; a method made only of assumptions and the remainder is rejected
+  r1 pooled: None (n/a)
+  r2 before repair m1: ok, points 2, assumptions 0, top 4.00% or lower 56.3%
+  r2 before repair m2: ERROR id a2 is used for outcomes '4.00% or lower' and '4.25%'; one probability denotes one outcome; outcome_probs needs at least one kept data point among its inputs; a method made only of assumptions and the remainder is rejected
+  r2 before repair pooled: 4.00% or lower (56.3%)
+  r2 m1: ERROR outcome '4.50%' has a probability input and is also the remainder
+  r2 pooled: None (n/a)
+== discrete5: outcomes ['4.50% or lower', '4.75%', '5.00%', '5.25%', '5.50%', '5.75% or higher']
+  r1 m1: ERROR outcome '4.75%': assumption a1 restates kept data point p78 (same value and unit); reference p78 instead
+  r1 pooled: None (n/a)
+  r2 before repair m1: ERROR outcome '4.50% or lower': assumption a1 restates kept data point p78 (same value and unit); reference p78 instead; outcome '4.75%': assumption a2 restates kept data point p79 (same value and unit); reference p79 instead; outcome_p
+  r2 before repair pooled: None (n/a)
+  r2 m1: ok, points 2, assumptions 0, top 4.75% 56.3%
+  r2 pooled: 4.75% (56.3%)
+== constructed (discrete4 points)
+  level/change points m1: ERROR outcome '4.25%': p95 = 22.1 percentage points is a change or difference (percentage points or basis points), not a probability; outcome '4.50%': data point p117 ('Unemployment rate in July and August 2026', unit 'percent') is not 
+  level/change points pooled: None (n/a)
+== constructed (discrete2 points): m1 = {4.25%: p22}, remainder 3.25%
+  remainder m1: ok, points 1, assumptions 0, top 3.25% 66.8%
+  remainder pooled: 3.25% (66.8%)
