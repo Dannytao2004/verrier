@@ -42,6 +42,12 @@ The DeepSeek key is read at run time from the file in `TRIANGULATE_KEY_FILE` (de
 
 `run` and `demo` skip questions that already have saved replies. Use `--force` to call the model again (this costs money and changes results).
 
+## Already-published targets (v2.4, live use only)
+
+When the agent runs on today's date and the question has no registered official value, a kept data point may already be the target value (same entity, measure and period, published on or before as_of). Code proposes candidates (kept points whose period matches the target period, whose name contains the target's entity words and shares a stem with the target's measure, with the same % / non-% unit, and that are not named as a forecast, probability or change); one model call marks each candidate `target` or `different` and writes no numbers. If the confirmed values agree (within 0.5%), the result is that value, marked `published` with its source and date (`state.json` -> `published`; `compute.result.basis = "published"`); the estimation methods are still computed and listed for reference (`compute.estimate_result`) but not blended, and code writes the final answer. A discrete target whose published value falls in one of the judge's outcomes is reported as resolved. Confirmed values that disagree are reported as a conflict next to the estimate. Backtests never run the check (the target is published after as_of there); the 7 dev/test runs recompute identically and the continuous-path prompt hash is unchanged. Code: `triangulate/agent/published.py`.
+
+Live check (2026-10-16, `results/agent/ask_a63174a0/published1`): "How many new cars were registered in the UK in September 2026, as reported by SMMT?" was reported as published, 350,536 (SMMT preliminary figure via fleetnews.co.uk and tradingeconomics.com; the estimation methods gave 352,638 for reference), $0.46, 27 minutes. An earlier snapshot of the same article said 350,518; which figure is SMMT's final one was not checked. Open problems are in `NEXT.md`.
+
 ## Web UI (local)
 
 ```
@@ -73,7 +79,7 @@ Assumption share (read-only, computed from the saved state, never written back):
 | `triangulate/arms.py`, `prompts.py`, `llm.py` | the two arms, prompts, DeepSeek client with per-call logging |
 | `triangulate/report.py`, `viewer.py` | offline metrics, tables and HTML graph pages |
 | `results/` | `summary.json`, `per_question.json`, `report_tables.md`, `calls.jsonl`, `demo/` |
-| `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher, extractor checks, judge, method library, assumption inputs for formula_mc (`assumptions.py`), own-history ablation (`ablation.py`), discrete targets (`discrete.py`), optional Jev arm (`jev.py`) |
+| `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher, extractor checks, judge, method library, assumption inputs for formula_mc (`assumptions.py`), own-history ablation (`ablation.py`), discrete targets (`discrete.py`), optional Jev arm (`jev.py`), already-published targets in live use (`published.py`) |
 | `results/agent/<id>/[<tag>/]` | `state.json`, `calls.jsonl`, `ledger.md`, `graph.html` per run; raw pages stay in `data/raw/agent/` (local only) |
 | `docs/graphs/` | `index.html`, the finance demo graph; realFP question pages under `realfp/` (local only) |
 
