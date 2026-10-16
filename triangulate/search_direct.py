@@ -129,15 +129,16 @@ def audit(d: dict) -> dict:
     return {"queries": queries, "results": results, "n_search_errors": n_err, "texts": texts, "n_thinking_blocks": n_think}
 
 
-def run_search_direct(client, q: dict) -> dict:
-    """一题：首次调用（带 web_search）+ 输出不合格时重试一次（不带工具）。返回要保存的记录。"""
+def run_search_direct(client, q: dict, max_tokens: int = MAX_TOKENS) -> dict:
+    """一题：首次调用（带 web_search）+ 输出不合格时重试一次（不带工具）。返回要保存的记录。
+    max_tokens 只给补充运行用（probes/search_direct_supp.py）；正式运行用默认值。"""
     user = _messages(SYSTEM, q)[1]["content"]
     msgs = [{"role": "user", "content": user}]
     strict = q.get("strict", True)
     record = {"qid": q["id"], "arm": ARM, "model": client.model, "target_unit": q["answer_unit"], "as_of": q["as_of"],
-              "system": SYSTEM, "user": user, "max_uses": MAX_USES, "attempts": []}
+              "system": SYSTEM, "user": user, "max_uses": MAX_USES, "max_tokens": max_tokens, "attempts": []}
     for attempt in (1, 2):
-        body = {"model": client.model, "max_tokens": MAX_TOKENS, "system": SYSTEM, "messages": msgs}
+        body = {"model": client.model, "max_tokens": max_tokens, "system": SYSTEM, "messages": msgs}
         if attempt == 1:
             body["tools"] = [{"type": "web_search_20250305", "name": "web_search", "max_uses": MAX_USES}]
         d = client.call(body, qid=q["id"], attempt=attempt)

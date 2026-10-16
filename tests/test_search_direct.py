@@ -85,6 +85,12 @@ class TestSearchDirect(unittest.TestCase):
         self.assertEqual(r["attempts"][0]["problems"], ["reply was truncated (stop_reason=max_tokens)"])
         self.assertEqual(r["estimate"], 3200000.0)
 
+    def test_max_tokens_default_and_override(self):
+        c = Fake(resp('{"estimate": 1, "unit": ""}'), resp('{"estimate": 1, "unit": ""}'))
+        self.assertEqual(SD.run_search_direct(c, Q)["max_tokens"], 4096)
+        self.assertEqual(SD.run_search_direct(c, Q, max_tokens=32000)["max_tokens"], 32000)
+        self.assertEqual([b["max_tokens"] for b in c.bodies], [4096, 32000])
+
     def test_costs_are_summed_over_attempts(self):
         r = SD.run_search_direct(Fake(resp("x"), resp('{"estimate": 1, "unit": ""}')), Q)
         self.assertAlmostEqual(r["usd"], sum(a["usd"] for a in r["attempts"]), places=6)
