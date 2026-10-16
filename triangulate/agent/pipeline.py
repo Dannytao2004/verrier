@@ -190,6 +190,8 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
         value, is_pct = ev.parse_value(vw, sw)
     except ValueError as e:
         return None, f"number: {e}"
+    if cut := ev.cjk_fragment(q, vw, sw):   # v2.6e：只写了更大的中日韩数字的一截（1億3000万 里的 1億3000）就丢，不静默读错
+        return None, f"number: {cut}"
     basis = ev.scale_supported(sw, q, text_n[max(0, span[0] - ev.HEADER_WINDOW_CHARS):span[0]], vw)
     if not basis:
         return None, f"scale word {sw!r} not supported by quote or table header"
@@ -197,8 +199,13 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
     if why:
         return None, why
     # 抽取员给的期间年份必须在页面正文或网址里出现过（v2.1b 韩国题：旧页面上「7 月（报告当年）」被标成了 2026 年 7 月）
-    y = str(raw.get("period_end") or "")[:4]
-    if y.isdigit() and y not in text_n and y not in url:
+    # v2.6e：页面只写纪年（令和8年、民國115年、台湾的「115年」）时也算出现过（evidence.era_years）；period_end 本身写成纪年
+    # （parse_date 现在认「令和8年3月」）时换成公历年再查，不让这种写法绕过检查
+    pe_s = str(raw.get("period_end") or "")
+    y = pe_s[:4]
+    if not y.isdigit() and not pe_s[:1].isascii() and (pe := ev.parse_date(pe_s, end=True)):
+        y = str(pe.year)
+    if y.isdigit() and y not in text_n and y not in url and not (y.isdecimal() and int(y) in ev.era_years(text_n)):
         return None, f"period year {y} does not appear in the page text or URL (likely mis-dated)"
     unit = "%" if is_pct else str(raw.get("unit") or "")[:60]
     lo = max(0, min(i - 80, len(q) - QUOTE_STORE_CHARS))

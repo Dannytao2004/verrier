@@ -60,9 +60,13 @@ def find_value(quote_n: str, value_written: str) -> int:
 
 
 # ---------- 数字与倍数词 ----------
+# v2.6e：中日韩倍数字（万 / 萬 / 만 = 1e4，億 / 亿 / 억 = 1e8，兆 / 조 = 1e12，复合倍数万亿 / 萬億 = 1e12）和英文表头 '000s
+CJK_SCALES = {"万": 1e4, "萬": 1e4, "만": 1e4, "億": 1e8, "亿": 1e8, "억": 1e8, "兆": 1e12, "조": 1e12,
+              "万亿": 1e12, "萬億": 1e12}
 SCALES = {"": 1.0, "none": 1.0, "hundred": 1e2, "thousand": 1e3, "thousands": 1e3, "k": 1e3,
           "million": 1e6, "millions": 1e6, "m": 1e6, "mn": 1e6, "mln": 1e6,
-          "billion": 1e9, "billions": 1e9, "bn": 1e9, "b": 1e9, "trillion": 1e12, "trillions": 1e12, "tn": 1e12}
+          "billion": 1e9, "billions": 1e9, "bn": 1e9, "b": 1e9, "trillion": 1e12, "trillions": 1e12, "tn": 1e12,
+          "000s": 1e3, "'000s": 1e3, **CJK_SCALES}
 PERCENT = {"%", "percent", "per cent", "pct"}
 _NUM = re.compile(r"(?<![\d.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
 _WORD_SCALE = re.compile(r"^\s*(hundred|thousand|million|billion|trillion)s?\b", re.I)
@@ -77,49 +81,149 @@ _HEADER = re.compile(r"\((?:in\s+)?(?:[A-Z]{3}\s+|US\$\s*|[$€£¥]\s*)?(hundre
                      r"(?:\s+of\s+[^()]{1,30})?\s*\)"
                      r"|\bin\s+(hundreds|thousands|millions|billions|trillions)(?=\s*(?:[.:;,)\]]|$))"
                      r"|\(\s*'?(000)s?'?\s*\)", re.I)
+_CJK_SCALE_ALT = "万亿|萬億|[万萬만億亿억兆조]"
+_CJK_SCALE = re.compile(rf"^\s?({_CJK_SCALE_ALT})")   # 紧跟在数字后面的倍数字
+_CJK_SEG = re.compile(rf"\s?((?:\d{{1,3}}(?:,\d{{3}})+|\d+)(?:\.\d+)?)(?:\s?({_CJK_SCALE_ALT}))?")
+_CJK_NUMERAL_CHARS = "〇零一二三四五六七八九十百千拾佰仟两兩천백십"
+# 汉字 / 韩文数词（三百、1千）不支持：报错，不静默丢掉；「百分点」（0.5百分点）不算数词
+_CJK_NUMERAL = re.compile(rf"^\s?(?!百分)[{_CJK_NUMERAL_CHARS}]")
+_CJK_WORD = re.compile(rf"^({_CJK_SCALE_ALT})(.*)$")
+_CJK_SC = "万萬만億亿억兆조"   # 单个倍数字：判断一个数是不是更大的中日韩数字的一截（_cjk_reads）
+# 前面紧挨「数字 + 倍数字」（만 / 억 / 조 后面可以隔一个空格）：「1億2345万」里的 2345万、「1억 2345만」里的 2345만。
+# 倍数字前面必须是数字：하지만、다만、만 30세 里的「만」是普通的字，不是倍数
+_CJK_BEFORE = re.compile(rf"\d\s?(?:{_CJK_SCALE_ALT})$|\d\s?[만억조]\s$")
+_SI_UNIT = r"\s?(?:瓦|赫|帕|焦|字节|比特)"   # 兆瓦 / 兆赫 / 兆字节 ...：这里的「兆」是 SI 前缀 mega，和 1e12 歧义，不猜
+_MEGA_UNIT = re.compile("兆" + _SI_UNIT)
+
+
+def _cjk_scale_word(sw: str) -> str:
+    """scale_word 里倍数字后面接着的单位去掉：万人 / 万人泊 -> 万，兆円 -> 兆，만 명 -> 만（万亿元 -> 万亿）。
+    单位部分必须全是文字、不含数词；不是这种写法就原样返回。"""
+    m = _CJK_WORD.match(sw)
+    u = m.group(2).strip() if m else ""
+    return m.group(1) if m and u.isalpha() and not set(u) & set(_CJK_NUMERAL_CHARS) else sw
+
+
+def _cjk_sum(s: str, m) -> tuple:
+    """m 是 s 里的第一个数字，后面紧跟中日韩倍数字：读「数字 + 倍数字」连写（3409万、519万548、1億2345万、2만 9000），
+    返回 (各段之和, 第一段的倍数字, 读到的位置)；加法只在这里由代码做。后一段的倍数必须比前一段小，而且整段不满前一段的
+    一个倍数单位（35万6713 可以；35万67130、5万3万 报错）；有几段时每段都必须是整数。段与段之间只有韩文
+    （만 / 억 / 조 后面）允许一个空格（2만 9000）；「3409万 2025」不连读，按「多于一个数字」报错。"""
+    first = _CJK_SCALE.match(s[m.end():])
+    segs = [(abs(float(m.group().replace(",", ""))), CJK_SCALES[first.group(1)], "." in m.group())]
+    prev, pos = first.group(1), m.end() + first.end()
+    while (g := _CJK_SEG.match(s, pos)) and not (s[pos:pos + 1].isspace() and prev not in "만억조"):
+        segs.append((float(g.group(1).replace(",", "")), CJK_SCALES[g.group(2)] if g.group(2) else 1.0, "." in g.group(1)))
+        prev, pos = g.group(2), g.end()
+        if not prev:
+            break
+    for (_, hi, _), (n, f, _) in zip(segs, segs[1:]):
+        if f >= hi or n * f >= hi:
+            raise ValueError("malformed CJK number: each part must be smaller than the scale before it")
+    if len(segs) > 1 and any(dec for _, _, dec in segs):
+        raise ValueError("malformed CJK number: decimal in a multi-part number")
+    total = sum(n * f for n, f, _ in segs)
+    return (-total if m.group().startswith("-") else total), first.group(1), pos
 
 
 def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
     """返回 (数值, 是否百分数)。数值 = 原文数字 x 倍数；只做这一次乘法。
-    倍数可来自原文数字本身（"4.8 million"）或模型填的 scale_word；两者都有且不一致就报错。"""
+    倍数可来自原文数字本身（"4.8 million"、"3409万"）或模型填的 scale_word；两者都有且不一致就报错。
+    v2.6e：中日韩复合写法（519万548 = 5,190,548）是各段之和（_cjk_sum）；scale_word 里倍数字后面的单位先去掉
+    （万人 -> 万、兆円 -> 兆）；'000s = 千；汉字 / 韩文数词（三百、1千）不支持，报错；「兆」后面紧跟 SI 单位（兆瓦）报错；
+    倍数字后面又接倍数字（15.4万億）报错。"""
     s = norm(value_as_written)
     if _DOT_THOUSANDS.search(s):
         raise ValueError("ambiguous separators: '.' used as a thousands separator")
+    if _MEGA_UNIT.search(s) or _MEGA_UNIT.match(norm(scale_word)):
+        raise ValueError("ambiguous '兆' before an SI unit: 10^12 or mega-")
     m = _NUM.search(s)
     if not m:
         raise ValueError("no number in value_as_written")
-    rest = s[m.end():]
+    cjk = _cjk_sum(s, m) if _CJK_SCALE.match(s[m.end():]) else None
+    rest = s[cjk[2]:] if cjk else s[m.end():]
     if _NUM.search(rest):
         raise ValueError("more than one number in value_as_written")
-    num = float(m.group().replace(",", ""))
+    if cjk and _CJK_SCALE.match(rest):   # 15.4万億（混写的复合倍数）、3万万：不猜，以前把第二个倍数字当成单位文字丢掉
+        raise ValueError("malformed CJK number: two scale characters in a row")
+    if _CJK_NUMERAL.match(rest):
+        raise ValueError("CJK numerals (e.g. 三百, 1千) are not supported")
+    num = cjk[0] if cjk else float(m.group().replace(",", ""))
     if s[:m.start()].strip().startswith("(") and rest.strip().startswith(")"):
         num = -num  # 会计写法 (1,234)
-    text_scale, is_pct = None, False
+    text_scale, is_pct = (cjk[1] if cjk else None), False
     if rest.strip().startswith("%") or rest.strip().lower().startswith(("percent", "per cent")):
         is_pct = True
-    elif (w := _WORD_SCALE.match(rest)) or (w := _ABBR_SCALE.match(rest)):
+    elif not cjk and ((w := _WORD_SCALE.match(rest)) or (w := _ABBR_SCALE.match(rest))):
         text_scale = w.group(1).lower()
     sw = norm(scale_word).lower()
     if sw in PERCENT:
         is_pct, sw = True, ""
+    sw = _cjk_scale_word(sw)
     if sw not in SCALES:
         raise ValueError(f"unknown scale word {scale_word!r}")
     if text_scale and sw and SCALES[sw] != SCALES[text_scale]:
         raise ValueError(f"scale conflict: {text_scale!r} in value vs {scale_word!r}")
-    factor = SCALES[text_scale or sw]
+    factor = 1.0 if cjk else SCALES[text_scale or sw]   # 中日韩写法的倍数已经在各段里乘过
     return num * factor, is_pct
+
+
+def _cjk_reads(quote_n: str, vw: str, cj: str):
+    """vw 在 quote 里每一次作为完整数字出现（find_value 的规则）时，逐次给出 (是否用上了 cj, 问题)。cj 是 scale_word 给的
+    中日韩倍数字：vw 不以倍数字结尾、后面（最多隔一个空格）紧跟 cj 时算进这个数。问题为空串 = 这次读到的是一个完整的数；
+    "part" = 只是更大的数的一截：① 前面紧挨「数字 + 倍数字」（_CJK_BEFORE；倍数字前面不是数字的不算，하지만 24,275 里的
+    24,275 是完整的数）；② 读到的数后面（最多隔一个空格）还接着倍数字；③ 读到的数以倍数字结尾、后面紧接数字（만 / 억 / 조
+    后面可以隔一个空格）；④ 读到的数带中日韩倍数字、后面紧接汉字 / 韩文数词（「61万1千人」里只写 61万1，parse_value 会读成
+    610,001）。①③ 的段间空格规则和 _cjk_sum 相同；② 比 _cjk_sum 宽（15.4万億 这种混写 _cjk_sum 不连读，这里也算一截）。
+    不带倍数字的数后面接「千」（12,345千人 里的 12,345）不算，和 v2.6d 一样按原文数字取值。
+    "mega" = 读到的数以「兆」结尾、后面紧跟 SI 单位（兆瓦）。"""
+    for m in re.finditer(r"(?<![\d.,])" + re.escape(vw) + r"(?!\d|[.,]\d)", quote_n):
+        tail, last, used = quote_n[m.end():], vw[-1], False
+        if cj and last not in _CJK_SC and (g := re.match(r"\s?" + re.escape(cj), tail)):
+            tail, last, used = tail[g.end():], cj[-1], True
+        if (_CJK_BEFORE.search(quote_n[max(0, m.start() - 4):m.start()])
+                or re.match(rf"\s?[{_CJK_SC}]", tail)
+                or (last in _CJK_SC and re.match(r"\s?\d" if last in "만억조" else r"\d", tail))
+                or ((used or set(vw) & set(_CJK_SC)) and re.match(rf"(?!百分)[{_CJK_NUMERAL_CHARS}]", tail))):
+            yield used, "part"
+        else:
+            yield used, ("mega" if last == "兆" and re.match(_SI_UNIT, tail) else "")
+
+
+def cjk_fragment(quote_n: str, value_written: str, scale_word: str = "") -> str:
+    """v2.6e：value_as_written 在 quote 里的每一次出现都读不成一个完整的数时返回原因（pipeline.verify_point 据此丢点），否则空串。
+    例：「1億3000万人泊」里只写 1億3000、「1億2345万人」里只写 2345万 或 2345 + 万、「15.4万亿元」里写 15.4万 或 15.4 + 万、
+    scale_word 为空时「3409万」里只写 3409、「500兆瓦」里写 500兆 或 500 + 兆。前后都不挨中日韩倍数字的写法（英文页面）一律返回空串。"""
+    vw = norm(value_written)
+    cj = _cjk_scale_word(norm(scale_word).lower())
+    reads = [why for _, why in _cjk_reads(quote_n, vw, cj if cj in CJK_SCALES else "")] if vw else []
+    if not reads or "" in reads:
+        return ""
+    if reads[0] == "mega":
+        return "ambiguous '兆' before an SI unit: 10^12 or mega-"
+    return "value_as_written is only part of a larger CJK number in the quote"
 
 
 def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written: str = "") -> str:
     """倍数词必须有原文依据。返回依据（quote / page_header / none_needed），否则空串。
     - 缩写（k、m、b、bn ...）：只认紧贴数字的写法（value_as_written 本身带着，或 quote 里数字后面紧跟），没有页面级依据。
     - 单词（thousand、million ...）：quote 里数字后面紧跟这个词；或者 quote / context_n（调用方给的、quote 前面
-      HEADER_WINDOW_CHARS 个字符的原文）里有独立的表头写法（见 _HEADER）。"""
+      HEADER_WINDOW_CHARS 个字符的原文）里有独立的表头写法（见 _HEADER）。'000s 按 thousand 处理。
+    - v2.6e 中日韩倍数字（万、億、만 ...；scale_word 里后面的单位先去掉）：和缩写一样只认紧贴数字的写法，没有页面级依据；
+      quote 里「数字 + 倍数字」必须是一个完整的数（_cjk_reads）：前面不挨「数字 + 倍数字」，后面不再接
+      倍数字或连读的数字（「519万548」只写 519 + 万会丢掉 548，「15.4万亿」只写 15.4 + 万会丢掉亿，「1億2345万」只写 2345 + 万会丢掉 1 億）。"""
     sw = norm(scale_word).lower()
     if sw in ("", "none") or sw in PERCENT:
         return "none_needed"
     vw = norm(value_written)
+    if (cj := _cjk_scale_word(sw)) in CJK_SCALES:
+        if vw and re.search(rf"\d\s?{re.escape(cj)}", vw):
+            return "quote"
+        if vw and any(used and not why for used, why in _cjk_reads(quote_n, vw, cj)):
+            return "quote"
+        return ""
     base = sw[:-1] if sw.endswith("s") and sw[:-1] in SCALE_WORDS else sw
+    base = "thousand" if base in ("000s", "'000s") else base
     if base in ABBREVIATIONS:
         if vw and re.search(rf"\d\s?{re.escape(base)}$", vw, re.I):
             return "quote"
@@ -143,16 +247,51 @@ def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written
 _MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
 _MONTHS.update({m.lower(): i for i, m in enumerate(calendar.month_abbr) if m})
 _MONTHS["sept"] = 9
+# v2.6e 中日韩日期：年份是公历（2026年 / 2026년）或纪年：令和 N 年 = 2018+N，平成 N 年 = 1988+N，民國 / 民国 N 年 = 1911+N（元年 = 1）
+_ERA_BASE = {"令和": 2018, "平成": 1988, "民國": 1911, "民国": 1911}
+_ERA = r"(?P<era>令和|平成|民國|民国)\s?(?P<n>\d{1,3}|元)"
+# \d 也认全角数字（日文页面常见，int() 能直接转）；年份范围在 _cjk_year 里查
+_YMD_CJK = re.compile(rf"(?:(?P<g>\d{{4}})|{_ERA})\s?年(?:\s?(?P<m>\d{{1,2}})\s?月(?:\s?(?P<d>\d{{1,2}})\s?日)?)?")
+_YMD_KR = re.compile(r"(?P<g>\d{4})\s?년(?:\s?(?P<m>\d{1,2})\s?월(?:\s?(?P<d>\d{1,2})\s?일)?)?")
+# 正文里只认完整的年月日；台湾常省略「民國」，不带前缀的三位数 1NN年M月D日 也按民国算
+_TEXT_DATE_CJK = re.compile(rf"(?:(?<!\d)(?P<g>\d{{4}})|{_ERA}|(?<![\d.,])(?P<b>\d{{3}}))"
+                            r"\s?年\s?(?P<m>\d{1,2})\s?月\s?(?P<d>\d{1,2})\s?日"
+                            r"|(?<!\d)(?P<kg>\d{4})\s?년\s?(?P<km>\d{1,2})\s?월\s?(?P<kd>\d{1,2})\s?일")
+_ERA_YEAR = re.compile(rf"{_ERA}\s?年|(?<![\d.,])(?P<b>\d{{3}})\s?年")
+
+
+def _cjk_year(g: dict):
+    """正则命中的年份 -> 公历年：公历年原样（只认 1900–2099，和英文日期的 (19|20)\\d\\d 一样）；令和 / 平成 / 民國 N 年
+    加基数（元年 = 1）；不带前缀的三位数只认 100–199，按民国算（115年 = 2026）。范围外返回 None。"""
+    if g.get("g") or g.get("kg"):
+        y = int(g.get("g") or g["kg"])
+        return y if 1900 <= y <= 2099 else None
+    if g.get("era"):
+        return _ERA_BASE[g["era"]] + (1 if g["n"] == "元" else int(g["n"]))
+    n = int(g["b"])
+    return 1911 + n if 100 <= n <= 199 else None
+
+
+def era_years(text: str) -> set:
+    """文字里纪年写法的年份（公历）：令和 / 平成 / 民國 / 民国 N 年，和台湾常用的不带「民國」的 1NN 年（115年 = 2026）。
+    pipeline.verify_point 的期间年份检查用：页面只写纪年时，公历年份不在正文里。"""
+    return {y for m in _ERA_YEAR.finditer(text or "") if (y := _cjk_year(m.groupdict())) is not None}
 
 
 def parse_date(s, end: bool = False):
-    """接受 YYYY-MM-DD / YYYY-MM / YYYY / "August 2025" / "Aug 5, 2025"。end=True 时不完整日期取期末。"""
+    """接受 YYYY-MM-DD / YYYY-MM / YYYY / "August 2025" / "Aug 5, 2025"。end=True 时不完整日期取期末。
+    v2.6e 也接受 2026年3月27日 / 2026年3月 / 2026年、2026년 3월 27일、令和8年3月、民國115年5月（这里纪年要带前缀）。"""
     if not s or not isinstance(s, str):
         return None
     s = s.strip()
     m = re.fullmatch(r"(\d{4})(?:-(\d{1,2})(?:-(\d{1,2}))?)?(?:T.*)?", s)
+    c = None if m else (_YMD_CJK.fullmatch(s) or _YMD_KR.fullmatch(s))
     if m:
         y, mo, d = int(m.group(1)), m.group(2), m.group(3)
+    elif c:
+        y, mo, d = _cjk_year(c.groupdict()), c["m"], c["d"]
+        if y is None:
+            return None
     else:
         m = re.fullmatch(r"([A-Za-z]+)\.?\s+(?:(\d{1,2}),?\s+)?(\d{4})", s)
         if not m or m.group(1).lower() not in _MONTHS:
@@ -177,21 +316,30 @@ _TEXT_DATE = re.compile(rf"\b(?:(?P<m1>{_MON})\.?\s+(?P<d1>\d{{1,2}})(?:st|nd|rd
 
 
 def text_dates(text: str) -> list:
-    """正文里的显式日期：Month D, YYYY / D Month YYYY / Month YYYY（取该月 1 日）/ YYYY-MM-DD。"""
+    """正文里的显式日期：Month D, YYYY / D Month YYYY / Month YYYY（取该月 1 日）/ YYYY-MM-DD；
+    v2.6e 加中日韩的完整年月日（2026年3月27日、2026년 3월 27일、令和8年3月27日、民國115年5月20日 / 115年5月20日）。
+    按在正文里出现的顺序返回。"""
     out = []
     for m in _TEXT_DATE.finditer(text or ""):
         try:
             if m.group("iso"):
-                out.append(date.fromisoformat(m.group("iso")))
+                out.append((m.start(), date.fromisoformat(m.group("iso"))))
             elif m.group("y1"):
-                out.append(date(int(m.group("y1")), _MONTHS[m.group("m1").lower()], int(m.group("d1"))))
+                out.append((m.start(), date(int(m.group("y1")), _MONTHS[m.group("m1").lower()], int(m.group("d1")))))
             elif m.group("y2"):
-                out.append(date(int(m.group("y2")), _MONTHS[m.group("m2").lower()], int(m.group("d2"))))
+                out.append((m.start(), date(int(m.group("y2")), _MONTHS[m.group("m2").lower()], int(m.group("d2")))))
             else:
-                out.append(date(int(m.group("y3")), _MONTHS[m.group("m3").lower()], 1))
+                out.append((m.start(), date(int(m.group("y3")), _MONTHS[m.group("m3").lower()], 1)))
         except ValueError:
             pass
-    return out
+    for m in _TEXT_DATE_CJK.finditer(text or ""):
+        g = m.groupdict()
+        try:
+            if (y := _cjk_year(g)) is not None:
+                out.append((m.start(), date(y, int(g["m"] or g["km"]), int(g["d"] or g["kd"]))))
+        except ValueError:
+            pass
+    return [d for _, d in sorted(out, key=lambda x: x[0])]
 
 
 def late_dates(text: str, as_of: date, until: date) -> list:
@@ -219,9 +367,22 @@ def date_check(point: dict, as_of: date, page_date, allow_no_period: bool = Fals
 
 
 # ---------- 泄漏哨兵 ----------
+def _cjk_exact_forms(n: int) -> set:
+    """整数 n（|n| >= 1 万）的中日韩精确写法：35万6920 / 35萬6920 / 35만6920，以及各段写千分位的 35万6,920；
+    1 亿以上再加億 / 亿 / 억 一段（1億2345万6789），为 0 的段省略（300万）。不登记四舍五入写法（344万、13.4萬）。"""
+    sign, a = ("-" if n < 0 else ""), abs(n)
+    hi, mid, lo = a // 10**8, a // 10**4 % 10**4, a % 10**4
+    forms = set()
+    for wan, yi in (("万", "億"), ("万", "亿"), ("萬", "億"), ("만", "억")):
+        for f in (str, "{:,}".format):
+            forms.add(sign + (f(hi) + yi if hi else "") + (f(mid) + wan if mid else "") + (f(lo) if lo else ""))
+    return forms
+
+
 def leak_forms(true_value: float) -> list:
     """一个值的常见写法。整数：千分位（, 空格 .）、无分隔、四舍五入到百和千、x.x / x.xx thousand 和 k、整数 k、
     0.xxx / 0.xx million 和 M、x.xx million。大小写不敏感（856K = 856k）。
+    v2.6e：1 万以上的整数加中日韩的精确写法（_cjk_exact_forms，例如 35万6920）；中日韩的四舍五入写法不登记（少误杀，见 C3）。
     小于 1000 的数太容易撞车，只登记原样写法，并在报告里说明哨兵弱。"""
     v = float(true_value)
     forms = set()
@@ -234,6 +395,7 @@ def leak_forms(true_value: float) -> list:
             forms |= {f"{round(n, -2):,}", f"{round(n, -3):,}", f"{k0} thousand", f"{k0}k", f"{k0} k"}
             for kx in (f"{n / 1e3:.1f}", f"{n / 1e3:.2f}"):
                 forms |= {f"{kx} thousand", f"{kx}k", f"{kx} k"}
+            forms |= _cjk_exact_forms(n)
         if abs(n) >= 100_000:
             for mx in (f"{n / 1e6:.3f}", f"{n / 1e6:.2f}"):
                 forms |= {f"{mx} million", f"{mx}M", f"{mx} M"}
