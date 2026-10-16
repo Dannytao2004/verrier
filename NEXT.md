@@ -1,4 +1,77 @@
-# 断点（2026-10-16）
+# 断点（2026-10-16 晚，第一轮修复）
+
+当前代码：tag `v2.6d`（fc11b6c）。第一轮修复按 `FIX_PLAN.md` 做（决定 D1–D9、第 3 节模块约定、第 4 节门槛 G1–G8、第 6 节本轮不做），
+原则是只修不加功能、模块的输入输出约定不变（公开签名和返回结构不改，state.json 只追加键）。
+每条问题现在的状态见 `BUGS.md` 的「本轮状态」列（另补了 N1–N46 和本轮新发现的 R1–R14）；阶段状态见 `docs/structure.html` 第 5 节。
+阶段报告在 `probes/out/stages/S0.md`–`S8.md`（被 gitignore，只在本机）：每份写了改了什么、改到的函数和上下一层的输入输出、改前 / 改后示例、
+门槛的命令和关键输出、和计划的出入、发现但没改的事。
+全程离线：没联网、没调模型、没读 `.env`；`results/`、`data/` 一个字节没改（每个阶段 G8 有文件快照）。
+
+## 做完的阶段（每个都过了 G1–G8 才打 tag）
+
+| 阶段 | tag | commit | 改了什么 | 测试数 |
+|---|---|---|---|---|
+| S0 | `tools-regress-v1` | 590bb8f | `probes/recheck_continuous.py` 加 `--code` / `--json` / `--diff`、全量回归表（40 行）和终稿 lint；`tests/test_agent.py` 的 `__main__` 守卫挪到末尾（N45） | 240 |
+| S1 | `v2.5.3` | 7fef548 | `config.MAX_TOKENS` 一张表（值不变），final 显式传参；Z90 / MC_N / MC_SEED 改为引用；state.json 追加 `settings`（N1、N6）。这一步的 commit 是父会话做的（第一次运行的 commit 步骤拒绝了） | 247 |
+| S2 | `v2.5.4` | 188004c | 假设的 unit 带 % 就按百分数换算（`assumptions.is_pct`），unit 原文保留用于显示（N17） | 260 |
+| S3 | `v2.5.5` | 19a71fa | 先拿并发名额再预扣（N2） | 264 |
+| S4 | `v2.6a` | 8a19c18 | searcher 上限 2048 → 8192；n_search_errors 认 list 里的错误块（N24、N25） | 267 |
+| S5 | `v2.6b` | 7559140 | 裁判第 2 轮表格（D1 / N11）；量纲规则的报错点名每个输入（B5 的一部分）；回复示例补 role（N15） | 273 |
+| S6 | `v2.6c` | 2767296 | 回测时查询词命中登记值的方向整个作废（D3 / C2）；k / M 写法后面加字母边界（N31） | 280 |
+| S7 | `v2.6d` | fc11b6c | 终稿数字出口（D4：F1、F2、N32–N34）；`run.score_all` 去掉「去年同月」臂（N44） | 290 |
+
+每个阶段的门槛结果：G1 全过，没有本来就失败的测试；G3 回归表 40 行对上一个 tag 0 差异、7/7；G5 内存里的 `showcase.build()` 和已提交的
+`results/showcase/summary.json` 逐字节相同（37026 字节）；G7 冻结路径 diff 为空、`check_naive` 源码 sha256 不变；
+G4 有差异的只有 S2（4 个 key，都是韩国 showcase1 的 a2 换算）和 S5（22 个 key，都是量纲报错多出的输入说明），报告里逐个解释了。
+
+## G2 的 sha256（`probes/compare_continuous_prompts.py`，假模型跑一遍连续题的全部 prompt）
+
+| 适用的代码 | sha256 | 为什么变 |
+|---|---|---|
+| web-v0.3、S0–S4 | `4a56d5864fe6d024d5f91e79a3b878b2ccd3687de2797ff9d9222a7eea56e9b6` | 原值 |
+| S5、S6（`v2.6b`、`v2.6c`） | `c96dc2faeffecd6f9bb876b0f4d0e2634c0d85dd95f5eb3359db55e484db2d92` | S5 改了 JUDGE_USER 的两处：任务 2 那句（「没列出 = 保留」只对表格里的点）、回复示例 m2 的 inputs 补 role。8 个 prompt 里只有 judge:r1、judge:r2、judge:r2:repair 的 user 变了；假裁判第 1 轮不丢点，所以没有紧凑段 |
+| S7 起（`v2.6d`；S8 工作区的代码也是这个值） | `bbcfa3b1da2ff3d90cf24d9f9c4473ab81e1406d79efab9aef58072ffc52649a` | S7 改了 FINAL_SYSTEM 的例外句（离 as_of 10 年内的年份、Q / H 标签、方法 id、「- assumption」「- observed point」行列出的 id）和 FINAL_USER 两处，final 的输入多了 observed point 行和 `p{n}_value` 占位符。只有 final 这一个 prompt 和 `final` 记录变了 |
+
+S7 返工前登记过的 `85e10616…`、`c04dd0ec…` 都已作废。之后不改 judge / final prompt 的阶段应该仍是 `bbcfa3b1…`。
+
+## 没做完的
+
+- **S8（`v2.6e`，中日韩数字和日期：N26、N27、C1 的解析部分，也是 B1 的主因）停在核查**。代码改完了，在工作区、没提交：
+  ` M triangulate/agent/evidence.py`、` M triangulate/agent/pipeline.py`、`?? tests/test_cjk_numbers.py`（24 个测试；全量 314 个全过；G2 仍是 `bbcfa3b1…`）。
+  第三轮之后的核查退回 2 条，都是 `probes/out/stages/S8.md` 第 2 节输入输出表的文字错误，代码不用动：
+  1. 第 146 行「`leak_forms` 多 6 个（1 亿以上 8 个）中日韩精确写法」不对：每种字形登记「不分隔」和「千分位」两种写法，各段都不到 1000 时两种相同，去重后只多 3 个
+     （例：7,180,000 只多 718万 / 718萬 / 718만）。应写成「对 |n| ≥ 1 万的整数最多多 6 个，1 亿以上最多 8 个，两种写法相同时去重」。
+  2. 第 142 行的 `compute._point_years`（`compute.py:75`）不存在，应为 `compute._span`（`compute.py:74-77`，`build_series` 和 `published.candidates` 都经过它），再加上 `compute.run` 的目标期间（`compute.py:136-137`）。
+  下一步：改这两行 → 再核查 → 显式 add 这 3 个文件提交、打 `v2.6e`。S8.md 第 8 节有要用户定的事：千 / 천 要不要支持；
+  中日韩的四舍五入写法（344万、13.4萬）登不登记哨兵（和 C3 一起定）。另外，S8 的新哨兵下 S6 的「47 个里正好 5 个作废」会变成 6 个（S8.md 第 4.3 节）。
+- **S9（`v2.6f`，页面解码顺序 + zstd）没开始**：依赖 S8（先能解析再能解码，否则中日韩数字会悄悄小 10^4 倍）。
+- **S10（`v2.6g`，key 不跟随跳转）没开始**：只依赖 S1，可以单独做。注意 N30 的证据位置是 `agent/search.py` 自己调的 `urlopen`，不在 S10 的文件列（`llm.py`、`jev.py`）里。
+- **收尾 `fixround1-docs`**：这次更新了 BUGS.md、NEXT.md、docs/structure.html 并提交；S8–S10 没做完，所以没打这个 tag。
+
+## 等用户定的事（FIX_PLAN 第 6 节、D5–D8）
+
+- **S11 重跑 7 道开发 / 留出题**（约 $3.45）：要联网花钱，等批准（D7）。离线检查只证明已存结果不变；S4 的 8192、S6 的方向作废、S7 的终稿规则对真实运行的效果都还没验证。
+  重跑以后 tw、lhr、jp_births 三道留出题只能算开发数据（部分修复的依据来自它们自己）。挑错意见建议命令固定为 `--arms full`
+  （`probes/run_v2_backtests.py` 默认 `--arms both`，会把消融版也跑一遍，费用翻倍）。
+- **B0 展示集打分**：10-21（JNTO）、10-28（韩国出生）公布后，各登记一次官方值、`python -m triangulate showcase` 打分并提交。
+  登记 JNTO 真值时 `tests/test_showcase.py:58-59`（断言未公布题的 answer_value 为 None）会失败，要同时改测试。冻结路径（G7）到 10-28 打分提交为止不能动。
+- **结构化基线修复（G1、G2、N38–N41）等 10-28 打分提交之后**（D5）：先处理「每千人」双重换算（N38），再改量纲报错的反馈；规则不放松；补充运行另存。
+  之后 G5 的口径要改成只比较数值字段（errors 文字会变）。
+- **区间规则放到 v2.7**（D6；A1–A7、B2、B3、N18–N23）：先定新的预注册（Winkler interval score、≥ 10 道新留出题、其中 ≥ 3 道非英文），再只用开发集调。本轮只改了标签。
+- **Kalshi**（D8）：没补查，记为和预注册不一致（预注册要求的补查只能在 2026-10-16 UTC 当天做；这是新的外部 API，没批准）。
+- 要联网核实、本轮没做：searcher 的 thinking / temperature（N4）、搜索单价（G7）、deepseek-flash 的输出上限。
+
+## 发现了、这次没改的文档问题
+
+- `docs/structure.html` 是按 6226d9e 生成的快照，这次只改了阶段状态和表下那行说明。页面里还有几处过时：第 5 节的「编号对照」框和「读这页时要注意」的前两条说
+  FIX_PLAN 第 3 节的阶段编号、parse_value 的返回值写错了，这两处在 dea7efa、cb6db0e 已经改了；门槛 G2 的引文还是旧编号「S6、S8」（FIX_PLAN 现在写的是 S5、S7）；
+  第 2、3、4 节还写着 `JUDGE_MAX_TOKENS`（S1 已删；`grep -n JUDGE_MAX_TOKENS docs/structure.html` 命中 140、453、468、469 行）。
+- `docs/prompts_bilingual.md` 和 `probes/gen_prompts_bilingual.py` 的中文对照没跟上 S5、S7 改过的 prompt（BUGS.md R13）。
+- `AGENT_MVP.md:25` 写每个方向最多 5 个 URL，代码是 4（BUGS.md N46）；下面 v2.5 未解决问题第 7 条的「默认的 60 s 超时」不准（BUGS.md C8）。
+
+---
+
+# 断点（2026-10-16，第一轮修复之前；下面是当时的原文）
 
 当前代码：tag `v2.5.2`（agent，1bd2077，没改）+ arm (3) 联网直接答（`showcase-arm3`，3d57649；补充运行用的 max_tokens 参数 447c66a）
 + 展示集汇总 `triangulate/showcase.py`。测试见展示集结果的提交。
