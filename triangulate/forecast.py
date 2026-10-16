@@ -78,6 +78,44 @@ QUESTIONS += [
                  "nationals in Japan).",
      "unit_hint": "a count of births", "leak_values": [62479]},
 ]
+# 展示集（2026-10-16 选定，在任何模型调用之前提交；见 EVAL_SHOWCASE_PLAN.md）。两道已公布题（回测，选题标准同上，
+# 领域不和前 7 题重复）+ 两道未公布题（真实使用，"set": "live"，没有真值，公布后另行登记再打分）。
+# last_year 只作数据留在这里，不进任何对比和展示。
+QUESTIONS += [
+    # NHS England 月度 A&E 统计：2026 年 9 月全部类型就诊 2.44 百万（NHS England 新闻稿，公布值只有 3 位有效数字；BMA、
+    # Pharmacy Business、Open Access Government 同值）。公布日：同批的 Aug26 RTT 统计文件 2026-10-08 已被 Wayback 抓到、
+    # BMA 10-08 更新时已引用 9 月数；GOV.UK 页面记 2026-10-09 09:30。取较早的 10-08，as_of = 2026-09-08。
+    # 2025 年 9 月 2,309,154（NHS England 2025 年 9 月统计评述）。晚于 as_of 公布：8 月约 2.34 百万（2026-09-10 公布，
+    # 精确值没读出，只登记约数）、6-8 月合计 7,268,445。
+    {"id": "fc_nhs_ae_2026_09", "set": "showcase", "as_of": "2026-09-08", "released": "2026-10-08", "answer_value": 2440000,
+     "last_year": 2309154,
+     "source": "https://www.gov.uk/government/statistics/ae-attendances-and-emergency-admissions-for-september-2026-and-quarterly-report-q2",
+     "question": _ASOF.format(as_of="2026-09-08") + "Estimate the total number of A&E attendances in England in September 2026 "
+                 "(all A&E types, including minor injury units and walk-in centres), as reported in NHS England's monthly "
+                 "A&E Attendances and Emergency Admissions statistics.",
+     "unit_hint": "a count of A&E attendances", "leak_values": [2440000, 2340000, 7268445]},
+    # 总务省统计局住民基本台帳人口移动报告 2026 年 8 月结果（令和 8 年 9 月 29 日公表）：市区町村间移动者（日本人 + 外国人）
+    # 356,920（+2.4%）；2025 年 8 月 348,602（同表）。同一公布里的分项（都道府县间 164,955、都道府县内 191,965、
+    # 日本人 307,665、外国人 49,255）都晚于 as_of。7 月结果 2026-08-27 公布，早于 as_of。
+    {"id": "fc_jp_movers_2026_08", "set": "showcase", "as_of": "2026-08-29", "released": "2026-09-29", "answer_value": 356920,
+     "last_year": 348602, "source": "https://www.stat.go.jp/data/idou/sokuhou/tsuki/index.html",
+     "question": _ASOF.format(as_of="2026-08-29") + "Estimate the number of people who moved between municipalities within Japan "
+                 "in August 2026 (Japanese and foreign residents combined), as first reported in the Statistics Bureau of "
+                 "Japan's monthly Report on Internal Migration in Japan Derived from the Basic Resident Registration.",
+     "unit_hint": "a count of people who moved", "leak_values": [356920, 164955, 191965, 307665, 49255]},
+    # 未公布：JNTO 发表预定表（20260916.pdf）写 2026 年 9 月推计值 10 月 21 日（周三）16:15 公布。2025 年 9 月推计值 3,266,800。
+    {"id": "fc_jnto_2026_09", "set": "live", "as_of": "2026-10-16", "expected_release": "2026-10-21",
+     "last_year": 3266800, "source": "https://www.jnto.go.jp/statistics/data/20260916.pdf",
+     "question": _ASOF.format(as_of="2026-10-16") + "Estimate the number of foreign visitor arrivals to Japan in September 2026, "
+                 "as it will be first reported in the Japan National Tourism Organization's (JNTO) monthly estimate.",
+     "unit_hint": "a count of visitor arrivals"},
+    # 未公布：国家数据处 10 月月间报道计划写「2026년 8월 인구동향」10.28（周三）12:00 公布。2025 年 8 月出生 20,867（初值）。
+    {"id": "fc_kr_births_2026_08", "set": "live", "as_of": "2026-10-16", "expected_release": "2026-10-28",
+     "last_year": 20867, "source": "https://mods.go.kr/newsPln.es?mid=a10305000000",
+     "question": _ASOF.format(as_of="2026-10-16") + "Estimate the number of live births in South Korea in August 2026, "
+                 "as it will be first reported in the national statistics agency's monthly Population Trends release.",
+     "unit_hint": "a count of live births"},
+]
 for _q in QUESTIONS[2:]:
     _q.update(answer_unit="", strict=False)
 FNS = {"naive": run_naive, "structured": run_structured}
@@ -113,6 +151,8 @@ def _pct(est, ans):
 def report():
     rows = []
     for q in QUESTIONS:
+        if q.get("answer_value") is None:   # 未公布题（set = live）：公布后登记真值再打分
+            continue
         ans = q["answer_value"]
         row = {k: q.get(k) for k in ("id", "month", "as_of", "released", "answer_value", "source")}
         row["last_year_same_month"] = {"estimate": q["last_year"], "pct_err": _pct(q["last_year"], ans)}

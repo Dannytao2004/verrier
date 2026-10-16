@@ -155,8 +155,9 @@ class TestGate(unittest.TestCase):
         from triangulate.forecast import QUESTIONS
         today = date(2026, 10, 16)
         self.assertTrue(QUESTIONS)
-        for q in QUESTIONS:   # 全部回测 / 留出题：有真值、as_of 早于今天
-            self.assertFalse(checks_published(q, today), q["id"])
+        for q in QUESTIONS:   # 回测 / 留出 / 展示的已公布题：有真值、as_of 早于今天；未公布题（set = live）：真实使用
+            self.assertEqual(checks_published(q, today), q.get("set") == "live", q["id"])
+            self.assertEqual(q.get("answer_value") is None, q.get("set") == "live", q["id"])
         self.assertTrue(checks_published({"as_of": "2026-10-16"}, today))
         self.assertFalse(checks_published({"as_of": "2026-10-15"}, today))
         self.assertFalse(checks_published({"as_of": "2026-10-16", "answer_value": 350518}, today))
