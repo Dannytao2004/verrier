@@ -1,0 +1,126 @@
+[fc_nhs_ae_2026_09] plan: 8 directions -> approved=True
+[fc_nhs_ae_2026_09] done in 491.5s; estimate 2,447,480; usd 0.6164
+[fc_jp_movers_2026_08] plan: 8 directions -> approved=True
+[fc_jp_movers_2026_08] done in 493.3s; estimate n/a; usd 0.5995
+[
+ {
+  "id": "fc_nhs_ae_2026_09",
+  "as_of": "2026-09-08",
+  "answer_value": 2440000,
+  "source": "https://www.gov.uk/government/statistics/ae-attendances-and-emergency-admissions-for-september-2026-and-quarterly-report-q2",
+  "estimate": 2447480.4581541396,
+  "p10": 1633266.200056194,
+  "p90": 3667596.0066033937,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.003065761538581846,
+  "abs_log10_err": 0.0013294065369751128,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 2447480.4581541396,
+    "pct_err": 0.003065761538581846,
+    "abs_log10_err": 0.0013294065369751128
+   },
+   "naive": {
+    "estimate": 2100000.0,
+    "pct_err": -0.139344262295082,
+    "abs_log10_err": 0.06517053160481018
+   },
+   "structured_no_retrieval": {
+    "estimate": 2423248.5696216593,
+    "pct_err": -0.006865340318992108,
+    "abs_log10_err": 0.0029918612816411103
+   },
+   "last_year_same_period": {
+    "estimate": 2309154,
+    "pct_err": -0.05362540983606556,
+    "abs_log10_err": 0.02393692888280539
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true,
+   "last_year_same_period": false
+  },
+  "usd_total_assumed": 0.6164,
+  "usd_tokens": 0.1164,
+  "wall_s": 491.5
+ },
+ {
+  "id": "fc_jp_movers_2026_08",
+  "as_of": "2026-08-29",
+  "answer_value": 356920,
+  "source": "https://www.stat.go.jp/data/idou/sokuhou/tsuki/index.html",
+  "estimate": null,
+  "p10": null,
+  "p90": null,
+  "basis": "no_method",
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": 0,
+  "ablation": false,
+  "pct_err": null,
+  "abs_log10_err": null,
+  "covered_80": null,
+  "arms": {
+   "agent": null,
+   "naive": {
+    "estimate": 400000.0,
+    "pct_err": 0.12069931637341691,
+    "abs_log10_err": 0.049489107014003365
+   },
+   "structured_no_retrieval": null,
+   "last_year_same_period": {
+    "estimate": 348602,
+    "pct_err": -0.023304942283985164,
+    "abs_log10_err": 0.010241009897781025
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false,
+   "last_year_same_period": true
+  },
+  "usd_total_assumed": 0.5995,
+  "usd_tokens": 0.1595,
+  "wall_s": 493.3
+ }
+]
+exit 0
+2026-10-16T09:23:50Z

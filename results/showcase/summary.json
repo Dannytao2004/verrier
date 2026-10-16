@@ -1,0 +1,861 @@
+{
+ "tag": "showcase1",
+ "rows": [
+  {
+   "id": "fc_nhs_ae_2026_09",
+   "kind": "published",
+   "question": "Assume today is 2026-09-08. You know nothing published after this date. Estimate the total number of A&E attendances in England in September 2026 (all A&E types, including minor injury units and walk-in centres), as reported in NHS England's monthly A&E Attendances and Emergency Admissions statistics.",
+   "as_of": "2026-09-08",
+   "answer_value": 2440000,
+   "released": "2026-10-08",
+   "expected_release": null,
+   "source": "https://www.gov.uk/government/statistics/ae-attendances-and-emergency-admissions-for-september-2026-and-quarterly-report-q2",
+   "arms": {
+    "agent": {
+     "estimate": 2447480.4581541396,
+     "p10": 1633266.200056194,
+     "p90": 3667596.0066033937,
+     "basis": "monte_carlo",
+     "weight_rule": "equal",
+     "assumption_weight_share": 1.0,
+     "methods": [
+      {
+       "id": "m1",
+       "method": "formula_mc",
+       "formula": "p38 * k_days_target * a1",
+       "estimate": 2486404.394864849,
+       "weight": 0.3333333333333333,
+       "rationale": "Direct partial-observation route: the most recent daily attendance rate before the cutoff is June 2026 at 81,264/day (p38), a record. Multiplying by the 30 days of September and by a modest seasonal uplift (a1) gives a September 2026 total. This is the strongest single route because it uses the latest observed level and a small, well-bounded seasonal adjustment. Shared dependency: p38 comes from t",
+       "notes": [],
+       "points": [
+        {
+         "id": "p38",
+         "name": "Average daily A&E attendances in England, June (record daily attendance)",
+         "value": 81264.0,
+         "unit": "attendances (visits) per day",
+         "source_url": "https://www.england.nhs.uk/2026/07/warm-weather-world-cup-drives-record-nhs-demand-satisfaction-gps-bounce-back/",
+         "page_date": "2026-08-09",
+         "via": "snapshot"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a1",
+         "name": "September-to-June seasonal ratio for England A&E attendances",
+         "value": 1.02,
+         "low": 0.98,
+         "high": 1.06,
+         "p10_used": 0.72069410986909,
+         "p90_used": 1.4413882197381802,
+         "unit": "ratio"
+        }
+       ]
+      },
+      {
+       "id": "m2",
+       "method": "formula_mc",
+       "formula": "p6 * a3 * a2",
+       "estimate": 2494657.5358519866,
+       "weight": 0.3333333333333333,
+       "rationale": "Year-on-year route anchored on the last fully published September-relevant baseline: the May 2025 total of 2,395,886 attendances (p6) is transferred to a September 2025 level using the May-to-September seasonal ratio (a3), then grown to September 2026 using the year-on-year growth factor (a2) implied by the 2026 record levels (p1, p19, p38) and the 7-10% year-on-year rises in 999 calls and ambulan",
+       "notes": [],
+       "points": [
+        {
+         "id": "p6",
+         "name": "Total A&E attendances in England in May",
+         "value": 2395886.0,
+         "unit": "attendances (visits)",
+         "source_url": "https://www.england.nhs.uk/long-read/monthly-operational-statistics-june-2025/",
+         "page_date": "2026-06-06",
+         "via": "snapshot"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a2",
+         "name": "Year-on-year growth factor for England A&E attendances, September 2026 vs September 2025",
+         "value": 1.04,
+         "low": 1.0,
+         "high": 1.09,
+         "p10_used": 0.9338094023943002,
+         "p90_used": 1.1672617529928753,
+         "unit": "ratio"
+        },
+        {
+         "id": "a3",
+         "name": "May-to-September seasonal ratio for England A&E attendances",
+         "value": 1.0,
+         "low": 0.96,
+         "high": 1.04,
+         "p10_used": 0.7065408693062277,
+         "p90_used": 1.4130817386124555,
+         "unit": "ratio"
+        }
+       ]
+      },
+      {
+       "id": "m3",
+       "method": "formula_mc",
+       "formula": "p7 * k_days_target * a1",
+       "estimate": 2363605.5405110307,
+       "weight": 0.3333333333333333,
+       "rationale": "Cross-check route using the May 2025 daily rate (p7, 77,287/day) rather than the June 2026 rate. It applies the same September-to-June seasonal factor (a1) as m1, so it is not fully independent of m1, but it uses a different base year and month and therefore tests whether the 2026 level is consistent with the 2025 level plus the observed growth. If m1 and m3 disagree materially, the growth between",
+       "notes": [],
+       "points": [
+        {
+         "id": "p7",
+         "name": "Average daily A&E attendances in England in May",
+         "value": 77287.0,
+         "unit": "attendances (visits) per day",
+         "source_url": "https://www.england.nhs.uk/long-read/monthly-operational-statistics-june-2025/",
+         "page_date": "2026-06-06",
+         "via": "snapshot"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a1",
+         "name": "September-to-June seasonal ratio for England A&E attendances",
+         "value": 1.02,
+         "low": 0.98,
+         "high": 1.06,
+         "p10_used": 0.72069410986909,
+         "p90_used": 1.4413882197381802,
+         "unit": "ratio"
+        }
+       ]
+      },
+      {
+       "id": "m4",
+       "method": "formula_mc",
+       "formula": "p52 / k_months_per_year * 3 * a2",
+       "estimate": null,
+       "weight": null,
+       "rationale": "Quarterly-anchor route: p52 gives 6.9 million attendances in Q4 2025/26 (January-March 2026), implying about 2.3 million per month in early 2026. Multiplying the monthly average by 3 gives a quarterly-scale figure, and applying the year-on-year growth factor (a2) transfers it to September 2026. This route is included because it uses a different published aggregate (quarterly rather than monthly) a",
+       "notes": [],
+       "points": [
+        {
+         "id": "p52",
+         "name": "Total A&E attendances in England, all A&E types, Q4 2025/26",
+         "value": 6900000.0,
+         "unit": "attendances (visits)",
+         "source_url": "https://www.nuffieldtrust.org.uk/resource/a-e-waiting-times",
+         "page_date": "2026-08-02",
+         "via": "snapshot"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a2",
+         "name": "Year-on-year growth factor for England A&E attendances, September 2026 vs September 2025",
+         "value": 1.04,
+         "low": 1.0,
+         "high": 1.09,
+         "p10_used": 0.9338094023943002,
+         "p90_used": 1.1672617529928753,
+         "unit": "ratio"
+        }
+       ]
+      }
+     ],
+     "n_points_kept": 37,
+     "n_points": 62,
+     "published_check": "not_checked",
+     "markets": {
+      "keywords": [
+       "nhs ae attendances",
+       "england ae september",
+       "ae attendances 2026"
+      ],
+      "matched": [],
+      "price_points": [],
+      "note": "no matching market created on or before as_of"
+     },
+     "leakage": {
+      "pages_total": 44,
+      "pages_snapshot": 18,
+      "pages_live_dated": 0,
+      "pages_dropped": 26,
+      "sentinel_hits": 1,
+      "points_dated_after_as_of": 0,
+      "snapshots_after_as_of": 0,
+      "late_dates_in_text_sent": 0,
+      "searcher_queries_containing_registered_values": 1,
+      "assumptions_containing_registered_values": 0
+     },
+     "usd_total_assumed": 0.6164,
+     "usd_tokens": 0.1164,
+     "usd_search_fee_assumed": 0.5,
+     "n_calls": 33,
+     "aborted": "",
+     "wall_s": 491.5,
+     "started_at": "20261016T090725Z",
+     "final_text": "The best estimate for total A&E attendances in England across all A&E types for September 2026 is 2,447,480 attendances, with an 80% interval of 1,633,266 to 3,667,596 (monte carlo). This covers the full month and all reported A&E types, counting visits rather than patients. The combination draws on 3 methods, each weighted 33%, 33%, and 33%; the fourth route was unusable. The strongest route uses the latest observed daily rate, multiplied by the month length and a September-to-June seasonal factor of 1.02 (range 0.7207 to 1.441). A second route transfers an observed [n] monthly total using a May-to-September ratio of 1 and a year-on-year growth factor of 1.04 (range 0.9338 to 1.167). Only the base observations are observed; the seasonal and growth factors are assumptions, so the interval is model-based and conditional, not a demonstrated accuracy guarantee. The main risk is that September 2026 demand departs from these assumed seasonal and growth patterns. Published September 2026 data would most improve the estimate.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 September-to-June seasonal ratio for England A&E attendances: 1.02 ratio, range 0.7207 to 1.441 (range widened by code); used by m1, m3. Overturned by: Evidence that September 2026 attendances were materially below June 2026 (for example a published September 2026 total below about [n] million) or a known major shock (new pandemic, widespread strikes) that breaks the normal seasonal pattern.\n- a2 Year-on-year growth factor for England A&E attendances, September 2026 vs September 2025: 1.04 ratio, range 0.9338 to 1.167 (range widened by code); used by m2. Overturned by: Evidence that September 2026 attendances were flat or falling relative to September 2025, or a major shock (strike, pandemic wave) that breaks the trend.\n- a3 May-to-September seasonal ratio for England A&E attendances: 1 ratio, range 0.7065 to 1.413 (range widened by code); used by m2. Overturned by: Evidence that September 2025 attendances were materially different from May 2025 (for example a published September 2025 total far from [n] million).",
+     "pct_err": 0.003065761538581846,
+     "abs_log10_err": 0.0013294065369751128
+    },
+    "naive": {
+     "status": "ok",
+     "estimate": 2100000.0,
+     "attempts": 1,
+     "pct_err": -0.139344262295082,
+     "abs_log10_err": 0.06517053160481018
+    },
+    "structured": {
+     "estimate": 2423248.5696216593,
+     "p10": 1980569.8174449734,
+     "p90": 2963797.4647247563,
+     "n_valid_paths": 1,
+     "attempts": 2,
+     "errors": [
+      "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+      "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+     ],
+     "pct_err": -0.006865340318992108,
+     "abs_log10_err": 0.0029918612816411103
+    }
+   },
+   "search_direct_supplementary": null,
+   "covered_80": {
+    "agent": true,
+    "structured": true
+   }
+  },
+  {
+   "id": "fc_jp_movers_2026_08",
+   "kind": "published",
+   "question": "Assume today is 2026-08-29. You know nothing published after this date. Estimate the number of people who moved between municipalities within Japan in August 2026 (Japanese and foreign residents combined), as first reported in the Statistics Bureau of Japan's monthly Report on Internal Migration in Japan Derived from the Basic Resident Registration.",
+   "as_of": "2026-08-29",
+   "answer_value": 356920,
+   "released": "2026-09-29",
+   "expected_release": null,
+   "source": "https://www.stat.go.jp/data/idou/sokuhou/tsuki/index.html",
+   "arms": {
+    "agent": {
+     "estimate": null,
+     "p10": null,
+     "p90": null,
+     "basis": "no_method",
+     "weight_rule": null,
+     "assumption_weight_share": 0,
+     "methods": [
+      {
+       "id": "m1",
+       "method": "formula_mc",
+       "formula": "p12 * a1",
+       "estimate": null,
+       "weight": null,
+       "rationale": "Decomposes the target as the 2025 annual inter-municipal mover total (p12, about 5.19 million persons) times the August share of the annual total (a1). p12 is a quantity (persons), so the product is a person count. This is the base_rates route: the annual level is well evidenced, and the August share is informed by the Libero moving-job seasonal pattern (p1-p8) but widened because posting counts a",
+       "notes": [],
+       "points": [
+        {
+         "id": "p12",
+         "name": "Year-on-year percentage change in Japan inter-municipal movers, 2025 vs 2024",
+         "value": 0.3,
+         "unit": "%",
+         "source_url": "https://ifa-leading.com/column/nihon-kokunai-ni-okeru-jinko-ido-no-jokyo/",
+         "page_date": "2026-06-10",
+         "via": "snapshot"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a1",
+         "name": "August share of the annual inter-municipal mover total",
+         "value": 9.5,
+         "low": 8.0,
+         "high": 11.5,
+         "p10_used": 0.06782329983125267,
+         "p90_used": 0.13564659966250536,
+         "unit": "%"
+        }
+       ]
+      },
+      {
+       "id": "m2",
+       "method": "formula_mc",
+       "formula": "p12 * a1 * a2",
+       "estimate": null,
+       "weight": null,
+       "rationale": "Extends m1 by applying an explicit year-on-year change factor (a2) to carry the 2025-based August level into 2026. p12 supplies the person-count level, so the product remains a person count. The factor is centered at 1.0 because the 2025 annual total was nearly flat versus 2024 (p12) and the mover share was stable at just over 4% (p17). This method shares the p12 and a1 inputs with m1, so it is no",
+       "notes": [],
+       "points": [
+        {
+         "id": "p12",
+         "name": "Year-on-year percentage change in Japan inter-municipal movers, 2025 vs 2024",
+         "value": 0.3,
+         "unit": "%",
+         "source_url": "https://ifa-leading.com/column/nihon-kokunai-ni-okeru-jinko-ido-no-jokyo/",
+         "page_date": "2026-06-10",
+         "via": "snapshot"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a1",
+         "name": "August share of the annual inter-municipal mover total",
+         "value": 9.5,
+         "low": 8.0,
+         "high": 11.5,
+         "p10_used": 0.06782329983125267,
+         "p90_used": 0.13564659966250536,
+         "unit": "%"
+        },
+        {
+         "id": "a2",
+         "name": "Year-on-year change factor for August 2026 vs August 2025",
+         "value": 1.0,
+         "low": 0.97,
+         "high": 1.03,
+         "p10_used": 0.8940246081624375,
+         "p90_used": 1.1175307602030469,
+         "unit": "factor"
+        }
+       ]
+      }
+     ],
+     "n_points_kept": 10,
+     "n_points": 18,
+     "published_check": "not_checked",
+     "markets": {
+      "keywords": [
+       "japan internal migration",
+       "august 2026 migration",
+       "japan move statistics"
+      ],
+      "matched": [],
+      "price_points": [],
+      "note": "no matching market created on or before as_of"
+     },
+     "leakage": {
+      "pages_total": 44,
+      "pages_snapshot": 3,
+      "pages_live_dated": 0,
+      "pages_dropped": 41,
+      "sentinel_hits": 0,
+      "points_dated_after_as_of": 0,
+      "snapshots_after_as_of": 0,
+      "late_dates_in_text_sent": 0,
+      "searcher_queries_containing_registered_values": 0,
+      "assumptions_containing_registered_values": 0
+     },
+     "usd_total_assumed": 0.5995,
+     "usd_tokens": 0.1595,
+     "usd_search_fee_assumed": 0.44,
+     "n_calls": 18,
+     "aborted": "",
+     "wall_s": 493.3,
+     "started_at": "20261016T091536Z",
+     "final_text": "No estimate: no estimation method could be computed from the verified evidence.",
+     "pct_err": null,
+     "abs_log10_err": null
+    },
+    "naive": {
+     "status": "ok",
+     "estimate": 400000.0,
+     "attempts": 1,
+     "pct_err": 0.12069931637341691,
+     "abs_log10_err": 0.049489107014003365
+    },
+    "structured": {
+     "estimate": null,
+     "p10": null,
+     "p90": null,
+     "n_valid_paths": 0,
+     "attempts": 2,
+     "errors": [
+      "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
+      "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
+      "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+     ],
+     "pct_err": null,
+     "abs_log10_err": null
+    }
+   },
+   "search_direct_supplementary": null,
+   "covered_80": {
+    "agent": null,
+    "structured": null
+   }
+  },
+  {
+   "id": "fc_jnto_2026_09",
+   "kind": "unpublished",
+   "question": "Assume today is 2026-10-16. You know nothing published after this date. Estimate the number of foreign visitor arrivals to Japan in September 2026, as it will be first reported in the Japan National Tourism Organization's (JNTO) monthly estimate.",
+   "as_of": "2026-10-16",
+   "answer_value": null,
+   "released": null,
+   "expected_release": "2026-10-21",
+   "source": "https://www.jnto.go.jp/statistics/data/20260916.pdf",
+   "arms": {
+    "agent": {
+     "estimate": 3146914.014318431,
+     "p10": 2114198.1003162856,
+     "p90": 4684077.528984741,
+     "basis": "monte_carlo",
+     "weight_rule": "equal",
+     "assumption_weight_share": 1.0,
+     "methods": [
+      {
+       "id": "m1",
+       "method": "formula_mc",
+       "formula": "p19 * a1",
+       "estimate": 3043428.591921947,
+       "weight": 0.5,
+       "rationale": "Direct year-on-year route: the September 2025 JNTO preliminary total (p19) is the most recent same-month base, and a1 encodes the expected September 2026 change given the China collapse and the continued growth in Korea, Taiwan, Hong Kong and the US. Shared dependency: both the base and the factor come from the same JNTO series, so any revision to the September 2025 preliminary figure propagates. ",
+       "notes": [],
+       "points": [
+        {
+         "id": "p19",
+         "name": "JNTO monthly estimate of foreign visitor arrivals to Japan, September 2025 (preliminary)",
+         "value": 3266800.0,
+         "unit": "persons (arrivals)",
+         "source_url": "https://www.jnto.go.jp/news/press/20251015_monthly.html",
+         "page_date": "2025-10-15",
+         "via": "live_dated"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a1",
+         "name": "September 2026 total foreign visitor arrivals as a factor of September 2025 JNTO preliminary total",
+         "value": 0.93,
+         "low": 0.82,
+         "high": 1.05,
+         "p10_used": 0.6561249880929699,
+         "p90_used": 1.31224997618594,
+         "unit": "ratio"
+        }
+       ]
+      },
+      {
+       "id": "m2",
+       "method": "formula_mc",
+       "formula": "p1 * a2",
+       "estimate": 3253918.242011342,
+       "weight": 0.5,
+       "rationale": "Seasonal-ratio route: applies the typical September/August ratio to the known August 2026 level (p1). This route does not depend on the September 2025 base being representative of the current China-collapse regime, which is its main advantage. Shared dependency: p1 is a preliminary JNTO figure subject to revision. Failure mode: the September/August ratio is not stable across years, and a September",
+       "notes": [],
+       "points": [
+        {
+         "id": "p1",
+         "name": "Foreign visitor arrivals to Japan, August 2026 (JNTO monthly estimate, preliminary)",
+         "value": 3098900.0,
+         "unit": "persons (arrivals)",
+         "source_url": "https://www.jnto.go.jp/news/press/20260916_montly.html",
+         "page_date": "2026-09-16",
+         "via": "live_dated"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a2",
+         "name": "September-to-August seasonal ratio for JNTO foreign visitor arrivals",
+         "value": 1.05,
+         "low": 0.98,
+         "high": 1.12,
+         "p10_used": 0.7408103670980853,
+         "p90_used": 1.4816207341961707,
+         "unit": "ratio"
+        }
+       ]
+      },
+      {
+       "id": "m3",
+       "method": "formula_mc",
+       "formula": "p19 * a3 + (p1 * a2 - p19 * a3) * 0.5",
+       "estimate": null,
+       "weight": null,
+       "rationale": "Component-aware blend: the first term scales the September 2025 base by the expected China factor (a3), and the second term is the seasonal-ratio estimate from m2; averaging the two with equal weight (0.5) reduces reliance on either the September 2025 base or the August 2026 level alone. Shared dependencies: p19 and p1 are both JNTO preliminary figures; a2 and a3 are both assumptions. Failure mode",
+       "notes": [],
+       "points": [
+        {
+         "id": "p19",
+         "name": "JNTO monthly estimate of foreign visitor arrivals to Japan, September 2025 (preliminary)",
+         "value": 3266800.0,
+         "unit": "persons (arrivals)",
+         "source_url": "https://www.jnto.go.jp/news/press/20251015_monthly.html",
+         "page_date": "2025-10-15",
+         "via": "live_dated"
+        },
+        {
+         "id": "p1",
+         "name": "Foreign visitor arrivals to Japan, August 2026 (JNTO monthly estimate, preliminary)",
+         "value": 3098900.0,
+         "unit": "persons (arrivals)",
+         "source_url": "https://www.jnto.go.jp/news/press/20260916_montly.html",
+         "page_date": "2026-09-16",
+         "via": "live_dated"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a2",
+         "name": "September-to-August seasonal ratio for JNTO foreign visitor arrivals",
+         "value": 1.05,
+         "low": 0.98,
+         "high": 1.12,
+         "p10_used": 0.7408103670980853,
+         "p90_used": 1.4816207341961707,
+         "unit": "ratio"
+        },
+        {
+         "id": "a3",
+         "name": "September 2026 China arrivals as a factor of September 2025 China arrivals",
+         "value": 0.42,
+         "low": 0.3,
+         "high": 0.58,
+         "p10_used": 0.2949576240750525,
+         "p90_used": 0.5899152481501051,
+         "unit": "ratio"
+        }
+       ]
+      }
+     ],
+     "n_points_kept": 47,
+     "n_points": 117,
+     "published_check": "no_candidates",
+     "markets": {
+      "keywords": [
+       "japan visitor arrivals",
+       "jnto september 2026",
+       "foreign visitors japan"
+      ],
+      "matched": [],
+      "price_points": [],
+      "note": "no matching market created on or before as_of"
+     },
+     "leakage": {
+      "pages_total": 44,
+      "pages_snapshot": 0,
+      "pages_live_dated": 31,
+      "pages_dropped": 13,
+      "sentinel_hits": 0,
+      "points_dated_after_as_of": 0,
+      "snapshots_after_as_of": 0,
+      "late_dates_in_text_sent": 0,
+      "searcher_queries_containing_registered_values": 0,
+      "assumptions_containing_registered_values": 0
+     },
+     "usd_total_assumed": 0.5988,
+     "usd_tokens": 0.1488,
+     "usd_search_fee_assumed": 0.45,
+     "n_calls": 47,
+     "aborted": "",
+     "wall_s": 128.4,
+     "started_at": "20261016T090723Z",
+     "final_text": "The best computed estimate for foreign visitor arrivals to Japan in September 2026, as first reported in JNTO's monthly preliminary estimate, is 3,146,914 persons. This counts all foreign nationals entering Japan for any purpose, not tourists only. The model-based interval is 2,114,198 to 4,684,078 (80% level, basis: monte carlo), conditional on the stated assumptions rather than a demonstrated accuracy guarantee.\n\nTwo routes were combined with weights 50% and 50%: a year-on-year route scaling the September 2025 JNTO base by 0.93 (range 0.6561 to 1.312), and a seasonal-ratio route applying 1.05 (range 0.7408 to 1.482) to August 2026. Observed inputs are the JNTO preliminary figures; the factors are analyst assumptions. The blend reduces reliance on either base.\n\nThe main risk is that the September/August ratio and the China-collapse factor are unstable. Better evidence would be confirmed September 2026 monthly source-market data.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 September 2026 total foreign visitor arrivals as a factor of September 2025 JNTO preliminary total: 0.93 ratio, range 0.6561 to 1.312 (range widened by code); used by m1. Overturned by: September 2026 airport/seat-capacity data showing China-Japan capacity recovering sharply, or a new bilateral easing, or a major disaster in September 2026.\n- a2 September-to-August seasonal ratio for JNTO foreign visitor arrivals: 1.05 ratio, range 0.7408 to 1.482 (range widened by code); used by m2. Overturned by: Evidence that September 2026 had a major typhoon or holiday-calendar shift that materially changed the August-to-September pattern."
+    },
+    "naive": {
+     "status": "ok",
+     "estimate": 3100000.0,
+     "attempts": 1
+    },
+    "structured": {
+     "estimate": 3294750.8968936405,
+     "p10": 2624018.450713977,
+     "p90": 3885642.883780337,
+     "n_valid_paths": 3,
+     "attempts": 1,
+     "errors": []
+    },
+    "search_direct": {
+     "status": "invalid_output",
+     "estimate": null,
+     "attempts": 2,
+     "max_tokens": 4096,
+     "web_search_requests": 6,
+     "queries": [
+      "JNTO foreign visitor arrivals September 2025 monthly estimate",
+      "JNTO September 2026 visitor arrivals",
+      "訪日外客数 2026年9月推計値",
+      "JNTO 2026年9月 訪日外客数 推計値 10月15日",
+      "\"2026年9月\" \"訪日外客数\" 推計値",
+      "2026年8月 訪日外客数 国別 中国 韓国 台湾 米国 総数 3,098,900"
+     ],
+     "stop_reasons": [
+      "max_tokens",
+      "end_turn"
+     ],
+     "problems": [
+      [
+       "reply was truncated (stop_reason=max_tokens)"
+      ],
+      [
+       "reply is not valid JSON"
+      ]
+     ],
+     "usd": 0.017485,
+     "usd_search_fee_assumed": 0.06,
+     "at": "2026-10-16T09:05:31+00:00"
+    }
+   },
+   "search_direct_supplementary": {
+    "status": "ok",
+    "estimate": 3050000.0,
+    "attempts": 1,
+    "max_tokens": 32000,
+    "web_search_requests": 6,
+    "queries": [
+     "JNTO foreign visitor arrivals September 2025 monthly estimate",
+     "JNTO 2026年8月 訪日外客数 推計値",
+     "JNTO 2026年9月 訪日外客数 推計値 2026年10月",
+     "\"2026年9月\" 訪日外客数 推計値 JNTO 2026年10月15日",
+     "2026年9月 訪日外客数 326 2026 9月 推計",
+     "\"9月の訪日外客数\" 2026"
+    ],
+    "stop_reasons": [
+     "end_turn"
+    ],
+    "problems": [
+     []
+    ],
+    "usd": 0.024736,
+    "usd_search_fee_assumed": 0.06,
+    "at": "2026-10-16T09:08:29+00:00"
+   },
+   "covered_80": {
+    "agent": null,
+    "structured": null
+   }
+  },
+  {
+   "id": "fc_kr_births_2026_08",
+   "kind": "unpublished",
+   "question": "Assume today is 2026-10-16. You know nothing published after this date. Estimate the number of live births in South Korea in August 2026, as it will be first reported in the national statistics agency's monthly Population Trends release.",
+   "as_of": "2026-10-16",
+   "answer_value": null,
+   "released": null,
+   "expected_release": "2026-10-28",
+   "source": "https://mods.go.kr/newsPln.es?mid=a10305000000",
+   "arms": {
+    "agent": {
+     "estimate": 21880.740235039633,
+     "p10": 15882.516565773283,
+     "p90": 30144.26531529779,
+     "basis": "no_basis",
+     "weight_rule": "equal",
+     "assumption_weight_share": 0.5,
+     "methods": [
+      {
+       "id": "m1",
+       "method": "formula_mc",
+       "formula": "p1 * a1",
+       "estimate": 22943.729009118808,
+       "weight": 0.5,
+       "rationale": "Direct YoY transfer: August 2025 KOSTAT live births (20,867) times an assumed August 2026 growth factor. The growth factor is anchored on the observed 2026 monthly path (July +11.1%, June +15.6%, May +13.6%, cumulative Jan–Jul +14.7%) and on the fact that August 2025 was a strong base. Shared dependency: both the base and the growth factor come from the same KOSTAT vital-statistics system, so a de",
+       "notes": [],
+       "points": [
+        {
+         "id": "p1",
+         "name": "South Korea live births, August 2025 (monthly Population Trends)",
+         "value": 20867.0,
+         "unit": "live births (persons)",
+         "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&act=view&list_no=439018&tag=&nPage=1&ref_bid=203,204,205,206,207,210,211,11109,11113,11814,213,215,214,11860,11695,216,218,219,220,10820,11815,11895,11816,208,245,222,223,225,226,227,228,229,230,11321,232,233,234,12029,10920,11469,11470,11817,236,237,11471,238,240,241,11865,243,244,11893,11898,12031,11825,246,0067&keyField=T&keyWord=%EC%9D%B8%EA%B5%AC%EB%8F%99%ED%96%A5&bodo_b_type=all",
+         "page_date": "2025-10-29",
+         "via": "live_dated"
+        }
+       ],
+       "assumptions": [
+        {
+         "id": "a1",
+         "name": "August 2026 YoY growth factor for Korean live births",
+         "value": 1.1,
+         "low": 1.04,
+         "high": 1.16,
+         "p10_used": 0.98240521171256,
+         "p90_used": 1.2280065146407002,
+         "unit": "ratio (this year / last year)"
+        }
+       ]
+      },
+      {
+       "id": "m2",
+       "method": "formula_mc",
+       "formula": "p56 * a2",
+       "estimate": null,
+       "weight": null,
+       "rationale": "Seasonal-share route: 2025 annual births (254,457) times the August share of annual births. The share is anchored on the 2024 August share (8.4%, p73) and the 1981–2023 cumulative share (8.0%, p85). This route is independent of the YoY-growth route in its main uncertainty (seasonality rather than the 2026 growth rate), but it shares the KOSTAT annual-total base. Main failure mode: the 2026 annual ",
+       "notes": [],
+       "points": [],
+       "assumptions": []
+      },
+      {
+       "id": "m3",
+       "method": "yoy_scaling",
+       "formula": null,
+       "estimate": null,
+       "weight": null,
+       "rationale": "YoY scaling using the target's own August history and the July 2026 live-birth level as the signal. The signal must have a value for the target's year and the year before; July 2026 (24,275) and July 2025 are both available from the same KOSTAT release, so the method scales August 2025 by the July 2026/July 2025 ratio. Shared dependency: both series come from the same monthly vital-statistics rele",
+       "notes": [],
+       "points": [
+        {
+         "id": "p1",
+         "name": "South Korea live births, August 2025 (monthly Population Trends)",
+         "value": 20867.0,
+         "unit": "live births (persons)",
+         "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&act=view&list_no=439018&tag=&nPage=1&ref_bid=203,204,205,206,207,210,211,11109,11113,11814,213,215,214,11860,11695,216,218,219,220,10820,11815,11895,11816,208,245,222,223,225,226,227,228,229,230,11321,232,233,234,12029,10920,11469,11470,11817,236,237,11471,238,240,241,11865,243,244,11893,11898,12031,11825,246,0067&keyField=T&keyWord=%EC%9D%B8%EA%B5%AC%EB%8F%99%ED%96%A5&bodo_b_type=all",
+         "page_date": "2025-10-29",
+         "via": "live_dated"
+        },
+        {
+         "id": "p10",
+         "name": "South Korea live births, July 2026 (monthly Population Trends)",
+         "value": 24275.0,
+         "unit": "live births (persons)",
+         "source_url": "https://mods.go.kr/board.es?mid=a10301020300&bid=204&act=view&list_no=447111",
+         "page_date": "2026-09-23",
+         "via": "live_dated"
+        }
+       ],
+       "assumptions": []
+      },
+      {
+       "id": "m4",
+       "method": "series_naive",
+       "formula": null,
+       "estimate": 20867.0,
+       "weight": 0.5,
+       "rationale": "Naive seasonal benchmark: the most recent observed August value (August 2025, 20,867) as a no-change forecast. This is a deliberately conservative anchor that ignores the 2026 upturn; it is included as a lower-bound-style benchmark rather than a central expectation, and its historical error will be large in a year with a strong trend.",
+       "notes": [],
+       "points": [
+        {
+         "id": "p1",
+         "name": "South Korea live births, August 2025 (monthly Population Trends)",
+         "value": 20867.0,
+         "unit": "live births (persons)",
+         "source_url": "https://mods.go.kr/board.es?mid=a10301010000&bid=204&act=view&list_no=439018&tag=&nPage=1&ref_bid=203,204,205,206,207,210,211,11109,11113,11814,213,215,214,11860,11695,216,218,219,220,10820,11815,11895,11816,208,245,222,223,225,226,227,228,229,230,11321,232,233,234,12029,10920,11469,11470,11817,236,237,11471,238,240,241,11865,243,244,11893,11898,12031,11825,246,0067&keyField=T&keyWord=%EC%9D%B8%EA%B5%AC%EB%8F%99%ED%96%A5&bodo_b_type=all",
+         "page_date": "2025-10-29",
+         "via": "live_dated"
+        }
+       ],
+       "assumptions": []
+      }
+     ],
+     "n_points_kept": 17,
+     "n_points": 173,
+     "published_check": "no_candidates",
+     "markets": {
+      "keywords": [
+       "south korea births",
+       "korea birth august",
+       "kostat births"
+      ],
+      "matched": [],
+      "price_points": [],
+      "note": "no matching market created on or before as_of"
+     },
+     "leakage": {
+      "pages_total": 44,
+      "pages_snapshot": 0,
+      "pages_live_dated": 29,
+      "pages_dropped": 15,
+      "sentinel_hits": 0,
+      "points_dated_after_as_of": 0,
+      "snapshots_after_as_of": 0,
+      "late_dates_in_text_sent": 0,
+      "searcher_queries_containing_registered_values": 0,
+      "assumptions_containing_registered_values": 0
+     },
+     "usd_total_assumed": 0.631,
+     "usd_tokens": 0.181,
+     "usd_search_fee_assumed": 0.45,
+     "n_calls": 45,
+     "aborted": "",
+     "wall_s": 169.0,
+     "started_at": "20261016T090931Z",
+     "final_text": "The best computed estimate for the number of live births in South Korea during August 2026, as first reported by Statistics Korea's monthly Population Trends release, is 21,881, with an interval of 15,883 to 30,144 (80%; no basis). The combination rests on 2 methods, but only two carried weight: a YoY-transfer estimate of 22,944 (weight 50%) and a naive seasonal benchmark of 20,867 (weight 50%). The YoY route applies an assumed August 2026 growth factor of 1.1 (range 0.9824 to 1.228) to the observed August 2025 level, anchored on the [n] monthly upturn. The benchmark simply repeats the last observed August. Both depend on the same KOSTAT vital-statistics system, so they are not independent. The interval is model-based and conditional on the growth assumption, not a demonstrated accuracy guarantee. The main risk is that the assumed growth factor is wrong, especially given August 2025's strong base. The most useful missing evidence would be an actual August 2026 signal or registration-based data.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 August 2026 YoY growth factor for Korean live births: 1.1 ratio (this year / last year), range 0.9824 to 1.228 (range widened by code); used by m1. Overturned by: A published August 2026 nowcast or registration count implying YoY growth outside roughly +[n] to +[n], or evidence that the spring surge was a one-off timing shift that reverses in August."
+    },
+    "naive": {
+     "status": "ok",
+     "estimate": 19000.0,
+     "attempts": 1
+    },
+    "structured": {
+     "estimate": 20342.76526016832,
+     "p10": 18931.311114672575,
+     "p90": 21859.784116376173,
+     "n_valid_paths": 1,
+     "attempts": 2,
+     "errors": [
+      "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
+      "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+     ]
+    },
+    "search_direct": {
+     "status": "invalid_output",
+     "estimate": null,
+     "attempts": 2,
+     "max_tokens": 4096,
+     "web_search_requests": 6,
+     "queries": [
+      "South Korea monthly live births 2025 Population Trends KOSTAT",
+      "2026년 3월 인구동향 출생아 수",
+      "2026년 7월 인구동향 출생아 수",
+      "2026년 6월 인구동향 출생아 수 2026년 6월",
+      "2026년 1월 인구동향 출생아 수 26",
+      "2026년 8월 출생아 수 전망"
+     ],
+     "stop_reasons": [
+      "max_tokens",
+      "end_turn"
+     ],
+     "problems": [
+      [
+       "reply was truncated (stop_reason=max_tokens)"
+      ],
+      [
+       "reply is not valid JSON"
+      ]
+     ],
+     "usd": 0.018116,
+     "usd_search_fee_assumed": 0.06,
+     "at": "2026-10-16T09:05:31+00:00"
+    }
+   },
+   "search_direct_supplementary": {
+    "status": "ok",
+    "estimate": 23300.0,
+    "attempts": 1,
+    "max_tokens": 32000,
+    "web_search_requests": 6,
+    "queries": [
+     "South Korea monthly live births 2025 August KOSTAT",
+     "South Korea births 2025 monthly statistics",
+     "2026년 7월 인구동향 출생아 수",
+     "South Korea births 2026 monthly Population Trends",
+     "2026년 8월 출생아 수 전망",
+     "South Korea August 2026 births estimate"
+    ],
+    "stop_reasons": [
+     "end_turn"
+    ],
+    "problems": [
+     []
+    ],
+    "usd": 0.015029,
+    "usd_search_fee_assumed": 0.06,
+    "at": "2026-10-16T09:08:29+00:00"
+   },
+   "covered_80": {
+    "agent": null,
+    "structured": null
+   }
+  }
+ ],
+ "criteria": {
+  "n_questions": 4,
+  "n_scored": 2,
+  "final": false,
+  "c1_agent_median_abs_pct_err": "inf",
+  "c1_pass": null,
+  "median_abs_log10": {
+   "agent": "inf",
+   "naive": 0.05732981930940677,
+   "structured": "inf"
+  },
+  "c2_vs_naive_structured_pass": null,
+  "c2_vs_search_direct_pass": null,
+  "met": null
+ }
+}
