@@ -135,6 +135,10 @@ class TestOutcomeProbs(unittest.TestCase):
         self.assertIn("restates kept data point p1", restated["error"])
         rej = _run({HOLD: {"id": "a1"}, HIKE: {"id": "p2"}}, remainder=CUT, assumptions=[_a(low=5)])["methods"][0]
         self.assertIn("was rejected", rej["error"])
+        # 一个方法的全部问题一次报出（修正轮要一次看到）：被拒的假设和漏掉的结果
+        both = _run({HIKE: {"id": "a1"}}, remainder=CUT, assumptions=[_a(low=0)])["methods"][0]
+        self.assertIn("was rejected", both["error"])
+        self.assertIn(f"outcomes without a probability: ['{HOLD}']", both["error"])
 
     def test_continuous_methods_rejected_for_discrete_and_vice_versa(self):
         for method in ("formula_mc", "series_naive"):

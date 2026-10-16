@@ -245,7 +245,8 @@ def outcomes_md(state: dict, score: dict | None = None) -> list:
     r = (state.get("compute") or {}).get("result") or {}
     rows, mids, jv = outcome_rows(state)
     L = ["## Outcome probabilities (computed by code)", "",
-         f"Most likely: **{_md(r.get('most_likely'))}** ({_pct(r.get('most_likely_prob'))}); pooling {r.get('weight_rule')} "
+         f"Most likely: **{_md(r.get('most_likely') or 'none (no method computed)')}** ({_pct(r.get('most_likely_prob'))}); "
+         f"pooling {r.get('weight_rule')} "
          f"over {len(mids)} method(s); weight on methods that use assumptions {r.get('assumption_weight_share') or 0:.2f}.", "",
          "| outcome | value | agent (pooled) | " + "".join(f"{m} | " for m in mids) + "Jev (not pooled) |",
          "|---|---|---|" + "---|" * len(mids) + "---|"]

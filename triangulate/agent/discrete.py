@@ -119,21 +119,32 @@ def outcome_probs(prm: dict, pts: dict, kept_a: dict, rejected_a: dict, outcomes
         rem = canon.get(_norm_label(rem_raw).casefold())
         if rem is None:
             raise MethodError(f"remainder {rem_raw!r} is not one of the outcomes {labels}")
-    given, detail = {}, []
+    # 一个方法的问题全部收齐再报（修正轮一次看到全部问题；live 运行 discrete2 里只报了第一个，漏掉的结果没被修）
+    given, detail, errs, seen = {}, [], [], set()
     for k, spec in probs.items():
         lab = canon.get(_norm_label(k).casefold())
         if lab is None:
-            raise MethodError(f"unknown outcome label {k!r}; use one of {labels}")
+            errs.append(f"unknown outcome label {k!r}; use one of {labels}")
+            continue
         if lab == rem:
-            raise MethodError(f"outcome {lab!r} has a probability input and is also the remainder")
-        if lab in given:
-            raise MethodError(f"outcome {lab!r} is given twice")
-        d = _probability(lab, spec, pts, kept_a, rejected_a)
+            errs.append(f"outcome {lab!r} has a probability input and is also the remainder")
+            continue
+        if lab in seen:
+            errs.append(f"outcome {lab!r} is given twice")
+            continue
+        seen.add(lab)
+        try:
+            d = _probability(lab, spec, pts, kept_a, rejected_a)
+        except MethodError as e:
+            errs.append(str(e))
+            continue
         given[lab] = d["prob"]
         detail.append(d)
-    missing = [lab for lab in labels if lab not in given and lab != rem]
+    missing = [lab for lab in labels if lab not in seen and lab != rem]
     if missing:
-        raise MethodError(f"outcomes without a probability: {missing} (give each one an input, or name one as the remainder)")
+        errs.append(f"outcomes without a probability: {missing} (give each one an input, or name one as the remainder)")
+    if errs:
+        raise MethodError("; ".join(errs))
     s = sum(given.values())
     if rem is not None:
         if s > 1 + SUM_TOL_REMAINDER:
