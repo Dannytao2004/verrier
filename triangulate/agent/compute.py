@@ -1,5 +1,6 @@
 """COMPUTE（只有代码）：把裁判选的方法和数据点 id 变成序列，跑方法、回测、加权、给区间。
-formula_mc 的输入可以是保留的数据点，也可以是校验通过的假设（assumptions.py）；规则：至少一个观测点、最多 3 个假设。"""
+formula_mc 的输入可以是保留的数据点，也可以是校验通过的假设（assumptions.py）；规则：至少一个观测点、最多 3 个假设
+（v2.7d：coverage 为 sum 的方法每个部分最多 3 个、整个方法最多 8 个）。"""
 import random
 import re
 import statistics
@@ -52,6 +53,49 @@ def calendar_constants(tps, tpe) -> dict:
     另加单位换算常数 UNIT_CONSTANTS。"""
     return {"k_days_target": float((tpe - tps).days + 1), "k_days_per_week": 7.0, "k_days_per_year": 365.25,
             "k_weeks_per_year": 365.25 / 7, "k_months_per_year": 12.0, **UNIT_CONSTANTS}
+
+
+def _names(c: dict, key: str, at_least: int) -> list:
+    v = c.get(key)
+    if not isinstance(v, list) or not all(isinstance(x, str) and x.strip() for x in v):
+        raise M.MethodError(f"coverage: {key} must be a list of names")
+    v = [x.strip() for x in v]
+    if len(v) < at_least:
+        raise M.MethodError(f"coverage: {key} needs at least {at_least} name{'s' if at_least > 1 else ''}")
+    if len(set(v)) != len(v):
+        raise M.MethodError(f"coverage: {key} lists a name twice")
+    return v
+
+
+def coverage(c) -> tuple:
+    """v2.7d：方法的 coverage 声明（省略 = full）。返回 (规范化的声明或 None, 不进合并的原因或 "")；不合规抛 MethodError。
+    part（只覆盖目标的一部分）和 missing 不为空的 sum 照算，但不进合并，原因交给修正轮。"""
+    if c is None:
+        return None, ""
+    if not isinstance(c, dict):
+        raise M.MethodError(f"coverage must be an object such as {{\"kind\": \"full\"}}, not {c!r}"[:200])
+    kind = c.get("kind")
+    if kind not in ("full", "part", "sum"):
+        raise M.MethodError(f"coverage: kind must be \"full\", \"part\" or \"sum\", not {kind!r}")
+    if kind == "full":
+        return {"kind": "full"}, ""
+    dim = c.get("dimension")
+    if not isinstance(dim, str) or not dim.strip():
+        raise M.MethodError("coverage: dimension must be a name (e.g. \"channel\")")
+    dim = dim.strip()
+    if kind == "part":
+        part = c.get("part")
+        if not isinstance(part, str) or not part.strip():
+            raise M.MethodError("coverage: part must be a name")
+        sib = _names(c, "siblings", 1)
+        return ({"kind": "part", "dimension": dim, "part": part.strip(), "siblings": sib},
+                f"covers only {part.strip()} of {dim}, so code does not combine it with full estimates; sum it with its "
+                f"siblings ({', '.join(sib)}) in one method, with an allowance assumption for parts without evidence")
+    parts, miss = _names(c, "parts", 2), _names(c, "missing", 0)
+    return ({"kind": "sum", "dimension": dim, "parts": parts, "missing": miss},
+            f"sums {', '.join(parts)} of {dim} but misses {', '.join(miss)}, so code does not combine it with full estimates; "
+            f"add each missing part to the sum with an allowance assumption (missing then empty), or drop the method"
+            if miss else "")
 
 
 def produced(m: dict) -> bool:
@@ -152,6 +196,11 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
              "rationale": str(m.get("rationale", ""))[:400], "estimate": None, "backtest": [], "notes": []}
         prm = r["params"]
         try:
+            cov, excluded = coverage(m.get("coverage"))
+            if cov is not None:
+                r["coverage"] = cov
+            # sum 方法每个部分最多 3 个假设、整个方法最多 8 个（= 每次运行的上限）；其他方法每个最多 3 个
+            cap = min(A.MAX_PER_METHOD * len(cov["parts"]), A.MAX_PER_RUN) if cov and cov["kind"] == "sum" else A.MAX_PER_METHOD
             if only_methods is not None and r["method"] not in only_methods:
                 raise M.MethodError(f"ablation: only {sorted(only_methods)} allowed (method needs target_history)")
             if r["method"] in ("series_naive", "yoy_scaling", "linear_fit", "ratio"):
@@ -227,8 +276,8 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                     raise M.MethodError("formula_mc needs at least one input that is a quantity (not a share, ratio or %); "
                                         f"a product of ratios cannot produce the target. Inputs: {named}. Code reads each of "
                                         "these units as a share, ratio, % or empty unit")
-                if len(set(used_a)) > A.MAX_PER_METHOD:
-                    raise M.MethodError(f"formula_mc uses {len(set(used_a))} assumptions (at most {A.MAX_PER_METHOD})")
+                if len(set(used_a)) > cap:
+                    raise M.MethodError(f"formula_mc uses {len(set(used_a))} assumptions (at most {cap})")
                 s = M.formula_mc_samples(str(prm.get("formula", "")), env)
                 f = 1.0
                 if tu:
@@ -247,6 +296,9 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                                     "this target is continuous")
             else:
                 raise M.MethodError(f"unknown method {r['method']!r}")
+            if excluded:   # 只覆盖一部分：结果留作诊断，不进合并（权重 0），原因交给修正轮
+                r["coverage_excluded"] = {"estimate": r["estimate"], "mc": r.pop("mc", None)}
+                r["estimate"], r["error"] = None, excluded
         except M.MethodError as e:
             r["error"] = str(e)
         except (TypeError, ValueError, KeyError, AttributeError) as e:

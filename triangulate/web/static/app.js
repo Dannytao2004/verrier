@@ -205,10 +205,18 @@ function evidenceText(e) {
   return `<span class="k-point">数据点 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)} ${esc(e.unit)}，期间 ${esc(e.period_start || "?")}..${esc(e.period_end || "?")}，
     来源 ${link(e.source_url, e.domain)}${e.snapshot_url ? `（${link(e.snapshot_url, "快照 " + e.snapshot_date)}）` : e.page_date ? `（${esc(e.via)} ${esc(e.page_date)}）` : ""}`;
 }
+function coverageText(c) {   // v2.7d：方法声明的覆盖范围（compute 规范化过的）
+  if (c.kind === "full") return "整个目标";
+  if (c.kind === "part") return `只有 ${esc(c.dimension)} 的 ${esc(c.part)}（同级：${(c.siblings || []).map(esc).join("、")}）`;
+  return `${esc(c.dimension)} 各部分之和：${(c.parts || []).map(esc).join(" + ")}${(c.missing || []).length ? `；缺 ${c.missing.map(esc).join("、")}` : ""}`;
+}
 function methodRows(ms) {
-  const ST = {computed: "", failed: '<span class="bad">失败</span>', excluded_by_input_audit: '<span class="bad">输入核对不通过，未计算</span>'};
+  const ST = {computed: "", failed: '<span class="bad">失败</span>', excluded_by_input_audit: '<span class="bad">输入核对不通过，未计算</span>',
+    excluded_by_coverage: '<span class="bad">只覆盖目标的一部分，不进合并</span>'};
   return ms.map(m => `<tr><td><b>${esc(m.id)}</b>${m.label && m.label !== m.id ? `<div class="muted small">裁判 id ${esc(m.label)}</div>` : ""}</td>
   <td>${esc(m.method)}<div>${ST[m.status] || ""}</div></td><td><code>${esc(m.formula)}</code>
+  ${m.coverage ? `<div class="small">覆盖范围：${coverageText(m.coverage)}</div>` : ""}
+  ${m.coverage_excluded ? `<div class="small muted">它自己的估计 ${fmt(m.coverage_excluded.estimate)}（只作参考）</div>` : ""}
   ${m.target_series ? `<div class="small muted">目标序列：${Object.entries(m.target_series).map(([y, v]) => `${y}: ${fmt(v)}`).join("，")}</div>` : ""}
   ${m.signal_series ? `<div class="small muted">信号序列：${Object.entries(m.signal_series).map(([y, v]) => `${y}: ${fmt(v)}`).join("，")}</div>` : ""}</td>
   <td><ul class="inputs">${(m.inputs || []).map(i => `<li><b>${esc(i.name)}</b> = ${esc(i.id)}${i.p10 !== undefined && i.p10 !== null && i.p10 !== i.p90 ? `

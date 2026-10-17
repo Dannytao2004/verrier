@@ -299,7 +299,9 @@ def _problems(jr: dict, out: dict, av: dict, failed: dict) -> tuple:
                      f"input, outcome assignment or remainder is wrong")
     if not ms:
         probs = ["no methods were proposed"]
-    if len(ok) >= 2 and not any(x.startswith("methods disagree") for x in probs):
+    # v2.7d：只覆盖一部分的方法（coverage part、缺部分的 sum）不进合并，总是交回裁判（让它和其余部分加成一个方法）
+    if len(ok) >= 2 and not any(x.startswith("methods disagree") for x in probs) and \
+            not any(m.get("coverage_excluded") for m in ms):
         return len(ok), []   # 已有两条以上互相吻合的路线：不交回裁判，免得把好结果改坏
     return len(ok), probs
 
@@ -383,7 +385,8 @@ def _audit_header(mi: dict, mo: dict) -> str:
                 f"level, a rate, a change)" +
                 (f"; the remainder outcome {rem!r} gets 1 minus the others: mark it \"mismatch\" when the probability left "
                  f"over by the other inputs does not belong to that outcome" if rem else ""))
-    return f"{mo['id']} ({mo.get('method')}): {prm.get('formula') or mo.get('method')}"
+    cov = f"; declared coverage = {dumps(mo['coverage'])}" if mo.get("coverage") else ""   # v2.7d：没声明时不变
+    return f"{mo['id']} ({mo.get('method')}): {prm.get('formula') or mo.get('method')}{cov}"
 
 
 def audit_methods(llm, qid: str, jr: dict, out: dict, av: dict, pts: list, failed: dict, target: dict) -> dict:

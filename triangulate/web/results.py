@@ -283,7 +283,9 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
                         "mc": m.get("mc"), "error": m.get("error"), "notes": m.get("notes") or [],
                         "rationale": m.get("rationale"), "assumption_share": ms.get("share"),
                         "distribution": m.get("distribution"), "remainder": m.get("remainder"),
-                        "status": "computed" if m.get("estimate") is not None or m.get("distribution") else "failed"})
+                        "status": "computed" if m.get("estimate") is not None or m.get("distribution") else
+                        "excluded_by_coverage" if m.get("coverage_excluded") else "failed",
+                        "coverage": m.get("coverage"), "coverage_excluded": m.get("coverage_excluded")})
     # 输入核对没过、compute 没有用的方法：公式和输入从裁判那一轮的原始方法列表里取
     jr = next((j for j in st.get("judge_rounds") or [] if j.get("round") == comp.get("methods_from_round")), {})
     for i, reason in sorted((jr.get("audit_failed") or {}).items(), key=lambda x: int(x[0])):

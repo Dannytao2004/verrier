@@ -40,6 +40,17 @@ def _pct(p):
     return "n/a" if p is None else f"{100 * p:.1f}%"
 
 
+def coverage_text(m: dict) -> str:
+    """v2.7d：方法的 coverage（compute 规范化过的）-> 一句英文；不进合并的方法附上它自己的估计（只作诊断）。"""
+    c = m.get("coverage") or {}
+    s = {"full": "the whole target",
+         "part": f"only {c.get('part')} of {c.get('dimension')} (siblings {', '.join(c.get('siblings') or [])})",
+         "sum": f"sum over {c.get('dimension')} of {', '.join(c.get('parts') or [])}" +
+                (f", missing {', '.join(c.get('missing'))}" if c.get("missing") else "")}.get(c.get("kind"), str(c))
+    x = m.get("coverage_excluded")
+    return s + (f"; not combined (its own estimate {_num(x.get('estimate'))})" if x else "")
+
+
 def _top(dist: dict):
     """一个方法的分布里概率最大的结果（并列取先出现的）。"""
     return max(dist.items(), key=lambda kv: kv[1]) if dist else (None, None)
@@ -229,6 +240,10 @@ def ledger(state: dict, score: dict | None = None) -> str:
         L.append(f"| {m['id']} | {m['method']} | {_num(m.get('estimate'))} | {_md(inp)} | "
                  f"{[b['year'] for b in m.get('backtest') or []]} | {es} | {w.get(m['id'], 0):.2f} | {wb.get(m['id'], '')} | "
                  f"{_md(m.get('error') or '; '.join(m.get('notes') or []))[:200]} |")
+    cov = [m for m in comp.get("methods") or [] if m.get("coverage")]   # v2.7d：只有声明了 coverage 的方法才多这几行
+    if cov:
+        L.append("")
+        L += [f"- {m['id']} coverage: {_md(coverage_text(m))}" for m in cov]
     share = r.get("assumption_weight_share")
     tail = "" if share is None else f", weight on methods that use assumptions {share:.2f}"
     if r.get("mode") == "discrete":

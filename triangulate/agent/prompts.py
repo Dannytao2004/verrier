@@ -154,6 +154,7 @@ METHODS_SPEC = """Code method library (you choose methods and parameters; code c
 - linear_fit: {"target_history": [ids], "signal_history": [ids]}. OLS of target on signal across aligned years (needs >= 3 aligned earlier years and the signal's value for the target's year).
 - ratio: {"target_history": [ids], "signal_history": [ids]}. Signal(target's year) x mean historical ratio target / signal.
 - formula_mc: {"formula": "a * b", "inputs": {"a": {"id": "p3", "role": "..."}, "b": {"id": "a1", "role": "..."}}}. Every input needs a role: the quantity, entity and period it must denote for the formula to estimate the target (for example "July 2025 live births in country X"). An independent check compares each role with the evidence the id points to and drops methods whose inputs do not match (a change used as a level, another entity's total used as the target entity's, a different kind of count). A formula over inputs that each reference a kept data-point id, an assumption id, or a constant supplied by code: calendar constants (k_days_target = days in the target period, k_days_per_week, k_days_per_year, k_weeks_per_year, k_months_per_year) and unit-conversion constants (k_bp_per_pct_point = 100 basis points per percentage point, k_percent_per_unit = 100 percent per whole); at least one input must be a kept data point, and at least one input must be a quantity rather than a share, ratio or percentage (a product of ratios cannot produce the target). Code converts percentages to fractions and runs Monte Carlo: every data-point input gets the same lognormal uncertainty (set by code); an assumption input is sampled lognormally with P10/P90 = its low/high, widened by code to at least high/low = 2 (1.25 for a change factor relative to an observed period). Formulas may use + - * / ( ) min max mean sqrt (mean(a, b, c) averages its arguments), input names, ** with an integer exponent from -3 to 3, and the number 1 (at most 3 times, never in a sub-expression without an input name). When the target has unit_canonical, also give each formula_mc method a "unit": the unit its formula produces, in the same notation (for example 'kg/year' when it uses an annual total, 'g/day' for grams per day); code converts the result to unit_canonical (g to t, year to day), so do not add scale or calendar factors only to change units, and declare the unit the formula really gives.
+- coverage (optional, any method): the part of the target that the method's result covers. Omit it, or give {"kind": "full"}, when the result is the whole target. When the target is made up of channels, segments or groups that the evidence covers separately, sum them in one formula_mc method and declare {"kind": "sum", "dimension": "channel", "parts": ["A", "B", "other"], "missing": []}; give each part without evidence an allowance assumption, so that every part is in the formula and missing stays empty. A method whose result covers only one part declares {"kind": "part", "dimension": "channel", "part": "B", "siblings": ["A", "other"]}. Code computes a part method, or a sum with missing parts, for reference only and never combines it with full estimates. A sum method may use up to 3 assumptions per listed part (at most 8).
 Series rules: a series is the same quantity for the same calendar period in different years; code aligns series by the year of period_end and takes the median when a year has several values. target_history must be the target's own values for the same calendar period as the target in earlier years. signal_history must be one signal for one fixed calendar period in several years, including the target's year (with data available before today). Code backtests each method on earlier years (using only data from before each tested year) and weights methods by their historical error."""
 
 # 离散目标（outcome_type = "discrete"）时代替 METHODS_SPEC 交给裁判：先是结果列表一段（v2.3 由裁判根据证据定义：
@@ -228,6 +229,7 @@ Method-selection rules:
 - Suitable decompositions include totals times shares, sums of non-overlapping components, capacity times utilisation and exposure, and physical flows times conversion factors.
 - Series-method alignment requirements apply to series methods. Do not impose them on unrelated structural formulas.
 - Every formula must have a coherent unit, scope, and period interpretation. Explain coverage adjustments, time lags, and transfer assumptions.
+- Channels or segments that together make up the target must be summed in one formula_mc method with coverage "sum". A method that covers only one of them is never averaged with full estimates: declare its coverage as "part", and code leaves it out of the combination.
 - Do not treat capacity as realised output, forecasts as actual outcomes, shipments as deliveries, or visits as unique people without a justified bridge.
 - Do not submit a bound or a scenario endpoint as an additional central estimate.
 - Do not insert an unsupported numerical coefficient, manufacture an input id, or encode a missing coefficient through repeated literal constants.
@@ -243,7 +245,7 @@ Assumptions (for formula_mc only):
 - Use the calendar constants instead of writing day or week counts into a formula.
 - Give honest, wide ranges: low and high are your 10th and 90th percentiles, with 0 < low <= value <= high. Write percentages as in the table (unit "%", 12 means 12%).
 - In applies_when, state when the value transfers to this target; in falsified_by, say what evidence would overturn it. In route, give the id of the method that uses it.
-- Ids a1 to a8, at most 3 assumptions per method. Every formula_mc must use at least one kept point; a formula made only of assumptions is rejected.
+- Ids a1 to a8, at most 3 assumptions per method (a coverage "sum" method: up to 3 per listed part, at most 8). Every formula_mc must use at least one kept point; a formula made only of assumptions is rejected.
 
 Give each method an id (m1, m2, ...) and a rationale. Do not calculate its result or invent combination weights.
 
@@ -253,7 +255,7 @@ Reply with JSON:
  "extra_directions": [],
  "assumptions": [{{"id": "a1", "name": "...", "value": <number>, "low": <number>, "high": <number>, "unit": "...", "rationale": "...", "applies_when": "...", "falsified_by": "...", "route": "m2"}}],
  "methods": [{{"id": "m1", "method": "series_naive", "params": {{"target_history": ["p1", "p2"], "k": 1}}, "rationale": "..."}},
-             {{"id": "m2", "method": "formula_mc", "params": {{"formula": "a * b", "inputs": {{"a": {{"id": "p3", "role": "..."}}, "b": {{"id": "a1", "role": "..."}}}}}}, "unit": "...", "rationale": "..."}}]}}"""
+             {{"id": "m2", "method": "formula_mc", "params": {{"formula": "a * b", "inputs": {{"a": {{"id": "p3", "role": "..."}}, "b": {{"id": "a1", "role": "..."}}}}}}, "unit": "...", "coverage": {{"kind": "full"}}, "rationale": "..."}}]}}"""
 
 EXTRA_RULE_R1 = """extra_directions: propose up to 3 targeted follow-up directions that would most improve the estimate.
 
@@ -331,7 +333,11 @@ AUDIT_USER = """Target: {target}
 
 For each method below, every input lists the role the analyst says it plays and the evidence its id points to (a data point extracted from a document, or an analyst assumption).
 
-Mark an input "mismatch" when the evidence is a different quantity, entity, place, period or kind of number than the role requires, for example: a change, difference or growth rate used as a level; another entity's or a broader total used as the target entity's total; a count of something else (flights, vehicles, households) used as a count of the target units without a conversion input in the formula; a value for a different period than the role states. Mark "ok" when the evidence matches the role, including small wording differences, or when the formula itself contains the conversion that bridges the difference. Judge only the match between role and evidence.
+Mark an input "mismatch" when the evidence is a different quantity, entity, place, period or kind of number than the role requires, for example: a change, difference or growth rate used as a level; another entity's or a broader total used as the target entity's total; a count of something else (flights, vehicles, households) used as a count of the target units without a conversion input in the formula; a value for a different period than the role states. Mark "ok" when the evidence matches the role, including small wording differences, or when the formula itself contains the conversion that bridges the difference.
+
+Coverage: a method's result must cover the whole target unless its header declares a coverage. Mark an input "mismatch" when its evidence limits the result to one part of the target (one channel, segment, region or product type, with no other input bringing in the rest) while the method declares no coverage or "full", or when the evidence does not fit the declared coverage (for example a total over all channels used as one part of a sum).
+
+Judge only the match between role, declared coverage and evidence.
 
 {methods}
 
