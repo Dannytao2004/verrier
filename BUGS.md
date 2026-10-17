@@ -1,19 +1,19 @@
-# BUGS：当前全部已知问题（2026-10-16 整理，代码 v2.5.2 + showcase 臂；同日晚按第一轮修复的结果更新状态，代码 v2.6d）
+# BUGS：当前全部已知问题（2026-10-16 整理，代码 v2.5.2 + showcase 臂；10-16 晚、10-17 凌晨按第一轮修复的结果更新状态，代码 v2.6g）
 
 只做整理，没改代码、没重跑。来源：NEXT.md、SHOWCASE.md 的记录，加上 2026-10-16 对 showcase1 结果和代码的检查。
 「新」= 这次检查新发现（证据是这次跑的离线查询）；「记」= 以前已经记录（NEXT.md / SHOWCASE.md 有详细说明，当时对着代码核实过）。
 严重度：**高** = 影响结果对不对，或者影响和基线的对比公不公平；**中** = 影响部分题、可信度或可读性；**低** = 边角情况、记录精度。
 
-**第一轮修复后的状态（2026-10-16 晚更新）**：每张表最后一列是「本轮状态」，依据 `FIX_PLAN.md`（决定 D1–D9、第 6 节「本轮不做」）和阶段报告
-`probes/out/stages/S0.md`–`S8.md`（被 gitignore，只在本机）。
+**第一轮修复后的状态（2026-10-16 晚更新，10-17 凌晨按 S8–S10 再更新）**：每张表最后一列是「本轮状态」，依据 `FIX_PLAN.md`（决定 D1–D10、第 6 节「本轮不做」）和阶段报告
+`probes/out/stages/S0.md`–`S10.md`（被 gitignore，只在本机；S9b 没有单独的报告，依据是提交 16673a4 的说明）。
 
 - 「已修 `tag`」：改动过了 FIX_PLAN 第 4 节的门槛 G1–G8，并打了 tag。全部是离线验证（没联网、没调模型），已存的 `results/` 一个字节没改；
   对以后运行的真实效果要等重跑（D7，没批准）。
 - 「部分修 `tag`」：只修了写明的那一部分。
-- 「未修（阶段没完成）」：FIX_PLAN 排了阶段，但本轮没做完。S8（`v2.6e`）的改动在工作区、停在核查，没提交；S9、S10 没开始。
+- FIX_PLAN 第 5 节排的 S0–S10 都已提交并打了 tag，上次更新时的「未修（阶段没完成）」已经没有了。S9 之后多了一个 S9b（`v2.6f1`）：按用户的要求（「直接找个项目或者别的库放进去，编码这种问题别自己死命干」），手写的解码顺序换成 w3lib 库，见 FIX_PLAN 的 D10。
 - 「本轮不修」：FIX_PLAN 第 6 节或 D5–D8 写明不做，括号里是原因。
 - 「订正」：按 `probes/out/fixplan_analysis.json` 或阶段报告里核对过的事实改了描述，括号里留了原来的写法。
-- 证据里的行号是整理时的行号（A–H 对 v2.5.2，N 对 web-v0.3）；S1–S8 改过的文件，行号已经移动。
+- 证据里的行号是整理时的行号（A–H 对 v2.5.2，N 对 web-v0.3）；S1–S10 改过的文件，行号已经移动。
 
 ## A. 区间与不确定度
 
@@ -32,7 +32,7 @@
 
 | # | 严重度 | 问题 | 证据 / 出处 | 来源 | 本轮状态 |
 |---|---|---|---|---|---|
-| B1 | 高 | 把变化率当成水平值：日本迁移题 p12 = 「2025 比 2024 +0.3%」被当成「全年 519 万人」；代码拦住了，但修正轮没修好，整题没有估计。**订正主因**（原来只写了上面这些）：表示水平值的点「519万548」在核对阶段就因为 `more than one number in value_as_written` 被丢了（N26），裁判手里只剩 0.3% 这个变化率；p12 的 quote 原文是「…は519万548人で、前年に比べ1万7,198人(0.3%)の減少」，value_as_written 却是 0.3%。修正轮的报错看不出是哪个输入（B5）是次因 | SHOWCASE.md 日本迁移节；`results/agent/fc_jp_movers_2026_08/showcase1/state.json` 的 p12 和 dropped_points（挑错意见离线核对） | 记 | 未修（阶段没完成）：主因 N26 在 S8，没提交；次因已在 `v2.6b` 改了：量纲规则的报错点名每个输入 |
+| B1 | 高 | 把变化率当成水平值：日本迁移题 p12 = 「2025 比 2024 +0.3%」被当成「全年 519 万人」；代码拦住了，但修正轮没修好，整题没有估计。**订正主因**（原来只写了上面这些）：表示水平值的点「519万548」在核对阶段就因为 `more than one number in value_as_written` 被丢了（N26），裁判手里只剩 0.3% 这个变化率；p12 的 quote 原文是「…は519万548人で、前年に比べ1万7,198人(0.3%)の減少」，value_as_written 却是 0.3%。修正轮的报错看不出是哪个输入（B5）是次因 | SHOWCASE.md 日本迁移节；`results/agent/fc_jp_movers_2026_08/showcase1/state.json` 的 p12 和 dropped_points（挑错意见离线核对） | 记 | 部分修：主因 N26 已在 `v2.6e` 修了（`parse_value('519万548','')` 现在是 5,190,548；S8 的重放里，日本迁移题这一页的 8 个复合写法点都能解析、都过邻接检查）；次因已在 `v2.6b` 改了：量纲规则的报错点名每个输入。已存的点不重新核对，这道题能不能出数要等重跑（D7）；修正轮仍只有一次 |
 | B2 | 高 | 伪装的「样本 × 放大系数」假设识别不了：留出集日本出生题靠「单家诊所接生数 × 放大系数」得出 +0.8% | NEXT.md 收尾清单 4、docs/project.html 的提醒框 | 记 | 本轮不修（D6） |
 | B3 | 中 | series_naive（就是去年同月）仍会进 agent 的答案：韩国 8 月题占 50% 权重。去年同月不再作为对照之后，这个方法保不保留、权重怎么定，还没定 | SHOWCASE.md 发现 7 | 记 | 本轮不修（D6：series_naive 的地位放到下一轮预注册） |
 | B4 | 中 | 假设的取值和它自己的理由矛盾，没有检查：JNTO a2 取 1.05，理由里写的是 0.95 / 0.98 | SHOWCASE.md 发现 4 | 记 | 本轮不修（第 6 节：rationale 一致性检查要先定设计） |
@@ -44,8 +44,8 @@
 
 | # | 严重度 | 问题 | 证据 / 出处 | 来源 | 本轮状态 |
 |---|---|---|---|---|---|
-| C1 | 高 | 非英文官方统计取证弱：日本迁移题 44 页里只有 3 页能用。13 页是 PDF（不支持）；7 页 stat.go.jp HTML 解码失败；21 页在截止日前没有快照。截止日前已公布的 7 月官方数也没拿到。**订正**（原写「解码失败原因没查，可能是编码问题，未核实」）：`fetch._decode` 只看 HTTP 头里的 charset，不看 meta，也不认带引号的写法（N28）；这些快照的头只有 `text/html`，Shift_JIS 页面按 utf-8 解码，U+FFFD 超过 1% 就判 undecodable。同类的还有日本出生留出题 2 页 mhlw.go.jp（meta 是 shift_jis），以及 LHR 留出题 3 页 zstd 压缩的快照（`net.decompress` 只认 gzip / deflate；用标准库 `compression.zstd` 解开后 U+FFFD 为 0）。能解码的页面上，中日韩倍数字又会被丢（N26） | SHOWCASE.md 日本迁移节；`fetch.py:121-127`、`net.py:76-89`；zstd 的缓存快照 `data/raw/agent/_cache/snap/2a926955898fcc3d.bin`、`38932b7bcaf4fcb7.bin`（挑错意见离线核对） | 记 | 未修（阶段没完成）：解析部分在 S8（没提交），解码和 zstd 在 S9（没开始）；PDF 本轮不做（不加依赖） |
-| C2 | 高 | 泄漏风险：searcher 的搜索不能限定日期，能看到公布后的结果，并把真值写进了查询（NHS「2.44 million」）。只有 URL 往下传，但选哪些 URL 可能受答案影响；只能事后审计，挡不住 | NHS state.json 的 leakage 字段 | 记 | 部分修 `v2.6c`（D3）：回测时，查询词命中登记值的方向整个作废（不取页、不重搜），原因写进 `search.voided` 和审计的 `directions_voided`；已存的 50 个审计里会有 7 个运行各作废 1 个方向。searcher 仍然看得到公布后的结果，没作废的方向选 URL 仍可能受影响（残余风险） |
+| C1 | 高 | 非英文官方统计取证弱：日本迁移题 44 页里只有 3 页能用。13 页是 PDF（不支持）；7 页 stat.go.jp HTML 解码失败；21 页在截止日前没有快照。截止日前已公布的 7 月官方数也没拿到。**订正**（原写「解码失败原因没查，可能是编码问题，未核实」）：`fetch._decode` 只看 HTTP 头里的 charset，不看 meta，也不认带引号的写法（N28）；这些快照的头只有 `text/html`，Shift_JIS 页面按 utf-8 解码，U+FFFD 超过 1% 就判 undecodable。同类的还有日本出生留出题 2 页 mhlw.go.jp（meta 是 shift_jis），以及 LHR 留出题 3 页 zstd 压缩的快照（`net.decompress` 只认 gzip / deflate；用标准库 `compression.zstd` 解开后 U+FFFD 为 0）。能解码的页面上，中日韩倍数字又会被丢（N26） | SHOWCASE.md 日本迁移节；`fetch.py:121-127`、`net.py:76-89`；zstd 的缓存快照 `data/raw/agent/_cache/snap/2a926955898fcc3d.bin`、`38932b7bcaf4fcb7.bin`（挑错意见离线核对） | 记 | 部分修：解析部分 `v2.6e`（N26、N27）；解码和 zstd `v2.6f`，`v2.6f1` 起解码改用 w3lib（D10）。缓存 286 个快照里原来 undecodable 的 7 个（stat.go.jp 3、mhlw.go.jp 2、LHR 的 zstd 2）现在都能解码、U+FFFD 为 0，其余快照的正文不变（S9.md 第 4 节、提交 16673a4）。PDF 本轮不做（不加依赖）。已存结果没重跑；能解码不等于能拿到数：stat.go.jp 移动报告在 as_of 前最新的快照只有 2 月结果，mhlw 两页是目录页（S9.md 第 8 节）。残余情况见 R18 |
+| C2 | 高 | 泄漏风险：searcher 的搜索不能限定日期，能看到公布后的结果，并把真值写进了查询（NHS「2.44 million」）。只有 URL 往下传，但选哪些 URL 可能受答案影响；只能事后审计，挡不住 | NHS state.json 的 leakage 字段 | 记 | 部分修 `v2.6c`（D3）：回测时，查询词命中登记值的方向整个作废（不取页、不重搜），原因写进 `search.voided` 和审计的 `directions_voided`；已存的 50 个审计里会有 7 个运行各作废 1 个方向；`v2.6e` 登记中日韩精确写法以后多作废 1 个（`fc_jnto_2026_08/v21b_noown` 第 2 轮 b2，查询词里有 as_of 之后才公布的 7 月值「344万2100」），共 8 个方向（S8.md 第 4.3 节）。searcher 仍然看得到公布后的结果，没作废的方向选 URL 仍可能受影响（残余风险） |
 | C3 | 低 | 哨兵误杀：7.27 million 撞上登记的 6–8 月合计，整页被排除。**订正**（原写「很可能是候诊人数，未核实」）：S6 核对了这一页的上下文，原文是「The waiting list fell to 7.27 million」，确实是候诊名单 | 同上；`data/raw/agent/fc_nhs_ae_2026_09/f706a9125ce75ee7.txt`（S6.md 第 4.2 节） | 记 | 本轮不修（D3：四舍五入写法命中照旧整页排除，护栏不放松）；`v2.6c` 之后这一页只由「7.27 million」命中，原来那条「7.27 M」是误报，已去掉（N31）。中日韩四舍五入写法要不要登记，还没定 |
 | C4 | 中 | live 页读不出日期就直接丢，漏了多少没测 | NEXT.md v2.5 第 4 条 | 记 | 本轮不修（第 6 节：live 取页收尾） |
 | C5 | 低 | 同一个 URL 被几个方向重复抓；live 存盘文件名冲突会互相覆盖 | NEXT.md v2.5 第 3、15 条 | 记 | 本轮不修（第 6 节） |
@@ -68,7 +68,7 @@
 | E1 | 中 | 字符串真值（"4.25%"、人名）会让泄漏哨兵和 save_run / ledger 崩掉 | NEXT.md 离散第 12 条 | 记 | 本轮不修（第 6 节：运行骨架的机械问题） |
 | E2 | 中 | 回复模板里没有 outcomes 字段；依据 id 规则过严（引用了丢弃的点就整份列表被拒） | 离散第 1、2 条 | 记 | 本轮不修（第 6 节：离散规则） |
 | E3 | 中 | 代码查不出列表是不是「按证据定的」；沿用列表时不复查；不查步长；同日冲突的 FedWatch 读数混进一个方法；余下概率放错桶 | 离散第 3–6、10 条 | 记 | 本轮不修（第 6 节：离散规则） |
-| E4 | 低（安全） | render_graph 用链式 str.replace，label 里含 `__GRAPH__` 可注入；jev 跟随跳转时会带上 Authorization 头 | 离散第 13、14 条 | 记 | 未修：jev 跳转的部分排在 S10（没开始）；render_graph 的部分 FIX_PLAN 没排阶段 |
+| E4 | 低（安全） | render_graph 用链式 str.replace，label 里含 `__GRAPH__` 可注入；jev 跟随跳转时会带上 Authorization 头 | 离散第 13、14 条 | 记 | 部分修 `v2.6g`（D9）：jev 遇到 3xx 不跟随，抛 `JevError`（消息不带 key），`run_arm` 记 `status="error"`；render_graph 的注入 FIX_PLAN 没排阶段，没改 |
 | E5 | 低 | 输入核对的 prompt 带着裁判写的 note，有锚定风险；修正回复里的 decisions 不采用；Jev 臂没真实调用过 | 离散第 16、17、9 条 | 记 | 本轮不修（第 6 节：离散规则；Jev 真实调用要外部 key，没批准） |
 
 ## F. 终稿文字与网页
@@ -123,11 +123,11 @@
 | N23 | 低 | 反比回测误差权重不考虑回测年数 | `methods.py:198` | 本轮不修（D6） |
 | N24 | 中 | searcher 的 max_tokens 写死 2048、不关 thinking、不检查 stop_reason：493 次搜索 39 次截断，其中 32 次模型一个 URL 都没给 | `search.py:49、94-103`；`results/agent/**/calls*.jsonl` | 部分修 `v2.6a`：上限 2048 → 8192（只改表里这一项）；thinking 没改（N4），stop 仍只记在 calls.jsonl |
 | N25 | 低 | 搜索错误计数永远是 0；超出 max_uses 的调用也被计数 | `search.py:86-91`；web_search_requests 分布 4:425、5:22、6:22（max_uses = 3） | 部分修 `v2.6a`：agent 的 searcher 认 list 里的 `web_search_tool_result_error`；arm (3) 的 `search_direct.audit` 有同样的问题，没改（预注册对照臂，S4.md 第 7 节）；超出 max_uses 的调用收不收费等 G7 |
-| N26 | 中 | 中日韩倍数字（万 / 億 / 만）被静默丢掉，或整个点被拒：`parse_value('519万','')` = (519.0, False)，`'35万6713'` 报错；含万 / 萬 / 만 / 億的复合写法因为 more than one number 被丢 464 个点，unknown scale word 189 个点 | `evidence.py:63-65`（SCALES）、`82-139`；全量统计见挑错意见 | 未修（阶段没完成）：S8（`v2.6e`）的改动在工作区、停在核查，没提交。S8 的规则、已知局限和要用户定的事（千 / 천）见 `probes/out/stages/S8.md` 第 7、8 节 |
-| N27 | 低-中 | 日期识别只认英文和 ISO：`text_dates('令和8年3月27日公表 2026年3月27日')` 返回 [] | `evidence.text_dates`、`parse_date` | 未修（阶段没完成）：同 N26，在 S8 |
-| N28 | 低 | `_decode` 的 charset 正则不认带引号的写法 | `fetch.py:123` | 未修（阶段没完成）：S9 没开始 |
+| N26 | 中 | 中日韩倍数字（万 / 億 / 만）被静默丢掉，或整个点被拒：`parse_value('519万','')` = (519.0, False)，`'35万6713'` 报错；含万 / 萬 / 만 / 億的复合写法因为 more than one number 被丢 464 个点，unknown scale word 189 个点 | `evidence.py:63-65`（SCALES）、`82-139`；全量统计见挑错意见 | 已修 `v2.6e`：认 万/萬/億/亿/兆/만/억/조、复合写法（519万548、2만4,275）、倍数字后接单位（万人、兆円）和 `'000s`；只抄了中日韩数字一截的点改为丢掉。已存点的 parse_value 重放：复合写法 464 个里 426 个解析出值，unknown scale word 189 个里 187 个（S8.md 第 4.1 节；已存的点不回写）。千 / 천 不支持，见 R15；其他已知局限见 R16、R17 |
+| N27 | 低-中 | 日期识别只认英文和 ISO：`text_dates('令和8年3月27日公表 2026年3月27日')` 返回 [] | `evidence.text_dates`、`parse_date` | 已修 `v2.6e`：认 YYYY年M月D日、YYYY년 M월 D일、令和 / 平成 N年、民国 / 民國 N年，期间年份检查也认纪年；上面的例子现在返回两个 2026-03-27（收尾时离线核对）。昭和和 R8 / H31 这类缩写没做；不带前缀的 1NN年 见 R16 |
+| N28 | 低 | `_decode` 的 charset 正则不认带引号的写法 | `fetch.py:123` | 已修 `v2.6f`；`v2.6f1` 换成 w3lib 以后，双引号和不带引号的写法都认，单引号（`charset='Shift_JIS'`）不认，见 R18 |
 | N29 | 低 | CDX 查询失败被记成「no snapshot <= as_of」 | `fetch.py:155-158、196` | 本轮不修（第 6 节） |
-| N30 | 低（安全，假设性） | DeepSeek 的 key 在重定向时也会被带过去（E4 只写了 jev） | `search.py:56-59`（urllib 跟随重定向时保留其他请求头，读者读了 venv 源码） | 未修（阶段没完成）：S10 没开始。注意 S10 的文件列只有 `llm.py`、`jev.py`，这条的证据位置 `search.py` 自己调 `urlopen`，S10 做的时候要一起看 |
+| N30 | 低（安全，假设性） | DeepSeek 的 key 在重定向时也会被带过去（E4 只写了 jev） | `search.py:56-59`（urllib 跟随重定向时保留其他请求头，读者读了 venv 源码） | 已修 `v2.6g`（D9）：新函数 `llm.urlopen_no_redirect`（标准库 `HTTPRedirectHandler` 的子类，不生成跳转请求）；`LLM._post`、`Searcher.search`、`DirectClient.call`、`jev._urllib_post` 和手动探针 `probes/deepseek_search_probe.py` 都走它（比 S10 的文件列多了 `search.py`、`search_direct.py` 和探针，S10.md 第 5 节）。3xx 时各客户端沿用原来的传输错误处理（Searcher 返回 `error="http_3xx"`），key 不会发到跳转后的地址；200 的结果逐字不变。真实端点会不会回 3xx 没核实 |
 | N31 | 低 | 泄漏哨兵的写法过宽：非整数登记 .1f 截断写法（`leak_forms(4.25)` = ['4.2','4.25']）；缩写不区分大小写、后面没有字母边界（「7.27 M」命中「7.27 miles」） | `evidence.py:240-249` | 部分修 `v2.6c`：k / M 结尾的写法后面不能再接字母；.1f 截断写法和不区分大小写没改 |
 | N32 | 中 | 连续值终稿没有观测输入值的占位符；未知占位符渲染成 [unknown placeholder] | `graph.py:696-717、747`；fc_jnto_2026_08/v21b（读者） | 已修 `v2.6d`：方法用到的点各给 `p{n}_value`；没加 `p{n}_period`（D4 只写了 value） |
 | N33 | 中 | 清洗规则和 FINAL_SYSTEM 矛盾；连续值的 keep_ids 不含点 id | `prompts.py:268`；`graph.py:107-108、736` | 已修 `v2.6d` |
@@ -143,10 +143,10 @@
 | N43 | 低 | arm (3) 取文字的方式和预注册写法有细微差别 | `EVAL_SHOWCASE_PLAN.md:63`；`search_direct.py:85-91`（读者） | 本轮不修：预注册的对照臂，FIX_PLAN 没排阶段，只记录 |
 | N44 | 低 | run.score_all 仍然写出 last_year_same_period 臂 | `run.py:239-243`；`EVAL_SHOWCASE_PLAN.md:12` | 已修 `v2.6d` |
 | N45 | 低 | 测试缺口；tests/test_agent.py 的 `__main__` 守卫写在最后一个测试类之前 | `tests/test_agent.py:695-699`；`tests/test_graph.py:115-120`（读者） | 部分修 `tools-regress-v1`：守卫挪到文件末尾；`test_graph` 的 G1 场景测试没加（G1 本轮不修）。各阶段新加的测试见 R 节前的说明 |
-| N46 | 低 | BUGS.md 和文档里有几处描述与代码不符 | BUGS.md C8、G2；`AGENT_MVP.md:25` 对 `pipeline.py:38` | 订正（本次文档提交）：BUGS.md 的 B1、C1、C3、C8、G1、G2 已改。`AGENT_MVP.md:25` 写每个方向最多 5 个 URL，代码是 4（现在是 `pipeline.py:39` 的 `urls_per_direction: int = 4`），AGENT_MVP.md 本次没改；NEXT.md v2.5 第 7 条的「60 s」同 C8，原文没改 |
+| N46 | 低 | BUGS.md 和文档里有几处描述与代码不符 | BUGS.md C8、G2；`AGENT_MVP.md:25` 对 `pipeline.py:38` | 订正（e757e61）：BUGS.md 的 B1、C1、C3、C8、G1、G2 已改。`AGENT_MVP.md:25` 写每个方向最多 5 个 URL，代码是 4（现在是 `pipeline.py:39` 的 `urls_per_direction: int = 4`），AGENT_MVP.md 两次文档提交都没改；NEXT.md v2.5 第 7 条的「60 s」同 C8，原文没改 |
 
-本轮新加的测试：S0 基线 240 个 → `v2.6d` 290 个（S1 `test_settings`、S2 `test_pct_units`、S3 `test_budget_order`、S4 `test_search_errors`、S5 `test_judge_protocol`、
-S6 `test_leak_guard`、S7 `test_final_text`），每个阶段 `unittest` 全过、没有本来就失败的测试。S8 在工作区的 `tests/test_cjk_numbers.py` 另有 24 个（没提交）。
+本轮新加的测试：S0 基线 240 个 → `v2.6g` 338 个（S1 `test_settings`、S2 `test_pct_units`、S3 `test_budget_order`、S4 `test_search_errors`、S5 `test_judge_protocol`、
+S6 `test_leak_guard`、S7 `test_final_text`、S8 `test_cjk_numbers` 24 个、S9 `test_decode` 21 个（S9b 改写后 18 个）、S10 `test_redirect` 6 个），每个阶段 `unittest` 全过、没有本来就失败的测试。
 
 ## R. 本轮修复中新发现、没改的问题（来自阶段报告「发现但没改」一节）
 
@@ -164,8 +164,13 @@ S6 `test_leak_guard`、S7 `test_final_text`），每个阶段 `unittest` 全过�
 | R10 | 低 | `probes/replay_discrete_rules.py` 原样跑会在 discrete6 处 `KeyError: 'outcomes'`（探针写于 v2.2.1，之后结果列表改存在 `state["outcomes"]`） | S5.md 第 5 节、第 8 节第 4 条 | 没改（S5 用 scratch 副本跑完了对比） |
 | R11 | 低 | 哨兵的字母边界会漏掉「2.44mn / 2.44 mln / 2.44 Mio」这类写法（「million」整词照旧命中）；作废规则对四舍五入写法也生效（韩国「24,000명」） | S6.md 第 8 节第 1、4 条 | 没改（D3 定的写法和代价） |
 | R12 | 低 | 网页：泄漏审计表不显示 `directions_voided`，作废的方向只显示「0 页」；实时进度页的 compute 卡片仍显示原始 basis 键；ledger 和 graph.html 的「80% interval」字样没改成 model-based | S6.md 第 8 节第 3 条；S7.md 第 7 节第 7 条、第 8 节第 5 条 | 没改（`web/runs.py`、`_leakage_view` 不在阶段文件里） |
-| R13 | 低 | `docs/prompts_bilingual.md`（和生成它的 `probes/gen_prompts_bilingual.py` 里的中文对照）没跟上 S5、S7 改过的 JUDGE_USER、FINAL_SYSTEM、FINAL_USER | S5.md 第 8 节第 5 条；S7.md 第 8 节第 10 条 | 没改（本次文档提交只改 BUGS.md、NEXT.md、docs/structure.html） |
+| R13 | 低 | `docs/prompts_bilingual.md`（和生成它的 `probes/gen_prompts_bilingual.py` 里的中文对照）没跟上 S5、S7 改过的 JUDGE_USER、FINAL_SYSTEM、FINAL_USER | S5.md 第 8 节第 5 条；S7.md 第 8 节第 10 条 | 没改（两次文档提交都只改了 BUGS.md、NEXT.md、docs/structure.html，第二次另加 FIX_PLAN.md 的 D10 一行） |
 | R14 | 低 | 「% points」写法会被 `is_pct` 当成百分数（已存假设没有这种写法）；restated_point 的词干比较仍会误伤；依赖图标签和网页假设表对「% of ...」的假设多一个 `%` 后缀 | S2.md 第 6 节第 2–4 条 | 没改 |
+| R15 | 中（要用户定） | 千 / 천 不当倍数：已存的点里 37 个仍被丢（29 个韩文「N만N천N」如 `2만4천275`，8 个以「千」结尾如 `61万1千`），韩国出生题的新闻常用这种写法（缓存页 51 处）；不带倍数字的数后面接千（「12,345千人」里只写 `12,345`）照旧按原文数字取值、小 1000 倍，和 v2.6d 相同 | S8.md 第 7 节第 1 条、第 8 节第 1 条和第 7 条 (f) | 没改：要用户定（要支持的话还得处理千万 / 千億 / 百万这类组合） |
+| R16 | 低 | 不带前缀的「1NN年」（100–199）对所有页面都按民国纪年认：日文 / 中文页上的「創業100年」「過去115年」会被当成 2011 / 2026 年，期间年份检查因此放宽。已存缓存页里这种写法只出现在台湾题的 3 页，都是真的民国年 | S8.md 第 7 节第 3 条 | 没改 |
+| R17 | 低 | 中日韩数字仍会读错或误丢的已知写法：「兆」后面的 SI 单位只认 瓦 / 赫 / 帕 / 焦 / 字节 / 比特；中日文段间有空格（「1億 3000万人」）不连读；韩文「조」也是「条」（「제3조 2항」）；数字后隔一个空格接 만 / 억 / 조 开头的韩文词（「2024 조사」）会被当成一截丢掉（相对 v2.6d 是回归，缓存页 0 处）；页面级「（単位：万人）」表头、「成」、「千分之」没处理 | S8.md 第 8 节第 2、3、7 条 | 没改（多数写法在缓存页里 0 处；区分「29 만 명」和「2024 조사」要靠词表） |
+| R18 | 低 | 页面解码的残余情况（`v2.6f1`）：(1) 头里单引号的 charset（`charset='Shift_JIS'`）w3lib 不认，几乎全 ASCII 的 Shift_JIS 页会被自动探测猜成 cp1250（日文为主的页由探测解对）；双引号和不带引号的写法都认。(2) 自动探测的猜测质量一般：小段 cp1252 法文也被猜成 cp1250，重音字母错、ASCII 数字不错。(3) 页面其实是 UTF-8、头里没 charset、meta 写错（如 iso-8859-1）时按 meta 解成乱码（v2.6e 解对），这和浏览器的做法相同。缓存 286 个快照的头里没有带引号的 charset，也没有 (3) 这种页面；S9 时没有缓存页走到 charset 探测（v2.6f1 没重新统计） | 收尾时离线核对 `probes/out/_docs_r2_check.py`；`probes/out/_rev_s9b/edges.out`、`edges2.out`；S9.md 第 8 节 | 没改（(3) 要用户定） |
+| R19 | 低 | S10 遗留：`llm.json_call`、`Searcher.search`、`DirectClient.call` 的 `except HTTPError` 没有关闭响应，走到 3xx / 4xx / 5xx 时有 `ResourceWarning`（G1 输出里 5 条，不是失败，原来就有的写法，以前没有测试走到）；`llm.py` 新加的 `_NoRedirect` 和 `agent/net.py` 取页用的同名类重复，没有合并 | S10.md 第 6 节 | 没改（属于 N3「HTTP 客户端统一」；合并要挪 `net.py`，是重构） |
 
 ## H. 我的做事方式（这些低级错误的来源）
 
