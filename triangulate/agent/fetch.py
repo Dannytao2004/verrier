@@ -28,12 +28,7 @@ CDX = "https://web.archive.org/cdx/search/cdx"
 SNAP_TS = re.compile(r"/web/(\d{14})id_/")
 URL_DATE = re.compile(r"(?<!\d)((?:19|20)\d{2})[/_-]?(0[1-9]|1[0-2])[/_-]?(0[1-9]|[12]\d|3[01])?(?!\d)")
 TEXT_TYPES = ("text/html", "application/xhtml", "text/plain", "text/csv")
-CHARSET = re.compile(r"charset=[\"']?([\w-]+)", re.I)   # HTTP 头；N28：charset="Shift_JIS" 这种带引号的也认
-META_CHARSET = re.compile(rb"<meta[^>]+charset\s*=\s*[\"']?\s*([\w-]+)", re.I)   # <meta charset=…> 和 http-equiv 的 content 都认
-PRINTABLE_ASCII = bytes(range(0x20, 0x7F))   # _ascii_compatible 用：95 个可打印 ASCII 字节
-# UTF-8 BOM 用 utf-8 解（BOM 字符留在开头，和旧版按 utf-8 解的结果相同）；UTF-16 由 codec 按 BOM 认字节序
-BOMS = ((b"\xef\xbb\xbf", "utf-8"), (b"\xff\xfe", "utf-16"), (b"\xfe\xff", "utf-16"))
-FFFD_MAX = 0.01   # U+FFFD 超过全文 1% 判 undecodable（_to_text）；_decode 的 utf-8 一步用同一个阈值
+FFFD_MAX = 0.01   # U+FFFD 超过全文 1% 判 undecodable（_to_text）
 
 
 def _key(s: str) -> str:
@@ -128,43 +123,36 @@ def _clean(s: str) -> bool:
     return s.count("\ufffd") <= FFFD_MAX * max(len(s), 1)
 
 
-def _ascii_compatible(enc: str) -> bool:
-    """meta 一步用：meta 是 bytes 正则在 ASCII 字节里匹配到的，声明 UTF-16/32、EBCDIC 就一定是错的（WHATWG 的 prescan
-    也是 meta 写 UTF-16 就按 UTF-8）；UTF-7 会把正文里的「+2.1%」解坏。照这些声明解只会把旧版能解对的页解坏。
-    判据：这个编码解可打印 ASCII 必须原样。"""
+def _sniff(body: bytes):
+    """没有任何声明时的自动探测：整页是合法 UTF-8 就用 utf-8，否则用 charset_normalizer 的最佳猜测（猜不出返回 None，
+    html_to_unicode 退回 utf-8）。"""
     try:
-        return PRINTABLE_ASCII.decode(enc) == PRINTABLE_ASCII.decode("ascii")
-    except (LookupError, UnicodeError):
-        return False
+        body.decode("utf-8")
+        return "utf-8"
+    except UnicodeDecodeError:
+        pass
+    from charset_normalizer import from_bytes
+    best = from_bytes(body).best()
+    return best.encoding if best else None
 
 
 def _decode(body: bytes, headers: dict) -> str:
-    """字节 → 文字。顺序：HTTP 头的 charset（允许引号）→ BOM → 前 4 KB 的 <meta charset> / http-equiv →
-    utf-8（U+FFFD 不超过 FFFD_MAX 才用）→ 自动探测（trafilatura.utils.detect_encoding，内部是 charset_normalizer；
-    只用第一个 Python 认识的猜测）→ 都不行返回 utf-8 replace 的结果，由 _to_text 判 undecodable。
-    声明的编码 Python 不认识就看下一步；meta 给的编码和 ASCII 不兼容（_ascii_compatible）也不用。
-    头里有 Python 认识的 charset 的页面、没有任何声明且按 utf-8 本来就干净的页面，结果和旧版相同。"""
-    m = CHARSET.search(headers.get("Content-Type", "") or "")
-    declared = [m.group(1)] if m else []
-    declared += [enc for bom, enc in BOMS if body.startswith(bom)][:1]
-    m = META_CHARSET.search(body[:4096])
-    if m and _ascii_compatible(m.group(1).decode("ascii")):
-        declared.append(m.group(1).decode("ascii"))
-    for enc in declared:
-        try:
-            return body.decode(enc, "replace")
-        except (LookupError, UnicodeError):
-            continue
-    utf8 = body.decode("utf-8", "replace")
-    if _clean(utf8):
-        return utf8
-    from trafilatura.utils import detect_encoding
-    for enc in detect_encoding(body):
-        try:
-            return body.decode(enc, "replace")
-        except (LookupError, UnicodeError):
-            continue
-    return utf8
+    """字节 → 文字。v2.6f1 起交给现成的库 w3lib.encoding.html_to_unicode（Scrapy 的编码模块），按浏览器的顺序：
+    BOM → HTTP 头的 charset → <meta> / xml 声明 → 自动探测（_sniff）→ utf-8；编码别名按 WHATWG 换成超集
+    （shift_jis → cp932、gb2312 → gb18030、latin-1 → cp1252 等），UTF BOM 会被去掉。解不对的字节变成 U+FFFD，
+    由 _to_text 按 FFFD_MAX 判 undecodable。
+    w3lib 之外只补两条：(1) 编码只来自 <meta> 且和 ASCII 不兼容（utf-16/32、EBCDIC）时按 WHATWG 的规定不用它，改走自动探测
+    （meta 是在 ASCII 字节里读到的，这种声明必然是错的）；(2) 声明的编码不支持 errors="replace"（如 idna）时不崩，同样改走自动探测。"""
+    from w3lib.encoding import html_body_declared_encoding, html_to_unicode, http_content_type_encoding, read_bom
+    ct = headers.get("Content-Type") or None
+    try:
+        enc, text = html_to_unicode(ct, body, auto_detect_fun=_sniff)
+    except (UnicodeError, LookupError):
+        enc, text = None, None
+    from_meta = read_bom(body)[0] is None and http_content_type_encoding(ct) is None and html_body_declared_encoding(body)
+    if text is None or (from_meta and b"<html>".decode(enc, "replace") != "<html>"):
+        text = body.decode(_sniff(body) or "utf-8", "replace")
+    return text
 
 
 def _to_text(body: bytes, headers: dict) -> tuple:

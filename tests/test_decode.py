@@ -1,4 +1,4 @@
-"""S9：页面解码（C1 的解码部分、N28）和 zstd 解压。纯函数，不读 data/、results/，不联网。"""
+"""S9 / S9b：页面解码（C1 的解码部分、N28；v2.6f1 起用 w3lib）和 zstd 解压。纯函数，不读 data/、results/，不联网。"""
 import unittest
 from unittest import mock
 
@@ -30,15 +30,16 @@ class TestZstd(unittest.TestCase):
 
 
 class TestDecodeOrder(unittest.TestCase):
+    """v2.6f1：解码交给 w3lib.encoding.html_to_unicode（BOM → 头 → meta → 自动探测 → utf-8），这里只钉住我们依赖的行为。"""
+    NO_DETECT = mock.patch("charset_normalizer.from_bytes", side_effect=AssertionError("detector called"))
+
     def test_header_charset_with_quotes(self):   # N28
-        # 只有头里有 charset（没有 meta），探测 mock 成报错：头里的 charset 认不出来就只剩 utf-8 一步。
-        # 几乎全 ASCII 的正文按 utf-8 解是能过阈值的乱码；日文正文按 utf-8 解不干净、会去调探测。两种都只能靠头里的 charset 解对
-        with mock.patch("trafilatura.utils.detect_encoding", side_effect=AssertionError("detector called")):
-            for body in ("Population report " * 40 + "東京都", JP * 3):
-                html = page(body=body)
-                for ct in ('text/html; charset="Shift_JIS"', "text/html; charset='Shift_JIS'", "text/html; charset=Shift_JIS"):
-                    with self.subTest(ct=ct, n=len(body)):
-                        self.assertEqual(_decode(html.encode("shift_jis"), {"Content-Type": ct}), html)
+        # 几乎全 ASCII 的 Shift_JIS 正文：按 utf-8 解是能过阈值的乱码，只能靠头里的 charset 解对；探测 mock 成报错
+        html = page(body="Population report " * 40 + "東京都")
+        with self.NO_DETECT:
+            for ct in ('text/html; charset="Shift_JIS"', "text/html; charset=Shift_JIS"):
+                with self.subTest(ct=ct):
+                    self.assertEqual(_decode(html.encode("shift_jis"), {"Content-Type": ct}), html)
 
     def test_header_wins_over_meta(self):
         html = page('<meta charset="Shift_JIS">')
@@ -50,91 +51,49 @@ class TestDecodeOrder(unittest.TestCase):
             html = page(meta)
             self.assertEqual(_decode(html.encode("shift_jis"), {"Content-Type": "text/html"}), html, meta)
 
-    def test_meta_only_in_first_4kb(self):
-        # 干净的 utf-8 页、正文有非 ASCII 字符：照 meta（latin-1）解和不看 meta（utf-8）解，结果不一样
-        text = "<p>Fares rose 3.4% – to €12.50 per trip.</p>" * 3
-        pad = "<!-- pad -->" * 400
-        far = f'<html><head>{pad}<meta charset="iso-8859-1"></head><body>{text}</body></html>'.encode("utf-8")
-        near = f'<html><head><meta charset="iso-8859-1">{pad}</head><body>{text}</body></html>'.encode("utf-8")
-        self.assertGreater(far.find(b"<meta"), 4096)
-        self.assertLess(near.find(b"<meta"), 4096)
-        self.assertNotEqual(far.decode("utf-8"), far.decode("latin-1"))
-        self.assertEqual(_decode(far, {"Content-Type": "text/html"}), far.decode("utf-8"))      # 4 KB 之后的 meta 不看
-        self.assertEqual(_decode(near, {"Content-Type": "text/html"}), near.decode("latin-1"))  # 对照：前 4 KB 内的照用
-
-    def test_meta_utf16_utf32_ebcdic_ignored(self):
-        # meta 是在 ASCII 字节里匹配到的，声明这些编码一定是错的：结果要和 v2.6e（不看 meta，utf-8 replace）逐字相同
-        ascii_body = "<p>Heathrow handled 6,912,345 passengers in July 2026, up +2.1% on last year.</p>" * 6
-        for meta in ('<meta charset="utf-16">', '<meta http-equiv="Content-Type" content="text/html; charset=UTF-16LE">',
-                     '<meta charset="utf16">', '<meta charset="utf-32">', '<meta charset="cp037">'):
-            for body in (ascii_body, JP * 3):
-                b = page(meta, body).encode("utf-8")
-                with self.subTest(meta=meta, ascii=body is ascii_body):
-                    self.assertEqual(_decode(b, {"Content-Type": "text/html"}), b.decode("utf-8", "replace"))
-
-    def test_meta_utf7_ignored(self):
-        # utf-7 会把「+2.1%」解成「�1%」；不看这个 meta，结果和 v2.6e 逐字相同
-        for meta in ('<meta charset="utf-7">', '<meta charset="u7">'):
-            for body in ("<p>Passengers rose +2.1% to 6,912,345 in July 2026.</p>",
-                         "<p>Heathrow handled 6,912,345 passengers in July 2026, up +2.1% on last year.</p>" * 6):
-                b = page(meta, body).encode("utf-8")
-                with self.subTest(meta=meta, n=len(body)):
-                    self.assertEqual(_decode(b, {"Content-Type": "text/html"}), b.decode("utf-8", "replace"))
-                    text, why = _to_text(b, {"Content-Type": "text/html"})
-                    self.assertEqual(why, "")
-                    self.assertIn("+2.1%", text)
-
-    def test_ascii_compatible_meta_labels_still_used(self):
-        from triangulate.agent.fetch import _ascii_compatible
-        for lab in ("Shift_JIS", "cp932", "euc-jp", "iso-2022-jp", "gbk", "gb2312", "GB18030", "big5", "euc-kr",
-                    "windows-1252", "iso-8859-1", "windows-1251", "koi8-r", "utf-8"):
-            self.assertTrue(_ascii_compatible(lab), lab)
-        for lab in ("utf-16", "UTF-16LE", "utf-16be", "utf-32", "utf-7", "cp037", "cp500", "x-no-such-codec"):
-            self.assertFalse(_ascii_compatible(lab), lab)
-
     def test_meta_wins_over_clean_utf8(self):
-        # 几乎全是 ASCII 的 Shift_JIS 页：按 utf-8 解只有很少的 U+FFFD（旧版当成能解码，日文成了乱码）；meta 排在 utf-8 前面
+        # 浏览器的顺序：meta 排在自动探测前面。几乎全 ASCII 的 Shift_JIS 页按 utf-8 解只有很少的 U+FFFD（v2.6e 当成能解码，日文成了乱码）
         html = page('<meta charset="Shift_JIS">', "Population report " * 40 + "東京都")
         b = html.encode("shift_jis")
-        self.assertLess(b.decode("utf-8", "replace").count("�"), 0.01 * len(b))
+        self.assertLess(b.decode("utf-8", "replace").count("\ufffd"), 0.01 * len(b))
         self.assertEqual(_decode(b, {}), html)
 
-    def test_utf8_bom_kept_like_before(self):
-        b = b"\xef\xbb\xbf" + page().encode("utf-8")
-        self.assertEqual(_decode(b, {"Content-Type": "text/html"}), b.decode("utf-8", "replace"))   # 和旧版逐字相同
+    def test_meta_not_ascii_compatible_is_ignored(self):
+        # WHATWG：meta 是在 ASCII 字节里读到的，声明 utf-16/32、EBCDIC 必然是错的，按自动探测（这里是 utf-8）解；
+        # w3lib 本身会照这些声明解成乱码，这是 fetch._decode 在 w3lib 外补的第一条。idna 不支持 replace，不能让取页崩（第二条）
+        ascii_body = "<p>Heathrow handled 6,912,345 passengers in July 2026, up +2.1% on last year.</p>" * 6
+        for meta in ('<meta charset="utf-16">', '<meta http-equiv="Content-Type" content="text/html; charset=UTF-16LE">',
+                     '<meta charset="utf-32">', '<meta charset="cp037">', '<meta charset="idna">'):
+            for body in (ascii_body, JP * 3):
+                html = page(meta, body)
+                with self.subTest(meta=meta, ascii=body is ascii_body):
+                    self.assertEqual(_decode(html.encode("utf-8"), {"Content-Type": "text/html"}), html)
+
+    def test_utf8_bom_is_stripped(self):
+        # w3lib 去掉 BOM（v2.6f 以前 BOM 字符留在开头）；html_to_text 之后的正文不受影响
+        self.assertEqual(_decode(b"\xef\xbb\xbf" + page().encode("utf-8"), {"Content-Type": "text/html"}), page())
 
     def test_utf16_bom(self):
-        # 探测 mock 成报错。全 ASCII 的正文：没有 BOM 一步就按 utf-8 解，只有 BOM 的 2 个 U+FFFD、字符之间夹着 NUL，能过阈值
-        # （v2.6e 就这样放行）；日文正文按 utf-8 解不干净、会去调探测。两种都只能靠 BOM 解对
-        with mock.patch("trafilatura.utils.detect_encoding", side_effect=AssertionError("detector called")):
+        # 全 ASCII 的正文：没有 BOM 一步就按 utf-8 解，只有 BOM 的 2 个 U+FFFD、字符之间夹着 NUL，能过阈值；探测 mock 成报错
+        with self.NO_DETECT:
             for body in ("Passengers rose 2.1% to 6,912,345 in July 2026. " * 3, JP * 3):
                 with self.subTest(n=len(body)):
                     self.assertEqual(_decode(page(body=body).encode("utf-16"), {"Content-Type": "text/html"}), page(body=body))
 
-    def test_unknown_or_unusable_declared_charset_falls_through(self):
-        b = page().encode("utf-8")
-        self.assertEqual(_decode(b, {"Content-Type": "text/html; charset=x-no-such-codec"}), page())
-        html = page('<meta charset="idna">')   # idna 不支持 errors="replace"，会抛 UnicodeError；不能让页面里的 meta 弄崩取页
-        self.assertEqual(_decode(html.encode("utf-8"), {}), html)
+    def test_unknown_header_charset_falls_through(self):
+        self.assertEqual(_decode(page().encode("utf-8"), {"Content-Type": "text/html; charset=x-no-such-codec"}), page())
 
     def test_clean_utf8_does_not_call_detector(self):
-        with mock.patch("trafilatura.utils.detect_encoding", side_effect=AssertionError("detector called")):
+        with self.NO_DETECT:
             self.assertEqual(_decode(page().encode("utf-8"), {"Content-Type": "text/html"}), page())
 
     def test_detector_for_undeclared_non_utf8(self):
-        b = page().encode("shift_jis")
-        self.assertEqual(_decode(b, {"Content-Type": "text/html"}), page())
+        self.assertEqual(_decode(page().encode("shift_jis"), {"Content-Type": "text/html"}), page())
 
-    def test_only_first_known_guess_is_used(self):
-        b = "Le nombre a augmenté de 3,4 %. ".encode("cp1252") * 20
-        with mock.patch("trafilatura.utils.detect_encoding", return_value=["no-such-codec", "cp1252", "latin-1"]):
-            self.assertEqual(_decode(b, {}), b.decode("cp1252"))
-        # 第一个认识的猜测解出来不干净也照用（之后由 _to_text 判 undecodable），不往后找能解干净的 latin-1
-        self.assertNotEqual(b.decode("ascii", "replace"), b.decode("latin-1"))
-        with mock.patch("trafilatura.utils.detect_encoding", return_value=["ascii", "latin-1"]):
-            self.assertEqual(_decode(b, {}), b.decode("ascii", "replace"))
-        with mock.patch("trafilatura.utils.detect_encoding", return_value=[]):
-            self.assertEqual(_decode(b, {}), b.decode("utf-8", "replace"))   # 探测不出：旧版的 utf-8 replace
+    def test_shift_jis_label_decodes_as_cp932(self):
+        # w3lib 按 WHATWG 把 shift_jis 换成超集 cp932：「～」「－」这类字符照浏览器的显示（v2.6f 解成「〜」「−」）
+        html = page(body="期間：1月～3月、増減－343人")
+        self.assertEqual(_decode(html.encode("cp932"), {"Content-Type": "text/html; charset=Shift_JIS"}), html)
 
 
 class TestToText(unittest.TestCase):
