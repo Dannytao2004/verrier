@@ -200,6 +200,15 @@ class TestParse(unittest.TestCase):
         self.assertEqual(Q.base_factor(Q.UREG.Quantity(1, "electron_g_factor")),
                          (None, "cannot convert electron_g_factor to base units (factor -2.00231930436092)"))
 
+    def test_exponent_guard(self):
+        # 链式幂和巨大指数会让 pint 算到挂死（幂塔），解析前就报错；常规的平方、立方、开方照旧
+        for t in ("kg**2**3**4**5", "kg**999999999", "kg**inf", "kg^1e308", "m**7"):
+            with self.subTest(t=t):
+                self.assertParseError(t, "exponents must be numbers between -6 and 6")
+        for t, want in (("m**2", "meter ** 2"), ("km^2", "kilometer ** 2"), ("s^-1", "1 / second"), ("kg**0.5", "kilogram ** 0.5")):
+            with self.subTest(t=t):
+                self.assertEqual(str(unit(t).units), want)
+
     def test_numbers_only_as_rate_base(self):
         for t in ("2015 USD/year", "1,000 tonnes", "0.5 kg", "1e6 USD", "100 g", "kg * 1000"):
             with self.subTest(t=t):

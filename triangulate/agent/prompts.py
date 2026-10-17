@@ -42,6 +42,8 @@ If the question is ambiguous, choose an explicit working interpretation and reco
 
 Set outcome_type. Use "discrete" only when the answer must be exactly one of a small set of mutually exclusive outcomes (for example a policy rate set at one meeting, an election winner, or whether an event happens), and give outcome_kind: a few words on what kind of outcome it is (for example "policy rate in fixed steps", "categorical winner", "yes/no"). Do not list the outcomes: the analyst defines them after the evidence is collected. Otherwise use "continuous" with an empty outcome_kind.
 
+For a continuous target, also give unit_canonical: the unit of the number to be estimated, written as exactly one unit that code can parse, with its time basis. Use singular count nouns (person, visitor, vehicle), standard unit symbols (kg, t for metric tons, km, kWh), currency codes (USD) and percent, joined only by '/', '*', '**' and parentheses; no scale words (thousand, million), no descriptions and no alternatives. A total over the target period takes a count or total unit ('visitor' for the number of visitors in one month, not 'visitor/month'); a quantity stated per unit of time keeps that time unit ('t/day' for metric tons per day, 'USD/year' for a yearly rate); a rate per population base puts the base in parentheses ('birth/(1000 person)'); a percentage is 'percent'. Keep unit as the human-readable description. For a discrete target, leave unit_canonical empty.
+
 Step 2. Design estimation routes before designing searches.
 
 Consider practical relationships such as:
@@ -75,9 +77,14 @@ Rules for directions:
 Also give market_keywords: 2-3 lowercase words for a plausible prediction market about this exact target, or an empty list if a useful market is unlikely. Do not force a market-based route.
 
 Reply with JSON:
-{{"target": {{"what": "...", "unit": "...", "period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "publisher": "...", "cadence": "...", "caveats": "...", "outcome_type": "continuous", "outcome_kind": ""}},
+{{"target": {{"what": "...", "unit": "...", "unit_canonical": "...", "period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "publisher": "...", "cadence": "...", "caveats": "...", "outcome_type": "continuous", "outcome_kind": ""}},
  "market_keywords": ["..."],
  "directions": [{{"id": "d1", "category": "related_series", "perspective": "...", "hypothesis": "...", "data_to_find": "...", "search_hints": ["...", "..."], "expected_information": 4}}]}}"""
+
+# U1：continuous 目标的 unit_canonical 缺失或 qty 解析不了时，附在 PLAN_USER 后面重问一次规划（graph.plan）
+PLAN_UNIT_RETRY = """
+
+A previous reply to this request was rejected: {error}. Reply again with the complete JSON object, with target.unit_canonical written as exactly one unit as described in Step 1."""
 
 SEARCH_USER = """You are a web research assistant supporting a Fermi estimate. Find evidence that can supply or constrain an input to an estimation route.
 

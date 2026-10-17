@@ -88,6 +88,7 @@ AMBIGUOUS = {"ton": "pint reads it as a 2000 lb short ton; write 't' for metric 
              "chain": "pint reads it as a unit of length; write another word"}
 DIMLESS_OK = {"percent", "percentage_point", "basis_point", "ppm", "permille", "bit", "byte"}   # 无量纲、系数不是 1，但照 pint 的意思用
 ALTERNATIVES = {"or", "and", "vs", "versus"}
+EXPONENT = re.compile(r"(?:\*\*|\^)\s*(-?\s*[^\s*/^()]+)")   # 幂运算符后面的指数原文（_parse 里只放行 -6..6 的单个整数）
 NOT_UNITS = {"a", "an", "the", "of", "in", "on", "at", "as", "to", "for", "by", "from", "with", "each", "every", "than"}
 SCALE_WORDS = {"thousand", "million", "billion", "trillion"}
 METRIC = {"meter", "gram", "second", "liter", "metric_ton", "watt", "watt_hour", "joule", "calorie", "byte", "bit", "hertz",
@@ -356,6 +357,12 @@ def _expr(items: list) -> str:
 
 
 def _parse(t: str):
+    # 保护：链式幂（kg**2**3**4）、很大或非有限的指数会让 pint 算到挂死（幂塔 2**3**4**5 = 2**(3**1024)），先挡掉。
+    # 指数只许 -6..6、最多两位小数（kg**0.5 是开方），后面不能再接一个幂。
+    for m in EXPONENT.finditer(t):
+        e, tail = m.group(1), t[m.end():].lstrip()
+        if tail.startswith(("**", "^")) or not re.fullmatch(r"-?\d(?:\.\d{1,2})?", e.replace(" ", "")) or abs(float(e.replace(" ", ""))) > 6:
+            raise _Bad("exponents must be numbers between -6 and 6 with at most 2 decimals, with no chained powers (e.g. 'm**2', 'km^2')")
     alt = sorted({w.lower() for w in re.findall(r"[^\W\d]+", t)} & ALTERNATIVES)
     if alt:
         raise _Bad(f"{alt[0]!r} gives alternatives; pin exactly one unit")

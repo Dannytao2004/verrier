@@ -26,13 +26,14 @@ from . import compute as C
 from . import discrete as D
 from . import jev as J
 from . import published as PB
+from . import qty as Q
 from .markets import search_markets
 from .outputs import basis_text
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
 from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
                       DISCRETE_OUTCOMES_GIVEN, DISCRETE_REVISE, DISCRETE_REVISE_DONE, EXTRA_RULE_R1, EXTRA_RULE_R2,
                       FINAL_SYSTEM, FINAL_USER, FINAL_USER_DISCRETE, JUDGE_SYSTEM, JUDGE_USER, METHODS_SPEC, PLAN_SYSTEM,
-                      PLAN_USER)
+                      PLAN_UNIT_RETRY, PLAN_USER)
 
 CATEGORIES = {"own_history", "related_series", "physical_flow", "capacity_consumption", "administrative", "attention",
               "shocks", "persona", "forecasts_markets", "base_rates"}
@@ -425,16 +426,59 @@ def audit_methods(llm, qid: str, jr: dict, out: dict, av: dict, pts: list, faile
     return res
 
 
+def _pin_unit(t) -> tuple:
+    """U1：plan 回复里 target.unit_canonical 的检查。返回 (单位原文, 错误)；错误为 "" 表示 qty 能把它解析成一个单位。
+    缺失、不是字符串、解析不了、几个候选（or、逗号）都是错误；错误是一句英文，重问规划时附在 prompt 后面，也写进 plan note。"""
+    v = t.get("unit_canonical") if isinstance(t, dict) else None
+    if v is None or (isinstance(v, str) and not v.strip()):
+        return "", "target.unit_canonical is missing"
+    if not isinstance(v, str):
+        return "", f"target.unit_canonical must be one unit written as a string, not {dumps(v)[:200]}"
+    if len(v.strip()) > 80 or "\n" in v.strip():
+        return "", "target.unit_canonical must be one short unit on one line (at most 80 characters), e.g. 't/day'"
+    _, err = Q.parse_unit(v.strip())
+    return ("", f"target.unit_canonical: {err}") if err else (v.strip(), "")
+
+
+# allow_discrete=False（run.prepare_run：有真值、没标 discrete 的题）时规划选了离散目标：plan note 原文，和 U1 之前相同
+_AS_CONTINUOUS = ("plan chose a discrete target, but this scored question is not marked outcome_type 'discrete'; "
+                  "treated as continuous")
+# 这种情况下单位错误后面加的一句（重问 prompt 和 plan note 里都有）：PLAN_USER 让离散目标留空 unit_canonical，要讲清为什么要它
+_NEEDS_CONTINUOUS = ('; this question needs a continuous number, so outcome_type must be "continuous" and '
+                     'target.unit_canonical must be given')
+
+
 def build(ctx: Context):
     b = ctx.budget
     ablate = bool(getattr(ctx, "ablate_own_history", False))
 
+    def target_kind(out: dict) -> tuple:
+        kind, note = D.parse_outcome_type(out.get("target") if isinstance(out.get("target"), dict) else {})
+        if kind["outcome_type"] == "discrete" and not getattr(ctx, "allow_discrete", True):   # 见 run.prepare_run
+            kind, note = {"outcome_type": "continuous"}, _AS_CONTINUOUS
+        return kind, note
+
+    def pin(out: dict) -> tuple:   # U1：连续目标要钉死 unit_canonical，离散目标不要（("", "")）
+        kind, note = target_kind(out)
+        if kind["outcome_type"] == "discrete":
+            return "", ""
+        unit, err = _pin_unit(out.get("target"))
+        return unit, (err + _NEEDS_CONTINUOUS if err and note == _AS_CONTINUOUS else err)
+
     def plan(state: AgentState):
         notes = []
+        user = PLAN_USER.format(question=state["question"], as_of=state["as_of"], checklist=CHECKLIST)
         try:
-            out, err = ctx.llm.ask(PLAN_SYSTEM, PLAN_USER.format(question=state["question"], as_of=state["as_of"],
-                                                                checklist=CHECKLIST), role="plan", qid=ctx.qid,
-                                   max_tokens=MAX_TOKENS["plan"])
+            out, err = ctx.llm.ask(PLAN_SYSTEM, user, role="plan", qid=ctx.qid, max_tokens=MAX_TOKENS["plan"])
+            unit, unit_err = pin(out) if out is not None else ("", "")
+            if unit_err:   # U1：带着错误重问一次（只问一次）
+                out2, _ = ctx.llm.ask(PLAN_SYSTEM, user + PLAN_UNIT_RETRY.format(error=unit_err), role="plan", qid=ctx.qid,
+                                      max_tokens=MAX_TOKENS["plan"], tries=1)
+                unit2 = pin(out2)[0] if out2 is not None else ""
+                # 重问的回复钉住了单位、又是一份能用的规划（至少一个 dict 方向）才换掉第一份；否则沿用第一份和它的单位错误。
+                # 离散目标的 pin 是 ("", "")，所以重问也不能把连续题改成离散题
+                if unit2 and isinstance(out2.get("directions"), list) and any(isinstance(d, dict) for d in out2["directions"]):
+                    out, unit, unit_err = out2, unit2, ""
         except BudgetExceeded as e:
             return {"aborted": str(e), "plan": {}, "directions": []}
         if out is None:
@@ -455,13 +499,15 @@ def build(ctx: Context):
             notes.append("no own_history direction in plan")
         target = {k: str((out.get("target") or {}).get(k, ""))[:300]
                   for k in ("what", "unit", "period_start", "period_end", "publisher", "cadence", "caveats")}
-        kind, note = D.parse_outcome_type(out.get("target") if isinstance(out.get("target"), dict) else {})
-        if kind["outcome_type"] == "discrete" and not getattr(ctx, "allow_discrete", True):   # 见 run.prepare_run
-            kind, note = {"outcome_type": "continuous"}, ("plan chose a discrete target, but this scored question is not "
-                                                          "marked outcome_type 'discrete'; treated as continuous")
+        kind, note = target_kind(out)
         target.update(kind)
         if note:
             notes.append(note)
+        if kind["outcome_type"] != "discrete":
+            if unit_err:   # 不中止：这次运行不做量纲检查（U2），终稿写明没有钉死单位（U4）
+                notes.append(f"unit not pinned: {unit_err}; unit checks off")
+            else:
+                target["unit_canonical"] = unit
         kws = [str(k).lower()[:30] for k in (out.get("market_keywords") or [])][:3]
         return {"plan": {"target": target, "market_keywords": kws, "candidates": cands}, "directions": dirs,
                 "plan_notes": notes}
