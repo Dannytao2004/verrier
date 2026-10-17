@@ -1,6 +1,6 @@
 """HTTP：统一 User-Agent；每个 host 两次请求的开始时间至少隔 1 秒（Wayback 1.5 秒且单连接；robots.txt 给了更长的
 Crawl-delay 就按它）；robots.txt 用我们自己的 UA 去取并遵守，取的时候跟随重定向，按 (scheme, host) 缓存；
-页面重定向手动跟随（每一跳都过 robots 和限速）；gzip/deflate 由代码解压；连接失败退避重试。只用标准库。"""
+页面重定向手动跟随（每一跳都过 robots 和限速）；gzip/deflate/zstd 由代码解压；连接失败退避重试。只用标准库。"""
 import gzip
 import threading
 import time
@@ -13,6 +13,7 @@ import zlib
 UA = "triangulate-agent/0.1 (research prototype)"
 MIN_INTERVAL_S = 1.0
 MAX_BYTES = 6_000_000
+ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"   # zstd 帧开头的 4 个字节（RFC 8878）
 # 第一次运行时 Wayback 在并发请求下出现过连接被拒（WinError 10061），所以对它单连接、间隔放宽到 1.5 秒
 HOST_INTERVAL = {"web.archive.org": 1.5}
 HOST_CONCURRENCY = {"web.archive.org": 1}
@@ -74,8 +75,15 @@ class Blocked(RuntimeError):
 
 
 def decompress(body: bytes, headers: dict) -> bytes:
-    """Wayback 的 id_ 原样返回网站当年的字节，可能是 gzip 压缩的（即使我们请求 identity）。按头或魔数解压。"""
+    """Wayback 的 id_ 原样返回网站当年的字节，可能是 gzip 压缩的（即使我们请求 identity）。按头或魔数解压。
+    zstd 只认魔数（缓存的 .json 里没存 Content-Encoding），用标准库 compression.zstd（Python 3.14+）。解不开就原样返回。"""
     enc = (headers.get("Content-Encoding") or "").lower()
+    if body[:4] == ZSTD_MAGIC:
+        try:
+            from compression import zstd
+            return zstd.decompress(body)
+        except Exception:  # noqa: BLE001  坏数据（ZstdError）或 Python < 3.14 没有这个模块：同 gzip 失败，原样返回
+            return body
     try:
         if "gzip" in enc or body[:2] == b"\x1f\x8b":
             return gzip.decompress(body)

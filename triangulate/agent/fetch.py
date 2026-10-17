@@ -28,6 +28,12 @@ CDX = "https://web.archive.org/cdx/search/cdx"
 SNAP_TS = re.compile(r"/web/(\d{14})id_/")
 URL_DATE = re.compile(r"(?<!\d)((?:19|20)\d{2})[/_-]?(0[1-9]|1[0-2])[/_-]?(0[1-9]|[12]\d|3[01])?(?!\d)")
 TEXT_TYPES = ("text/html", "application/xhtml", "text/plain", "text/csv")
+CHARSET = re.compile(r"charset=[\"']?([\w-]+)", re.I)   # HTTP 头；N28：charset="Shift_JIS" 这种带引号的也认
+META_CHARSET = re.compile(rb"<meta[^>]+charset\s*=\s*[\"']?\s*([\w-]+)", re.I)   # <meta charset=…> 和 http-equiv 的 content 都认
+PRINTABLE_ASCII = bytes(range(0x20, 0x7F))   # _ascii_compatible 用：95 个可打印 ASCII 字节
+# UTF-8 BOM 用 utf-8 解（BOM 字符留在开头，和旧版按 utf-8 解的结果相同）；UTF-16 由 codec 按 BOM 认字节序
+BOMS = ((b"\xef\xbb\xbf", "utf-8"), (b"\xff\xfe", "utf-16"), (b"\xfe\xff", "utf-16"))
+FFFD_MAX = 0.01   # U+FFFD 超过全文 1% 判 undecodable（_to_text）；_decode 的 utf-8 一步用同一个阈值
 
 
 def _key(s: str) -> str:
@@ -118,13 +124,47 @@ def page_dates(url: str, html: str) -> list:
     return out
 
 
-def _decode(body: bytes, headers: dict) -> str:
-    ct = headers.get("Content-Type", "") or ""
-    m = re.search(r"charset=([\w-]+)", ct, re.I)
+def _clean(s: str) -> bool:
+    return s.count("\ufffd") <= FFFD_MAX * max(len(s), 1)
+
+
+def _ascii_compatible(enc: str) -> bool:
+    """meta 一步用：meta 是 bytes 正则在 ASCII 字节里匹配到的，声明 UTF-16/32、EBCDIC 就一定是错的（WHATWG 的 prescan
+    也是 meta 写 UTF-16 就按 UTF-8）；UTF-7 会把正文里的「+2.1%」解坏。照这些声明解只会把旧版能解对的页解坏。
+    判据：这个编码解可打印 ASCII 必须原样。"""
     try:
-        return body.decode(m.group(1) if m else "utf-8", "replace")
-    except LookupError:
-        return body.decode("utf-8", "replace")
+        return PRINTABLE_ASCII.decode(enc) == PRINTABLE_ASCII.decode("ascii")
+    except (LookupError, UnicodeError):
+        return False
+
+
+def _decode(body: bytes, headers: dict) -> str:
+    """字节 → 文字。顺序：HTTP 头的 charset（允许引号）→ BOM → 前 4 KB 的 <meta charset> / http-equiv →
+    utf-8（U+FFFD 不超过 FFFD_MAX 才用）→ 自动探测（trafilatura.utils.detect_encoding，内部是 charset_normalizer；
+    只用第一个 Python 认识的猜测）→ 都不行返回 utf-8 replace 的结果，由 _to_text 判 undecodable。
+    声明的编码 Python 不认识就看下一步；meta 给的编码和 ASCII 不兼容（_ascii_compatible）也不用。
+    头里有 Python 认识的 charset 的页面、没有任何声明且按 utf-8 本来就干净的页面，结果和旧版相同。"""
+    m = CHARSET.search(headers.get("Content-Type", "") or "")
+    declared = [m.group(1)] if m else []
+    declared += [enc for bom, enc in BOMS if body.startswith(bom)][:1]
+    m = META_CHARSET.search(body[:4096])
+    if m and _ascii_compatible(m.group(1).decode("ascii")):
+        declared.append(m.group(1).decode("ascii"))
+    for enc in declared:
+        try:
+            return body.decode(enc, "replace")
+        except (LookupError, UnicodeError):
+            continue
+    utf8 = body.decode("utf-8", "replace")
+    if _clean(utf8):
+        return utf8
+    from trafilatura.utils import detect_encoding
+    for enc in detect_encoding(body):
+        try:
+            return body.decode(enc, "replace")
+        except (LookupError, UnicodeError):
+            continue
+    return utf8
 
 
 def _to_text(body: bytes, headers: dict) -> tuple:
@@ -132,7 +172,7 @@ def _to_text(body: bytes, headers: dict) -> tuple:
     if ct and not ct.startswith(TEXT_TYPES):
         return None, f"unsupported content type {ct.split(';')[0]}"
     raw = _decode(body, headers)
-    if raw.count("\ufffd") > 0.01 * max(len(raw), 1):
+    if not _clean(raw):
         return None, "undecodable content (binary or unsupported encoding)"
     if ct.startswith(("text/plain", "text/csv")):
         return raw, ""
