@@ -124,13 +124,11 @@ def _clean(s: str) -> bool:
 
 
 def _sniff(body: bytes):
-    """没有任何声明时的自动探测：整页是合法 UTF-8 就用 utf-8，否则用 charset_normalizer 的最佳猜测（猜不出返回 None，
-    html_to_unicode 退回 utf-8）。"""
-    try:
-        body.decode("utf-8")
+    """没有任何声明时的自动探测：按 utf-8 解、U+FFFD 不超过 FFFD_MAX 就用 utf-8（夹了几个坏字节的 utf-8 页仍按 utf-8，
+    v2.6f1 要求整页严格合法时，这种页会被 charset_normalizer 猜成 mac_iceland 之类、负号「−」变成乱码）；否则用
+    charset_normalizer 的最佳猜测（猜不出返回 None，html_to_unicode 退回 utf-8）。"""
+    if _clean(body.decode("utf-8", "replace")):
         return "utf-8"
-    except UnicodeDecodeError:
-        pass
     from charset_normalizer import from_bytes
     best = from_bytes(body).best()
     return best.encoding if best else None

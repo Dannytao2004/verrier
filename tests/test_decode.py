@@ -95,6 +95,43 @@ class TestDecodeOrder(unittest.TestCase):
         html = page(body="期間：1月～3月、増減－343人")
         self.assertEqual(_decode(html.encode("cp932"), {"Content-Type": "text/html; charset=Shift_JIS"}), html)
 
+    def test_undeclared_utf8_with_a_few_bad_bytes_stays_utf8(self):
+        # v2.6f2：没有声明、夹了几个坏字节的 utf-8 页仍按 utf-8（坏字节处出 U+FFFD），不交给探测；
+        # v2.6f1 要求整页严格合法，这种页会被猜成 mac_* 之类，「−2.1%」的负号变成乱码
+        text = "<p>Passenger numbers fell −2.1% to 6,912,345 – “the weakest July” €.</p>" * 12
+        b = page(body=text).encode("utf-8")
+        b = b[:300] + b"\xff" + b[300:600] + b"\xfe\xfd" + b[600:]
+        with self.NO_DETECT:
+            got = _decode(b, {"Content-Type": "text/html"})
+        self.assertEqual(got, b.decode("utf-8", "replace"))
+        self.assertIn("−2.1%", got)
+
+    def test_single_quoted_header_charset_is_not_a_charset(self):
+        # 和浏览器一致：charset='Shift_JIS'（单引号）不是合法的 MIME 参数写法，不当作声明；几乎全 ASCII 的页按 utf-8 解
+        # （v2.6e 也是这样；v2.6f 的手写正则曾认它）。改成认单引号要另写解析，按用户的要求不在 w3lib 外再加规则
+        b = page(body="Population report " * 40 + "東京都").encode("shift_jis")
+        self.assertEqual(_decode(b, {"Content-Type": "text/html; charset='Shift_JIS'"}), b.decode("utf-8", "replace"))
+
+    def test_meta_utf7_ignored(self):
+        # w3lib 不认 utf-7 这个 label（WHATWG 也没有）：「+2.1%」不会被 utf-7 解坏。升级 w3lib 时这条是防线
+        for meta in ('<meta charset="utf-7">', '<meta charset="u7">'):
+            html = page(meta, "<p>Heathrow handled 6,912,345 passengers in July 2026, up +2.1% on last year.</p>" * 6)
+            with self.subTest(meta=meta):
+                got = _decode(html.encode("utf-8"), {"Content-Type": "text/html"})
+                self.assertEqual(got, html)
+                self.assertIn("+2.1%", got)
+
+    def test_meta_only_in_first_4kb(self):
+        # 干净的 utf-8 页、正文有非 ASCII 字符：前 4 KB 内的 meta（latin-1，w3lib 按 WHATWG 换成 cp1252）照用，4 KB 之后的不看
+        text = "<p>Fares rose 3.4% – to €12.50 per trip.</p>" * 3
+        pad = "<!-- pad -->" * 400
+        far = f'<html><head>{pad}<meta charset="iso-8859-1"></head><body>{text}</body></html>'.encode("utf-8")
+        near = f'<html><head><meta charset="iso-8859-1">{pad}</head><body>{text}</body></html>'.encode("utf-8")
+        self.assertGreater(far.find(b"<meta"), 4096)
+        self.assertLess(near.find(b"<meta"), 4096)
+        self.assertEqual(_decode(far, {"Content-Type": "text/html"}), far.decode("utf-8"))
+        self.assertEqual(_decode(near, {"Content-Type": "text/html"}), near.decode("cp1252", "replace"))
+
 
 class TestToText(unittest.TestCase):
     def test_shift_jis_meta_page_now_has_text(self):
