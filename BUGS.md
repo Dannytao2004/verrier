@@ -1,4 +1,4 @@
-# BUGS：当前全部已知问题（2026-10-16 整理，代码 v2.5.2 + showcase 臂；10-16 晚、10-17 凌晨按第一轮修复的结果更新状态，代码 v2.6g）
+# BUGS：当前全部已知问题（2026-10-16 整理，代码 v2.5.2 + showcase 臂；10-16 晚、10-17 凌晨按第一轮修复的结果更新状态，代码 v2.6g；10-17 补 Q 节：v2.7 的 U0，没提交）
 
 只做整理，没改代码、没重跑。来源：NEXT.md、SHOWCASE.md 的记录，加上 2026-10-16 对 showcase1 结果和代码的检查。
 「新」= 这次检查新发现（证据是这次跑的离线查询）；「记」= 以前已经记录（NEXT.md / SHOWCASE.md 有详细说明，当时对着代码核实过）。
@@ -152,7 +152,7 @@ S6 `test_leak_guard`、S7 `test_final_text`、S8 `test_cjk_numbers` 24 个、S9 
 
 | # | 严重度 | 问题 | 证据 / 出处 | 状态 |
 |---|---|---|---|---|
-| R1 | 中 | 观测点一侧的百分数 unit 只有精确的 `"%"` 才除以 100：已存 4691 个点里 771 个的 unit 是别的百分数写法（`percent` 593 个……），`fc_jnto_2026_08/v21` 第 2 轮 m3 就是因为 p36（9.6 percent）没除以 100 而失败（开发运行）。但 FOMC 的目标本身是 percent per annum，点一侧不能一律按 is_pct 除 | `compute.py` formula_mc 的点分支；`probes/out/stages/S2.md` 第 6 节第 1 条 | 没改：要先定点的 unit 规则 |
+| R1 | 中 | 观测点一侧的百分数 unit 只有精确的 `"%"` 才除以 100：已存 4691 个点里 771 个的 unit 是别的百分数写法（`percent` 593 个……），`fc_jnto_2026_08/v21` 第 2 轮 m3 就是因为 p36（9.6 percent）没除以 100 而失败（开发运行）。但 FOMC 的目标本身是 percent per annum，点一侧不能一律按 is_pct 除 | `compute.py` formula_mc 的点分支；`probes/out/stages/S2.md` 第 6 节第 1 条 | 没改：要先定点的 unit 规则。v2.7 的 U2（`UNITS_PLAN.md` 的百分数守卫）计划处理，U2 还没开始；接入时注意 Q5 |
 | R2 | 中（潜在） | 点 id 和区间占位符同名：点 p10 / p90 的值占位符是 `[[p10_value]]` / `[[p90_value]]`，而 `[[p10]]` / `[[p90]]` 是区间上下限。模型写 `[[p10]]` 想指点 p10 时会渲染成区间 P10，数字错而且没有提示。已存运行里只有 `fc_kr_births_2026_08/showcase1` 会碰上 | S7.md 第 8 节第 6 条 | 没改：改名等于改终稿的输入输出约定（G2 还要再变），下一轮再定 |
 | R3 | 低 | F1 剩下的来源：ISO 日期仍被清洗成 `2026-[n]-[n]`（已存终稿 116 个 `[n]` 里 18 个来自日期）；贴着字母数字的年份（`FY2025`）照旧被清洗，prompt 没写这一点 | S7.md 第 8 节第 7、8 条 | 没改（D4 没覆盖日期） |
 | R4 | 低 | URL 在右括号处被截断（`agent/search.py` 的 `URL_RE` 排除了 `)`），IRMA 的两个 URL 只剩半截；对取页的影响未核实 | S4.md 第 7 节第 2 条 | 没改 |
@@ -171,6 +171,23 @@ S6 `test_leak_guard`、S7 `test_final_text`、S8 `test_cjk_numbers` 24 个、S9 
 | R17 | 低 | 中日韩数字仍会读错或误丢的已知写法：「兆」后面的 SI 单位只认 瓦 / 赫 / 帕 / 焦 / 字节 / 比特；中日文段间有空格（「1億 3000万人」）不连读；韩文「조」也是「条」（「제3조 2항」）；数字后隔一个空格接 만 / 억 / 조 开头的韩文词（「2024 조사」）会被当成一截丢掉（相对 v2.6d 是回归，缓存页 0 处）；页面级「（単位：万人）」表头、「成」、「千分之」没处理 | S8.md 第 8 节第 2、3、7 条 | 没改（多数写法在缓存页里 0 处；区分「29 만 명」和「2024 조사」要靠词表） |
 | R18 | 低 | 页面解码的残余情况（`v2.6f1`）：(1) 头里单引号的 charset（`charset='Shift_JIS'`）w3lib 不认，几乎全 ASCII 的 Shift_JIS 页在 v2.6f1 会被自动探测猜成 cp1250，`v2.6h` 起按 utf-8 解（和 v2.6e、浏览器相同，日文处是 U+FFFD）；日文为主的页由探测解对；双引号和不带引号的写法都认。另：没有声明、夹了几个坏字节的 utf-8 页在 v2.6f1 会被猜成 mac_* 编码，`v2.6h` 已修（S9c）。(2) 自动探测的猜测质量一般：小段 cp1252 法文也被猜成 cp1250，重音字母错、ASCII 数字不错。(3) 页面其实是 UTF-8、头里没 charset、meta 写错（如 iso-8859-1）时按 meta 解成乱码（v2.6e 解对），这和浏览器的做法相同。缓存 286 个快照的头里没有带引号的 charset，也没有 (3) 这种页面；S9 时没有缓存页走到 charset 探测（v2.6f1 没重新统计） | 收尾时离线核对 `probes/out/_docs_r2_check.py`；`probes/out/_rev_s9b/edges.out`、`edges2.out`；S9.md 第 8 节 | 没改（(3) 要用户定） |
 | R19 | 低 | S10 遗留：`llm.json_call`、`Searcher.search`、`DirectClient.call` 的 `except HTTPError` 没有关闭响应，走到 3xx / 4xx / 5xx 时有 `ResourceWarning`（G1 输出里 5 条，不是失败，原来就有的写法，以前没有测试走到）；`llm.py` 新加的 `_NoRedirect` 和 `agent/net.py` 取页用的同名类重复，没有合并 | S10.md 第 6 节 | 没改（属于 N3「HTTP 客户端统一」；合并要挪 `net.py`，是重构） |
+
+## Q. v2.7 单位轮新发现、没改的问题（`triangulate/agent/qty.py`，来自 U0 阶段报告第 8、9 节和第三轮审查；U0 没提交，代码只在工作区）
+
+qty 还没接入任何流程，下面的问题现在都不影响运行结果；U1 / U2 接入以后才会出现。
+
+| # | 严重度 | 问题 | 证据 / 出处 | 状态 |
+|---|---|---|---|---|
+| Q1 | 低 | `/` 后面的比率基数检查漏了连字符写法：`USD/1000-person` → `0.001 USD * person`、`birth/1000-person` → `0.001 birth * person`、`USD/1-person` → `USD * person`（悄悄读成乘法），同一个串用 per 写是 `0.001 USD / person`；`USD/1000 people` 已经报错。原因是 `_number` 不看下一项是不是 `('op', '-')`，`_expr` 把数字后的 `-` 变成 `*`。量纲变了，下游一般报不符、不会悄悄算错 | 第三轮审查 `probes/out/_rev_u0r3/probe1.py`、`slash_vs_per.py`（5450 对里 112 对不同）；`qty.py:265`、`:329` | 没改：U0 收尾要修（审查推荐把 `_number` 的检查扩大到 `('op', '-')`，测试补这两个写法，改 docstring 和 U0.md 的说法） |
+| Q2 | 低 | 单数化有错，不完整，举例如下：cookies → cooky、movies → movy、series → sery、species → specy、buses → buse、caches → cach、headaches → headach；us / is 结尾不去 s（taxis、menus、kiwis、skis 不变）；knives → knive、lives → live、potatoes → potatoe、heroes → heroe、gas → ga、news → new、lens → len。只在同一个名词单复数混用时报名词不符，不会算错数 | U0.md 第 9 节第 1 条；第三轮审查 `probe1.py` | 没改；U1 / U2 的 prompt 可以要求计数名词一律写单数 |
+| Q3 | 低 | 量纲对、系数和某些用法不同、qty 照 pint 读的写法（会悄悄算错，费米题里少见），不完整，举例如下：gallon / pint / quart / cup 是美制（英制 gallon 大 20%）；`oz` 是常衡 28.35 g，不是金衡 31.10 g；`nm` 是纳米，不是海里；`hp` 是机械马力；`month` 是 30.4375 天的平均月；`B` 是 byte（系数 8），当「十亿」写会差 8 倍 | U0.md 第 9 节第 2 条 | 没改（不要画蛇添足）；U2 的 AUDIT「单位是否和证据一致」可以顺带看 |
+| Q4 | 低 | pint 把计数名词或缩写读成物理单位：前后写法一致时数字对、只是名字怪；混用时报错文字里出现 parsec、pint 这类名字，修正轮可能看不懂。不完整，举例如下：EV / TV / PV = exavolt / teravolt / petavolt，`kt` = knot，`pcs` = parsec，`pt` / `pts` = pint，hands、leagues、links（长度），sections（面积），stones、grains（质量），barns | U0.md 第 9 节第 3 条 | 没改；U1 / U2 的 prompt 可以要求计数名词用小写英文单词（vehicle、television、piece） |
+| Q5 | 中（潜在，U2 接入后才会出现） | 百分数可能被除两次：`compute.run` 已对 unit 正好是 `"%"` 的点除以 100，`assumptions.effective_range` 已对 `is_pct` 的假设除以 100；U2 再按方法里写的 `percent` 乘 `base_factor` = 0.01，这两类输入差 100 倍。披萨的 p84（`% of population`）compute 没除，乘 0.01 正好对 | U0.md 第 9 节第 4 条；和 R1 同源 | 没改：U2 开工前要先定代码已经换算过的输入按什么单位算 |
+| Q6 | 低 | 单位显示不好看：short_ton 显示成 `ton`，quarter、decade 显示成 `quarter_year`、`decade_year`，倍数不是 1 的倒数单位显示成 `1000 1 / kilogram` | U0.md 第 9 节第 5 条 | 没改（`text()` 只影响显示；U4 显示单位时要注意） |
+| Q7 | 低 | 自动定义的计数名词存在模块级注册表里，进程内越积越多（每个词一个基本维度）；解释和解析顺序无关（有测试钉住） | U0.md 第 9 节第 6 条 | 没改 |
+| Q8 | 低 | `per mille` 被当成计数名词 mille（`1 / mille`），不是 permille；和别的单位混用报量纲不符，不会悄悄算错。`per mil` 报错（mil 在 pint 里是角度单位） | U0.md 第 9 节第 7 条 | 没改（审查没要求映射） |
+| Q9 | 低 | 有些写法的报错原样带出 pint 的异常类名，可读性一般，不完整，举例如下：`kg^`、`s^-`（`DefinitionSyntaxError: missing operand`）、`1/0`、`per 0 people`（`ZeroDivisionError`）、`kg^kg`（`DimensionalityError`）、`per 00 **`（`AssertionError`，没有说明文字）、`year^11000`（`OverflowError`）。另外 `g e` 的报错写的是并成一个词后的 `g_e`；`2015 USD` 的理由「the value is already scaled」对不变价美元不完全贴切（给的改法是对的）。这些写法都不会被当成合法单位 | U0.md 第 7 节 G6；`probes/out/u0/r3/fuzz2_new.txt` | 没改（不要画蛇添足） |
+| Q10 | 低 | requirements.txt 只加了 `pint==0.26.1`，pint 的依赖 `flexcache==0.3`、`flexparser==0.4`、`platformdirs==4.13.3` 已装在 .venv、没写进去，新环境装出来的版本不一定相同 | U0.md 第 8 节第 5 条；第三轮审查（排序后对比 `pip freeze`） | 没改：等用户定 |
 
 ## H. 我的做事方式（这些低级错误的来源）
 

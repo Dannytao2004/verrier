@@ -82,13 +82,15 @@
 
 ## 阶段（每个阶段一个 tag；门槛同 FIX_PLAN.md 第 4 节 G1–G8）
 
-| 阶段 | tag | 内容 | G2（prompt sha256） |
-|---|---|---|---|
-| U0 | `v2.7a` | `agent/qty.py` 和单元测试；requirements.txt 加 pint。不接入任何流程 | 不变 |
-| U1 | `v2.7b` | 规划钉死单位（prompt、代码检查、重问一次、plan note） | 变，登记 |
-| U2 | `v2.7c` | formula_mc 量纲检查和单位换算、百分数守卫、常数单位、AUDIT 加单位一项、JUDGE / METHODS_SPEC 的说明和回复示例 | 变 |
-| U3 | `v2.7d` | 方法层覆盖范围（coverage、合并排除、修正提示、sum 的假设上限、AUDIT 加覆盖一项） | 变 |
-| U4 | `v2.7e` | 显示单位（终稿 `[[unit]]`、控制台、经典界面、ledger、graph.html、results JSON） | 变 |
+| 阶段 | tag | 内容 | G2（prompt sha256） | 状态（2026-10-17） |
+|---|---|---|---|---|
+| U0 | `v2.7a` | `agent/qty.py` 和单元测试；requirements.txt 加 pint。不接入任何流程 | 不变 | 受阻：代码在工作区，没提交、没打 tag；第三轮审查退回 2 条低、1 条信息（见下面「结果」） |
+| U1 | `v2.7b` | 规划钉死单位（prompt、代码检查、重问一次、plan note） | 变，登记 | 未开始 |
+| U2 | `v2.7c` | formula_mc 量纲检查和单位换算、百分数守卫、常数单位、AUDIT 加单位一项、JUDGE / METHODS_SPEC 的说明和回复示例 | 变 | 未开始 |
+| U3 | `v2.7d` | 方法层覆盖范围（coverage、合并排除、修正提示、sum 的假设上限、AUDIT 加覆盖一项） | 变 | 未开始 |
+| U4 | `v2.7e` | 显示单位（终稿 `[[unit]]`、控制台、经典界面、ledger、graph.html、results JSON） | 变 | 未开始 |
+
+状态的写法：「完成 `tag`」= 过了 G1–G8 并打了 tag；「受阻」= 停在审查，没提交；「未开始」。
 
 每个阶段除了 G1–G8，还要：
 - 用假模型跑一遍完整的图（同 `tests/test_web.py` 的 FakeLLM），新字段齐全时能出数；
@@ -96,6 +98,52 @@
   - U2 之后 m1 得到约 64.8 吨/天、m2 约 59.9 吨/天；
   - U3 之后 m3 被排除在合并之外；把 m2、m3 合成一个 sum 方法（按本文件的规则补上 other 的假设）可以出数。
 - 回归表（G3）：已存运行重算的结果和上一个 tag 逐行相同（旧运行走 `require_units=False`）。
+
+## 结果（2026-10-17，这一轮停在 U0）
+
+**没有阶段完成。** U0 做了三轮（每轮之后独立审查），第三轮审查停在 verify，退回 2 条低、1 条信息；没有 commit，没有 tag，`v2.7a`–`v2.7e` 都不存在。
+工作区里 U0 的文件：`triangulate/agent/qty.py`（新，sha256 `fe60a967e58e…`）、`tests/test_qty.py`（新，28 条，`39d05ed72be8…`）、
+`requirements.txt`（加 `pint==0.26.1`，`b676b6eac5c0…`）。现有代码没有一处 import `qty`，**agent 的行为和 web-v0.5 完全相同**：
+披萨题现在重跑，终稿仍然没有单位、m1 的 11 % 仍然不除以 100、m3 仍然和全量路线等权平均。
+第三轮代码的门槛（U0.md 第 7 节）：G1 374 个测试全过（改前 346）；G2 `bbcfa3b1…` 不变；G3 41 行 0 差异；G5 `showcase.build()` 逐字节相同；G7 冻结路径 diff 为空。
+
+**第三轮审查退回的问题**（U1 之前要先处理）：
+1. （低）`/` 后面的比率基数检查漏了连字符写法：`USD/1000-person` → `0.001 USD * person`、`USD/1-person` → `USD * person`（悄悄变成乘法），
+   而 `USD per 1000-person` → `0.001 USD / person`；`USD/1000 people` 已经报错。审查用 `probes/out/_rev_u0r3/slash_vs_per.py` 比了 5450 对，112 对不同，
+   全是「数字-单位」这一类。审查推荐的改法：`_number` 把 `/` 后的检查扩大到下一项是 `('op', '-')`，测试里加 `USD/1000-person`、`USD/1-person`，
+   重跑 G1 和变异检查，qty.py 模块 docstring 和 U0.md 第 2 节的说法跟着改。量纲变了，下游一般会报不符，不会悄悄算错。
+2. （低）U0.md 第 9 节第 1 条「单数化的已知错误」没标「不完整」，漏了 taxis（不变）、menus、knives → knive、potatoes → potatoe、gas → ga、news → new 等。
+3. （信息）requirements.txt 只加了 pint，pint 的依赖 `flexcache==0.3`、`flexparser==0.4`、`platformdirs==4.13.3` 已装在 .venv、没固定。要不要补，等用户定。
+
+**披萨题的数字**（`tests/test_qty.py` 的 `TestPizzaFixtures`，用字面值重建，不读 results/；2026-10-17 在工作区重跑 `tests.test_qty` 28 条 OK，
+数字用 `probes/out/docs_v27/_pizza_numbers.py` 按同样的夹具打印）：
+
+| 路线 | qty 推导的公式单位 | 吨/天（P10..P90） | `_pizza_tonnes.py` |
+|---|---|---|---|
+| m1 消费侧 `a*b*c*d*e` | gram * percent / day | 64.79（30.9..135.5） | 64.8 |
+| m2 餐馆 `a*b/c*d` | kilogram / year | 59.89（29.5..120.8） | 59.9 |
+| m3 冷冻 `a*b/c*d` | kilogram / year | 22.29（10.2..48.6） | 22.3 |
+| 餐馆 + 冷冻，一个公式 | kilogram / year | 86.18（47.1..156.1） | 86.2 |
+| `methods.combine(m1, 餐馆 + 冷冻)` | | 74.72，80% [35.67, 156.53]，monte_carlo | 74.7 |
+
+这些数是**测试自己**做了 U2、U3 该做的事得到的：输入先按 `PIZZA_UNITS` 乘 `base_factor` 换到基本单位，再交给现有的 `compute.run`（不认单位），
+结果除以 `base_factor('t/day')`；「餐馆 + 冷冻」用了 5 个假设，测试里临时把 `MAX_PER_METHOD` 放宽到 5（U3 的 sum 方法才会放宽）。
+所以它证明的是 qty 的单位推导和换算对，不证明流程里会这样算。「阶段」一节「每个阶段除了 G1–G8，还要」里的两条（U2 之后 m1、m2 出数；U3 之后 m3 被排除、sum 方法出数）
+要等 U2、U3 做完才能写成流程上的测试。
+
+**和计划的出入**（U0.md 第 8 节）：
+- 按字面值直接相乘，m1 是 65.748375 吨/天；64.8 是 MC 中位数（假设按 low / high 的 lognormal 采样，中位数是 sqrt(low × high)；a1、a2 的区间被代码放宽）。两种都写成了测试。
+- `convert_factor` 的报错是 `X cannot be converted to Y`；计划举的「formula gives …; target is …」由 U2 在 compute 里拼。
+- qty 的规则比「设计」一节多：拦住 pint 和常见用法不一致的读法（ton、mt、calorie、barrel、point、全大写缩写、无量纲但系数不是 1 的 degree / grade / turn 等、
+  非乘性单位）、单位前面的数字报错、`1.000` 报错、虚词和两个单词并排报错、quarter / decade 映射到 3 个月 / 10 年。
+- requirements.txt 只加 pint 一行（上面第 3 条）。
+
+**U2 开工前要定**（U0.md 第 9 节第 4 条）：`compute.run` 已经对 unit **正好是** `"%"` 的观测点除以 100，`assumptions.effective_range` 也已经对 `is_pct`
+的假设除以 100。U2 如果再按方法里写的 `percent` 乘 `base_factor = 0.01`，这两类输入会差 100 倍（披萨的 p84 原文是 `% of population`，compute 没除，乘 0.01 正好对）。
+要先定：代码已经换算过的输入按什么单位算。
+
+**还要真实运行才能知道的**：模型会不会写出能解析的 `unit_canonical`、input 的 `unit` 和 `coverage`；修正轮能不能看懂 qty 的报错文字并改对；
+披萨题重跑后的数字和终稿。真实运行每次约 $0.5，要用户批准；至少要 U1–U3 做完才有意义，要在控制台看到单位还要 U4。
 
 ## 不做
 
