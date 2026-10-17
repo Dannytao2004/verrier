@@ -25,6 +25,9 @@ function resultHref(qid, tag) { return `#/result?qid=${encodeURIComponent(qid)}&
 function fileHref(qid, tag, name) {
   return `/api/file?qid=${encodeURIComponent(qid)}&tag=${encodeURIComponent(tag || "")}&name=${name}`;
 }
+// v2.7e：估计值和区间后面的单位（钉死的 unit_canonical，没有就用 target.unit；结果页用 API 的 estimate.unit）；空串不显示
+function unitOf(t) { return t ? String(t.unit_canonical || t.unit || "") : ""; }
+function withUnit(u) { return u ? " " + esc(u) : ""; }
 function link(url, text) { return url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text || url)}</a>` : "—"; }
 const STATUS = {planning: "规划中", awaiting_approval: "等待确认方向", running: "运行中", done: "完成", failed: "失败", cancelled: "已取消"};
 function badge(st) { return `<span class="badge b-${esc(st)}">${esc(STATUS[st] || st)}</span>`; }
@@ -147,7 +150,7 @@ async function pageRun(id) {
   ${r.markets ? `<p class="muted">预测市场工具：${r.markets.n_markets} 个市场，${r.markets.n_points} 个点。${esc(r.markets.note || "")}</p>` : ""}` : ""}
   ${r.compute ? (r.compute.mode === "discrete" ? `<h2>计算结果（离散目标）</h2><p>最可能的结果 <b>${esc(r.compute.most_likely ?? "—")}</b>（${prob(r.compute.most_likely_prob)}）：
      ${(r.compute.outcomes || []).map(o => `${esc(o.label)} ${prob(o.prob)}`).join("；")}</p>` :
-    `<h2>计算结果</h2><p>估计 <b>${fmt(r.compute.central)}</b>，80% 区间 [${fmt(r.compute.p10)}, ${fmt(r.compute.p90)}]（${esc(r.compute.basis)}）</p>`) : ""}
+    `<h2>计算结果</h2><p>估计 <b>${fmt(r.compute.central)}</b>${withUnit(unitOf(r.target))}，80% 区间 [${fmt(r.compute.p10)}, ${fmt(r.compute.p90)}]${withUnit(unitOf(r.target))}（${esc(r.compute.basis)}）</p>`) : ""}
   ${r.calls && Object.keys(r.calls).length ? `<details><summary>calls.jsonl 里的调用（按 role）</summary><p class="small">
      ${Object.entries(r.calls).map(([k, v]) => `${esc(k)} × ${v}`).join("；")}</p></details>` : ""}`;
   if (picking) wireApproval(r);
@@ -254,8 +257,8 @@ async function pageResult(qid, tag) {
    · <a href="${fileHref(r.qid, r.tag, "ledger.md")}" target="_blank">证据账本 ledger.md</a></p>
   ${r.aborted ? `<div class="err">中止：${esc(r.aborted)}</div>` : ""}
   ${r.discrete ? discreteBlock(r.discrete, o) : `<div class="row">
-    <div class="card"><div class="muted">估计</div><div class="big">${fmt(e.central)}</div>
-      <div>80% 区间 [${fmt(e.p10)}, ${fmt(e.p90)}]</div><div class="muted small">区间依据 ${esc(e.basis)}${e.basis_text ? "：" + esc(e.basis_text) : ""} · 加权规则 ${esc(e.weight_rule)}</div></div>
+    <div class="card"><div class="muted">估计</div><div class="big">${fmt(e.central)}${e.unit ? ` <span class="muted">${esc(e.unit)}</span>` : ""}</div>
+      <div>80% 区间 [${fmt(e.p10)}, ${fmt(e.p90)}]${withUnit(e.unit)}</div><div class="muted small">区间依据 ${esc(e.basis)}${e.basis_text ? "：" + esc(e.basis_text) : ""} · 加权规则 ${esc(e.weight_rule)}</div></div>
     ${o ? `<div class="card"><div class="muted">官方值（只用于打分，agent 看不到）</div><div class="big">${fmt(o.answer_value)}</div>
       <div>误差 <b>${pct(o.pct_err)}</b> · 80% 区间盖住：${yesno(o.covered_80)}</div>
       <div class="muted small">公布 ${esc(o.released)} · ${link(o.source, "来源")}</div></div>` : ""}

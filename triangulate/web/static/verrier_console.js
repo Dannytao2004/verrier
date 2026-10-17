@@ -340,11 +340,14 @@
         <span><b>${esc(pts)}</b> ${T("points", "个点")}</span></span>
       ${d.stopped ? `<span class="fine">${esc(d.stopped)}</span>` : ""}</div>`;
   }
-  function computed(c) {
+  // v2.7e：估计值和区间后面的单位（钉死的 unit_canonical，没有就用 target.unit；结果用 API 的 estimate.unit）；空串不显示
+  const unitOf = t => t ? String(t.unit_canonical || t.unit || "") : "";
+  const bigUnit = u => u ? ` <span style="font-size:.4em;font-stretch:100%;letter-spacing:0">${esc(u)}</span>` : "";
+  function computed(c, u) {
     if (c.mode === "discrete") return `<h3 class="cx-h">${T("Computed · outcome probabilities", "代码计算 · 各结果的概率")}</h3>
       <div class="cx-big">${esc(c.most_likely ?? "—")}</div><p class="fine">${prob(c.most_likely_prob)} · ${(c.outcomes || []).map(o => `${esc(o.label)} ${prob(o.prob)}`).join(" · ")}</p>`;
-    return `<h3 class="cx-h">${T("Computed by code", "代码计算")}</h3><div class="cx-big">${fmt(c.central)}</div>
-      <p class="fine">80% model-based [${fmt(c.p10)}, ${fmt(c.p90)}] · ${esc(c.basis)}</p>`;
+    return `<h3 class="cx-h">${T("Computed by code", "代码计算")}</h3><div class="cx-big">${fmt(c.central)}${bigUnit(u)}</div>
+      <p class="fine">80% model-based [${fmt(c.p10)}, ${fmt(c.p90)}]${u ? " " + esc(u) : ""} · ${esc(c.basis)}</p>`;
   }
   function wireCancel(r) {
     const c = $("cxCancel");
@@ -384,7 +387,7 @@
         ${r.markets ? `<p class="fine">${T("Prediction markets", "预测市场")}: ${esc(r.markets.n_markets)} · ${esc(r.markets.n_points)} pts. ${esc(r.markets.note || "")}</p>` : ""}
       </div><div>
         <h3 class="cx-h">${T("Pinned target", "钉死的目标")}</h3>${targetTable(r.target)}
-        ${r.compute ? computed(r.compute) : ""}
+        ${r.compute ? computed(r.compute, unitOf(r.target)) : ""}
       </div></div>
       <div id="cxDelivered"></div>`;
     body.scrollTop = keep;
@@ -400,8 +403,8 @@
     const ms = r.methods || [], d = r.discrete;
     const main = d ? `<div class="lbl">${T("Most likely outcome", "最可能的结果")}</div><div class="cx-big">${esc(d.most_likely ?? "—")}</div>
         <p class="fine">${prob(d.most_likely_prob)} · ${(d.outcomes || []).map(x => `${esc(x.label)} ${prob(x.prob)}`).join(" · ")}</p>`
-      : `<div class="lbl">${T("Estimate", "估计")}</div><div class="cx-big">${fmt(e.central)}</div>
-        <p class="fine">80% model-based [${fmt(e.p10)}, ${fmt(e.p90)}]${e.basis_text ? " · " + esc(e.basis_text) : ""}</p>`;
+      : `<div class="lbl">${T("Estimate", "估计")}</div><div class="cx-big">${fmt(e.central)}${bigUnit(e.unit)}</div>
+        <p class="fine">80% model-based [${fmt(e.p10)}, ${fmt(e.p90)}]${e.unit ? " " + esc(e.unit) : ""}${e.basis_text ? " · " + esc(e.basis_text) : ""}</p>`;
     return `<div class="cx-deliv"><div class="bh"><span>R-01 · ${T("Delivered", "已交付")}</span><i class="hz"></i><span class="sp"></span><span>${esc(qid)} / ${esc(tag || "—")}</span></div>
       <div class="bd"><div class="cx-grid"><div>${main}
         ${o && !d ? `<p class="fine">OFFICIAL ${fmt(o.answer_value)} · ${T("error", "误差")} <b>${pct(o.pct_err)}</b></p>` : ""}

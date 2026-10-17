@@ -28,7 +28,7 @@ from . import jev as J
 from . import published as PB
 from . import qty as Q
 from .markets import search_markets
-from .outputs import basis_text
+from .outputs import basis_text, unit_text
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
 from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
                       DISCRETE_OUTCOMES_GIVEN, DISCRETE_REVISE, DISCRETE_REVISE_DONE, EXTRA_RULE_R1, EXTRA_RULE_R2,
@@ -447,6 +447,9 @@ _AS_CONTINUOUS = ("plan chose a discrete target, but this scored question is not
 # 这种情况下单位错误后面加的一句（重问 prompt 和 plan note 里都有）：PLAN_USER 让离散目标留空 unit_canonical，要讲清为什么要它
 _NEEDS_CONTINUOUS = ('; this question needs a continuous number, so outcome_type must be "continuous" and '
                      'target.unit_canonical must be given')
+# v2.7e：没钉住单位的连续值运行，终稿末尾由代码加这一句（UNITS_PLAN「钉死单位」：终稿写明没有钉死单位）
+UNIT_NOT_PINNED = ("Unit not pinned: the plan gave no unit that code could parse, so code did not check or convert the units "
+                   "of the methods' results; the unit shown is the plan's description of the target.")
 
 
 def build(ctx: Context):
@@ -787,7 +790,9 @@ def build(ctx: Context):
         if r.get("mode") == "discrete":
             return {"final": final_discrete(state, comp, r)}
         # v2.6d（F2，D4）：区间标签如实写成 model-based；区间依据用 outputs.BASIS_TEXT 的说明（ledger、graph.html、网页共用）
+        # v2.7e：[[unit]] = 钉死的 unit_canonical，没有就用 target.unit（outputs.unit_text）
         ph = {"estimate": _fmt_num(r.get("central")), "p10": _fmt_num(r.get("p10")), "p90": _fmt_num(r.get("p90")),
+              "unit": unit_text(state["plan"]["target"]),
               "interval_level": "80% model-based", "interval_basis": basis_text(r.get("basis")),
               "n_points_kept": str(sum(1 for p in state.get("points") or [] if p.get("keep") and p.get("judged_round"))),
               "n_methods": str(sum(1 for m in comp.get("methods") or [] if m.get("estimate")))}
@@ -815,7 +820,8 @@ def build(ctx: Context):
                            f"{ph[a['id'] + '_high']} ({a['unit']}); rationale: {a['rationale']}")
         summary.insert(0, f"combined estimate {ph['estimate']}, {ph['interval_level']} interval {ph['p10']} to {ph['p90']} "
                           f"(basis: {ph['interval_basis']})")
-        default = ("Estimate: [[estimate]] ([[interval_level]] interval [[p10]] to [[p90]], basis: [[interval_basis]]), "
+        u = " [[unit]]" if ph["unit"] else ""
+        default = (f"Estimate: [[estimate]]{u} ([[interval_level]] interval [[p10]] to [[p90]]{u}, basis: [[interval_basis]]), "
                    "from [[n_methods]] method(s) over [[n_points_kept]] kept data points.")
         text, model_text, digits_removed, err = default, None, 0, None
         if r.get("central") is not None and not b.aborted:
@@ -849,6 +855,8 @@ def build(ctx: Context):
         rendered = "".join(p if i % 2 == 0 else ph.get(p, "[unknown placeholder]") for i, p in enumerate(parts))
         if r.get("central") is None:
             rendered = "No estimate: no estimation method could be computed from the verified evidence."
+        elif not state["plan"]["target"].get("unit_canonical"):   # v2.7e：U1 没钉住单位（plan note 记了原因），终稿写明
+            text, rendered = text + "\n\n" + UNIT_NOT_PINNED, rendered + "\n\n" + UNIT_NOT_PINNED
         # model_text（v2.6d，N34）：模型回复的原文（清洗之前），只存进 state，不进终稿
         return {"final": {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
                           "model_error": err, "used_model_text": model_text is not None, "model_text": model_text}}

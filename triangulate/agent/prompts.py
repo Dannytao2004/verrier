@@ -287,7 +287,7 @@ Available placeholders: {placeholders}
 
 Write an answer of at most 180 words in English.
 
-Start with the best computed estimate and clearly identify the target's scope and period. Include the supplied interval when available, using only available placeholders for quantitative claims.
+Start with the best computed estimate and clearly identify the target's scope and period. Include the supplied interval when available, using only available placeholders for quantitative claims. Write [[unit]] (the target unit) right after the estimate and right after the interval, for example "[[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]])".
 
 Briefly explain:
 - the main evidence and estimation relationships;

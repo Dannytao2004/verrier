@@ -32,6 +32,13 @@ def basis_text(basis) -> str:
     return BASIS_TEXT.get(basis) or str(basis or "").replace("_", " ")
 
 
+def unit_text(target) -> str:
+    """v2.7e：估计值和区间后面显示的单位：钉死的 target.unit_canonical，没有就用 target.unit（已存的运行都没有 unit_canonical）。
+    终稿的 [[unit]]、ledger、graph.html 页头、网页结果 JSON 的 estimate.unit 共用。"""
+    t = target or {}
+    return str(t.get("unit_canonical") or t.get("unit") or "").strip()
+
+
 def _num(v):
     return "n/a" if v is None else (f"{v:,.0f}" if abs(v) >= 100 else f"{v:.4g}")
 
@@ -258,9 +265,10 @@ def ledger(state: dict, score: dict | None = None) -> str:
                   f"Estimation methods for reference only, not blended (weights above are theirs): central "
                   f"{_num(est.get('central'))}, 80% interval [{_num(est.get('p10'))}, {_num(est.get('p90'))}], basis "
                   f"{est.get('basis')}" + (f" ({bt})" if bt else "") + f", weight rule {est.get('weight_rule')}"]
-    else:   # v2.6d：basis 后面附 BASIS_TEXT 的说明（没有 basis 时说明是空串，不加括号）
+    else:   # v2.6d：basis 后面附 BASIS_TEXT 的说明（没有 basis 时说明是空串，不加括号）；v2.7e：中心和区间后面跟单位
         bt = basis_text(r.get("basis"))
-        L += ["", f"Result: central **{_num(r.get('central'))}**, 80% interval [{_num(r.get('p10'))}, {_num(r.get('p90'))}], "
+        u = f" {_md(unit_text(t))}" if unit_text(t) else ""
+        L += ["", f"Result: central **{_num(r.get('central'))}**{u}, 80% interval [{_num(r.get('p10'))}, {_num(r.get('p90'))}]{u}, "
                   f"basis {r.get('basis')}" + (f" ({bt})" if bt else "") + f", weight rule {r.get('weight_rule')}{tail}"]
     L += [""] + published_md(state)
     L += ["", "## Final answer", "", (state.get("final") or {}).get("text", ""), ""]

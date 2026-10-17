@@ -22,7 +22,7 @@ from . import methods as M
 from . import published as PB
 from .evidence import parse_date
 from .graph import build
-from .outputs import basis_text, ledger, outcome_table_html, render_graph
+from .outputs import basis_text, ledger, outcome_table_html, render_graph, unit_text
 from .pipeline import Budget, Context
 
 RES = RESULTS / "agent"
@@ -203,8 +203,10 @@ def save_run(h: dict, approvals: list) -> dict:
         est = f"published value {_n(r.get('central'))}"
     else:
         bt = basis_text(r.get("basis"))   # v2.6d：附 BASIS_TEXT 的说明（没有 basis 时说明是空串，只写键，同 v2.6c）
-        meta = (f"as_of <b>{q['as_of']}</b> &middot; estimate <b>{_n(r.get('central'))}</b> &middot; 80% [{_n(r.get('p10'))}, "
-                f"{_n(r.get('p90'))}] ({r.get('basis')}" + (f": {html.escape(bt)}" if bt else "") + ")")
+        ut = unit_text((state.get("plan") or {}).get("target"))   # v2.7e：估计值和区间后面跟单位（没有单位时和以前相同）
+        u = f" {html.escape(ut)}" if ut else ""
+        meta = (f"as_of <b>{q['as_of']}</b> &middot; estimate <b>{_n(r.get('central'))}</b>{u} &middot; 80% [{_n(r.get('p10'))}, "
+                f"{_n(r.get('p90'))}]{u} ({r.get('basis')}" + (f": {html.escape(bt)}" if bt else "") + ")")
         est = f"estimate {_n(r.get('central'))}"
     if q.get("answer_value") is not None:
         meta += f" &middot; official value (scoring only) <b>{q['answer_value']:,}</b>"
