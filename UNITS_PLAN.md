@@ -14,6 +14,20 @@
 钉死单位（2）、量纲检查（3，用 pint）、百分数 bug（4）、方法层的覆盖声明（6 的第一步）、显示单位（1）。
 数据点层的完整集合坐标（6 的第二步）这轮不做。
 
+## 2026-10-17 修订：改成简单版（用户：「我意思已经给你了，自己改」），以本节为准
+
+U0、U1 之后，逐项量纲推导（下面「量纲检查」一节）被放弃：它让日历常数 k_months_per_year 换算后等于 1，「年总量 / 12」会悄悄大 12 倍；
+qty 的自然语言解析（约 500 行）不断冒出边角问题。现在的做法：
+
+- **qty.py 是 pint 的薄封装**（约 100 行）：只认 pint 写法（`kg/day`、`USD/year`、`birth/(1000 person)`、`percent`），补货币（各自独立、不换算）、
+  计数名词（自动定义，复数归单数）、「给了几个候选」报错。没有指数、长度这类保护。
+- **U1（`v2.7b`）**：规划钉死 `target.unit_canonical`，解析不了重问一次，仍不行就记 plan note、这次不做单位换算。
+- **U2（`v2.7c`）**：钉了单位时，每个 formula_mc 方法声明一个 `"unit"`（公式结果的单位，例如 `kg/year`），代码用 pint 把结果换到
+  `unit_canonical`（g→t、year→day）；缺 unit 或换不了就是方法错误，交修正轮。**不推导每个输入的单位**，日历常数照旧是普通数字。
+  观测点单位里带 %（`% of population`）就除以 100，目标本身是百分数时除外。没钉单位的运行（已存的都是）完全不变。
+  已知局限：裁判把公式结果的单位写错（公式其实是每年、写成每天），代码查不出，靠输入核对。
+- **U3、U4 照原计划**，同样从简：只做方法层的 coverage 声明和合并排除、显示单位，不加别的机制。
+
 ## 原则（沿用 FIX_PLAN.md 第 1、3、4 节）
 
 - **模型提议，代码判定。** 模型负责写单位、声明覆盖范围；代码负责解析单位、推导公式的量纲、做单位换算、检查覆盖范围。
@@ -47,7 +61,7 @@
   记 plan note「unit not pinned; unit checks off」，这次运行不做量纲检查，终稿写明没有钉死单位。
 - 离散题（outcome_type discrete）不需要 `unit_canonical`。
 
-### 量纲检查（compute 的 formula_mc，`require_units=True` 时）
+### 量纲检查（已作废，见文首「2026-10-17 修订」）
 
 - 方法的每个 input 必须带 `unit`（规范写法，同上）。常数由代码给单位：k_days_target 是 `day`，k_days_per_week 是 `day/week`，
   k_days_per_year 是 `day/year`，k_weeks_per_year 是 `week/year`，k_months_per_year 是 `month/year`，k_bp_per_pct_point、k_percent_per_unit 按定义。
