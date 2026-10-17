@@ -1,6 +1,6 @@
 # 断点（2026-10-17 凌晨，第一轮修复收尾）
 
-当前代码：tag `v2.6g`（59dcd90）。`FIX_PLAN.md` 第 5 节排的阶段 S0–S10 全部提交并打了 tag，S9 之后另有一个 S9b（`v2.6f1`）；
+当前代码：tag `v2.6h`（3d6b0a9，S9c，在 `fixround1-docs` 之后）。`FIX_PLAN.md` 第 5 节排的阶段 S0–S10 全部提交并打了 tag，S9 之后另有一个 S9b（`v2.6f1`）；
 这次的文档提交打 tag `fixround1-docs`。原则没变：只修不加功能（唯一的例外是用户批准的 w3lib，FIX_PLAN 的 D10）、
 模块的输入输出约定不变（公开签名和返回结构不改，state.json 只追加键）。
 全程离线：没联网、没调模型、没读 `.env`；`results/`、`data/` 一个字节没改（每个阶段 G8 有文件快照）。
@@ -15,10 +15,11 @@
 | S9 | `v2.6f` | d177259 | 页面解码（C1 的解码部分、N28）：手写的顺序 头 charset（允许引号）→ BOM → meta → utf-8 → 自动探测；`net.decompress` 认 zstd 魔数，用标准库 `compression.zstd` 解压 | 335 |
 | S9b | `v2.6f1` | 16673a4 | 按用户的要求（「直接找个项目或者别的库放进去，编码这种问题别自己死命干」）把 S9 的手写顺序换成 `w3lib.encoding.html_to_unicode`，库外补两条 WHATWG 护栏；`requirements.txt` 加 `w3lib==2.5.0`（FIX_PLAN 的 D10）。zstd 那部分（`net.py`）没动 | 332（`test_decode` 21 → 18） |
 | S10 | 记 | 一道网页实跑题没出数（冻结版 v2.8e，10-18 用户实跑）。三处流程问题叠在一起：(1) 裁判第 2 轮丢掉第 1 轮已经用上的总数点，把这个总数写成假设，公式全是假设；(2) `assumptions.target_reason` 按单位词干判「目标的水平值」，目标单位和假设单位都是 person、名字没有比率词，这个总数被当成目标本身拒掉（误伤：目标只是其中一部分）；(3) 修正轮只有一次，compute 只报第一个输入错误，修正轮没看到「公式至少要一个观测点」这条，裁判把假设改个编号原样交回，再被拒。证据本身够做带数据的估计：总数点 × 观测到的比例，再借同类对象的比例 | 该运行的 state.json（judge_rounds[1].repair） | 冻结版不修（用户 10-18 同意记为已知局限），预注册和留出测试之后再看 |
+| S9c | `v2.6h` | 3d6b0a9 | S9b 独立审查的修正：没有声明、夹了几个坏字节的 utf-8 页仍按 utf-8（v2.6f1 会把它交给 charset_normalizer，可能猜成 mac_* 编码，负号「−」变乱码）；补 4 条测试钉住 w3lib 的行为（坏字节 utf-8、单引号 charset 不算声明、utf-7 meta 不认、meta 只看前 4 KB） | 342 |
 
 S8–S10 的门槛：G1 全过，没有本来就失败的测试；G2 都是 `bbcfa3b1…`（没变）；G3 回归表 40 行对上一个 tag 0 差异、7/7；G4 两份逐字节相同（20678 字节）；
 G5 内存里的 `showcase.build()` 和已提交的 `results/showcase/summary.json` 逐字节相同；G7 冻结路径 diff 为空、`check_naive` 源码 sha256 `526e90ba…` 不变；G8 快照没有变化。
-S9b 没有单独的阶段报告，门槛结果按提交 16673a4 的说明：332 个测试全过、G2 不变、回归表 40/40 相同、`showcase.build()` 相同。
+S9b 没有单独的阶段报告，门槛结果按提交 16673a4 的说明：332 个测试全过、G2 不变、回归表 40/40 相同、`showcase.build()` 相同；独立审查（`probes/out/_rev_s9b/`）有条件通过，唯一的中等问题由 S9c 修掉。S9c：342 个测试全过，缓存 286 个快照的解码和 v2.6f1 完全相同，G2 不变，回归表 40/40，`showcase.build()` 相同，冻结路径 diff 为空。
 
 对已存结果没有影响（已存的点不重新核对，已存 state 不回写）。影响的是以后的运行：中日韩页面的点多了、值乘上了倍数；缓存里原来 undecodable 的
 7 个快照（Shift_JIS 5 个、zstd 2 个）能用了；回测作废的方向从 7 个变成 8 个（中日韩精确写法）；带 key 的端点回 3xx 时报传输错误、不跟随。真实效果要等重跑。
@@ -29,7 +30,7 @@ S9b 没有单独的阶段报告，门槛结果按提交 16673a4 的说明：332 
 |---|---|---|
 | web-v0.3、S0–S4 | `4a56d5864fe6d024d5f91e79a3b878b2ccd3687de2797ff9d9222a7eea56e9b6` | 原值 |
 | S5、S6（`v2.6b`、`v2.6c`） | `c96dc2faeffecd6f9bb876b0f4d0e2634c0d85dd95f5eb3359db55e484db2d92` | S5 改了 JUDGE_USER 的两处（任务 2 那句、回复示例 m2 的 inputs 补 role） |
-| S7 起到现在（`v2.6d`–`v2.6g`） | `bbcfa3b1da2ff3d90cf24d9f9c4473ab81e1406d79efab9aef58072ffc52649a` | S7 改了 FINAL_SYSTEM 的例外句和 FINAL_USER 两处；S8、S9、S9b、S10 不碰 prompt，值不变 |
+| S7 起到现在（`v2.6d`–`v2.6h`） | `bbcfa3b1da2ff3d90cf24d9f9c4473ab81e1406d79efab9aef58072ffc52649a` | S7 改了 FINAL_SYSTEM 的例外句和 FINAL_USER 两处；S8、S9、S9b、S10、S9c 不碰 prompt，值不变 |
 
 FIX_PLAN 第 4 节 G2 的原文还写着「预期不变的阶段必须仍是 `4a56d586…`」，那是 S0–S4 的值；之后不改 judge / final prompt 的阶段以 `bbcfa3b1…` 为准。
 
