@@ -193,7 +193,7 @@ class TestOtherCallers(unittest.TestCase):
             return Resp()
         s = object.__new__(S.Searcher)   # 不走 __init__：不读 key
         s.model, s._key, s._log = "fake", "not-a-key", lambda rec: None
-        with mock.patch.dict(config.MAX_TOKENS, DISTINCT), mock.patch("urllib.request.urlopen", urlopen):
+        with mock.patch.dict(config.MAX_TOKENS, DISTINCT), mock.patch("triangulate.llm.urlopen_no_redirect", urlopen):
             s.search("p", role="search:d1", qid="t")
         self.assertEqual([b["max_tokens"] for b in sent], [DISTINCT["search"]])
         b = P.Budget()   # 搜索预扣按表里的 search 上限算：上限改成 0，预扣正好少了「上限 x 峰时输出价」

@@ -10,6 +10,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
+from .. import llm
 from ..config import MAX_TOKENS, MODEL, read_key, usd_cost
 
 SEARCH_URL = "https://api.deepseek.com/anthropic/v1/messages"
@@ -56,7 +57,8 @@ class Searcher:
             req = urllib.request.Request(SEARCH_URL, data=body, method="POST", headers={
                 "Content-Type": "application/json", "x-api-key": self._key, "anthropic-version": "2023-06-01"})
             try:
-                with urllib.request.urlopen(req, timeout=600) as r:
+                # 不跟随跳转（D9）：3xx 以 HTTPError 回来，下面记成 http_3xx 错误返回，key 不会发到别的地址
+                with llm.urlopen_no_redirect(req, timeout=600) as r:
                     status, raw = r.status, r.read()
             except urllib.error.HTTPError as e:
                 status, raw = e.code, b""

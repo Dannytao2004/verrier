@@ -26,6 +26,25 @@ class TransportError(RuntimeError):
     runner 不保存这道题，之后再跑 run 会补上。"""
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """不跟随跳转（v2.6g，D9）。urllib 默认把 POST 的 301/302/303 改成 GET 跟到 Location，并把 Authorization、
+    x-api-key 这些请求头原样带过去。这里不生成新请求，urllib 就把 3xx 当作 HTTPError 抛出（e.code 是 3xx）。"""
+
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+_NO_REDIRECT_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
+def urlopen_no_redirect(req, timeout: float):
+    """同 urllib.request.urlopen(req, timeout=timeout)，只是不跟随跳转。带 key 的请求都走这里：
+    本模块的 LLM、agent/search.py 的 Searcher、search_direct.py 的 DirectClient、agent/jev.py
+    （另有手动探针 probes/deepseek_search_probe.py）。前四处都在调用时按 llm.urlopen_no_redirect 取这个函数，
+    测试换掉这一个名字就能拦下这四处的 HTTP。"""
+    return _NO_REDIRECT_OPENER.open(req, timeout=timeout)
+
+
 class LLM:
     def __init__(self, calls_path=CALLS, model: str = MODEL):
         self.model = model
@@ -34,7 +53,8 @@ class LLM:
 
     def json_call(self, messages: list, *, arm: str, qid: str, attempt: int, max_tokens: int = 4000):
         """返回 (parsed_dict_or_None, raw_text, error_or_None)，error 只表示模型输出本身的问题。
-        传输层失败（超时、5xx、空 body）内部重试最多 3 次，仍失败则抛 TransportError。"""
+        传输层失败（超时、5xx、空 body）内部重试最多 3 次，仍失败则抛 TransportError。
+        3xx 跳转不跟随、不重试，直接抛 TransportError（D9）。"""
         payload = {"model": self.model, "messages": messages,
                    "thinking": {"type": "disabled"}, "response_format": {"type": "json_object"},
                    "temperature": 0, "max_tokens": max_tokens, "stream": False}
@@ -60,6 +80,12 @@ class LLM:
                 rec.update(ok=False, error=f"http_{status}")
                 self._log(rec)
                 raise KeyRejected(f"DeepSeek rejected the API key (HTTP {status})")
+            if 300 <= status < 400:
+                # 跳转没有跟随（urlopen_no_redirect）：跟过去的请求会带着 Authorization 头发到新地址
+                rec.update(ok=False, error=f"http_{status}")
+                self._log(rec)
+                raise TransportError(f"{arm} {qid} attempt {attempt}: http_{status} redirect not followed "
+                                     f"(the API key is only sent to {API_URL})")
             if status in RETRY_STATUS and http_try < 3:
                 time.sleep(2 * http_try)
                 continue
@@ -118,7 +144,7 @@ class LLM:
         """服务端排队时会先回 200 头，再每隔约 60 秒发一个换行保活，最后才给 body。
         socket 超时管单次读，total_timeout 管整次请求。"""
         t0 = time.time()
-        with urllib.request.urlopen(req, timeout=sock_timeout) as r:
+        with urlopen_no_redirect(req, timeout=sock_timeout) as r:
             chunks = []
             while True:
                 c = r.read1(65536)

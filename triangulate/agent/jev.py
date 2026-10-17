@@ -22,6 +22,7 @@ import urllib.request
 from datetime import date
 from pathlib import Path
 
+from .. import llm
 from . import discrete as D
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
@@ -127,7 +128,8 @@ def parse_answer(data, labels: list) -> dict:
 def _urllib_post(url: str, body: bytes, headers: dict, timeout: float) -> tuple:
     req = urllib.request.Request(url, data=body, method="POST", headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        # 不跟随跳转（D9）：3xx 以 HTTPError 回来，这里返回 (3xx, body)，JevClient.ask 报错
+        with llm.urlopen_no_redirect(req, timeout=timeout) as r:
             return r.status, r.read()
     except urllib.error.HTTPError as e:
         return e.code, e.read() if hasattr(e, "read") else b""
@@ -156,6 +158,8 @@ class JevClient:
         latency = round(time.time() - t0, 2)
         if status in (401, 403):
             raise JevError(f"TypeSafe rejected the API key (HTTP {status})")
+        if status is not None and 300 <= status < 400:
+            raise JevError(f"HTTP {status} redirect not followed (the key is only sent to {API_URL})")
         if status != 200:
             raise JevError(f"HTTP {status if status is not None else 'error ' + raw.decode(errors='replace')[:40]}")
         try:

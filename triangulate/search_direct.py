@@ -11,7 +11,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-from . import config
+from . import config, llm
 from .agent.search import SEARCH_FEE_ASSUMED_USD, SEARCH_URL, Searcher, anthropic_usage_to_cost
 from .arms import _messages, check_naive
 from .llm import TransportError
@@ -28,7 +28,8 @@ class DirectClient(Searcher):
     """复用 Searcher 的 key 读取、模型名和日志回调；只把 HTTP 这一步拆成可替换的 call()，测试里用假客户端。"""
 
     def call(self, body: dict, *, qid: str, attempt: int) -> dict:
-        """返回解析后的响应 dict。没拿到 HTTP 200 的传输错误最多重发 3 次（同 Searcher），仍失败抛 TransportError。"""
+        """返回解析后的响应 dict。没拿到 HTTP 200 的传输错误最多重发 3 次（同 Searcher），仍失败抛 TransportError。
+        3xx 跳转不跟随、不重试，直接抛 TransportError（D9，同 llm.LLM.json_call）。"""
         data = json.dumps(body).encode("utf-8")
         rec = {"arm": ARM, "qid": qid, "attempt": attempt, "model": self.model, "kind": "search_direct"}
         for http_try in range(1, 4):
@@ -37,7 +38,7 @@ class DirectClient(Searcher):
             req = urllib.request.Request(SEARCH_URL, data=data, method="POST", headers={
                 "Content-Type": "application/json", "x-api-key": self._key, "anthropic-version": "2023-06-01"})
             try:
-                with urllib.request.urlopen(req, timeout=600) as r:
+                with llm.urlopen_no_redirect(req, timeout=600) as r:
                     status, raw = r.status, r.read()
             except urllib.error.HTTPError as e:
                 status, raw = e.code, b""
@@ -47,6 +48,11 @@ class DirectClient(Searcher):
                 continue
             rec.update(http=status, http_try=http_try, latency_s=round(time.time() - t0, 2),
                        at=started.isoformat(timespec="seconds"))
+            if 300 <= status < 400:
+                rec.update(ok=False, error=f"http_{status}")
+                self._log(rec)
+                raise TransportError(f"{ARM} {qid} attempt {attempt}: http_{status} redirect not followed "
+                                     f"(the API key is only sent to {SEARCH_URL})")
             if status in (429, 500, 502, 503, 504) and http_try < 3:
                 time.sleep(3 * http_try)
                 continue

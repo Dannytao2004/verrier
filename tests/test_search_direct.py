@@ -102,7 +102,7 @@ class TestDirectClient(unittest.TestCase):
         logs = []
         with mock.patch("triangulate.agent.search.read_key", return_value="sk-FAKE-123"):
             c = SD.DirectClient(logs.append)
-        with mock.patch("urllib.request.urlopen", side_effect=urllib.error.URLError("down")) as u, \
+        with mock.patch("triangulate.llm.urlopen_no_redirect", side_effect=urllib.error.URLError("down")) as u, \
                 mock.patch("time.sleep"):
             with self.assertRaises(TransportError):
                 c.call({"model": "deepseek-flash"}, qid="q", attempt=1)
@@ -117,7 +117,7 @@ class TestDirectClient(unittest.TestCase):
         body = json.dumps({"stop_reason": "end_turn", "usage": USAGE, "content": []}).encode()
         r = mock.MagicMock()
         r.__enter__.return_value = mock.MagicMock(status=200, read=lambda: body)
-        with mock.patch("urllib.request.urlopen", return_value=r) as u:
+        with mock.patch("triangulate.llm.urlopen_no_redirect", return_value=r) as u:
             d = c.call({"model": "deepseek-flash"}, qid="q", attempt=1)
         self.assertEqual(u.call_args[0][0].full_url, SD.SEARCH_URL)
         self.assertEqual(d["stop_reason"], "end_turn")

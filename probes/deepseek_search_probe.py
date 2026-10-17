@@ -12,6 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from triangulate.config import read_key  # noqa: E402
+from triangulate.llm import urlopen_no_redirect  # noqa: E402  不跟随跳转（v2.6g，D9）：3xx 和别的 HTTP 错误一样处理，key 不发到别的地址
 
 sys.stdout.reconfigure(encoding="utf-8")
 OUT = Path(__file__).resolve().parent / "out"
@@ -27,7 +28,7 @@ req = urllib.request.Request(URL, data=json.dumps(body).encode("utf-8"), method=
     "Content-Type": "application/json", "x-api-key": read_key(), "anthropic-version": "2023-06-01"})
 t0 = time.time()
 try:
-    with urllib.request.urlopen(req, timeout=600) as r:
+    with urlopen_no_redirect(req, timeout=600) as r:
         status, raw = r.status, r.read()
 except urllib.error.HTTPError as e:
     status, raw = e.code, e.read()
