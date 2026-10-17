@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VERRIER — Mission Control</title>
+<meta name="description" content="Verrier is an AI research agent that reconstructs figures nobody has published yet, from public evidence, with every step on the record.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23F4F2EC'/%3E%3Ccircle cx='27' cy='29' r='18' fill='none' stroke='%23151515' stroke-width='3'/%3E%3Ccircle cx='27' cy='29' r='3.5' fill='%23151515'/%3E%3Ccircle cx='46' cy='44' r='8' fill='%23151515'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F2EC; --panel:#FCFBF7; --ink:#151515; --ink2:#3B3934; --muted:#76716A; --hair:#D6D0C4; --tint:#EEEBE3;
+  --red:#D63A2C;
+  --ext:"Archivo","Univers Extended","Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"IBM Plex Mono","JetBrains Mono",Consolas,"PingFang SC","Microsoft YaHei",monospace;
+  --screw:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Ccircle cx='6' cy='6' r='4.6' fill='%23ECE8DF' stroke='%235E5950' stroke-width='1'/%3E%3Cpath d='M3.3 7.5 L8.7 4.5' stroke='%235E5950' stroke-width='1.3'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ext);font-stretch:112%;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.035;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+html[data-lang="en"] .zh, html[data-lang="zh"] .en{display:none}
+html[data-lang="zh"] body{font-stretch:100%}
+a{color:inherit}
+.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-stretch:100%}
+.stencil{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--ink2);border:1px solid var(--ink2);padding:2px 6px;display:inline-block;text-transform:uppercase;font-stretch:100%;white-space:nowrap}
+/* marching dashed rule */
+.march{height:1px;margin:clamp(10px,1.6vh,14px) 0;background:repeating-linear-gradient(90deg,var(--ink) 0 8px,transparent 8px 13px,var(--ink) 13px 15px,transparent 15px 20px);background-size:20px 1px;animation:march 1.6s linear infinite}
+@keyframes march{to{background-position:20px 0}}
+
+#scene{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;display:block}
+
+/* ---------- chrome ---------- */
+header.top{position:fixed;top:0;left:0;right:0;z-index:50;height:52px;display:flex;align-items:stretch;background:var(--panel);border-bottom:1px solid var(--ink)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:850;font-stretch:125%;letter-spacing:.14em;font-size:15px;padding:0 22px 0 52px;border-right:1px solid var(--ink)}
+.brand svg{width:22px;height:22px}
+.pn{display:flex;align-items:center;gap:8px;padding:0 18px;border-right:1px solid var(--hair)}
+.pn .lamp{width:7px;height:7px;background:var(--ink);animation:blink 1.6s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+nav.links{margin-left:auto;display:flex;align-items:stretch}
+nav.links a{display:flex;align-items:center;gap:7px;padding:0 15px;text-decoration:none;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;border-left:1px solid var(--hair);color:var(--ink2);font-stretch:100%}
+nav.links a i{font-style:normal;color:var(--muted)}
+nav.links a:hover,nav.links a.on{background:var(--ink);color:var(--panel)}
+nav.links a.on i,nav.links a:hover i{color:var(--hair)}
+.lang{font-family:var(--mono);font-size:11px;letter-spacing:.12em;border:0;border-left:1px solid var(--ink);background:transparent;color:var(--ink);padding:0 18px;cursor:pointer}
+.lang b{font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.lang:hover{background:var(--ink);color:var(--panel)}
+.rail{position:fixed;left:0;top:52px;bottom:0;width:30px;border-right:1px solid var(--ink);background:var(--panel);z-index:40;
+  background-image:repeating-linear-gradient(to bottom,var(--ink2) 0 1px,transparent 1px 10px),repeating-linear-gradient(to bottom,var(--ink2) 0 1px,transparent 1px 50px);
+  background-size:6px 100%,12px 100%;background-repeat:no-repeat;background-position:right 0 top 0,right 0 top 0}
+.rail span{position:absolute;left:4px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--muted);white-space:nowrap}
+
+/* HUD */
+.hud{position:fixed;right:24px;bottom:22px;width:300px;z-index:45;background:var(--panel);border:1px solid var(--ink);box-shadow:inset 0 0 0 3px var(--panel),inset 0 0 0 4px var(--hair);
+  transition:right .6s cubic-bezier(.6,0,.2,1)}
+body[data-view="3"] .hud{right:calc(100vw - 30px - 24px - 300px - 24px)}
+.hud .bh{margin:0}
+.hud .row{display:flex;justify-content:space-between;align-items:center;padding:6px 12px 0}
+.hud .clock{font-family:var(--mono);font-size:24px;font-weight:500;letter-spacing:.02em}
+.hud .cam{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--ink2);padding:2px 12px 0}
+.hud svg{display:block;margin:6px 12px 0;width:274px;height:34px;border:1px solid var(--hair);background:var(--bg)}
+.hud .ph{display:flex;gap:4px;padding:8px 12px 10px;align-items:center}
+.hud .ph span{flex:1;height:14px;border:1px solid var(--ink);font-family:var(--mono);font-size:8.5px;line-height:12px;text-align:center;color:var(--ink2);letter-spacing:.05em}
+.hud .ph span.done{background:var(--ink);color:var(--panel)}
+.hud .ph span.now{outline:1.5px solid var(--ink);outline-offset:1px;color:var(--ink);font-weight:600}
+.hud .foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--hair);padding:7px 12px}
+.tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;font-weight:600;color:var(--panel);background:var(--red);padding:3px 8px;opacity:0;transform:scale(.6);transition:opacity .2s,transform .35s cubic-bezier(.3,1.6,.5,1)}
+.tag.on{opacity:1;transform:none}
+.replay{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;border:1px solid var(--ink);background:var(--panel);color:var(--ink);padding:4px 9px;cursor:pointer}
+.replay:hover{background:var(--ink);color:var(--panel)}
+.idx{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:44;display:flex;flex-direction:column;border:1px solid var(--ink);border-right:0;background:var(--panel)}
+.idx a{display:block;width:30px;height:30px;line-height:30px;text-align:center;text-decoration:none;font-family:var(--mono);font-size:10px;color:var(--ink2);border-bottom:1px solid var(--hair)}
+.idx a:last-child{border-bottom:0}
+.idx a.on{background:var(--ink);color:var(--panel)}
+
+/* ---------- panels ---------- */
+.card{position:relative;background-color:var(--panel);border:1px solid var(--ink);
+  box-shadow:inset 0 0 0 4px var(--panel),inset 0 0 0 5px var(--hair);
+  background-image:var(--screw),var(--screw),var(--screw),var(--screw);background-repeat:no-repeat;
+  background-position:7px 7px,calc(100% - 7px) 7px,7px calc(100% - 7px),calc(100% - 7px) calc(100% - 7px)}
+.bh{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--ink);color:var(--panel);margin:9px 24px 0;padding:5px 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-stretch:100%}
+.bh .hz{flex:0 0 52px;height:9px;background:repeating-linear-gradient(-45deg,var(--panel) 0 4px,var(--ink) 4px 8px);border:1px solid var(--panel)}
+.bh .sp{flex:1}
+.bd{padding:clamp(14px,2.4vh,26px) 28px clamp(16px,2.6vh,28px)}
+
+/* ---------- sections ---------- */
+main{position:relative;z-index:2}
+.sec{position:relative;height:100vh;height:100dvh;padding:calc(52px + clamp(14px,3vh,34px)) 64px clamp(14px,3vh,34px) 64px;display:flex;align-items:center;scroll-snap-align:start;scroll-snap-stop:always}
+.col{width:min(640px,46vw)}
+.col.right{margin-left:auto;margin-right:24px}
+.eyebrow{display:flex;align-items:center;gap:10px}
+.eyebrow i{width:34px;height:3px;background:var(--ink)}
+h2.hl{margin:clamp(6px,1.2vh,12px) 0 clamp(6px,1.2vh,10px);font-weight:850;font-stretch:125%;font-size:clamp(28px,5vh,50px);line-height:.98;letter-spacing:-.005em}
+.sub{margin:0;color:var(--ink2);font-size:clamp(14px,1.9vh,16.5px);font-stretch:100%;max-width:560px}
+.fine{font-size:11px;font-stretch:100%;color:var(--muted);margin:clamp(8px,1.4vh,12px) 0 0}
+
+/* cover */
+.cov{container-type:inline-size}
+h1.title{font-weight:850;font-stretch:125%;font-size:min(104px,calc(100cqw / 6.1),11vh);line-height:.88;letter-spacing:.01em;margin:clamp(8px,1.4vh,14px) 0 clamp(8px,1.4vh,12px);white-space:nowrap}
+.claim{font-weight:800;font-stretch:118%;font-size:clamp(20px,3.1vh,30px);line-height:1.12;margin:0 0 clamp(8px,1.3vh,12px)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--ink);margin:clamp(12px,2.2vh,20px) 0 clamp(12px,2vh,16px)}
+.stat{padding:clamp(8px,1.5vh,14px) 14px;border-right:1px solid var(--ink)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-weight:850;font-stretch:125%;font-size:clamp(24px,4.4vh,40px);line-height:1;letter-spacing:-.01em}
+.stat span{display:block;margin-top:6px;font-size:12px;font-stretch:100%;color:var(--ink2);line-height:1.35}
+.cta{display:grid;grid-template-columns:1.3fr 1fr auto;gap:8px}
+.btn{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:clamp(9px,1.5vh,13px) 13px;border:1px solid var(--ink);background:var(--panel);color:var(--ink);
+  text-decoration:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;font-stretch:100%}
+.btn:hover{background:var(--ink);color:var(--panel)}
+.btn.primary{background:var(--red);border-color:var(--red);color:var(--panel)}
+.btn.primary:hover{background:var(--ink);border-color:var(--ink)}
+.cap{margin:clamp(12px,2vh,16px) 0 0;padding-top:10px;border-top:1px dashed var(--ink2);font-size:12px;font-stretch:100%;color:var(--ink2);display:grid;grid-template-columns:auto 1fr;gap:10px}
+.cap b{font-family:var(--mono);font-weight:600;letter-spacing:.1em;font-size:10.5px;color:var(--ink);white-space:nowrap;padding-top:1px}
+
+/* story */
+.story p{margin:0 0 clamp(8px,1.4vh,12px);font-size:clamp(14px,1.95vh,16.5px);font-stretch:100%;line-height:1.55}
+.story p strong{font-weight:700}
+.tl{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--ink);margin-top:clamp(10px,1.8vh,16px);position:relative}
+.tl div{padding:clamp(8px,1.4vh,12px) 12px;border-right:1px dashed var(--ink2);position:relative}
+.tl div:last-child{border-right:0}
+.tl b{display:block;font-weight:850;font-stretch:125%;font-size:clamp(17px,2.6vh,23px);line-height:1}
+.tl span{display:block;font-size:12px;font-stretch:100%;color:var(--ink2);margin-top:4px}
+.tl .lbl{display:block;margin-bottom:4px}
+.punch{margin-top:clamp(12px,2vh,18px);padding:clamp(10px,1.6vh,14px) 16px;background:var(--ink);color:var(--panel);font-weight:750;font-stretch:115%;font-size:clamp(15px,2.2vh,19px);line-height:1.3}
+
+/* how */
+.steps{position:relative;margin-top:clamp(10px,1.8vh,16px)}
+.steps::before{content:"";position:absolute;left:21px;top:14px;bottom:14px;border-left:1.5px dotted var(--ink)}
+.st{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;padding:clamp(5px,1vh,9px) 0}
+.st .n{width:44px;height:30px;background:var(--panel);border:1.5px solid var(--ink);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.st:nth-child(2) .n{background:var(--ink);color:var(--panel)}
+.st h3{margin:0;font-weight:850;font-stretch:125%;font-size:clamp(14px,2vh,17px);letter-spacing:.04em;text-transform:uppercase}
+.st p{margin:2px 0 0;font-size:clamp(13px,1.75vh,14.5px);font-stretch:100%;color:var(--ink2);line-height:1.42}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:clamp(10px,1.6vh,14px)}
+
+/* trust */
+.pillars{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);margin-top:clamp(10px,1.8vh,16px)}
+.pl{padding:clamp(10px,1.7vh,15px) 15px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);position:relative}
+.pl:nth-child(2n){border-right:0}.pl:nth-child(n+5){border-bottom:0}
+.pl .n{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--muted);float:right}
+.pl h3{margin:0 0 4px;font-weight:850;font-stretch:125%;font-size:clamp(15px,2.1vh,18px);text-transform:uppercase;letter-spacing:.03em}
+.pl p{margin:0;font-size:clamp(12.5px,1.65vh,14px);font-stretch:100%;color:var(--ink2);line-height:1.42}
+.pl p b{font-family:var(--mono);font-weight:600;color:var(--ink)}
+
+/* proof */
+.trio{display:grid;grid-template-columns:1.25fr 1fr 1fr;border:1px solid var(--ink);margin-top:clamp(10px,1.8vh,16px)}
+.trio div{padding:clamp(10px,1.8vh,16px) 14px;border-right:1px solid var(--ink)}
+.trio div:last-child{border-right:0}
+.trio .us{background:var(--ink);color:var(--panel)}
+.trio .us .lbl{color:var(--hair)}
+.trio b{display:block;font-weight:850;font-stretch:125%;font-size:clamp(28px,5.4vh,52px);line-height:1;margin-top:6px}
+.trio .bar{height:6px;margin-top:10px;border:1px solid currentColor;position:relative}
+.trio .bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:currentColor;transition:width 1.3s cubic-bezier(.3,0,.1,1)}
+.trio div:nth-child(2) .bar i{background:repeating-linear-gradient(-45deg,var(--ink) 0 1.2px,transparent 1.2px 4px)}
+.trio div:nth-child(3) .bar i{background:transparent;border-right:1.5px dashed var(--ink)}
+.log{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:clamp(10px,1.8vh,14px)}
+.log div{border:1px solid var(--ink);padding:clamp(8px,1.4vh,12px) 12px;position:relative;background:var(--panel)}
+.log div::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:4px;background:repeating-linear-gradient(-45deg,var(--ink) 0 3px,var(--panel) 3px 6px)}
+.log .lbl{display:block;margin:4px 0 6px}
+.log b{display:block;font-weight:850;font-stretch:125%;font-size:clamp(20px,3.2vh,28px);line-height:1}
+.log span{display:block;font-size:11.5px;font-stretch:100%;color:var(--ink2);margin-top:4px;font-family:var(--mono)}
+
+/* use cases */
+.uses{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--ink);margin-top:clamp(10px,1.8vh,16px)}
+.use{padding:clamp(10px,1.8vh,15px) 14px;border-right:1px dashed var(--ink2)}
+.use:last-child{border-right:0}
+.use .lbl{display:block;margin-bottom:6px}
+.use h3{margin:0 0 6px;font-weight:850;font-stretch:125%;font-size:clamp(14px,2vh,17px);text-transform:uppercase;letter-spacing:.03em;line-height:1.1}
+.use p{margin:0;font-size:clamp(12.5px,1.65vh,13.5px);font-stretch:100%;color:var(--ink2);line-height:1.42}
+.nextm{display:flex;align-items:center;gap:10px;margin-top:clamp(10px,1.6vh,14px);font-size:13px;font-stretch:100%;color:var(--ink2)}
+.final{margin-top:clamp(12px,2vh,18px);border:1px solid var(--ink);display:grid;grid-template-columns:1fr auto;align-items:center;gap:14px;padding:clamp(12px,2vh,18px) 16px;background:var(--tint)}
+.final b{font-weight:850;font-stretch:122%;font-size:clamp(17px,2.6vh,23px);line-height:1.15}
+.final .btns{display:flex;gap:8px}
+.colo{display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center;margin-top:clamp(10px,1.8vh,16px)}
+.colo svg{width:72px;height:72px}
+.colo p{margin:0 0 3px;font-size:11px;font-stretch:100%;color:var(--muted);line-height:1.45}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.sec.in .rv{opacity:1;transform:none}
+
+@media (min-width:1024px) and (min-height:600px){ html{scroll-snap-type:y mandatory} }
+@media (max-height:780px) and (min-width:1024px){ .hud{display:none} .cap,.colo{display:none} }
+@media (max-width:1360px){ .rail{display:none} .brand{padding-left:22px} }
+@media (max-width:1200px){ .pn{display:none} nav.links a i{display:none} }
+@media (max-width:1023px){
+  .sec{height:auto;min-height:100vh;padding:84px 18px 40px}
+  .col,.col.right{width:100%;margin:0}
+  .hud,.idx{display:none}
+  nav.links{display:none}
+  .lang{margin-left:auto}
+  .bh{white-space:nowrap}.bh>span:last-child{display:none}
+  #scene{opacity:.5}
+}
+@media (max-width:600px){
+  .stats,.trio,.log,.uses,.tl{grid-template-columns:1fr}
+  .stat,.trio div,.tl div,.use{border-right:0!important;border-bottom:1px solid var(--ink)}
+  .stat:last-child,.trio div:last-child,.tl div:last-child,.use:last-child{border-bottom:0}
+  .cta{grid-template-columns:1fr}
+  .pillars{grid-template-columns:1fr}
+  .pl{border-right:0!important;border-bottom:1px solid var(--ink)!important}.pl:last-child{border-bottom:0!important}
+  .final{grid-template-columns:1fr}
+  .bd{padding:14px 18px 18px}.bh{margin:9px 16px 0}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .rv{opacity:1;transform:none;transition:none}
+  .march,.pn .lamp{animation:none}
+  .trio .bar i,.hud,.tag{transition:none!important}
+}
+
+/* ---------- 06 console（verrier_console.js：提问 → 人工确认 → 进度 → 结果） ---------- */
+body.cx-open{overflow:hidden}
+body.cx-open main,body.cx-open .idx{visibility:hidden}
+body.cx-open nav.links a.on:not(.cx-nav){background:transparent;color:var(--ink2)}
+body.cx-open nav.links a.cx-nav{background:var(--ink);color:var(--panel)}
+.cx{position:fixed;z-index:46;top:68px;bottom:22px;left:54px;right:348px;display:flex}
+.cx[hidden]{display:none}
+.cx-card{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0}
+.cx-card>.bh{flex:none}
+.cx-x{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;background:transparent;border:1px solid var(--panel);color:var(--panel);cursor:pointer;padding:1px 8px}
+.cx-x:hover{background:var(--panel);color:var(--ink)}
+.cx-body{flex:1;overflow:auto;padding:18px 28px 28px;min-height:0;font-stretch:100%}
+.cx-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:22px;align-items:start}
+.cx-ask textarea{display:block;width:100%;min-height:112px;margin:6px 0 8px;font:inherit;font-size:15px;line-height:1.45;padding:10px 12px;border:1px solid var(--ink);background:var(--bg);color:var(--ink);resize:vertical}
+.cx-ask input[type=date]{font-family:var(--mono);font-size:12px;padding:5px 8px;border:1px solid var(--ink);background:var(--bg);color:var(--ink)}
+.cx-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.cx-row .fine{margin:0}
+.cx-chips{display:flex;gap:6px;flex-wrap:wrap}
+.cx-chips button{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;border:1px dashed var(--ink2);background:transparent;color:var(--ink2);padding:3px 8px;cursor:pointer;text-align:left}
+.cx-chips button:hover{border-style:solid;color:var(--ink);background:var(--tint)}
+.btn:disabled{opacity:.45;cursor:default}
+.cx-h{display:flex;align-items:center;gap:10px;margin:22px 0 10px;font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+.cx-h::after{content:"";flex:1;height:1px;background:var(--ink)}
+.cx-grid>div>.cx-h:first-child{margin-top:4px}
+.cx-list{border:1px solid var(--ink)}
+.cx-li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--hair);text-decoration:none;font-size:13px}
+.cx-li:last-child{border-bottom:0}
+.cx-li:hover{background:var(--tint)}
+.cx-li>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stencil.s-planning,.stencil.s-running{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.stencil.s-awaiting_approval{background:var(--red);color:var(--panel);border-color:var(--red)}
+.stencil.s-failed,.stencil.s-cancelled{color:var(--red);border-color:var(--red)}
+.cx-strip{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr)) auto;border:1px solid var(--ink);align-items:stretch}
+.cx-strip>div{padding:8px 12px;border-right:1px solid var(--ink);display:flex;flex-direction:column;justify-content:center;gap:2px}
+.cx-strip>div:last-child{border-right:0}
+.cx-strip b{font-family:var(--mono);font-weight:600;font-size:14px}
+.cx-q{font-weight:800;font-stretch:115%;font-size:clamp(17px,2.4vh,21px);line-height:1.25;margin:16px 0 4px}
+.cx-gate{border:1.5px solid var(--red);padding:2px 14px 6px;margin:14px 0 4px;background:var(--panel)}
+.cx-gate .cx-h{color:var(--red)}
+.cx-gate .cx-h::after{background:var(--red)}
+.cx-dirs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.cx-dir{display:flex;flex-direction:column;gap:5px;border:1px solid var(--ink);padding:12px 12px 10px;background:var(--panel);position:relative;font-size:13px;line-height:1.4}
+.cx-dir::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:4px;background:repeating-linear-gradient(-45deg,var(--ink) 0 3px,var(--panel) 3px 6px)}
+.cx-dir.busy::before{background:repeating-linear-gradient(-45deg,var(--red) 0 3px,var(--panel) 3px 6px);background-size:8.5px 4px;animation:march 1s linear infinite}
+.cx-dir.ok::before{background:var(--ink)}
+.cx-dir.off{opacity:.42}
+.cx-pick{cursor:pointer}
+.cx-pick input{position:absolute;right:10px;top:11px;accent-color:var(--ink);width:15px;height:15px}
+.cx-dh{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding-right:24px}
+.cx-dh b{font-family:var(--mono);font-size:13px}
+.cx-dots{font-size:10px;letter-spacing:1px;color:var(--ink2)}
+.cx-state{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.cx-dir.busy .cx-state{color:var(--red)}
+.cx-dp{color:var(--ink2)}
+.cx-nums{display:flex;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:var(--muted);border-top:1px dashed var(--hair);padding-top:5px}
+.cx-nums b{color:var(--ink);font-weight:600}
+.cx-steps{position:relative}
+.cx-steps::before{content:"";position:absolute;left:21px;top:14px;bottom:14px;border-left:1.5px dotted var(--ink)}
+.cx-st{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;padding:5px 0}
+.cx-st .n{width:44px;height:28px;background:var(--panel);border:1.5px solid var(--hair);color:var(--muted);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.cx-st.st-done .n{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.cx-st.st-running .n{border-color:var(--red);color:var(--red);animation:blink 1.2s steps(2,start) infinite}
+.cx-st.st-waiting .n{background:var(--red);border-color:var(--red);color:var(--panel)}
+.cx-st h4{margin:2px 0 0;font-weight:850;font-stretch:125%;font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+.cx-st.st-pending h4{color:var(--muted)}
+.cx-st p{margin:1px 0 0;font-size:12.5px;color:var(--ink2)}
+table.cx-t{width:100%;border-collapse:collapse;font-size:13px}
+.cx-t th,.cx-t td{border-bottom:1px solid var(--hair);padding:5px 8px;text-align:left;vertical-align:top}
+.cx-t th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;width:108px;white-space:nowrap}
+.cx-big{font-weight:850;font-stretch:125%;font-size:clamp(34px,6vh,54px);line-height:1;letter-spacing:-.01em;margin:4px 0 6px}
+.cx-deliv{border:1px solid var(--ink);margin-top:22px;background:var(--panel)}
+.cx-deliv .bh{margin:9px 14px 0}
+.cx-deliv .bd{padding:16px 18px 18px}
+.cx-meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink)}
+.cx-meta>div{padding:8px 12px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.cx-meta>div:nth-child(2n){border-right:0}
+.cx-meta>div:nth-child(n+3){border-bottom:0}
+.cx-meta b{display:block;font-weight:850;font-stretch:125%;font-size:22px;line-height:1.1}
+.cx-bar{height:8px;border:1px solid var(--ink);margin:10px 0 4px;background:repeating-linear-gradient(-45deg,var(--ink2) 0 1.2px,transparent 1.2px 4px)}
+.cx-bar i{display:block;height:100%;background:var(--ink)}
+.cx-answer{white-space:pre-wrap;word-break:break-word;font-family:var(--ext);font-stretch:100%;font-size:14px;line-height:1.6;border-left:3px solid var(--ink);padding:2px 0 2px 14px;margin:0}
+.cx-err{border:1px solid var(--red);color:var(--red);padding:8px 12px;margin:10px 0;font-family:var(--mono);font-size:12px;background:var(--panel)}
+.cx-bad{color:var(--red)}
+@media (max-width:1360px){ .cx{left:24px} }
+@media (max-height:780px) and (min-width:1024px){ .cx{right:24px} }
+@media (max-width:1100px){ .cx-grid{grid-template-columns:1fr} }
+@media (max-width:1023px){ .cx{left:8px;right:8px;top:60px;bottom:8px} .cx-body{padding:14px 14px 20px} .cx-strip{grid-template-columns:1fr 1fr} .cx-strip>div{border-bottom:1px solid var(--ink)}
+  .cx-card>.bh .hz,.cx-card>.bh #cxCode{display:none} .cx-card>.bh{margin:9px 12px 0} }
+</style>
+</head>
+<body data-view="0">
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<header class="top">
+  <a class="brand" href="#s0" aria-label="Verrier">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="27" cy="29" r="18" fill="none" stroke="#151515" stroke-width="3"/><circle cx="27" cy="29" r="3.5" fill="#151515"/><circle cx="46" cy="44" r="8" fill="#151515"/></svg>
+    VERRIER
+  </a>
+  <div class="pn lbl"><i class="lamp"></i>AI RESEARCH AGENT · REV C · 2026</div>
+  <nav class="links" id="nav">
+    <a href="#s1"><i>01</i><span class="en">Story</span><span class="zh">故事</span></a>
+    <a href="#s2"><i>02</i><span class="en">How it works</span><span class="zh">原理</span></a>
+    <a href="#s3"><i>03</i><span class="en">Trust</span><span class="zh">可信</span></a>
+    <a href="#s4"><i>04</i><span class="en">Results</span><span class="zh">成绩</span></a>
+    <a href="#s5"><i>05</i><span class="en">Use cases</span><span class="zh">场景</span></a>
+    <a href="#console" class="cx-nav"><i>06</i><span class="en">Console</span><span class="zh">控制台</span></a>
+  </nav>
+  <button class="lang" id="lang" type="button" aria-label="Switch language"><span class="en"><b>EN</b> / 中</span><span class="zh">EN / <b>中</b></span></button>
+</header>
+<div class="rail" aria-hidden="true"><span>VERRIER · P/N VRR-001 · STOW 84S · THIS SIDE UP →</span></div>
+<nav class="idx" id="idx" aria-label="Sections"><a href="#s0">00</a><a href="#s1">01</a><a href="#s2">02</a><a href="#s3">03</a><a href="#s4">04</a><a href="#s5">05</a></nav>
+
+<aside class="hud" aria-hidden="true">
+  <div class="bh"><span>DU-1 · ORBIT SOLVER</span><span class="sp"></span><span id="hudView">VIEW 00</span></div>
+  <div class="row"><span class="clock" id="hudClock">T+ 00.00 S</span><span class="tag" id="hudTag">ACQUIRED</span></div>
+  <div class="cam" id="hudCam">AZ −058°  EL 30°  R 10.5</div>
+  <svg viewBox="0 0 274 34" preserveAspectRatio="none"><line x1="0" y1="17" x2="274" y2="17" stroke="#151515" stroke-width="1" stroke-dasharray="1 4"/><line x1="0" y1="6" x2="274" y2="6" stroke="#D6D0C4" stroke-width="1"/><line x1="0" y1="28" x2="274" y2="28" stroke="#D6D0C4" stroke-width="1"/><polyline id="hudSig" fill="none" stroke="#151515" stroke-width="1.3"/><text x="4" y="12" font-family="IBM Plex Mono" font-size="7.5" fill="#76716A" letter-spacing="1">RESIDUAL SIGNAL</text></svg>
+  <div class="ph" id="hudPh"><span>OBS</span><span>RES</span><span>INF</span><span>PRED</span><span>ACQ</span></div>
+  <div class="foot"><span class="lbl" id="hudStatus">TRACKING</span><button class="replay" type="button" data-replay>↻ REPLAY</button></div>
+</aside>
+
+<main>
+<!-- 00 cover -->
+<section class="sec" id="s0">
+  <div class="col">
+    <div class="card rv">
+      <div class="bh"><span>A-01 · AI RESEARCH AGENT</span><i class="hz"></i><span class="sp"></span><span>STOW 84S</span></div>
+      <div class="bd cov">
+        <div class="eyebrow lbl"><i></i><span class="en">Public data · Unpublished numbers</span><span class="zh">公开的数据 · 未公布的数字</span></div>
+        <h1 class="title">VERRIER</h1>
+        <p class="claim"><span class="en">See the number before it's published.</span><span class="zh">在数字公布之前，先看见它。</span></p>
+        <p class="sub"><span class="en">Verrier reconstructs figures nobody has released yet — from public evidence, with every step on the record.</span><span class="zh">Verrier 用公开证据，推算出还没人公布的数字——每一步都有据可查。</span></p>
+        <div class="stats">
+          <div class="stat"><b>1.1%</b><span><span class="en">median error on questions it had never seen</span><span class="zh">从未见过的题，中位误差</span></span></div>
+          <div class="stat"><b>37.7 s</b><span><span class="en">to recognise a figure that's already out</span><span class="zh">识别一个已公布的数字</span></span></div>
+          <div class="stat"><b>100%</b><span><span class="en">of the arithmetic done by code</span><span class="zh">的计算由代码完成</span></span></div>
+        </div>
+        <div class="cta">
+          <a class="btn primary" href="#console"><span class="en">Start a mission</span><span class="zh">开始任务</span><span>→</span></a>
+          <a class="btn" href="#s4"><span class="en">Results</span><span class="zh">看成绩</span><span>→</span></a>
+          <button class="btn" type="button" data-replay aria-label="Replay"><span>↻</span></button>
+        </div>
+        <p class="cap"><b>FIG. 1</b><span><span class="en">1846 — Le Verrier pinpointed Neptune from the wobble of Uranus, before anyone had seen it.</span><span class="zh">1846 年，勒威耶仅凭天王星的「摆动」，在任何人看到它之前就锁定了海王星。</span></span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 01 story -->
+<section class="sec" id="s1">
+  <div class="col">
+    <div class="card rv">
+      <div class="bh"><span>B-01 · ORIGIN</span><i class="hz"></i><span class="sp"></span><span>1846</span></div>
+      <div class="bd story">
+        <div class="eyebrow lbl"><i></i><span class="en">01 · The idea</span><span class="zh">01 · 灵感</span></div>
+        <h2 class="hl"><span class="en">Found with a pen.</span><span class="zh">用一支笔找到的行星。</span></h2>
+        <div class="march"></div>
+        <p><span class="en">In 1846 nobody had seen Neptune — and Urbain Le Verrier didn't need to. Uranus was drifting off course, and the drift could mean only one thing: <strong>something unseen was pulling on it.</strong> He worked out where it had to be and mailed the coordinates to Berlin.</span><span class="zh">1846 年，没人见过海王星，勒威耶也不需要见到它。天王星总在偏离轨道，而这种偏离只说明一件事：<strong>有一个看不见的东西在拉它。</strong>他算出了它该在哪儿，把坐标寄往柏林。</span></p>
+        <p><span class="en">Johann Galle pointed a telescope there the night the letter arrived, and found a new planet within one degree.</span><span class="zh">伽勒在收到信的当晚把望远镜对准那里——在不到 1° 的地方，发现了一颗新行星。</span></p>
+        <div class="tl">
+          <div><span class="lbl">31 AUG 1846</span><b>325°58′</b><span class="en">Le Verrier's prediction</span><span class="zh">勒威耶的预测</span></div>
+          <div><span class="lbl">23 SEP 1846</span><b>326°57′</b><span class="en">Galle finds Neptune</span><span class="zh">伽勒找到海王星</span></div>
+          <div><span class="lbl">MISS</span><b>&lt; 1°</b><span class="en">from a calculation on paper</span><span class="zh">纸上算出的结果</span></div>
+        </div>
+        <div class="punch"><span class="en">Verrier brings the same idea to data: the numbers that matter leave traces in the numbers that are public.</span><span class="zh">Verrier 把同样的思路带进数据世界：重要的数字，总会在公开的数字里留下痕迹。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 how -->
+<section class="sec" id="s2">
+  <div class="col">
+    <div class="card rv">
+      <div class="bh"><span>C-01 · HOW IT WORKS</span><i class="hz"></i><span class="sp"></span><span>PROC 2.0</span></div>
+      <div class="bd">
+        <div class="eyebrow lbl"><i></i><span class="en">02 · From question to answer</span><span class="zh">02 · 从问题到答案</span></div>
+        <h2 class="hl"><span class="en">Ask. Approve.<br>Get the evidence.</span><span class="zh">提问，确认，<br>拿到证据。</span></h2>
+        <p class="sub"><span class="en">One question in. One defensible number out.</span><span class="zh">输入一个问题，输出一个经得起追问的数字。</span></p>
+        <div class="steps">
+          <div class="st"><span class="n">01</span><div><h3><span class="en">Ask</span><span class="zh">提问</span></h3><p><span class="en">Name the number you need — next month's births, this quarter's deliveries, a figure no one reports.</span><span class="zh">说出你要的数字：下个月的出生数、本季度的交付量、没人统计的数据。</span></p></div></div>
+          <div class="st"><span class="n">02</span><div><h3><span class="en">Approve</span><span class="zh">确认</span></h3><p><span class="en">Verrier drafts the estimation routes and sources. You sign off before a single search runs.</span><span class="zh">Verrier 先拿出推算路线和数据来源，你批准之后才开始搜索。</span></p></div></div>
+          <div class="st"><span class="n">03</span><div><h3><span class="en">Gather</span><span class="zh">搜集</span></h3><p><span class="en">Parallel agents read the public record and bring back numbers with verbatim quotes.</span><span class="zh">多个 agent 并行阅读公开记录，带回附原文引用的数字。</span></p></div></div>
+          <div class="st"><span class="n">04</span><div><h3><span class="en">Compute</span><span class="zh">计算</span></h3><p><span class="en">Code — not the model — runs the math: formulas, Monte Carlo, weights earned in backtests.</span><span class="zh">计算交给代码而不是模型：公式、Monte Carlo、按回测表现加权。</span></p></div></div>
+          <div class="st"><span class="n">05</span><div><h3><span class="en">Deliver</span><span class="zh">交付</span></h3><p><span class="en">An estimate with a range, an evidence ledger and a dependency graph you can audit.</span><span class="zh">带区间的估计，加上可审计的证据账本和依赖图。</span></p></div></div>
+        </div>
+        <div class="meta"><span class="stencil">LANGGRAPH</span><span class="stencil">PARALLEL AGENTS</span><span class="stencil">HUMAN GATE</span><span class="stencil">≈ US$0.3–0.6 / ANSWER</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 trust -->
+<section class="sec" id="s3">
+  <div class="col right">
+    <div class="card rv">
+      <div class="bh"><span>D-01 · BUILT TO BE CHECKED</span><i class="hz"></i><span class="sp"></span><span>MANDATORY</span></div>
+      <div class="bd">
+        <div class="eyebrow lbl"><i></i><span class="en">03 · Why you can trust it</span><span class="zh">03 · 为什么可信</span></div>
+        <h2 class="hl"><span class="en">Every answer<br>shows its work.</span><span class="zh">每个答案<br>都摊开过程。</span></h2>
+        <p class="sub"><span class="en">Trace any number back, line by line, to where it came from.</span><span class="zh">任何一个数字，都能逐行追溯到出处。</span></p>
+        <div class="pillars">
+          <div class="pl"><span class="n">T-01</span><h3><span class="en">Sourced</span><span class="zh">有出处</span></h3><p><span class="en">Every observed number carries a verbatim quote, checked against the page.</span><span class="zh">每个观测数字都附原文引用，并与网页逐字核对。</span></p></div>
+          <div class="pl"><span class="n">T-02</span><h3><span class="en">Computed</span><span class="zh">代码计算</span></h3><p><span class="en">The model plans; Python calculates. No mental math, ever.</span><span class="zh">模型做规划，Python 做计算，从不「心算」。</span></p></div>
+          <div class="pl"><span class="n">T-03</span><h3><span class="en">Labelled</span><span class="zh">假设透明</span></h3><p><span class="en">Assumptions are flagged, bounded and falsifiable — never hidden.</span><span class="zh">假设会被标出、给出范围、可被证伪，绝不藏起来。</span></p></div>
+          <div class="pl"><span class="n">T-04</span><h3><span class="en">Audited</span><span class="zh">独立核对</span></h3><p><span class="en">An independent check catches inputs that don't mean what the formula needs.</span><span class="zh">独立核对，抓出「名不副实」的输入。</span></p></div>
+          <div class="pl"><span class="n">T-05</span><h3><span class="en">Leak-proof</span><span class="zh">回测防泄漏</span></h3><p><span class="en">Backtests read only archived pages from before the cutoff.</span><span class="zh">回测只读截止日之前的存档网页。</span></p></div>
+          <div class="pl"><span class="n">T-06</span><h3><span class="en">Fast when it can be</span><span class="zh">该快就快</span></h3><p><span class="en">Already published? It finds it and stops — <b>37.7 s</b> instead of <b>27 min</b>.</span><span class="zh">已经公布？找到就停——<b>37.7 秒</b>，而不是 <b>27 分钟</b>。</span></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 results -->
+<section class="sec" id="s4">
+  <div class="col">
+    <div class="card rv">
+      <div class="bh"><span>E-01 · TELEMETRY</span><i class="hz"></i><span class="sp"></span><span>HELD-OUT</span></div>
+      <div class="bd">
+        <div class="eyebrow lbl"><i></i><span class="en">04 · Results</span><span class="zh">04 · 成绩</span></div>
+        <h2 class="hl"><span class="en">Closer than asking<br>the model.</span><span class="zh">比直接问模型<br>更准。</span></h2>
+        <p class="sub"><span class="en">On questions it had never seen — code frozen in advance, answers released after the model was trained — Verrier posted the lowest median error.</span><span class="zh">在从没见过的题上——代码事先冻结，答案在模型训练之后才公布——Verrier 的中位误差最低。</span></p>
+        <div class="trio" id="trio">
+          <div class="us"><span class="lbl">VERRIER</span><b>1.1%</b><div class="bar"><i data-w="1.1"></i></div></div>
+          <div><span class="lbl"><span class="en">Reasoning, no web</span><span class="zh">只推理不联网</span></span><b>2.5%</b><div class="bar"><i data-w="2.5"></i></div></div>
+          <div><span class="lbl"><span class="en">Asking the model</span><span class="zh">直接问模型</span></span><b>4.0%</b><div class="bar"><i data-w="4.0"></i></div></div>
+        </div>
+        <div class="log">
+          <div><span class="lbl"><span class="en">Taiwan births · Sep</span><span class="zh">台湾出生数 · 9 月</span></span><b>+1.1%</b><span>OFFICIAL 7,704</span></div>
+          <div><span class="lbl"><span class="en">Heathrow pax · Sep</span><span class="zh">希思罗旅客 · 9 月</span></span><b>+3.0%</b><span>OFFICIAL 7.18 M</span></div>
+          <div><span class="lbl"><span class="en">Japan births · Jul</span><span class="zh">日本出生数 · 7 月</span></span><b>+0.8%</b><span>OFFICIAL 62,479</span></div>
+        </div>
+        <p class="fine"><span class="en">Median absolute error, held-out test of 3 official monthly figures (2026). Full run logs in the repository.</span><span class="zh">绝对误差中位数；留出测试，3 个按月发布的官方数字（2026）。完整运行记录见仓库。</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 use cases -->
+<section class="sec" id="s5">
+  <div class="col">
+    <div class="card rv">
+      <div class="bh"><span>F-01 · USE CASES</span><i class="hz"></i><span class="sp"></span><span>LOT 26-10</span></div>
+      <div class="bd">
+        <div class="eyebrow lbl"><i></i><span class="en">05 · What it's for</span><span class="zh">05 · 用在哪里</span></div>
+        <h2 class="hl"><span class="en">What will<br>you ask?</span><span class="zh">你想问<br>什么？</span></h2>
+        <div class="uses">
+          <div class="use"><span class="lbl">U-01</span><h3><span class="en">Company metrics</span><span class="zh">公司指标</span></h3><p><span class="en">Deliveries, subscribers, store traffic — before the earnings call.</span><span class="zh">交付量、订阅数、门店客流——在财报会之前。</span></p></div>
+          <div class="use"><span class="lbl">U-02</span><h3><span class="en">Macro prints</span><span class="zh">宏观数据</span></h3><p><span class="en">CPI, payrolls, rate decisions — with a probability for every outcome.</span><span class="zh">CPI、非农、议息——给出每种结果的概率。</span></p></div>
+          <div class="use"><span class="lbl">U-03</span><h3><span class="en">Local figures</span><span class="zh">地方数据</span></h3><p><span class="en">Births in a county, visitors to a park — numbers no one tracks.</span><span class="zh">某个县的出生数、某个公园的游客——没人统计的数字。</span></p></div>
+        </div>
+        <div class="nextm"><span class="stencil">NEXT MISSION</span><span><span class="en">A pre-registered showcase on four new questions is armed.</span><span class="zh">四道新题的预注册展示评测已就位。</span></span></div>
+        <div class="final">
+          <b><span class="en">Have a number nobody publishes?<br>That's Verrier's next mission.</span><span class="zh">有一个没人公布的数字？<br>那就是 Verrier 的下一个任务。</span></b>
+          <div class="btns"><a class="btn primary" href="#console"><span class="en">Start a mission</span><span class="zh">开始任务</span><span>→</span></a><button class="btn" type="button" data-replay aria-label="Replay 1846"><span>↻</span></button><a class="btn" href="#s0"><span>↑</span></a></div>
+        </div>
+        <div class="colo">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <defs><path id="ring" d="M100,100 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/></defs>
+            <circle cx="100" cy="100" r="96" fill="#FCFBF7" stroke="#151515" stroke-width="3"/>
+            <circle cx="100" cy="100" r="86" fill="none" stroke="#151515" stroke-width="1" stroke-dasharray="2 3"/>
+            <circle cx="100" cy="100" r="62" fill="none" stroke="#151515" stroke-width="1"/>
+            <text font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="3.3" fill="#151515"><textPath href="#ring">PUBLIC DATA · UNPUBLISHED NUMBERS · VERRIER · MISSION 01 ·</textPath></text>
+            <circle cx="100" cy="100" r="40" fill="none" stroke="#151515" stroke-width="1" stroke-dasharray="10 3 2 3"/>
+            <circle cx="100" cy="100" r="6" fill="none" stroke="#151515" stroke-width="1.6"/><circle cx="100" cy="100" r="1.8" fill="#151515"/>
+            <circle cx="128" cy="128" r="9" fill="#151515"/>
+          </svg>
+          <div>
+            <p><span class="en">VERRIER · research prototype · 2026 · figures as of 16 Oct 2026 · not investment advice.</span><span class="zh">VERRIER · 研究原型 · 2026 · 数字截至 2026 年 10 月 16 日 · 不构成投资建议。</span></p>
+            <p><span class="en">Neptune's rings are named Galle, Le Verrier, Lassell, Arago and Adams — after the people who found it.</span><span class="zh">海王星的光环分别以 Galle、Le Verrier、Lassell、Arago、Adams 命名——正是发现它的那些人。</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- 06 console：verrier_console.js 渲染，内容来自现有 API（/api/runs、/api/result、/api/saved） -->
+<div class="cx" id="cx" hidden>
+  <div class="card cx-card" role="dialog" aria-label="Mission control">
+    <div class="bh"><span>M-01 · MISSION CONTROL</span><i class="hz"></i><span class="sp"></span><span id="cxCode">STANDBY</span><button class="cx-x" type="button" id="cxClose" aria-label="Close">✕ ESC</button></div>
+    <div class="cx-body" id="cxBody"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const setLang = l => { root.dataset.lang = l; root.lang = l === 'zh' ? 'zh-CN' : 'en'; localStorage.setItem('verrier-lang', l); };
+  setLang(localStorage.getItem('verrier-lang') || ((navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en'));
+  document.getElementById('lang').addEventListener('click', () => setLang(root.dataset.lang === 'en' ? 'zh' : 'en'));
+
+  /* ---------- math ---------- */
+  const TAU = Math.PI * 2, rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const eo = x => 1 - Math.pow(1 - x, 3);
+  const back = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+  const wrap = d => ((d % 360) + 540) % 360 - 180;
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const norm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+
+  /* ---------- scene (schematic: perturbation and sizes exaggerated) ---------- */
+  const INK = '#151515', PANEL = '#FCFBF7', RED = '#D63A2C';
+  const RU = 2.0, RN = 3.14, AMP = .17, SIG = 34, HS = 5.2;
+  const TH_N = 326 + 57 / 60, TH_P = 325 + 58 / 60;
+  const bump = d => AMP * Math.exp(-Math.pow(wrap(d - TH_N) / SIG, 2));
+  const pol3 = (r, d, z = 0) => [r * Math.cos(rad(d)), r * Math.sin(rad(d)), z];
+  const Pw = pol3(RN, TH_P), Nw = pol3(RN, TH_N);
+  const TICKS = [289, 303, 317, 331, 345, 359];
+  const NR = .26, UR = .15;                       // planet radii in scene units
+  /* line types, after engineering-drawing conventions */
+  const LT = { center: [18, 4, 3, 4], hidden: [4, 3], phantom: [14, 3, 3, 3, 3, 3], dot: [1, 5], dashdot: [8, 3, 1, 3], long: [10, 6], fine: [2, 3] };
+  const USES = [['U-01', 'COMPANY METRICS', 4.7, 64], ['U-02', 'MACRO PRINTS', 5.1, 140], ['U-03', 'LOCAL FIGURES', 4.3, 208], ['M-02', 'NEXT MISSION', 5.3, 262]];
+
+  const KF = [
+    { az: -58, el: 30, dist: 10.2, tx: .55, ty: -.45, ox: .2, oy: .04 },
+    { az: -118, el: 20, dist: 4.6, tx: 1.75, ty: -1.0, ox: .22, oy: .03 },
+    { az: -28, el: 34, dist: 5.6, tx: 2.2, ty: -1.4, ox: .22, oy: .05 },
+    { az: 90, el: 84, dist: 9.6, tx: 1.15, ty: -.75, ox: -.22, oy: .03 },
+    { az: 18, el: 16, dist: 2.9, tx: Nw[0], ty: Nw[1], ox: .22, oy: .03 },
+    { az: 36, el: 48, dist: 15, tx: 0, ty: 0, ox: .2, oy: .03 },
+  ];
+  const VIEWS = ['COVER', '1846', 'PIPELINE', 'PLAN VIEW', 'NEPTUNE', 'WIDE FIELD'];
+
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const STARS = Array.from({ length: 240 }, (_, i) => { const u = rnd() * 2 - 1, th = rnd() * TAU, r = 60; const s = Math.sqrt(1 - u * u); return [r * s * Math.cos(th), r * s * Math.sin(th), r * u, i % 13 === 0]; });
+
+  /* ---------- canvas & projection ---------- */
+  const cvs = document.getElementById('scene'), ctx = cvs.getContext('2d');
+  let W = 0, H = 0, DPR = 1;
+  const resize = () => { DPR = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR); };
+  addEventListener('resize', resize); resize();
+  let C, F, R, U, focal, SX, SY, cam = Object.assign({}, KF[0]), sS = 0;
+  function setupView() {
+    const az = rad(cam.az), el = rad(Math.min(cam.el, 86));
+    const dx = Math.cos(el) * Math.cos(az), dy = Math.cos(el) * Math.sin(az), dz = Math.sin(el);
+    C = [cam.tx + cam.dist * dx, cam.ty + cam.dist * dy, cam.dist * dz];
+    F = [-dx, -dy, -dz]; R = norm(cross(F, [0, 0, 1])); U = cross(R, F);
+    const mobile = W < 1024;
+    focal = Math.min(mobile ? W * 1.1 : W * .62, H) * 1.02;
+    SX = W * (.5 + (mobile ? 0 : cam.ox)); SY = H * (.5 + (mobile ? -.05 : cam.oy));
+  }
+  function proj(p) {
+    const d0 = p[0] - C[0], d1 = p[1] - C[1], d2 = p[2] - C[2];
+    const z = d0 * F[0] + d1 * F[1] + d2 * F[2];
+    if (z < .08) return null;
+    return { x: SX + (d0 * R[0] + d1 * R[1] + d2 * R[2]) / z * focal, y: SY - (d0 * U[0] + d1 * U[1] + d2 * U[2]) / z * focal, z };
+  }
+  const depthA = z => 1 - .66 * clamp((z - cam.dist * .55) / (cam.dist * 1.25));
+
+  function poly(pts, o = {}) {
+    const w = o.w || 1, a = o.a == null ? 1 : o.a; if (a <= .004) return;
+    ctx.lineWidth = w; ctx.strokeStyle = o.color || INK; ctx.lineCap = o.cap || 'butt';
+    if (o.dash) {
+      ctx.setLineDash(o.dash); ctx.lineDashOffset = o.off || 0; ctx.beginPath();
+      let pen = false, zs = 0, n = 0;
+      for (const p of pts) { const q = proj(p); if (!q) { pen = false; continue; } zs += q.z; n++; if (pen) ctx.lineTo(q.x, q.y); else { ctx.moveTo(q.x, q.y); pen = true; } }
+      ctx.globalAlpha = a * (n ? depthA(zs / n) : 1); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; ctx.lineCap = 'butt'; return;
+    }
+    let prev = null, cur = -1, lastQ = null;
+    const flush = () => { if (cur >= 0) { ctx.globalAlpha = cur; ctx.stroke(); } };
+    for (const p of pts) {
+      const q = proj(p); if (!q) { prev = null; continue; }
+      if (prev) {
+        const b = Math.round(a * depthA((prev.z + q.z) / 2) * 10) / 10;
+        if (b !== cur) { flush(); ctx.beginPath(); ctx.moveTo(prev.x, prev.y); cur = b; }
+        else if (lastQ !== prev) ctx.moveTo(prev.x, prev.y);
+        ctx.lineTo(q.x, q.y); lastQ = q;
+      }
+      prev = q;
+    }
+    flush(); ctx.globalAlpha = 1; ctx.lineCap = 'butt';
+  }
+  const ring = (r, d0 = 0, d1 = 360, z = 0, rf = null, step = 2) => {
+    const out = []; if (Math.abs(d1 - d0) < .01) return out;
+    const n = Math.max(1, Math.ceil(Math.abs(d1 - d0) / step));
+    for (let i = 0; i <= n; i++) { const d = d0 + (d1 - d0) * i / n; out.push(pol3(rf ? rf(d) : r, d, z)); }
+    return out;
+  };
+  function arrow(a, b, o = {}) {           // screen-space arrowhead at b, pointing from a
+    const ang = Math.atan2(b.y - a.y, b.x - a.x), s = o.s || 7;
+    ctx.globalAlpha = o.a == null ? 1 : o.a; ctx.fillStyle = o.color || INK; ctx.beginPath();
+    ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - s * Math.cos(ang - .32), b.y - s * Math.sin(ang - .32)); ctx.lineTo(b.x - s * Math.cos(ang + .32), b.y - s * Math.sin(ang + .32)); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  function text(s, x, y, o = {}) {
+    if (!s) return;
+    const size = o.size || 11;
+    ctx.font = `${o.weight || 500} ${size}px "IBM Plex Mono", Consolas, monospace`;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = (o.ls == null ? 1.4 : o.ls) + 'px';
+    const w = ctx.measureText(s).width, pad = o.pad == null ? 4 : o.pad;
+    let bx = o.align === 'right' ? x - w - pad * 2 : o.align === 'center' ? x - w / 2 - pad : x;
+    let lim = W - (W < 1024 ? 8 : 52);
+    if (W >= 1024) { const k = clamp(1 - Math.abs(sS - 3) * 2); lim = lim + (W - 100 - Math.min(640, W * .46) - lim) * k; }
+    bx = Math.max(8, Math.min(bx, lim - w - pad * 2));
+    ctx.globalAlpha = o.a == null ? 1 : o.a;
+    if (o.box) {
+      ctx.fillStyle = o.fill || PANEL; ctx.fillRect(bx, y - size - pad + 2, w + pad * 2, size + pad * 2 - 2);
+      ctx.strokeStyle = o.stroke || INK; ctx.lineWidth = 1; ctx.strokeRect(Math.round(bx) + .5, Math.round(y - size - pad + 2) + .5, Math.round(w + pad * 2) - 1, Math.round(size + pad * 2 - 2) - 1);
+    }
+    ctx.fillStyle = o.color || INK; ctx.fillText(s, bx + pad, y);
+    ctx.globalAlpha = 1; if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+  }
+  const typed = (s, p) => s.slice(0, Math.round(s.length * clamp(p)));
+
+  /* ---------- planets: halftone shading + wireframe + rings ---------- */
+  const tiltFn = (t, v) => [v[0], v[1] * Math.cos(t) - v[2] * Math.sin(t), v[1] * Math.sin(t) + v[2] * Math.cos(t)];
+  function planet(c, r, o) {
+    const qc = proj(c); if (!qc || r <= 0) return null;
+    const sr = r / qc.z * focal, t = rad(o.tilt), spin = o.spin, A = o.a == null ? 1 : o.a;
+    // 光源：太阳方向和镜头方向折中（示意图），保证总能看到受光面和明暗交界线
+    const toSun = norm([-c[0], -c[1], -c[2]]), toCam = norm([C[0] - c[0], C[1] - c[1], C[2] - c[2]]);
+    const Lw = norm([toSun[0] * .55 + toCam[0] * .6, toSun[1] * .55 + toCam[1] * .6, toSun[2] * .55 + toCam[2] * .6 + .25]);
+    const Lc = [dot(Lw, R), dot(Lw, U), -dot(Lw, F)];
+    const P3 = (lat, lon) => { const la = rad(lat), lo = rad(lon) + spin; const v = tiltFn(t, [Math.cos(la) * Math.cos(lo), Math.cos(la) * Math.sin(lo), Math.sin(la)]); return [c[0] + r * v[0], c[1] + r * v[1], c[2] + r * v[2]]; };
+    const facing = p => ((p[0] - c[0]) * (C[0] - p[0]) + (p[1] - c[1]) * (C[1] - p[1]) + (p[2] - c[2]) * (C[2] - p[2])) > 0;
+    const hidden = q => q && q.z > qc.z && Math.hypot(q.x - qc.x, q.y - qc.y) < sr - .5;
+    const ringPts = k => { const out = []; for (let a = 0; a <= 360; a += 3) { const v = tiltFn(t, [k * Math.cos(rad(a)), k * Math.sin(rad(a)), 0]); out.push([c[0] + r * v[0], c[1] + r * v[1], c[2] + r * v[2], a]); } return out; };
+    const drawRing = (rg, front) => {
+      const pts = ringPts(rg.k); ctx.strokeStyle = INK; ctx.lineWidth = rg.w; ctx.setLineDash(rg.dash || []); ctx.lineDashOffset = rg.off || 0; ctx.globalAlpha = rg.a * A;
+      ctx.beginPath(); let pen = false;
+      for (const p of pts) { const q = proj(p); const hid = hidden(q); const isFront = q && q.z <= qc.z;
+        if (!q || hid || isFront !== front) { pen = false; continue; }
+        if (pen) ctx.lineTo(q.x, q.y); else { ctx.moveTo(q.x, q.y); pen = true; } }
+      ctx.stroke(); ctx.setLineDash([]);
+      if (rg.arcs && front !== null) rg.arcs.forEach(([a0, a1]) => { ctx.lineWidth = 3; ctx.globalAlpha = A; ctx.beginPath(); let pen2 = false;
+        for (const p of pts) { if (p[3] < a0 || p[3] > a1) continue; const q = proj(p); if (!q || hidden(q) || (q.z <= qc.z) !== front) { pen2 = false; continue; } if (pen2) ctx.lineTo(q.x, q.y); else { ctx.moveTo(q.x, q.y); pen2 = true; } } ctx.stroke(); });
+      ctx.globalAlpha = 1;
+    };
+    (o.rings || []).forEach(rg => drawRing(rg, false));             // far half of the rings
+    /* disc + halftone */
+    ctx.globalAlpha = A; ctx.fillStyle = PANEL; ctx.beginPath(); ctx.arc(qc.x, qc.y, sr, 0, TAU); ctx.fill();
+    const step = clamp(sr / 15, 2.4, 4.4);
+    ctx.beginPath();
+    let row = 0;
+    for (let y = -sr; y <= sr; y += step, row++) for (let x0 = -sr; x0 <= sr; x0 += step) {
+      const x = x0 + (row % 2 ? step / 2 : 0), nx = x / sr, ny = -y / sr, rr = nx * nx + ny * ny; if (rr > .995) continue;
+      const nz = Math.sqrt(1 - rr);
+      const I = nx * Lc[0] + ny * Lc[1] + nz * Lc[2];
+      const wv = [nx * R[0] + ny * U[0] - nz * F[0], nx * R[1] + ny * U[1] - nz * F[1], nx * R[2] + ny * U[2] - nz * F[2]];
+      const ly = wv[1] * Math.cos(t) + wv[2] * Math.sin(t), lz = -wv[1] * Math.sin(t) + wv[2] * Math.cos(t);
+      const lat = deg(Math.asin(clamp(lz, -1, 1))), lon = deg(Math.atan2(ly, wv[0]) - spin);
+      let d = 1 - Math.max(0, I) * 1.1 + o.band(lat, lon) + .24 * (1 - nz);
+      d = clamp(d * o.k, .02, 1);
+      const rd = step * .54 * Math.sqrt(d); if (rd < .3) continue;
+      ctx.moveTo(qc.x + x + rd, qc.y + y); ctx.arc(qc.x + x, qc.y + y, rd, 0, TAU);
+    }
+    ctx.fillStyle = INK; ctx.globalAlpha = A; ctx.fill();
+    /* wireframe: hidden lines dashed, visible lines thin */
+    const curves = [];
+    (o.lats || [-60, -30, 0, 30, 60]).forEach(lat => { const pts = []; for (let lo = 0; lo <= 360; lo += 6) pts.push(P3(lat, lo)); curves.push(pts); });
+    for (let lo = 0; lo < 180; lo += (o.mstep || 30)) { const pts = []; for (let la = -90; la <= 270; la += 6) pts.push(P3(la <= 90 ? la : 180 - la, la <= 90 ? lo : lo + 180)); curves.push(pts); }
+    const pass = front => {
+      ctx.strokeStyle = INK; ctx.lineWidth = front ? .8 : .7; ctx.setLineDash(front ? [] : LT.hidden); ctx.globalAlpha = (front ? .42 : .22) * A;
+      for (const pts of curves) { ctx.beginPath(); let pen = false;
+        for (const p of pts) { const q = proj(p); if (!q || facing(p) !== front) { pen = false; continue; } if (pen) ctx.lineTo(q.x, q.y); else { ctx.moveTo(q.x, q.y); pen = true; } }
+        ctx.stroke(); }
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+    };
+    pass(false); pass(true);
+    /* terminator: phantom line where the surface turns away from the sun */
+    { const a0 = norm(cross(Lw, [0, 0, 1])), b0 = cross(Lw, a0); ctx.setLineDash(LT.phantom); ctx.lineWidth = 1.1; ctx.globalAlpha = .75 * A; ctx.beginPath(); let pen = false;
+      for (let s = 0; s <= 360; s += 4) { const v = [a0[0] * Math.cos(rad(s)) + b0[0] * Math.sin(rad(s)), a0[1] * Math.cos(rad(s)) + b0[1] * Math.sin(rad(s)), a0[2] * Math.cos(rad(s)) + b0[2] * Math.sin(rad(s))];
+        const p = [c[0] + r * v[0], c[1] + r * v[1], c[2] + r * v[2]], q = proj(p); if (!q || !facing(p)) { pen = false; continue; } if (pen) ctx.lineTo(q.x, q.y); else { ctx.moveTo(q.x, q.y); pen = true; } }
+      ctx.stroke(); ctx.setLineDash([]); }
+    /* limb + registration ring */
+    ctx.globalAlpha = A; ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(qc.x, qc.y, sr, 0, TAU); ctx.stroke();
+    if (o.reg) { ctx.setLineDash(LT.dot); ctx.lineCap = 'round'; ctx.lineWidth = 1.2; ctx.lineDashOffset = -o.time * 8; ctx.globalAlpha = .7 * A; ctx.beginPath(); ctx.arc(qc.x, qc.y, sr + 7, 0, TAU); ctx.stroke(); ctx.setLineDash([]); ctx.lineCap = 'butt'; }
+    ctx.globalAlpha = 1;
+    (o.rings || []).forEach(rg => drawRing(rg, true));              // near half
+    return { qc, sr, ringPt: (k, a) => { const v = tiltFn(t, [k * Math.cos(rad(a)), k * Math.sin(rad(a)), 0]); return proj([c[0] + r * v[0], c[1] + r * v[1], c[2] + r * v[2]]); } };
+  }
+  const nepBand = (lat, lon) => {
+    let b = .2 * Math.exp(-Math.pow((lat + 20) / 7, 2)) + .14 * Math.exp(-Math.pow((lat - 26) / 6, 2)) - .12 * Math.exp(-Math.pow((lat + 52) / 8, 2)) + .06 * Math.sin(rad(lat * 9));
+    const dl = wrap(lon - 40); if (Math.pow((lat + 22) / 7, 2) + Math.pow(dl / 13, 2) < 1) b += .45;   // Great Dark Spot (Voyager 2)
+    return b;
+  };
+  const uraBand = lat => .04 * Math.sin(rad(lat * 6)) - .08 * Math.exp(-Math.pow((lat - 70) / 12, 2));
+
+  /* ---------- state ---------- */
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let started = false, t0 = 0, last = performance.now();
+  const secs = [...document.querySelectorAll('.sec')];
+  const scrollPos = () => {
+    const y = scrollY; let i = 0;
+    for (let k = 0; k < secs.length; k++) if (secs[k].offsetTop <= y + 2) i = k;
+    const top = secs[i].offsetTop, next = secs[i + 1] ? secs[i + 1].offsetTop : top + secs[i].offsetHeight;
+    return clamp(i + (y - top) / Math.max(1, next - top), 0, secs.length - 1);
+  };
+
+  /* sun: ☉ with a rotating dash-dot corona ring and ticks */
+  function drawSun(tau, tm) {
+    const q = proj([0, 0, 0]); if (!q) return; const a = eo(seg(tau, .05, .4)); ctx.globalAlpha = a; ctx.strokeStyle = INK;
+    ctx.setLineDash(LT.dashdot); ctx.lineDashOffset = tm * 10; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(q.x, q.y, 17, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+    for (let i = 0; i < 12; i++) { const an = rad(i * 30) + tm * .15; ctx.beginPath(); ctx.moveTo(q.x + Math.cos(an) * 21, q.y + Math.sin(an) * 21); ctx.lineTo(q.x + Math.cos(an) * (i % 3 ? 25 : 29), q.y + Math.sin(an) * (i % 3 ? 25 : 29)); ctx.stroke(); }
+    ctx.fillStyle = PANEL; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(q.x, q.y, 9, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(q.x, q.y, 2.4, 0, TAU); ctx.fill();
+    ctx.globalAlpha = 1; text('SUN', q.x + 32, q.y - 8, { size: 10, a: a * .9, pad: 0 });
+  }
+
+  /* ---------- frame ---------- */
+  function draw(time, tau) {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+    setupView();
+    const e = i => clamp(1 - Math.abs(sS - i));
+    const e0 = e(0), e1 = e(1), e2 = e(2), e3 = e(3), e4 = e(4), e5 = e(5);
+    const tm = reduce ? 0 : time;
+    const gA = eo(seg(tau, 0, .7));
+
+    /* stars */
+    ctx.fillStyle = INK;
+    for (const s of STARS) {
+      const q = proj([s[0] + cam.tx, s[1] + cam.ty, s[2]]); if (!q || q.x < -10 || q.x > W + 10 || q.y < -10 || q.y > H + 10) continue;
+      ctx.globalAlpha = .3 * seg(tau, 0, .8);
+      if (s[3]) { ctx.fillRect(q.x - 3, q.y - .5, 6, 1); ctx.fillRect(q.x - .5, q.y - 3, 1, 6); } else ctx.fillRect(q.x - .6, q.y - .6, 1.2, 1.2);
+    }
+    ctx.globalAlpha = 1;
+
+    /* ecliptic plate: double frame, hatched border band, corner marks, ruler ticks */
+    const E = 6.4, E2 = 6.75;
+    poly([[-E, -E, 0], [E, -E, 0], [E, E, 0], [-E, E, 0], [-E, -E, 0]], { w: 1, a: .35 * gA });
+    poly([[-E2, -E2, 0], [E2, -E2, 0], [E2, E2, 0], [-E2, E2, 0], [-E2, -E2, 0]], { w: 1, a: .22 * gA, dash: LT.center, off: -tm * 6 });
+    for (let v = -E2; v < E2; v += .35) { [[v, -E2, v + .3, -E], [v, E, v + .3, E2]].forEach(([x1, y1, x2, y2]) => poly([[x1, y1, 0], [x2, y2, 0]], { a: .14 * gA })); [[-E2, v, -E, v + .3], [E, v, E2, v + .3]].forEach(([x1, y1, x2, y2]) => poly([[x1, y1, 0], [x2, y2, 0]], { a: .14 * gA })); }
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => poly([[sx * E, sy * (E - .9), 0], [sx * E, sy * E, 0], [sx * (E - .9), sy * E, 0]], { w: 2.2, a: .85 * gA }));
+    for (let v = -E + .4; v < E; v += .4) { const big = Math.abs(Math.round(v * 10) % 20) === 0; poly([[v, -E, 0], [v, -E + (big ? .3 : .13), 0]], { a: .5 * gA }); poly([[-E, v, 0], [-E + (big ? .3 : .13), v, 0]], { a: .5 * gA }); }
+    { const q = proj([-E, -E, 0]); if (q) text('ECLIPTIC PLATE · SCHEMATIC · NOT TO SCALE', q.x + 10, q.y - 10, { size: 9.5, a: .65 * gA, pad: 0 }); }
+
+    /* polar grid: alternating solid / dotted rings, dash-dot spokes, double outer ring */
+    for (let r = 1; r <= 6; r++) {
+      if (r % 2) poly(ring(r, 0, 360, 0, null, 2), { w: 1.2, a: .4 * gA, dash: LT.dot, cap: 'round' });
+      else poly(ring(r, 0, 360, 0, null, 3), { w: 1, a: .17 * gA });
+    }
+    poly(ring(6.12, 0, 360, 0, null, 3), { w: 1, a: .35 * gA });
+    for (let d = 0; d < 360; d += 30) poly([pol3(.4, d), pol3(6, d)], { w: 1, a: .16 * gA, dash: LT.dashdot });
+    for (let d = 0; d < 360; d += 5) poly([pol3(6, d), pol3(d % 30 ? 5.88 : 5.68, d)], { w: 1, a: .55 * gA });
+    [[0, '000°'], [90, '090°'], [180, '180°'], [270, '270°']].forEach(([d, s]) => { const q = proj(pol3(6.45, d)); if (q) text(s, q.x, q.y + 4, { align: 'center', size: 10, a: .7 * gA * depthA(q.z), pad: 0 }); });
+
+    /* radar sweep with a hatched trail of fading spokes */
+    if (tau > .6) { const ph = (tm * 22) % 360;
+      for (let i = 0; i < 10; i++) poly([pol3(.5, ph - i * 2.2), pol3(6, ph - i * 2.2)], { w: i ? .8 : 1.3, a: (i ? .22 * (1 - i / 10) : .55) * gA });
+      const q = proj(pol3(6.35, ph)); if (q) text('SWEEP ' + String(Math.round(ph)).padStart(3, '0') + '°', q.x, q.y, { size: 9, a: .55 * gA, pad: 0, align: 'center' }); }
+
+    /* orbits */
+    poly(ring(RU, 150, 150 + 360 * eio(seg(tau, .1, 1.05))), { w: 1.2, a: .7, dash: LT.phantom, off: -tm * 10 });
+    const thU = 150 + 270 * eio(seg(tau, .35, 2.25));
+    poly(ring(0, 150, thU, 0, d => RU + bump(d), 1.5), { w: 2, a: .95 });
+    poly(ring(0, 150, thU, 0, d => RU + bump(d) + .07, 1.5), { w: .7, a: .5 });               // double line
+    poly(ring(RN, TH_N, TH_N + 360 * eio(seg(tau, 4.05, 5.0)), 0, null, 2), { w: 1.2, a: .62 + .3 * e5, dash: LT.center, off: -tm * 14 });
+    poly(ring(RN, 298, 298 + 58 * eio(seg(tau, 2.75, 3.5))), { w: 1.4, a: .9 - .5 * seg(tau, 4, 4.7) + .4 * e2, dash: LT.phantom, off: tm * 12 });
+    /* orbit chevrons marching along Neptune's orbit */
+    if (tau > 4.6) for (let i = 0; i < 3; i++) { const d = (TH_N + 40 + i * 120 + tm * 6) % 360, a = proj(pol3(RN, d)), b = proj(pol3(RN, d + 1.6)); if (a && b) arrow(a, b, { s: 7, a: .7 }); }
+
+    drawSun(tau, tm);
+
+    /* residual stems */
+    const tops = TICKS.map((d, i) => {
+      const p = eo(clamp((thU - d) / 10));
+      const b0 = pol3(RU, d), b = pol3(RU + bump(d) * p, d), top = [b[0], b[1], HS * bump(d) * p];
+      if (p > 0) {
+        poly([b0, b], { w: 2.6 + e1, a: 1 });
+        poly([b, top], { w: 1.3 + 1.2 * e1, a: .95 });
+        poly([[b0[0], b0[1], 0], [b0[0], b0[1], top[2] * .5]], { w: .8, a: .5, dash: LT.fine });
+        const q = proj(top); if (q) { ctx.fillStyle = INK; ctx.globalAlpha = p; ctx.fillRect(q.x - 3, q.y - 3, 6, 6); ctx.fillRect(q.x - 9, q.y - .5, 18, 1); ctx.globalAlpha = 1;
+          if (e1 > .05) text('R' + (i + 1), q.x + 11, q.y + 4, { size: 10, a: e1, pad: 0 }); }
+      }
+      return { top, p };
+    });
+    { const k = tops[3]; const q = k && proj(k.top); if (q && k.p > 0) {
+      const a = clamp(seg(tau, 1.85, 2.1) * (.75 + .25 * e1)) * clamp(e0 + e1);
+      text('RESIDUAL Δr', q.x - 14, q.y - 14, { size: 10.5, weight: 600, box: true, a, align: 'right' });
+      if (e1 > .05) text('= OBSERVED − PREDICTED', q.x - 14, q.y + 4, { size: 10, a: a * e1, align: 'right', pad: 4 });
+    } }
+
+    /* inference rays: dotted, flowing toward the prediction */
+    tops.forEach((k, i) => {
+      const p = eo(seg(tau, 2.1 + i * .06, 2.95 + i * .06)); if (p <= 0) return;
+      const end = [k.top[0] + (Pw[0] - k.top[0]) * p, k.top[1] + (Pw[1] - k.top[1]) * p, k.top[2] * (1 - p)];
+      poly([k.top, end], { w: 1.5 + .5 * e2, a: .7 - .35 * seg(tau, 3.9, 4.6) + .3 * e2, dash: LT.dot, cap: 'round', off: -tm * (14 + 30 * e2) });
+    });
+    if (e2 > .05) { const q = proj(Pw); if (q) text('F = G·M·m / r²  →  SOLVE M, a, λ', q.x - 40, q.y - 64, { size: 11, weight: 600, box: true, a: e2, align: 'right' }); }
+
+    /* plan view: longitude rays + dimension arc with arrowheads; semi-major axis dimensions */
+    if (e3 > .01) {
+      const qs = proj([0, 0, 0]);
+      [[TH_P, 'PRED λ 325°58′ · 31 AUG 1846', 1], [TH_N, 'OBS λ 326°57′ · 23 SEP 1846', -1]].forEach(([d, s, k]) => {
+        poly([[0, 0, 0], pol3(RN + 1.05, d)], { w: 1.1, a: .9 * e3, dash: k > 0 ? LT.long : LT.center });
+        const q = proj(pol3(RN * .55, d)); if (!q || !qs) return;
+        let nx = -(q.y - qs.y), ny = q.x - qs.x; const l = Math.hypot(nx, ny) || 1; nx /= l; ny /= l; if (ny > 0) { nx = -nx; ny = -ny; }
+        const off = k > 0 ? -1 : 1;
+        text(s, q.x + nx * 18 * -off - 60, q.y + ny * 18 * -off + (k > 0 ? 14 : 0), { size: 10.5, weight: 600, box: true, a: e3 });
+      });
+      const arcR = RN + .8, a1 = proj(pol3(arcR, TH_P - 4)), a2 = proj(pol3(arcR, TH_N + 4));
+      poly(ring(arcR, TH_P - 4, TH_N + 4, 0, null, .3), { w: 1.2, a: e3 });
+      const pA = proj(pol3(arcR, TH_P)), pB = proj(pol3(arcR, TH_N));
+      if (pA && pB && a1 && a2) { arrow(a1, pA, { a: e3 }); arrow(a2, pB, { a: e3 }); }
+      const qd = proj(pol3(RN + 1.1, TH_N)); if (qd) text('Δλ = 0°59′', qd.x + 8, qd.y + 4, { size: 11, weight: 600, a: e3, box: true });
+    }
+    if (e3 + e5 > .01) {
+      const A2 = clamp(e3 + e5);
+      [[RU, 200, 'a = 19.2 AU'], [RN, 232, 'a = 30.1 AU']].forEach(([r, d, s]) => {
+        const p0 = proj(pol3(.3, d)), p1 = proj(pol3(r - .05, d)); if (!p0 || !p1) return;
+        poly([pol3(.3, d), pol3(r - .05, d)], { w: 1, a: .85 * A2 });
+        arrow(p1, p0, { a: A2, s: 6 }); arrow(p0, p1, { a: A2, s: 6 });
+        const m = proj(pol3(r * .6, d)); if (m) text(s, m.x + 6, m.y - 6, { size: 10, weight: 600, box: true, a: A2 });
+      });
+    }
+
+    /* uranus: halftone + near-polar rings */
+    const Uw = pol3(RU + bump(thU), thU);
+    if (tau > .35) {
+      const ua = seg(tau, .35, .5);
+      const res = planet(Uw, UR, { tilt: 98, spin: tm * .5, a: ua, k: .62, band: uraBand, lats: [-45, 0, 45], mstep: 45, time: tm,
+        rings: [{ k: 1.62, w: .6, a: .5, dash: LT.fine }, { k: 1.72, w: .6, a: .5 }, { k: 1.82, w: .6, a: .45, dash: LT.fine }, { k: 2.0, w: 1.3, a: .9 }] });
+      if (res) { const top = proj([Uw[0], Uw[1], .66]); if (top) { poly([[Uw[0], Uw[1], .16], [Uw[0], Uw[1], .66]], { w: 1, a: .8 * ua, dash: LT.hidden }); text('URANUS', top.x + 4, top.y - 2, { size: 10.5, weight: 600, box: true, a: ua }); } }
+    }
+
+    /* neptune: halftone shading, wireframe, terminator, rings, Triton */
+    let nepSR = 0;
+    const na = Math.max(0, back(seg(tau, 3.75, 4.45)));
+    if (na > 0) {
+      for (let i = 0; i < 3; i++) { const q = seg(tau, 4.3 + i * .2, 4.95 + i * .2); if (q > 0 && q < 1) poly(ring(.3 + 1.2 * eo(q), 0, 360, 0, null, 5).map(p => [p[0] + Nw[0], p[1] + Nw[1], 0]), { w: 1.2, a: .9 * (1 - q), dash: [LT.dot, LT.long, null][i], cap: 'round' }); }
+      /* Triton: dotted retrograde orbit (schematic distance) */
+      const tri = []; const ti = rad(23); for (let a = 0; a <= 360; a += 4) { const x = Math.cos(rad(a)) * .95, y = Math.sin(rad(a)) * .95; tri.push([Nw[0] + x, Nw[1] + y * Math.cos(ti), y * Math.sin(ti)]); }
+      poly(tri, { w: 1, a: .55 * na * (.5 + .5 * e4), dash: LT.dot, cap: 'round', off: tm * 10 });
+      const ta = -tm * .35, tp = [Nw[0] + Math.cos(ta) * .95, Nw[1] + Math.sin(ta) * .95 * Math.cos(ti), Math.sin(ta) * .95 * Math.sin(ti)];
+      const res = planet(Nw, NR * na, { tilt: 28, spin: tm * .32, k: 1, band: nepBand, lats: [-60, -30, 0, 30, 60], mstep: 30, reg: true, time: tm,
+        rings: [{ k: 1.69, w: .7, a: .55, dash: LT.dot }, { k: 2.15, w: 1.1, a: .85 }, { k: 2.23, w: .5, a: .3, dash: LT.fine }, { k: 2.31, w: .7, a: .55 }, { k: 2.58, w: .9, a: .8, dash: LT.long, arcs: [[200, 206], [210, 218], [221, 226], [229, 240]] }] });
+      if (res) {
+        nepSR = res.sr;
+        const tq = proj(tp); if (tq) { const behind = tq.z > res.qc.z && Math.hypot(tq.x - res.qc.x, tq.y - res.qc.y) < res.sr; if (!behind) { ctx.globalAlpha = na; ctx.fillStyle = PANEL; ctx.strokeStyle = INK; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(tq.x, tq.y, Math.max(2.5, res.sr * .09), 0, TAU); ctx.fill(); ctx.stroke(); ctx.globalAlpha = 1; if (e4 > .05) text('TRITON · RETROGRADE', tq.x - 8, tq.y + 20, { size: 9.5, a: e4, pad: 3, box: true, align: 'right' }); } }
+        if (e4 > .05) [[2.15, 300, 'LE VERRIER RING', 0], [2.58, 318, 'ADAMS RING · ARCS', 22], [1.69, 285, 'GALLE RING', 44]].forEach(([k, a, s, dy]) => {
+          const q = res.ringPt(k, a); if (!q) return; const lx = res.qc.x + res.sr * 2.9, ly = res.qc.y + res.sr * .9 + dy;
+          ctx.globalAlpha = e4; ctx.strokeStyle = INK; ctx.lineWidth = .9; ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(lx - 10, ly - 4); ctx.lineTo(lx - 2, ly - 4); ctx.stroke(); ctx.fillStyle = INK; ctx.fillRect(q.x - 2, q.y - 2, 4, 4); ctx.globalAlpha = 1;
+          text(s, lx, ly, { size: 9.5, a: e4, pad: 3, box: true });
+        });
+      }
+      if (res && tau > 4.1) {
+        const lh = .95 - .5 * e4, top = proj([Nw[0], Nw[1], lh]), la = 1 - .85 * e3;
+        if (top) {
+          poly([[Nw[0], Nw[1], .27], [Nw[0], Nw[1], lh]], { w: 1, a: .85 * la, dash: LT.hidden });
+          const tx = top.x + 4 + (res.sr > 40 ? res.sr * .9 : 0);
+          text(typed('NEPTUNE', seg(tau, 4.1, 4.35)), tx, top.y - 4, { size: 13, weight: 600, box: true, ls: 3, a: la });
+          text(typed('OBSERVED λ 326°57′', seg(tau, 4.2, 4.6)), tx, top.y + 17, { size: 10.5, pad: 4, a: 1 - e3, box: true, stroke: PANEL });
+          if (e4 > .05) { text('GALLE · BERLIN · 23 SEP 1846', tx, top.y + 35, { size: 10, pad: 4, a: e4, box: true, stroke: PANEL }); text('Δλ = 0°59′ FROM PREDICTION', tx, top.y + 54, { size: 10.5, weight: 600, pad: 4, a: e4, box: true }); }
+        }
+      }
+    }
+
+    /* reticle at the predicted point — the one red mark in the scene */
+    { const q = proj(Pw); const rp = seg(tau, 2.95, 3.6); const a = seg(tau, 2.95, 3.15);
+      if (q && a > 0) {
+        const s = Math.max(24 * (2.3 - 1.3 * back(rp)) * (1 + .2 * e2), nepSR * 1.45), K = s * .38, rot = rad(45 * (1 - eo(rp)));
+        ctx.save(); ctx.translate(q.x, q.y); ctx.globalAlpha = a; ctx.strokeStyle = RED;
+        ctx.setLineDash([2, 5]); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, s * 1.22, tm * .6, tm * .6 + TAU); ctx.lineDashOffset = -tm * 20; ctx.stroke(); ctx.setLineDash([]);
+        ctx.rotate(rot); ctx.lineWidth = 2.2;
+        [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => { ctx.beginPath(); ctx.moveTo(sx * s, sy * (s - K)); ctx.lineTo(sx * s, sy * s); ctx.lineTo(sx * (s - K), sy * s); ctx.stroke(); });
+        ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(-3, 0); ctx.moveTo(3, 0); ctx.lineTo(8, 0); ctx.moveTo(0, -8); ctx.lineTo(0, -3); ctx.moveTo(0, 3); ctx.lineTo(0, 8); ctx.stroke();
+        ctx.restore(); ctx.globalAlpha = 1;
+        const lp = seg(tau, 3.25, 3.75), la = 1 - e3 - e5;
+        if (lp > 0 && la > .01) { text(typed('PREDICTED λ 325°58′', lp), q.x - s - 10, q.y + s + 18, { size: 10.5, weight: 600, align: 'right', box: true, a: la });
+          if (seg(tau, 3.4, 3.95) > 0) text(typed('LE VERRIER · 31 AUG 1846', seg(tau, 3.4, 3.95)), q.x - s - 10, q.y + s + 36, { size: 10, align: 'right', pad: 4, a: .85 * la }); }
+      } }
+
+    /* wide view: use-case markers on lifted flight paths from the sun */
+    if (e5 > .01) USES.forEach(([id, nm, r, d], i) => {
+      const b = pol3(r, d), q = proj(b), top = proj([b[0], b[1], 1.15]); if (!q || !top) return;
+      const path = []; for (let s = 0; s <= 1.0001; s += .04) { const z = Math.sin(Math.PI * s) * 1.6; path.push([b[0] * s, b[1] * s, z]); }
+      poly(path, { w: 1.1, a: .7 * e5, dash: i === 3 ? LT.phantom : LT.long, off: -tm * 18 });
+      const pe = proj(path[path.length - 2]); if (pe) arrow(pe, q, { a: e5, s: 7 });
+      poly([b, [b[0], b[1], 1.15]], { w: 1, a: .8 * e5, dash: LT.hidden });
+      ctx.globalAlpha = e5; ctx.strokeStyle = INK; ctx.lineWidth = 1.6; const sz = 9;
+      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => { ctx.beginPath(); ctx.moveTo(q.x + sx * sz, q.y + sy * (sz - 4)); ctx.lineTo(q.x + sx * sz, q.y + sy * sz); ctx.lineTo(q.x + sx * (sz - 4), q.y + sy * sz); ctx.stroke(); });
+      ctx.globalAlpha = 1;
+      text(id + ' · ' + nm, top.x + 4, top.y - 2, { size: 10.5, weight: 600, box: true, a: e5 });
+    });
+  }
+
+  /* ---------- HUD + index ---------- */
+  const $ = id => document.getElementById(id);
+  const hud = { view: $('hudView'), clock: $('hudClock'), cam: $('hudCam'), status: $('hudStatus'), tag: $('hudTag'), ph: [...$('hudPh').children], sig: $('hudSig') };
+  const navA = [...document.querySelectorAll('#nav a')], idxA = [...document.querySelectorAll('#idx a')];
+  const PH = [[0, 1.4], [1.4, 2.1], [2.1, 2.9], [2.9, 3.75], [3.75, 5.01]];
+  let lastView = -1; const lastTxt = {};
+  const setT = (k, el, s) => { if (lastTxt[k] !== s) { el.textContent = s; lastTxt[k] = s; } };
+  /* 控制台（verrier_console.js）：VERRIER.mission({...}) 接管 HUD 和机位；传 null 交还给滚动和 1846 动画 */
+  let mission = null;
+  const PH_LBL = hud.ph.map(e => e.textContent), MPH = ['PLAN', 'GATE', 'GATHER', 'JUDGE', 'CALC'];
+  function updMission(time) {
+    const m = mission;
+    setT('clock', hud.clock, 'T+ ' + Number(m.elapsed || 0).toFixed(1).padStart(5, '0') + ' S');
+    setT('cam', hud.cam, m.cam || '');
+    setT('status', hud.status, m.status || '');
+    setT('view', hud.view, m.view || 'MISSION');
+    setT('tag', hud.tag, m.tag || 'ACQUIRED');
+    hud.tag.classList.toggle('on', !!m.done);
+    hud.ph.forEach((el, i) => { if (el.textContent !== MPH[i]) el.textContent = MPH[i]; el.className = i < m.phase ? 'done' : i === m.phase ? 'now' : ''; });
+    const amp = 2 + 9 * Math.max(0, Math.min(1, m.progress || 0)), sh = reduce ? 0 : time * 40; let pts = '';
+    for (let x = 0; x <= 274; x += 4) { const u = (x + sh) % 274; const g = Math.exp(-Math.pow((u - 160) / 26, 2)); const y = 17 - amp * g + 1.2 * Math.sin((x + sh) * .35) * (1 - g); pts += x + ',' + y.toFixed(1) + ' '; }
+    hud.sig.setAttribute('points', pts);
+  }
+  function setMission(m) {
+    mission = m || null;
+    if (mission) { document.body.dataset.view = 'm'; return; }
+    hud.ph.forEach((el, i) => { el.textContent = PH_LBL[i]; });
+    setT('tag', hud.tag, 'ACQUIRED');
+    lastView = -1;
+  }
+  function updHud(tau, time) {
+    if (mission) return updMission(time);
+    const v = Math.round(sS);
+    setT('clock', hud.clock, 'T+ ' + tau.toFixed(2).padStart(5, '0') + ' S');
+    setT('cam', hud.cam, `AZ ${cam.az < 0 ? '−' : '+'}${String(Math.round(Math.abs(cam.az))).padStart(3, '0')}°  EL ${String(Math.round(cam.el)).padStart(2, '0')}°  R ${cam.dist.toFixed(1)}`);
+    setT('status', hud.status, tau >= 4.6 ? 'TARGET ACQUIRED' : tau >= 3.6 ? 'POSITION LOCKED' : tau >= 2.1 ? 'SOLVING' : 'TRACKING');
+    hud.tag.classList.toggle('on', tau >= 4.6);
+    PH.forEach(([a, b], i) => { const done = tau >= b || (i === 4 && tau >= 4.95), now = tau >= a && !done; hud.ph[i].className = done ? 'done' : now ? 'now' : ''; });
+    /* residual signal: a bump that grows as the residual is found, scrolling */
+    const amp = 2 + 9 * seg(tau, 1.2, 2.2), sh = reduce ? 0 : time * 40; let pts = '';
+    for (let x = 0; x <= 274; x += 4) { const u = (x + sh) % 274; const g = Math.exp(-Math.pow((u - 160) / 26, 2)); const y = 17 - amp * g + 1.2 * Math.sin((x + sh) * .35) * (1 - g); pts += x + ',' + y.toFixed(1) + ' '; }
+    hud.sig.setAttribute('points', pts);
+    if (v !== lastView) {
+      lastView = v; document.body.dataset.view = v;
+      setT('view', hud.view, `VIEW ${String(v).padStart(2, '0')} · ${VIEWS[v]}`);
+      navA.forEach((a, i) => a.classList.toggle('on', i + 1 === v));
+      idxA.forEach((a, i) => a.classList.toggle('on', i === v));
+    }
+  }
+
+  /* ---------- loop ---------- */
+  let forceTau = null, forceS = null;   // 调试用：VERRIER.render(tau, section)
+  function tick(now, once) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    const s = forceS != null ? forceS : mission ? KF.length - 1 : scrollPos();
+    sS += (s - sS) * (reduce || forceS != null ? 1 : 1 - Math.exp(-dt * 3.4));
+    if (Math.abs(s - sS) < .0005) sS = s;
+    const i0 = Math.floor(sS), i1 = Math.min(KF.length - 1, i0 + 1), f = eio(sS - i0), A = KF[i0], B = KF[i1];
+    cam = { az: A.az + wrap(B.az - A.az) * f, el: A.el + (B.el - A.el) * f, dist: A.dist + (B.dist - A.dist) * f, tx: A.tx + (B.tx - A.tx) * f, ty: A.ty + (B.ty - A.ty) * f, ox: A.ox + (B.ox - A.ox) * f, oy: A.oy + (B.oy - A.oy) * f };
+    const tau = forceTau != null ? forceTau : reduce ? 5 : started ? Math.min(5, (now - t0) / 1000) : 0;
+    draw(now / 1000, tau);
+    updHud(tau, now / 1000);
+    if (!once) requestAnimationFrame(t => tick(t));
+  }
+  function play() { started = true; t0 = performance.now(); }
+  document.querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', play));
+  const start = () => {
+    if (!document.hidden) return void setTimeout(play, 250);
+    const h = () => { if (document.hidden) return; document.removeEventListener('visibilitychange', h); setTimeout(play, 250); };
+    document.addEventListener('visibilitychange', h);
+  };
+  const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  Promise.race([fontsReady, new Promise(r => setTimeout(r, 700))]).then(start, start);
+  requestAnimationFrame(t => tick(t));
+  window.VERRIER = { play, mission: setMission, state: () => ({ sS, cam, started, mission }),
+    render: (tau, sec) => { forceTau = tau; forceS = sec == null ? null : sec; tick(performance.now(), true); },
+    release: () => { forceTau = null; forceS = null; } };
+
+  /* ---------- section reveals ---------- */
+  const io = new IntersectionObserver(es => es.forEach(en => {
+    if (!en.isIntersecting) return;
+    en.target.classList.add('in');
+    en.target.querySelectorAll('.trio .bar i').forEach(f => { f.style.width = (parseFloat(f.dataset.w) / 4.5 * 100) + '%'; });
+  }), { threshold: .35 });
+  secs[0].classList.add('in');
+  secs.forEach(s => io.observe(s));
+})();
+</script>
+<script src="/static/verrier_console.js"></script>
+</body>
+</html>

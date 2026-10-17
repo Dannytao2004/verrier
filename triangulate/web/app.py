@@ -37,6 +37,11 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
     def index():
         return FileResponse(STATIC / "index.html", media_type="text/html; charset=utf-8")
 
+    @app.get("/verrier")
+    def verrier():
+        # Verrier 宣传页 + 控制台（提问 → 人工确认 → 进度 → 结果），和经典界面用同一套 API
+        return FileResponse(STATIC / "verrier_console.html", media_type="text/html; charset=utf-8")
+
     # ---------- 网页运行 ----------
     @app.post("/api/runs")
     def start_run(body: dict = Body(...)):
