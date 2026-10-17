@@ -53,24 +53,6 @@ nav.links a.on i,nav.links a:hover i{color:var(--hair)}
   background-size:6px 100%,12px 100%;background-repeat:no-repeat;background-position:right 0 top 0,right 0 top 0}
 .rail span{position:absolute;left:4px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--muted);white-space:nowrap}
 
-/* HUD */
-.hud{position:fixed;right:24px;bottom:22px;width:300px;z-index:45;background:var(--panel);border:1px solid var(--ink);box-shadow:inset 0 0 0 3px var(--panel),inset 0 0 0 4px var(--hair);
-  transition:right .6s cubic-bezier(.6,0,.2,1)}
-body[data-view="3"] .hud{right:calc(100vw - 30px - 24px - 300px - 24px)}
-.hud .bh{margin:0}
-.hud .row{display:flex;justify-content:space-between;align-items:center;padding:6px 12px 0}
-.hud .clock{font-family:var(--mono);font-size:24px;font-weight:500;letter-spacing:.02em}
-.hud .cam{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--ink2);padding:2px 12px 0}
-.hud svg{display:block;margin:6px 12px 0;width:274px;height:34px;border:1px solid var(--hair);background:var(--bg)}
-.hud .ph{display:flex;gap:4px;padding:8px 12px 10px;align-items:center}
-.hud .ph span{flex:1;height:14px;border:1px solid var(--ink);font-family:var(--mono);font-size:8.5px;line-height:12px;text-align:center;color:var(--ink2);letter-spacing:.05em}
-.hud .ph span.done{background:var(--ink);color:var(--panel)}
-.hud .ph span.now{outline:1.5px solid var(--ink);outline-offset:1px;color:var(--ink);font-weight:600}
-.hud .foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--hair);padding:7px 12px}
-.tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;font-weight:600;color:var(--panel);background:var(--red);padding:3px 8px;opacity:0;transform:scale(.6);transition:opacity .2s,transform .35s cubic-bezier(.3,1.6,.5,1)}
-.tag.on{opacity:1;transform:none}
-.replay{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;border:1px solid var(--ink);background:var(--panel);color:var(--ink);padding:4px 9px;cursor:pointer}
-.replay:hover{background:var(--ink);color:var(--panel)}
 .idx{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:44;display:flex;flex-direction:column;border:1px solid var(--ink);border-right:0;background:var(--panel)}
 .idx a{display:block;width:30px;height:30px;line-height:30px;text-align:center;text-decoration:none;font-family:var(--mono);font-size:10px;color:var(--ink2);border-bottom:1px solid var(--hair)}
 .idx a:last-child{border-bottom:0}
@@ -183,13 +165,13 @@ h1.title{font-weight:850;font-stretch:125%;font-size:min(104px,calc(100cqw / 6.1
 .sec.in .rv{opacity:1;transform:none}
 
 @media (min-width:1024px) and (min-height:600px){ html{scroll-snap-type:y mandatory} }
-@media (max-height:780px) and (min-width:1024px){ .hud{display:none} .cap,.colo{display:none} }
+@media (max-height:780px) and (min-width:1024px){ .cap,.colo{display:none} }
 @media (max-width:1360px){ .rail{display:none} .brand{padding-left:22px} }
 @media (max-width:1200px){ .pn{display:none} nav.links a i{display:none} }
 @media (max-width:1023px){
   .sec{height:auto;min-height:100vh;padding:84px 18px 40px}
   .col,.col.right{width:100%;margin:0}
-  .hud,.idx{display:none}
+  .idx{display:none}
   nav.links{display:none}
   .lang{margin-left:auto}
   .bh{white-space:nowrap}.bh>span:last-child{display:none}
@@ -209,7 +191,7 @@ h1.title{font-weight:850;font-stretch:125%;font-size:min(104px,calc(100cqw / 6.1
   html{scroll-behavior:auto}
   .rv{opacity:1;transform:none;transition:none}
   .march,.pn .lamp{animation:none}
-  .trio .bar i,.hud,.tag{transition:none!important}
+  .trio .bar i{transition:none!important}
 }
 
 /* ---------- 06 console（verrier_console.js：提问 → 人工确认 → 进度 → 结果） ---------- */
@@ -217,7 +199,7 @@ body.cx-open{overflow:hidden}
 body.cx-open main,body.cx-open .idx{visibility:hidden}
 body.cx-open nav.links a.on:not(.cx-nav){background:transparent;color:var(--ink2)}
 body.cx-open nav.links a.cx-nav{background:var(--ink);color:var(--panel)}
-.cx{position:fixed;z-index:46;top:68px;bottom:22px;left:54px;right:348px;display:flex}
+.cx{position:fixed;z-index:46;top:68px;bottom:22px;left:54px;right:24px;display:flex}
 .cx[hidden]{display:none}
 .cx-card{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0}
 .cx-card>.bh{flex:none}
@@ -300,6 +282,85 @@ table.cx-t{width:100%;border-collapse:collapse;font-size:13px}
 @media (max-width:1100px){ .cx-grid{grid-template-columns:1fr} }
 @media (max-width:1023px){ .cx{left:8px;right:8px;top:60px;bottom:8px} .cx-body{padding:14px 14px 20px} .cx-strip{grid-template-columns:1fr 1fr} .cx-strip>div{border-bottom:1px solid var(--ink)}
   .cx-card>.bh .hz,.cx-card>.bh #cxCode{display:none} .cx-card>.bh{margin:9px 12px 0} }
+
+/* ---------- ask dock：替换原来右下角的 HUD，红色提问按钮，点了进控制台 ---------- */
+.ask{position:fixed;right:24px;bottom:22px;width:300px;z-index:45;display:block;text-decoration:none;color:var(--panel);background:var(--red);border:1px solid var(--ink);
+  overflow:hidden;isolation:isolate;cursor:pointer;transition:right .6s cubic-bezier(.6,0,.2,1),background .25s,transform .15s;animation:askPulse 2.8s ease-out infinite}
+body[data-view="3"] .ask{right:calc(100vw - 30px - 24px - 300px - 24px)}
+body.cx-open .ask{display:none}
+.ask:hover{background:var(--ink)}
+.ask:active{transform:translateY(1px)}
+.ask:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+@keyframes askPulse{0%{box-shadow:0 0 0 0 rgba(214,58,44,.55)}70%{box-shadow:0 0 0 16px rgba(214,58,44,0)}100%{box-shadow:0 0 0 0 rgba(214,58,44,0)}}
+.ask::before{content:"";position:absolute;inset:5px;pointer-events:none;z-index:2;opacity:.8;
+  background-image:linear-gradient(90deg,var(--panel) 50%,transparent 0),linear-gradient(90deg,var(--panel) 50%,transparent 0),linear-gradient(0deg,var(--panel) 50%,transparent 0),linear-gradient(0deg,var(--panel) 50%,transparent 0);
+  background-repeat:repeat-x,repeat-x,repeat-y,repeat-y;background-size:10px 1px,10px 1px,1px 10px,1px 10px;background-position:0 0,0 100%,0 0,100% 0;animation:askMarch .9s linear infinite}
+@keyframes askMarch{to{background-position:10px 0,-10px 100%,0 -10px,100% 10px}}
+.ask::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:38%;z-index:1;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(252,251,247,.30),transparent);transform:skewX(-18deg);animation:askSheen 4.4s cubic-bezier(.6,0,.2,1) infinite}
+@keyframes askSheen{0%,58%{left:-60%}100%{left:135%}}
+.ask-bh{display:flex;align-items:center;gap:10px;white-space:nowrap;overflow:hidden;background:var(--ink);color:var(--panel);margin:9px 10px 0;padding:4px 9px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;position:relative;z-index:3;transition:background .25s}
+.ask:hover .ask-bh{background:var(--red)}
+.ask-bh .hz{flex:0 0 40px;height:8px;border:1px solid var(--panel);background:repeating-linear-gradient(-45deg,var(--red) 0 4px,var(--ink) 4px 8px);background-size:11.31px 8px;animation:askHz .8s linear infinite}
+.ask:hover .ask-bh .hz{background-image:repeating-linear-gradient(-45deg,var(--ink) 0 4px,var(--red) 4px 8px)}
+@keyframes askHz{to{background-position:11.31px 0}}
+.ask-bh #askView{margin-left:auto}
+.ask-main{display:grid;grid-template-columns:78px 1fr;gap:12px;align-items:center;padding:10px 14px 6px;position:relative;z-index:3}
+.ask-orb{width:78px;height:78px;overflow:visible}
+.ask-orb *{fill:none;stroke:var(--panel)}
+.ask-orb .o-ring{stroke-width:1;stroke-dasharray:2 3;transform-origin:40px 40px;animation:askSpin 26s linear infinite}
+.ask-orb .o-ticks path{stroke-width:1.4}
+.ask-orb .o-sweep{fill:rgba(252,251,247,.26);stroke:none;transform-origin:40px 40px;animation:askSpin 3.2s linear infinite}
+.ask-orb .o-sys{transform-origin:40px 40px;animation:askSpin 48s linear infinite reverse}
+.ask-orb .o-orbit{stroke-width:1}
+.ask-orb .o-orbit.dim{stroke-dasharray:1 2.5}
+.ask-orb .o-pl{fill:var(--panel);stroke:none}
+.ask-orb .o-core{fill:var(--panel);stroke:none}
+.ask-orb .o-halo{stroke-width:1;transform-origin:40px 40px;animation:askHalo 1.8s ease-out infinite}
+@keyframes askSpin{to{transform:rotate(360deg)}}
+@keyframes askHalo{0%{transform:scale(.6);opacity:1}100%{transform:scale(3.6);opacity:0}}
+.ask-txt b{display:flex;align-items:center;gap:10px;font-weight:850;font-stretch:125%;font-size:34px;line-height:1;letter-spacing:.02em;text-transform:uppercase}
+.ask-txt b i{font-style:normal;font-size:22px;transition:transform .25s}
+.ask:hover .ask-txt b i{transform:translateX(7px)}
+.ask-sub{display:block;margin-top:6px;font-size:11.5px;font-stretch:100%;line-height:1.32;opacity:.92}
+.ask-tick{display:block;margin:5px 10px 9px;border-top:1px solid rgba(252,251,247,.5);padding-top:5px;overflow:hidden;white-space:nowrap;position:relative;z-index:3;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em}
+.ask-tape{display:inline-block;animation:askTape 18s linear infinite}
+@keyframes askTape{to{transform:translateX(-50%)}}
+@media (max-height:780px) and (min-width:1024px){ .ask-tick,.ask-sub{display:none} .ask-orb{width:56px;height:56px} .ask-main{grid-template-columns:56px 1fr} }
+@media (max-width:1023px){ .ask{display:block;right:12px;bottom:12px;width:auto} .ask-bh,.ask-sub,.ask-tick{display:none} .ask-main{grid-template-columns:44px auto;padding:8px 14px} .ask-orb{width:44px;height:44px} .ask-txt b{font-size:22px} }
+@media (prefers-reduced-motion: reduce){ .ask,.ask::before,.ask::after,.ask *{animation:none!important} }
+
+/* ---------- 「思考中」动效（纯装饰，内容取自真实阶段，不显示编造的数字） ---------- */
+.cx-scope{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center;border:1px solid var(--ink);padding:12px;background:var(--panel);margin:4px 0 2px}
+.cx-radar{position:relative;width:120px;height:120px;border-radius:50%;border:1px solid var(--ink);overflow:hidden;background:radial-gradient(circle,var(--panel) 0 55%,var(--tint) 100%)}
+.cx-radar .ring{position:absolute;border:1px dashed var(--hair);border-radius:50%}
+.cx-radar .ring.a{inset:18px}.cx-radar .ring.b{inset:38px}.cx-radar .ring.c{inset:54px;border-style:solid;border-color:var(--ink)}
+.cx-radar .ax{position:absolute;background:var(--hair)}.cx-radar .ax.h{left:0;right:0;top:50%;height:1px}.cx-radar .ax.v{top:0;bottom:0;left:50%;width:1px}
+.cx-radar .sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(214,58,44,0) 0deg 290deg,rgba(214,58,44,.32) 350deg,rgba(214,58,44,.85) 360deg);animation:askSpin 3.6s linear infinite}
+.cx-radar.fast .sweep{animation-duration:1s}
+.cx-radar .blip{position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;background:var(--ink);border-radius:50%;animation:cxBlip 2.4s ease-out forwards}
+.cx-radar .blip.r{background:var(--red)}
+@keyframes cxBlip{0%{transform:scale(0);opacity:1}15%{transform:scale(1.7)}100%{transform:scale(1);opacity:0}}
+.cx-scope-read b{display:block;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin:4px 0;min-height:1.5em}
+.cx-wave{display:flex;align-items:flex-end;gap:2px;height:22px;margin:6px 0 2px;border-bottom:1px solid var(--ink)}
+.cx-wave i{flex:1;background:var(--ink);height:8%;transition:height .14s ease-out}
+.cx-wave.live i{background:var(--red)}
+.btn.ignite{position:relative;overflow:hidden}
+.btn.ignite::after{content:"";position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(252,251,247,.38);animation:cxIgnite 1.4s ease-in forwards}
+@keyframes cxIgnite{to{width:100%}}
+.cx-think{display:grid;grid-template-columns:88px minmax(0,1fr);gap:18px;align-items:center;background:var(--ink);color:var(--panel);padding:14px 18px;margin:14px 0 4px;position:relative;overflow:hidden}
+.cx-think::before{content:"";position:absolute;inset:4px;border:1px dashed rgba(252,251,247,.25);pointer-events:none}
+.cx-think .lbl{color:var(--hair)}
+.cx-think .ask-orb{width:88px;height:88px}
+.cx-tl{margin:6px 0 0;min-height:1.4em}
+.cx-type{font-weight:800;font-stretch:118%;font-size:clamp(17px,2.4vh,22px);line-height:1.2}
+.cx-cursor{display:inline-block;margin-left:3px;color:var(--red);animation:blink 1s steps(2,start) infinite}
+.cx-scan{position:relative;height:3px;margin:10px 0 7px;background:rgba(252,251,247,.15);overflow:hidden}
+.cx-scan i{position:absolute;top:0;bottom:0;width:32%;background:linear-gradient(90deg,transparent,var(--red),transparent);animation:cxScan 1.7s cubic-bezier(.5,0,.5,1) infinite}
+@keyframes cxScan{from{left:-32%}to{left:100%}}
+.cx-bits{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:rgba(252,251,247,.55);white-space:nowrap;overflow:hidden}
+.cx-dir.busy::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(214,58,44,.10),transparent 65%);background-size:260% 100%;animation:cxDirSheen 1.8s linear infinite}
+@keyframes cxDirSheen{from{background-position:130% 0}to{background-position:-130% 0}}
+@media (prefers-reduced-motion: reduce){ .cx-radar .sweep,.cx-scan i,.cx-dir.busy::after,.cx-cursor,.cx-think .ask-orb *{animation:none!important} }
 </style>
 </head>
 <body data-view="0">
@@ -324,14 +385,31 @@ table.cx-t{width:100%;border-collapse:collapse;font-size:13px}
 <div class="rail" aria-hidden="true"><span>VERRIER · P/N VRR-001 · STOW 84S · THIS SIDE UP →</span></div>
 <nav class="idx" id="idx" aria-label="Sections"><a href="#s0">00</a><a href="#s1">01</a><a href="#s2">02</a><a href="#s3">03</a><a href="#s4">04</a><a href="#s5">05</a></nav>
 
-<aside class="hud" aria-hidden="true">
-  <div class="bh"><span>DU-1 · ORBIT SOLVER</span><span class="sp"></span><span id="hudView">VIEW 00</span></div>
-  <div class="row"><span class="clock" id="hudClock">T+ 00.00 S</span><span class="tag" id="hudTag">ACQUIRED</span></div>
-  <div class="cam" id="hudCam">AZ −058°  EL 30°  R 10.5</div>
-  <svg viewBox="0 0 274 34" preserveAspectRatio="none"><line x1="0" y1="17" x2="274" y2="17" stroke="#151515" stroke-width="1" stroke-dasharray="1 4"/><line x1="0" y1="6" x2="274" y2="6" stroke="#D6D0C4" stroke-width="1"/><line x1="0" y1="28" x2="274" y2="28" stroke="#D6D0C4" stroke-width="1"/><polyline id="hudSig" fill="none" stroke="#151515" stroke-width="1.3"/><text x="4" y="12" font-family="IBM Plex Mono" font-size="7.5" fill="#76716A" letter-spacing="1">RESIDUAL SIGNAL</text></svg>
-  <div class="ph" id="hudPh"><span>OBS</span><span>RES</span><span>INF</span><span>PRED</span><span>ACQ</span></div>
-  <div class="foot"><span class="lbl" id="hudStatus">TRACKING</span><button class="replay" type="button" data-replay>↻ REPLAY</button></div>
-</aside>
+<a class="ask" id="askBtn" href="#console" aria-label="Ask Verrier">
+  <span class="ask-bh"><span>DU-1 · ASK</span><i class="hz"></i><span id="askView">00 · COVER</span></span>
+  <span class="ask-main">
+    <svg class="ask-orb" viewBox="0 0 80 80" aria-hidden="true">
+      <circle class="o-ring" cx="40" cy="40" r="37"/>
+      <g class="o-ticks"><path d="M40 0v6M40 74v6M0 40h6M74 40h6"/></g>
+      <path class="o-sweep" d="M40 40 L40 3 A37 37 0 0 1 66.2 13.8 Z"/>
+      <g class="o-sys">
+        <path id="askOrbA" class="o-orbit" d="M10 40 a30 11 0 1 0 60 0 a30 11 0 1 0 -60 0"/>
+        <circle class="o-pl" r="3.4"><animateMotion dur="5.2s" repeatCount="indefinite"><mpath href="#askOrbA"/></animateMotion></circle>
+        <g transform="rotate(58 40 40)">
+          <path id="askOrbB" class="o-orbit dim" d="M40 13 a10 27 0 1 0 0 54 a10 27 0 1 0 0 -54"/>
+          <circle class="o-pl" r="2.3"><animateMotion dur="3.3s" repeatCount="indefinite"><mpath href="#askOrbB"/></animateMotion></circle>
+        </g>
+      </g>
+      <circle class="o-halo" cx="40" cy="40" r="8"/>
+      <circle class="o-core" cx="40" cy="40" r="4.4"/>
+    </svg>
+    <span class="ask-txt">
+      <b><span class="en">Ask</span><span class="zh">提问</span><i>→</i></b>
+      <span class="ask-sub"><span class="en">Hand Verrier a number nobody has published.</span><span class="zh">把一个还没人公布的数字交给 Verrier。</span></span>
+    </span>
+  </span>
+  <span class="ask-tick"><span class="ask-tape">PUBLIC DATA · UNPUBLISHED NUMBERS · HUMAN GATE · CODE DOES THE MATH · EVERY STEP ON THE RECORD · PUBLIC DATA · UNPUBLISHED NUMBERS · HUMAN GATE · CODE DOES THE MATH · EVERY STEP ON THE RECORD · </span></span>
+</a>
 
 <main>
 <!-- 00 cover -->
@@ -892,51 +970,24 @@ table.cx-t{width:100%;border-collapse:collapse;font-size:13px}
     });
   }
 
-  /* ---------- HUD + index ---------- */
+  /* ---------- 提问按钮上的 VIEW 标签 + 导航高亮（原来的 HUD 已换成提问按钮） ---------- */
   const $ = id => document.getElementById(id);
-  const hud = { view: $('hudView'), clock: $('hudClock'), cam: $('hudCam'), status: $('hudStatus'), tag: $('hudTag'), ph: [...$('hudPh').children], sig: $('hudSig') };
+  const askView = $('askView');
   const navA = [...document.querySelectorAll('#nav a')], idxA = [...document.querySelectorAll('#idx a')];
-  const PH = [[0, 1.4], [1.4, 2.1], [2.1, 2.9], [2.9, 3.75], [3.75, 5.01]];
-  let lastView = -1; const lastTxt = {};
-  const setT = (k, el, s) => { if (lastTxt[k] !== s) { el.textContent = s; lastTxt[k] = s; } };
-  /* 控制台（verrier_console.js）：VERRIER.mission({...}) 接管 HUD 和机位；传 null 交还给滚动和 1846 动画 */
+  let lastView = -1;
+  /* 控制台（verrier_console.js）：VERRIER.mission({...}) 时机位停在 WIDE FIELD；传 null 交还给滚动 */
   let mission = null;
-  const PH_LBL = hud.ph.map(e => e.textContent), MPH = ['PLAN', 'GATE', 'GATHER', 'JUDGE', 'CALC'];
-  function updMission(time) {
-    const m = mission;
-    setT('clock', hud.clock, 'T+ ' + Number(m.elapsed || 0).toFixed(1).padStart(5, '0') + ' S');
-    setT('cam', hud.cam, m.cam || '');
-    setT('status', hud.status, m.status || '');
-    setT('view', hud.view, m.view || 'MISSION');
-    setT('tag', hud.tag, m.tag || 'ACQUIRED');
-    hud.tag.classList.toggle('on', !!m.done);
-    hud.ph.forEach((el, i) => { if (el.textContent !== MPH[i]) el.textContent = MPH[i]; el.className = i < m.phase ? 'done' : i === m.phase ? 'now' : ''; });
-    const amp = 2 + 9 * Math.max(0, Math.min(1, m.progress || 0)), sh = reduce ? 0 : time * 40; let pts = '';
-    for (let x = 0; x <= 274; x += 4) { const u = (x + sh) % 274; const g = Math.exp(-Math.pow((u - 160) / 26, 2)); const y = 17 - amp * g + 1.2 * Math.sin((x + sh) * .35) * (1 - g); pts += x + ',' + y.toFixed(1) + ' '; }
-    hud.sig.setAttribute('points', pts);
-  }
   function setMission(m) {
     mission = m || null;
     if (mission) { document.body.dataset.view = 'm'; return; }
-    hud.ph.forEach((el, i) => { el.textContent = PH_LBL[i]; });
-    setT('tag', hud.tag, 'ACQUIRED');
     lastView = -1;
   }
   function updHud(tau, time) {
-    if (mission) return updMission(time);
+    if (mission) return;
     const v = Math.round(sS);
-    setT('clock', hud.clock, 'T+ ' + tau.toFixed(2).padStart(5, '0') + ' S');
-    setT('cam', hud.cam, `AZ ${cam.az < 0 ? '−' : '+'}${String(Math.round(Math.abs(cam.az))).padStart(3, '0')}°  EL ${String(Math.round(cam.el)).padStart(2, '0')}°  R ${cam.dist.toFixed(1)}`);
-    setT('status', hud.status, tau >= 4.6 ? 'TARGET ACQUIRED' : tau >= 3.6 ? 'POSITION LOCKED' : tau >= 2.1 ? 'SOLVING' : 'TRACKING');
-    hud.tag.classList.toggle('on', tau >= 4.6);
-    PH.forEach(([a, b], i) => { const done = tau >= b || (i === 4 && tau >= 4.95), now = tau >= a && !done; hud.ph[i].className = done ? 'done' : now ? 'now' : ''; });
-    /* residual signal: a bump that grows as the residual is found, scrolling */
-    const amp = 2 + 9 * seg(tau, 1.2, 2.2), sh = reduce ? 0 : time * 40; let pts = '';
-    for (let x = 0; x <= 274; x += 4) { const u = (x + sh) % 274; const g = Math.exp(-Math.pow((u - 160) / 26, 2)); const y = 17 - amp * g + 1.2 * Math.sin((x + sh) * .35) * (1 - g); pts += x + ',' + y.toFixed(1) + ' '; }
-    hud.sig.setAttribute('points', pts);
     if (v !== lastView) {
       lastView = v; document.body.dataset.view = v;
-      setT('view', hud.view, `VIEW ${String(v).padStart(2, '0')} · ${VIEWS[v]}`);
+      askView.textContent = `${String(v).padStart(2, '0')} · ${VIEWS[v]}`;
       navA.forEach((a, i) => a.classList.toggle('on', i + 1 === v));
       idxA.forEach((a, i) => a.classList.toggle('on', i === v));
     }

@@ -8,6 +8,10 @@
   const cx = $("cx"), body = $("cxBody"), code = $("cxCode");
   let timer = null, token = 0, lastScroll = 0;
   const played = new Set();
+  // 装饰动效（雷达、声波、打字机）的定时器：换页或关掉控制台时清掉；和轮询的 timer 分开，轮询重画不打断它们
+  const fxTimers = [];
+  const fxEvery = (fn, ms) => fxTimers.push(setInterval(fn, ms));
+  function fxClear() { while (fxTimers.length) clearInterval(fxTimers.pop()); thinkStop(); }
 
   // ---------- 工具（和经典界面 app.js 同一套格式） ----------
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
@@ -63,6 +67,7 @@
   }
   function close() {
     stop();
+    fxClear();
     token++;
     if (cx.hidden) return;
     cx.hidden = true;
@@ -86,6 +91,7 @@
     }
     open();
     stop();
+    fxClear();
     const tok = ++token, parts = h.slice(1).split("/").map(decodeURIComponent);
     const p = parts[1] === "run" && parts[2] ? viewRun(parts[2], tok)
       : parts[1] === "result" && parts[2] ? viewResult(parts[2], parts[3] || "", tok) : viewHome(tok);
@@ -109,6 +115,7 @@
           "Verrier 先钉死目标、列出取证方向，然后停下来等你批准；批准之后才开始搜索。")}</p>
         <div class="cx-row"><label class="lbl" for="cxQ">${T("Question", "问题")}</label></div>
         <textarea id="cxQ" placeholder="How many ... in ...?"></textarea>
+        <div class="cx-wave" id="cxWave" aria-hidden="true">${"<i></i>".repeat(48)}</div>
         <div class="cx-chips">${EXAMPLES.map((q, i) => `<button type="button" data-ex="${i}" title="${esc(q)}">${esc(q.slice(0, 48))}…</button>`).join("")}</div>
         <div class="cx-row"><label class="lbl" for="cxAsof">AS OF</label><input type="date" id="cxAsof">
           <span class="fine">${T("Empty = today (live pages). An earlier date = backtest: only archived snapshots up to that day.",
@@ -119,19 +126,33 @@
           "需要 key 文件（TRIANGULATE_KEY_FILE）和网络。每次运行的花费上限 $1.00（含按假设单价记的搜索费）。")}</p>
       </div>
       <div>
+        <h3 class="cx-h">${T("Signal scope", "信号扫描")}</h3>
+        <div class="cx-scope" aria-hidden="true"><div class="cx-radar" id="cxRadar"><i class="ring a"></i><i class="ring b"></i><i class="ring c"></i>
+          <i class="ax h"></i><i class="ax v"></i><i class="sweep"></i></div>
+          <div class="cx-scope-read"><span class="lbl">DU-2 · SCOPE</span><b id="cxScopeTxt"></b><span class="lbl" id="cxScopeSub">SWEEP 0000</span></div></div>
         <h3 class="cx-h">${T("Missions this session", "这次服务启动后的任务")}</h3><div id="cxRuns" class="fine">…</div>
         <h3 class="cx-h">${T("Saved runs", "已保存的运行")}</h3><div id="cxSaved" class="fine">…</div>
         <p class="fine"><a href="/#/saved" target="_blank" rel="noopener">${T("All saved runs and backtests in the classic view ↗", "在经典界面看全部运行和回测 ↗")}</a></p>
       </div></div>`;
-    body.querySelectorAll("[data-ex]").forEach(b => { b.onclick = () => { $("cxQ").value = EXAMPLES[+b.dataset.ex]; $("cxQ").focus(); }; });
+    body.dataset.run = "";
+    body.querySelectorAll("[data-ex]").forEach(b => { b.onclick = () => {
+      $("cxQ").value = EXAMPLES[+b.dataset.ex]; $("cxQ").dispatchEvent(new Event("input")); $("cxQ").focus(); }; });
     $("cxGo").onclick = async () => {
       const btn = $("cxGo");
       btn.disabled = true;
+      btn.classList.add("ignite");
+      $("cxScopeTxt").innerHTML = T("Ignition", "点火");
       try {
-        const r = await post("/api/runs", {question: $("cxQ").value, as_of: $("cxAsof").value || null});
+        const [r] = await Promise.all([post("/api/runs", {question: $("cxQ").value, as_of: $("cxAsof").value || null}),
+          new Promise(ok => setTimeout(ok, 900))]);   // 点火动画至少放完一段
         location.hash = "#console/run/" + encodeURIComponent(r.id);
-      } catch (e) { $("cxMsg").innerHTML = `<span class="cx-bad">${esc(e.message)}</span>`; btn.disabled = false; }
+      } catch (e) {
+        $("cxMsg").innerHTML = `<span class="cx-bad">${esc(e.message)}</span>`;
+        btn.disabled = false;
+        btn.classList.remove("ignite");
+      }
     };
+    scope(tok);
     const [runs, saved] = await Promise.all([api("/api/runs"), api("/api/saved").catch(() => ({runs: []}))]);
     if (tok !== token) return;
     $("cxRuns").innerHTML = runs.runs.length ? `<div class="cx-list">${runs.runs.map(r => `<a class="cx-li" href="#console/run/${encodeURIComponent(r.id)}">
@@ -141,6 +162,98 @@
     $("cxSaved").innerHTML = sv.length ? `<div class="cx-list">${sv.map(r => `<a class="cx-li" href="#console/result/${encodeURIComponent(r.qid)}/${encodeURIComponent(r.tag || "")}">
       <span class="stencil">${esc(r.kind)}</span><span title="${esc(r.qid)} / ${esc(r.tag)}">${esc(r.qid)} <span class="lbl">${esc(r.tag || "")}</span></span>
       <span class="lbl">${r.mode === "discrete" ? esc(r.most_likely ?? "—") : fmt(r.estimate)}</span></a>`).join("")}</div>` : T("None.", "没有。");
+  }
+
+  // ---------- 装饰动效：雷达扫描、按键声波、「思考中」打字机 ----------
+  // 只是动效：显示的文字是固定的短语或真实的阶段名、字数，不编造证据或数字。
+  const IDLE = [["Listening for a question", "等待你的问题"], ["Scanning the public record", "扫描公开记录"],
+    ["Release calendars on file", "发布日历已就绪"], ["Field agents on standby", "子 agent 待命"]];
+  function scope(tok) {
+    const radar = $("cxRadar"), txt = $("cxScopeTxt"), sub = $("cxScopeSub"), wave = $("cxWave"), q = $("cxQ");
+    if (!radar || !wave || !q) return;
+    const bars = [...wave.children];
+    let k = 0, typing = 0;
+    txt.innerHTML = T(...IDLE[0]);
+    const blip = () => {
+      const a = Math.random() * 2 * Math.PI, r = 8 + Math.random() * 48, b = document.createElement("span");
+      b.className = "blip" + (Math.random() < .3 ? " r" : "");
+      b.style.left = (60 + r * Math.cos(a)).toFixed(1) + "px";
+      b.style.top = (60 + r * Math.sin(a)).toFixed(1) + "px";
+      radar.appendChild(b);
+      setTimeout(() => b.remove(), 2500);
+    };
+    q.addEventListener("input", () => {
+      typing = 3;
+      radar.classList.add("fast");
+      wave.classList.add("live");
+      const s = q.value.trim(), words = s ? s.split(/\s+/).length : 0;
+      txt.innerHTML = T("Parsing the question", "正在解析问题");
+      sub.textContent = `${s.length} CHARS · ${words} WORDS`;
+      bars.forEach(i => { i.style.height = (18 + Math.random() * 82).toFixed(0) + "%"; });
+      if (Math.random() < .5) blip();
+    });
+    fxEvery(() => {
+      if (tok !== token || !document.body.contains(radar)) return;
+      blip();
+      if (typing > 0) typing--;
+      else {
+        radar.classList.remove("fast");
+        wave.classList.remove("live");
+        if (!$("cxGo") || !$("cxGo").disabled) { txt.innerHTML = T(...IDLE[++k % IDLE.length]); sub.textContent = "SWEEP " + String(k).padStart(4, "0"); }
+      }
+    }, 1400);
+    fxEvery(() => { if (!typing) bars.forEach(i => { i.style.height = (5 + Math.random() * 16).toFixed(0) + "%"; }); }, 220);
+  }
+  const orb = p => `<svg class="ask-orb" viewBox="0 0 80 80" aria-hidden="true"><circle class="o-ring" cx="40" cy="40" r="37"/>
+    <g class="o-ticks"><path d="M40 0v6M40 74v6M0 40h6M74 40h6"/></g><path class="o-sweep" d="M40 40 L40 3 A37 37 0 0 1 66.2 13.8 Z"/>
+    <g class="o-sys"><path id="${p}A" class="o-orbit" d="M10 40 a30 11 0 1 0 60 0 a30 11 0 1 0 -60 0"/>
+    <circle class="o-pl" r="3.4"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#${p}A"/></animateMotion></circle>
+    <g transform="rotate(58 40 40)"><path id="${p}B" class="o-orbit dim" d="M40 13 a10 27 0 1 0 0 54 a10 27 0 1 0 0 -54"/>
+    <circle class="o-pl" r="2.3"><animateMotion dur="1.7s" repeatCount="indefinite"><mpath href="#${p}B"/></animateMotion></circle></g></g>
+    <circle class="o-halo" cx="40" cy="40" r="8"/><circle class="o-core" cx="40" cy="40" r="4.4"/></svg>`;
+  // 每个阶段的短语：描述这个阶段真实在做的事
+  const PHRASES = {
+    plan: [["Reading the question", "正在读题"], ["Pinning the exact target", "锁定要估的那个数"], ["Drafting estimation routes", "起草推算路线"],
+      ["Working out where the evidence might hide", "推测证据可能藏在哪里"]],
+    subagents: [["Field agents are reading the public record", "子 agent 正在翻公开记录"], ["Checking every quote against the page", "逐字核对每条引文"],
+      ["Dropping pages without a usable date", "丢掉读不出日期的网页"], ["Collecting numbers with their sources", "收集带出处的数字"]],
+    judge: [["Weighing the evidence", "权衡证据"], ["Cross-checking the routes", "交叉核对各条路线"], ["Flagging every assumption", "标出每一个假设"],
+      ["Auditing each formula input", "逐个核对公式输入"]],
+    compute: [["Running the formulas in code", "用代码跑公式"], ["Drawing 20,000 Monte Carlo samples", "抽 20,000 个 Monte Carlo 样本"],
+      ["Combining the routes", "合并各条路线"]],
+    final: [["Writing the answer", "撰写答案"], ["Attaching the evidence ledger", "附上证据账本"]],
+  };
+  const GLYPHS = "▮▯▮▯··0123456789ABCDEF";
+  let think = null;
+  function thinkStop() { if (think) { clearInterval(think.timer); think = null; } }
+  function thinkSet(host, key, stageHtml) {
+    if (!host) return thinkStop();
+    if (!key) { thinkStop(); host.innerHTML = ""; return; }
+    if (think && think.host === host && think.key === key) { $("cxThinkStage").innerHTML = stageHtml; return; }
+    thinkStop();
+    host.innerHTML = `<div class="cx-think" aria-live="polite">${orb("cxOrb")}<div>
+      <span class="lbl">${T("Verrier is thinking", "Verrier 正在思考")} · <span id="cxThinkStage">${stageHtml}</span></span>
+      <div class="cx-tl"><b class="cx-type" id="cxType"></b><span class="cx-cursor">▌</span></div>
+      <div class="cx-scan"><i></i></div><div class="cx-bits" id="cxBits"></div></div></div>`;
+    const list = PHRASES[key] || PHRASES.plan, st = {host, key, p: 0, c: 0, dir: 1, hold: 0, n: 0};
+    st.timer = setInterval(() => {
+      const el = $("cxType"), bits = $("cxBits");
+      if (!el || !document.body.contains(host)) return thinkStop();
+      const s = list[st.p][zh() ? 1 : 0];
+      if (st.hold > 0) { if (--st.hold === 0) st.dir = -1; }
+      else if (st.dir === 1) { st.c = Math.min(s.length, st.c + 1); if (st.c >= s.length) { st.dir = 0; st.hold = 40; } }
+      else if (st.dir === -1) { st.c = Math.max(0, st.c - 2); if (st.c === 0) { st.p = (st.p + 1) % list.length; st.dir = 1; } }
+      el.textContent = s.slice(0, st.c);
+      if (bits && ++st.n % 3 === 0) bits.textContent = Array.from({length: 56}, () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)]).join("");
+    }, 45);
+    think = st;
+  }
+  function stageKey(r) {
+    if (!["planning", "running"].includes(r.status)) return null;
+    const first = (r.stages || []).find(s => s.status !== "done");
+    if (!first || first.key === "approve") return r.status === "planning" ? "plan" : null;
+    const k = first.key || "";
+    return k.startsWith("subagents") ? "subagents" : k.startsWith("judge") ? "judge" : ["plan", "compute", "final"].includes(k) ? k : "plan";
   }
 
   // ---------- 进度 ----------
@@ -205,8 +318,7 @@
       try {
         await post(`/api/runs/${encodeURIComponent(r.id)}/approve`, ids.length === (r.directions_proposed || []).length ? {} : {keep_direction_ids: ids});
         stop();
-        body.innerHTML = "";
-        viewRun(r.id, tok).catch(fail(tok));
+        viewRun(r.id, tok).catch(fail(tok));   // 骨架（cxRunTop / cxThink / cxRunMain）留着，只重画里面
       } catch (e) { $("cxGateMsg").innerHTML = `<span class="cx-bad">${esc(e.message)}</span>`; $("cxApprove").disabled = false; }
     };
   }
@@ -255,11 +367,17 @@
       wireCancel(r);
       return schedule(() => viewRun(id, tok), 3000, tok);
     }
-    const keep = body.scrollTop;
-    body.innerHTML = `<div id="cxStrip">${strip(r)}</div>
+    // 同一个运行只搭一次骨架：「思考中」面板放在 cxThink 里，轮询只重画 cxRunTop 和 cxRunMain，打字机动画不会被打断
+    if (body.dataset.run !== id) {
+      body.dataset.run = id;
+      body.innerHTML = `<div id="cxRunTop"></div><div id="cxThink"></div><div id="cxRunMain"></div>`;
+    }
+    const keep = body.scrollTop, key = stageKey(r), cur = (r.stages || []).find(s => s.status !== "done");
+    $("cxRunTop").innerHTML = `<div id="cxStrip">${strip(r)}</div>
       ${r.error ? `<div class="cx-err">${esc(r.error)}</div>` : ""}
-      <p class="cx-q">${esc(r.question)}</p><p class="fine">${T("question id", "题 id")} ${esc(r.qid)} · tag ${esc(r.tag)}</p>
-      ${picking ? gate(r) : ""}
+      <p class="cx-q">${esc(r.question)}</p><p class="fine">${T("question id", "题 id")} ${esc(r.qid)} · tag ${esc(r.tag)}</p>`;
+    thinkSet($("cxThink"), key, cur ? T(...(STAGE[cur.key] || [esc(cur.label), esc(cur.label)])) : "");
+    $("cxRunMain").innerHTML = `${picking ? gate(r) : ""}
       <div class="cx-grid"><div>
         <h3 class="cx-h">${T("Pipeline", "流程")}</h3>${stages(r.stages)}
         ${(r.directions || []).length ? `<h3 class="cx-h">${T("Field agents", "子 agent（各取证方向）")}</h3><div class="cx-dirs">${r.directions.map(dirCard).join("")}</div>` : ""}
@@ -313,6 +431,7 @@
   }
   async function viewResult(qid, tag, tok) {
     code.textContent = String(qid).toUpperCase();
+    body.dataset.run = "";
     body.innerHTML = `<div class="cx-row"><a class="btn" href="#console"><span>←</span>${T("Mission control", "控制台")}</a></div>
       <p class="cx-q" id="cxRq">…</p><p class="fine" id="cxRm"></p><div id="cxDelivered"></div>`;
     const r = await loadDelivered(qid, tag, tok, true);

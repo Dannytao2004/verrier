@@ -20,12 +20,13 @@ from triangulate.web.app import HOST, create_app  # noqa: E402
 from triangulate.web.runs import Registry  # noqa: E402
 
 DELAY_S = 1.2
+ROLE_DELAY_S = {"plan": 5.0, "judge": 3.0, "final": 2.0}   # 按角色多等一会儿，接近真实运行的节奏（真实的 plan 约 13 s）
 
 
 class SlowLLM(TW.FakeLLM):
-    def ask(self, *a, **k):
-        time.sleep(DELAY_S)
-        return super().ask(*a, **k)
+    def ask(self, system, user, *, role, qid, **k):
+        time.sleep(next((v for r, v in ROLE_DELAY_S.items() if role.startswith(r)), DELAY_S))
+        return super().ask(system, user, role=role, qid=qid, **k)
 
 
 class SlowSearcher(TW.FakeSearcher):

@@ -25,8 +25,12 @@ class TestVerrierPage(unittest.TestCase):
         r = self.c.get("/verrier")
         self.assertEqual(r.status_code, 200)
         self.assertTrue(r.headers["content-type"].startswith("text/html"))
-        for s in ('id="cx"', 'id="cxBody"', "MISSION CONTROL", "/static/verrier_console.js", 'href="#console"', "mission: setMission"):
+        for s in ('id="cx"', 'id="cxBody"', "MISSION CONTROL", "/static/verrier_console.js", 'href="#console"', "mission: setMission",
+                  'class="ask" id="askBtn" href="#console"', 'id="askView"'):
             self.assertIn(s, r.text)
+        # 右下角原来的 HUD（ORBIT SOLVER）已换成提问按钮，场景脚本里也不再引用它的元素
+        for gone in ('class="hud"', "hudPh", "hudSig", "ORBIT SOLVER"):
+            self.assertNotIn(gone, r.text)
         self.assertEqual(self.c.get("/static/verrier_console.js").status_code, 200)
 
     def test_classic_app_unchanged(self):
