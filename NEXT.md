@@ -1,5 +1,61 @@
 # 断点（2026-10-17，v2.7 单位与覆盖范围）
 
+当前代码：HEAD `63b0b4d` = tag `v2.7a`（U0）。往前依次是 `7709c5b`（上一次文档提交，写的时候 U0 受阻，见下面上一个断点）、`3911465`（`UNITS_PLAN.md`）、
+tag `web-v0.5`（`ba53c97`）、`web-v0.4`（`f1ea8bd`）、`v2.6h`（`3d6b0a9`）。v2.7 按 `UNITS_PLAN.md` 做（用户批准的原话：「我觉得还行，起码比把应该搭配使用的channel分开来用要好很多。改吧」），
+分 U0–U4 五个阶段、各打一个 tag。
+
+**这次运行没有提交任何阶段**：U1 做了三轮，第三轮独立审查停在 verify（1 条低、2 条信息），没有 commit、没有 tag。U1 的改动留在工作区：
+` M triangulate/agent/graph.py`、` M triangulate/agent/prompts.py`、`?? tests/test_plan_unit.py`。在 `v2.7a` 上没有一处 import `qty`，agent 的行为和 `web-v0.5` 相同；
+工作区的 graph.py 已经 import qty（规划会钉单位，计算不变）。全程离线：没联网、没调模型、没读 `.env`；`results/`、`data/` 没改（U1 的 G8：2771 个文件，0 增 0 删 0 改）。
+
+## tag 和阶段
+
+| 阶段 | tag | 状态 | 说明 |
+|---|---|---|---|
+| （已有） | `v2.6h`、`web-v0.4`、`web-v0.5` | 已打 | 第一轮修复收尾和网页，见下面的断点 |
+| U0 | `v2.7a`（`63b0b4d`） | 完成 | `agent/qty.py`、`tests/test_qty.py`（28 条）、requirements.txt 加 `pint==0.26.1` 和它的 3 个依赖；不接入流程。上一个断点里第三轮审查退回的第 1 条（`USD/1000-person` 这类连字符基数，现在报错，10-17 下午在 HEAD 上复查）和第 3 条（依赖补进 requirements.txt）在提交前改了；第 2 条（U0.md 第 9 节第 1 条没标「不完整」）只在 BUGS.md Q2 写全，U0.md 没改。提交说明记的门槛：374 个测试 OK、G2 不变、回归 41/41 相同、showcase 相同、冻结路径没动。U0.md 停在第三轮，没写这两处收尾 |
+| U1 | 计划 `v2.7b` | 受阻（工作区，没提交） | 规划钉死 `target.unit_canonical`：解析不了就带着错误重问一次，仍不行记 plan note、不中止；离散题不检查。第三轮 G1 384 个测试 OK、G3 41 行 0 差异、G4 / G5 / G7 / G8 过、变异 19 个全抓到。审查退回 1 条低：`tests/test_plan_unit.py` 第 98、99 行的换算断言没有检验力（`places=7` 的绝对比较，期望值只有 2.7e-6 和 1e-8），U1.md 第 3、4 节说重了 |
+| U2 | `v2.7c` | 未开始 | formula_mc 量纲检查和换算、百分数守卫（R1） |
+| U3 | `v2.7d` | 未开始 | 方法层 coverage、part 方法不进合并 |
+| U4 | `v2.7e` | 未开始 | 终稿 `[[unit]]`、控制台和各页面显示单位 |
+
+## G2 的 sha256
+
+| 适用的代码 | sha256 | 为什么 |
+|---|---|---|
+| `v2.6d`–`v2.6h`、`web-v0.4`、`web-v0.5`、`v2.7a` | `bbcfa3b1da2ff3d90cf24d9f9c4473ab81e1406d79efab9aef58072ffc52649a` | S7 定的值。web-v0.4 / v0.5 只改网页；U0 只加新模块、不碰 prompt。U1 在 `v2.7a` 的导出（`probes/out/_old_v2_7a`）上量到的也是这个值 |
+| U1 工作区（计划 `v2.7b`） | `826f83628d710413883ea6c588a023f8624fcdb8cb0de6bb4be4b16c0e04095e` | PLAN_USER 多一段 unit_canonical 的要求、回复示例多一个键；探针的假规划没有 unit_canonical，所以多一条重问的 plan prompt（8 条变 9 条），其余 7 条 prompt 逐字节相同。第二、三轮重跑都是这个值；审查退回的那条只改测试，修完应保持不变。参考（不是门槛）：假规划带 `unit_canonical: "widget"` 时是 `fa81d279…`，plan 只问 1 次，裁判、输入核对、终稿的 target 那一行末尾多 `"unit_canonical": "widget"` |
+| U2–U4 | 还没有 | 计划都会变（U2 改 AUDIT、JUDGE / METHODS_SPEC；U3 改 AUDIT；U4 改 FINAL），每个阶段做完时登记 |
+
+## 没做的、等用户定的
+
+- **U1 收尾**：把第 98、99 行改成相对比较（`f * 365250`、`f * 1e8` 对 1.0，`places=12`），或删掉、注释指向 `tests/test_qty.py:283`；改 U1.md 第 3、4 节的措辞；
+  重跑 G1、变异检查和 G8（G2 应保持 `826f8362…`）。然后提交 `graph.py`、`prompts.py`、`tests/test_plan_unit.py` 三个文件、打 `v2.7b`，再开始 U2。
+- **要不要把重问的结果写进 plan note**（U1.md 第 8 节第 9 条）：现在重问的回复和它被拒的原因都没有保存，真实运行之后看不出第一次错在哪、重问为什么被拒。
+  阶段报告推荐改（会改 U1 规定的 note 格式），等用户定。
+- **U2 开工前要定**：(1) 百分数的口径：`compute.run` 已经对 unit 正好是 `"%"` 的点除以 100，`assumptions.effective_range` 已经对 `is_pct` 的假设除以 100，
+  U2 再按 `percent` 乘 0.01 会差 100 倍（BUGS.md Q5、R1）；(2) `birth/1000` 这类自带倍数的目标单位要不要在钉单位时拒收（BUGS.md Q15）。
+- **过渡期**：U1 提交之后、U2 之前，裁判、输入核对、终稿、已公布检查的 prompt 都能看到钉住的单位，但 compute 不换算；这期间不做真实运行。
+- **真实运行**：用控制台重跑披萨题（`芝加哥人每天吃多少披萨`）看新行为，约 $0.5，要用户批准；至少要 U1–U3 做完才有意义，要在控制台看到单位还要 U4。
+  离线测试只证明 qty 的推导和换算对（`tests/test_qty.py` 的披萨夹具，10-17 下午重跑：m1 64.79、m2 59.89、m3 22.29、餐馆 + 冷冻 86.18 吨/天，和 m1 合并 74.72，
+  80% [35.67, 156.53]）；模型会不会写出能解析的单位和 coverage、修正轮能不能看懂报错，都要真实运行才知道。
+- **数据点层的集合坐标**（第 6 条的第二步：每个点标 geo / channel 等维度，代码查包含、重叠、重复计算）：这一轮不做，等 U0–U4 跑过几道真题再定。
+- 上一个断点里「requirements.txt 要不要补 pint 的 3 个依赖」已经在 `v2.7a` 补上。更早的待办（S11 重跑、10-21 / 10-28 展示集打分、结构化基线修复、区间规则、Kalshi 等）不变，
+  见下面。冻结路径（G7）到 10-28 打分提交为止仍不能动。
+
+## 报告在哪
+
+- `probes/out/stages/U1.md`（被 gitignore，只在本机）：三轮的改动、改前 / 改后真实输出、改动函数和上下一层的输入输出、门槛命令和输出、和计划的出入、已知限制、交给提交步骤；
+  同目录的 `U1_*.txt|json` 是门槛输出；前两轮的报告备份 `probes/out/u1/U1_round1.md`、`U1_round2.md`；U1 的探针在 `probes/out/u1/`；`v2.7a` 的代码导出 `probes/out/_old_v2_7a/`。
+- U1 审查的探针和输出：`probes/out/_rev_u1/`、`_rev_u1r2/`、`_rev_u1r3/`（第三轮，含 `hang_find.py`、`paths_probe.py`、`fuzz_pin.py`）。
+- `probes/out/stages/U0.md`（停在第三轮）、`probes/out/u0/`、`probes/out/_rev_u0/`、`probes/out/_rev_u0r3/`：U0 的报告、探针和审查。
+- 披萨题离线重算：`probes/out/_pizza_tonnes.py`；按测试夹具打印数字：`probes/out/docs_v27/_pizza_numbers.py`。
+- 已知限制在 `BUGS.md` 的 Q 节（Q1、Q10 在 `v2.7a` 修了；Q11–Q20 是 U1 的）；阶段状态和数字见 `UNITS_PLAN.md` 的阶段表和「结果」一节。
+
+---
+
+# 断点（2026-10-17 早上，v2.7 停在 U0；下面是当时的原文）
+
 当前代码：HEAD `3911465`（= tag `web-v0.5` `ba53c97` + `UNITS_PLAN.md` 一次提交）。`web-v0.4`（`f1ea8bd`）、`web-v0.5` 在 `v2.6h` 之上，只改了网页
 （`/verrier` 页和它的运行控制台、`app.py` 一个路由、`tests/test_verrier_page.py`、`probes/web_demo_fake.py`），不碰 prompt、compute、graph。
 v2.7 这一轮按 `UNITS_PLAN.md` 做（用户批准的原话：「我觉得还行，起码比把应该搭配使用的channel分开来用要好很多。改吧」）：

@@ -1,4 +1,4 @@
-# BUGS：当前全部已知问题（2026-10-16 整理，代码 v2.5.2 + showcase 臂；10-16 晚、10-17 凌晨按第一轮修复的结果更新状态，代码 v2.6g；10-17 补 Q 节：v2.7 的 U0，没提交）
+# BUGS：当前全部已知问题（2026-10-16 整理，代码 v2.5.2 + showcase 臂；10-16 晚、10-17 凌晨按第一轮修复的结果更新状态，代码 v2.6g；10-17 补 Q 节：v2.7 的 U0，没提交；10-17 下午：U0 提交为 v2.7a，Q 节补上 U1（没提交）的已知限制）
 
 只做整理，没改代码、没重跑。来源：NEXT.md、SHOWCASE.md 的记录，加上 2026-10-16 对 showcase1 结果和代码的检查。
 「新」= 这次检查新发现（证据是这次跑的离线查询）；「记」= 以前已经记录（NEXT.md / SHOWCASE.md 有详细说明，当时对着代码核实过）。
@@ -172,13 +172,13 @@ S6 `test_leak_guard`、S7 `test_final_text`、S8 `test_cjk_numbers` 24 个、S9 
 | R18 | 低 | 页面解码的残余情况（`v2.6f1`）：(1) 头里单引号的 charset（`charset='Shift_JIS'`）w3lib 不认，几乎全 ASCII 的 Shift_JIS 页在 v2.6f1 会被自动探测猜成 cp1250，`v2.6h` 起按 utf-8 解（和 v2.6e、浏览器相同，日文处是 U+FFFD）；日文为主的页由探测解对；双引号和不带引号的写法都认。另：没有声明、夹了几个坏字节的 utf-8 页在 v2.6f1 会被猜成 mac_* 编码，`v2.6h` 已修（S9c）。(2) 自动探测的猜测质量一般：小段 cp1252 法文也被猜成 cp1250，重音字母错、ASCII 数字不错。(3) 页面其实是 UTF-8、头里没 charset、meta 写错（如 iso-8859-1）时按 meta 解成乱码（v2.6e 解对），这和浏览器的做法相同。缓存 286 个快照的头里没有带引号的 charset，也没有 (3) 这种页面；S9 时没有缓存页走到 charset 探测（v2.6f1 没重新统计） | 收尾时离线核对 `probes/out/_docs_r2_check.py`；`probes/out/_rev_s9b/edges.out`、`edges2.out`；S9.md 第 8 节 | 没改（(3) 要用户定） |
 | R19 | 低 | S10 遗留：`llm.json_call`、`Searcher.search`、`DirectClient.call` 的 `except HTTPError` 没有关闭响应，走到 3xx / 4xx / 5xx 时有 `ResourceWarning`（G1 输出里 5 条，不是失败，原来就有的写法，以前没有测试走到）；`llm.py` 新加的 `_NoRedirect` 和 `agent/net.py` 取页用的同名类重复，没有合并 | S10.md 第 6 节 | 没改（属于 N3「HTTP 客户端统一」；合并要挪 `net.py`，是重构） |
 
-## Q. v2.7 单位轮新发现、没改的问题（`triangulate/agent/qty.py`，来自 U0 阶段报告第 8、9 节和第三轮审查；U0 没提交，代码只在工作区）
+## Q. v2.7 单位轮新发现、没改的问题（`triangulate/agent/qty.py` 和 U1 的规划钉单位；来自 U0、U1 阶段报告和审查；U0 已提交为 `v2.7a`，U1 没提交，代码只在工作区）
 
-qty 还没接入任何流程，下面的问题现在都不影响运行结果；U1 / U2 接入以后才会出现。
+在 `v2.7a` 上 qty 还没接入任何流程，Q1–Q10 都不影响运行结果，U1 / U2 接入以后才会出现。Q11–Q20 来自 U1（工作区，规划节点已经调用 qty）的阶段报告第 8–10 节和第三轮审查；U1 不碰计算，流程里的数和 `v2.7a` 相同。
 
 | # | 严重度 | 问题 | 证据 / 出处 | 状态 |
 |---|---|---|---|---|
-| Q1 | 低 | `/` 后面的比率基数检查漏了连字符写法：`USD/1000-person` → `0.001 USD * person`、`birth/1000-person` → `0.001 birth * person`、`USD/1-person` → `USD * person`（悄悄读成乘法），同一个串用 per 写是 `0.001 USD / person`；`USD/1000 people` 已经报错。原因是 `_number` 不看下一项是不是 `('op', '-')`，`_expr` 把数字后的 `-` 变成 `*`。量纲变了，下游一般报不符、不会悄悄算错 | 第三轮审查 `probes/out/_rev_u0r3/probe1.py`、`slash_vs_per.py`（5450 对里 112 对不同）；`qty.py:265`、`:329` | 没改：U0 收尾要修（审查推荐把 `_number` 的检查扩大到 `('op', '-')`，测试补这两个写法，改 docstring 和 U0.md 的说法） |
+| Q1 | 低 | `/` 后面的比率基数检查漏了连字符写法：`USD/1000-person` → `0.001 USD * person`、`birth/1000-person` → `0.001 birth * person`、`USD/1-person` → `USD * person`（悄悄读成乘法），同一个串用 per 写是 `0.001 USD / person`；`USD/1000 people` 已经报错。原因是 `_number` 不看下一项是不是 `('op', '-')`，`_expr` 把数字后的 `-` 变成 `*`。量纲变了，下游一般报不符、不会悄悄算错 | 第三轮审查 `probes/out/_rev_u0r3/probe1.py`、`slash_vs_per.py`（5450 对里 112 对不同）；`qty.py:265`、`:329`（行号是第三轮的代码） | 已修（`v2.7a`）：三种写法都报 `number … right after '/' divides only itself, so the unit after it would multiply; put the base and its unit in parentheses or use 'per'`，`tests/test_qty.py` 的 `test_numbers_only_as_rate_base` 管着；`USD per 1000-person` 仍是 `0.001 USD / person`。10-17 下午在 HEAD 上复查 |
 | Q2 | 低 | 单数化有错，不完整，举例如下：cookies → cooky、movies → movy、series → sery、species → specy、buses → buse、caches → cach、headaches → headach；us / is 结尾不去 s（taxis、menus、kiwis、skis 不变）；knives → knive、lives → live、potatoes → potatoe、heroes → heroe、gas → ga、news → new、lens → len。只在同一个名词单复数混用时报名词不符，不会算错数 | U0.md 第 9 节第 1 条；第三轮审查 `probe1.py` | 没改；U1 / U2 的 prompt 可以要求计数名词一律写单数 |
 | Q3 | 低 | 量纲对、系数和某些用法不同、qty 照 pint 读的写法（会悄悄算错，费米题里少见），不完整，举例如下：gallon / pint / quart / cup 是美制（英制 gallon 大 20%）；`oz` 是常衡 28.35 g，不是金衡 31.10 g；`nm` 是纳米，不是海里；`hp` 是机械马力；`month` 是 30.4375 天的平均月；`B` 是 byte（系数 8），当「十亿」写会差 8 倍 | U0.md 第 9 节第 2 条 | 没改（不要画蛇添足）；U2 的 AUDIT「单位是否和证据一致」可以顺带看 |
 | Q4 | 低 | pint 把计数名词或缩写读成物理单位：前后写法一致时数字对、只是名字怪；混用时报错文字里出现 parsec、pint 这类名字，修正轮可能看不懂。不完整，举例如下：EV / TV / PV = exavolt / teravolt / petavolt，`kt` = knot，`pcs` = parsec，`pt` / `pts` = pint，hands、leagues、links（长度），sections（面积），stones、grains（质量），barns | U0.md 第 9 节第 3 条 | 没改；U1 / U2 的 prompt 可以要求计数名词用小写英文单词（vehicle、television、piece） |
@@ -186,8 +186,18 @@ qty 还没接入任何流程，下面的问题现在都不影响运行结果；U
 | Q6 | 低 | 单位显示不好看：short_ton 显示成 `ton`，quarter、decade 显示成 `quarter_year`、`decade_year`，倍数不是 1 的倒数单位显示成 `1000 1 / kilogram` | U0.md 第 9 节第 5 条 | 没改（`text()` 只影响显示；U4 显示单位时要注意） |
 | Q7 | 低 | 自动定义的计数名词存在模块级注册表里，进程内越积越多（每个词一个基本维度）；解释和解析顺序无关（有测试钉住） | U0.md 第 9 节第 6 条 | 没改 |
 | Q8 | 低 | `per mille` 被当成计数名词 mille（`1 / mille`），不是 permille；和别的单位混用报量纲不符，不会悄悄算错。`per mil` 报错（mil 在 pint 里是角度单位） | U0.md 第 9 节第 7 条 | 没改（审查没要求映射） |
-| Q9 | 低 | 有些写法的报错原样带出 pint 的异常类名，可读性一般，不完整，举例如下：`kg^`、`s^-`（`DefinitionSyntaxError: missing operand`）、`1/0`、`per 0 people`（`ZeroDivisionError`）、`kg^kg`（`DimensionalityError`）、`per 00 **`（`AssertionError`，没有说明文字）、`year^11000`（`OverflowError`）。另外 `g e` 的报错写的是并成一个词后的 `g_e`；`2015 USD` 的理由「the value is already scaled」对不变价美元不完全贴切（给的改法是对的）。这些写法都不会被当成合法单位 | U0.md 第 7 节 G6；`probes/out/u0/r3/fuzz2_new.txt` | 没改（不要画蛇添足） |
-| Q10 | 低 | requirements.txt 只加了 `pint==0.26.1`，pint 的依赖 `flexcache==0.3`、`flexparser==0.4`、`platformdirs==4.13.3` 已装在 .venv、没写进去，新环境装出来的版本不一定相同 | U0.md 第 8 节第 5 条；第三轮审查（排序后对比 `pip freeze`） | 没改：等用户定 |
+| Q9 | 低 | 有些写法的报错原样带出 pint 的异常类名，可读性一般，不完整，举例如下：`kg^`、`s^-`（`DefinitionSyntaxError: missing operand`）、`1/0`、`per 0 people`（`ZeroDivisionError`）、`kg^kg`（`DimensionalityError`）、`per 00 **`（`AssertionError`，没有说明文字）、`year^11000`（`OverflowError`）。另外 `g e` 的报错写的是并成一个词后的 `g_e`；`2015 USD` 的理由「the value is already scaled」对不变价美元不完全贴切（给的改法是对的）；U1 起目标单位里写倍数词也报这一句，理由同样不完全贴切（U1.md 第 9 节第 2 条）。这些写法都不会被当成合法单位 | U0.md 第 7 节 G6；`probes/out/u0/r3/fuzz2_new.txt` | 没改（不要画蛇添足） |
+| Q10 | 低 | requirements.txt 只加了 `pint==0.26.1`，pint 的依赖 `flexcache==0.3`、`flexparser==0.4`、`platformdirs==4.13.3` 已装在 .venv、没写进去，新环境装出来的版本不一定相同 | U0.md 第 8 节第 5 条；第三轮审查（排序后对比 `pip freeze`） | 已补（`v2.7a`）：requirements.txt 有这 3 行 |
+| Q11 | 低 | U1 的测试 `tests/test_plan_unit.py` 第 98、99 行（`test_valid_unit_kept`）的两个换算断言没有检验力：`assertAlmostEqual` 默认 `places=7`，比的是绝对差，而期望值只有 1/365250 ≈ 2.7e-6 和 1e-8；percent 多乘一次 0.01、或一年按 365 天算，都照样通过。U1.md 第 3、4 节把它说成验证了换算 | U1 第三轮审查（实测 `assertAlmostEqual(x, 1e-8)` 在 x = 0.0、1e-10、1e-9、4e-8 时都通过，`assertAlmostEqual(1/365000, 1/365250)` 也通过）；同样的系数 `tests/test_qty.py:283` 已经精确检查 | 没改：U1 受阻就是因为这一条；收尾改成相对比较（`places=12`）或删掉，U1.md 措辞跟着改 |
+| Q12 | 低 | qty 遇到幂塔写法会挂死，挂死时一直持有模块锁（`qty.py` 的 `_LOCK` 是 RLock，`parse_unit` 里 `with _LOCK:`）：`kg**2**3**4**5` 的指数是 2**(3**1024)。U1 把 `qty.parse_unit` 接进 plan 节点，模型写出这种单位时 plan 节点一直挂着，同一进程里其他调用 qty 的线程（网页上同时进行的其他运行）也一起卡住。另外 `kg**999999999`、`kg**inf`、`kg**nan`、`kg^1e308` 会被当成合法单位钉住（到 U2，`base_factor` 会对非有限系数报错）。不会悄悄算错数，真实模型写出这种单位的可能性很低 | U1 第三轮审查 `probes/out/_rev_u1r3/hang_find.py`（前 21 个输入各自不到 0.01 s，第 22 个跑满 60 s 被 timeout 杀掉）；10-17 下午复查：后 4 种 `_pin_unit` 都原样钉住、错误为空 | 没改：按 QTY SCOPE 不改 qty，留给 U2 或以后（例如限制指数的大小或嵌套层数） |
+| Q13 | 低 | 钉住的 `unit_canonical` 原样存进 target：不截断（target 的其他字段都截到 300 字符），内部的换行也保留。它会写进 state.json，并通过 `dumps(target)` 进入裁判、输入核对、终稿、已公布检查的每一条 prompt | U1 第三轮审查 `probes/out/_rev_u1r3/paths_probe.py`；10-17 下午复查：`'kg/' + 'day/'*200 + 'day'`（806 字符）、`'kg\n/day'` 都原样钉住 | 没改（可选：超过 300 字符按错误处理，或存空白归一后的写法） |
+| Q14 | 低 | qty 能解析、但语义不对的目标单位拦不住：`kg / lb` 解析成 `kilogram / pound`；一段期间的总量写成 `visitor/month` 也能解析（prompt 里举了这个反例）。要到 U2 和证据的单位对照时才会报不符 | U1.md 第 8 节第 8 条、第 9 节第 1 条 | 没改 |
+| Q15 | 低（潜在，U2 / U4 接入后） | qty 收下、但多半不是模型本意的目标单位：`birth/1000` → `0.001 birth`（本意多半是 `birth/(1000 person)`）；`kt/day` → knot / day；`T/day` → tesla / day；`kvisitor` → 新的计数名词。后 3 种在 U2 换算时会报 `cannot be converted`；只有 `birth/1000` 在公式给 `birth` 时换算系数是 1000、不报错，结果按「千分之一个出生」表示，显示成 `… birth/1000` 读起来是错的 | U1.md 第 9 节第 8 条；`probes/out/u1/_qty_edges.py`（`U1_qty_edges.txt`）；审查 `probes/out/_rev_u1r2/units_probe.py` | 没改：要不要在钉单位时拒收「纯计数、倍数不是 1」的写法，留给 U2 定 |
+| Q16 | 低 | 单位重问的回复和它被拒的原因都没有保存：calls.jsonl 只记计量字段（重问只多一行 `arm "plan"`、`attempt 1`，`ok` 只表示回复是 JSON 对象），state.json 只有被采用的那一份规划。真实运行之后能看出重问有没有改对，看不出改对时第一次错在哪、没改对时为什么被拒 | U1.md 第 8 节第 9 条、第 9 节第 7 条；`probes/out/u1/_calls_log.py`（`U1_calls_log.txt`） | 没改：要不要把重问的结果写进 plan note（会改 U1 规定的 note 格式）等用户定，阶段报告推荐改 |
+| Q17 | 低 | 重问的回复钉住了单位、有方向，但方向比第一份少或差，仍会整份替换：代码只判断能不能用，不判断规划的好坏 | U1.md 第 9 节第 6 条 | 没改 |
+| Q18 | 低 | graph.py 现在 import qty（pint 注册表），`import triangulate.agent.graph` 从 1.15 s 变成 1.58 s（各跑一次） | U1.md 第 9 节第 3 条 | 没改 |
+| Q19 | 低 | `probes/web_demo_fake.py` 用 `tests/test_web.py` 的 FakeLLM，假规划没有 unit_canonical：演示服务里规划会多问一次（多等约 5 s），审批页多一条 `unit not pinned` 的 note | U1.md 第 9 节第 4 条 | 没改（FakeLLM 很多测试共用）；要看「钉住」的样子，可以在 web_demo_fake 的 SlowLLM 里给 plan 回复加 unit_canonical |
+| Q20 | 中（潜在，只在 U1 提交之后、U2 之前做真实运行时） | 过渡期：裁判、输入核对、终稿、已公布检查的 prompt 都能看到钉住的 `unit_canonical`，但 compute 还不做量纲检查和换算，终稿可能把用别的单位算出来的数标成钉住的单位 | U1.md 第 0 节第 4 条、第 10 节；钉住版 G2 `probes/out/u1/g6_pinned_r3.txt` | 没改：照 UNITS_PLAN，U3 做完之前不做真实运行 |
 
 ## H. 我的做事方式（这些低级错误的来源）
 
