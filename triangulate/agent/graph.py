@@ -434,8 +434,6 @@ def _pin_unit(t) -> tuple:
         return "", "target.unit_canonical is missing"
     if not isinstance(v, str):
         return "", f"target.unit_canonical must be one unit written as a string, not {dumps(v)[:200]}"
-    if len(v.strip()) > 80 or "\n" in v.strip():
-        return "", "target.unit_canonical must be one short unit on one line (at most 80 characters), e.g. 't/day'"
     _, err = Q.parse_unit(v.strip())
     return ("", f"target.unit_canonical: {err}") if err else (v.strip(), "")
 

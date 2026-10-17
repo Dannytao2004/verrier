@@ -7,6 +7,7 @@ from datetime import timedelta
 
 from . import assumptions as A
 from . import methods as M
+from . import qty as Q
 from ..mc import sample_lognormal
 from .evidence import parse_date
 
@@ -140,6 +141,10 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
     tps = tps or tpe - timedelta(days=0)
     year = tpe.year
     consts = calendar_constants(tps, tpe)
+    # v2.7c：规划钉了单位（target.unit_canonical）时，formula_mc 要声明「公式结果的单位」（方法的 unit），代码把结果换算成目标单位；
+    # 观测点的单位里带 %（'% of population'）就除以 100，目标本身是百分数时除外。没钉单位的运行（已存的都是）照旧。
+    tu = (target or {}).get("unit_canonical") or ""
+    target_pct = A.is_pct(tu or (target or {}).get("unit", ""))
     results = []
     for n, m in enumerate(methods or [], start=1):
         # id 由代码按列表顺序重编（m1..mN），保证唯一；裁判给的 id 只作为 label 保存
@@ -192,7 +197,8 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                         p = pts.get(iid)
                         if p is None or not p.get("keep", True):
                             raise M.MethodError(f"input {name}: id {iid} unknown or discarded")
-                        v = p["value"] / 100 if p.get("unit") == "%" else p["value"]
+                        pct = (A.is_pct(p.get("unit")) and not target_pct) if tu else p.get("unit") == "%"
+                        v = p["value"] / 100 if pct else p["value"]
                         if not (v > 0):
                             raise M.MethodError(f"input {name} must be positive for lognormal sampling")
                         # 观测点的不确定度由代码统一给；裁判填的 rel_uncertainty 只记录，不使用
@@ -224,7 +230,18 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                 if len(set(used_a)) > A.MAX_PER_METHOD:
                     raise M.MethodError(f"formula_mc uses {len(set(used_a))} assumptions (at most {A.MAX_PER_METHOD})")
                 s = M.formula_mc_samples(str(prm.get("formula", "")), env)
-                r.update(estimate=s["median"], mc={"p10": s["p10"], "p90": s["p90"]})
+                f = 1.0
+                if tu:
+                    mu = m.get("unit")
+                    if not isinstance(mu, str) or not mu.strip():
+                        raise M.MethodError(f"give the method a \"unit\": the unit its formula produces, in pint notation (e.g. 'kg/year' "
+                                            f"for an annual total); code converts it to the target unit '{tu}'")
+                    f, err = Q.convert_factor(mu.strip(), tu)
+                    if err:
+                        raise M.MethodError(f"unit of the formula's result: {err}. Write the unit the formula actually produces "
+                                            "(an annual total gives a per-year result); code converts units, do not add scale factors")
+                    r["unit_check"] = {"unit": mu.strip(), "target_unit": tu, "factor": f}
+                r.update(estimate=s["median"] * f, mc={"p10": s["p10"] * f, "p90": s["p90"] * f})
             elif r["method"] == "outcome_probs":
                 raise M.MethodError("outcome_probs is only available for a discrete target (outcome_type 'discrete'); "
                                     "this target is continuous")
