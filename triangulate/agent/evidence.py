@@ -278,6 +278,56 @@ def split_multiplier(value_as_written: str, scale_word: str = "") -> tuple:
     return s, SCALES[swn]
 
 
+# ---------- v2.8r：单位里的倍数（万元、USD million、(10,000 CNY)） ----------
+# 用户 10-18 的调研（XBRL「金额以元为单位」、SDMX UNIT_MEASURE 不含倍数、Recognizers-Text 1000万元 -> value 10000000 + unit 元）：
+# 倍数只能在一个地方、只乘一次；乘完之后单位里不能再有倍数。恒顺 v2.8p：代码按 scale_word 乘了 万，unit 仍写「万元 (10,000 CNY)」，
+# 单位核对据此又乘 10^4（6089 万瓶）。per / 每 / '/' 后面的是比率的分母（births per 1,000 women、每万人），不是倍数，不动；
+# 「千」单独出现不算（千克、千米、千瓦是 SI 前缀）；1,000 / 1000 这种裸数字也不算（1000 ml）
+_UNIT_MULT = re.compile(
+    r"(?P<cjk>万亿|萬億|十万|十萬|百万|百萬|千万|千萬|十亿|十億|百亿|百億|千亿|千億|万|萬|만|亿|億|억)"
+    r"|(?<![\w,.])(?P<num>100,000,000|100 million|10,000|10000)(?![\d,.])(?!\s*(?:ml|g|kg|km|l|cc)\b)"
+    r"|\b(?P<word>ten[- ]thousands?|hundred[- ]millions?|thousands?|millions?|billions?|trillions?|mn|mln|bn)\b"
+    r"|(?P<k>'000s?|\b000s\b)", re.I)
+_UNIT_MULT_FACTOR = {"100,000,000": 1e8, "100 million": 1e8, "10,000": 1e4, "10000": 1e4, "ten thousand": 1e4, "ten-thousand": 1e4,
+                     "hundred million": 1e8, "hundred-million": 1e8, "thousand": 1e3, "million": 1e6, "billion": 1e9,
+                     "trillion": 1e12, "mn": 1e6, "mln": 1e6, "bn": 1e9, "'000": 1e3, "000": 1e3}
+SCALE_FOR_FACTOR = {1e3: "thousand", 1e4: "万", 1e5: "十万", 1e6: "million", 1e7: "千万", 1e8: "亿", 1e9: "billion", 1e12: "trillion"}
+
+
+def unit_multipliers(unit: str) -> list:
+    """unit 里的倍数：[(match, 倍数)]，比率分母（per / 每 / '/' 后面）不算。"""
+    out = []
+    for m in _UNIT_MULT.finditer(unit):
+        if re.search(r"(?:\bper|每|/)\s*$", unit[:m.start()], re.I):
+            continue
+        t = m.group(0).lower()
+        if m.group("cjk"):
+            f = SCALES[t]
+        else:
+            t = re.sub(r"s$", "", t.strip("'")) if m.group("word") or m.group("k") else t
+            f = _UNIT_MULT_FACTOR.get(t.replace("'", "")) or _UNIT_MULT_FACTOR.get(t)
+        if f:
+            out.append((m, f))
+    return out
+
+
+def strip_unit_multiplier(unit: str, factor: float) -> tuple:
+    """去掉 unit 里倍数为 factor 的写法，返回 (新 unit, 原因)。unit 里还有别的倍数（scale_word 是万、unit 写亿元）：原因非空，调用方丢点。
+    去掉后清理空括号和多余的标点、空格：「万元 (10,000 CNY)」->「元 (CNY)」，「USD million」->「USD」，「CNY yuan (100 million)」->「CNY yuan」。"""
+    hits = unit_multipliers(unit)
+    other = [m.group(0) for m, f in hits if not math.isclose(f, factor)]
+    if other:
+        return unit, f"unit {unit!r} names a different multiplier ({', '.join(other)}) than the number's ({factor:g})"
+    s = unit
+    for m, _ in sorted(hits, key=lambda x: -x[0].start()):
+        s = s[:m.start()] + s[m.end():]
+    s = re.sub(r"\(\s*[,;=]?\s*\)", "", s)
+    s = re.sub(r"\(\s*[,;]\s*", "(", re.sub(r"\s*[,;]\s*\)", ")", s))
+    s = re.sub(r"\(\s+", "(", re.sub(r"\s+\)", ")", s))
+    s = re.sub(r"\s{2,}", " ", s).strip(" ,;")
+    return s, ""
+
+
 def written_number(value_as_written: str, scale_word: str = "") -> str:
     """给核对模型看的写法：value_as_written 去掉末尾的倍数词（百分号照旧留着）。"""
     return split_multiplier(value_as_written, "" if norm(scale_word).lower() in PERCENT else scale_word)[0]

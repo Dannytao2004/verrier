@@ -202,7 +202,8 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
             return None, f"number: {e2}"
     if cut := ev.cjk_fragment(q, vw, sw):   # v2.6e：只写了更大的中日韩数字的一截（1億3000万 里的 1億3000）就丢，不静默读错
         return None, f"number: {cut}"
-    basis = ev.scale_supported(sw, q, text_n[max(0, span[0] - ev.HEADER_WINDOW_CHARS):span[0]], vw)
+    header = text_n[max(0, span[0] - ev.HEADER_WINDOW_CHARS):span[0]]
+    basis = ev.scale_supported(sw, q, header, vw)
     if not basis:
         return None, f"scale word {sw!r} not supported by quote or table header"
     why = ev.date_check(raw, as_of, page_date, allow_no_period=allow_no_period)
@@ -217,18 +218,55 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
         y = str(pe.year)
     if y.isdigit() and y not in text_n and y not in url and not (y.isdecimal() and int(y) in ev.era_years(text_n)):
         return None, f"period year {y} does not appear in the page text or URL (likely mis-dated)"
-    unit = "%" if is_pct else str(raw.get("unit") or "")[:60]
+    unit, unit_as_written = ("%", None) if is_pct else (str(raw.get("unit") or ""), None)
+    if not is_pct:
+        paired = _pair_unit(unit, vw, sw, q, header)
+        if isinstance(paired, str):
+            return None, f"unit: {paired}"
+        if paired:
+            unit_as_written, unit, g, sw2, b2 = unit, *paired
+            if g != 1:   # 倍数只写在 unit 里、原文有依据：挪到数上
+                value, sw, basis = value * g, sw2, b2
+                lo_v, hi_v = (lo_v * g, hi_v * g) if lo_v is not None else (None, None)
+    unit = unit[:60]
     lo = max(0, min(i - 80, len(q) - QUOTE_STORE_CHARS))
     point = {"name": str(raw.get("name") or "")[:160], "value": value, "value_as_written": vw, "scale_word": sw,
              "scale_basis": basis, "unit": unit, "period_start": str(raw.get("period_start") or ""),
              "period_end": str(raw.get("period_end") or ""),
              "published_at_if_visible": str(raw.get("published_at_if_visible") or ""),
              "quote": q[lo:lo + QUOTE_STORE_CHARS]}
+    if unit_as_written is not None:
+        point["unit_as_written"] = unit_as_written[:120]
     if reading is not None:
         point.update(reading=reading, value_check="pending")
         if lo_v is not None:
             point.update(value_low=lo_v, value_high=hi_v)
     return point, ""
+
+
+def _pair_unit(unit: str, vw: str, sw: str, q: str, header: str):
+    """v2.8r：一个点的数和单位必须成对（XBRL：金额以元为单位；SDMX：UNIT_MEASURE 不含倍数）。
+    - 代码已乘过倍数 f（scale_word 或写法末尾的 万 / million）：unit 里同一个倍数去掉（「万元 (10,000 CNY)」->「元 (CNY)」）；
+      unit 写的是别的倍数就返回原因（调用方丢点）。恒顺 v2.8p 因为没去掉，单位核对又乘了 10^4。
+    - 代码没乘、倍数只写在 unit 里（「万元」「£ million」）：倍数在 quote 或表头有依据（scale_supported）就挪到数上，没依据照旧。
+    返回 None（不用改）、(新 unit, 要乘的倍数, 新 scale_word, 新 scale_basis) 或原因字符串。比率分母（per 1,000 women、每万人）不动。"""
+    hits = ev.unit_multipliers(unit)
+    if not hits:
+        return None
+    try:
+        f = ev.split_multiplier(vw, "" if ev.norm(sw).lower() in ev.PERCENT else sw)[1]
+    except ValueError:
+        f = 1.0
+    if f != 1:
+        new, why = ev.strip_unit_multiplier(unit, f)
+        return why or (new, 1.0, sw, None)
+    gs = {g for _, g in hits}
+    word = ev.SCALE_FOR_FACTOR.get(gs.pop()) if len(gs) == 1 else None
+    b = ev.scale_supported(word, q, header, vw) if word else ""
+    if not b:
+        return None
+    new, _ = ev.strip_unit_multiplier(unit, ev.SCALES[ev._cjk_scale_word(word)])
+    return new, ev.SCALES[ev._cjk_scale_word(word)], word, b
 
 
 def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict, text, out: dict,

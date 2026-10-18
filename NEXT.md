@@ -1,4 +1,4 @@
-# 断点（2026-10-18 深夜，v2.8o / v2.8p，冻结之后的改动）
+# 断点（2026-10-18，v2.8o–v2.8r，冻结之后的改动）
 
 **`frozen-v2.8n` 不变。** v2.8o 在它之后，预注册要用哪一版还没定（用户说先频繁改，只跑基本测试）。
 
@@ -17,6 +17,23 @@
 验证：458 个单元测试通过（新增 `tests/test_value_reading.py` 17 个）；核对模型探针 `probes/value_check_probe.py`（单词 / 分数 / 区间用例 5 轮全对）；
 披萨实跑 `results/agent/smoke_pizza/v28o_test`：130 t/day。NHANES 的块数和 1/6 进来了，裁判第 1 轮用上了，第 2 轮改写方法时换成了假设
 （BUGS S16）；这次运行里 24 个有读数的点另外单独核对，全部一次通过。没跑全套回归门（G2 的 prompt sha 会变，没登记）。
+
+## v2.8r：数和单位成对（恒顺 v2.8p 实跑；v2.8q 只修了单位核对一层，已回退）
+
+恒顺 `v28p_test` 输出 6089 万瓶：p1「4,774.13」scale_word 万，代码已乘 10^4（47,741,300 元），抽取员又把 unit 记成「万元 (10,000 CNY)」，
+单位核对据此又乘 10^4。按调研的标准做法（XBRL「金额以元为单位」、SDMX UNIT_MEASURE 不含倍数、Recognizers-Text / FinGLM 乘倍数和改单位
+同一步完成；IncarnaMind #577 是同一个 bug）分三层修：
+
+| 层 | 做法 |
+|---|---|
+| 1 源头：抽取员提示词 | unit 不带倍数，倍数（包括表头「单位：万元」）只进 scale_word；比率分母（per 1,000 women）留在 unit |
+| 2 源头：代码（`pipeline._pair_unit`、`evidence.strip_unit_multiplier`） | 代码乘过倍数 f，unit 里同一个倍数去掉（原 unit 存 `unit_as_written`）；unit 写了别的倍数就丢点；倍数只写在 unit 里、原文或表头有依据就挪到数上。per / 每 / '/' 后面、单独的「千」、裸 1000 不算倍数 |
+| 3 兜底：单位核对（`unit_review`） | 乘过倍数的点加 note（照百分数 note）；裁定给它的单位系数恰好等于倍数（10000 CNY/year）就交回重试 |
+
+验证：472 个单元测试通过（新增 `tests/test_unit_pairing.py`、`tests/test_unit_multiplier.py`）；G3 72 个已存运行重算 0 差异；
+第 2 层套到已存的 7597 个点：清理 76 个（23 种写法逐条看过）、挪到数上 1 个（「年产3万吨」3 -> 30,000 吨）、丢 0 个，比率单位一个没动；
+第 3 层真实模型重放：恒顺 m1 改判 bottle/year，英文 million / billion 4 个方法不变。实跑 `v28r_test`：恒顺 106 万瓶/年（规划把期间定成 2025 年）、
+另一道网页题 72 人；两题 20 个带倍数的点 unit 全是纯单位（亿 + CNY、万 + tons），终稿不再出现「47,741,300 万元」这种写法。
 
 ## v2.8p：裁判和哨兵（v2.8o 实跑暴露的问题）
 
