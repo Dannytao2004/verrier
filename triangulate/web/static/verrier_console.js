@@ -1,6 +1,7 @@
 // Verrier 控制台：把 agent 的主运行界面（提问 → 人工确认方向 → 进度 → 结果）放进 Verrier 页面（verrier_console.html）。
-// 只调用现有 API（/api/runs、/api/result、/api/saved、/api/file），后端逻辑不变；完整的证据表、回测在经典界面（/#/...）。
-// 路由：#console（提问）、#console/run/<运行 id>（进度）、#console/result/<题 id>/<tag>（保存的结果）。别的 hash 是页面锚点，控制台关掉。
+// 只调用现有 API（/api/runs、/api/result、/api/saved、/api/file），后端逻辑不变；回测表在经典界面（/#/...）。
+// 路由：#console（提问）、#console/run/<运行 id>（进度）、#console/result/<题 id>/<tag>（保存的结果）、
+// #console/evidence/<题 id>/<tag>（证据、方法和假设；面板由 verrier_evidence.js 画）。别的 hash 是页面锚点，控制台关掉。
 // 右下角 HUD 由页面里的场景脚本画；这里用 VERRIER.mission({...}) 把它换成任务遥测（用时、阶段、花费），关掉控制台时交还。
 "use strict";
 (() => {
@@ -34,7 +35,6 @@
     return b;
   }
   const post = (path, data) => api(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data || {})});
-  const resultHref = (qid, tag) => `/#/result?qid=${encodeURIComponent(qid)}&tag=${encodeURIComponent(tag || "")}`;
   const fileHref = (qid, tag, name) => `/api/file?qid=${encodeURIComponent(qid)}&tag=${encodeURIComponent(tag || "")}&name=${name}`;
   const hud = m => window.VERRIER && window.VERRIER.mission && window.VERRIER.mission(m);
 
@@ -94,7 +94,8 @@
     fxClear();
     const tok = ++token, parts = h.slice(1).split("/").map(decodeURIComponent);
     const p = parts[1] === "run" && parts[2] ? viewRun(parts[2], tok)
-      : parts[1] === "result" && parts[2] ? viewResult(parts[2], parts[3] || "", tok) : viewHome(tok);
+      : parts[1] === "result" && parts[2] ? viewResult(parts[2], parts[3] || "", tok)
+      : parts[1] === "evidence" && parts[2] ? viewEvidence(parts[2], parts[3] || "", tok) : viewHome(tok);
     p.catch(fail(tok));
   }
   const fail = tok => e => { if (tok === token) body.insertAdjacentHTML("afterbegin", `<div class="cx-err">${esc(e.message || e)}</div>`); };
@@ -419,7 +420,7 @@
       </div></div>
       <h3 class="cx-h">${T("Final answer", "最终答案")}</h3><pre class="cx-answer">${esc(r.final_text || "—")}</pre>
       <div class="cx-row">
-        <a class="btn primary" href="${resultHref(qid, tag)}" target="_blank" rel="noopener">${T("Evidence, methods, assumptions", "证据、方法和假设")}<span>↗</span></a>
+        <a class="btn primary" href="#console/evidence/${encodeURIComponent(qid)}/${encodeURIComponent(tag || "")}">${T("Evidence, methods, assumptions", "证据、方法和假设")}<span>→</span></a>
         <a class="btn" href="${fileHref(qid, tag, "graph.html")}" target="_blank" rel="noopener">${T("Dependency graph", "依赖图")}<span>↗</span></a>
         <a class="btn" href="${fileHref(qid, tag, "ledger.md")}" target="_blank" rel="noopener">ledger.md<span>↗</span></a>
       </div></div></div>`;
@@ -442,6 +443,19 @@
     $("cxRq").textContent = r.question || qid;
     $("cxRm").innerHTML = `AS OF ${esc(r.as_of)} · ${esc(r.kind)} · ${esc(r.model)} · ${esc(r.started_at)}${r.wall_s ? ` · ${fmt(r.wall_s)} s` : ""}`;
     hud({view: "MISSION · " + String(qid).toUpperCase(), status: r.aborted ? "MISSION FAILED" : "ARCHIVED RESULT", phase: r.aborted ? -1 : 5, progress: 1,
+      elapsed: r.wall_s || 0, done: !r.aborted, cam: `US$ ${(r.budget || {}).usd_total_assumed?.toFixed?.(3) ?? "—"}  AS OF ${r.as_of}`});
+  }
+  // 证据、方法和假设：同一份 /api/result，面板由 verrier_evidence.js 画；返回按钮回到交付页（#console/result/...）
+  async function viewEvidence(qid, tag, tok) {
+    code.textContent = String(qid).toUpperCase() + " · EVIDENCE";
+    body.dataset.run = "";
+    body.innerHTML = `<div class="cx-row"><a class="btn" href="#console/result/${encodeURIComponent(qid)}/${encodeURIComponent(tag)}"><span>←</span>${T("Back to delivered", "返回交付页")}</a></div>
+      <div id="cxEv"><p class="fine">…</p></div>`;
+    body.scrollTop = 0;
+    const r = await api(`/api/result?qid=${encodeURIComponent(qid)}&tag=${encodeURIComponent(tag)}`);
+    if (tok !== token) return;
+    $("cxEv").innerHTML = window.VERRIER_EVIDENCE(r, qid, tag);
+    hud({view: "EVIDENCE · " + String(qid).toUpperCase(), status: r.aborted ? "MISSION FAILED" : "ARCHIVED RESULT", phase: r.aborted ? -1 : 5, progress: 1,
       elapsed: r.wall_s || 0, done: !r.aborted, cam: `US$ ${(r.budget || {}).usd_total_assumed?.toFixed?.(3) ?? "—"}  AS OF ${r.as_of}`});
   }
 

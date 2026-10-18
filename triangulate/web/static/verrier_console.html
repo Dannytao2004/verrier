@@ -277,6 +277,18 @@ table.cx-t{width:100%;border-collapse:collapse;font-size:13px}
 .cx-answer{white-space:pre-wrap;word-break:break-word;font-family:var(--ext);font-stretch:100%;font-size:14px;line-height:1.6;border-left:3px solid var(--ink);padding:2px 0 2px 14px;margin:0}
 .cx-err{border:1px solid var(--red);color:var(--red);padding:8px 12px;margin:10px 0;font-family:var(--mono);font-size:12px;background:var(--panel)}
 .cx-bad{color:var(--red)}
+/* 证据页（verrier_evidence.js，#console/evidence/...）：带螺丝的面板、宽表格、方法卡片 */
+.cx-ev{margin-top:18px}
+.cx-ev>.bh{margin:9px 22px 0}
+.cx-ev>.bd{padding:14px 22px 18px}
+.cx-ev ul{margin:4px 0 0;padding-left:18px;font-size:12.5px}
+.cx-scroll{overflow-x:auto}
+table.cx-w th{width:auto;white-space:normal}
+.cx-w td{font-size:12.5px}
+.cx-ms{display:grid;gap:10px}
+.cx-dir.bad::before{background:var(--red)}
+.cx-f{font-family:var(--mono);font-size:14px;font-weight:600}
+.cx-qt{font-family:var(--mono);font-size:11.5px;color:var(--ink2);min-width:240px}
 @media (max-width:1360px){ .cx{left:24px} }
 @media (max-height:780px) and (min-width:1024px){ .cx{right:24px} }
 @media (max-width:1100px){ .cx-grid{grid-template-columns:1fr} }
@@ -569,7 +581,7 @@ body.cx-open .ask{display:none}
 </section>
 </main>
 
-<!-- 06 console：verrier_console.js 渲染，内容来自现有 API（/api/runs、/api/result、/api/saved） -->
+<!-- 06 console：verrier_console.js 渲染（证据页的面板由 verrier_evidence.js 画），内容来自现有 API（/api/runs、/api/result、/api/saved） -->
 <div class="cx" id="cx" hidden>
   <div class="card cx-card" role="dialog" aria-label="Mission control">
     <div class="bh"><span>M-01 · MISSION CONTROL</span><i class="hz"></i><span class="sp"></span><span id="cxCode">STANDBY</span><button class="cx-x" type="button" id="cxClose" aria-label="Close">✕ ESC</button></div>
@@ -1031,6 +1043,7 @@ body.cx-open .ask{display:none}
   secs.forEach(s => io.observe(s));
 })();
 </script>
+<script src="/static/verrier_evidence.js"></script>
 <script src="/static/verrier_console.js"></script>
 </body>
 </html>
