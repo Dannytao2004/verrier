@@ -215,7 +215,10 @@ def ledger(state: dict, score: dict | None = None) -> str:
                          f"{pg.get('n_points_raw', '-')}/{pg.get('n_points_verified', '-')}")
                 for p in pts_by_url.get((d["id"], pg["url"]), []):
                     k = "EXCLUDED (ablation)" if p.get("ablation_excluded") else "keep" if p.get("keep") else "DISCARD"
-                    L.append(f"  - {p['id']} {_md(p['name'])[:80]} = **{_num(p['value'])}** {_md(p.get('unit'))} "
+                    # v2.8o：抽取员读的数（number / 区间）写出原文写法和核对结果
+                    rd = (f" (range {_num(p['value_low'])}..{_num(p['value_high'])})" if p.get("value_low") is not None else "") + \
+                         (f" as written \"{_md(p.get('value_as_written'))}\", value check {p.get('value_check')}" if p.get("reading") else "")
+                    L.append(f"  - {p['id']} {_md(p['name'])[:80]} = **{_num(p['value'])}**{rd} {_md(p.get('unit'))} "
                              f"({p.get('period_start')}..{p.get('period_end')}) [{k}: {_md(p.get('judge_reason'))[:120]}] "
                              f"quote: \"{_md(p.get('quote'))[:200]}\"")
             n_drop = len(res.get("dropped_points") or [])

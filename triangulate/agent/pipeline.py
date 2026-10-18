@@ -186,8 +186,14 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
     if i < 0:
         return None, "value_as_written not in quote as a whole number"
     sw = str(raw.get("scale_word") or "")
+    # v2.8o：抽取员给了 number（区间给 low / high）就用它，value_as_written 可以是单词、分数、区间（披萨题 NHANES 的
+    # 「males had four ... three slices」因此丢过）；这个数算之前由模型逐个核对（value_check.py）。没给的照旧由代码解析
+    reading, lo_v, hi_v = None, None, None
     try:
-        value, is_pct = ev.parse_value(vw, sw)
+        if ev.has_reading(raw):
+            value, lo_v, hi_v, is_pct, reading = ev.read_reading(raw, vw, sw)
+        else:
+            value, is_pct = ev.parse_value(vw, sw)
     except ValueError as e:
         return None, f"number: {e}"
     if cut := ev.cjk_fragment(q, vw, sw):   # v2.6e：只写了更大的中日韩数字的一截（1億3000万 里的 1億3000）就丢，不静默读错
@@ -209,11 +215,16 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
         return None, f"period year {y} does not appear in the page text or URL (likely mis-dated)"
     unit = "%" if is_pct else str(raw.get("unit") or "")[:60]
     lo = max(0, min(i - 80, len(q) - QUOTE_STORE_CHARS))
-    return {"name": str(raw.get("name") or "")[:160], "value": value, "value_as_written": vw, "scale_word": sw,
-            "scale_basis": basis, "unit": unit, "period_start": str(raw.get("period_start") or ""),
-            "period_end": str(raw.get("period_end") or ""),
-            "published_at_if_visible": str(raw.get("published_at_if_visible") or ""),
-            "quote": q[lo:lo + QUOTE_STORE_CHARS]}, ""
+    point = {"name": str(raw.get("name") or "")[:160], "value": value, "value_as_written": vw, "scale_word": sw,
+             "scale_basis": basis, "unit": unit, "period_start": str(raw.get("period_start") or ""),
+             "period_end": str(raw.get("period_end") or ""),
+             "published_at_if_visible": str(raw.get("published_at_if_visible") or ""),
+             "quote": q[lo:lo + QUOTE_STORE_CHARS]}
+    if reading is not None:
+        point.update(reading=reading, value_check="pending")
+        if lo_v is not None:
+            point.update(value_low=lo_v, value_high=hi_v)
+    return point, ""
 
 
 def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict, text, out: dict,

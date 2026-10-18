@@ -115,6 +115,16 @@ class Draws:
             self._cache[k] = sample_lognormal(low, high, self.n, random.Random(f"{self.seed}|{key}"))
         return self._cache[k]
 
+    def get_range(self, key: str, low: float, high: float) -> list:
+        """v2.8o：原文给的区间（3-4 slices）：在 [low, high] 上均匀取值，再乘和单个观测点一样的误差（中位数 1，P10/P90 = 1/1.2、1.2）。"""
+        k = (key, "range", low, high)
+        if k not in self._cache:
+            u = 1 + M.DEFAULT_REL_U
+            noise = sample_lognormal(1 / u, u, self.n, random.Random(f"{self.seed}|{key}"))
+            rng = random.Random(f"{self.seed}|{key}|range")
+            self._cache[k] = [rng.uniform(low, high) * z for z in noise]
+        return self._cache[k]
+
 
 def _span(p):
     pe = parse_date(p.get("period_end"), end=True)
@@ -257,15 +267,24 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                         if p is None or not p.get("keep", True):
                             raise M.MethodError(f"input {name}: id {iid} unknown or discarded")
                         pct = (A.is_pct(p.get("unit")) and not target_pct) if tu else p.get("unit") == "%"
-                        v = p["value"] / 100 if pct else p["value"]
+                        f = 100 if pct else 1   # 除以 f（不乘 0.01：浮点结果和以前逐位相同）
+                        v = p["value"] / f if pct else p["value"]
                         if not (v > 0):
                             raise M.MethodError(f"input {name} must be positive for lognormal sampling")
                         # 观测点的不确定度由代码统一给；裁判填的 rel_uncertainty 只记录，不使用
                         lo, hi = v / (1 + M.DEFAULT_REL_U), v * (1 + M.DEFAULT_REL_U)
+                        rng_lo, rng_hi = p.get("value_low"), p.get("value_high")   # v2.8o：原文给的区间
+                        ranged = isinstance(rng_lo, (int, float)) and isinstance(rng_hi, (int, float)) and 0 <= rng_lo < rng_hi
                         if "rel_uncertainty" in spec:
                             r.setdefault("rel_uncertainty_from_judge_ignored", {})[name] = spec.get("rel_uncertainty")
                         used.append(iid)
                         kind = "point"
+                    if kind == "point" and ranged:
+                        env[name] = draws.get_range(iid, rng_lo / f, rng_hi / f)
+                        q = sorted(env[name])
+                        detail.append({"name": name, "id": iid, "kind": kind, "p10": q[len(q) // 10], "p90": q[len(q) * 9 // 10],
+                                       "value": v, "low": rng_lo / f, "high": rng_hi / f, "unit": pts[iid].get("unit") or ""})
+                        continue
                     env[name] = [fixed] * draws.n if fixed is not None else draws.get(iid, lo, hi)
                     unit = (kept_a[iid].get("unit") if kind == "assumption" else
                             pts[iid].get("unit") if kind == "point" else "constant")

@@ -167,6 +167,8 @@ def candidates(points: list, target: dict, as_of, judged_only: bool = True) -> t
     for p in points or []:
         if (judged_only and not (p.get("keep") and p.get("judged_round"))) or p.get("ablation_excluded"):
             continue
+        if p.get("value_low") is not None or p.get("value_check") == "failed":   # v2.8o：区间不是公布值；数核对没过的点不用
+            continue
         v, name, unit = p.get("value"), str(p.get("name") or ""), str(p.get("unit") or "")
         if not isinstance(v, (int, float)) or isinstance(v, bool) or not math.isfinite(v):
             continue

@@ -43,6 +43,7 @@ class TestTable(unittest.TestCase):
         v2.8b 只改了 extract：4000 -> 16000。v2.8e 新加 unit_check、unit_arbiter（单位核对和裁定），其余不变。"""
         self.assertEqual(config.MAX_TOKENS, {"plan": 6000, "extract": 16000, "judge": 12000, "repair": 12000, "audit": 4000,
                                              "unit_check": 4000, "unit_arbiter": 4000,
+                                         "value_check": 2000, "value_reread": 2000,   # v2.8o
                                              "published": 3000, "early": 3000, "final": 4000, "search": 8192,
                                              "naive": 500, "structured": 6000, "search_direct": 4096})
 

@@ -39,6 +39,8 @@ MAX_TOKENS = {
     "audit": 4000,           # 输入核对
     "unit_check": 4000,      # v2.8e：单位核对（三个核对模型，每个方法各一次）
     "unit_arbiter": 4000,    # v2.8e：单位裁定（第四个模型）
+    "value_check": 2000,     # v2.8o：一个数的核对（只回 true / false）
+    "value_reread": 2000,    # v2.8o：核对没过时重新读这个数
     "published": 3000,       # 「答案已公布」确认
     "early": 3000,           # 提前停确认：同 published（同一个 prompt）
     "final": 4000,           # 终稿

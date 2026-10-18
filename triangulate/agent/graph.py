@@ -28,6 +28,7 @@ from . import jev as J
 from . import published as PB
 from . import qty as Q
 from . import unit_review as UR
+from . import value_check as VC
 from .markets import search_markets
 from .outputs import basis_text, unit_text
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
@@ -129,12 +130,18 @@ def _fmt_num(v):
     return f"{v:,.0f}" if abs(v) >= 100 else f"{v:.4g}"
 
 
+def _fmt_point(p: dict) -> str:
+    """点的值；v2.8o 原文给的区间点写成「中点 (range 低 to 高)」。"""
+    lo, hi = p.get("value_low"), p.get("value_high")
+    return _fmt_num(p["value"]) + (f" (range {_fmt_num(lo)} to {_fmt_num(hi)})" if lo is not None and hi is not None else "")
+
+
 def _table(points: list) -> str:
     rows = ["id | dir | name | value | unit | period | published | source | via | quote"]
     for p in points:
         dom = urllib.parse.urlsplit(p.get("source_url", "")).netloc
         via = f"snapshot {p['page_date']}" if p.get("via") == "snapshot" else f"{p.get('via')} {p.get('page_date') or ''}"
-        rows.append(" | ".join([p["id"], p["direction_id"], p["name"][:90], _fmt_num(p["value"]), p.get("unit", "")[:25],
+        rows.append(" | ".join([p["id"], p["direction_id"], p["name"][:90], _fmt_point(p), p.get("unit", "")[:25],
                                 f"{p.get('period_start') or '?'}..{p.get('period_end') or '?'}",
                                 p.get("published_at_if_visible") or "", dom, via.strip(), p.get("quote", "")[:150]]))
     return "\n".join(rows)
@@ -322,7 +329,7 @@ def _evidence(iid: str, by_id: dict, kept_a: dict) -> str:
     if p is None:
         return f"{iid}: unknown id"
     dom = urllib.parse.urlsplit(p.get("source_url", "")).netloc
-    return (f'data point {iid}: "{p["name"]}" = {_fmt_num(p["value"])} {p.get("unit", "")}, period '
+    return (f'data point {iid}: "{p["name"]}" = {_fmt_point(p)} {p.get("unit", "")}, period '
             f'{p.get("period_start") or "?"}..{p.get("period_end") or "?"}, source {dom}')
 
 
@@ -647,19 +654,23 @@ def build(ctx: Context):
             last = {}   # v2.8l：最近一次 check 里只被输入核对否掉的方法（代码算得出），兜底时用
 
             def check(t):
-                out_c, av_c, failed = _code_check(jr, pts, t, only)
+                # v2.8o：方法用到的点先逐个核对抽取员读的数（模型只回 true / false，没过就重读，最多三次）；没过的点算的时候去掉
+                vfail = VC.review(ctx.llm, ctx.qid, jr, pts)
+                live = VC.usable(pts)
+                out_c, av_c, failed = _code_check(jr, live, t, only)
                 # v2.8e：钉了单位时，三个模型核对 + 一个模型裁定每个 formula_mc 方法的结果单位，写回方法再试跑；没钉单位时不变
-                ufail = UR.review(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)
+                ufail = UR.review(ctx.llm, ctx.qid, jr, out_c, av_c, live, failed, t)
                 if ufail is not None:
-                    out_c, av_c, failed = _code_check(jr, pts, t, only)
+                    out_c, av_c, failed = _code_check(jr, live, t, only)
                     failed.update(ufail)
                 # v2.8j：单位核对没过的方法和输入核对没过的一样记进 aud（-> jr["audit_failed"]），compute 不用它；只放进 failed 时
                 # compute 照样按裁判写错的单位算并参与合并（恒顺题因此输出 87.65 瓶）
-                audit = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)   # 只核对代码算得出、单位也过了的方法
+                audit = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, live, failed, t)   # 只核对代码算得出、单位也过了的方法
                 aud = {**(ufail or {}), **audit}
                 failed.update(aud)
                 last["audit_only"] = dict(audit)
-                return (aud, *_problems(jr, out_c, av_c, failed))
+                n_ok, errs = _problems(jr, out_c, av_c, failed)
+                return aud, n_ok, (vfail + errs if errs else errs)
 
             target = D.with_outcomes(target0, orec_new) if disc else target0
             # 有方法失败、或能跑的方法互相打架，就交回裁判修一次；修完一个都跑不了而原来能跑，就退回原方案
@@ -744,7 +755,7 @@ def build(ctx: Context):
 
     def compute(state: AgentState):
         jr = next((j for j in reversed(state.get("judge_rounds") or []) if j.get("methods")), {})
-        pts = {p["id"]: p for p in state.get("points") or []}
+        pts = {p["id"]: p for p in VC.usable(state.get("points") or [])}   # v2.8o：数核对没过的点不用
         target = D.with_outcomes(state["plan"]["target"], state.get("outcomes"))   # 离散：裁判定义的结果列表
         av = AS.validate(jr.get("assumptions") or [], target)
         bad = jr.get("audit_failed") or {}

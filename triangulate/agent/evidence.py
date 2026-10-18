@@ -1,5 +1,6 @@
 """证据层的纯函数：数字解析、quote 原文核对、日期过滤、泄漏哨兵。全部由代码完成，不交给模型。"""
 import calendar
+import math
 import re
 import unicodedata
 from datetime import date
@@ -54,10 +55,24 @@ def quote_in_text(quote: str, text_norm: str) -> bool:
     return quote_span(quote, text_norm) is not None
 
 
+def _word_guards(vw: str) -> tuple:
+    """v2.8o：value_as_written 可以写成单词 / 中日韩数词（four、三百）。两头不能紧挨着同类的字：four 不能从 fourteen 里匹配，
+    one 不能从 someone 里匹配，三百 / 两万 不能从 三百五十 / 两万三千 里匹配。纯数字写法不加（照旧）。"""
+    cj = re.escape(_CJK_NUMERAL_CHARS + _CJK_SC)
+    pre = r"(?<![A-Za-z])" if re.match(r"[A-Za-z]", vw) else ""
+    post = r"(?![A-Za-z])" if re.search(r"[A-Za-z]$", vw) else ""
+    if vw[:1] in _CJK_NUMERAL_CHARS:
+        pre += rf"(?<![{cj}\d])"
+    if vw[-1:] and vw[-1:] in _CJK_NUMERAL_CHARS + _CJK_SC and set(vw) & set(_CJK_NUMERAL_CHARS):
+        post += rf"(?![{cj}\d])"
+    return pre, post
+
+
 def find_value(quote_n: str, value_written: str) -> int:
     """value_as_written 在 quote 里作为完整的数字出现时返回位置，否则 -1：前面不能紧挨数字、小数点或千分位，
     后面不能接数字或小数/千分位部分。'2.9%' 不能从 '12.9%' 里匹配，'412' 不能从 '3,412' 里匹配。"""
-    m = re.search(r"(?<![\d.,])" + re.escape(value_written) + r"(?!\d|[.,]\d)", quote_n)
+    pre, post = _word_guards(value_written)
+    m = re.search(r"(?<![\d.,])" + pre + re.escape(value_written) + r"(?!\d|[.,]\d)" + post, quote_n)
     if m:
         return m.start()
     # v2.8g：抽取员漏写千分位（原文 4,774.10，写成 4774.10）也算同一个数：只放宽逗号，数字一位都不能差（恒顺外贸收入因此丢过 4 次）
@@ -188,6 +203,110 @@ def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
     return num * factor, is_pct
 
 
+# ---------- v2.8o：抽取员读的数（number / low / high） ----------
+# 用户 10-18 的设计：value_as_written 照抄原文的写法（数字、单词、分数、区间都行），number 是它表示的数（不乘倍数词），
+# 区间给 low / high。代码只乘 scale_word 的倍数、算区间中点；读得对不对，算之前交给模型逐个核对（value_check.py）
+_PCT_WRITTEN = re.compile(r"%|per\s?cent|\bpct\b|百分之|퍼센트|パーセント", re.I)
+_FRACTION = re.compile(r"([-+]?\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)")
+READING_KEYS = ("number", "low", "high")
+_RANGE_MARK = re.compile(r"\s(?:to|and)\s|[-–—~～至到]", re.I)   # 3-4、3 to 4、between 10 and 12、3至4
+
+
+def has_reading(raw: dict) -> bool:
+    """抽取员给了 number 或 low / high（没给的旧写法照旧由 parse_value 从 value_as_written 解析）。"""
+    return any(raw.get(k) not in (None, "") for k in READING_KEYS)
+
+
+def _reading_num(x, what: str) -> float:
+    """number / low / high：JSON 数字，或写成数字的字符串（"4774.10"、分数 "1/6"）。千分位逗号不认（和小数逗号分不清）。"""
+    if isinstance(x, bool):
+        raise ValueError(f"{what} is not a number")
+    if isinstance(x, (int, float)):
+        v = float(x)
+    else:
+        s = str(x).strip()
+        m = _FRACTION.fullmatch(s)
+        try:
+            v = float(m.group(1)) / float(m.group(2)) if m else float(s)
+        except (ValueError, ZeroDivisionError):
+            raise ValueError(f"{what} {str(x)[:20]!r} is not a plain number") from None
+    if not math.isfinite(v):
+        raise ValueError(f"{what} is not a finite number")
+    return v
+
+
+_TRAIL_ABBR = re.compile(r"(?<=\d)(k|m|mn|mln|bn|b|tn)\b", re.I)   # 只认紧贴数字的缩写：4.8m、$5bn（4.8 m 是米）
+_NUM_WORDS = re.compile(r"\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|"
+                        r"sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|"
+                        r"thousand|million|billion|trillion|dozen|half|quarter)\b", re.I)
+
+
+def _trailing_multiplier(s: str, words: str):
+    """value_as_written 里最后一个数后面的倍数词（4.8 million、two million cases、3409万元、两万、$5bn）；后面还有数
+    （four thousand two hundred、519万548）就不算。汉字数词后面的「千」是数的一部分（三千），不算倍数。"""
+    nums = re.escape(_CJK_NUMERAL_CHARS)
+    cands = list(re.finditer(rf"(?<=[\da-z])\s*-?\s*({words})s?\b", s, re.I)) + list(_TRAIL_ABBR.finditer(s))
+    cands += [m for m in re.finditer(rf"(?<=[\d{nums}])\s?({_CJK_MULT})", s)
+              if not (m.group(1) in ("千", "仟") and not s[m.start() - 1].isdigit())]
+    if not cands:
+        return None
+    m = max(cands, key=lambda x: x.end())
+    tail = s[m.end():]
+    return None if re.search(rf"[\d{nums}]", tail) or _NUM_WORDS.search(tail) else m
+
+
+def split_multiplier(value_as_written: str, scale_word: str = "") -> tuple:
+    """返回 (去掉倍数词的写法, 倍数)。倍数由代码定：scale_word 的，或 value_as_written 末尾写着的（_trailing_multiplier）；
+    两者都有而不一致就报错。核对模型只看去掉倍数词的写法（v2.8o 探针：倍数交给模型判，「4.8 million」读成 4.8、
+    表头「万」的 4,774.10 读成 477410 都被它判成对的）。
+    中日韩复合写法（519万548）里的倍数字后面还有数，不算末尾的倍数：这时 scale_word 必须为空，number 写整个数。"""
+    s, swn = norm(value_as_written), _cjk_scale_word(norm(scale_word).lower())
+    if swn not in SCALES:
+        raise ValueError(f"unknown scale word {scale_word!r}")
+    words = "hundred|thousand|million|billion|trillion" if swn in ("hundred", "hundreds") else "thousand|million|billion|trillion"
+    m = _trailing_multiplier(s, words)
+    if m:
+        key = m.group(1).lower()
+        f = SCALES.get(key, SCALES.get(key + "s"))
+        if swn and SCALES[swn] != f:
+            raise ValueError(f"scale conflict: {m.group(1)!r} in value vs {scale_word!r}")
+        return (s[:m.start()] + s[m.end():]).strip(), f
+    nums = re.escape(_CJK_NUMERAL_CHARS)
+    if swn and re.search(rf"[\d{nums}]\s?(?:{_CJK_SCALE_ALT})[\d{nums}]", s):
+        raise ValueError("compound CJK number (519万548): leave scale_word empty and give the whole number")
+    return s, SCALES[swn]
+
+
+def written_number(value_as_written: str, scale_word: str = "") -> str:
+    """给核对模型看的写法：value_as_written 去掉末尾的倍数词（百分号照旧留着）。"""
+    return split_multiplier(value_as_written, "" if norm(scale_word).lower() in PERCENT else scale_word)[0]
+
+
+def read_reading(raw: dict, value_as_written: str, scale_word: str = "") -> tuple:
+    """返回 (value, low, high, is_pct, reading)：value / low / high 已乘 scale_word 的倍数（区间时 value = 中点，没有区间时
+    low = high = None）；reading 是抽取员读的数本身（不乘倍数），交给核对模型看。
+    原文写法上的两条旧检查照旧：欧式千分位（1.234.567）、「兆」后面紧跟 SI 单位（兆瓦）不猜，报错。"""
+    s, swn = norm(value_as_written), norm(scale_word).lower()
+    if _DOT_THOUSANDS.search(s):
+        raise ValueError("ambiguous separators: '.' used as a thousands separator")
+    if _MEGA_UNIT.search(s) or _MEGA_UNIT.match(swn):
+        raise ValueError("ambiguous '兆' before an SI unit: 10^12 or mega-")
+    is_pct = bool(_PCT_WRITTEN.search(s)) or swn in PERCENT
+    _, f = split_multiplier(value_as_written, "" if swn in PERCENT else scale_word)
+    lo, hi = raw.get("low"), raw.get("high")
+    if lo not in (None, "") or hi not in (None, ""):
+        if lo in (None, "") or hi in (None, ""):
+            raise ValueError("a range needs both low and high")
+        if not _RANGE_MARK.search(s[1:]):   # v2.8o 探针：「12」读成 12..13 被核对模型放行；写法里没有区间就不是区间
+            raise ValueError("low/high given but value_as_written is not a range")
+        lo, hi = _reading_num(lo, "low"), _reading_num(hi, "high")
+        if not lo < hi:
+            raise ValueError("range low must be below high")
+        return (lo + hi) / 2 * f, lo * f, hi * f, is_pct, {"low": lo, "high": hi}
+    n = _reading_num(raw.get("number"), "number")
+    return n * f, None, None, is_pct, {"number": n}
+
+
 def _cjk_reads(quote_n: str, vw: str, cj: str):
     """vw 在 quote 里每一次作为完整数字出现（find_value 的规则）时，逐次给出 (是否用上了 cj, 问题)。cj 是 scale_word 给的
     中日韩倍数字：vw 不以倍数字结尾、后面（最多隔一个空格）紧跟 cj 时算进这个数。问题为空串 = 这次读到的是一个完整的数；
@@ -238,11 +357,11 @@ def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written
     vw = norm(value_written)
     if (cj := _cjk_scale_word(sw)) in CJK_SCALES or cj in CJK_WORD_SCALES:
         if cj in CJK_SCALES:
-            if vw and re.search(rf"\d\s?{re.escape(cj)}", vw):
+            if vw and re.search(rf"[\d{_CJK_NUMERAL_CHARS}]\s?{re.escape(cj)}", vw):   # v2.8o：数词写法（两万）也算紧贴
                 return "quote"
             if vw and any(used and not why for used, why in _cjk_reads(quote_n, vw, cj)):
                 return "quote"
-        elif vw and re.search(rf"\d\s?{re.escape(cj)}$", vw):
+        elif vw and re.search(rf"[\d{_CJK_NUMERAL_CHARS}]\s?{re.escape(cj)}$", vw):
             return "quote"   # value_as_written 本身带着复合倍数词：12.5十亿
         elif vw and re.search(rf"(?<![\d.,]){re.escape(vw)}\s?{re.escape(cj)}(?![{_CJK_SC}{_CJK_NUMERAL_CHARS}\d])", quote_n):
             return "quote"   # 复合倍数词紧跟在数字后面：12.5千万元
@@ -264,7 +383,7 @@ def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written
         return ""
     if base not in SCALE_WORDS:
         return ""
-    if vw and re.search(rf"\d\s*{base}s?\b", vw, re.I):
+    if vw and re.search(rf"(?:\d|[a-z])\s*{base}s?\b", vw, re.I):   # v2.8o：单词写法（two million）也算紧贴
         return "quote"
     if vw and re.search(rf"(?<![\d.,]){re.escape(vw)}\s*(?:-\s*)?{base}s?\b", quote_n, re.I):
         return "quote"
