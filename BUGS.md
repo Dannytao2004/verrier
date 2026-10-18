@@ -225,6 +225,10 @@ agent 用命令行 `--ask --auto-approve`，两个基线用 `probes/smoke_run.py
 | S16 | 已修（v2.8p：提示词 + 第 2 轮看到第 1 轮方法；v28p_test 里块数进了最终答案） | 披萨 v2.8o 实跑：裁判第 1 轮方法用了 NHANES 块数（mean(p35, p36) × p37），第 2 轮改写时换成假设「每次吃多少克」，这条又被单位核对否掉，块数最终没用上；修正轮还有「assumption a3 rejected: value, low and high must be numbers」 | `results/agent/smoke_pizza/v28o_test/state.json` 的 judge_rounds | 没改（裁判的选择） |
 | S17 | 记 | v2.8o 行为变化：欧式小数逗号（"16,8%"、"R$ 54,46"）、OCR 错字（"8l,030"）、".75" 以前被代码丢，现在走抽取员读数 + 模型核对进来（这次 24 个真实点全部核对通过） | 同上运行的 points | 观察 |
 | S18 | 记 | 披萨 v2.8p 实跑：NHANES 路线只用了男性每次 4 块（p6），乘假设 a3 = 0.9「Chicago 每次块数相对 NHANES」，没用女性 3 块（p7）；数值接近男女平均 3.5，但 a3 的含义混了「男→全体」和「芝加哥→全国」两件事。修正轮 3 轮都在修「每天的比例 × 每次块数」消不掉 occasion 的单位 | `results/agent/smoke_pizza/v28p_test/state.json` | 没改（裁判的选择） |
+| S19 | 已修（v2.8q） | 单位核对重复乘倍数：代码已按 scale_word 乘过 万，unit 仍写「万元 (10,000 CNY)」，核对和裁定模型判成 10000 CNY/year，pint 再乘 10^4（恒顺 v2.8p 输出 6089 万瓶） | `results/agent/ask_9b1539aa/v28p_test` 的 unit_reviews | v2.8q：输入行加倍数 note + 裁定兜底 |
+| S20 | 记 | 终稿和点表里，乘过倍数的值仍配着原来的单位串：恒顺 v2.8q 终稿写「47,741,300 万元 RMB」（数是元）。不影响计算，读者会误读 10^4 倍；裁判也据此把 role 写成「in 10,000 CNY」 | `v28q_test` 终稿 | 没改（最小改动只修计算） |
+| S21 | 记 | 单位裁定隐含密度：恒顺 v2.8i m2「吨 / (毫升/瓶)」被裁定成 1000000 bottle/year（默认 1 kg/L），量纲上缺一个密度输入 | `probes/out/unit_multiplier/replay.json` | 没改 |
+| S22 | 记（用户 10-18 指出） | 修正轮把裁判修不了的问题也交回裁判：恒顺 v2.8p 三轮修正都收到「m1 和 m3 差 3 倍以上」，真正原因在单位核对层，裁判看不到；m1 三轮结果逐位相同也不停，修正阶段占这次运行 43% 的 token | `v28p_test` 的 judge_rounds[1].repairs、calls.jsonl | 没改 |
 
 ## H. 我的做事方式（这些低级错误的来源）
 
