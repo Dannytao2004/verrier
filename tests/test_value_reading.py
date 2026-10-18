@@ -86,8 +86,17 @@ class TestVerifyPointReading(unittest.TestCase):
             ev.split_multiplier("519万548", "万")
 
     def test_range_needs_a_range_in_the_written_form(self):
-        _, why = vp(raw("11%", "pizza was consumed by 11% of the population overall", low=10, high=12, unit="share"))
+        _, why = vp(raw("fourteen percent", "fourteen percent of eaters had pizza twice", low=10, high=12, unit="share"))
         self.assertIn("not a range", why)
+
+    def test_digits_are_parsed_by_code_not_read_by_the_model(self):
+        # 用户 10-18 选的：阿拉伯数字照旧由代码解析，抽取员给的 number 不用，也不交给模型核对
+        p, _ = vp(raw("11%", "pizza was consumed by 11% of the population overall", number=0.11, unit="share"))
+        self.assertEqual((p["value"], p["unit"]), (11.0, "%"))
+        self.assertNotIn("value_check", p)
+        p, _ = vp(raw("two million", "Sales reached two million pies in 2019", number=2, unit="pies",
+                      period_start="2019-01-01", period_end="2019-12-31"))
+        self.assertEqual(p["value_check"], "pending")
 
     def test_bad_number_or_fragment_dropped(self):
         _, why = vp(raw("four", "Overall, males had four and females had three slices of pizza", number="four"))

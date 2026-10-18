@@ -186,16 +186,19 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
     if i < 0:
         return None, "value_as_written not in quote as a whole number"
     sw = str(raw.get("scale_word") or "")
-    # v2.8o：抽取员给了 number（区间给 low / high）就用它，value_as_written 可以是单词、分数、区间（披萨题 NHANES 的
-    # 「males had four ... three slices」因此丢过）；这个数算之前由模型逐个核对（value_check.py）。没给的照旧由代码解析
+    # v2.8o：阿拉伯数字写法照旧由代码解析（精确）。代码解析不了的写法（单词、分数、区间：披萨题 NHANES 的
+    # 「males had four ... three slices」因此丢过）用抽取员给的 number（区间给 low / high），算之前由模型逐个核对
+    # （value_check.py）。用户 10-18 选的：探针里模型核对阿拉伯数字会错放（4,774.10 读成 477410）也会误杀，单词写法 5 轮全对
     reading, lo_v, hi_v = None, None, None
     try:
-        if ev.has_reading(raw):
-            value, lo_v, hi_v, is_pct, reading = ev.read_reading(raw, vw, sw)
-        else:
-            value, is_pct = ev.parse_value(vw, sw)
+        value, is_pct = ev.parse_value(vw, sw)
     except ValueError as e:
-        return None, f"number: {e}"
+        if not ev.has_reading(raw):
+            return None, f"number: {e}"
+        try:
+            value, lo_v, hi_v, is_pct, reading = ev.read_reading(raw, vw, sw)
+        except ValueError as e2:
+            return None, f"number: {e2}"
     if cut := ev.cjk_fragment(q, vw, sw):   # v2.6e：只写了更大的中日韩数字的一截（1億3000万 里的 1億3000）就丢，不静默读错
         return None, f"number: {cut}"
     basis = ev.scale_supported(sw, q, text_n[max(0, span[0] - ev.HEADER_WINDOW_CHARS):span[0]], vw)

@@ -1,3 +1,25 @@
+# 断点（2026-10-18 深夜，v2.8o，冻结之后的改动）
+
+**`frozen-v2.8n` 不变。** v2.8o 在它之后，预注册要用哪一版还没定（用户说先频繁改，只跑基本测试）。
+
+## v2.8o：原文用单词、分数、区间写的数（用户 10-18 的设计）
+
+起因：披萨题 NHANES 简报的「males had four and females had three slices」「1/6 of 14-inch pizza」被代码丢了，
+`value_as_written` 写 "4" 不在原文里、写 "four" 代码又解析不了，没有合法写法。历史运行里同类丢失约 255（英文数词）+ 78（分数）个。
+
+| 部分 | 做法 |
+|---|---|
+| 抽取员 | `value_as_written` 照抄原文写法（数字、单词、分数、区间）；另给 `number`（不含倍数词），区间给 `low` / `high`（只用于能近似看作均匀或正态的区间，提示词写明不适用的情况） |
+| 代码（`pipeline.verify_point`） | 阿拉伯数字写法照旧由 `parse_value` 精确解析（用户选的：探针里模型核对数字写法会错放 4,774.10 读成 477410、11% 读成 0.11）；解析不了才用抽取员的读数，标 `value_check: pending`。倍数由代码定（`evidence.split_multiplier`：scale_word 或写法末尾的 million / 万） |
+| 核对（`value_check.py`） | 进 `check()` 之前，方法用到的 pending 点逐个并行核对，模型只回 true / false；false 就从同一 quote 重读，最多 3 次；仍不过的点算的时候去掉，原因交修正轮 |
+| 区间采样（`compute.Draws.get_range`） | [low, high] 上均匀 × 和单个点一样的 ±20% 对数正态误差；中点作为 value |
+
+验证：458 个单元测试通过（新增 `tests/test_value_reading.py` 17 个）；核对模型探针 `probes/value_check_probe.py`（单词 / 分数 / 区间用例 5 轮全对）；
+披萨实跑 `results/agent/smoke_pizza/v28o_test`：130 t/day。NHANES 的块数和 1/6 进来了，裁判第 1 轮用上了，第 2 轮改写方法时换成了假设
+（BUGS S16）；这次运行里 24 个有读数的点另外单独核对，全部一次通过。没跑全套回归门（G2 的 prompt sha 会变，没登记）。
+
+---
+
 # 断点（2026-10-18 晚，冻结 v2.8n）
 
 **冻结的代码：tag `v2.8n` = `frozen-v2.8n`（`2668e26`）**，取代下面的 `frozen-v2.8e`。留出测试和预注册用这一版。

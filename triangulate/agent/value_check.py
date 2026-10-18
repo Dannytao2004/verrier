@@ -4,7 +4,8 @@
 2. false：带着被否的读数让模型从同一个 quote 重新读这个数（scale_word 不变），再核对；最多重读 MAX_REREADS 次。
 3. 仍不过：这个点记为 failed，算的时候当作不存在（用到它的方法报错，原因交给修正轮）。
 核对调用本身失败（出错、超预算）时不拦，照抽取员读的数算（同单位核对），记为 error。
-旧运行的点、代码解析的点（抽取员没给 number）、市场数据的点没有 value_check，不核对。"""
+只有代码解析不了的写法（单词、分数、区间）才用抽取员读的数、才核对；阿拉伯数字写法由代码解析（pipeline.verify_point），
+旧运行的点、市场数据的点也没有 value_check，不核对。"""
 import re
 from concurrent.futures import ThreadPoolExecutor
 

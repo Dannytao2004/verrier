@@ -205,7 +205,8 @@ def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
 
 # ---------- v2.8o：抽取员读的数（number / low / high） ----------
 # 用户 10-18 的设计：value_as_written 照抄原文的写法（数字、单词、分数、区间都行），number 是它表示的数（不乘倍数词），
-# 区间给 low / high。代码只乘 scale_word 的倍数、算区间中点；读得对不对，算之前交给模型逐个核对（value_check.py）
+# 区间给 low / high。只用于 parse_value 解析不了的写法（阿拉伯数字照旧由代码解析）。代码只乘倍数、算区间中点；
+# 读得对不对，算之前交给模型逐个核对（value_check.py）
 _PCT_WRITTEN = re.compile(r"%|per\s?cent|\bpct\b|百分之|퍼센트|パーセント", re.I)
 _FRACTION = re.compile(r"([-+]?\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)")
 READING_KEYS = ("number", "low", "high")
