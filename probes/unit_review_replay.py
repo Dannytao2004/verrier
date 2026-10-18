@@ -27,7 +27,7 @@ def main():
         fails = UR.review(llm, run.replace("/", "_"), jr, out0, av, pts, dict(failed), t)
         out1, _, failed1 = G._code_check(jr, pts, t)
         failed1.update(fails or {})
-        print(f"===== {run}  target {t.get('unit_canonical')!r}  period {UR.period_length(t)!r}")
+        print(f"===== {run}  target {t.get('unit_canonical')!r}")
         recs = {r["method"]: r for r in (jr.get("unit_reviews") or [{"methods": []}])[-1]["methods"]}
         for i, (m0, m1) in enumerate(zip(out0["methods"], out1["methods"])):
             r = recs.get(m0["id"])
