@@ -725,8 +725,9 @@ class TestJudgeDefinedOutcomesGraph(unittest.TestCase):
 
     def test_still_invalid_after_repair_ends_without_estimate(self):
         bad = judge_reply(outcomes=[{"label": CUT, "value": 3.75}, {"label": HOLD, "value": 4.0}])   # 没有尾部
-        st, seen = discrete_graph_run(judge=[bad, bad])
-        self.assertEqual(seen["judge_roles"], ["judge:r1", "judge:r1:repair"])
+        from triangulate.agent import graph as G
+        st, seen = discrete_graph_run(judge=[bad] * (1 + G.MAX_REPAIRS))
+        self.assertEqual(seen["judge_roles"], ["judge:r1"] + ["judge:r1:repair"] * G.MAX_REPAIRS)   # v2.8l：修正最多 3 轮
         self.assertIsNone(st["outcomes"])
         self.assertTrue(st["judge_rounds"][0]["repair"]["outcome_errors_after"])
         self.assertTrue(all("no outcome list" in m["error"] for m in st["compute"]["methods"]))

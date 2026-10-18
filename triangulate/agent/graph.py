@@ -266,6 +266,7 @@ def _repair_errors(jr: dict, out: dict, av: dict, failed: dict) -> list:
     return errs or ["no methods were proposed"]
 
 
+MAX_REPAIRS = 3   # v2.8l：修正轮最多几轮（以前 1 轮）
 CONFLICT_RATIO = 3.0   # 能跑的方法之间差到这个倍数以上，就当作「至少一条路线的输入或假设错了」交回裁判
 CONFLICT_TVD = 0.5     # 离散方法的对应规则：两个分布的 total variation distance 超过它（一半以上的概率换了结果）就交回裁判
 
@@ -449,6 +450,8 @@ _AS_CONTINUOUS = ("plan chose a discrete target, but this scored question is not
 _NEEDS_CONTINUOUS = ('; this question needs a continuous number, so outcome_type must be "continuous" and '
                      'target.unit_canonical must be given')
 # v2.7e：没钉住单位的连续值运行，终稿末尾由代码加这一句（UNITS_PLAN「钉死单位」：终稿写明没有钉死单位）
+AUDIT_OVERRIDDEN = ("Input audit disputed: no method passed every check after the repair rounds, so this estimate uses methods "
+                    "that code could compute but the input audit questioned. The audit's objections: ")
 UNIT_NOT_PINNED = ("Unit not pinned: the plan gave no unit that code could parse, so code did not check or convert the units "
                    "of the methods' results; the unit shown is the plan's description of the target.")
 
@@ -641,6 +644,8 @@ def build(ctx: Context):
             # 离散目标的结果列表被拒时也交回修正轮（第一轮还要再搜时只修列表，方法留到第二轮再核对）
             only = None if disc else (AB.ALLOWED_METHODS if ablate else None)   # 消融只针对连续值目标
 
+            last = {}   # v2.8l：最近一次 check 里只被输入核对否掉的方法（代码算得出），兜底时用
+
             def check(t):
                 out_c, av_c, failed = _code_check(jr, pts, t, only)
                 # v2.8e：钉了单位时，三个模型核对 + 一个模型裁定每个 formula_mc 方法的结果单位，写回方法再试跑；没钉单位时不变
@@ -650,16 +655,23 @@ def build(ctx: Context):
                     failed.update(ufail)
                 # v2.8j：单位核对没过的方法和输入核对没过的一样记进 aud（-> jr["audit_failed"]），compute 不用它；只放进 failed 时
                 # compute 照样按裁判写错的单位算并参与合并（恒顺题因此输出 87.65 瓶）
-                aud = {**(ufail or {}), **audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)}
+                audit = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)   # 只核对代码算得出、单位也过了的方法
+                aud = {**(ufail or {}), **audit}
                 failed.update(aud)
+                last["audit_only"] = dict(audit)
                 return (aud, *_problems(jr, out_c, av_c, failed))
 
             target = D.with_outcomes(target0, orec_new) if disc else target0
             # 有方法失败、或能跑的方法互相打架，就交回裁判修一次；修完一个都跑不了而原来能跑，就退回原方案
             aud, n_ok, errs = check(target) if need_check else ({}, 0, [])
             errs = oerrs + errs
-            if errs:
-                jr["repair"] = {"errors": errs}
+            # v2.8l：修正最多 MAX_REPAIRS 轮（用户 10-18：「最差也就是重跑最多三遍」）。每轮修完重新试跑、单位核对、输入核对，
+            # 还有错就带着新的错误再修；jr["repair"] 是最后一轮，jr["repairs"] 是每一轮
+            for attempt in range(MAX_REPAIRS):
+                if not errs:
+                    break
+                jr["repair"] = {"attempt": attempt + 1, "errors": errs}
+                jr.setdefault("repairs", []).append(jr["repair"])
                 prev_reply = {"methods": jr["methods"], "assumptions": jr["assumptions"]}
                 note, repair_user = "", judge_user
                 if disc:
@@ -699,9 +711,20 @@ def build(ctx: Context):
                         if n_ok2 == 0 and n_ok > 0:
                             jr["methods"], jr["assumptions"], aud, orec_new = prev
                             jr["repair"]["reverted"] = "repaired methods could not execute; kept the original ones"
+                            break
+                        n_ok, errs = n_ok2, oerrs2 + errs_after
                     else:
                         jr["repair"]["errors_after"] = oerrs2
+                        errs = oerrs2
+                    oerrs = oerrs2
+                if out2 is None:
+                    break
             if need_check:
+                # v2.8l（不准不出数）：修正完仍没有方法全部通过，但有方法代码算得出、只是被输入核对（模型调用，误判过多次）否掉，
+                # 就用这些方法出数，异议记在 audit_overridden，终稿末尾写明
+                if n_ok == 0 and last.get("audit_only") and not disc:
+                    jr["audit_overridden"] = {str(i): r for i, r in last["audit_only"].items()}
+                    aud = {i: r for i, r in aud.items() if i not in last["audit_only"]}
                 jr["audit_failed"] = {str(i): r for i, r in aud.items()}
         upd.update(points=pts, judge_rounds=[jr])
         if disc:
@@ -731,6 +754,10 @@ def build(ctx: Context):
         out["excluded_by_input_audit"] = [{"label": str(m.get("id", "")), "method": m.get("method"), "reason": bad[str(i)]}
                                           for i, m in enumerate(jr.get("methods") or []) if str(i) in bad]
         out["methods_from_round"] = jr.get("round")
+        ov = jr.get("audit_overridden") or {}   # v2.8l：兜底时用上的、输入核对有异议的方法
+        if ov:
+            out["audit_overridden"] = [{"label": str(m.get("id", "")), "reason": ov[str(i)]}
+                                       for i, m in enumerate(jr.get("methods") or []) if str(i) in ov]
         labels = {m["id"]: m.get("label") for m in out["methods"]}
         for a in av["kept"]:
             a["used_by"] = out["assumptions_used_by"].get(a["id"], [])
@@ -865,6 +892,9 @@ def build(ctx: Context):
             rendered = "No estimate: no estimation method could be computed from the verified evidence."
         elif not state["plan"]["target"].get("unit_canonical"):   # v2.7e：U1 没钉住单位（plan note 记了原因），终稿写明
             text, rendered = text + "\n\n" + UNIT_NOT_PINNED, rendered + "\n\n" + UNIT_NOT_PINNED
+        if r.get("central") is not None and comp.get("audit_overridden"):   # v2.8l：兜底用了输入核对有异议的方法，终稿写明
+            note = (AUDIT_OVERRIDDEN + " ".join(f"{x['label']}: {x['reason']}" for x in comp["audit_overridden"]))[:800]
+            text, rendered = text + "\n\n" + note, rendered + "\n\n" + note
         # model_text（v2.6d，N34）：模型回复的原文（清洗之前），只存进 state，不进终稿
         return {"final": {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
                           "model_error": err, "used_model_text": model_text is not None, "model_text": model_text}}
