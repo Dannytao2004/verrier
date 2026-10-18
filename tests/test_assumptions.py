@@ -170,12 +170,13 @@ class TestFormulaRulesWithAssumptions(unittest.TestCase):
         self.assertIn("at least one kept observed data point", m["error"])
         self.assertIsNone(out["result"]["central"])
 
-    def test_more_than_three_assumptions_per_method(self):
-        xs = [A(id=f"a{i}", name=f"ratio {chr(96 + i)}") for i in range(1, 5)]
-        inputs = {"p": {"id": "p1"}} | {f"x{i}": {"id": f"a{i}"} for i in range(1, 5)}
-        m, _ = self._run(inputs, "p * x1 * x2 * x3 * x4", xs)
-        self.assertIn("at most 3", m["error"])
-        m, _ = self._run({k: v for k, v in inputs.items() if k != "x4"}, "p * x1 * x2 * x3", xs)
+    def test_more_than_six_assumptions_per_method(self):
+        # v2.8m：上限 3 -> 6
+        xs = [A(id=f"a{i}", name=f"ratio {chr(96 + i)}") for i in range(1, 8)]
+        inputs = {"p": {"id": "p1"}} | {f"x{i}": {"id": f"a{i}"} for i in range(1, 8)}
+        m, _ = self._run(inputs, "p * x1 * x2 * x3 * x4 * x5 * x6 * x7", xs)
+        self.assertIn("at most 6", m["error"])
+        m, _ = self._run({k: v for k, v in inputs.items() if k != "x7"}, "p * x1 * x2 * x3 * x4 * x5 * x6", xs)
         self.assertNotIn("error", m)
         self.assertTrue(m["rests_mainly_on_assumptions"])
 

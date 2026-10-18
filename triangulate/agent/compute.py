@@ -199,8 +199,8 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
             cov, excluded = coverage(m.get("coverage"))
             if cov is not None:
                 r["coverage"] = cov
-            # sum 方法每个部分最多 3 个假设、整个方法最多 8 个（MAX_PER_SUM）；其他方法每个最多 3 个
-            cap = min(A.MAX_PER_METHOD * len(cov["parts"]), A.MAX_PER_SUM) if cov and cov["kind"] == "sum" else A.MAX_PER_METHOD
+            # v2.8m：sum 方法最多 8 个假设（MAX_PER_SUM），其他方法每个最多 6 个（以前 3 个，sum 按部分数算）
+            cap = A.MAX_PER_SUM if cov and cov["kind"] == "sum" else A.MAX_PER_METHOD
             if only_methods is not None and r["method"] not in only_methods:
                 raise M.MethodError(f"ablation: only {sorted(only_methods)} allowed (method needs target_history)")
             if r["method"] in ("series_naive", "yoy_scaling", "linear_fit", "ratio"):

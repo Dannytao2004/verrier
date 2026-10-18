@@ -159,15 +159,13 @@ class TestAssumptionCap(unittest.TestCase):
         two = {"kind": "sum", "dimension": "channel", "parts": ["restaurant", "frozen_retail"], "missing": []}
         three = dict(two, parts=["restaurant", "frozen_retail", "other"])
         four = dict(two, parts=["w", "x", "y", "z"])
-        self.assertEqual(self.err(3), "")
-        self.assertEqual(self.err(4), "formula_mc uses 4 assumptions (at most 3)")
-        self.assertEqual(self.err(4, {"kind": "full"}), "formula_mc uses 4 assumptions (at most 3)")
-        self.assertEqual(self.err(4, part), "formula_mc uses 4 assumptions (at most 3)")
-        self.assertEqual(self.err(6, two), "")
-        self.assertEqual(self.err(7, two), "formula_mc uses 7 assumptions (at most 6)")
-        self.assertEqual(self.err(8, three), "")   # 3 个部分：min(9, 8)
-        self.assertEqual(self.err(8, four), "")    # 4 个部分：仍是 8（MAX_PER_SUM）
-        self.assertEqual((A.MAX_PER_RUN, A.MAX_PER_METHOD, A.MAX_PER_SUM), (12, 3, 8))
+        self.assertEqual(self.err(6), "")   # v2.8m：普通方法最多 6 个（以前 3 个）
+        self.assertEqual(self.err(7), "formula_mc uses 7 assumptions (at most 6)")
+        self.assertEqual(self.err(7, {"kind": "full"}), "formula_mc uses 7 assumptions (at most 6)")
+        self.assertEqual(self.err(7, part), "formula_mc uses 7 assumptions (at most 6)")
+        self.assertEqual(self.err(8, two), "")     # sum 方法最多 8 个，不再按部分数算
+        self.assertEqual(self.err(8, four), "")
+        self.assertEqual((A.MAX_PER_RUN, A.MAX_PER_METHOD, A.MAX_PER_SUM), (12, 6, 8))
 
 
 class TestCoverageValidation(unittest.TestCase):

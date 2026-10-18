@@ -13,7 +13,7 @@
    目标 unit 的词干里，或者 name 指向目标实体 + 目标量（ablation.refers_to_target）。v2 还按「提到目标年份」「是目标的
    变化」拒绝，v2.1 去掉了这两条：它们挡住了「去年同期 × 今年变化倍数」这类正常路线（见 AGENT_MVP.md v2.1 节）。
 方法层面的规则在 compute.py：每个 formula_mc 至少引用一个保留的观测点（只由假设组成的公式丢弃）；每个方法最多
-MAX_PER_METHOD = 3 个假设；coverage 为 sum 的方法每个部分最多 3 个、整个方法最多 MAX_PER_SUM = 8 个。
+MAX_PER_METHOD = 6 个假设（v2.8m 以前 3 个）；coverage 为 sum 的方法最多 MAX_PER_SUM = 8 个。
 
 不确定度（effective_range）：P10 / P90 = low / high 的 lognormal。high / low 小于下限时（变化倍数 MIN_WIDTH_CHANGE = 1.25，其余 MIN_WIDTH），以 sqrt(low * high) 为中心、
 在对数空间对称放宽到下限。MIN_WIDTH = 2.0：探针 1 里模型给的假设区间 high / low 的中位数约 1.5
@@ -26,7 +26,7 @@ import re
 from .ablation import refers_to_target, stems
 
 MAX_PER_RUN = 12
-MAX_PER_METHOD = 3
+MAX_PER_METHOD = 6   # v2.8m：3 -> 6。恒顺题修正 3 轮都卡在「4 个假设」：密度、汇率、「3 年」这类固定数也只能写成假设
 MAX_PER_SUM = 8
 MIN_WIDTH = 2.0
 MIN_WIDTH_CHANGE = 1.25
