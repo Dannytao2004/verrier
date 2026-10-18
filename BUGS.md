@@ -1,4 +1,4 @@
-# BUGS：当前全部已知问题（2026-10-16 整理，代码 v2.5.2 + showcase 臂；10-16 晚、10-17 凌晨按第一轮修复的结果更新状态，代码 v2.6g；10-17 补 Q 节：v2.7 的 U0，没提交；10-17 下午：U0 提交为 v2.7a，Q 节补上 U1（没提交）的已知限制）
+# BUGS：当前全部已知问题（2026-10-16 整理，代码 v2.5.2 + showcase 臂；10-16 晚、10-17 凌晨按第一轮修复的结果更新状态，代码 v2.6g；10-17 补 Q 节：v2.7 的 U0，没提交；10-17 下午：U0 提交为 v2.7a，Q 节补上 U1（没提交）的已知限制；10-17 晚：结构化基线修复 `v2.8c`（G1、N39、N41），冻结前冒烟测试的发现和 `v2.8d` 的修复见 S 节）
 
 只做整理，没改代码、没重跑。来源：NEXT.md、SHOWCASE.md 的记录，加上 2026-10-16 对 showcase1 结果和代码的检查。
 「新」= 这次检查新发现（证据是这次跑的离线查询）；「记」= 以前已经记录（NEXT.md / SHOWCASE.md 有详细说明，当时对着代码核实过）。
@@ -36,8 +36,8 @@
 | B2 | 高 | 伪装的「样本 × 放大系数」假设识别不了：留出集日本出生题靠「单家诊所接生数 × 放大系数」得出 +0.8% | NEXT.md 收尾清单 4、docs/project.html 的提醒框 | 记 | 本轮不修（D6） |
 | B3 | 中 | series_naive（就是去年同月）仍会进 agent 的答案：韩国 8 月题占 50% 权重。去年同月不再作为对照之后，这个方法保不保留、权重怎么定，还没定 | SHOWCASE.md 发现 7 | 记 | 本轮不修（D6：series_naive 的地位放到下一轮预注册） |
 | B4 | 中 | 假设的取值和它自己的理由矛盾，没有检查：JNTO a2 取 1.05，理由里写的是 0.95 / 0.98 | SHOWCASE.md 发现 4 | 记 | 本轮不修（第 6 节：rationale 一致性检查要先定设计） |
-| B5 | 中 | 修正轮只有一次，修不好就整题没有估计（日本迁移） | `graph.py` 修正轮 | 新 | 部分修 `v2.6b`：量纲规则（「至少一个输入是量」）的报错点名每个输入的 id / unit / name；修正轮仍只有一次（第 6 节：修正次数本轮不改） |
-| B6 | 低 | 公式里写了数字常数被拒（NHS m4 的 3、JNTO m3 的 0.5）：规则对，但裁判 prompt 没说清，白白浪费一个方法名额 | SHOWCASE.md 发现 5 | 记 | 本轮不修（第 6 节：改 prompt 收益小） |
+| B5 | 中 | 修正轮只有一次，修不好就整题没有估计（日本迁移） | `graph.py` 修正轮 | 新 | 部分修 `v2.6b`：量纲规则（「至少一个输入是量」）的报错点名每个输入的 id / unit / name；修正轮仍只有一次（第 6 节：修正次数本轮不改）；冒烟测试 smoke1 里披萨、茶两题的方法都是在唯一的修正轮里出错（S1–S3），`v2.8d` 修了这几处报错和规则，修正次数仍是一次 |
+| B6 | 低 | 公式里写了数字常数被拒（NHS m4 的 3、JNTO m3 的 0.5）：规则对，但裁判 prompt 没说清，白白浪费一个方法名额 | SHOWCASE.md 发现 5 | 记 | 本轮不修（第 6 节：改 prompt 收益小）；`v2.8d`：钉了单位时，这条报错还说明「只是换单位的数就删掉、在 unit 里写清单位」（冒烟测试 S2） |
 | B7 | 低 | 方法引用已丢弃的点（韩国 m2 → p56）；yoy_scaling 缺信号年份（韩国 m3） | 韩国 8 月 state.json | 新 | 本轮不修（第 6 节）。注：p56 是同一份回复自己丢掉又引用的，S5 的第 2 轮表格解决不了它 |
 
 ## C. 取证 / 检索
@@ -84,8 +84,8 @@
 
 | # | 严重度 | 问题 | 证据 / 出处 | 来源 | 本轮状态 |
 |---|---|---|---|---|---|
-| G1 | 高 | **不联网结构化基线的路线大量被量纲检查拒掉**：「人口 × 每人每年就诊次数 × 9 月占全年份额」算出来是 /year，被判 dimension mismatch。11 道题里 7 道至少有一条路线因此被拒；日本迁移 3/3 全拒，NHS 2/3 被拒；台湾留出题基线的「没有估计」，两次尝试的报错都是这条和 G2，具体是哪条拦下了最后一条路线没有逐条核实。**订正**（原写「语义上是对的」「和基线的对比因此偏向 agent」）：基线 prompt（`triangulate/prompts.py:42`）本来就要求「目标是一段时间的总量时加 period_length 输入」，这些路线没加，检查没有判错；问题在报错是 SI 写法（NHS 两次尝试都是 `dimension mismatch: formula gives s**-1, target is dimensionless`），模型看不懂、改不对（N39）。偏向哪边也不一致：分析时在内存里做的反事实（没重跑）NHS 会变成 −10.0%（现存 −0.7%），也就是在 NHS 上量纲检查反而帮了基线；日本迁移从没有估计变成 +33.4%，台湾 +36.2% | `engine.py:141`；`results/forecast/raw/structured/*.json` | 新 | 本轮不修（D5：`showcase.py` 每次打分都用当前 engine 重算结构化臂，10-28 打分提交前改就是改预注册的对照臂；之后先处理 N38，再改报错反馈）；描述已订正 |
-| G2 | 中 | 结构化基线不允许公式里出现数字常数：日本迁移、台湾两题都有路线因为 1000 被拒。**订正**（原写「和『每千人』这类比率冲突」）：单位串里的 per 1000 代码已经换算过（`parse_unit('births per 1000 people per year').factor` = 3.17e-11/s），模型又在公式里除以 1000，这些路线放行就会双重换算、小 1000 倍（N38）。台湾第 2 次尝试把常数改名（`people_per_birth_rate_unit`）绕过了常数规则，拦住它的只剩量纲错误 | `expr.py:85`；`results/forecast/raw/structured/fc_tw_births_2026_09.json` 第 2 次尝试的 p1 | 新 | 本轮不修（D5）；描述已订正 |
+| G1 | 高 | **不联网结构化基线的路线大量被量纲检查拒掉**：「人口 × 每人每年就诊次数 × 9 月占全年份额」算出来是 /year，被判 dimension mismatch。11 道题里 7 道至少有一条路线因此被拒；日本迁移 3/3 全拒，NHS 2/3 被拒；台湾留出题基线的「没有估计」，两次尝试的报错都是这条和 G2，具体是哪条拦下了最后一条路线没有逐条核实。**订正**（原写「语义上是对的」「和基线的对比因此偏向 agent」）：基线 prompt（`triangulate/prompts.py:42`）本来就要求「目标是一段时间的总量时加 period_length 输入」，这些路线没加，检查没有判错；问题在报错是 SI 写法（NHS 两次尝试都是 `dimension mismatch: formula gives s**-1, target is dimensionless`），模型看不懂、改不对（N39）。偏向哪边也不一致：分析时在内存里做的反事实（没重跑）NHS 会变成 −10.0%（现存 −0.7%），也就是在 NHS 上量纲检查反而帮了基线；日本迁移从没有估计变成 +33.4%，台湾 +36.2% | `engine.py:141`；`results/forecast/raw/structured/*.json` | 新 | 已修 `v2.8c`（用户 10-17：「没有基线我做个毛线的测试啊」）：engine 的量纲报错改成白话（SI 写法留在括号里），点名哪些输入带时间单位、怎么让它抵消；规则不变。showcase1 打分改用冻结的 `showcase_engine.py`（`d79db02` 的 engine 原样复制），预注册的对照臂不变。已存的 55 次尝试重算数字全部相同。冒烟测试 smoke1（v2.8c，目标单位给对之后）结构化基线 4 题都出了数 |
+| G2 | 中 | 结构化基线不允许公式里出现数字常数：日本迁移、台湾两题都有路线因为 1000 被拒。**订正**（原写「和『每千人』这类比率冲突」）：单位串里的 per 1000 代码已经换算过（`parse_unit('births per 1000 people per year').factor` = 3.17e-11/s），模型又在公式里除以 1000，这些路线放行就会双重换算、小 1000 倍（N38）。台湾第 2 次尝试把常数改名（`people_per_birth_rate_unit`）绕过了常数规则，拦住它的只剩量纲错误 | `expr.py:85`；`results/forecast/raw/structured/fc_tw_births_2026_09.json` 第 2 次尝试的 p1 | 新 | 部分修 `v2.8c`：规则不变（公式里仍不许出现数字常数）；结构化 prompt 加一句「单位里的倍数（per 1000）由 Python 换算，公式不能再乘除一次」，带倍数单位的输入在报错里另有提示（N38） |
 | G3 | 高（我的失误） | 联网直接答臂 max_tokens 写成 4096，预注册那次两题都没出数；不带工具重试时，模型把工具调用写成了文本 | SHOWCASE.md arm (3) 节 | 记 | 没改值：`v2.5.3` 把 4096 收进 `config.MAX_TOKENS["search_direct"]`（值不变）；预注册那次不能重跑；以后的默认值没定 |
 | G4 | 中 | 预测市场臂没查 Kalshi，和预注册不一致 | SHOWCASE.md「不一致」第 3 条 | 记 | 本轮不补查（D8：Kalshi 是新的外部 API，没批准；按预注册只能在 2026-10-16（UTC）当天补查），记为和预注册不一致 |
 | G5 | 中 | 样本太少：真正的样本外只有 4 题（留出 3 题 + NHS）；dev 4 题是边调边跑的，不能当测试成绩 | — | 新 | 本轮不修（第 6 节：要先定新的留出集）。另：S11 重跑以后，tw、lhr、jp_births 三道留出题只能算开发数据 |
@@ -135,10 +135,10 @@
 | N35 | 低 | 数字格式化有 7 份，规则不一致；graph.html 页头一律取整 | `graph.py:122-125`、`run.py:198-199`、`outputs.py:17`、`published.py:59`、`viewer.py:71`、`report.py:156`、`app.js:11`（读者） | 本轮不修（第 6 节） |
 | N36 | 低 | docs/project.html 是手写的，没有生成脚本；「已知局限」两条已过时 | `docs/project.html:107-108` | 本轮不修（第 6 节） |
 | N37 | 低 | 网页把展示集的真实运行标成「--ask」；用时按分钟取整 | `web/results.py:109-113`；`app.js:195`（读者） | 本轮不修（第 6 节） |
-| N38 | 高（G1 / G2 一修就会暴露） | 结构化基线的「每千人」双重换算：单位已乘 1e-3，模型又在公式里除以 1000 | `parse_unit('births per 1000 people per year')`；`results/forecast/raw/structured/fc_tw_births_2026_09.json` 第 2 次尝试的 p1 | 本轮不修（D5：B0 之后先处理它，再改 G1 的报错反馈） |
-| N39 | 中 | 基线重试反馈改不动错：报错用 SI 写法，常数错误会遮住量纲错误 | `engine.py:122-126、141`；台湾第 1、2 次尝试 | 本轮不修（D5） |
+| N38 | 高（G1 / G2 一修就会暴露） | 结构化基线的「每千人」双重换算：单位已乘 1e-3，模型又在公式里除以 1000 | `parse_unit('births per 1000 people per year')`；`results/forecast/raw/structured/fc_tw_births_2026_09.json` 第 2 次尝试的 p1 | 部分修 `v2.8c`：prompt 和报错提示都说明单位里的倍数已换算；代码不拦，模型把常数改名绕过规则时仍可能双重换算 |
+| N39 | 中 | 基线重试反馈改不动错：报错用 SI 写法，常数错误会遮住量纲错误 | `engine.py:122-126、141`；台湾第 1、2 次尝试 | 已修 `v2.8c`：报错用白话（SI 留在括号里）；常数错误不再遮住同一路线的其他问题 |
 | N40 | 中（G1 修好以后才会出现） | 基线区间把 outlier 路线的样本也混进去 | `mc.py:77-78` | 本轮不修（D5） |
-| N41 | 低 | MC 之后才判无效的路线不进 errors，不触发重试 | `engine.py:152、178-180` | 本轮不修（D5） |
+| N41 | 低 | MC 之后才判无效的路线不进 errors，不触发重试 | `engine.py:152、178-180` | 已修 `v2.8c`：MC 之后判无效的路线进 errors，触发重试 |
 | N42 | 低 | 「没有估计时算不算覆盖」三处口径不一致 | `forecast.py:196`、`showcase.py:150-151`、`report.py:99`（读者） | 本轮不修：三个文件都在冻结清单里（G7，到 10-28 打分提交为止），FIX_PLAN 没排阶段 |
 | N43 | 低 | arm (3) 取文字的方式和预注册写法有细微差别 | `EVAL_SHOWCASE_PLAN.md:63`；`search_direct.py:85-91`（读者） | 本轮不修：预注册的对照臂，FIX_PLAN 没排阶段，只记录 |
 | N44 | 低 | run.score_all 仍然写出 last_year_same_period 臂 | `run.py:239-243`；`EVAL_SHOWCASE_PLAN.md:12` | 已修 `v2.6d` |
@@ -198,6 +198,24 @@ S6 `test_leak_guard`、S7 `test_final_text`、S8 `test_cjk_numbers` 24 个、S9 
 | Q18 | 低 | graph.py 现在 import qty（pint 注册表），`import triangulate.agent.graph` 从 1.15 s 变成 1.58 s（各跑一次） | U1.md 第 9 节第 3 条 | 没改 |
 | Q19 | 低 | `probes/web_demo_fake.py` 用 `tests/test_web.py` 的 FakeLLM，假规划没有 unit_canonical：演示服务里规划会多问一次（多等约 5 s），审批页多一条 `unit not pinned` 的 note | U1.md 第 9 节第 4 条 | 没改（FakeLLM 很多测试共用）；要看「钉住」的样子，可以在 web_demo_fake 的 SlowLLM 里给 plan 回复加 unit_canonical |
 | Q20 | 中（潜在，只在 U1 提交之后、U2 之前做真实运行时） | 过渡期：裁判、输入核对、终稿、已公布检查的 prompt 都能看到钉住的 `unit_canonical`，但 compute 还不做量纲检查和换算，终稿可能把用别的单位算出来的数标成钉住的单位 | U1.md 第 0 节第 4 条、第 10 节；钉住版 G2 `probes/out/u1/g6_pinned_r3.txt` | 没改：照 UNITS_PLAN，U3 做完之前不做真实运行 |
+
+## S. 冻结前冒烟测试（2026-10-17 晚，代码 `v2.8c`，tag `smoke1`；修复 `v2.8d`；10-18 单位核对 `v2.8e`，冻结）
+
+4 道题：芝加哥披萨（t/day）、东京迪士尼 2026 年 9 月日均入园（visitor/day）、纽约 2026 年 10 月出租车 + 网约车日均行程（trip/day）、英国每天喝几杯茶（cup/day）。
+agent 用命令行 `--ask --auto-approve`，两个基线用 `probes/smoke_run.py`；结果在 `results/agent/smoke_*/smoke1/`，基线回复在 `probes/out/smoke/`（gitignore）。
+速览脚本 `probes/smoke_inspect.py`。
+
+| 编号 | 严重度 | 问题 | 证据 | 状态 |
+|---|---|---|---|---|
+| S1 | 高 | 假设 id 只有 a1..a8：披萨题修正轮写到 a10，用到 a9 的「餐馆 + 在家」加总方法被拒，整题没有估计 | `results/agent/smoke_pizza/smoke1/state.json` 的 compute.methods（m4、m5：`assumption a9 was rejected (id must be a1..a8)`） | 已修 `v2.8d`：id 放到 a1..a12（MAX_PER_RUN = 12），sum 方法仍最多 8 个（MAX_PER_SUM）。用 v2.8d 重算这次保存的方法：82.5 t/day |
+| S2 | 高 | 「numeric constant 1000 not allowed…; make it a named input」把修正轮带偏：第一轮的 `/ 1000` 只是克换千克，修正轮照提示自造了 `k_grams_per_kg`（不存在的常数） | 同上，judge_rounds[1].repair.errors 和 m1、m2 的报错 | 已修 `v2.8d`：钉了单位时，报错接着说「只是换单位的数就删掉、在 unit 里写公式给出的单位，代码换算到目标单位」 |
+| S3 | 中 | 公式里直接写了代码给的常数（k_days_per_year），inputs 里漏列，方法被拒（茶题的供给路线 m1、m3） | `results/agent/smoke_tea/smoke1/state.json`：`formula names ['a2', 'k_days_per_year', 'p135'] != inputs ['a2', 'p135']` | 已修 `v2.8d`：代码给的常数出现在公式里、inputs 没列时由代码补上（不改模型给的 params）。重算：茶 1.00 亿 → 8,361 万 cup/day（供给路线进了合并） |
+| S4 | 低 | 终稿单位重复：「100,000,000 cups of tea per day cups per day」「19,800,000 trips trips」。`[[pN_value]]` 本来就带点的单位，U4 让模型在估计值后写 `[[unit]]` 之后，模型在观测值后也补了单位 | 三道出数题的 final.template | 已修 `v2.8d`（prompt 一句）：观测点占位符已经带单位，后面不要再写。只能在新运行里看效果 |
+| S5 | 低（我的失误） | 冒烟脚本第一次给两个基线的目标单位是 `""`（无量纲），每天的量、质量题基线必然被量纲检查拒掉，看起来像 G1 没修好 | `probes/out/smoke/first_try_dimless/` | 已改：按题给 `tonne/day` 等单位重跑。预注册的题目：按日均问的必须带单位，只有一段时间的总数才能用 `""` |
+| S6 | 记 | 模型的建模错误，不是代码问题：纽约题用 2 月的月总量除以 10 月的天数（k_days_target）；迪士尼题 m1、m3 是同一个式子的两种写法（重复方法，用户 10-17 定为搁置）；结构化基线把 0.008 这样的占比标成 `%`（披萨基线因此小 100 倍） | 各题 state.json；`probes/out/smoke/structured_smoke_pizza.json` | 不修。方法声明的 unit 写错（比如年总量写成 per day）代码查不出来，是已知限制 |
+| S7 | 记 | 东方乐园（OLC）的 IR PDF 被 robots.txt 禁止，照规矩跳过；PDF 取文本（L2）在披萨题里正常（USDA 两份 PDF 各抽出 18、15 个点） | smoke_tdr、smoke_pizza 的 pages | 正常行为 |
+| S8 | 高 | 裁判声明的结果单位写错，代码照用：smoke2 披萨 1,027,630 t/day（公式给的是「每天多少个 100 g」，声明成 t/day），大一万倍 | `results/agent/smoke_pizza/smoke2/state.json` | 已修 `v2.8e`（用户 10-18 的设计）：三个模型核对 + 一个模型裁定结果单位，`agent/unit_review.py`。重放 smoke2：102.8 t/day；smoke3 实跑披萨 128 t/day、茶 1.09 亿 cup/day，茶题里一个声明成 kg/day 的方法被改成 1000 cup/day |
+| S9 | 记 | `v2.8e` 冻结时已知、没修的问题（用户 10-18：版本测试里没出现的错误不拦）：(1) 单位核对判失败的方法只放进 failed、没进 audit_failed，compute 仍按裁判的单位算并参与合并（审查用假模型复现）；(2) 代码不核对裁定的 result_unit 是否等于它自己推导的结果，重试时可能只改结果串（旧版 prompt 重放里茶题出现过一次 1000 倍）；(3) 三个核对模型的 prompt 相同、temperature 0，答案几乎总是一样；(4) 给旧回测运行补上 unit_canonical 重放时，「全年 × 月份额」的写法（韩国 m2、台湾 m3）被推成 birth/year、判失败 | 审查结论 `probes/out/unit_review/workflow_verified.txt`；重放 `probes/out/unit_review/replay*.json`（gitignore） | 冻结版不修。smoke3 两次实跑都没有触发。冻结后改过的 graph.py 一行、prompt 一句没测全，撤回了，diff 留在 `probes/out/unit_review/untested_after_v28e.diff` |
 
 ## H. 我的做事方式（这些低级错误的来源）
 

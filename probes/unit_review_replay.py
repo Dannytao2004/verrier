@@ -1,6 +1,6 @@
 """v2.8e：在已存的冒烟运行上重放单位核对（三个核对 + 裁定，真模型）。裁判方法取 compute 用的那一轮，代码试跑用当前代码；
 打印每个方法裁判写的单位、裁定的单位、核对前后的估计，全部回答存进 probes/out/unit_review/replay.json。不写 results/。
-用法：.venv/Scripts/python.exe probes/unit_review_replay.py smoke_pizza/smoke2 smoke_pizza/smoke1 ..."""
+用法：.venv/Scripts/python.exe probes/unit_review_replay.py smoke_pizza/smoke2 fc_kr_births_2026_07/v21=birth ..."""
 import copy
 import json
 import sys
@@ -19,9 +19,12 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     llm = AgentLLM(OUT / "calls.jsonl", Budget(usd=5.0))
     dump = {}
-    for run in sys.argv[1:]:
+    for arg in sys.argv[1:]:
+        run, _, unit = arg.partition("=")   # qid/tag=unit：给没钉单位的旧运行补一个 unit_canonical（只在内存里）
         s = json.loads((ROOT / "results" / "agent" / run / "state.json").read_text(encoding="utf-8"))
-        t, pts = s["plan"]["target"], s["points"]
+        t, pts = dict(s["plan"]["target"]), s["points"]
+        if unit:
+            t["unit_canonical"] = unit
         jr = copy.deepcopy(s["judge_rounds"][s["compute"]["methods_from_round"] - 1])
         out0, av, failed = G._code_check(jr, pts, t)
         fails = UR.review(llm, run.replace("/", "_"), jr, out0, av, pts, dict(failed), t)
