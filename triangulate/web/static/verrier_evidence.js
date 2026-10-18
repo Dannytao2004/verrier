@@ -54,15 +54,33 @@
     return panel("E-01", T("Estimate", "估计"), `${esc(qid)} / ${esc(tag || "—")}`, inner);
   }
 
-  // ---------- E-02 钉死的目标 ----------
+  // ---------- 目标锁定卡（控制台运行页和 E-02 共用，window.VERRIER_SPEC）：规格卡的版式，标签列 + 细线；单位做成徽章，起止日期画成时间轴，
+  // 口径说明放进斜线底纹的框里。extra：[[标签 HTML, 值 HTML]]，接在固定行后面（离散题的结果集合）
+  const has = v => v !== undefined && v !== null && v !== "";
+  function spec(t, extra) {
+    const row = (lab, val) => `<dt>${lab}</dt><dd>${val}</dd>`;
+    const rows = [has(t.what) ? row(T("Quantity", "测算对象"), esc(t.what)) : "",
+      has(t.unit) ? row(T("Unit", "计量单位"), esc(t.unit)) : "",
+      has(t.period_start) || has(t.period_end) ? row(T("Period", "统计期间"), `<div class="cx-span"><span><i>${T("Period start", "统计起点")}</i>${esc(t.period_start || "?")}</span>
+        <b></b><span><i>${T("Period end", "统计终点")}</i>${esc(t.period_end || "?")}</span></div>`) : "",
+      has(t.publisher) ? row(T("Publisher", "发布机构"), esc(t.publisher)) : "",
+      has(t.cadence) ? row(T("Release cadence", "发布频率"), esc(t.cadence)) : "",
+      has(t.outcome_type) ? row(T("Target type", "目标类型"), t.outcome_type === "discrete" ? T("discrete outcomes", "离散结果")
+        : t.outcome_type === "continuous" ? T("continuous number", "连续数值") : esc(t.outcome_type)) : "",
+      ...(extra || []).map(([l, v]) => row(l, v))].join("");
+    return `<div class="cx-spec"><div class="sh"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2"/><path d="M8 0v4M8 12v4M0 8h4M12 8h4"/></svg>
+        <span class="lbl">TARGET LOCK · ${T("locked unit", "锁定单位")}</span>
+        <span class="cx-unit${t.unit_canonical ? "" : " off"}">${t.unit_canonical ? esc(t.unit_canonical) : T("not locked", "未锁定")}</span></div>
+      <dl>${rows}</dl>
+      ${has(t.caveats) ? `<div class="cx-caveat"><span class="lbl">${T("Scope notes", "口径说明")}</span><p>${esc(t.caveats)}</p></div>` : ""}</div>`;
+  }
+  window.VERRIER_SPEC = spec;
+
+  // ---------- E-02 目标锁定 ----------
   function target(t) {
-    const rows = [["what", "What", "是什么"], ["unit", "Unit", "单位"], ["unit_canonical", "Pinned unit", "钉死的单位"],
-      ["period_start", "From", "期间开始"], ["period_end", "To", "期间结束"], ["publisher", "Publisher", "谁公布"], ["cadence", "Cadence", "公布节奏"],
-      ["caveats", "Caveats", "注意"], ["outcome_type", "Outcome type", "结果类型"]];
-    const have = rows.filter(([k]) => t[k] !== undefined && t[k] !== null && t[k] !== "");
-    const outs = (t.outcomes || []).length ? `<tr><th>${T("Outcomes", "结果")}</th><td>${t.outcomes.map(o => esc(o.label)).join(" · ")}</td></tr>` : "";
-    return panel("E-02", T("Pinned target", "钉死的目标"), t.unit_canonical ? esc(t.unit_canonical) : T("unit not pinned", "没有钉死单位"),
-      have.length || outs ? `<table class="cx-t">${have.map(([k, en, z]) => `<tr><th>${T(en, z)}</th><td>${esc(t[k])}</td></tr>`).join("")}${outs}</table>` : none());
+    const outs = (t.outcomes || []).length ? [[T("Outcomes", "结果集合"), t.outcomes.map(o => esc(o.label)).join(" · ")]] : [];
+    return panel("E-02", T("Target lock", "目标锁定"), t.unit_canonical ? esc(t.unit_canonical) : T("unit not locked", "单位未锁定"),
+      Object.keys(t).length || outs.length ? spec(t, outs) : none());
   }
 
   // ---------- E-03 方法 ----------

@@ -46,10 +46,35 @@
     failed: "MISSION FAILED", cancelled: "MISSION ABORTED"};
   const DST = {queued: ["Queued", "排队"], searching: ["Searching", "搜索中"], fetching: ["Fetching", "取页中"], extracting: ["Extracting", "抽取中"],
     done: ["Done", "完成"], stopped: ["Stopped", "中止"]};
-  const STAGE = {plan: ["Plan routes", "规划方向"], approve: ["Human gate", "人工确认"], subagents1: ["Gather evidence", "子 agent 取证"],
-    subagents2: ["Base-rate routes", "追加的 base-rate 方向"], judge1: ["Judge · round 1", "裁判第 1 轮"], judge2: ["Judge · round 2", "裁判第 2 轮"],
-    compute: ["Compute (code)", "代码计算"], final: ["Final answer", "终稿"]};
   const SSTAT = {done: ["done", "完成"], running: ["running", "进行中"], waiting: ["waiting for you", "等你确认"], pending: ["pending", "未开始"]};
+  // 运行页的流程时间轴：8 站，由 /api/runs 的 stages（服务端的阶段）和 calls（按角色计的调用次数）推出来，只是大致反映 agent 在做什么：
+  // 单位核对、输入核对和修正都在裁判节点里，服务端没有单独的阶段，按调用次数亮灯
+  const STATIONS = [["plan", ["Plan · lock target", "规划 · 锁定目标"], ["plan"]], ["approve", ["Human gate", "人工确认"], ["approve"]],
+    ["field", ["Field agents", "子 agent 取证"], ["subagents1", "subagents2"]], ["judge", ["Judge", "裁判评估"], ["judge1", "judge2"]],
+    ["units", ["Unit review", "单位核对"], []], ["audit", ["Input audit · repair", "输入核对 · 修正"], []],
+    ["compute", ["Compute (code)", "代码计算"], ["compute"]], ["final", ["Published check · final", "已公布检查 · 终稿"], ["final"]]];
+  function stations(r) {
+    const by = new Map((r.stages || []).map(s => [s.key, s])), calls = Object.entries(r.calls || {});
+    const count = f => calls.reduce((n, [k, v]) => n + (f(k) ? v : 0), 0);
+    const nChk = count(k => k.startsWith("unit_check")), nArb = count(k => k.startsWith("unit_arbiter"));
+    const nAud = count(k => k === "audit"), nRep = count(k => k.endsWith(":repair"));
+    const computed = (by.get("compute") || {}).status === "done";
+    const plain = keys => { const ss = keys.map(k => by.get(k)).filter(Boolean), sts = ss.map(s => s.status);
+      return {status: !sts.length ? "pending" : sts.every(s => s === "done") ? "done" : sts.includes("waiting") ? "waiting"
+        : sts.includes("running") ? "running" : "pending", detail: ss.map(s => esc(s.detail || "")).filter(Boolean).join(" · ")}; };
+    const judging = plain(["judge1", "judge2"]).status === "running";   // 单位核对、输入核对都在裁判节点里：裁判站在跑时才按调用次数亮
+    const st = STATIONS.map(([key, label, keys]) => {
+      if (key === "units") return {key, label, status: computed ? "done" : judging && nChk + nArb ? "running" : "pending",
+        detail: nChk + nArb ? `${T("checks", "核对")} ${nChk} · ${T("arbiter", "裁定")} ${nArb}` : ""};
+      if (key === "audit") return {key, label, status: computed ? "done" : judging && nAud + nRep ? "running" : "pending",
+        detail: nAud + nRep ? `${T("audits", "输入核对")} ${nAud}${nRep ? ` · ${T("repairs", "修正")} ${nRep}` : ""}` : ""};
+      return {key, label, ...plain(keys)};
+    });
+    // 后一站已经开始时，前面没完成的站都显示成完成（裁判节点要等单位核对、输入核对做完才结束；没做单位核对时那一站算跳过）
+    const last = st.map(s => s.status).lastIndexOf("running");
+    st.forEach((s, i) => { if (i < last && s.status !== "done") s.status = "done"; });
+    return st;
+  }
   const ACTIVE = ["planning", "awaiting_approval", "running"];
   const EXAMPLES = [
     "How many foreign visitors arrived in Japan in November 2026, as first reported in JNTO's preliminary estimate?",
@@ -224,7 +249,11 @@
       ["Auditing each formula input", "逐个核对公式输入"]],
     compute: [["Running the formulas in code", "用代码跑公式"], ["Drawing 20,000 Monte Carlo samples", "抽 20,000 个 Monte Carlo 样本"],
       ["Combining the routes", "合并各条路线"]],
-    final: [["Writing the answer", "撰写答案"], ["Attaching the evidence ledger", "附上证据账本"]],
+    units: [["Three checkers derive each input's unit", "三位核对员各自推导单位"], ["The arbiter settles the result unit", "裁定员定下结果单位"],
+      ["Checking the unit fits the target", "检查单位和目标是否同类"]],
+    audit: [["Matching every formula input to its evidence", "逐个比对公式输入和证据"], ["Sending failed routes back for repair", "把没过的路线交回修正"]],
+    final: [["Checking whether the number is already published", "检查这个数是否已经公布"], ["Writing the answer", "撰写答案"],
+      ["Attaching the evidence ledger", "附上证据账本"]],
   };
   const GLYPHS = "▮▯▮▯··0123456789ABCDEF";
   let think = null;
@@ -253,10 +282,9 @@
   }
   function stageKey(r) {
     if (!["planning", "running"].includes(r.status)) return null;
-    const first = (r.stages || []).find(s => s.status !== "done");
-    if (!first || first.key === "approve") return r.status === "planning" ? "plan" : null;
-    const k = first.key || "";
-    return k.startsWith("subagents") ? "subagents" : k.startsWith("judge") ? "judge" : ["plan", "compute", "final"].includes(k) ? k : "plan";
+    const cur = stations(r).find(s => s.status !== "done");
+    if (!cur || cur.key === "approve") return r.status === "planning" ? "plan" : null;
+    return cur.key === "field" ? "subagents" : cur.key;
   }
 
   // ---------- 进度 ----------
@@ -284,12 +312,10 @@
         : `<a class="btn" href="#console">${T("New mission", "新任务")}<span>+</span></a>`}</div></div>`;
   }
   function targetTable(t) {
-    if (!t) return `<p class="fine">${T("Not pinned yet.", "还没有。")}</p>`;
-    const rows = [["what", "What", "是什么"], ["unit", "Unit", "单位"], ["period_start", "From", "期间开始"], ["period_end", "To", "期间结束"],
-      ["publisher", "Publisher", "谁公布"], ["cadence", "Cadence", "公布节奏"], ["caveats", "Caveats", "注意"]];
-    const outs = t.outcome_type === "discrete" ? `<tr><th>${T("Outcomes", "结果")}</th><td>${(t.outcomes || []).map(o => esc(o.label)).join(" · ") || T("defined by the judge after the evidence", "取证后由裁判定义")}</td></tr>` : "";
-    return `<table class="cx-t">${rows.filter(([k]) => t[k] !== undefined && t[k] !== null && t[k] !== "")
-      .map(([k, en, z]) => `<tr><th>${T(en, z)}</th><td>${esc(t[k])}</td></tr>`).join("")}${outs}</table>`;
+    if (!t) return `<p class="fine">${T("Not locked yet.", "尚未锁定。")}</p>`;
+    const outs = t.outcome_type === "discrete" ? [[T("Outcomes", "结果集合"), (t.outcomes || []).map(o => esc(o.label)).join(" · ")
+      || T("defined by the judge after the evidence", "取证后由裁判定义")]] : [];
+    return window.VERRIER_SPEC(t, outs);
   }
   const dots = n => { const k = Math.max(0, Math.min(5, Math.round(+n || 0))); return "●".repeat(k) + "○".repeat(5 - k); };
   function gate(r) {
@@ -325,10 +351,11 @@
       } catch (e) { $("cxGateMsg").innerHTML = `<span class="cx-bad">${esc(e.message)}</span>`; $("cxApprove").disabled = false; }
     };
   }
-  function stages(ss) {
-    return `<div class="cx-steps">${(ss || []).map((s, i) => `<div class="cx-st st-${esc(s.status)}"><span class="n">${String(i + 1).padStart(2, "0")}</span>
-      <div><h4>${T(...(STAGE[s.key] || [esc(s.label), esc(s.label)]))}</h4>
-      <p><span class="lbl">${T(...(SSTAT[s.status] || [esc(s.status), esc(s.status)]))}</span>${s.detail ? " · " + esc(s.detail) : ""}</p></div></div>`).join("")}</div>`;
+  function timeline(ss, live) {
+    const cur = live ? ss.findIndex(s => s.status !== "done") : -1, done = ss.filter(s => s.status === "done").length;
+    return `<div class="cx-tl8" style="--p:${(100 * done / ss.length).toFixed(1)}%">${ss.map((s, i) => `<div class="cx-sta st-${s.status}${i === cur ? " cur" : ""}">
+      <span class="n">${String(i + 1).padStart(2, "0")}</span><h4>${T(...s.label)}</h4>
+      <p><span class="lbl">${T(...(SSTAT[s.status] || [esc(s.status), esc(s.status)]))}</span>${s.detail ? `<br>${s.detail}` : ""}</p></div>`).join("")}</div>`;
   }
   function dirCard(d) {
     const st = DST[d.status] || [esc(d.status), esc(d.status)], busy = ["searching", "fetching", "extracting"].includes(d.status);
@@ -378,18 +405,18 @@
       body.dataset.run = id;
       body.innerHTML = `<div id="cxRunTop"></div><div id="cxThink"></div><div id="cxRunMain"></div>`;
     }
-    const keep = body.scrollTop, key = stageKey(r), cur = (r.stages || []).find(s => s.status !== "done");
+    const keep = body.scrollTop, key = stageKey(r), cur = stations(r).find(s => s.status !== "done");
     $("cxRunTop").innerHTML = `<div id="cxStrip">${strip(r)}</div>
       ${r.error ? `<div class="cx-err">${esc(r.error)}</div>` : ""}
       <p class="cx-q">${esc(r.question)}</p><p class="fine">${T("question id", "题 id")} ${esc(r.qid)} · tag ${esc(r.tag)}</p>`;
-    thinkSet($("cxThink"), key, cur ? T(...(STAGE[cur.key] || [esc(cur.label), esc(cur.label)])) : "");
+    thinkSet($("cxThink"), key, cur ? T(...cur.label) : "");
     $("cxRunMain").innerHTML = `${picking ? gate(r) : ""}
+      <h3 class="cx-h">${T("Mission timeline", "任务流程")}</h3>${timeline(stations(r), active)}
       <div class="cx-grid"><div>
-        <h3 class="cx-h">${T("Pipeline", "流程")}</h3>${stages(r.stages)}
         ${(r.directions || []).length ? `<h3 class="cx-h">${T("Field agents", "子 agent（各取证方向）")}</h3><div class="cx-dirs">${r.directions.map(dirCard).join("")}</div>` : ""}
         ${r.markets ? `<p class="fine">${T("Prediction markets", "预测市场")}: ${esc(r.markets.n_markets)} · ${esc(r.markets.n_points)} pts. ${esc(r.markets.note || "")}</p>` : ""}
       </div><div>
-        <h3 class="cx-h">${T("Pinned target", "钉死的目标")}</h3>${targetTable(r.target)}
+        <h3 class="cx-h">${T("Target lock", "目标锁定")}</h3>${targetTable(r.target)}
         ${r.compute ? computed(r.compute, unitOf(r.target)) : ""}
       </div></div>
       <div id="cxDelivered"></div>`;

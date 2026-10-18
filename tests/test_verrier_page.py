@@ -174,7 +174,7 @@ class TestEvidenceView(unittest.TestCase):
                   "Unit check</span><span class=\"zh\">单位检查</span></span> g/day → t/day × 0.000001</span>",
                   "kg/year → t/day × 0.000002738", "sum over channel: restaurant + frozen_retail",
                   "only frozen_retail of channel (siblings: restaurant, other)", "(reference only)", "22.29 · P10..P90 10.21..48.6",
-                  f'<span class="cx-bad">{esc(TC.PART_ERR)}</span>', "Pinned unit"):
+                  f'<span class="cx-bad">{esc(TC.PART_ERR)}</span>', "Target lock", '<span class="cx-unit">t/day</span>'):
             self.assertIn(s, h)
         self.assertEqual(h.count('<div class="cx-dir ok">'), 2)
         self.assertEqual(h.count('<div class="cx-dir bad">'), 1)
@@ -246,7 +246,9 @@ class TestGraphApi(unittest.TestCase):
 NODE_GRAPH = ("globalThis.window = globalThis; require(process.argv[1]); const g = JSON.parse(require('fs').readFileSync(process.argv[2], 'utf8')); "
               "process.stdout.write(JSON.stringify({html: window.VERRIER_GRAPH.draw(g), "
               "detail: Object.fromEntries(g.nodes.map(n => [n.id, window.VERRIER_GRAPH.detail(g, n.id)]))}));")
-NODE_RE = r'<g class="g-n g-(\w+)((?: dash| red)*)" data-id="([^"]*)"><rect x="(\d+)" y="([\d.]+)" width="212" height="(\d+)"/>'
+# 10-18 起节点画成星球（verrier_graph.js 的 planet）：从外圈 pl-limb 的圆心和半径还原列的 x（星球轴线离列左边 AX = 44）、行的上沿和行高
+NODE_RE = (r'<g class="g-n g-(\w+)((?: dash| red)*)" data-id="([^"]*)">(?:(?!<g class="g-n).)*?'
+           r'<circle class="pl-limb" cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"/>')
 
 
 def draw(graph):
@@ -263,7 +265,12 @@ def draw(graph):
 class TestGraphView(unittest.TestCase):
     @staticmethod
     def nodes(html):
-        return {m[2]: {"kind": m[0], "cls": m[1].split(), "x": int(m[3]), "y": float(m[4]), "h": int(m[5])} for m in re.findall(NODE_RE, html)}
+        out = {}
+        for m in re.findall(NODE_RE, html, re.S):
+            cx, cy, r = float(m[3]), float(m[4]), float(m[5])
+            h = max(2 * r, 28)
+            out[m[2]] = {"kind": m[0], "cls": m[1].split(), "x": round(cx - 44), "y": cy - h / 2, "h": h, "r": r}
+        return out
 
     def test_published_run_drawing(self):
         """已提交的 ask_a63174a0/published1（结果是已公布的 p52）：四列，每个节点和每条边都画出来；没连到目标的方法和裁判丢弃的点是虚线，
@@ -276,7 +283,7 @@ class TestGraphView(unittest.TestCase):
         h, ns = out["html"], self.nodes(out["html"])
         self.assertEqual(set(ns), {n["id"] for n in g["nodes"]})
         self.assertEqual({k: {n["x"] for n in ns.values() if n["kind"] == k} for k in ("source", "point", "method", "target")},
-                         {"source": {12}, "point": {288}, "method": {564}, "target": {840}})
+                         {"source": {12}, "point": {334}, "method": {656}, "target": {978}})
         self.assertEqual(h.count('<path class="g-e'), len(g["edges"]))
         failed = {n["id"] for n in g["nodes"] if n["kind"] == "method" and n["detail"]["estimate"] is None}
         discarded = {n["id"] for n in g["nodes"] if n["kind"] == "point" and not n["detail"]["keep"]}
@@ -289,11 +296,17 @@ class TestGraphView(unittest.TestCase):
         right = {}
         for e in g["edges"]:
             right.setdefault(e["from"], []).append(mid[e["to"]])
-        for x in (12, 288, 564):
+        deg = {}
+        for e in g["edges"]:
+            deg[e["from"]] = deg.get(e["from"], 0) + 1
+            deg[e["to"]] = deg.get(e["to"], 0) + 1
+        for i, n in ns.items():   # 星球半径按连线数：7 + 5·√连线数，最大 40
+            self.assertAlmostEqual(n["r"], min(40, 7 + 5 * deg.get(i, 0) ** .5), delta=.06, msg=i)
+        for x in (12, 334, 656):
             col = sorted((n["y"], i) for i, n in ns.items() if n["x"] == x)
             keys = [sum(right[i]) / len(right[i]) if i in right else float("inf") for _, i in col]
             self.assertEqual(keys, sorted(keys), x)
-            self.assertTrue(all(b[0] >= a[0] + ns[a[1]]["h"] for a, b in zip(col, col[1:])), x)   # 同一列不重叠
+            self.assertTrue(all(b[0] >= a[0] + ns[a[1]]["h"] - .2 for a, b in zip(col, col[1:])), x)   # 同一列不重叠（坐标取一位小数）
         d = out["detail"]
         self.assertIn("Published value", d["P:p52"])
         self.assertIn("<th>quote</th><td>350,536 new cars were registered in September, up from 312,891 during the same month last year</td>",
@@ -318,8 +331,8 @@ class TestGraphView(unittest.TestCase):
         ns = self.nodes(out["html"])
         self.assertEqual({i for i, n in ns.items() if "dash" in n["cls"]}, {"M:m3"})
         self.assertNotIn({"from": "M:m3", "to": "target"}, g["edges"])
-        self.assertIn('<text x="848" y="69">74.72</text>', out["html"])
-        self.assertIn('<text x="572" y="69">64.79</text>', out["html"])
+        self.assertRegex(out["html"], r'(?s)<g class="g-n g-target" data-id="target">(?:(?!<g class="g-n).)*?<text x="\d+" y="[\d.]+">74\.72</text>')
+        self.assertRegex(out["html"], r'(?s)data-id="M:m1">(?:(?!<g class="g-n).)*?<text x="\d+" y="[\d.]+">64\.79</text>')
         self.assertIn("Not in the combined estimate", out["detail"]["M:m3"])
         self.assertIn("<th>factor</th><td>0.000002738</td>", out["detail"]["M:m2"])
 

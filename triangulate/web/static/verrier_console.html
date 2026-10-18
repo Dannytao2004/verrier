@@ -250,19 +250,39 @@ body.cx-open nav.links a.cx-nav{background:var(--ink);color:var(--panel)}
 .cx-dp{color:var(--ink2)}
 .cx-nums{display:flex;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:var(--muted);border-top:1px dashed var(--hair);padding-top:5px}
 .cx-nums b{color:var(--ink);font-weight:600}
-.cx-steps{position:relative}
-.cx-steps::before{content:"";position:absolute;left:21px;top:14px;bottom:14px;border-left:1.5px dotted var(--ink)}
-.cx-st{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;padding:5px 0}
-.cx-st .n{width:44px;height:28px;background:var(--panel);border:1.5px solid var(--hair);color:var(--muted);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
-.cx-st.st-done .n{background:var(--ink);border-color:var(--ink);color:var(--panel)}
-.cx-st.st-running .n{border-color:var(--red);color:var(--red);animation:blink 1.2s steps(2,start) infinite}
-.cx-st.st-waiting .n{background:var(--red);border-color:var(--red);color:var(--panel)}
-.cx-st h4{margin:2px 0 0;font-weight:850;font-stretch:125%;font-size:14px;letter-spacing:.04em;text-transform:uppercase}
-.cx-st.st-pending h4{color:var(--muted)}
-.cx-st p{margin:1px 0 0;font-size:12.5px;color:var(--ink2)}
+/* 任务流程时间轴（verrier_console.js 的 timeline）：8 站横排，轨道线按已完成的站数填墨，当前站红色闪烁 */
+.cx-tl8{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0 10px;padding-top:2px}
+.cx-tl8::before,.cx-tl8::after{content:"";position:absolute;left:0;top:15px;height:3px}
+.cx-tl8::before{right:0;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 7px);opacity:.35}
+.cx-tl8::after{width:var(--p);background:var(--ink);transition:width .6s}
+.cx-sta{position:relative;z-index:1;min-width:0}
+.cx-sta .n{width:40px;height:30px;background:var(--panel);border:1.5px solid var(--hair);color:var(--muted);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.cx-sta.st-done .n{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.cx-sta.st-running .n,.cx-sta.cur .n{border-color:var(--red);color:var(--red);animation:blink 1.2s steps(2,start) infinite}
+.cx-sta.st-waiting .n{background:var(--red);border-color:var(--red);color:var(--panel)}
+.cx-sta.cur .n::after{content:"";position:absolute;left:46px;top:12px;width:7px;height:7px;background:var(--red)}
+.cx-sta h4{margin:8px 0 0;font-weight:850;font-stretch:125%;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;line-height:1.25}
+.cx-sta.st-pending h4{color:var(--muted)}
+.cx-sta p{margin:3px 0 0;font-size:11.5px;color:var(--ink2);overflow-wrap:anywhere;line-height:1.4;max-height:6.2em;overflow:hidden}
+@media (max-width:1100px){ .cx-tl8{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:14px} .cx-tl8::before,.cx-tl8::after{display:none} }
 table.cx-t{width:100%;border-collapse:collapse;font-size:13px}
 .cx-t th,.cx-t td{border-bottom:1px solid var(--hair);padding:5px 8px;text-align:left;vertical-align:top}
 .cx-t th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;width:108px;white-space:nowrap}
+/* 目标锁定卡（verrier_evidence.js 的 VERRIER_SPEC）：规格卡，标签列 + 细线，单位徽章，期间时间轴，口径说明斜线底纹 */
+.cx-spec{border:1px solid var(--ink);background:var(--panel)}
+.cx-spec .sh{display:flex;align-items:center;gap:9px;padding:7px 10px;border-bottom:1px solid var(--ink);background:var(--tint)}
+.cx-spec .sh svg{width:15px;height:15px;fill:none;stroke:var(--red);stroke-width:1.4;flex:none}
+.cx-unit{margin-left:auto;font-family:var(--mono);font-size:15px;font-weight:600;border:1.5px solid var(--ink);background:var(--panel);padding:1px 9px;letter-spacing:.02em}
+.cx-unit.off{border-style:dashed;color:var(--muted)}
+.cx-spec dl{margin:0;display:grid;grid-template-columns:120px minmax(0,1fr)}
+.cx-spec dt{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--hair);border-right:1px dashed var(--hair)}
+.cx-spec dd{margin:0;padding:7px 10px;border-bottom:1px solid var(--hair);font-size:13px;line-height:1.45}
+.cx-span{display:flex;align-items:flex-end;gap:10px;font-family:var(--mono);font-size:12px;font-weight:600}
+.cx-span span{display:flex;flex-direction:column}
+.cx-span i{font-style:normal;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.cx-span b{flex:1;height:7px;margin-bottom:4px;border:1px solid var(--ink);background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 9px)}
+.cx-caveat{margin:10px;padding:8px 11px;border:1px solid var(--ink2);background:repeating-linear-gradient(-45deg,var(--tint) 0 6px,var(--panel) 6px 12px);font-size:12.5px}
+.cx-caveat p{margin:3px 0 0;color:var(--ink2)}
 .cx-big{font-weight:850;font-stretch:125%;font-size:clamp(34px,6vh,54px);line-height:1;letter-spacing:-.01em;margin:4px 0 6px}
 .cx-deliv{border:1px solid var(--ink);margin-top:22px;background:var(--panel)}
 .cx-deliv .bh{margin:9px 14px 0}
@@ -301,15 +321,37 @@ table.cx-w th{width:auto;white-space:normal}
 .g-e.dash{stroke-dasharray:3 3;opacity:.45}
 .g-e.red{stroke:var(--red);stroke-width:1.3;opacity:1}
 .g-n{cursor:pointer}
-.g-n rect{fill:var(--panel);stroke:var(--ink);stroke-width:1}
-.g-assumption rect{fill:var(--tint)}
-.g-target rect{stroke-width:2}
-.g-n.dash rect{stroke:var(--muted);stroke-dasharray:4 3}
+/* 星球（verrier_graph.js 的 planet）：和主页海王星同一套画法——纸色圆盘、网点阴影、细经纬线、虚线明暗交界线、轨道环；方法和目标慢慢自转 */
+.g-lead{fill:none;stroke:var(--ink);stroke-width:.6;stroke-dasharray:1 2.5;opacity:.55}
+.pl-disc{fill:var(--panel);stroke:none}
+.pl-dot{fill:var(--ink)}
+.pl-shade{opacity:.85}
+.pl-w{fill:none;stroke:var(--ink);stroke-width:.6;opacity:.38}
+.pl-mer{stroke-dasharray:2 2;transform-box:fill-box;transform-origin:center}
+.pl-term{fill:none;stroke:var(--ink);stroke-width:.9;stroke-dasharray:7 2 1.5 2;opacity:.7}
+.pl-limb{fill:none;stroke:var(--ink);stroke-width:1.2}
+.pl-ring{fill:none;stroke:var(--ink);stroke-width:1;opacity:.85}
+.pl-ring.far{stroke-dasharray:2 2.5;opacity:.45}
+.pl-ring.thin{stroke-width:.6}
+.pl-reg{fill:none;stroke:var(--ink);stroke-width:.8;stroke-dasharray:1.5 2.5}
+.pl-sel{fill:none;stroke:var(--ink);stroke-width:1.2;opacity:0}
+.g-assumption .pl-disc{fill:var(--tint)}
+.g-target .pl-limb{stroke-width:2}
+.g-target .pl-reg{stroke-dasharray:none}
+.g-n.dash .pl-limb{stroke:var(--muted);stroke-dasharray:3 2.5}
+.g-n.dash .pl-w,.g-n.dash .pl-term,.g-n.dash .pl-ring{stroke:var(--muted)}
 .g-n.dash text{fill:var(--muted)}
-.g-n.red rect{stroke:var(--red)}
+.g-n.red .pl-limb,.g-n.red .pl-ring,.g-n.red .pl-reg{stroke:var(--red)}
 .g-n.red text{fill:var(--red)}
-.g-n:hover rect{fill:var(--tint)}
-.g-n.on rect{stroke-width:2.6}
+.g-n:hover .pl-disc{fill:var(--tint)}
+.g-n.on .pl-limb{stroke-width:2.4}
+.g-n.on .pl-sel{opacity:1}
+.cx-gsvg text{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}
+@keyframes plspin{0%{transform:scaleX(1)}50%{transform:scaleX(.08)}100%{transform:scaleX(1)}}
+@keyframes plorbit{to{stroke-dashoffset:-18}}
+.g-method .pl-mer,.g-target .pl-mer{animation:plspin 9s ease-in-out infinite}
+.g-target .pl-ring.far{animation:plorbit 2.4s linear infinite}
+@media (prefers-reduced-motion: reduce){ .pl-mer,.pl-ring{animation:none!important} }
 .cx-gside{position:sticky;top:0;max-height:calc(100vh - 170px);overflow:auto;border:1px solid var(--ink);background:var(--panel);padding:12px 14px;font-size:12.5px}
 .cx-gl{font-family:var(--mono);font-size:13px;font-weight:600;white-space:pre-wrap;margin:4px 0 6px}
 .cx-gd th{width:34%;white-space:normal;overflow-wrap:anywhere;letter-spacing:.04em}
@@ -398,7 +440,7 @@ body.cx-open .ask{display:none}
 .cx-bits{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:rgba(252,251,247,.55);white-space:nowrap;overflow:hidden}
 .cx-dir.busy::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(214,58,44,.10),transparent 65%);background-size:260% 100%;animation:cxDirSheen 1.8s linear infinite}
 @keyframes cxDirSheen{from{background-position:130% 0}to{background-position:-130% 0}}
-@media (prefers-reduced-motion: reduce){ .cx-radar .sweep,.cx-scan i,.cx-dir.busy::after,.cx-cursor,.cx-think .ask-orb *{animation:none!important} }
+@media (prefers-reduced-motion: reduce){ .cx-radar .sweep,.cx-scan i,.cx-dir.busy::after,.cx-cursor,.cx-think .ask-orb *,.cx-sta .n{animation:none!important} }
 </style>
 </head>
 <body data-view="0">
