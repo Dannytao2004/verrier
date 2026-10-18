@@ -7,11 +7,13 @@
    （原因交给修正轮）。
 定下的单位写回裁判方法的 "unit"（裁判原来写的放进 "unit_from_judge"），compute 照它换算；全部回答存进这一轮的
 judge_rounds[...]["unit_reviews"]。核对调用本身失败（出错、超预算）时不拦方法，照裁判写的单位算（同输入核对）。"""
+import calendar
 import math
 from concurrent.futures import ThreadPoolExecutor
 
 from ..config import MAX_TOKENS
 from . import qty as Q
+from .evidence import parse_date
 from .pipeline import BudgetExceeded, dumps
 from .prompts import (UNIT_ARBITER_RETRY, UNIT_ARBITER_SYSTEM, UNIT_ARBITER_USER, UNIT_CHECK_SYSTEM, UNIT_CHECK_USER,
                       UNIT_RULES)
@@ -62,6 +64,36 @@ def input_lines(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
     return rows
 
 
+def period_length(target: dict) -> str:
+    """目标期间的长度（pint 写法）：整月 1 month、整年 1 year、7 天 1 week，其余 N day。"""
+    s, e = parse_date(target.get("period_start")), parse_date(target.get("period_end"), end=True)
+    if s is None or e is None:
+        return ""
+    if s.day == 1 and (e.year, e.month) == (s.year, s.month) and e.day == calendar.monthrange(e.year, e.month)[1]:
+        return "1 month"
+    if (s.month, s.day, e.month, e.day) == (1, 1, 12, 31) and s.year == e.year:
+        return "1 year"
+    n = (e - s).days + 1
+    return "1 week" if n == 7 else f"{n} day"
+
+
+def to_target(unit: str, tu: str, target: dict) -> tuple:
+    """(实际用的单位串, 倍数, 错误)。先直接换；换不了、目标是一段时间的总量（单位里没有时间，如 bottle）而且目标期间已知，
+    再乘上期间长度（bottle/year × 1 year -> bottle）。目标本身是速率（t/day）时不乘，免得把错单位凑成对的。
+    v2.8j：恒顺题目标锁成 bottle（一年的瓶数），裁定给的是 1000 bottle/year，换不过去就判失败，方法照用裁判的错单位，结果小了 1000 倍"""
+    f, err = Q.convert_factor(unit, tu)
+    if not err:
+        return unit, f, ""
+    q, _ = Q.parse_unit(tu)
+    period = period_length(target)
+    if period and q is not None and not q.dimensionality.get("[time]", 0):
+        u2 = f"({unit}) * {period}"
+        f2, err2 = Q.convert_factor(u2, tu)
+        if not err2:
+            return u2, f2, ""
+    return unit, None, err
+
+
 def _ask(llm, system, user, role, qid, key):
     try:
         return llm.ask(system, user, role=role, qid=qid, max_tokens=MAX_TOKENS[key])
@@ -69,8 +101,8 @@ def _ask(llm, system, user, role, qid, key):
         return None, str(e)
 
 
-def _conv(unit: str, tu: str) -> str:
-    f, err = Q.convert_factor(unit, tu) if unit else (None, "no result_unit")
+def _conv(unit: str, tu: str, target: dict) -> str:
+    _, f, err = to_target(unit, tu, target) if unit else (None, None, "no result_unit")
     return f"{f:.6g}" if not err else f"cannot be converted: {err}"
 
 
@@ -98,7 +130,7 @@ def review_method(llm, qid: str, mid: str, m_in: dict, m_out: dict, by_id: dict,
             checkers.append({"error": err})
             answers.append(f"checker {k + 1}: no answer")
             continue
-        conv = _conv(str(out.get("result_unit") or "").strip(), tu)
+        conv = _conv(str(out.get("result_unit") or "").strip(), tu, target)
         checkers.append({"reply": out, "converts_to_target": conv})
         answers.append(f"checker {k + 1}: {dumps({**out, 'converts_to_target': conv})}")
     arb_user = sub(UNIT_ARBITER_USER, {"__ANSWERS__": "\n".join(answers)})
@@ -116,7 +148,7 @@ def review_method(llm, qid: str, mid: str, m_in: dict, m_out: dict, by_id: dict,
         elif not ru:
             problem = "result_unit is empty"
         else:
-            f, cerr = Q.convert_factor(ru, tu)
+            ru, f, cerr = to_target(ru, tu, target)
             if cerr:
                 problem = f"code cannot convert '{ru}' to the target unit '{tu}': {cerr}"
         rec["arbiter"].append({"reply": out, "problem": problem})

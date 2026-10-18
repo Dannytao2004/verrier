@@ -123,6 +123,19 @@ class TestUnitReview(unittest.TestCase):
         self.assertEqual(review(FakeLLM(CHECK, [arb("100 g/day")]), jr), {})
         self.assertAlmostEqual(trial(jr["methods"])[0]["methods"][0]["estimate"], 84.0, delta=84 * 0.05)
 
+    def test_rate_for_a_period_total_target_is_multiplied_by_the_period(self):
+        # v2.8j（恒顺题）：目标锁成 bottle（一年的瓶数），裁定给 1000 bottle/year：乘上 1 year 换算，不再判失败
+        t = dict(TARGET, unit="bottles in 2024", unit_canonical="kg", period_start="2024-01-01", period_end="2024-12-31")
+        jr = {"methods": [method("kg")]}
+        self.assertEqual(review(FakeLLM(CHECK, [arb("100 g/year")]), jr, t), {})
+        self.assertEqual(jr["methods"][0]["unit"], "(100 g/year) * 1 year")
+        yearly = {"unit_canonical": "bottle", "period_start": "2024-01-01", "period_end": "2024-12-31"}
+        self.assertEqual(UR.to_target("1000 bottle/year", "bottle", yearly)[:2], ("(1000 bottle/year) * 1 year", 1000.0))
+        monthly = {"period_start": "2026-07-01", "period_end": "2026-07-31"}
+        self.assertEqual(UR.to_target("birth/month", "birth", monthly)[1], 1.0)
+        # 目标本身是速率时不乘：错单位不能凑成对的
+        self.assertIsNone(UR.to_target("1000 cup/(year*day)", "cup/day", {"period_start": "2024-01-01", "period_end": "2025-10-17"})[1])
+
     def test_unpinned_target_is_untouched(self):
         t = {k: v for k, v in TARGET.items() if k != "unit_canonical"}
         jr = {"methods": [method()]}

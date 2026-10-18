@@ -648,7 +648,9 @@ def build(ctx: Context):
                 if ufail is not None:
                     out_c, av_c, failed = _code_check(jr, pts, t, only)
                     failed.update(ufail)
-                aud = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)
+                # v2.8j：单位核对没过的方法和输入核对没过的一样记进 aud（-> jr["audit_failed"]），compute 不用它；只放进 failed 时
+                # compute 照样按裁判写错的单位算并参与合并（恒顺题因此输出 87.65 瓶）
+                aud = {**(ufail or {}), **audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)}
                 failed.update(aud)
                 return (aud, *_problems(jr, out_c, av_c, failed))
 
