@@ -233,6 +233,12 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                     iid = str(spec.get("id"))
                     fixed = None
                     if iid in consts:
+                        if iid == "k_percent_per_unit" and tu and not target_pct:
+                            # v2.8k（一道网页题输出 0.0066 人）：代码已经把每个 % 输入换成小数，再除以 k_percent_per_unit 就小了 100 倍；
+                            # 单位核对查不出（100 percent = 1，量纲不变）。只有目标本身是百分数时才用得上它
+                            raise M.MethodError(f"input {name}: k_percent_per_unit is only for a percentage target; code already turns "
+                                                "every % input into a fraction, so dividing by it makes the result 100 times too small. "
+                                                "Remove it from the formula")
                         fixed = lo = hi = consts[iid]
                         kind = "constant"
                     elif iid in kept_a:

@@ -107,6 +107,22 @@ class TestMethodUnit(unittest.TestCase):
         self.assertAlmostEqual(e2["estimate"] / e1["estimate"], 1, places=9)
         self.assertNotIn("k_days_per_year", bare["params"]["inputs"])   # 不改模型给的 params
 
+    def test_percent_constant_rejected_for_a_non_percent_target(self):
+        # v2.8k（一道网页题）：% 输入代码已换成小数，再除以 k_percent_per_unit 小 100 倍；目标不是百分数时直接报错交修正轮
+        m = m1("g/day")
+        m["params"]["formula"] = "a * b * c * d * e / k"
+        m["params"]["inputs"]["k"] = {"id": "k_percent_per_unit", "role": "percent per whole"}
+        err = run([m], target("t/day"))["methods"][0]["error"]
+        self.assertIn("k_percent_per_unit is only for a percentage target", err)
+        # 目标本身是百分数时照常可用
+        pts = dict([pt("p1", 0.04, "fraction")])
+        t = {"what": "policy rate", "unit": "percent", "unit_canonical": "percent", "period_start": "2026-10-28",
+             "period_end": "2026-10-28", "outcome_type": "continuous"}
+        mp = {"id": "m1", "method": "formula_mc", "unit": "percent", "params": {"formula": "a * k", "inputs": {
+            "a": {"id": "p1", "role": "rate as a fraction"}, "k": {"id": "k_percent_per_unit", "role": "percent per whole"}}}}
+        r = C.run([mp], pts, t, assumptions={"kept": [], "rejected": []})
+        self.assertAlmostEqual(r["methods"][0]["estimate"], 4.0, delta=0.1)
+
     def test_legacy_target_without_unit_canonical_is_unchanged(self):
         # 没钉单位（已存的运行都是这样）：不要求 unit，不换算；'% of population' 也照旧不除以 100
         r = run([m1()], target())
