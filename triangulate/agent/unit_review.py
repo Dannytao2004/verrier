@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ..config import MAX_TOKENS
 from . import qty as Q
-from .evidence import PERCENT, norm, parse_date, split_multiplier
+from .evidence import parse_date
 from .pipeline import BudgetExceeded, dumps
 from .prompts import (UNIT_ARBITER_RETRY, UNIT_ARBITER_SYSTEM, UNIT_ARBITER_USER, UNIT_CHECK_SYSTEM, UNIT_CHECK_USER,
                       UNIT_RULES)
@@ -34,30 +34,6 @@ CONSTANTS = {"k_days_target": ("day", "days in the target period"),
 
 def _sig(v):
     return float(f"{v:.6g}")
-
-
-def _multiplier(p: dict) -> float:
-    """v2.8q：代码给这个数据点乘过的倍数（scale_word 或写法末尾的 万 / million，evidence.split_multiplier）；没有就是 1。"""
-    sw = str(p.get("scale_word") or "")
-    try:
-        return split_multiplier(str(p.get("value_as_written") or ""), "" if norm(sw).lower() in PERCENT else sw)[1]
-    except ValueError:
-        return 1.0
-
-
-def _doubled(out: dict, mults: dict) -> str:
-    """v2.8q：代码已乘过倍数 f 的数据点，裁定又给它一个系数恰好是 f 的单位（10000 CNY/year），pint 会再乘一次
-    （恒顺题 v2.8p：4,774.13 万元 -> 69.5 亿瓶）。返回交给裁定重试的问题，没有就是空串。birth/(1000 person) 的系数是 1/1000，不算。"""
-    for x in out.get("inputs") or []:
-        if not isinstance(x, dict) or x.get("name") not in mults:
-            continue
-        q, _ = Q.parse_unit(str(x.get("unit") or ""))
-        f = mults[x["name"]]
-        if q is not None and math.isclose(float(q.magnitude), f, rel_tol=1e-9):
-            return (f"input {x['name']}: code already multiplied this data point by {f:,.0f}, so its value_used is in base units; "
-                    f"its unit must not contain the factor {f:.0f} (for example 'CNY/year', not '{f:.0f} CNY/year'). "
-                    "Correct that input's unit and the result unit")
-    return ""
 
 
 def input_lines(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
@@ -86,12 +62,6 @@ def input_lines(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
                 x["range_used"] = f"{_sig(d['low'])}..{_sig(d['high'])}"
             if p.get("value") and abs(v * 100 / p["value"] - 1) < 1e-6:
                 x["note"] = f"recorded as {p['value']:g} {p.get('unit', '')}; code divided it by 100, so the formula uses the fraction {v:g}"
-            mult = _multiplier(p)
-            if mult != 1:   # v2.8q：倍数照百分数的写法说明；倍数为 1 的点这一行和以前逐字相同
-                sw = f" with multiplier {p.get('scale_word')}" if p.get("scale_word") else ""
-                note = (f"written as {p.get('value_as_written')}{sw}; code already multiplied it by {mult:,.0f}, so value_used "
-                        f"{_sig(v)} is in base units (not in units of {mult:,.0f}), even if unit_as_recorded names the multiplier")
-                x["note"] = f"{x['note']}; {note}" if x.get("note") else note
         x["role"] = roles.get(d["name"], "")
         rows.append(dumps(x))
     return rows
@@ -168,7 +138,6 @@ def review_method(llm, qid: str, mid: str, m_in: dict, m_out: dict, by_id: dict,
         answers.append(f"checker {k + 1}: {dumps({**out, 'converts_to_target': conv})}")
     arb_user = sub(UNIT_ARBITER_USER, {"__ANSWERS__": "\n".join(answers)})
     rec = {"method": mid, "label": m_out.get("label"), "judge_unit": declared, "checkers": checkers, "arbiter": []}
-    mults = {d["name"]: m for d in m_out.get("inputs_detail") or [] if d["kind"] == "point" and (m := _multiplier(by_id[d["id"]])) != 1}
     user = arb_user
     for t in range(ARBITER_TRIES):
         out, err = _ask(llm, UNIT_ARBITER_SYSTEM, user, f"unit_arbiter:{mid}:{t + 1}", qid, "unit_arbiter")
@@ -177,9 +146,7 @@ def review_method(llm, qid: str, mid: str, m_in: dict, m_out: dict, by_id: dict,
             return rec
         ru = str(out.get("result_unit") or "").strip()
         f, problem = None, ""
-        if dbl := _doubled(out, mults):   # v2.8q：倍数乘两次
-            problem = dbl
-        elif out.get("fits_target") is not True:
+        if out.get("fits_target") is not True:
             problem = f"you judged that it does not fit the target unit '{tu}': {out.get('fit_reason', '')}"
         elif not ru:
             problem = "result_unit is empty"
