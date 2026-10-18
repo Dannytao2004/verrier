@@ -82,6 +82,7 @@ SCALES = {"": 1.0, "none": 1.0, "hundred": 1e2, "thousand": 1e3, "thousands": 1e
           "000s": 1e3, "'000s": 1e3, **CJK_SCALES, **CJK_WORD_SCALES}
 # 打头的倍数词，长的先配（千万 先于 千，万亿 先于 万）
 _CJK_MULT = "|".join(sorted({*CJK_SCALES, *CJK_WORD_SCALES}, key=len, reverse=True))
+_CJK_WORD_ALT = "|".join(sorted(CJK_WORD_SCALES, key=len, reverse=True))
 PERCENT = {"%", "percent", "per cent", "pct"}
 _NUM = re.compile(r"(?<![\d.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
 _WORD_SCALE = re.compile(r"^\s*(hundred|thousand|million|billion|trillion)s?\b", re.I)
@@ -158,6 +159,9 @@ def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
         raise ValueError("no number in value_as_written")
     cjk = _cjk_sum(s, m) if _CJK_SCALE.match(s[m.end():]) else None
     rest = s[cjk[2]:] if cjk else s[m.end():]
+    word = None if cjk else re.match(rf"\s?({_CJK_WORD_ALT})", rest)   # v2.8g：数字后面紧跟复合倍数词（12.5十亿、3.2百万、12,345千人）
+    if word:
+        rest = rest[word.end():]
     if _NUM.search(rest):
         raise ValueError("more than one number in value_as_written")
     if cjk and _CJK_SCALE.match(rest):   # 15.4万億（混写的复合倍数）、3万万：不猜，以前把第二个倍数字当成单位文字丢掉
@@ -167,7 +171,7 @@ def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
     num = cjk[0] if cjk else float(m.group().replace(",", ""))
     if s[:m.start()].strip().startswith("(") and rest.strip().startswith(")"):
         num = -num  # 会计写法 (1,234)
-    text_scale, is_pct = (cjk[1] if cjk else None), False
+    text_scale, is_pct = (cjk[1] if cjk else word.group(1) if word else None), False
     if rest.strip().startswith("%") or rest.strip().lower().startswith(("percent", "per cent")):
         is_pct = True
     elif not cjk and ((w := _WORD_SCALE.match(rest)) or (w := _ABBR_SCALE.match(rest))):
@@ -238,6 +242,8 @@ def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written
                 return "quote"
             if vw and any(used and not why for used, why in _cjk_reads(quote_n, vw, cj)):
                 return "quote"
+        elif vw and re.search(rf"\d\s?{re.escape(cj)}$", vw):
+            return "quote"   # value_as_written 本身带着复合倍数词：12.5十亿
         elif vw and re.search(rf"(?<![\d.,]){re.escape(vw)}\s?{re.escape(cj)}(?![{_CJK_SC}{_CJK_NUMERAL_CHARS}\d])", quote_n):
             return "quote"   # 复合倍数词紧跟在数字后面：12.5千万元
         # v2.8g：中文表格把单位写在表头（「单位：万元」），数字后面不带「万」。取 quote 前面最近的一个「单位：」声明（quote 里有就用 quote 里的），

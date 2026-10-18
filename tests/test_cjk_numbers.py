@@ -53,12 +53,12 @@ class TestParseValueCjk(unittest.TestCase):
     def test_rejected_not_silently_misread(self):
         for vw, sw, msg in [("35万67130", "", "malformed CJK number"), ("5万3万", "", "malformed CJK number"),
                             ("1億12345万", "", "malformed CJK number"), ("1.5万3000", "", "decimal in a multi-part"),
-                            ("61万1千", "", "CJK numerals"), ("1千", "", "CJK numerals"), ("三百", "", "no number"),
+                            ("61万1千", "", "CJK numerals"), ("1千2百", "", "more than one number"), ("三百", "", "no number"),
                             ("3409万 2025", "", "more than one number"), ("3409万", "million", "scale conflict"),
                             ("1億2345万", "万", "scale conflict"), ("2", "成", "unknown scale word"),
                             ("5", "万5", "unknown scale word"), ("5", "万千", "unknown scale word"),
                             ("500兆瓦", "", "ambiguous '兆'"), ("500 兆瓦", "", "ambiguous '兆'"), ("500", "兆瓦", "ambiguous '兆'"),
-                            ("3.5", "兆赫", "ambiguous '兆'"), ("12", "兆字节", "ambiguous '兆'"), ("3百万", "", "CJK numerals"),
+                            ("3.5", "兆赫", "ambiguous '兆'"), ("12", "兆字节", "ambiguous '兆'"),
                             ("15.4万億", "", "two scale characters in a row"), ("15.4萬亿", "", "two scale characters in a row"),
                             ("3万万", "", "two scale characters in a row")]:
             with self.assertRaises(ValueError, msg=vw) as cm:
@@ -117,6 +117,12 @@ class TestScaleSupportedCjk(unittest.TestCase):
                 self.assertEqual(ev.parse_value("12.5", sw), (12.5 * f, False))
                 self.assertEqual(ev.scale_supported(sw, ev.norm("| 合计 | 12.5 |"), ev.norm(f"单位：{sw}\n| 项目 | 金额 |\n"), "12.5"), "page_header")
         self.assertEqual(ev.scale_supported("千万元", ev.norm("销售额 12.5千万元"), "", "12.5"), "quote")
+        # 数字和复合倍数词连写在 value_as_written 里（v2.6e 以前按汉字数词拒绝）
+        for vw, v in [("12.5十亿", 1.25e10), ("3百万", 3e6), ("1千", 1e3), ("12,345千", 12345e3), ("2.5千万", 2.5e7)]:
+            with self.subTest(vw=vw):
+                self.assertEqual(ev.parse_value(vw, ""), (v, False))
+        self.assertEqual(ev.scale_supported("十亿元", ev.norm("营收12.5十亿元"), "", "12.5十亿"), "quote")
+        self.assertEqual(ev.cjk_fragment(ev.norm("营收12.5十亿元"), "12.5十亿", "十亿元"), "")
         self.assertEqual(ev.scale_supported("千万元", ev.norm("销售额 12.5 元"), "", "12.5"), "")
 
     def test_000s_is_a_thousands_header(self):
