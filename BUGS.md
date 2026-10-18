@@ -216,6 +216,7 @@ agent 用命令行 `--ask --auto-approve`，两个基线用 `probes/smoke_run.py
 | S7 | 记 | 东方乐园（OLC）的 IR PDF 被 robots.txt 禁止，照规矩跳过；PDF 取文本（L2）在披萨题里正常（USDA 两份 PDF 各抽出 18、15 个点） | smoke_tdr、smoke_pizza 的 pages | 正常行为 |
 | S8 | 高 | 裁判声明的结果单位写错，代码照用：smoke2 披萨 1,027,630 t/day（公式给的是「每天多少个 100 g」，声明成 t/day），大一万倍 | `results/agent/smoke_pizza/smoke2/state.json` | 已修 `v2.8e`（用户 10-18 的设计）：三个模型核对 + 一个模型裁定结果单位，`agent/unit_review.py`。重放 smoke2：102.8 t/day；smoke3 实跑披萨 128 t/day、茶 1.09 亿 cup/day，茶题里一个声明成 kg/day 的方法被改成 1000 cup/day |
 | S9 | 记 | `v2.8e` 冻结时已知、没修的问题（用户 10-18：版本测试里没出现的错误不拦）：(1) 单位核对判失败的方法只放进 failed、没进 audit_failed，compute 仍按裁判的单位算并参与合并（审查用假模型复现）；(2) 代码不核对裁定的 result_unit 是否等于它自己推导的结果，重试时可能只改结果串（旧版 prompt 重放里茶题出现过一次 1000 倍）；(3) 三个核对模型的 prompt 相同、temperature 0，答案几乎总是一样；(4) 给旧回测运行补上 unit_canonical 重放时，「全年 × 月份额」的写法（韩国 m2、台湾 m3）被推成 birth/year、判失败 | 审查结论 `probes/out/unit_review/workflow_verified.txt`；重放 `probes/out/unit_review/replay*.json`（gitignore） | 冻结版不修。smoke3 两次实跑都没有触发。冻结后改过的 graph.py 一行、prompt 一句没测全，撤回了，diff 留在 `probes/out/unit_review/untested_after_v28e.diff` |
+| S10 | 记 | 一道网页实跑题没出数（冻结版 v2.8e，10-18 用户实跑）。三处流程问题叠在一起：(1) 裁判第 2 轮丢掉第 1 轮已经用上的总数点，把这个总数写成假设，公式全是假设；(2) `assumptions.target_reason` 按单位词干判「目标的水平值」，目标单位和假设单位都是 person、名字没有比率词，这个总数被当成目标本身拒掉（误伤：目标只是其中一部分）；(3) 修正轮只有一次，compute 只报第一个输入错误，修正轮没看到「公式至少要一个观测点」这条，裁判把假设改个编号原样交回，再被拒。证据本身够做带数据的估计：总数点 × 观测到的比例，再借同类对象的比例 | 该运行的 state.json（judge_rounds[1].repair） | 冻结版不修（用户 10-18 同意记为已知局限），预注册和留出测试之后再看 |
 
 ## H. 我的做事方式（这些低级错误的来源）
 
