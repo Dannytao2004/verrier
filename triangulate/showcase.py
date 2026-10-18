@@ -10,9 +10,9 @@ import statistics
 
 from .arms import check_naive
 from .config import RESULTS
-from .engine import evaluate_structured
 from .forecast import FC, QUESTIONS
 from .report import _clean, _load, final_reply
+from .showcase_engine import evaluate_structured   # 冻结在 showcase1 打分时的 engine；engine.py 之后的修改不影响预注册对照臂
 
 TAG = "showcase1"
 AGENT = RESULTS / "agent"
