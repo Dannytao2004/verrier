@@ -4,6 +4,8 @@ import re
 import unicodedata
 from datetime import date
 
+import dateparser
+
 # ---------- 文本规范化 ----------
 _TRANS = str.maketrans({"‘": "'", "’": "'", "“": '"', "”": '"', "–": "-", "—": "-",
                         "−": "-", " ": " ", " ": " ", " ": " "})
@@ -244,6 +246,8 @@ def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written
 
 
 # ---------- 日期 ----------
+# L1（v2.8a）：parse_date 里 ISO 和中日韩的整串写法仍用原来的正则，其他写法（英文月份名等）交给 dateparser。
+# 中日韩不交给它：dateparser 1.4.3 读不出 2026년 3월 27일、2026 年 3 月 27 日、2025年08月（月份补零）这些写法，也不认纪年
 _MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
 _MONTHS.update({m.lower(): i for i, m in enumerate(calendar.month_abbr) if m})
 _MONTHS["sept"] = 9
@@ -278,9 +282,16 @@ def era_years(text: str) -> set:
     return {y for m in _ERA_YEAR.finditer(text or "") if (y := _cjk_year(m.groupdict())) is not None}
 
 
+# dateparser 的设置：不完整的日期取期初 / 期末（PREFER_DAY_OF_MONTH、PREFER_MONTH_OF_YEAR，按 end 填）；不带时区；不往将来推。
+# 和改前一样必须写明年份、不认相对现在的写法（yesterday、3 months ago、时间戳）
+_DATEPARSER = {"PREFER_DATES_FROM": "past", "RETURN_AS_TIMEZONE_AWARE": False, "REQUIRE_PARTS": ["year"],
+               "PARSERS": ["absolute-time"]}
+
+
 def parse_date(s, end: bool = False):
-    """接受 YYYY-MM-DD / YYYY-MM / YYYY / "August 2025" / "Aug 5, 2025"。end=True 时不完整日期取期末。
-    v2.6e 也接受 2026年3月27日 / 2026年3月 / 2026年、2026년 3월 27일、令和8年3月、民國115年5月（这里纪年要带前缀）。"""
+    """日期串 -> date，解析不了返回 None。end=True 时不完整日期取期末（2025-08 -> 8 月 31 日，2026年 -> 12 月 31 日）。
+    YYYY-MM-DD / YYYY-MM / YYYY（可带 T 时间）、2026年3月27日 / 2026年3月 / 2026年、2026년 3월 27일、令和8年3月、
+    民國115年5月（这里纪年要带前缀）用原来的正则；其他写法（"August 2025"、"Aug 5, 2025"、"5 August 2025"……）交给 dateparser。"""
     if not s or not isinstance(s, str):
         return None
     s = s.strip()
@@ -293,10 +304,9 @@ def parse_date(s, end: bool = False):
         if y is None:
             return None
     else:
-        m = re.fullmatch(r"([A-Za-z]+)\.?\s+(?:(\d{1,2}),?\s+)?(\d{4})", s)
-        if not m or m.group(1).lower() not in _MONTHS:
-            return None
-        y, mo, d = int(m.group(3)), _MONTHS[m.group(1).lower()], m.group(2)
+        pref = "last" if end else "first"
+        dt = dateparser.parse(s, settings=dict(_DATEPARSER, PREFER_DAY_OF_MONTH=pref, PREFER_MONTH_OF_YEAR=pref))
+        return dt.date() if dt else None
     try:
         if mo is None:
             return date(y, 12, 31) if end else date(y, 1, 1)
@@ -318,28 +328,13 @@ _TEXT_DATE = re.compile(rf"\b(?:(?P<m1>{_MON})\.?\s+(?P<d1>\d{{1,2}})(?:st|nd|rd
 def text_dates(text: str) -> list:
     """正文里的显式日期：Month D, YYYY / D Month YYYY / Month YYYY（取该月 1 日）/ YYYY-MM-DD；
     v2.6e 加中日韩的完整年月日（2026年3月27日、2026년 3월 27일、令和8年3月27日、民國115年5月20日 / 115年5月20日）。
+    L1：候选串仍由这两个正则找，每个候选交给 parse_date 解析（不用 dateparser 的全文搜索：长页面上慢、误报多）。
     按在正文里出现的顺序返回。"""
-    out = []
-    for m in _TEXT_DATE.finditer(text or ""):
-        try:
-            if m.group("iso"):
-                out.append((m.start(), date.fromisoformat(m.group("iso"))))
-            elif m.group("y1"):
-                out.append((m.start(), date(int(m.group("y1")), _MONTHS[m.group("m1").lower()], int(m.group("d1")))))
-            elif m.group("y2"):
-                out.append((m.start(), date(int(m.group("y2")), _MONTHS[m.group("m2").lower()], int(m.group("d2")))))
-            else:
-                out.append((m.start(), date(int(m.group("y3")), _MONTHS[m.group("m3").lower()], 1)))
-        except ValueError:
-            pass
+    out = [(m.start(), parse_date(m.group(0))) for m in _TEXT_DATE.finditer(text or "")]
     for m in _TEXT_DATE_CJK.finditer(text or ""):
-        g = m.groupdict()
-        try:
-            if (y := _cjk_year(g)) is not None:
-                out.append((m.start(), date(y, int(g["m"] or g["km"]), int(g["d"] or g["kd"]))))
-        except ValueError:
-            pass
-    return [d for _, d in sorted(out, key=lambda x: x[0])]
+        if _cjk_year(m.groupdict()) is not None:   # 年份范围：公历只认 1900–2099，不带前缀的三位数只认 100–199
+            out.append((m.start(), parse_date(("民國" if m["b"] else "") + m.group(0))))   # 补回台湾省略的「民國」
+    return [d for _, d in sorted(out, key=lambda x: x[0]) if d is not None]
 
 
 def late_dates(text: str, as_of: date, until: date) -> list:
