@@ -40,8 +40,9 @@ def role_key(role: str) -> str:
 class TestTable(unittest.TestCase):
     def test_values_are_the_ones_before_v253(self):
         """收拢时值都不变：和收拢前各处写的字面量相同（以后改哪个值，同时改这里）。v2.6a 只改了 search：2048 -> 8192。
-        v2.8b 只改了 extract：4000 -> 16000。"""
+        v2.8b 只改了 extract：4000 -> 16000。v2.8e 新加 unit_check、unit_arbiter（单位核对和裁定），其余不变。"""
         self.assertEqual(config.MAX_TOKENS, {"plan": 6000, "extract": 16000, "judge": 12000, "repair": 12000, "audit": 4000,
+                                             "unit_check": 4000, "unit_arbiter": 4000,
                                              "published": 3000, "early": 3000, "final": 4000, "search": 8192,
                                              "naive": 500, "structured": 6000, "search_direct": 4096})
 

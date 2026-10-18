@@ -37,6 +37,8 @@ MAX_TOKENS = {
     "judge": 12000,          # v2 的 6000 在 167 个数据点时被截断过
     "repair": 12000,         # 裁判修正轮：同 judge
     "audit": 4000,           # 输入核对
+    "unit_check": 4000,      # v2.8e：单位核对（三个核对模型，每个方法各一次）
+    "unit_arbiter": 4000,    # v2.8e：单位裁定（第四个模型）
     "published": 3000,       # 「答案已公布」确认
     "early": 3000,           # 提前停确认：同 published（同一个 prompt）
     "final": 4000,           # 终稿

@@ -27,6 +27,7 @@ from . import discrete as D
 from . import jev as J
 from . import published as PB
 from . import qty as Q
+from . import unit_review as UR
 from .markets import search_markets
 from .outputs import basis_text, unit_text
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
@@ -642,6 +643,11 @@ def build(ctx: Context):
 
             def check(t):
                 out_c, av_c, failed = _code_check(jr, pts, t, only)
+                # v2.8e：钉了单位时，三个模型核对 + 一个模型裁定每个 formula_mc 方法的结果单位，写回方法再试跑；没钉单位时不变
+                ufail = UR.review(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)
+                if ufail is not None:
+                    out_c, av_c, failed = _code_check(jr, pts, t, only)
+                    failed.update(ufail)
                 aud = audit_methods(ctx.llm, ctx.qid, jr, out_c, av_c, pts, failed, t)
                 failed.update(aud)
                 return (aud, *_problems(jr, out_c, av_c, failed))

@@ -368,3 +368,80 @@ Otherwise mark "different" and name the condition that fails. Judge only from th
 {candidates}
 
 Reply with JSON: {{"candidates": [{{"id": "p1", "verdict": "target", "reason": "..."}}]}}"""
+
+# v2.8e：钉了单位时，formula_mc 方法的结果单位由三个核对模型分别推、第四个模型裁定（unit_review.py，用户 10-18 的设计）。
+# 输入按行给成 JSON（值、记录的单位、描述分开）；回复里每个输入的单位只写 pint 写法，理由另放一个字段。__X__ 由代码替换
+UNIT_RULES = """Unit notation (pint):
+- units and nouns joined by * and /, with parentheses: kg/year, kcal/(person*day);
+- a number that is part of the unit stays inside it: kcal/(100 g), birth/(1000 person), 0.01 L/year;
+- counted things are singular nouns (person, household, cup, trip, visitor); money is a currency code (USD); a pure number, ratio or share is 1;
+- write out what a number is per (per person, per day, per year) when its description, quote or period says so, even if unit_as_recorded leaves it out."""
+
+UNIT_CHECK_SYSTEM = """You work out the units of one estimation formula. You do not judge whether the estimate is good and you do not compute its value. Reply with one JSON object only."""
+
+UNIT_CHECK_USER = """Target: __TARGET__
+Target unit: __TARGET_UNIT__, over the target period __PERIOD__
+
+Formula: __FORMULA__
+Result unit written by the analyst: __DECLARED__
+
+Inputs, one JSON object per line. value_used is the number code puts into the formula. unit_as_recorded is the unit text stored with the evidence; it is often incomplete. description, quote, period and role say what the number is.
+__INPUTS__
+
+For each input write, in this order:
+- name;
+- reason: what the number counts or measures, and what it is per;
+- unit: that unit in the notation below, and nothing else;
+- recorded_unit_ok: true if unit_as_recorded already says this unit (other wording is fine), false if it leaves a part out or is wrong.
+Then write:
+- derivation: the input units multiplied and divided as in the formula, simplified, on one line;
+- result_unit: the unit the formula gives, keeping any number that does not cancel;
+- declared_unit_matches: true if the analyst's result unit is the same kind of quantity at the same scale as result_unit.
+
+__RULES__
+
+Example A (another question). Formula: a * b / k. Target unit: kWh/day.
+{"name": "a", "kind": "data point", "value_used": 1200000, "unit_as_recorded": "households", "description": "households in the city, 2025"}
+{"name": "b", "kind": "data point", "value_used": 10500, "unit_as_recorded": "kWh", "description": "average electricity use per household in 2025"}
+{"name": "k", "kind": "constant supplied by code", "value_used": 365.25, "unit_as_recorded": "day/year", "description": "days per year"}
+Answer: {"inputs": [{"name": "a", "reason": "number of households", "unit": "household", "recorded_unit_ok": true}, {"name": "b", "reason": "electricity one household uses in a year", "unit": "kWh/(household*year)", "recorded_unit_ok": false}, {"name": "k", "reason": "days per year", "unit": "day/year", "recorded_unit_ok": true}], "derivation": "household * kWh/(household*year) / (day/year) = kWh/day", "result_unit": "kWh/day", "declared_unit_matches": true}
+
+Example B (another question). Formula: a * b. Target unit: L/year. Result unit written by the analyst: L/year.
+{"name": "a", "kind": "data point", "value_used": 3100000000, "unit_as_recorded": "km per year", "description": "distance driven by all cars in the region in a year"}
+{"name": "b", "kind": "analyst assumption", "value_used": 6.5, "unit_as_recorded": "L per 100 km", "description": "average fuel use"}
+Answer: {"inputs": [{"name": "a", "reason": "km driven in a year", "unit": "km/year", "recorded_unit_ok": true}, {"name": "b", "reason": "litres used per 100 km driven", "unit": "L/(100 km)", "recorded_unit_ok": true}], "derivation": "km/year * L/(100 km) = 0.01 L/year", "result_unit": "0.01 L/year", "declared_unit_matches": false}
+(The analyst wrote L/year and left out the 100.)
+
+Reply with JSON: {"inputs": [{"name": "...", "reason": "...", "unit": "...", "recorded_unit_ok": true}], "derivation": "...", "result_unit": "...", "declared_unit_matches": true}"""
+
+UNIT_ARBITER_SYSTEM = """You settle the units of one estimation formula. Three checkers worked them out independently; you read their answers, decide the unit of each input, work out the unit of the formula's result yourself and check that it is the kind of quantity the target asks for. You do not judge whether the estimate is good. Reply with one JSON object only."""
+
+UNIT_ARBITER_USER = """Target: __TARGET__
+Target unit: __TARGET_UNIT__, over the target period __PERIOD__
+
+Formula: __FORMULA__
+Result unit written by the analyst: __DECLARED__
+
+Inputs, one JSON object per line (the same lines the checkers saw):
+__INPUTS__
+
+The three checkers' answers. converts_to_target is added by code: the factor that turns 1 of the checker's result_unit into the target unit, or why it cannot be converted.
+__ANSWERS__
+
+Decide, in this order:
+- inputs: for each input its name, reason and unit; where the checkers disagree, say in reason which reading the description, quote and period support;
+- derivation: the decided input units multiplied and divided as in the formula, simplified, on one line;
+- result_unit: the unit the formula gives. Write what the formula gives, not the target unit; code converts it to the target unit (g/day to t/day, kg/year to t/day);
+- fit_reason, then fits_target: true when result_unit is the same kind of quantity as the target unit and only the scale may differ (g/day, 100 g/day and kg/year all fit t/day); false otherwise (kg**2/day, kg*day, or kg/person/day for a city total do not fit t/day).
+
+__RULES__
+
+Example (another question). Target unit: t/day. Decided units: person, 1, g/(person*day). Derivation: "person * 1 * g/(person*day) = g/day". result_unit "g/day"; fits_target true.
+
+Reply with JSON: {"inputs": [{"name": "...", "reason": "...", "unit": "..."}], "derivation": "...", "result_unit": "...", "fit_reason": "...", "fits_target": true}"""
+
+UNIT_ARBITER_RETRY = """
+
+Your previous answer: __PREVIOUS__
+It cannot be used: __PROBLEM__
+Check the unit of each input and the derivation again, and answer again in the same JSON form."""
