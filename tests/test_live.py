@@ -103,7 +103,7 @@ class TestLiveFetch(NetCase):
         rec = F.fetch_live("https://c.example.org/private/x", AS_OF, "t", today=AS_OF)
         self.assertEqual(rec["reason"], "live fetch blocked by robots.txt")
         self.assertNotIn("https://c.example.org/private/x", [x["url"] for x in fake.log])
-        self.assertEqual(F.fetch_live("https://a.example.org/r.pdf", AS_OF, "t", today=AS_OF)["reason"], "binary file type not supported in MVP")
+        self.assertEqual(F.fetch_live("https://a.example.org/r.xlsx", AS_OF, "t", today=AS_OF)["reason"], "binary file type not supported in MVP")
 
     def test_live_does_not_retry_or_back_off(self):
         import urllib.error

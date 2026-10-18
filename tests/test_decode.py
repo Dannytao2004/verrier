@@ -154,9 +154,10 @@ class TestToText(unittest.TestCase):
         self.assertIn("undecodable", why)
 
     def test_content_type_check_unchanged(self):
-        text, why = _to_text(b"%PDF-1.7 ...", {"Content-Type": "application/pdf"})
+        # v2.8b 起 PDF 交给 pypdfium2（tests/test_pdf.py），这里换成别的二进制类型
+        text, why = _to_text(b"PK\x03\x04 ...", {"Content-Type": "application/zip"})
         self.assertIsNone(text)
-        self.assertEqual(why, "unsupported content type application/pdf")
+        self.assertEqual(why, "unsupported content type application/zip")
 
 
 if __name__ == "__main__":

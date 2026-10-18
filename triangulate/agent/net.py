@@ -12,7 +12,7 @@ import zlib
 
 UA = "triangulate-agent/0.1 (research prototype)"
 MIN_INTERVAL_S = 1.0
-MAX_BYTES = 6_000_000
+MAX_BYTES = 64_000_000   # v2.8b 从 6 MB 放宽：缓存里两个 PDF（台湾内政部、美国 NPS）在 6 MB 处被截断，打不开
 ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"   # zstd 帧开头的 4 个字节（RFC 8878）
 # 第一次运行时 Wayback 在并发请求下出现过连接被拒（WinError 10061），所以对它单连接、间隔放宽到 1.5 秒
 HOST_INTERVAL = {"web.archive.org": 1.5}

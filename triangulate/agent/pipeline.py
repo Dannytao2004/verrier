@@ -15,7 +15,7 @@ from .fetch import fetch_live, fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
 from .search import SEARCH_FEE_ASSUMED_USD, Searcher
 
-MAX_CHARS_TO_EXTRACTOR = 24_000
+MAX_CHARS_TO_EXTRACTOR = 400_000   # v2.8b 从 24_000 放宽（HTML 和 PDF 都适用）：长的统计页不再只发开头
 QUOTE_STORE_CHARS = 200
 
 

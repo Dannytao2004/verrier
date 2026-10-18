@@ -11,10 +11,14 @@
 v2.5：真实使用（as_of = 今天、题目没有登记真值）走 fetch_live：直接抓 live 页，完全不查 Wayback；收下的条件同上面第 2 条。
 回测（as_of 早于今天，或登记了真值）仍走 fetch_page，没有改。v2.5.2：fetch_live 每次取页再判断 as_of >= 今天，
 已早于今天就改走 fetch_page（不抓 live 页）。
+v2.8b：PDF（Content-Type application/pdf，或正文以 %PDF 开头）用 pypdfium2 取出所有页的文字，页与页之间空一行，不选页、
+不限页数；要密码、损坏（包括下载被截断）、没有文字层（扫描件，不做 OCR）的 PDF 丢弃并写明原因。live PDF 的日期先用 URL 里的，
+URL 里没有再用 PDF 元数据的 CreationDate / ModDate。
 """
 import hashlib
 import json
 import re
+import threading
 import urllib.parse
 from datetime import date, datetime
 
@@ -29,6 +33,10 @@ SNAP_TS = re.compile(r"/web/(\d{14})id_/")
 URL_DATE = re.compile(r"(?<!\d)((?:19|20)\d{2})[/_-]?(0[1-9]|1[0-2])[/_-]?(0[1-9]|[12]\d|3[01])?(?!\d)")
 TEXT_TYPES = ("text/html", "application/xhtml", "text/plain", "text/csv")
 FFFD_MAX = 0.01   # U+FFFD 超过全文 1% 判 undecodable（_to_text）
+# PDFium 不是线程安全的（pypdfium2 文档：「PDFium is inherently not thread-safe」），而方向、live 取页都在各自的线程里：
+# 对它的调用（打开、取文字、关闭）一律在这把锁里做
+_PDFIUM_LOCK = threading.Lock()
+PDF_DATE = re.compile(r"(?:D:)?((?:19|20)\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])")   # PDF 元数据日期 D:YYYYMMDDHHmmSS…
 
 
 def _key(s: str) -> str:
@@ -100,14 +108,19 @@ def html_to_text(html: str) -> str:
     return t.strip()
 
 
-def page_dates(url: str, html: str) -> list:
-    """URL 里的日期 + htmldate 找到的原始日期和最新日期。"""
+def _url_dates(url: str) -> list:
     out = []
     for m in URL_DATE.finditer(urllib.parse.urlsplit(url).path):
         try:
             out.append(date(int(m.group(1)), int(m.group(2)), int(m.group(3) or 1)))
         except ValueError:
             pass
+    return out
+
+
+def page_dates(url: str, html: str) -> list:
+    """URL 里的日期 + htmldate 找到的原始日期和最新日期。"""
+    out = _url_dates(url)
     try:
         from htmldate import find_date
         for orig in (True, False):
@@ -116,6 +129,55 @@ def page_dates(url: str, html: str) -> list:
                 out.append(date.fromisoformat(d))
     except Exception:  # noqa: BLE001
         pass
+    return out
+
+
+def _is_pdf(body: bytes, headers: dict) -> bool:
+    return (headers.get("Content-Type") or "").lower().startswith("application/pdf") or body.startswith(b"%PDF")
+
+
+def pdf_to_text(body: bytes) -> tuple:
+    """PDF 字节 -> (全文, "")：pypdfium2 逐页取文字，页与页之间空一行。打不开或没有文字 -> (None, 原因)。"""
+    import pypdfium2 as pdfium
+    with _PDFIUM_LOCK:
+        try:
+            pdf = pdfium.PdfDocument(body)
+        except pdfium.PdfiumError as e:
+            if e.err_code == pdfium.raw.FPDF_ERR_PASSWORD:
+                return None, "encrypted PDF (needs a password)"
+            return None, f"unreadable PDF: {e}"
+        try:
+            pages = [p.get_textpage().get_text_range().replace("\r\n", "\n").strip() for p in pdf]
+        except pdfium.PdfiumError as e:
+            return None, f"unreadable PDF: {e}"
+        finally:
+            pdf.close()
+    text = "\n\n".join(pages)
+    if not text.strip():
+        return None, "PDF has no text layer (scanned image?); OCR is not supported"
+    return text, ""
+
+
+def pdf_dates(url: str, body: bytes) -> list:
+    """live PDF 的日期：URL 里的日期；URL 里没有，再用 PDF 元数据的 CreationDate / ModDate（只取年月日）。
+    body 必须是 pdf_to_text 能打开的 PDF。"""
+    out = _url_dates(url)
+    if out:
+        return out
+    import pypdfium2 as pdfium
+    with _PDFIUM_LOCK:
+        pdf = pdfium.PdfDocument(body)
+        try:
+            meta = pdf.get_metadata_dict()
+        finally:
+            pdf.close()
+    for k in ("CreationDate", "ModDate"):
+        m = PDF_DATE.match((meta.get(k) or "").strip())
+        if m:
+            try:
+                out.append(date(int(m.group(1)), int(m.group(2)), int(m.group(3))))
+            except ValueError:
+                pass
     return out
 
 
@@ -154,6 +216,8 @@ def _decode(body: bytes, headers: dict) -> str:
 
 
 def _to_text(body: bytes, headers: dict) -> tuple:
+    if _is_pdf(body, headers):
+        return pdf_to_text(body)
     ct = (headers.get("Content-Type", "") or "").lower()
     if ct and not ct.startswith(TEXT_TYPES):
         return None, f"unsupported content type {ct.split(';')[0]}"
@@ -245,13 +309,13 @@ def fetch_live(url: str, as_of: date, qid: str, today=None) -> dict:
 def _unsupported(url: str) -> str:
     if not url.startswith(("http://", "https://")):
         return "not an http url"
-    if url.lower().split("?")[0].endswith((".pdf", ".xls", ".xlsx", ".zip", ".doc", ".docx", ".ppt", ".pptx")):
+    if url.lower().split("?")[0].endswith((".xls", ".xlsx", ".zip", ".doc", ".docx", ".ppt", ".pptx")):
         return "binary file type not supported in MVP"
     return ""
 
 
 def _live(rec: dict, out_dir, url: str, as_of: date, today: date, pre: str, get) -> dict:
-    """抓 live 页并检查：http 200、文字类型、读得出日期且 <= as_of、正文没有晚于 as_of 的显式日期。
+    """抓 live 页并检查：http 200、文字类型或 PDF、读得出日期且 <= as_of、正文没有晚于 as_of 的显式日期。
     pre = 丢弃原因的前缀（fetch_page：快照为什么没用上；fetch_live：空）。"""
     def why(msg):
         return f"{pre}; {msg}" if pre else msg
@@ -270,7 +334,7 @@ def _live(rec: dict, out_dir, url: str, as_of: date, today: date, pre: str, get)
     if text is None:
         rec["reason"] = why(w)
         return rec
-    dates = page_dates(final, _decode(body, headers))
+    dates = pdf_dates(final, body) if _is_pdf(body, headers) else page_dates(final, _decode(body, headers))
     if not dates:
         rec["reason"] = why("live page has no readable date")
         return rec

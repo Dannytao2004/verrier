@@ -33,7 +33,7 @@ MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
 # 每次 agent 运行的 state.json 里也记一份（agent/run.save_run 的 settings）。v2.5.3 只是收拢，值和收拢前各处写的相同。
 MAX_TOKENS = {
     "plan": 6000,
-    "extract": 4000,         # 抽取员，每页一次
+    "extract": 16000,        # 抽取员，每页一次。v2.8b 从 4000 调到 16000：页面最多发 40 万字符，长页的 JSON 不被截断
     "judge": 12000,          # v2 的 6000 在 167 个数据点时被截断过
     "repair": 12000,         # 裁判修正轮：同 judge
     "audit": 4000,           # 输入核对
