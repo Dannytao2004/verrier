@@ -93,8 +93,31 @@ class TestScaleSupportedCjk(unittest.TestCase):
         self.assertEqual(ev.scale_supported("万", ev.norm(JP), "", "519"), "")    # 后面还有 548，不能只取 519 万
         self.assertEqual(ev.scale_supported("만", "2만 9000명", "", "2"), "")
         self.assertEqual(ev.scale_supported("万", "2,995万人泊", "", "995"), "")
-        self.assertEqual(ev.scale_supported("万", "visitors 315 in total", "(単位:万人)", "315"), "")  # 没有页面级依据
+        self.assertEqual(ev.scale_supported("万", "visitors 315 in total", "", "315"), "")  # 没有任何依据
         self.assertEqual(ev.scale_supported("億", "3409万", "", "3409"), "")
+
+    def test_cjk_table_header(self):
+        # v2.8g：恒顺 2024 年报的销售模式表：「单位：万元」在表头，行里的数字不带「万」
+        ctx = ev.norm("2、按照销售模式分类情况：\n单位：万元\n| 渠道类型 | 2024年度销售收入 | 2023年度销售收入 | 同比增减% |\n")
+        row = ev.norm("| 外贸模式 | 4,774.13 | 4,513.39 | 5.78 |")
+        self.assertEqual(ev.scale_supported("万元", row, ctx, "4,774.13"), "page_header")
+        self.assertEqual(ev.scale_supported("万", "visitors 315 in total", "(単位:万人)", "315"), "page_header")
+        self.assertEqual(ev.scale_supported("亿", row, ctx, "4,774.13"), "")   # 表头是万，不是亿
+        later = ctx + ev.norm("| 合计 | 209,300.68 |\n3、经销商情况：\n单位：个\n")
+        self.assertEqual(ev.scale_supported("万", "| 华东 | 702 |", later, "702"), "")   # 最近的表头是「个」
+        row2 = ev.norm("| 合计 | 12.5 |")
+        self.assertEqual(ev.scale_supported("万", row2, ev.norm("单位：万亿元\n"), "12.5"), "")       # 表头是万亿，不能当万用
+        self.assertEqual(ev.scale_supported("千", row2, ev.norm("单位：千万元\n"), "12.5"), "")       # 表头是千万，不能当千用
+        self.assertEqual(ev.scale_supported("万元", row2, ev.norm("单位：人民币万元\n"), "12.5"), "page_header")
+
+    def test_compound_scale_words(self):
+        # v2.8g：千元、百万元、千万元、十万、万瓶、亿元：scale_word 和表头里的复合倍数词
+        for sw, f in [("千元", 1e3), ("百万元", 1e6), ("千万元", 1e7), ("十万", 1e5), ("万瓶", 1e4), ("亿元", 1e8), ("천만 원", 1e7)]:
+            with self.subTest(sw=sw):
+                self.assertEqual(ev.parse_value("12.5", sw), (12.5 * f, False))
+                self.assertEqual(ev.scale_supported(sw, ev.norm("| 合计 | 12.5 |"), ev.norm(f"单位：{sw}\n| 项目 | 金额 |\n"), "12.5"), "page_header")
+        self.assertEqual(ev.scale_supported("千万元", ev.norm("销售额 12.5千万元"), "", "12.5"), "quote")
+        self.assertEqual(ev.scale_supported("千万元", ev.norm("销售额 12.5 元"), "", "12.5"), "")
 
     def test_000s_is_a_thousands_header(self):
         ctx = "| September 2025 | | \n| Terminal Passengers (000s) | Sep 2025 | % Change |"

@@ -58,17 +58,30 @@ def find_value(quote_n: str, value_written: str) -> int:
     """value_as_written 在 quote 里作为完整的数字出现时返回位置，否则 -1：前面不能紧挨数字、小数点或千分位，
     后面不能接数字或小数/千分位部分。'2.9%' 不能从 '12.9%' 里匹配，'412' 不能从 '3,412' 里匹配。"""
     m = re.search(r"(?<![\d.,])" + re.escape(value_written) + r"(?!\d|[.,]\d)", quote_n)
-    return m.start() if m else -1
+    if m:
+        return m.start()
+    # v2.8g：抽取员漏写千分位（原文 4,774.10，写成 4774.10）也算同一个数：只放宽逗号，数字一位都不能差（恒顺外贸收入因此丢过 4 次）
+    plain = value_written.replace(",", "")
+    for t in re.finditer(r"(?<![\d.,])\d{1,3}(?:,\d{3})+(?:\.\d+)?(?!\d|[.,]\d)", quote_n):
+        if t.group(0).replace(",", "") == plain:
+            return t.start()
+    return -1
 
 
 # ---------- 数字与倍数词 ----------
 # v2.6e：中日韩倍数字（万 / 萬 / 만 = 1e4，億 / 亿 / 억 = 1e8，兆 / 조 = 1e12，复合倍数万亿 / 萬億 = 1e12）和英文表头 '000s
 CJK_SCALES = {"万": 1e4, "萬": 1e4, "만": 1e4, "億": 1e8, "亿": 1e8, "억": 1e8, "兆": 1e12, "조": 1e12,
               "万亿": 1e12, "萬億": 1e12}
+# v2.8g：只在 scale_word 和表头（「单位：千元」「单位：百万元」）里出现的复合倍数词；正文里的连写数字（519万548）仍只认 CJK_SCALES
+CJK_WORD_SCALES = {"千": 1e3, "仟": 1e3, "十万": 1e5, "十萬": 1e5, "百万": 1e6, "百萬": 1e6, "千万": 1e7, "千萬": 1e7,
+                   "十亿": 1e9, "十億": 1e9, "百亿": 1e10, "百億": 1e10, "千亿": 1e11, "千億": 1e11,
+                   "천": 1e3, "십만": 1e5, "백만": 1e6, "천만": 1e7}
 SCALES = {"": 1.0, "none": 1.0, "hundred": 1e2, "thousand": 1e3, "thousands": 1e3, "k": 1e3,
           "million": 1e6, "millions": 1e6, "m": 1e6, "mn": 1e6, "mln": 1e6,
           "billion": 1e9, "billions": 1e9, "bn": 1e9, "b": 1e9, "trillion": 1e12, "trillions": 1e12, "tn": 1e12,
-          "000s": 1e3, "'000s": 1e3, **CJK_SCALES}
+          "000s": 1e3, "'000s": 1e3, **CJK_SCALES, **CJK_WORD_SCALES}
+# 打头的倍数词，长的先配（千万 先于 千，万亿 先于 万）
+_CJK_MULT = "|".join(sorted({*CJK_SCALES, *CJK_WORD_SCALES}, key=len, reverse=True))
 PERCENT = {"%", "percent", "per cent", "pct"}
 _NUM = re.compile(r"(?<![\d.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
 _WORD_SCALE = re.compile(r"^\s*(hundred|thousand|million|billion|trillion)s?\b", re.I)
@@ -84,12 +97,13 @@ _HEADER = re.compile(r"\((?:in\s+)?(?:[A-Z]{3}\s+|US\$\s*|[$€£¥]\s*)?(hundre
                      r"|\bin\s+(hundreds|thousands|millions|billions|trillions)(?=\s*(?:[.:;,)\]]|$))"
                      r"|\(\s*'?(000)s?'?\s*\)", re.I)
 _CJK_SCALE_ALT = "万亿|萬億|[万萬만億亿억兆조]"
+_CJK_UNIT_HEAD = re.compile(r"(?:[单單単]位|단위)\s*[:：]\s*([^\n|，,。；;)）]{1,12})")   # v2.8g：表头的单位声明「单位：万元」「(単位:万人)」
 _CJK_SCALE = re.compile(rf"^\s?({_CJK_SCALE_ALT})")   # 紧跟在数字后面的倍数字
 _CJK_SEG = re.compile(rf"\s?((?:\d{{1,3}}(?:,\d{{3}})+|\d+)(?:\.\d+)?)(?:\s?({_CJK_SCALE_ALT}))?")
 _CJK_NUMERAL_CHARS = "〇零一二三四五六七八九十百千拾佰仟两兩천백십"
 # 汉字 / 韩文数词（三百、1千）不支持：报错，不静默丢掉；「百分点」（0.5百分点）不算数词
 _CJK_NUMERAL = re.compile(rf"^\s?(?!百分)[{_CJK_NUMERAL_CHARS}]")
-_CJK_WORD = re.compile(rf"^({_CJK_SCALE_ALT})(.*)$")
+_CJK_WORD = re.compile(rf"^({_CJK_MULT})(.*)$")   # v2.8g：scale_word 打头的倍数词也认复合的（千万元 -> 千万，千元 -> 千）
 _CJK_SC = "万萬만億亿억兆조"   # 单个倍数字：判断一个数是不是更大的中日韩数字的一截（_cjk_reads）
 # 前面紧挨「数字 + 倍数字」（만 / 억 / 조 后面可以隔一个空格）：「1億2345万」里的 2345万、「1억 2345만」里的 2345만。
 # 倍数字前面必须是数字：하지만、다만、만 30세 里的「만」是普通的字，不是倍数
@@ -218,11 +232,21 @@ def scale_supported(scale_word: str, quote_n: str, context_n: str, value_written
     if sw in ("", "none") or sw in PERCENT:
         return "none_needed"
     vw = norm(value_written)
-    if (cj := _cjk_scale_word(sw)) in CJK_SCALES:
-        if vw and re.search(rf"\d\s?{re.escape(cj)}", vw):
-            return "quote"
-        if vw and any(used and not why for used, why in _cjk_reads(quote_n, vw, cj)):
-            return "quote"
+    if (cj := _cjk_scale_word(sw)) in CJK_SCALES or cj in CJK_WORD_SCALES:
+        if cj in CJK_SCALES:
+            if vw and re.search(rf"\d\s?{re.escape(cj)}", vw):
+                return "quote"
+            if vw and any(used and not why for used, why in _cjk_reads(quote_n, vw, cj)):
+                return "quote"
+        elif vw and re.search(rf"(?<![\d.,]){re.escape(vw)}\s?{re.escape(cj)}(?![{_CJK_SC}{_CJK_NUMERAL_CHARS}\d])", quote_n):
+            return "quote"   # 复合倍数词紧跟在数字后面：12.5千万元
+        # v2.8g：中文表格把单位写在表头（「单位：万元」），数字后面不带「万」。取 quote 前面最近的一个「单位：」声明（quote 里有就用 quote 里的），
+        # 它打头的倍数词必须和 scale_word 的完全一样（「单位：万亿元」不能当「万」用，「单位：千万元」不能当「千」用）；
+        # 最近的声明是别的单位（单位：个）就不算。恒顺年报的外贸收入因此丢过 4 次
+        heads = _CJK_UNIT_HEAD.findall(context_n + " | " + quote_n)
+        lead = re.match(rf"\s*(?:人民币|美元|港币|港元|日元|韩元|币种[:：]?\S*)?\s*({_CJK_MULT})", heads[-1]) if heads else None
+        if lead and lead.group(1) == cj:
+            return "page_header"
         return ""
     base = sw[:-1] if sw.endswith("s") and sw[:-1] in SCALE_WORDS else sw
     base = "thousand" if base in ("000s", "'000s") else base
