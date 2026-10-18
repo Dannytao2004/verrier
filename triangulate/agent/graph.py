@@ -35,7 +35,7 @@ from .pipeline import BudgetExceeded, Context, dumps, run_direction
 from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
                       DISCRETE_OUTCOMES_GIVEN, DISCRETE_REVISE, DISCRETE_REVISE_DONE, EXTRA_RULE_R1, EXTRA_RULE_R2,
                       FINAL_SYSTEM, FINAL_USER, FINAL_USER_DISCRETE, JUDGE_SYSTEM, JUDGE_USER, METHODS_SPEC, PLAN_SYSTEM,
-                      PLAN_UNIT_RETRY, PLAN_USER)
+                      PLAN_UNIT_RETRY, PLAN_USER, PREVIOUS_ROUND)
 
 CATEGORIES = {"own_history", "related_series", "physical_flow", "capacity_consumption", "administrative", "attention",
               "shocks", "persona", "forecasts_markets", "base_rates"}
@@ -319,6 +319,18 @@ def _dry_run_errors(jr: dict, pts: list, target: dict, only_methods=None) -> lis
     """只按代码规则检查（不做输入核对）。"""
     out, av, failed = _code_check(jr, pts, target, only_methods)
     return _repair_errors(jr, out, av, failed)
+
+
+def _previous_round(judge_rounds: list) -> str:
+    """v2.8p：第 2 轮裁判 prompt 里附上第 1 轮的方法和假设（只有 id、方法、单位、参数；假设的 id、名字、值、范围、单位）。
+    第 1 轮没有方法（出错、跳过）时返回空串。"""
+    jr = next((j for j in judge_rounds if j.get("round") == 1 and j.get("methods")), None)
+    if jr is None:
+        return ""
+    ms = [{k: m[k] for k in ("id", "method", "unit", "params") if k in m} for m in jr["methods"]]
+    av = [{k: a[k] for k in ("id", "name", "value", "low", "high", "unit") if k in a}
+          for a in jr.get("assumptions") or [] if isinstance(a, dict)]
+    return PREVIOUS_ROUND.replace("__PREV__", dumps({"methods": ms, "assumptions": av}))
 
 
 def _evidence(iid: str, by_id: dict, kept_a: dict) -> str:
@@ -605,12 +617,14 @@ def build(ctx: Context):
         table = (_table([p for p in shown if p["id"] not in gone_before]) +
                  _discarded_rows([p for p in shown if p["id"] in gone_before]) if shown else "(no verified data points)")
 
+        extra_rule = EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2 + _previous_round(state.get("judge_rounds") or [])
+
         def judge_prompt(rec):
             return JUDGE_USER.format(
                 question=state["question"], as_of=state["as_of"], target=dumps(target0),
                 directions=dirs, table=table,
                 methods_spec=(_discrete_spec(target0, rec) if disc else AB.methods_spec() if ablate else METHODS_SPEC),
-                extra_rule=EXTRA_RULE_R1 if rnd == 1 else EXTRA_RULE_R2)
+                extra_rule=extra_rule)
         judge_user = judge_prompt(orec)
         try:
             out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=MAX_TOKENS["judge"])

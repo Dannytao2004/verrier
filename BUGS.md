@@ -221,9 +221,10 @@ agent 用命令行 `--ask --auto-approve`，两个基线用 `probes/smoke_run.py
 | S12 | 记（用户 10-18 指出） | 参照对象层次不可比：两次实跑里当参考的对象层次远高于目标，它们的比例搬到目标上很可能偏高；会公布这类数字的多是头部对象，取证本身有选择偏差。裁判第一次运行的理由里写过「目标层次较低可能拉低比例」，仍照搬头部对象的比例。裁判 prompt 和输入核对都不检查参照对象的可比性（输入核对只拦「不同实体」） | 两次运行的假设 a1 / a2 及其 rationale | 冻结版不修；以后的方向：参照对象要求写明可比性（层次、规模），或让核对按可比性给出降权 / 放宽区间，等留出测试后再定 |
 | S13 | 记 | v2.8e 冻结后实跑暴露、已修的问题（详见 NEXT.md 断点表）：期间留空被丢（v2.8f）、中文表头单位和千分位（v2.8g/h）、套用可比对象不调整（v2.8i）、单位核对失败的方法仍进合并 + 期间总量换算（v2.8j，即 S9(1)）、% 除两次（v2.8k）、修正只有一次（v2.8l，即 B5）、每方法假设上限 3（v2.8m）、份额乘错基数（v2.8n） | 各运行 results/agent/ask_9b1539aa 等的 v28*_test | 已修，冻结 `frozen-v2.8n` |
 | S14 | 已修（v2.8o） | 原文用单词、分数、区间写的数一律被丢（披萨题 NHANES「males had four and females had three slices」、「1/6 of 14-inch pizza」；历史运行约 255 + 78 个） | `results/agent/smoke_pizza/smoke4` 的 dropped_points | v2.8o：抽取员给 number / low / high，算前模型核对（NEXT.md 断点） |
-| S15 | 记 | 泄漏哨兵只登记数字和中日韩写法，没有英文数词；v2.8o 之后单词写的数能进证据，真值如果在页面上写成单词（"two million"）哨兵查不到。实跑里没出现 | `evidence.leak_forms` | 回测 / 留出测试前再看 |
-| S16 | 记 | 披萨 v2.8o 实跑：裁判第 1 轮方法用了 NHANES 块数（mean(p35, p36) × p37），第 2 轮改写时换成假设「每次吃多少克」，这条又被单位核对否掉，块数最终没用上；修正轮还有「assumption a3 rejected: value, low and high must be numbers」 | `results/agent/smoke_pizza/v28o_test/state.json` 的 judge_rounds | 没改（裁判的选择） |
+| S15 | 已修（v2.8p，按数值比） | 泄漏哨兵只登记数字和中日韩写法，没有英文数词；v2.8o 之后单词写的数能进证据，真值如果在页面上写成单词（"two million"）哨兵查不到。实跑里没出现 | `evidence.leak_forms` | 回测 / 留出测试前再看 |
+| S16 | 已修（v2.8p：提示词 + 第 2 轮看到第 1 轮方法；v28p_test 里块数进了最终答案） | 披萨 v2.8o 实跑：裁判第 1 轮方法用了 NHANES 块数（mean(p35, p36) × p37），第 2 轮改写时换成假设「每次吃多少克」，这条又被单位核对否掉，块数最终没用上；修正轮还有「assumption a3 rejected: value, low and high must be numbers」 | `results/agent/smoke_pizza/v28o_test/state.json` 的 judge_rounds | 没改（裁判的选择） |
 | S17 | 记 | v2.8o 行为变化：欧式小数逗号（"16,8%"、"R$ 54,46"）、OCR 错字（"8l,030"）、".75" 以前被代码丢，现在走抽取员读数 + 模型核对进来（这次 24 个真实点全部核对通过） | 同上运行的 points | 观察 |
+| S18 | 记 | 披萨 v2.8p 实跑：NHANES 路线只用了男性每次 4 块（p6），乘假设 a3 = 0.9「Chicago 每次块数相对 NHANES」，没用女性 3 块（p7）；数值接近男女平均 3.5，但 a3 的含义混了「男→全体」和「芝加哥→全国」两件事。修正轮 3 轮都在修「每天的比例 × 每次块数」消不掉 occasion 的单位 | `results/agent/smoke_pizza/v28p_test/state.json` | 没改（裁判的选择） |
 
 ## H. 我的做事方式（这些低级错误的来源）
 

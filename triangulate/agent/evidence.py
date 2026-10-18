@@ -549,6 +549,30 @@ def leak_forms(true_value: float) -> list:
     return sorted(forms)
 
 
+def leak_numbers(true_value: float) -> set:
+    """v2.8p：leak_forms 各种写法对应的数值（原值、四舍五入到百 / 千、x.x / x.xx thousand、0.xxx / x.xx million），
+    用来和抽取员读出的数比（单词写的数页面文字里搜不到：two million、四百万）。"""
+    v = float(true_value)
+    out = {v}
+    if v == int(v):
+        n = int(v)
+        if abs(n) >= 10_000:
+            out |= {float(round(n, -2)), float(round(n, -3)), round(n / 1e3, 1) * 1e3, round(n / 1e3, 2) * 1e3}
+        if abs(n) >= 100_000:
+            out |= {round(n / 1e6, 3) * 1e6, round(n / 1e6, 2) * 1e6}
+    else:
+        out |= {round(v, 1), round(v, 2)}
+    return out
+
+
+def leak_number_hit(x, values) -> bool:
+    """x 是不是登记值（真值等）的某种写法对应的数。values：一个数或一组数，空 = 不查。"""
+    if not values or not isinstance(x, (int, float)) or isinstance(x, bool):
+        return False
+    vals = values if isinstance(values, (list, tuple, set)) else [values]
+    return any(math.isclose(x, t, rel_tol=1e-9, abs_tol=1e-9) for v in vals for t in leak_numbers(v))
+
+
 def leak_patterns(values) -> list:
     """values：一个数或一组数（目标真值，以及同一题里所有「公布日晚于 as_of」的已知官方值）。
     v2.6c：以 k 或 M 结尾的缩写写法后面不能接字母（「7.27 M」不再命中「7.27 miles」）；thousand、million 这类写法不变。"""

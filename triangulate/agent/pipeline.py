@@ -157,6 +157,7 @@ class Context:
         self.searcher = Searcher(log=self.llm._log)
         # 哨兵只在代码里用：真值（和其他 as_of 之后才公布的已知值）不进任何 prompt。可以是一个数或一组数
         self.leak_patterns = ev.leak_patterns(leak_value) if leak_value else []
+        self.leak_values = leak_value   # v2.8p：抽取员读出的数（单词、分数）也按数值和它比，见 _process_page
         self.progress = None  # 可选的进度回调 progress(event: dict)，网页用；只读通知，不影响运行
 
 
@@ -268,6 +269,14 @@ def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict
         else:
             new.append({**base, **p, "verified_by": "quote_in_page"})
             out["points"].append(new[-1])
+    # v2.8p：页面哨兵只搜数字写法；抽取员读出的数（单词、分数写的：two million）也按数值和登记值比，命中就整页作废
+    hit = [p for p in new if p.get("reading") and any(ev.leak_number_hit(p.get(k), getattr(ctx, "leak_values", None))
+                                                     for k in ("value", "value_low", "value_high"))]
+    if hit:
+        page["leak_hits"] = [f'{p["value_as_written"]} (read as {p["value"]:g})' for p in hit]
+        page["status_detail"] = "excluded: leak sentinel hit (number read from words)"
+        out["points"][:] = [p for p in out["points"] if not any(p is q for q in new)]
+        new = []
     page["n_points_verified"] = len(new)
     out["pages"].append(page)
     _emit(ctx, kind="extracted", direction_id=d["id"], n_verified=len(new))

@@ -243,6 +243,7 @@ Method-selection rules:
 Assumptions (for formula_mc only):
 - If a credible route lacks a coefficient that no kept point supplies, declare it under assumptions instead of writing it into a formula, and reference its id in formula_mc inputs. You propose the value; code does all computation.
 - Use an assumption only for a quantity that no kept point supplies. Never restate a kept point.
+- When kept points can be combined to give a quantity (for example slices per occasion, the fraction of a pie in one slice and grams per pie give grams per occasion), put those points into the formula by id; do not compute the combination yourself and declare the result as an assumption. An assumption may then only adjust that combination, as a dimensionless factor with its own rationale.
 - Give every assumption a realistic basis. When you base it on comparable entities (other universities, firms, cities), say in rationale how the target entity differs from them (tier, size, rank, market position) and move the value and range in that direction instead of copying the comparables: a market leader belongs at the high end of its peers, an institution ranked well below elite peers belongs well below their rates. If a key assumption has no comparable evidence, ask for a direction that searches for comparable data while extra directions are still possible, or base the value on what you know about the real entity and say so.
 - Never assume the target's level itself. Code rejects an assumption that is a level of the target quantity. Dimensionless factors are allowed, including a change factor of the target relative to an observed earlier period (for example this year versus last year) or a share; base such a factor on kept evidence where possible and say which evidence in rationale.
 - Evidence from an earlier period can stand in for the target period if the formula adjusts it: multiply the earlier value by a change factor for the gap (for example the national trend in the same rate between the two years), and write the role as what the evidence is ("2019 overseas-study rate, adjusted to 2026 by a2"). Do not drop such evidence for being old, and do not use it unadjusted when the gap is large.
@@ -277,6 +278,13 @@ In hypothesis, identify the route or kept evidence this search would unlock and 
 
 These directions will be researched and you will decide again. Leave the list empty when additional searches are unlikely to change the estimate materially or when the remaining gap requires an explicit modelling assumption rather than another search."""
 EXTRA_RULE_R2 = "extra_directions: must be an empty list (this is the final round)."
+
+# v2.8p：第 2 轮裁判看到第 1 轮的方法和假设（披萨 v2.8o：第 1 轮把 NHANES 块数写进了公式，第 2 轮从头重写时换成了假设）
+PREVIOUS_ROUND = """
+
+Your round-1 methods and assumptions, written before the extra directions were researched (code has not run them):
+__PREV__
+Reuse a round-1 route whose inputs are still kept, and improve it with the new points. Do not replace kept data points in a route with an assumption computed from them."""
 
 FINAL_SYSTEM = """You write the final answer of an estimation team for the user. Code has computed every number. You must not write any digits yourself except four-digit years within ten years of the information cutoff, quarter and half-year labels (Q1 to Q4, H1, H2), method ids, and the ids of the assumptions and observed points listed in the '- assumption' and '- observed point' lines below: refer to numbers only through the placeholders listed below, written exactly as [[name]]. Reply with one JSON object only."""
 

@@ -220,3 +220,51 @@ class TestValueCheck(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestLeakNumbers(unittest.TestCase):
+    """v2.8p：单词写的数页面哨兵搜不到，抽取员读出的数按数值和登记值比。"""
+
+    def test_numeric_forms(self):
+        self.assertTrue(ev.leak_number_hit(2e6, 2_000_000))
+        self.assertTrue(ev.leak_number_hit(2.03e6, [2_034_567]))       # 2.03 million
+        self.assertTrue(ev.leak_number_hit(2_035_000, 2_034_567))      # 四舍五入到千
+        self.assertFalse(ev.leak_number_hit(2e6, 2_034_567))           # two million 不是登记写法（和页面哨兵一致）
+        self.assertFalse(ev.leak_number_hit(4.0, None))
+
+    def test_page_with_a_word_form_leak_is_excluded(self):
+        from triangulate.agent import pipeline as P
+
+        class LLM:
+            def ask(self, system, user, *, role, qid, max_tokens=4000, tries=2):
+                return {"points": [
+                    {"name": "births", "value_as_written": "two million", "number": 2, "scale_word": "million", "unit": "births",
+                     "period_start": "2026-07-01", "period_end": "2026-07-31", "quote": "July 2026 saw two million births"},
+                    {"name": "other", "value_as_written": "35", "unit": "clinics", "period_start": "2026-07-01",
+                     "period_end": "2026-07-31", "quote": "35 clinics opened in July 2026"}]}, None
+        ctx = object.__new__(P.Context)
+        ctx.qid, ctx.as_of, ctx.budget, ctx.progress, ctx.llm = "t", date(2026, 9, 1), P.Budget(), None, LLM()
+        ctx.leak_patterns, ctx.leak_values = ev.leak_patterns(2_000_000), 2_000_000
+        out = {"pages": [], "points": [], "dropped_points": []}
+        page = {"url": "https://example.org/x", "status": "live_dated", "page_date": "2026-08-01"}
+        text = "July 2026 saw two million births. 35 clinics opened in July 2026."
+        new = P._process_page(ctx, {"what": "w"}, {"id": "d1"}, 1, page, text, out, False)
+        self.assertEqual((new, out["points"]), ([], []))
+        self.assertEqual(out["pages"][0]["leak_hits"], ["two million (read as 2e+06)"])
+        ctx.leak_values = 3_000_000   # 不是登记值：照常
+        out = {"pages": [], "points": [], "dropped_points": []}
+        self.assertEqual(len(P._process_page(ctx, {"what": "w"}, {"id": "d1"}, 1, dict(page), text, out, False)), 2)
+
+
+class TestPreviousRound(unittest.TestCase):
+    def test_round_one_methods_go_into_the_round_two_prompt(self):
+        from triangulate.agent import graph as G
+        self.assertEqual(G._previous_round([]), "")
+        r1 = {"round": 1, "methods": [{"id": "m1", "method": "formula_mc", "unit": "g/day", "rationale": "long text",
+                                       "params": {"formula": "p33 * mean(p35, p36) * p37 * p158 * a1"}}],
+              "assumptions": [{"id": "a1", "name": "people", "value": 2.7e6, "low": 2.6e6, "high": 2.8e6, "unit": "person",
+                               "rationale": "r"}]}
+        txt = G._previous_round([r1, {"round": 2, "methods": []}])
+        self.assertIn("mean(p35, p36) * p37 * p158", txt)
+        self.assertIn('"a1"', txt)
+        self.assertNotIn("long text", txt)   # 只给方法和参数，不给理由
