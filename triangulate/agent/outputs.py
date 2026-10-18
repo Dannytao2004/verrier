@@ -103,7 +103,9 @@ def dep_graph(state: dict) -> dict:
         for pg in res_d.get("pages") or []:
             if pg.get("status") in ("snapshot", "live_dated"):
                 leak = bool(pg.get("leak_hits"))
-                srcs[pg["url"]] = {"id": f"S:{len(srcs) + 1}", "kind": "source", "colour": COL["leak" if leak else pg["status"]],
+                # 同一个网址被别的方向又取了一次：沿用它第一次的编号（P2 前会拿到 S:{n+1}，和下一个新网址撞号，边就分不清连的是谁）
+                sid = srcs[pg["url"]]["id"] if pg["url"] in srcs else f"S:{len(srcs) + 1}"
+                srcs[pg["url"]] = {"id": sid, "kind": "source", "colour": COL["leak" if leak else pg["status"]],
                                    "label": urllib.parse.urlsplit(pg["url"]).netloc[:28], "detail": pg}
     for p in state.get("points") or []:
         cat = (dirs.get(p["direction_id"]) or {}).get("category")

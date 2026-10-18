@@ -289,6 +289,32 @@ table.cx-w th{width:auto;white-space:normal}
 .cx-dir.bad::before{background:var(--red)}
 .cx-f{font-family:var(--mono);font-size:14px;font-weight:600}
 .cx-qt{font-family:var(--mono);font-size:11.5px;color:var(--ink2);min-width:240px}
+/* 依赖图（verrier_graph.js，#console/graph/...）：四列的技术图纸，细墨线；虚线 = 没进合并的方法 / 丢弃的点，红 = 已公布的值；右栏是点中节点的详情 */
+.cx-gw{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:18px;align-items:start}
+.cx-gsvg{border:1px solid var(--ink);background:var(--panel);padding:10px 12px}
+.cx-gsvg svg{display:block;max-width:100%;height:auto}
+.cx-gsvg text{font-family:var(--mono);font-size:10.5px;fill:var(--ink)}
+.cx-gsvg text.b{font-weight:600}
+.cx-gsvg .g-h{font-size:10px;letter-spacing:.14em;fill:var(--ink2)}
+.g-rule{stroke:var(--ink);stroke-width:1}
+.g-e{fill:none;stroke:var(--ink);stroke-width:.7;opacity:.6}
+.g-e.dash{stroke-dasharray:3 3;opacity:.45}
+.g-e.red{stroke:var(--red);stroke-width:1.3;opacity:1}
+.g-n{cursor:pointer}
+.g-n rect{fill:var(--panel);stroke:var(--ink);stroke-width:1}
+.g-assumption rect{fill:var(--tint)}
+.g-target rect{stroke-width:2}
+.g-n.dash rect{stroke:var(--muted);stroke-dasharray:4 3}
+.g-n.dash text{fill:var(--muted)}
+.g-n.red rect{stroke:var(--red)}
+.g-n.red text{fill:var(--red)}
+.g-n:hover rect{fill:var(--tint)}
+.g-n.on rect{stroke-width:2.6}
+.cx-gside{position:sticky;top:0;max-height:calc(100vh - 170px);overflow:auto;border:1px solid var(--ink);background:var(--panel);padding:12px 14px;font-size:12.5px}
+.cx-gl{font-family:var(--mono);font-size:13px;font-weight:600;white-space:pre-wrap;margin:4px 0 6px}
+.cx-gd th{width:34%;white-space:normal;overflow-wrap:anywhere;letter-spacing:.04em}
+.cx-gd td{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+@media (max-width:1100px){ .cx-gw{grid-template-columns:1fr} .cx-gside{position:static;max-height:none} }
 @media (max-width:1360px){ .cx{left:24px} }
 @media (max-height:780px) and (min-width:1024px){ .cx{right:24px} }
 @media (max-width:1100px){ .cx-grid{grid-template-columns:1fr} }
@@ -581,7 +607,7 @@ body.cx-open .ask{display:none}
 </section>
 </main>
 
-<!-- 06 console：verrier_console.js 渲染（证据页的面板由 verrier_evidence.js 画），内容来自现有 API（/api/runs、/api/result、/api/saved） -->
+<!-- 06 console：verrier_console.js 渲染（证据页的面板由 verrier_evidence.js 画，依赖图由 verrier_graph.js 画），内容来自现有 API（/api/runs、/api/result、/api/saved、/api/graph） -->
 <div class="cx" id="cx" hidden>
   <div class="card cx-card" role="dialog" aria-label="Mission control">
     <div class="bh"><span>M-01 · MISSION CONTROL</span><i class="hz"></i><span class="sp"></span><span id="cxCode">STANDBY</span><button class="cx-x" type="button" id="cxClose" aria-label="Close">✕ ESC</button></div>
@@ -1044,6 +1070,7 @@ body.cx-open .ask{display:none}
 })();
 </script>
 <script src="/static/verrier_evidence.js"></script>
+<script src="/static/verrier_graph.js"></script>
 <script src="/static/verrier_console.js"></script>
 </body>
 </html>

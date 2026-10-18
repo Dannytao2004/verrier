@@ -1,7 +1,8 @@
 // Verrier 控制台：把 agent 的主运行界面（提问 → 人工确认方向 → 进度 → 结果）放进 Verrier 页面（verrier_console.html）。
-// 只调用现有 API（/api/runs、/api/result、/api/saved、/api/file），后端逻辑不变；回测表在经典界面（/#/...）。
+// 只调用现有 API（/api/runs、/api/result、/api/saved、/api/file、/api/graph），后端逻辑不变；回测表在经典界面（/#/...）。
 // 路由：#console（提问）、#console/run/<运行 id>（进度）、#console/result/<题 id>/<tag>（保存的结果）、
-// #console/evidence/<题 id>/<tag>（证据、方法和假设；面板由 verrier_evidence.js 画）。别的 hash 是页面锚点，控制台关掉。
+// #console/evidence/<题 id>/<tag>（证据、方法和假设；面板由 verrier_evidence.js 画）、#console/graph/<题 id>/<tag>（依赖图；
+// 图纸由 verrier_graph.js 画）。别的 hash 是页面锚点，控制台关掉。
 // 右下角 HUD 由页面里的场景脚本画；这里用 VERRIER.mission({...}) 把它换成任务遥测（用时、阶段、花费），关掉控制台时交还。
 "use strict";
 (() => {
@@ -95,7 +96,8 @@
     const tok = ++token, parts = h.slice(1).split("/").map(decodeURIComponent);
     const p = parts[1] === "run" && parts[2] ? viewRun(parts[2], tok)
       : parts[1] === "result" && parts[2] ? viewResult(parts[2], parts[3] || "", tok)
-      : parts[1] === "evidence" && parts[2] ? viewEvidence(parts[2], parts[3] || "", tok) : viewHome(tok);
+      : parts[1] === "evidence" && parts[2] ? viewEvidence(parts[2], parts[3] || "", tok)
+      : parts[1] === "graph" && parts[2] ? viewGraph(parts[2], parts[3] || "", tok) : viewHome(tok);
     p.catch(fail(tok));
   }
   const fail = tok => e => { if (tok === token) body.insertAdjacentHTML("afterbegin", `<div class="cx-err">${esc(e.message || e)}</div>`); };
@@ -421,7 +423,7 @@
       <h3 class="cx-h">${T("Final answer", "最终答案")}</h3><pre class="cx-answer">${esc(r.final_text || "—")}</pre>
       <div class="cx-row">
         <a class="btn primary" href="#console/evidence/${encodeURIComponent(qid)}/${encodeURIComponent(tag || "")}">${T("Evidence, methods, assumptions", "证据、方法和假设")}<span>→</span></a>
-        <a class="btn" href="${fileHref(qid, tag, "graph.html")}" target="_blank" rel="noopener">${T("Dependency graph", "依赖图")}<span>↗</span></a>
+        <a class="btn" href="#console/graph/${encodeURIComponent(qid)}/${encodeURIComponent(tag || "")}">${T("Dependency graph", "依赖图")}<span>→</span></a>
         <a class="btn" href="${fileHref(qid, tag, "ledger.md")}" target="_blank" rel="noopener">ledger.md<span>↗</span></a>
       </div></div></div>`;
   }
@@ -457,6 +459,27 @@
     $("cxEv").innerHTML = window.VERRIER_EVIDENCE(r, qid, tag);
     hud({view: "EVIDENCE · " + String(qid).toUpperCase(), status: r.aborted ? "MISSION FAILED" : "ARCHIVED RESULT", phase: r.aborted ? -1 : 5, progress: 1,
       elapsed: r.wall_s || 0, done: !r.aborted, cam: `US$ ${(r.budget || {}).usd_total_assumed?.toFixed?.(3) ?? "—"}  AS OF ${r.as_of}`});
+  }
+
+  // 依赖图：/api/graph（outputs.dep_graph，和 graph.html 同一份数据），图纸由 verrier_graph.js 画；点一个节点，右栏显示它的详情
+  async function viewGraph(qid, tag, tok) {
+    code.textContent = String(qid).toUpperCase() + " · GRAPH";
+    body.dataset.run = "";
+    body.innerHTML = `<div class="cx-row"><a class="btn" href="#console/result/${encodeURIComponent(qid)}/${encodeURIComponent(tag)}"><span>←</span>${T("Back to delivered", "返回交付页")}</a>
+      <span class="lbl">${esc(qid)} / ${esc(tag || "—")}</span></div><div id="cxGr"><p class="fine">…</p></div>`;
+    body.scrollTop = 0;
+    const g = await api(`/api/graph?qid=${encodeURIComponent(qid)}&tag=${encodeURIComponent(tag)}`);
+    if (tok !== token) return;
+    const el = $("cxGr");
+    el.innerHTML = window.VERRIER_GRAPH.draw(g);
+    const pick = id => {
+      el.querySelectorAll(".g-n").forEach(x => x.classList.toggle("on", x.getAttribute("data-id") === id));
+      $("cxGside").innerHTML = window.VERRIER_GRAPH.detail(g, id);
+    };
+    el.querySelector("svg").addEventListener("click", e => { const n = e.target.closest(".g-n"); if (n) pick(n.getAttribute("data-id")); });
+    pick("target");
+    hud({view: "GRAPH · " + String(qid).toUpperCase(), status: "ARCHIVED RESULT", phase: 5, progress: 1, elapsed: 0, done: true,
+      cam: `${g.nodes.length} NODES · ${g.edges.length} EDGES`});
   }
 
   // ---------- 接线 ----------

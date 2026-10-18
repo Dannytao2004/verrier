@@ -10,6 +10,7 @@ from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from ..agent.outputs import dep_graph
 from ..agent.run import RES
 from . import results as R
 from .runs import BadState, Busy, Registry
@@ -93,6 +94,14 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
     def result(qid: str = Query(...), tag: str = Query("")):
         try:
             return R.load_result(qid, tag, res)
+        except R.NotFound as e:
+            raise HTTPException(404, str(e)) from None
+
+    @app.get("/api/graph")
+    def graph(qid: str = Query(...), tag: str = Query("")):
+        # 控制台的依赖图（#console/graph/...）：和 graph.html 同一个 outputs.dep_graph，按保存的 state.json 现算
+        try:
+            return R.clean(dep_graph(R.load_state(qid, tag, res)))
         except R.NotFound as e:
             raise HTTPException(404, str(e)) from None
 
