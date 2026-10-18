@@ -2,7 +2,8 @@
 代码校验、按下限加宽区间、在 formula_mc 里采样。校验不过的整条丢弃，原因写进 state.json。
 
 校验规则（validate）：
-1. id 必须是 a1..a8 且不重复；每次运行最多 MAX_PER_RUN = 8 条（超出的丢弃）。
+1. id 必须是 a1..a12 且不重复；每次运行最多 MAX_PER_RUN = 12 条（超出的丢弃）。v2.8d 以前是 a1..a8：冒烟测试 smoke_pizza 的
+   修正轮写到 a10，用到 a9 的加总方法被拒，整题没出数。
 2. name、unit、rationale 不能为空；value / low / high 都是有限数字（布尔、字符串不算），且 0 < low <= value <= high。
 3. 百分数和数据点一样处理：unit 是 % / percent / per cent / pct / percentage 时记为 "%"，代码使用时除以 100。
    v2.5.4（N17）：是不是百分数由 is_pct(unit) 判断：unit 里含 %、percent、per cent、pct、percentage 的都除以 100
@@ -12,7 +13,7 @@
    目标 unit 的词干里，或者 name 指向目标实体 + 目标量（ablation.refers_to_target）。v2 还按「提到目标年份」「是目标的
    变化」拒绝，v2.1 去掉了这两条：它们挡住了「去年同期 × 今年变化倍数」这类正常路线（见 AGENT_MVP.md v2.1 节）。
 方法层面的规则在 compute.py：每个 formula_mc 至少引用一个保留的观测点（只由假设组成的公式丢弃）；每个方法最多
-MAX_PER_METHOD = 3 个假设。
+MAX_PER_METHOD = 3 个假设；coverage 为 sum 的方法每个部分最多 3 个、整个方法最多 MAX_PER_SUM = 8 个。
 
 不确定度（effective_range）：P10 / P90 = low / high 的 lognormal。high / low 小于下限时（变化倍数 MIN_WIDTH_CHANGE = 1.25，其余 MIN_WIDTH），以 sqrt(low * high) 为中心、
 在对数空间对称放宽到下限。MIN_WIDTH = 2.0：探针 1 里模型给的假设区间 high / low 的中位数约 1.5
@@ -24,11 +25,12 @@ import re
 
 from .ablation import refers_to_target, stems
 
-MAX_PER_RUN = 8
+MAX_PER_RUN = 12
 MAX_PER_METHOD = 3
+MAX_PER_SUM = 8
 MIN_WIDTH = 2.0
 MIN_WIDTH_CHANGE = 1.25
-ID_RE = re.compile(r"a[1-8]")
+ID_RE = re.compile(r"a(?:[1-9]|1[0-2])")
 PCT_UNITS = {"%", "percent", "per cent", "pct", "percentage", "percent (%)"}
 # 百分数单位和百分点 / 基点（N17）：和 discrete.PCT_UNIT / CHANGE_UNIT 同一套写法（测试比对两边的 pattern）。
 # 不从 discrete 导入：discrete 导入 compute，compute 导入这里
@@ -90,7 +92,7 @@ def validate(raw, target: dict) -> dict:
             a["unit"] = "%"
         why = ""
         if not ID_RE.fullmatch(a["id"]):
-            why = "id must be a1..a8"
+            why = "id must be a1..a12"
         elif a["id"] in seen:
             why = "duplicate id"
         elif len(kept) >= MAX_PER_RUN:

@@ -115,7 +115,7 @@ class TestPizzaCoverage(unittest.TestCase):
         self.assertGreater(r["weights"]["m2"], 0)
 
     def test_three_part_sum_with_allowance_for_other_is_pooled(self):
-        # other 没有证据：给一个余量假设（相对餐馆 + 冷冻的比例）。id 只有 a1..a8，所以冷冻沿用 a4 的芝加哥占比（原运行里 a7 和 a4 的值相同），
+        # other 没有证据：给一个余量假设（相对餐馆 + 冷冻的比例）。（写这条测试时 id 只有 a1..a8）冷冻沿用 a4 的芝加哥占比（原运行里 a7 和 a4 的值相同），
         # a7 改成 other 的余量；这个方法用 5 个假设（3 个部分，上限 8），m1 用 3 个，合计 8 个
         raw = RAW_A[:6] + [asm("a7", "Other channels as a share of restaurant plus frozen pizza", 0.1, 0.05, 0.2, "share"),
                            RAW_A[7]]
@@ -166,8 +166,8 @@ class TestAssumptionCap(unittest.TestCase):
         self.assertEqual(self.err(6, two), "")
         self.assertEqual(self.err(7, two), "formula_mc uses 7 assumptions (at most 6)")
         self.assertEqual(self.err(8, three), "")   # 3 个部分：min(9, 8)
-        self.assertEqual(self.err(8, four), "")    # 4 个部分：仍是 8（= 每次运行的上限）
-        self.assertEqual((A.MAX_PER_RUN, A.MAX_PER_METHOD), (8, 3))
+        self.assertEqual(self.err(8, four), "")    # 4 个部分：仍是 8（MAX_PER_SUM）
+        self.assertEqual((A.MAX_PER_RUN, A.MAX_PER_METHOD, A.MAX_PER_SUM), (12, 3, 8))
 
 
 class TestCoverageValidation(unittest.TestCase):

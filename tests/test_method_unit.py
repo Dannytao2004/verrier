@@ -86,6 +86,27 @@ class TestMethodUnit(unittest.TestCase):
         r = C.run([m], pts, t, assumptions={"kept": [], "rejected": []})
         self.assertAlmostEqual(r["methods"][0]["estimate"], 4.0, delta=0.1)
 
+    def test_scale_constant_error_says_declare_the_unit(self):
+        # v2.8d（smoke_pizza）：/ 1000 只是克换千克；报错要说「删掉它、写 unit」，不是只说 make it a named input
+        m = m1("kg/day")
+        m["params"]["formula"] = "a * b * c * d * e / 1000"
+        err = run([m], target("t/day"))["methods"][0]["error"]
+        self.assertIn("numeric constant 1000 not allowed", err)
+        self.assertIn("drop it and set the method's \"unit\"", err)
+        self.assertIn("'t/day'", err)
+
+    def test_code_constant_missing_from_inputs_is_added(self):
+        # v2.8d（smoke_tea）：公式里写了 k_days_per_year，inputs 漏列；代码给的常数直接补上，结果和列出来时相同
+        listed = m2("kg/day")
+        listed["params"]["formula"] = "a * b / c * d / k"
+        listed["params"]["inputs"]["k"] = {"id": "k_days_per_year", "role": "days per year"}
+        bare = m2("kg/day")
+        bare["params"]["formula"] = "a * b / c * d / k_days_per_year"
+        e1, e2 = (run([m], target("t/day"))["methods"][0] for m in (listed, bare))
+        self.assertNotIn("error", e2)
+        self.assertAlmostEqual(e2["estimate"] / e1["estimate"], 1, places=9)
+        self.assertNotIn("k_days_per_year", bare["params"]["inputs"])   # 不改模型给的 params
+
     def test_legacy_target_without_unit_canonical_is_unchanged(self):
         # 没钉单位（已存的运行都是这样）：不要求 unit，不换算；'% of population' 也照旧不除以 100
         r = run([m1()], target())

@@ -245,7 +245,7 @@ Assumptions (for formula_mc only):
 - Use the calendar constants instead of writing day or week counts into a formula.
 - Give honest, wide ranges: low and high are your 10th and 90th percentiles, with 0 < low <= value <= high. Write percentages as in the table (unit "%", 12 means 12%).
 - In applies_when, state when the value transfers to this target; in falsified_by, say what evidence would overturn it. In route, give the id of the method that uses it.
-- Ids a1 to a8, at most 3 assumptions per method (a coverage "sum" method: up to 3 per listed part, at most 8). Every formula_mc must use at least one kept point; a formula made only of assumptions is rejected.
+- Ids a1 to a12, at most 3 assumptions per method (a coverage "sum" method: up to 3 per listed part, at most 8). Every formula_mc must use at least one kept point; a formula made only of assumptions is rejected.
 
 Give each method an id (m1, m2, ...) and a rationale. Do not calculate its result or invent combination weights.
 
@@ -287,7 +287,7 @@ Available placeholders: {placeholders}
 
 Write an answer of at most 180 words in English.
 
-Start with the best computed estimate and clearly identify the target's scope and period. Include the supplied interval when available, using only available placeholders for quantitative claims. Write [[unit]] (the target unit) right after the estimate and right after the interval, for example "[[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]])".
+Start with the best computed estimate and clearly identify the target's scope and period. Include the supplied interval when available, using only available placeholders for quantitative claims. Write [[unit]] (the target unit) right after the estimate and right after the interval, for example "[[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]])". An observed point's [[pN_value]] placeholder already ends with that point's own unit, so write no unit right after it.
 
 Briefly explain:
 - the main evidence and estimation relationships;

@@ -43,7 +43,7 @@ class TestAssumptionValidation(unittest.TestCase):
         self.assertFalse(v["kept"][0]["is_pct"])
 
     def test_form_rules(self):
-        bad = [(A(id="a9"), "a1..a8"), (A(id="b1"), "a1..a8"), (A(value="0.9"), "numbers"), (A(low=True), "numbers"),
+        bad = [(A(id="a13"), "a1..a12"), (A(id="a0"), "a1..a12"), (A(id="b1"), "a1..a12"), (A(value="0.9"), "numbers"), (A(low=True), "numbers"),
                (A(high=float("nan")), "numbers"), (A(low=0.0), "0 < low"), (A(value=1.2), "low <= value <= high"),
                (A(low=0.95), "low <= value"), (A(unit=""), "required"), (A(name=" "), "required"),
                (A(rationale=""), "required"), ("not a dict", "not an object")]
@@ -56,7 +56,7 @@ class TestAssumptionValidation(unittest.TestCase):
         v = AS.validate([A(), A(name="another ratio")], TARGET)
         self.assertEqual(len(v["kept"]), 1)
         self.assertEqual(v["rejected"][0]["reason"], "duplicate id")
-        many = [A(id=f"a{i}", name=f"ratio number {i}") for i in range(1, 9)] + [A(id="a9")]
+        many = [A(id=f"a{i}", name=f"ratio number {i}") for i in range(1, 13)] + [A(id="a13")]
         v = AS.validate(many, TARGET)
         self.assertEqual(len(v["kept"]), AS.MAX_PER_RUN)
         self.assertEqual(len(v["rejected"]), 1)

@@ -199,8 +199,8 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
             cov, excluded = coverage(m.get("coverage"))
             if cov is not None:
                 r["coverage"] = cov
-            # sum 方法每个部分最多 3 个假设、整个方法最多 8 个（= 每次运行的上限）；其他方法每个最多 3 个
-            cap = min(A.MAX_PER_METHOD * len(cov["parts"]), A.MAX_PER_RUN) if cov and cov["kind"] == "sum" else A.MAX_PER_METHOD
+            # sum 方法每个部分最多 3 个假设、整个方法最多 8 个（MAX_PER_SUM）；其他方法每个最多 3 个
+            cap = min(A.MAX_PER_METHOD * len(cov["parts"]), A.MAX_PER_SUM) if cov and cov["kind"] == "sum" else A.MAX_PER_METHOD
             if only_methods is not None and r["method"] not in only_methods:
                 raise M.MethodError(f"ablation: only {sorted(only_methods)} allowed (method needs target_history)")
             if r["method"] in ("series_naive", "yoy_scaling", "linear_fit", "ratio"):
@@ -224,7 +224,11 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                 r["backtest"] = M.backtest(r["method"], tgt, sig, year, k)
             elif r["method"] == "formula_mc":
                 env, used, used_a, detail = {}, [], [], []
-                for name, spec in (prm.get("inputs") or {}).items():
+                inputs = dict(prm.get("inputs") or {})
+                # v2.8d（冒烟测试 smoke_tea）：公式里直接写了代码给的常数（k_days_per_year），inputs 里漏列；常数的值由代码定，补上
+                for nm in sorted(set(re.findall(r"[A-Za-z_]\w*", str(prm.get("formula", "")))) & set(consts) - set(inputs)):
+                    inputs[nm] = {"id": nm, "role": "constant supplied by code"}
+                for name, spec in inputs.items():
                     spec = spec if isinstance(spec, dict) else {"id": spec}
                     iid = str(spec.get("id"))
                     fixed = None
@@ -278,7 +282,16 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                                         "these units as a share, ratio, % or empty unit")
                 if len(set(used_a)) > cap:
                     raise M.MethodError(f"formula_mc uses {len(set(used_a))} assumptions (at most {cap})")
-                s = M.formula_mc_samples(str(prm.get("formula", "")), env)
+                try:
+                    s = M.formula_mc_samples(str(prm.get("formula", "")), env)
+                except M.MethodError as e:
+                    # v2.8d（冒烟测试 smoke_pizza）：公式里的 / 1000 是克换千克；只说「make it a named input」，修正轮就自造了
+                    # k_grams_per_kg 这种不存在的常数。钉了单位时，换单位交给代码
+                    if tu and "numeric constant" in str(e):
+                        raise M.MethodError(f"{e}. If the number only converts units (1000 g per kg, days per year), drop it and "
+                                            f"set the method's \"unit\" to the unit the formula then gives (e.g. 'g/day'); "
+                                            f"code converts it to '{tu}'") from None
+                    raise
                 f = 1.0
                 if tu:
                     mu = m.get("unit")
