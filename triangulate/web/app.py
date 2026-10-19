@@ -48,6 +48,11 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
         # 并列的新版界面（航天宣传风草稿）：同一套 API 和共享 JS，旧版 /verrier 不变；照片在 static/aero_assets/（不进 git）
         return FileResponse(STATIC / "verrier_aero.html", media_type="text/html; charset=utf-8")
 
+    @app.get("/verrier/apple")
+    def verrier_apple():
+        # 第三版并列界面（浅色产品页风格草稿）：同一套 API 和共享 JS；首屏结果卡实时读 /api/result，读不到用页面里的快照
+        return FileResponse(STATIC / "verrier_apple.html", media_type="text/html; charset=utf-8")
+
     # ---------- 网页运行 ----------
     @app.post("/api/runs")
     def start_run(body: dict = Body(...)):
