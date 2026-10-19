@@ -1,0 +1,782 @@
+{
+ "qid": "fc_us_gen_2026_07",
+ "question": "Assume today is 2026-08-25. You know nothing published after this date. Estimate total U.S. net electricity generation at utility-scale facilities (all sectors, all energy sources, excluding small-scale solar) in July 2026, in gigawatt-hours (GWh, equal to thousand megawatthours), as it will be first reported in the U.S. Energy Information Administration's Electric Power Monthly (Table 1.1).",
+ "target": {
+  "unit": "",
+  "dims": "dimensionless",
+  "definition": "Total U.S. utility-scale net electricity generation (all sectors, all energy sources, excluding small-scale solar) during July 2026, as first reported in EIA's Electric Power Monthly Table 1.1."
+ },
+ "inputs": [
+  {
+   "name": "us_annual_generation",
+   "description": "Total U.S. utility-scale net generation in a recent full year (2025)",
+   "value": 4300000,
+   "low": 4200000,
+   "high": 4400000,
+   "unit": "GWh",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Recent US utility-scale generation runs near 4.2-4.3 million GWh/year, growing ~2%/yr"
+   },
+   "count_nouns": [],
+   "dims": "kg*m**2*s**-2",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.512e+19,
+    "high": 1.584e+19,
+    "value": 1.548e+19
+   },
+   "median": 4298837.0520409355,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "july_share_of_annual",
+   "description": "Fraction of annual generation occurring in July (summer peak month)",
+   "value": 0.092,
+   "low": 0.085,
+   "high": 0.1,
+   "unit": "%",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "July is typically the highest-demand month, ~9% of annual output"
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.0008500000000000001,
+    "high": 0.001,
+    "value": 0.00092
+   },
+   "median": 0.09219544457292887,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "us_population",
+   "description": "U.S. resident population in 2026",
+   "value": 342000000.0,
+   "low": 338000000.0,
+   "high": 346000000.0,
+   "unit": "people",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Census-style projection continuing recent growth"
+   },
+   "count_nouns": [
+    "people"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 338000000.0,
+    "high": 346000000.0,
+    "value": 342000000.0
+   },
+   "median": 341976607.3871136,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "per_capita_monthly_generation",
+   "description": "Utility-scale generation per person per month in July",
+   "value": 1.15,
+   "low": 1.0,
+   "high": 1.3,
+   "unit": "MWh/person/month",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "~13 MWh/person/year average, July above average"
+   },
+   "count_nouns": [
+    "person"
+   ],
+   "dims": "kg*m**2*s**-3",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1368.9253935660506,
+    "high": 1779.6030116358659,
+    "value": 1574.264202600958
+   },
+   "median": 1.140175425099138,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "july_period",
+   "description": "Length of the July reporting period",
+   "value": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "month",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "One month of July"
+   },
+   "count_nouns": [],
+   "dims": "s",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 2629800.0,
+    "high": 2629800.0,
+    "value": 2629800.0
+   },
+   "median": 1.0,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "peak_summer_demand",
+   "description": "U.S. peak summer electricity demand (all sectors)",
+   "value": 750,
+   "low": 700,
+   "high": 800,
+   "unit": "GW",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "US summer peak demand is roughly 700-750 GW"
+   },
+   "count_nouns": [],
+   "dims": "kg*m**2*s**-3",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 700000000000.0,
+    "high": 800000000000.0,
+    "value": 750000000000.0
+   },
+   "median": 748.3314773547883,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "july_hours",
+   "description": "Hours in July",
+   "value": 744,
+   "low": 744,
+   "high": 744,
+   "unit": "h",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "31 days x 24 hours"
+   },
+   "count_nouns": [],
+   "dims": "s",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 2678400.0,
+    "high": 2678400.0,
+    "value": 2678400.0
+   },
+   "median": 744.0,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "load_factor",
+   "description": "Ratio of average to peak load in July",
+   "value": 0.62,
+   "low": 0.55,
+   "high": 0.7,
+   "unit": "%",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Summer load factors typically 0.55-0.70"
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.0055000000000000005,
+    "high": 0.006999999999999999,
+    "value": 0.0062
+   },
+   "median": 0.6204836822995429,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "us_gdp",
+   "description": "U.S. nominal GDP in 2026",
+   "value": 31000000000000.0,
+   "low": 30000000000000.0,
+   "high": 32000000000000.0,
+   "unit": "USD",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Nominal GDP near $31 trillion"
+   },
+   "count_nouns": [],
+   "dims": "USD",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 30000000000000.0,
+    "high": 32000000000000.0,
+    "value": 31000000000000.0
+   },
+   "median": 30983866769659.336,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "electricity_intensity",
+   "description": "Electricity generation per dollar of GDP",
+   "value": 0.14,
+   "low": 0.12,
+   "high": 0.16,
+   "unit": "kWh/USD",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "US uses ~0.13-0.14 kWh per nominal GDP dollar"
+   },
+   "count_nouns": [],
+   "dims": "USD**-1*kg*m**2*s**-2",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 432000.0,
+    "high": 576000.0,
+    "value": 504000.00000000006
+   },
+   "median": 0.13856406460551018,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "july_gdp_share",
+   "description": "Fraction of annual GDP activity occurring in July",
+   "value": 0.0833,
+   "low": 0.08,
+   "high": 0.087,
+   "unit": "%",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Roughly 1/12 of annual activity"
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.0008,
+    "high": 0.00087,
+    "value": 0.000833
+   },
+   "median": 0.08342661445845684,
+   "used_by": [],
+   "n_dependents": 0,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  }
+ ],
+ "paths": [
+  {
+   "id": "p1",
+   "method": "top_down",
+   "description": "Annual utility-scale generation allocated to July by its seasonal share",
+   "formula": "us_annual_generation * july_share_of_annual",
+   "output_unit": "GWh",
+   "issues": [
+    "dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+   ],
+   "uses": [
+    "july_share_of_annual",
+    "us_annual_generation"
+   ],
+   "dims": "kg*m**2*s**-2",
+   "status": "invalid"
+  },
+  {
+   "id": "p2",
+   "method": "bottom_up",
+   "description": "Population times per-capita July generation over the one-month period",
+   "formula": "us_population * per_capita_monthly_generation * july_period",
+   "output_unit": "GWh",
+   "issues": [
+    "dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+   ],
+   "uses": [
+    "july_period",
+    "per_capita_monthly_generation",
+    "us_population"
+   ],
+   "dims": "kg*m**2*s**-2",
+   "status": "invalid"
+  },
+  {
+   "id": "p3",
+   "method": "proxy",
+   "description": "Peak demand times July hours times load factor",
+   "formula": "peak_summer_demand * july_hours * load_factor",
+   "output_unit": "GWh",
+   "issues": [
+    "dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+   ],
+   "uses": [
+    "july_hours",
+    "load_factor",
+    "peak_summer_demand"
+   ],
+   "dims": "kg*m**2*s**-2",
+   "status": "invalid"
+  }
+ ],
+ "errors": [
+  "path p1: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)",
+  "path p2: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)",
+  "path p3: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+ ],
+ "warnings": [],
+ "mc": {
+  "samples": 20000,
+  "seed": "20261015:fc_us_gen_2026_07",
+  "input_distribution": "lognormal, low/high = P10/P90"
+ },
+ "result": {
+  "central": null,
+  "p10": null,
+  "p90": null,
+  "unit": "",
+  "n_valid_paths": 0,
+  "outliers": [],
+  "path_spread_oom": null
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "target",
+    "kind": "target",
+    "label": "target",
+    "status": "failed",
+    "definition": "Total U.S. utility-scale net electricity generation (all sectors, all energy sources, excluding small-scale solar) during July 2026, as first reported in EIA's Electric Power Monthly Table 1.1.",
+    "unit": "",
+    "central": null,
+    "p10": null,
+    "p90": null,
+    "n_valid_paths": 0,
+    "outliers": []
+   },
+   {
+    "id": "path:p1",
+    "kind": "path",
+    "label": "p1 top_down",
+    "status": "invalid",
+    "method": "top_down",
+    "description": "Annual utility-scale generation allocated to July by its seasonal share",
+    "formula": "us_annual_generation * july_share_of_annual",
+    "output_unit": "GWh",
+    "issues": [
+     "dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p2",
+    "kind": "path",
+    "label": "p2 bottom_up",
+    "status": "invalid",
+    "method": "bottom_up",
+    "description": "Population times per-capita July generation over the one-month period",
+    "formula": "us_population * per_capita_monthly_generation * july_period",
+    "output_unit": "GWh",
+    "issues": [
+     "dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p3",
+    "kind": "path",
+    "label": "p3 proxy",
+    "status": "invalid",
+    "method": "proxy",
+    "description": "Peak demand times July hours times load factor",
+    "formula": "peak_summer_demand * july_hours * load_factor",
+    "output_unit": "GWh",
+    "issues": [
+     "dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "input:us_annual_generation",
+    "kind": "input",
+    "label": "us_annual_generation",
+    "status": "assumption",
+    "description": "Total U.S. utility-scale net generation in a recent full year (2025)",
+    "value": 4300000,
+    "low": 4200000,
+    "high": 4400000,
+    "unit": "GWh",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Recent US utility-scale generation runs near 4.2-4.3 million GWh/year, growing ~2%/yr"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:july_share_of_annual",
+    "kind": "input",
+    "label": "july_share_of_annual",
+    "status": "assumption",
+    "description": "Fraction of annual generation occurring in July (summer peak month)",
+    "value": 0.092,
+    "low": 0.085,
+    "high": 0.1,
+    "unit": "%",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "July is typically the highest-demand month, ~9% of annual output"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:us_population",
+    "kind": "input",
+    "label": "us_population",
+    "status": "assumption",
+    "description": "U.S. resident population in 2026",
+    "value": 342000000.0,
+    "low": 338000000.0,
+    "high": 346000000.0,
+    "unit": "people",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Census-style projection continuing recent growth"
+    },
+    "issues": [],
+    "count_nouns": [
+     "people"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:per_capita_monthly_generation",
+    "kind": "input",
+    "label": "per_capita_monthly_generation",
+    "status": "assumption",
+    "description": "Utility-scale generation per person per month in July",
+    "value": 1.15,
+    "low": 1.0,
+    "high": 1.3,
+    "unit": "MWh/person/month",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "~13 MWh/person/year average, July above average"
+    },
+    "issues": [],
+    "count_nouns": [
+     "person"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:july_period",
+    "kind": "input",
+    "label": "july_period",
+    "status": "assumption",
+    "description": "Length of the July reporting period",
+    "value": 1,
+    "low": 1,
+    "high": 1,
+    "unit": "month",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "One month of July"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:peak_summer_demand",
+    "kind": "input",
+    "label": "peak_summer_demand",
+    "status": "assumption",
+    "description": "U.S. peak summer electricity demand (all sectors)",
+    "value": 750,
+    "low": 700,
+    "high": 800,
+    "unit": "GW",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "US summer peak demand is roughly 700-750 GW"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:july_hours",
+    "kind": "input",
+    "label": "july_hours",
+    "status": "assumption",
+    "description": "Hours in July",
+    "value": 744,
+    "low": 744,
+    "high": 744,
+    "unit": "h",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "31 days x 24 hours"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:load_factor",
+    "kind": "input",
+    "label": "load_factor",
+    "status": "assumption",
+    "description": "Ratio of average to peak load in July",
+    "value": 0.62,
+    "low": 0.55,
+    "high": 0.7,
+    "unit": "%",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Summer load factors typically 0.55-0.70"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:us_gdp",
+    "kind": "input",
+    "label": "us_gdp",
+    "status": "assumption",
+    "description": "U.S. nominal GDP in 2026",
+    "value": 31000000000000.0,
+    "low": 30000000000000.0,
+    "high": 32000000000000.0,
+    "unit": "USD",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Nominal GDP near $31 trillion"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:electricity_intensity",
+    "kind": "input",
+    "label": "electricity_intensity",
+    "status": "assumption",
+    "description": "Electricity generation per dollar of GDP",
+    "value": 0.14,
+    "low": 0.12,
+    "high": 0.16,
+    "unit": "kWh/USD",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "US uses ~0.13-0.14 kWh per nominal GDP dollar"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:july_gdp_share",
+    "kind": "input",
+    "label": "july_gdp_share",
+    "status": "assumption",
+    "description": "Fraction of annual GDP activity occurring in July",
+    "value": 0.0833,
+    "low": 0.08,
+    "high": 0.087,
+    "unit": "%",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Roughly 1/12 of annual activity"
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [],
+    "n_dependents": 0,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   }
+  ],
+  "edges": [
+   {
+    "source": "path:p1",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:july_share_of_annual",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:us_annual_generation",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p2",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:july_period",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:per_capita_monthly_generation",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:us_population",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p3",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:july_hours",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:load_factor",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:peak_summer_demand",
+    "target": "path:p3",
+    "kind": "used_by"
+   }
+  ]
+ }
+}

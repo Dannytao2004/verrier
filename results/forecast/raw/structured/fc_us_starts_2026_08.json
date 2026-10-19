@@ -1,0 +1,188 @@
+{
+ "qid": "fc_us_starts_2026_08",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Seasonally adjusted annual rate of privately-owned housing starts in the United States for August 2026, as first reported by the Census Bureau/HUD Monthly New Residential Construction release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "recent_saar_level",
+      "description": "Recent monthly SAAR level of private housing starts around mid-2026",
+      "value": 1350000,
+      "low": 1150000,
+      "high": 1550000,
+      "unit": "housing units",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Starts have hovered in the 1.2-1.5M SAAR range in recent years; mid-2026 likely near the middle of that band"
+      }
+     },
+     {
+      "name": "annual_private_starts",
+      "description": "Total private housing starts over the trailing year",
+      "value": 1350000,
+      "low": 1150000,
+      "high": 1550000,
+      "unit": "housing units/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual total consistent with recent SAAR levels"
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Months in a year",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calendar constant"
+      }
+     },
+     {
+      "name": "seasonal_factor_august",
+      "description": "Ratio of August unadjusted starts to the annual average (August is a relatively strong month)",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August typically slightly above the annual average for housing starts"
+      }
+     },
+     {
+      "name": "single_family_share",
+      "description": "Share of private starts that are single-family",
+      "value": 0.68,
+      "low": 0.6,
+      "high": 0.75,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Single-family has been roughly two-thirds of starts in recent years"
+      }
+     },
+     {
+      "name": "multifamily_share",
+      "description": "Share of private starts that are multifamily (2+ units)",
+      "value": 0.32,
+      "low": 0.25,
+      "high": 0.4,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Multifamily roughly one-third of starts"
+      }
+     },
+     {
+      "name": "single_family_saar",
+      "description": "Single-family starts SAAR in August 2026",
+      "value": 920000,
+      "low": 750000,
+      "high": 1100000,
+      "unit": "housing units",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Single-family starts have run around 0.9M SAAR recently"
+      }
+     },
+     {
+      "name": "multifamily_saar",
+      "description": "Multifamily starts SAAR in August 2026",
+      "value": 430000,
+      "low": 280000,
+      "high": 600000,
+      "unit": "housing units",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Multifamily starts have run around 0.4M SAAR recently"
+      }
+     },
+     {
+      "name": "permits_to_starts_ratio",
+      "description": "Ratio of housing starts to housing permits (starts tend to track permits)",
+      "value": 0.98,
+      "low": 0.85,
+      "high": 1.1,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Starts and permits are closely linked, with starts slightly below permits on average"
+      }
+     },
+     {
+      "name": "august_permits_saar",
+      "description": "Private housing permits SAAR around August 2026",
+      "value": 1380000,
+      "low": 1150000,
+      "high": 1600000,
+      "unit": "housing units",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Permits have run near 1.3-1.5M SAAR recently"
+      }
+     },
+     {
+      "name": "households",
+      "description": "Number of U.S. households",
+      "value": 132000000,
+      "low": 128000000,
+      "high": 136000000,
+      "unit": "households",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Census household count is roughly 131-133 million in the mid-2020s"
+      }
+     },
+     {
+      "name": "starts_per_household",
+      "description": "Annual housing starts per household (formation plus replacement)",
+      "value": 0.0102,
+      "low": 0.0085,
+      "high": 0.012,
+      "unit": "housing units/household/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "About 1.3-1.4M starts against ~132M households gives ~1% per year"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Start from recent SAAR level and apply a modest August adjustment",
+      "formula": "recent_saar_level * seasonal_factor_august",
+      "output_unit": "housing units"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Sum single-family and multifamily SAAR components",
+      "formula": "single_family_saar + multifamily_saar",
+      "output_unit": "housing units"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale August permits by the starts-to-permits ratio",
+      "formula": "august_permits_saar * permits_to_starts_ratio",
+      "output_unit": "housing units"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

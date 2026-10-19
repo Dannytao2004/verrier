@@ -1,0 +1,314 @@
+{
+ "qid": "fc_googl_tokens_2026_q3",
+ "arm": "structured",
+ "target_unit": "token/minute",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "The number of tokens per minute processed by Alphabet's first-party models (e.g. Gemini) via direct API use by customers, as first stated with Alphabet's Q3 2026 results.",
+     "unit": "token/minute"
+    },
+    "inputs": [
+     {
+      "name": "q2_2026_tokens_per_minute",
+      "description": "API tokens per minute stated by Alphabet for Gemini models at Q2 2026 earnings",
+      "value": 22000000000,
+      "low": 22000000000,
+      "high": 22000000000,
+      "unit": "token/minute",
+      "provenance": {
+       "type": "sourced",
+       "source": "Alphabet Q2 2026 earnings call remarks",
+       "url": "",
+       "quote": "Gemini models now process 22 billion API tokens per minute"
+      }
+     },
+     {
+      "name": "quarterly_growth_factor",
+      "description": "Multiplicative growth in stated API tokens per minute from one quarterly earnings disclosure to the next",
+      "value": 1.35,
+      "low": 1.1,
+      "high": 1.7,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent Gemini API token-per-minute disclosures have grown roughly 30-50% per quarter; wide interval reflects uncertainty in deceleration or acceleration"
+      }
+     },
+     {
+      "name": "quarters_elapsed",
+      "description": "Number of quarterly reporting periods between the Q2 2026 statement and the Q3 2026 statement",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "quarter",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Q2 2026 to Q3 2026 is exactly one quarterly reporting interval"
+      }
+     },
+     {
+      "name": "q2_2026_quarterly_revenue",
+      "description": "Alphabet total revenue in Q2 2026, used as a scale anchor",
+      "value": 100000000000,
+      "low": 95000000000,
+      "high": 105000000000,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Alphabet quarterly revenue has been running near USD 100 billion in 2026"
+      }
+     },
+     {
+      "name": "q3_2026_quarterly_revenue",
+      "description": "Alphabet total revenue in Q3 2026, used as a scale anchor",
+      "value": 105000000000,
+      "low": 98000000000,
+      "high": 112000000000,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Q3 typically slightly above Q2; modest sequential growth assumed"
+      }
+     },
+     {
+      "name": "tokens_per_minute_per_revenue_dollar",
+      "description": "API tokens per minute processed per dollar of quarterly Alphabet revenue, calibrated from the Q2 2026 disclosure",
+      "value": 0.22,
+      "low": 0.18,
+      "high": 0.26,
+      "unit": "token/minute/USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "22 billion tokens/min divided by roughly USD 100 billion quarterly revenue gives about 0.22 tokens/min per revenue dollar"
+      }
+     },
+     {
+      "name": "revenue_growth_factor",
+      "description": "Multiplicative growth in Alphabet quarterly revenue from Q2 2026 to Q3 2026",
+      "value": 1.05,
+      "low": 1.0,
+      "high": 1.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Sequential quarterly revenue growth of a few percent"
+      }
+     },
+     {
+      "name": "token_intensity_growth_factor",
+      "description": "Growth in API token intensity per dollar of revenue from Q2 2026 to Q3 2026",
+      "value": 1.28,
+      "low": 1.05,
+      "high": 1.6,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "AI API usage growing faster than overall revenue, but with wide uncertainty"
+      }
+     },
+     {
+      "name": "global_ai_api_tokens_per_minute",
+      "description": "Total tokens per minute processed across all major AI API providers globally in late 2026",
+      "value": 200000000000,
+      "low": 100000000000,
+      "high": 400000000000,
+      "unit": "token/minute",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Order-of-magnitude estimate of aggregate frontier-model API throughput across providers"
+      }
+     },
+     {
+      "name": "alphabet_api_share",
+      "description": "Alphabet/Gemini share of global AI API token throughput",
+      "value": 0.15,
+      "low": 0.08,
+      "high": 0.25,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Gemini is a major but not dominant API provider; share of global token volume uncertain"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Grow the Q2 2026 disclosed tokens-per-minute by one quarter of growth",
+      "formula": "q2_2026_tokens_per_minute * quarterly_growth_factor ** quarters_elapsed",
+      "output_unit": "token/minute"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Scale Q2 2026 tokens-per-minute by revenue growth and token-intensity growth",
+      "formula": "q2_2026_tokens_per_minute * revenue_growth_factor * token_intensity_growth_factor",
+      "output_unit": "token/minute"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Estimate global AI API token throughput and take Alphabet's share",
+      "formula": "global_ai_api_tokens_per_minute * alphabet_api_share",
+      "output_unit": "token/minute"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p1: formula: exponent must be a plain number"
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "The number of tokens per minute processed by Alphabet's first-party models (e.g. Gemini) via direct API use by customers, as first stated with Alphabet's Q3 2026 results.",
+     "unit": "token/minute"
+    },
+    "inputs": [
+     {
+      "name": "q2_2026_tokens_per_minute",
+      "description": "API tokens per minute stated by Alphabet for Gemini models at Q2 2026 earnings",
+      "value": 22000000000,
+      "low": 22000000000,
+      "high": 22000000000,
+      "unit": "token/minute",
+      "provenance": {
+       "type": "sourced",
+       "source": "Alphabet Q2 2026 earnings call remarks",
+       "url": "",
+       "quote": "Gemini models now process 22 billion API tokens per minute"
+      }
+     },
+     {
+      "name": "quarterly_growth_factor",
+      "description": "Multiplicative growth in stated API tokens per minute from one quarterly earnings disclosure to the next",
+      "value": 1.35,
+      "low": 1.1,
+      "high": 1.7,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent Gemini API token-per-minute disclosures have grown roughly 30-50% per quarter; wide interval reflects uncertainty in deceleration or acceleration"
+      }
+     },
+     {
+      "name": "q2_2026_quarterly_revenue",
+      "description": "Alphabet total revenue in Q2 2026, used as a scale anchor",
+      "value": 100000000000,
+      "low": 95000000000,
+      "high": 105000000000,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Alphabet quarterly revenue has been running near USD 100 billion in 2026"
+      }
+     },
+     {
+      "name": "q3_2026_quarterly_revenue",
+      "description": "Alphabet total revenue in Q3 2026, used as a scale anchor",
+      "value": 105000000000,
+      "low": 98000000000,
+      "high": 112000000000,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Q3 typically slightly above Q2; modest sequential growth assumed"
+      }
+     },
+     {
+      "name": "tokens_per_minute_per_revenue_dollar",
+      "description": "API tokens per minute processed per dollar of quarterly Alphabet revenue, calibrated from the Q2 2026 disclosure",
+      "value": 0.22,
+      "low": 0.18,
+      "high": 0.26,
+      "unit": "token/minute/USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "22 billion tokens/min divided by roughly USD 100 billion quarterly revenue gives about 0.22 tokens/min per revenue dollar"
+      }
+     },
+     {
+      "name": "revenue_growth_factor",
+      "description": "Multiplicative growth in Alphabet quarterly revenue from Q2 2026 to Q3 2026",
+      "value": 1.05,
+      "low": 1.0,
+      "high": 1.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Sequential quarterly revenue growth of a few percent"
+      }
+     },
+     {
+      "name": "token_intensity_growth_factor",
+      "description": "Growth in API token intensity per dollar of revenue from Q2 2026 to Q3 2026",
+      "value": 1.28,
+      "low": 1.05,
+      "high": 1.6,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "AI API usage growing faster than overall revenue, but with wide uncertainty"
+      }
+     },
+     {
+      "name": "global_ai_api_tokens_per_minute",
+      "description": "Total tokens per minute processed across all major AI API providers globally in late 2026",
+      "value": 200000000000,
+      "low": 100000000000,
+      "high": 400000000000,
+      "unit": "token/minute",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Order-of-magnitude estimate of aggregate frontier-model API throughput across providers"
+      }
+     },
+     {
+      "name": "alphabet_api_share",
+      "description": "Alphabet/Gemini share of global AI API token throughput",
+      "value": 0.15,
+      "low": 0.08,
+      "high": 0.25,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Gemini is a major but not dominant API provider; share of global token volume uncertain"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Grow the Q2 2026 disclosed tokens-per-minute by one quarter of growth",
+      "formula": "q2_2026_tokens_per_minute * quarterly_growth_factor",
+      "output_unit": "token/minute"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Scale Q2 2026 tokens-per-minute by revenue growth and token-intensity growth",
+      "formula": "q2_2026_tokens_per_minute * revenue_growth_factor * token_intensity_growth_factor",
+      "output_unit": "token/minute"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Estimate global AI API token throughput and take Alphabet's share",
+      "formula": "global_ai_api_tokens_per_minute * alphabet_api_share",
+      "output_unit": "token/minute"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2
+}

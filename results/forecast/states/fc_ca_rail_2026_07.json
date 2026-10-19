@@ -1,0 +1,822 @@
+{
+ "qid": "fc_ca_rail_2026_07",
+ "question": "Assume today is 2026-08-29. You know nothing published after this date. Estimate the total freight carried by Canadian railways in July 2026, in tonnes, as it will be first reported by Statistics Canada in its monthly Railway carloadings release (total traffic carried, Canada).",
+ "target": {
+  "unit": "",
+  "dims": "dimensionless",
+  "definition": "Total freight carried by Canadian railways (all traffic, Canada) during July 2026, in tonnes, as first reported by Statistics Canada's monthly Railway carloadings release."
+ },
+ "inputs": [
+  {
+   "name": "annual_rail_tonnes",
+   "description": "Total freight tonnage carried by Canadian railways in a recent full year (all traffic, Canada)",
+   "value": 330000000.0,
+   "low": 280000000.0,
+   "high": 390000000.0,
+   "unit": "tonne/year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Canadian rail traffic is roughly 300-400 million tonnes per year across all commodities (grain, coal, potash, oil, intermodal)."
+   },
+   "count_nouns": [],
+   "dims": "kg*s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 8872.664587928106,
+    "high": 12358.35424747129,
+    "value": 10457.068978629553
+   },
+   "median": 330454232.83716613,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "july_seasonal_factor",
+   "description": "Ratio of July tonnage to the annual monthly average (grain harvest ramp-up, summer construction inputs)",
+   "value": 1.05,
+   "low": 0.95,
+   "high": 1.15,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "July is near or slightly above the annual average as grain and potash shipments build."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.95,
+    "high": 1.15,
+    "value": 1.05
+   },
+   "median": 1.0452272480183435,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "months_per_year",
+   "description": "Number of months in a year",
+   "value": 12,
+   "low": 12,
+   "high": 12,
+   "unit": "month/year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Calendar constant."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.0,
+    "high": 1.0,
+    "value": 1.0
+   },
+   "median": 12.0,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "period_length",
+   "description": "Length of the reporting period (one month)",
+   "value": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "month",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "The release reports a single month."
+   },
+   "count_nouns": [],
+   "dims": "s",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 2629800.0,
+    "high": 2629800.0,
+    "value": 2629800.0
+   },
+   "median": 1.0,
+   "used_by": [
+    "p1",
+    "p2"
+   ],
+   "n_dependents": 2,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "weekly_carloads",
+   "description": "Average number of loaded freight cars originated per week by Canadian railways",
+   "value": 85000,
+   "low": 70000,
+   "high": 100000,
+   "unit": "cars/week",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Class I Canadian railways originate on the order of 80-90 thousand carloads per week."
+   },
+   "count_nouns": [
+    "cars"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.11574074074074074,
+    "high": 0.16534391534391535,
+    "value": 0.14054232804232805
+   },
+   "median": 83666.00265340756,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "weeks_per_month",
+   "description": "Average number of weeks in a month",
+   "value": 4.35,
+   "low": 4.35,
+   "high": 4.35,
+   "unit": "week/month",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "52 weeks divided by 12 months."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 1.0004106776180697,
+    "high": 1.0004106776180697,
+    "value": 1.0004106776180697
+   },
+   "median": 4.35,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "tonnes_per_carload",
+   "description": "Average net tonnes per loaded freight car (mix of grain, coal, potash, intermodal)",
+   "value": 85,
+   "low": 70,
+   "high": 100,
+   "unit": "tonne/car",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Heavy bulk cars carry ~90-110 t; intermodal and lighter cars pull the average down to ~80-90 t."
+   },
+   "count_nouns": [
+    "car"
+   ],
+   "dims": "kg",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 70000.0,
+    "high": 100000.0,
+    "value": 85000.0
+   },
+   "median": 83.66600265340756,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "canada_gdp",
+   "description": "Annual nominal GDP of Canada",
+   "value": 3000000000000.0,
+   "low": 2700000000000.0,
+   "high": 3300000000000.0,
+   "unit": "USD/year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Canadian nominal GDP is roughly 3 trillion USD-equivalent in the mid-2020s."
+   },
+   "count_nouns": [],
+   "dims": "USD*s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 85557.83709787816,
+    "high": 104570.68978629552,
+    "value": 95064.26344208684
+   },
+   "median": 2984962311319.86,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "rail_tonnes_per_gdp",
+   "description": "Rail freight tonnes carried per unit of annual GDP (freight intensity of the economy)",
+   "value": 0.00011,
+   "low": 8e-05,
+   "high": 0.00015,
+   "unit": "tonne/year per USD/year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "About 330 Mt of rail freight against ~3e12 USD GDP gives ~1.1e-4 t per USD."
+   },
+   "count_nouns": [],
+   "dims": "USD**-1*kg*s**-2",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 8.033079274476882e-17,
+    "high": 1.506202363964415e-16,
+    "value": 1.1045484002405712e-16
+   },
+   "median": 0.00010954451150103323,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "july_share_of_year",
+   "description": "Share of annual rail tonnage carried in July",
+   "value": 0.0875,
+   "low": 0.079,
+   "high": 0.096,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "One month is 1/12 = 0.0833 of the year; July runs slightly above average."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.079,
+    "high": 0.096,
+    "value": 0.0875
+   },
+   "median": 0.08708616422830896,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  },
+  {
+   "name": "year_length",
+   "description": "Length of one year, used to convert annual quantities to the monthly period",
+   "value": 1,
+   "low": 1,
+   "high": 1,
+   "unit": "year",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Calendar constant."
+   },
+   "count_nouns": [],
+   "dims": "s",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 31557600.0,
+    "high": 31557600.0,
+    "value": 31557600.0
+   },
+   "median": 1.0,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": null,
+   "sensitivity_path_max": null
+  }
+ ],
+ "paths": [
+  {
+   "id": "p1",
+   "method": "top_down",
+   "description": "Allocate annual Canadian rail tonnage down to the July period using a seasonal factor.",
+   "formula": "annual_rail_tonnes * period_length / months_per_year * july_seasonal_factor",
+   "output_unit": "tonne",
+   "issues": [
+    "dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)"
+   ],
+   "uses": [
+    "annual_rail_tonnes",
+    "july_seasonal_factor",
+    "months_per_year",
+    "period_length"
+   ],
+   "dims": "kg",
+   "status": "invalid"
+  },
+  {
+   "id": "p2",
+   "method": "bottom_up",
+   "description": "Count weekly loaded carloads, convert to the monthly period, multiply by average tonnes per car.",
+   "formula": "weekly_carloads * weeks_per_month * period_length * tonnes_per_carload",
+   "output_unit": "tonne",
+   "issues": [
+    "dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)"
+   ],
+   "uses": [
+    "period_length",
+    "tonnes_per_carload",
+    "weekly_carloads",
+    "weeks_per_month"
+   ],
+   "dims": "kg",
+   "status": "invalid"
+  },
+  {
+   "id": "p3",
+   "method": "proxy",
+   "description": "Scale national GDP by rail freight intensity and take July's share of the year.",
+   "formula": "canada_gdp * rail_tonnes_per_gdp * year_length * july_share_of_year",
+   "output_unit": "tonne",
+   "issues": [
+    "dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+   ],
+   "uses": [
+    "canada_gdp",
+    "july_share_of_year",
+    "rail_tonnes_per_gdp",
+    "year_length"
+   ],
+   "dims": "kg*s**-2",
+   "status": "invalid"
+  }
+ ],
+ "errors": [
+  "path p1: dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)",
+  "path p2: dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)",
+  "path p3: dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+ ],
+ "warnings": [
+  "path p3: declared output_unit 'tonne' (kg) differs from computed kg*s**-2; computed one is used"
+ ],
+ "mc": {
+  "samples": 20000,
+  "seed": "20261015:fc_ca_rail_2026_07",
+  "input_distribution": "lognormal, low/high = P10/P90"
+ },
+ "result": {
+  "central": null,
+  "p10": null,
+  "p90": null,
+  "unit": "",
+  "n_valid_paths": 0,
+  "outliers": [],
+  "path_spread_oom": null
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "target",
+    "kind": "target",
+    "label": "target",
+    "status": "failed",
+    "definition": "Total freight carried by Canadian railways (all traffic, Canada) during July 2026, in tonnes, as first reported by Statistics Canada's monthly Railway carloadings release.",
+    "unit": "",
+    "central": null,
+    "p10": null,
+    "p90": null,
+    "n_valid_paths": 0,
+    "outliers": []
+   },
+   {
+    "id": "path:p1",
+    "kind": "path",
+    "label": "p1 top_down",
+    "status": "invalid",
+    "method": "top_down",
+    "description": "Allocate annual Canadian rail tonnage down to the July period using a seasonal factor.",
+    "formula": "annual_rail_tonnes * period_length / months_per_year * july_seasonal_factor",
+    "output_unit": "tonne",
+    "issues": [
+     "dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p2",
+    "kind": "path",
+    "label": "p2 bottom_up",
+    "status": "invalid",
+    "method": "bottom_up",
+    "description": "Count weekly loaded carloads, convert to the monthly period, multiply by average tonnes per car.",
+    "formula": "weekly_carloads * weeks_per_month * period_length * tonnes_per_carload",
+    "output_unit": "tonne",
+    "issues": [
+     "dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p3",
+    "kind": "path",
+    "label": "p3 proxy",
+    "status": "invalid",
+    "method": "proxy",
+    "description": "Scale national GDP by rail freight intensity and take July's share of the year.",
+    "formula": "canada_gdp * rail_tonnes_per_gdp * year_length * july_share_of_year",
+    "output_unit": "tonne",
+    "issues": [
+     "dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+    ],
+    "median": null,
+    "p10": null,
+    "p90": null,
+    "log10_vs_central": null,
+    "n_dependents": 1
+   },
+   {
+    "id": "input:annual_rail_tonnes",
+    "kind": "input",
+    "label": "annual_rail_tonnes",
+    "status": "assumption",
+    "description": "Total freight tonnage carried by Canadian railways in a recent full year (all traffic, Canada)",
+    "value": 330000000.0,
+    "low": 280000000.0,
+    "high": 390000000.0,
+    "unit": "tonne/year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Canadian rail traffic is roughly 300-400 million tonnes per year across all commodities (grain, coal, potash, oil, intermodal)."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:july_seasonal_factor",
+    "kind": "input",
+    "label": "july_seasonal_factor",
+    "status": "assumption",
+    "description": "Ratio of July tonnage to the annual monthly average (grain harvest ramp-up, summer construction inputs)",
+    "value": 1.05,
+    "low": 0.95,
+    "high": 1.15,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "July is near or slightly above the annual average as grain and potash shipments build."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:months_per_year",
+    "kind": "input",
+    "label": "months_per_year",
+    "status": "assumption",
+    "description": "Number of months in a year",
+    "value": 12,
+    "low": 12,
+    "high": 12,
+    "unit": "month/year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Calendar constant."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:period_length",
+    "kind": "input",
+    "label": "period_length",
+    "status": "assumption",
+    "description": "Length of the reporting period (one month)",
+    "value": 1,
+    "low": 1,
+    "high": 1,
+    "unit": "month",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "The release reports a single month."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1",
+     "p2"
+    ],
+    "n_dependents": 2,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:weekly_carloads",
+    "kind": "input",
+    "label": "weekly_carloads",
+    "status": "assumption",
+    "description": "Average number of loaded freight cars originated per week by Canadian railways",
+    "value": 85000,
+    "low": 70000,
+    "high": 100000,
+    "unit": "cars/week",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Class I Canadian railways originate on the order of 80-90 thousand carloads per week."
+    },
+    "issues": [],
+    "count_nouns": [
+     "cars"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:weeks_per_month",
+    "kind": "input",
+    "label": "weeks_per_month",
+    "status": "assumption",
+    "description": "Average number of weeks in a month",
+    "value": 4.35,
+    "low": 4.35,
+    "high": 4.35,
+    "unit": "week/month",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "52 weeks divided by 12 months."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:tonnes_per_carload",
+    "kind": "input",
+    "label": "tonnes_per_carload",
+    "status": "assumption",
+    "description": "Average net tonnes per loaded freight car (mix of grain, coal, potash, intermodal)",
+    "value": 85,
+    "low": 70,
+    "high": 100,
+    "unit": "tonne/car",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Heavy bulk cars carry ~90-110 t; intermodal and lighter cars pull the average down to ~80-90 t."
+    },
+    "issues": [],
+    "count_nouns": [
+     "car"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:canada_gdp",
+    "kind": "input",
+    "label": "canada_gdp",
+    "status": "assumption",
+    "description": "Annual nominal GDP of Canada",
+    "value": 3000000000000.0,
+    "low": 2700000000000.0,
+    "high": 3300000000000.0,
+    "unit": "USD/year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Canadian nominal GDP is roughly 3 trillion USD-equivalent in the mid-2020s."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:rail_tonnes_per_gdp",
+    "kind": "input",
+    "label": "rail_tonnes_per_gdp",
+    "status": "assumption",
+    "description": "Rail freight tonnes carried per unit of annual GDP (freight intensity of the economy)",
+    "value": 0.00011,
+    "low": 8e-05,
+    "high": 0.00015,
+    "unit": "tonne/year per USD/year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "About 330 Mt of rail freight against ~3e12 USD GDP gives ~1.1e-4 t per USD."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:july_share_of_year",
+    "kind": "input",
+    "label": "july_share_of_year",
+    "status": "assumption",
+    "description": "Share of annual rail tonnage carried in July",
+    "value": 0.0875,
+    "low": 0.079,
+    "high": 0.096,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "One month is 1/12 = 0.0833 of the year; July runs slightly above average."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   },
+   {
+    "id": "input:year_length",
+    "kind": "input",
+    "label": "year_length",
+    "status": "assumption",
+    "description": "Length of one year, used to convert annual quantities to the monthly period",
+    "value": 1,
+    "low": 1,
+    "high": 1,
+    "unit": "year",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Calendar constant."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": null,
+    "sensitivity_path_max": null
+   }
+  ],
+  "edges": [
+   {
+    "source": "path:p1",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:annual_rail_tonnes",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:july_seasonal_factor",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:months_per_year",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:period_length",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p2",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:period_length",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:tonnes_per_carload",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:weekly_carloads",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:weeks_per_month",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p3",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": false
+   },
+   {
+    "source": "input:canada_gdp",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:july_share_of_year",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:rail_tonnes_per_gdp",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:year_length",
+    "target": "path:p3",
+    "kind": "used_by"
+   }
+  ]
+ }
+}

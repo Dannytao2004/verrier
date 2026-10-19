@@ -1,0 +1,17 @@
+{
+ "qid": "fc_googl_tokens_2026_q3",
+ "arm": "naive",
+ "target_unit": "token/minute",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 35000000000.0,
+    "unit": "token/minute"
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

@@ -1,0 +1,334 @@
+{
+ "qid": "fc_kr_online_2026_08",
+ "arm": "structured",
+ "target_unit": "KRW",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total transaction value of online shopping in South Korea during August 2026, as first reported in the National Data Office's monthly Online Shopping Trends release.",
+     "unit": "KRW"
+    },
+    "inputs": [
+     {
+      "name": "annual_online_retail_2025",
+      "description": "Total online shopping transaction value in South Korea for calendar year 2025",
+      "value": 240000000000000.0,
+      "low": 220000000000000.0,
+      "high": 260000000000000.0,
+      "unit": "KRW",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Monthly online shopping trends ran around 20 trillion KRW/month in 2024-2025, giving roughly 240 trillion KRW/year"
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Year-over-year growth factor of online shopping value from 2025 to 2026",
+      "value": 1.05,
+      "low": 0.98,
+      "high": 1.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Online shopping growth has slowed to mid-single digits as the market matures"
+      }
+     },
+     {
+      "name": "august_seasonal_index",
+      "description": "Ratio of August transaction value to the average month (August includes summer holiday effects)",
+      "value": 0.98,
+      "low": 0.93,
+      "high": 1.03,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is a typical-to-slightly-soft month with no major shopping festival"
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Number of months in a year",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calendar constant"
+      }
+     },
+     {
+      "name": "population",
+      "description": "Population of South Korea",
+      "value": 51500000.0,
+      "low": 50000000.0,
+      "high": 53000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Resident population around 51-52 million in mid-2020s"
+      }
+     },
+     {
+      "name": "online_shopping_participation_share",
+      "description": "Share of population making online purchases in a given month",
+      "value": 0.55,
+      "low": 0.45,
+      "high": 0.65,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Roughly half of Koreans report online purchases in a month"
+      }
+     },
+     {
+      "name": "purchases_per_buyer_per_month",
+      "description": "Average number of online purchase transactions per active buyer per month",
+      "value": 6,
+      "low": 4,
+      "high": 9,
+      "unit": "transactions",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Frequent small purchases plus occasional larger orders"
+      }
+     },
+     {
+      "name": "average_transaction_value",
+      "description": "Average value per online shopping transaction",
+      "value": 70000,
+      "low": 50000,
+      "high": 95000,
+      "unit": "KRW",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Mix of small food/daily items and larger electronics/clothing orders"
+      }
+     },
+     {
+      "name": "household_consumption_expenditure",
+      "description": "Annual household final consumption expenditure in South Korea",
+      "value": 950000000000000.0,
+      "low": 900000000000000.0,
+      "high": 1000000000000000.0,
+      "unit": "KRW",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Korean household consumption is roughly 900-1000 trillion KRW per year"
+      }
+     },
+     {
+      "name": "online_share_of_consumption",
+      "description": "Share of household consumption expenditure spent through online shopping transactions",
+      "value": 0.25,
+      "low": 0.2,
+      "high": 0.3,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Online shopping is about a quarter of household consumption in Korea"
+      }
+     },
+     {
+      "name": "august_share_of_year",
+      "description": "Share of annual online shopping value falling in August",
+      "value": 0.082,
+      "low": 0.075,
+      "high": 0.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "One-twelfth of the year adjusted slightly for August seasonality"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale 2025 annual online shopping value by growth and August seasonal index, divided by 12 months",
+      "formula": "annual_online_retail_2025 * annual_growth_factor * august_seasonal_index / months_per_year",
+      "output_unit": "KRW"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Count active online buyers times purchases per buyer times average transaction value",
+      "formula": "population * online_shopping_participation_share * purchases_per_buyer_per_month * average_transaction_value",
+      "output_unit": "KRW"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Take online share of annual household consumption and allocate the August share",
+      "formula": "household_consumption_expenditure * online_share_of_consumption * august_share_of_year",
+      "output_unit": "KRW"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: months_per_year ('months'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Total transaction value of online shopping in South Korea during August 2026, as first reported in the National Data Office's monthly Online Shopping Trends release.",
+     "unit": "KRW"
+    },
+    "inputs": [
+     {
+      "name": "annual_online_retail_2025",
+      "description": "Total online shopping transaction value in South Korea for calendar year 2025",
+      "value": 240000000000000.0,
+      "low": 220000000000000.0,
+      "high": 260000000000000.0,
+      "unit": "KRW",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Monthly online shopping trends ran around 20 trillion KRW/month in 2024-2025, giving roughly 240 trillion KRW/year"
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Year-over-year growth factor of online shopping value from 2025 to 2026",
+      "value": 1.05,
+      "low": 0.98,
+      "high": 1.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Online shopping growth has slowed to mid-single digits as the market matures"
+      }
+     },
+     {
+      "name": "august_seasonal_index",
+      "description": "Ratio of August transaction value to the average month (August includes summer holiday effects)",
+      "value": 0.98,
+      "low": 0.93,
+      "high": 1.03,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is a typical-to-slightly-soft month with no major shopping festival"
+      }
+     },
+     {
+      "name": "august_share_of_year",
+      "description": "Share of annual online shopping value falling in August",
+      "value": 0.082,
+      "low": 0.075,
+      "high": 0.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "One-twelfth of the year adjusted slightly for August seasonality"
+      }
+     },
+     {
+      "name": "population",
+      "description": "Population of South Korea",
+      "value": 51500000.0,
+      "low": 50000000.0,
+      "high": 53000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Resident population around 51-52 million in mid-2020s"
+      }
+     },
+     {
+      "name": "online_shopping_participation_share",
+      "description": "Share of population making online purchases in a given month",
+      "value": 0.55,
+      "low": 0.45,
+      "high": 0.65,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Roughly half of Koreans report online purchases in a month"
+      }
+     },
+     {
+      "name": "purchases_per_buyer_per_month",
+      "description": "Average number of online purchase transactions per active buyer per month",
+      "value": 6,
+      "low": 4,
+      "high": 9,
+      "unit": "transactions",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Frequent small purchases plus occasional larger orders"
+      }
+     },
+     {
+      "name": "average_transaction_value",
+      "description": "Average value per online shopping transaction",
+      "value": 70000,
+      "low": 50000,
+      "high": 95000,
+      "unit": "KRW",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Mix of small food/daily items and larger electronics/clothing orders"
+      }
+     },
+     {
+      "name": "household_consumption_expenditure",
+      "description": "Annual household final consumption expenditure in South Korea",
+      "value": 950000000000000.0,
+      "low": 900000000000000.0,
+      "high": 1000000000000000.0,
+      "unit": "KRW",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Korean household consumption is roughly 900-1000 trillion KRW per year"
+      }
+     },
+     {
+      "name": "online_share_of_consumption",
+      "description": "Share of household consumption expenditure spent through online shopping transactions",
+      "value": 0.25,
+      "low": 0.2,
+      "high": 0.3,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Online shopping is about a quarter of household consumption in Korea"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale 2025 annual online shopping value by growth and take the August share of the year",
+      "formula": "annual_online_retail_2025 * annual_growth_factor * august_share_of_year",
+      "output_unit": "KRW"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Count active online buyers times purchases per buyer times average transaction value",
+      "formula": "population * online_shopping_participation_share * purchases_per_buyer_per_month * average_transaction_value",
+      "output_unit": "KRW"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Take online share of annual household consumption and allocate the August share",
+      "formula": "household_consumption_expenditure * online_share_of_consumption * august_share_of_year",
+      "output_unit": "KRW"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2
+}

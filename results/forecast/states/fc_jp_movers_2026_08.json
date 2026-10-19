@@ -326,7 +326,7 @@
    "formula": "japan_population * (annual_movers_per_1000 / people_per_1000) * august_share_of_annual",
    "output_unit": "people",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_movers_per_1000 ('people per 1000 people per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "annual_movers_per_1000",
@@ -344,7 +344,7 @@
    "formula": "japan_population * (movers_per_1000_august / people_per_1000)",
    "output_unit": "people",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: movers_per_1000_august ('people per 1000 people per month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "japan_population",
@@ -361,7 +361,7 @@
    "formula": "japan_households * annual_household_move_rate * august_household_share * people_per_household_move",
    "output_unit": "people",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_household_move_rate ('moves per household per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "annual_household_move_rate",
@@ -374,9 +374,12 @@
   }
  ],
  "errors": [
-  "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
-  "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
-  "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+  "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_movers_per_1000 ('people per 1000 people per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+  "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: movers_per_1000_august ('people per 1000 people per month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+  "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_household_move_rate ('moves per household per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+  "input 'annual_movers_per_1000': its unit 'people per 1000 people per year' contains the number 1000, which Python already applies when converting units, so a formula must not divide or multiply by 1000 again (neither as a number nor as an input equal to 1000)",
+  "input 'movers_per_1000_august': its unit 'people per 1000 people per month' contains the number 1000, which Python already applies when converting units, so a formula must not divide or multiply by 1000 again (neither as a number nor as an input equal to 1000)",
+  "input 'people_per_1000': its unit 'people per 1000 people' contains the number 1000, which Python already applies when converting units, so a formula must not divide or multiply by 1000 again (neither as a number nor as an input equal to 1000)"
  ],
  "warnings": [
   "path p1: declared output_unit 'people' (dimensionless) differs from computed s**-1; computed one is used",
@@ -422,7 +425,7 @@
     "formula": "japan_population * (annual_movers_per_1000 / people_per_1000) * august_share_of_annual",
     "output_unit": "people",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_movers_per_1000 ('people per 1000 people per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,
@@ -440,7 +443,7 @@
     "formula": "japan_population * (movers_per_1000_august / people_per_1000)",
     "output_unit": "people",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: movers_per_1000_august ('people per 1000 people per month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,
@@ -458,7 +461,7 @@
     "formula": "japan_households * annual_household_move_rate * august_household_share * people_per_household_move",
     "output_unit": "people",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_household_move_rate ('moves per household per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,

@@ -403,7 +403,7 @@
    "formula": "taiwan_population * annual_birth_rate / people_per_birth_rate_unit * days_in_september / days_in_year",
    "output_unit": "births",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_birth_rate ('births per 1000 people per year'), days_in_september ('days'), days_in_year ('days'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "annual_birth_rate",
@@ -422,7 +422,7 @@
    "formula": "women_20_39 * annual_births_per_woman_20_39 * september_share_of_year",
    "output_unit": "births",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_births_per_woman_20_39 ('births per woman per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "annual_births_per_woman_20_39",
@@ -439,7 +439,7 @@
    "formula": "monthly_births_2025 * monthly_change_factor",
    "output_unit": "births",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_births_2025 ('births per month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "monthly_births_2025",
@@ -450,9 +450,10 @@
   }
  ],
  "errors": [
-  "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
-  "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
-  "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+  "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_birth_rate ('births per 1000 people per year'), days_in_september ('days'), days_in_year ('days'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+  "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_births_per_woman_20_39 ('births per woman per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+  "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_births_2025 ('births per month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+  "input 'annual_birth_rate': its unit 'births per 1000 people per year' contains the number 1000, which Python already applies when converting units, so a formula must not divide or multiply by 1000 again (neither as a number nor as an input equal to 1000)"
  ],
  "warnings": [
   "path p1: declared output_unit 'births' (dimensionless) differs from computed s**-1; computed one is used",
@@ -498,7 +499,7 @@
     "formula": "taiwan_population * annual_birth_rate / people_per_birth_rate_unit * days_in_september / days_in_year",
     "output_unit": "births",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_birth_rate ('births per 1000 people per year'), days_in_september ('days'), days_in_year ('days'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,
@@ -516,7 +517,7 @@
     "formula": "women_20_39 * annual_births_per_woman_20_39 * september_share_of_year",
     "output_unit": "births",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_births_per_woman_20_39 ('births per woman per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,
@@ -534,7 +535,7 @@
     "formula": "monthly_births_2025 * monthly_change_factor",
     "output_unit": "births",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_births_2025 ('births per month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,

@@ -1,0 +1,298 @@
+{
+ "qid": "fc_de_unemployed_2026_10",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of registered unemployed persons in Germany in October 2026, not seasonally adjusted, as first reported in the Bundesagentur für Arbeit monthly labour market press release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "unemployed_prior_october",
+      "description": "Registered unemployed in Germany in October 2025 (not seasonally adjusted), the most recent October figure known before the estimate date",
+      "value": 2850000.0,
+      "low": 2700000.0,
+      "high": 3000000.0,
+      "unit": "persons",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent October non-seasonally-adjusted levels have hovered around 2.7-2.9 million as unemployment drifted up from 2023 to 2025"
+      }
+     },
+     {
+      "name": "annual_change_factor",
+      "description": "Year-over-year multiplicative change in October unemployment from 2025 to 2026",
+      "value": 1.03,
+      "low": 0.97,
+      "high": 1.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Weak German labour market with modest further increase, but uncertainty in either direction"
+      }
+     },
+     {
+      "name": "labour_force",
+      "description": "German labour force (employed plus unemployed, ILO/domestic concept)",
+      "value": 46500000.0,
+      "low": 45500000.0,
+      "high": 47500000.0,
+      "unit": "persons",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "German labour force is roughly 46-47 million"
+      }
+     },
+     {
+      "name": "unemployment_rate_october",
+      "description": "Non-seasonally-adjusted unemployment rate in October 2026",
+      "value": 6.1,
+      "low": 5.7,
+      "high": 6.6,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "October rates have been around 5.7-6.2% in recent years, trending slightly up"
+      }
+     },
+     {
+      "name": "registered_share_of_ilo_unemployed",
+      "description": "Ratio of registered unemployed (BA count) to ILO/domestic-concept unemployed persons",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Registered counts and survey-based unemployment are close in Germany, with registered slightly higher in recent years"
+      }
+     },
+     {
+      "name": "employed_persons",
+      "description": "Number of employed persons in Germany (domestic concept)",
+      "value": 45600000.0,
+      "low": 45000000.0,
+      "high": 46200000.0,
+      "unit": "persons",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "German employment has been near 45.5-46 million"
+      }
+     },
+     {
+      "name": "unemployed_per_employed",
+      "description": "Ratio of registered unemployed to employed persons in October",
+      "value": 0.062,
+      "low": 0.057,
+      "high": 0.068,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by roughly 2.8 million unemployed against roughly 45.6 million employed"
+      }
+     },
+     {
+      "name": "vacancies",
+      "description": "Registered job vacancies in Germany in October 2026",
+      "value": 650000,
+      "low": 550000,
+      "high": 800000,
+      "unit": "vacancies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Registered vacancies have fallen from over 800k in 2022 toward 600-700k"
+      }
+     },
+     {
+      "name": "unemployed_per_vacancy",
+      "description": "Ratio of registered unemployed to registered vacancies (a labour-market tightness proxy)",
+      "value": 4.4,
+      "low": 3.5,
+      "high": 5.5,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Beveridge-curve ratio has risen as matching efficiency fell, roughly 4-5 unemployed per vacancy"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale last October's non-seasonally-adjusted registered count by the year-over-year change",
+      "formula": "unemployed_prior_october * annual_change_factor",
+      "output_unit": "persons"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Labour force times October unemployment rate, adjusted for registered-vs-survey coverage",
+      "formula": "labour_force * unemployment_rate_october / 100 * registered_share_of_ilo_unemployed",
+      "output_unit": "persons"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Employed persons times unemployed-per-employed ratio; cross-check via vacancies times unemployed-per-vacancy",
+      "formula": "max(employed_persons * unemployed_per_employed, vacancies * unemployed_per_vacancy)",
+      "output_unit": "persons"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p2: formula: numeric constant 100 not allowed (only 1 and exponents); make it a named input"
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Number of registered unemployed persons in Germany in October 2026, not seasonally adjusted, as first reported in the Bundesagentur für Arbeit monthly labour market press release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "unemployed_prior_october",
+      "description": "Registered unemployed in Germany in October 2025 (not seasonally adjusted), the most recent October figure known before the estimate date",
+      "value": 2850000.0,
+      "low": 2700000.0,
+      "high": 3000000.0,
+      "unit": "persons",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent October non-seasonally-adjusted levels have hovered around 2.7-2.9 million as unemployment drifted up from 2023 to 2025"
+      }
+     },
+     {
+      "name": "annual_change_factor",
+      "description": "Year-over-year multiplicative change in October unemployment from 2025 to 2026",
+      "value": 1.03,
+      "low": 0.97,
+      "high": 1.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Weak German labour market with modest further increase, but uncertainty in either direction"
+      }
+     },
+     {
+      "name": "labour_force",
+      "description": "German labour force (employed plus unemployed, ILO/domestic concept)",
+      "value": 46500000.0,
+      "low": 45500000.0,
+      "high": 47500000.0,
+      "unit": "persons",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "German labour force is roughly 46-47 million"
+      }
+     },
+     {
+      "name": "unemployment_rate_october",
+      "description": "Non-seasonally-adjusted unemployment rate in October 2026",
+      "value": 6.1,
+      "low": 5.7,
+      "high": 6.6,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "October rates have been around 5.7-6.2% in recent years, trending slightly up"
+      }
+     },
+     {
+      "name": "registered_share_of_ilo_unemployed",
+      "description": "Ratio of registered unemployed (BA count) to ILO/domestic-concept unemployed persons",
+      "value": 1.05,
+      "low": 0.95,
+      "high": 1.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Registered counts and survey-based unemployment are close in Germany, with registered slightly higher in recent years"
+      }
+     },
+     {
+      "name": "employed_persons",
+      "description": "Number of employed persons in Germany (domestic concept)",
+      "value": 45600000.0,
+      "low": 45000000.0,
+      "high": 46200000.0,
+      "unit": "persons",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "German employment has been near 45.5-46 million"
+      }
+     },
+     {
+      "name": "unemployed_per_employed",
+      "description": "Ratio of registered unemployed to employed persons in October",
+      "value": 0.062,
+      "low": 0.057,
+      "high": 0.068,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by roughly 2.8 million unemployed against roughly 45.6 million employed"
+      }
+     },
+     {
+      "name": "vacancies",
+      "description": "Registered job vacancies in Germany in October 2026",
+      "value": 650000,
+      "low": 550000,
+      "high": 800000,
+      "unit": "vacancies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Registered vacancies have fallen from over 800k in 2022 toward 600-700k"
+      }
+     },
+     {
+      "name": "unemployed_per_vacancy",
+      "description": "Ratio of registered unemployed to registered vacancies (a labour-market tightness proxy)",
+      "value": 4.4,
+      "low": 3.5,
+      "high": 5.5,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Beveridge-curve ratio has risen as matching efficiency fell, roughly 4-5 unemployed per vacancy"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale last October's non-seasonally-adjusted registered count by the year-over-year change",
+      "formula": "unemployed_prior_october * annual_change_factor",
+      "output_unit": "persons"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Labour force times October unemployment rate, adjusted for registered-vs-survey coverage",
+      "formula": "labour_force * unemployment_rate_october * registered_share_of_ilo_unemployed",
+      "output_unit": "persons"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Employed persons times unemployed-per-employed ratio; cross-check via vacancies times unemployed-per-vacancy",
+      "formula": "max(employed_persons * unemployed_per_employed, vacancies * unemployed_per_vacancy)",
+      "output_unit": "persons"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2
+}

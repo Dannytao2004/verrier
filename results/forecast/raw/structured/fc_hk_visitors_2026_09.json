@@ -1,0 +1,326 @@
+{
+ "qid": "fc_hk_visitors_2026_09",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total visitor arrivals to Hong Kong during September 2026, as first reported provisionally by the Hong Kong Tourism Board.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_arrivals_2025",
+      "description": "Total visitor arrivals to Hong Kong in calendar year 2025",
+      "value": 46000000.0,
+      "low": 42000000.0,
+      "high": 50000000.0,
+      "unit": "arrivals",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "HKTB 2024 arrivals were ~44.5M; 2025 trending modestly higher toward ~46M"
+      }
+     },
+     {
+      "name": "september_share_of_year",
+      "description": "Fraction of annual arrivals falling in September",
+      "value": 0.075,
+      "low": 0.065,
+      "high": 0.085,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a shoulder month; roughly 1/12 of the year with slight dip"
+      }
+     },
+     {
+      "name": "yoy_growth_factor",
+      "description": "Year-over-year growth factor from 2025 to 2026 arrivals",
+      "value": 1.06,
+      "low": 0.98,
+      "high": 1.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Continued recovery/growth in inbound tourism, single-digit percent"
+      }
+     },
+     {
+      "name": "daily_arrivals",
+      "description": "Average daily visitor arrivals to Hong Kong in September 2026",
+      "value": 115000,
+      "low": 95000,
+      "high": 135000,
+      "unit": "arrivals/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "~46M/yr / 365 ≈ 126k/day average; September slightly below average"
+      }
+     },
+     {
+      "name": "days_in_september",
+      "description": "Number of days in September",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September always has 30 days"
+      }
+     },
+     {
+      "name": "mainland_share",
+      "description": "Share of arrivals from mainland China",
+      "value": 0.75,
+      "low": 0.7,
+      "high": 0.8,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Mainland typically ~75% of HK inbound visitors"
+      }
+     },
+     {
+      "name": "mainland_arrivals_sep",
+      "description": "Mainland Chinese visitor arrivals in September 2026",
+      "value": 2600000.0,
+      "low": 2100000.0,
+      "high": 3100000.0,
+      "unit": "arrivals",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "~75% of ~3.5M monthly arrivals"
+      }
+     },
+     {
+      "name": "non_mainland_arrivals_sep",
+      "description": "Non-mainland visitor arrivals in September 2026",
+      "value": 900000.0,
+      "low": 700000.0,
+      "high": 1100000.0,
+      "unit": "arrivals",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Short-haul and long-haul markets combined, ~25% share"
+      }
+     },
+     {
+      "name": "hk_population",
+      "description": "Population of Hong Kong",
+      "value": 7500000.0,
+      "low": 7400000.0,
+      "high": 7600000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "sourced",
+       "source": "Hong Kong Census and Statistics Department",
+       "url": "",
+       "quote": "Population of Hong Kong was about 7.5 million"
+      }
+     },
+     {
+      "name": "visitors_per_resident_per_year",
+      "description": "Annual visitor arrivals per Hong Kong resident",
+      "value": 6.1,
+      "low": 5.5,
+      "high": 6.8,
+      "unit": "arrivals/person/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "~46M arrivals / 7.5M residents ≈ 6.1"
+      }
+     },
+     {
+      "name": "september_fraction_of_year",
+      "description": "Fraction of the year represented by September",
+      "value": 0.0822,
+      "low": 0.0822,
+      "high": 0.0822,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "30/365 ≈ 0.0822"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate 2026 annual arrivals down to September using seasonal share",
+      "formula": "annual_arrivals_2025 * yoy_growth_factor * september_share_of_year",
+      "output_unit": "arrivals"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Daily arrivals times days in September",
+      "formula": "daily_arrivals * days_in_september",
+      "output_unit": "arrivals"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from resident population via arrivals-per-resident, then to September; cross-check with mainland/non-mainland split",
+      "formula": "hk_population * visitors_per_resident_per_year * september_fraction_of_year",
+      "output_unit": "arrivals"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: visitors_per_resident_per_year ('arrivals/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Total visitor arrivals to Hong Kong during September 2026, as first reported provisionally by the Hong Kong Tourism Board.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_arrivals_2025",
+      "description": "Total visitor arrivals to Hong Kong in calendar year 2025",
+      "value": 46000000.0,
+      "low": 42000000.0,
+      "high": 50000000.0,
+      "unit": "arrivals",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "HKTB 2024 arrivals were ~44.5M; 2025 trending modestly higher toward ~46M"
+      }
+     },
+     {
+      "name": "september_share_of_year",
+      "description": "Fraction of annual arrivals falling in September",
+      "value": 0.075,
+      "low": 0.065,
+      "high": 0.085,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a shoulder month; roughly 1/12 of the year with slight dip"
+      }
+     },
+     {
+      "name": "yoy_growth_factor",
+      "description": "Year-over-year growth factor from 2025 to 2026 arrivals",
+      "value": 1.06,
+      "low": 0.98,
+      "high": 1.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Continued recovery/growth in inbound tourism, single-digit percent"
+      }
+     },
+     {
+      "name": "daily_arrivals",
+      "description": "Average daily visitor arrivals to Hong Kong in September 2026",
+      "value": 115000,
+      "low": 95000,
+      "high": 135000,
+      "unit": "arrivals/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "~46M/yr / 365 ≈ 126k/day average; September slightly below average"
+      }
+     },
+     {
+      "name": "days_in_september",
+      "description": "Number of days in September",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September always has 30 days"
+      }
+     },
+     {
+      "name": "hk_population",
+      "description": "Population of Hong Kong",
+      "value": 7500000.0,
+      "low": 7400000.0,
+      "high": 7600000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "sourced",
+       "source": "Hong Kong Census and Statistics Department",
+       "url": "",
+       "quote": "Population of Hong Kong was about 7.5 million"
+      }
+     },
+     {
+      "name": "visitors_per_resident_per_year",
+      "description": "Annual visitor arrivals per Hong Kong resident",
+      "value": 6.1,
+      "low": 5.5,
+      "high": 6.8,
+      "unit": "arrivals/person/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "~46M arrivals / 7.5M residents ≈ 6.1"
+      }
+     },
+     {
+      "name": "period_length",
+      "description": "Length of the reporting period (one year) used to cancel the per-year rate",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual rate is converted to a yearly total over a one-year period"
+      }
+     },
+     {
+      "name": "september_fraction_of_year",
+      "description": "Fraction of the year represented by September",
+      "value": 0.0822,
+      "low": 0.0822,
+      "high": 0.0822,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "30/365 ≈ 0.0822"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate 2026 annual arrivals down to September using seasonal share",
+      "formula": "annual_arrivals_2025 * yoy_growth_factor * september_share_of_year",
+      "output_unit": "arrivals"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Daily arrivals times days in September",
+      "formula": "daily_arrivals * days_in_september",
+      "output_unit": "arrivals"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from resident population via arrivals-per-resident over a one-year period, then to September",
+      "formula": "hk_population * visitors_per_resident_per_year * period_length * september_fraction_of_year",
+      "output_unit": "arrivals"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2
+}

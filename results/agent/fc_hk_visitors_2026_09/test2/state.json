@@ -1,0 +1,4059 @@
+{
+ "qid": "fc_hk_visitors_2026_09",
+ "question": "Assume today is 2026-09-14. You know nothing published after this date. Estimate the total number of visitor arrivals to Hong Kong in September 2026, as it will be first reported (provisional figure) in the Hong Kong Tourism Board's monthly visitor arrivals press release.",
+ "as_of": "2026-09-14",
+ "plan": {
+  "target": {
+   "what": "Total visitor arrivals to Hong Kong (all source markets, all trip purposes, including same-day and overnight visitors) during the calendar month of September 2026, as the provisional figure first published by the Hong Kong Tourism Board in its monthly visitor arrivals press release",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "publisher": "Hong Kong Tourism Board (HKTB), monthly visitor arrivals statistics / press release",
+   "cadence": "monthly, provisional figure released roughly 3-5 weeks after month end",
+   "caveats": "Counts are person-trips (arrivals), not unique individuals; a visitor crossing the border multiple times in the month may be counted multiple times. Coverage is all source markets and includes both overnight and same-day (cross-boundary) visitors, mainly from Mainland China. Working interpretation: ",
+   "outcome_type": "continuous",
+   "unit_canonical": "visitor"
+  },
+  "market_keywords": [
+   "hong kong tourism",
+   "visitor arrivals",
+   "september 2026"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "HKTB monthly statistics",
+    "hypothesis": "September 2026 arrivals = most recent reported monthly arrivals (e.g. July/August 2026) scaled by the historical September-to-summer seasonal ratio and by the year-on-year growth trend. Own history gives both the level and the seasonal shape.",
+    "data_to_find": "HKTB monthly total visitor arrivals for each month of 2023, 2024, 2025 and any 2026 months published before 2026-09-14 (Jan-Aug 2026), plus the September values for 2023, 2024, 2025 to derive the September seasonal factor and recent YoY growth rate.",
+    "search_hints": [
+     "HKTB monthly visitor arrivals statistics 2025 September",
+     "Hong Kong visitor arrivals July 2026 provisional",
+     "香港旅遊發展局 訪港旅客 統計 2025年9月"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "Immigration Department / boundary control points",
+    "hypothesis": "HKTB arrivals are derived from Immigration Department arrival records; monthly or daily passenger throughput at land, sea and air control points (especially Mainland visitors via Lo Wu/Lok Ma Chau/High Speed Rail) tracks total arrivals with a stable coverage ratio.",
+    "data_to_find": "Immigration Department monthly arrival passenger counts by control point and by visitor vs resident for 2025 and Jan-Aug 2026; daily arrival figures for early September 2026 if published before cutoff; the ratio of HKTB visitor arrivals to total non-resident arrivals.",
+    "search_hints": [
+     "Immigration Department Hong Kong passenger traffic statistics monthly 2026",
+     "入境事務處 各管制站 旅客 統計 2026",
+     "Hong Kong control point arrivals September 2026"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "related_series",
+    "perspective": "Mainland source-market split",
+    "hypothesis": "Mainland visitors are ~75-80% of total arrivals; estimating Mainland September 2026 arrivals (from mainland outbound travel data, Greater Bay Area travel patterns, or HKTB Mainland figures) and dividing by the Mainland share gives the total.",
+    "data_to_find": "HKTB Mainland vs non-Mainland visitor arrivals monthly 2025 and 2026 to date; China outbound travel / Golden Week and Mid-Autumn holiday timing for 2026; any mainland travel-platform data on Hong Kong bookings for September 2026.",
+    "search_hints": [
+     "HKTB Mainland visitor arrivals 2026 monthly",
+     "China outbound travel Hong Kong September 2026 bookings",
+     "内地访港旅客 2026年9月"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "capacity_consumption",
+    "perspective": "Hotels and aviation",
+    "hypothesis": "Overnight visitor arrivals scale with hotel room-nights sold and with airport/HSR inbound seat capacity times load factor; September 2026 hotel occupancy and inbound flight/HSR bookings constrain the overnight component, which can be grossed up to total arrivals via the overnight share.",
+    "data_to_find": "Hong Kong hotel occupancy and room-nights sold for 2025 and 2026 to date; airport passenger arrivals and HSR West Kowloon inbound passenger counts; September 2026 forward bookings or schedule capacity; overnight share of total arrivals.",
+    "search_hints": [
+     "Hong Kong hotel occupancy rate 2026 monthly",
+     "Hong Kong International Airport passenger traffic August 2026",
+     "High Speed Rail West Kowloon passenger numbers 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "shocks",
+    "perspective": "Calendar and event effects",
+    "hypothesis": "September 2026 calendar effects (Mid-Autumn Festival date, National Day Golden Week starting Oct 1 pulling travel forward or back, typhoon disruptions, any visa or policy changes) shift arrivals relative to a naive seasonal extrapolation; quantifying the holiday timing and any known disruptions adjusts the seasonal factor.",
+    "data_to_find": "2026 Mid-Autumn Festival and National Day holiday dates; typhoon/black rainstorm events affecting Hong Kong in September 2026 before cutoff; any visa-free or travel-policy changes for Mainland or overseas visitors announced before 2026-09-14.",
+    "search_hints": [
+     "Hong Kong Mid-Autumn Festival 2026 date",
+     "Hong Kong typhoon September 2026 travel disruption",
+     "Hong Kong visa policy change 2026 visitors"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "forecasts_markets",
+    "perspective": "Official and analyst forecasts",
+    "hypothesis": "HKTB or government full-year 2026 visitor arrival targets/forecasts, and analyst or airline forecasts, imply a September level when combined with year-to-date actuals and the historical monthly distribution; forecasts constrain the plausible range.",
+    "data_to_find": "HKTB 2026 full-year visitor arrival forecast or target; Hong Kong government 2026 tourism forecasts; year-to-date 2026 arrivals through the latest reported month; historical share of September in annual arrivals.",
+    "search_hints": [
+     "HKTB 2026 visitor arrivals forecast target",
+     "Hong Kong tourism 2026 full year arrivals estimate",
+     "旅發局 2026 全年 訪港旅客 預測"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "base_rates",
+    "perspective": "Seasonal and growth base rates",
+    "hypothesis": "The September-to-August ratio and September YoY growth rate are stable enough across 2023-2025 to transfer to 2026; deriving these base rates from multi-year history lets code apply them to the latest known 2026 level.",
+    "data_to_find": "Monthly total visitor arrivals for 2023, 2024, 2025 (all 12 months each) to compute September/August ratios and September YoY growth; note any structural break from 2023 reopening.",
+    "search_hints": [
+     "Hong Kong visitor arrivals monthly 2023 2024 2025 table",
+     "HKTB visitor arrivals annual monthly breakdown",
+     "訪港旅客 按月 統計 2023 2024 2025"
+    ],
+    "expected_information": 4,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 7 candidate directions in 6 categories; running 7 (budget cap 10)"
+ ],
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "HKTB monthly statistics",
+   "hypothesis": "September 2026 arrivals = most recent reported monthly arrivals (e.g. July/August 2026) scaled by the historical September-to-summer seasonal ratio and by the year-on-year growth trend. Own history gives both the level and the seasonal shape.",
+   "data_to_find": "HKTB monthly total visitor arrivals for each month of 2023, 2024, 2025 and any 2026 months published before 2026-09-14 (Jan-Aug 2026), plus the September values for 2023, 2024, 2025 to derive the September seasonal factor and recent YoY growth rate.",
+   "search_hints": [
+    "HKTB monthly visitor arrivals statistics 2025 September",
+    "Hong Kong visitor arrivals July 2026 provisional",
+    "香港旅遊發展局 訪港旅客 統計 2025年9月"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "related_series",
+   "perspective": "Immigration Department / boundary control points",
+   "hypothesis": "HKTB arrivals are derived from Immigration Department arrival records; monthly or daily passenger throughput at land, sea and air control points (especially Mainland visitors via Lo Wu/Lok Ma Chau/High Speed Rail) tracks total arrivals with a stable coverage ratio.",
+   "data_to_find": "Immigration Department monthly arrival passenger counts by control point and by visitor vs resident for 2025 and Jan-Aug 2026; daily arrival figures for early September 2026 if published before cutoff; the ratio of HKTB visitor arrivals to total non-resident arrivals.",
+   "search_hints": [
+    "Immigration Department Hong Kong passenger traffic statistics monthly 2026",
+    "入境事務處 各管制站 旅客 統計 2026",
+    "Hong Kong control point arrivals September 2026"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d3",
+   "category": "related_series",
+   "perspective": "Mainland source-market split",
+   "hypothesis": "Mainland visitors are ~75-80% of total arrivals; estimating Mainland September 2026 arrivals (from mainland outbound travel data, Greater Bay Area travel patterns, or HKTB Mainland figures) and dividing by the Mainland share gives the total.",
+   "data_to_find": "HKTB Mainland vs non-Mainland visitor arrivals monthly 2025 and 2026 to date; China outbound travel / Golden Week and Mid-Autumn holiday timing for 2026; any mainland travel-platform data on Hong Kong bookings for September 2026.",
+   "search_hints": [
+    "HKTB Mainland visitor arrivals 2026 monthly",
+    "China outbound travel Hong Kong September 2026 bookings",
+    "内地访港旅客 2026年9月"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d4",
+   "category": "base_rates",
+   "perspective": "Seasonal and growth base rates",
+   "hypothesis": "The September-to-August ratio and September YoY growth rate are stable enough across 2023-2025 to transfer to 2026; deriving these base rates from multi-year history lets code apply them to the latest known 2026 level.",
+   "data_to_find": "Monthly total visitor arrivals for 2023, 2024, 2025 (all 12 months each) to compute September/August ratios and September YoY growth; note any structural break from 2023 reopening.",
+   "search_hints": [
+    "Hong Kong visitor arrivals monthly 2023 2024 2025 table",
+    "HKTB visitor arrivals annual monthly breakdown",
+    "訪港旅客 按月 統計 2023 2024 2025"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d5",
+   "category": "capacity_consumption",
+   "perspective": "Hotels and aviation",
+   "hypothesis": "Overnight visitor arrivals scale with hotel room-nights sold and with airport/HSR inbound seat capacity times load factor; September 2026 hotel occupancy and inbound flight/HSR bookings constrain the overnight component, which can be grossed up to total arrivals via the overnight share.",
+   "data_to_find": "Hong Kong hotel occupancy and room-nights sold for 2025 and 2026 to date; airport passenger arrivals and HSR West Kowloon inbound passenger counts; September 2026 forward bookings or schedule capacity; overnight share of total arrivals.",
+   "search_hints": [
+    "Hong Kong hotel occupancy rate 2026 monthly",
+    "Hong Kong International Airport passenger traffic August 2026",
+    "High Speed Rail West Kowloon passenger numbers 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d6",
+   "category": "shocks",
+   "perspective": "Calendar and event effects",
+   "hypothesis": "September 2026 calendar effects (Mid-Autumn Festival date, National Day Golden Week starting Oct 1 pulling travel forward or back, typhoon disruptions, any visa or policy changes) shift arrivals relative to a naive seasonal extrapolation; quantifying the holiday timing and any known disruptions adjusts the seasonal factor.",
+   "data_to_find": "2026 Mid-Autumn Festival and National Day holiday dates; typhoon/black rainstorm events affecting Hong Kong in September 2026 before cutoff; any visa-free or travel-policy changes for Mainland or overseas visitors announced before 2026-09-14.",
+   "search_hints": [
+    "Hong Kong Mid-Autumn Festival 2026 date",
+    "Hong Kong typhoon September 2026 travel disruption",
+    "Hong Kong visa policy change 2026 visitors"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d7",
+   "category": "forecasts_markets",
+   "perspective": "Official and analyst forecasts",
+   "hypothesis": "HKTB or government full-year 2026 visitor arrival targets/forecasts, and analyst or airline forecasts, imply a September level when combined with year-to-date actuals and the historical monthly distribution; forecasts constrain the plausible range.",
+   "data_to_find": "HKTB 2026 full-year visitor arrival forecast or target; Hong Kong government 2026 tourism forecasts; year-to-date 2026 arrivals through the latest reported month; historical share of September in annual arrivals.",
+   "search_hints": [
+    "HKTB 2026 visitor arrivals forecast target",
+    "Hong Kong tourism 2026 full year arrivals estimate",
+    "旅發局 2026 全年 訪港旅客 預測"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "b1",
+   "category": "own_history",
+   "perspective": "HKTB monthly release",
+   "hypothesis": "The most recent reported monthly arrivals (July and August 2026) would anchor the level for a September 2026 extrapolation via the September-to-August seasonal ratio; without them the estimate relies on the Jan-May 2026 run-rate and a transfer assumption.",
+   "data_to_find": "HKTB provisional total visitor arrivals for June, July and August 2026 (and Mainland split if available).",
+   "search_hints": [
+    "H",
+    "K",
+    "T",
+    "B"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b2",
+   "category": "related_series",
+   "perspective": "Immigration Department / control points",
+   "hypothesis": "Daily/monthly passenger throughput at land, sea and air control points for mid-2026 tracks HKTB arrivals with a stable coverage ratio, giving a near-real-time level for the September 2026 run-rate.",
+   "data_to_find": "Immigration Department monthly arrival passenger statistics for 2026 (especially July-August 2026) and the historical arrivals-to-throughput ratio.",
+   "search_hints": [
+    "I",
+    "m",
+    "m",
+    "i"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b3",
+   "category": "forecasts_markets",
+   "perspective": "Government/HKTB full-year 2026 target",
+   "hypothesis": "A full-year 2026 visitor arrival target combined with Jan-May 2026 actuals (p16) and the historical monthly distribution would constrain the September level and resolve uncertainty in the growth trend.",
+   "data_to_find": "HKTB or HKSAR government 2026 full-year visitor arrival forecast/target and any mid-year update.",
+   "search_hints": [
+    "B",
+    "u",
+    "d",
+    "g"
+   ],
+   "expected_information": 3
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "HKTB monthly visitor arrivals statistics September 2025 provisional",
+     "Hong Kong visitor arrivals July 2026 provisional HKTB",
+     "HKTB visitor arrivals August 2026 provisional total",
+     "旅發局 2025年8月 訪港旅客 初步 數字 400萬 按年"
+    ],
+    "urls": [
+     "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9388",
+     "https://partnernet.hktb.com/india/en/industry_news/hktb_updates/index.html?id=8291",
+     "https://partnernet.hktb.com/russia/ru/industry_news/hktb_updates/index.html?id=9568",
+     "https://indiaoutbound.info/trade-news/indian-arrivals-in-hong-kong-rise-22-3-pc-to-32416-in-july/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.004788468,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9388",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://partnernet.hktb.com/india/en/industry_news/hktb_updates/index.html?id=8291",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "cdx_error": "URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+    },
+    {
+     "url": "https://partnernet.hktb.com/russia/ru/industry_news/hktb_updates/index.html?id=9568",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "cdx_error": "URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+    },
+    {
+     "url": "https://indiaoutbound.info/trade-news/indian-arrivals-in-hong-kong-rise-22-3-pc-to-32416-in-july/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "cdx_error": "URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 216.7
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Immigration Department Hong Kong passenger traffic statistics monthly 2026 control point arrivals",
+     "入境事務處 各管制站 旅客 統計 2026 入境人次",
+     "immd.gov.hk passenger-statistics 20260901 annual passenger statistics monthly total arrivals",
+     "HKTB visitor arrivals September 2025 monthly press release total arrivals million"
+    ],
+    "urls": [
+     "https://www.immd.gov.hk/hks/facts/passenger-statistics.html?d=20260901",
+     "https://www.td.gov.hk/filemanager/en/content_5413/table82.xls",
+     "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "https://www.immd.gov.hk/opendata/eng/transport/immigration_clearance/data_specification_for_statistics_passenger_visitor_vehicular_traffic.pdf"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 22,
+    "web_search_requests": 4,
+    "usd": 0.007866888,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.immd.gov.hk/hks/facts/passenger-statistics.html?d=20260901",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.td.gov.hk/filemanager/en/content_5413/table82.xls",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20250823075409",
+     "page_date": "2025-08-23",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/4353c01f520ecabb.raw",
+     "text_chars": 1106,
+     "leak_hits": [],
+     "chars_sent": 1106,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://www.immd.gov.hk/opendata/eng/transport/immigration_clearance/data_specification_for_statistics_passenger_visitor_vehicular_traffic.pdf",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20230210044128",
+     "page_date": "2023-02-10",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/096ef56052d634a3.raw",
+     "text_chars": 1596,
+     "leak_hits": [],
+     "chars_sent": 1596,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [],
+   "dropped_points": [
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      0
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Overall passenger throughput at all control points, Hong Kong, 2022 (thousands)",
+     "value_as_written": "5 295"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      1
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Overall passenger throughput at all control points, Hong Kong, 2023 (thousands)",
+     "value_as_written": "211 754"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      2
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Overall passenger throughput at all control points, Hong Kong, 2024 (thousands)",
+     "value_as_written": "298 498"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      3
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "HK International Airport passenger throughput, 2024 (thousands)",
+     "value_as_written": "41 876"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      4
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Lo Wu control point passenger throughput, 2024 (thousands)",
+     "value_as_written": "64 216"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      5
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Lok Ma Chau control point passenger throughput, 2024 (thousands)",
+     "value_as_written": "12 057"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      6
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Lok Ma Chau Spur Line control point passenger throughput, 2024 (thousands)",
+     "value_as_written": "55 053"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      7
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Shenzhen Bay control point passenger throughput, 2024 (thousands)",
+     "value_as_written": "34 479"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      8
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "West Kowloon Station (Express Rail Link) passenger throughput, 2024 (thousands)",
+     "value_as_written": "26 524"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      9
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Hong Kong-Zhuhai-Macao Bridge control point passenger throughput, 2024 (thousands)",
+     "value_as_written": "28 468"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      10
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Heung Yuen Wai control point passenger throughput, 2024 (thousands)",
+     "value_as_written": "25 500"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      11
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Man Kam To control point passenger throughput, 2024 (thousands)",
+     "value_as_written": "1 481"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      12
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Macau Ferry Terminal passenger throughput, 2024 (thousands)",
+     "value_as_written": "7 031"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      13
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "China Ferry Terminal passenger throughput, 2024 (thousands)",
+     "value_as_written": "1 254"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.customs.gov.hk/hcms/filemanager/common/pdf/statistics/passenger_entry_exit_en.pdf",
+     "via": "snapshot",
+     "page_date": "2025-08-23",
+     "snapshot_ts": "20250823075409",
+     "order": [
+      2,
+      14
+     ],
+     "reason": "scale word 'thousand' not supported by quote or table header",
+     "name": "Other Passenger Terminals passenger throughput, 2024 (thousands)",
+     "value_as_written": "559"
+    }
+   ],
+   "wall_s": 205.2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "HKTB monthly visitor arrivals 2026 Mainland visitors July 2026",
+     "香港旅游发展局 2026年7月 访港旅客 数字 内地",
+     "HKTB provisional visitor arrivals September 2025 total Mainland 3.2 million",
+     "2026 中秋节 国庆 香港 旅游 预订 内地游客 9月 携程"
+    ],
+    "urls": [
+     "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9388",
+     "https://partnernet.hktb.com/sc/industry_news/hktb_updates/index.html?id=8291",
+     "https://www.nna.jp/news/2957143?media=yahoo",
+     "https://global.hk01.com/%E7%A4%BE%E4%BC%9A%E6%96%B0%E9%97%BB/60380787/7%E6%9C%88%E8%AE%BF%E6%B8%AF%E6%97%85%E5%AE%A2450%E4%B8%87%E4%BA%BA%E6%AC%A1%E5%90%8C%E6%AF%94%E5%8D%873-7%E6%9C%88%E7%9A%84%E6%81%B6%E5%8A%A3%E5%A4%A9%E6%B0%94%E8%87%B4%E5%86%85%E5%9C%B0%E5%AE%A2%E5%A2%9E%E9%95%BF%E6%94%BE%E7%BC%93"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.006070332,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9388",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://partnernet.hktb.com/sc/industry_news/hktb_updates/index.html?id=8291",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "cdx_error": "URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+    },
+    {
+     "url": "https://www.nna.jp/news/2957143?media=yahoo",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "cdx_error": "URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+    },
+    {
+     "url": "https://global.hk01.com/%E7%A4%BE%E4%BC%9A%E6%96%B0%E9%97%BB/60380787/7%E6%9C%88%E8%AE%BF%E6%B8%AF%E6%97%85%E5%AE%A2450%E4%B8%87%E4%BA%BA%E6%AC%A1%E5%90%8C%E6%AF%94%E5%8D%873-7%E6%9C%88%E7%9A%84%E6%81%B6%E5%8A%A3%E5%A4%A9%E6%B0%94%E8%87%B4%E5%86%85%E5%9C%B0%E5%AE%A2%E5%A2%9E%E9%95%BF%E6%94%BE%E7%BC%93",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "cdx_error": "URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 214.3
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Hong Kong visitor arrivals monthly 2023 2024 2025 table HKTB",
+     "HKTB monthly visitor arrivals statistics press release September 2025",
+     "HKTB provisional visitor arrivals 2025 full year December 2025 49 million monthly breakdown",
+     "Hong Kong visitor arrivals July 2026 provisional HKTB monthly"
+    ],
+    "urls": [
+     "https://www.censtatd.gov.hk/en/data/stat_report/product/B1010002/att/B10100022024MM11B0100.pdf",
+     "https://partnernet.hktb.com/en/research_statistics/research_publications/index.html?id=3631",
+     "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "https://partnernet.hktb.com/india/en/industry_news/hktb_updates/index.html?id=8688"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007081464,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.censtatd.gov.hk/en/data/stat_report/product/B1010002/att/B10100022024MM11B0100.pdf",
+     "status": "dropped",
+     "reason": "snapshot fetch failed (http -1); live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "fetch_error": "URLError"
+    },
+    {
+     "url": "https://partnernet.hktb.com/en/research_statistics/research_publications/index.html?id=3631",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260309210037",
+     "page_date": "2026-03-09",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/2e1503be4b3f82a5.raw",
+     "text_chars": 2082,
+     "leak_hits": [],
+     "chars_sent": 2082,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20251015203835",
+     "page_date": "2025-10-15",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/1bd48296c74ec5ac.raw",
+     "text_chars": 1758,
+     "leak_hits": [],
+     "chars_sent": 1758,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 15
+    },
+    {
+     "url": "https://partnernet.hktb.com/india/en/industry_news/hktb_updates/index.html?id=8688",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      0
+     ],
+     "name": "Provisional total visitor arrivals to Hong Kong, September 2025",
+     "value": 3292197.0,
+     "value_as_written": "3,292,197",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Total 3,292,197 (+8%) 36,471,648 (+12%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      1
+     ],
+     "name": "Year-on-year change in total visitor arrivals to Hong Kong, September 2025",
+     "value": 8.0,
+     "value_as_written": "8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Hong Kong for September were close to 3.3 million, an 8% increase compared to the same month last year.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      2
+     ],
+     "name": "Provisional total visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+     "value": 36471648.0,
+     "value_as_written": "36,471,648",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Total 3,292,197 (+8%) 36,471,648 (+12%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      3
+     ],
+     "name": "Year-on-year change in total visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+     "value": 12.0,
+     "value_as_written": "12%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "The preliminary visitor arrivals for the first three quarters of this year stand at over 36 million, representing a 12% increase compared to the same period last year.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      4
+     ],
+     "name": "Provisional Chinese Mainland visitor arrivals to Hong Kong, September 2025",
+     "value": 2458439.0,
+     "value_as_written": "2,458,439",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Chinese Mainland 2,458,439 (+7%) 27,985,883 (+11%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      5
+     ],
+     "name": "Year-on-year change in Chinese Mainland visitor arrivals to Hong Kong, September 2025",
+     "value": 7.0,
+     "value_as_written": "7%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Chinese Mainland 2,458,439 (+7%) 27,985,883 (+11%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      6
+     ],
+     "name": "Provisional non-Chinese Mainland visitor arrivals to Hong Kong, September 2025",
+     "value": 833758.0,
+     "value_as_written": "833,758",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Non-Chinese Mainland 833,758 (+9%) 8,485,765 (+16%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      7
+     ],
+     "name": "Year-on-year change in non-Chinese Mainland visitor arrivals to Hong Kong, September 2025",
+     "value": 9.0,
+     "value_as_written": "9%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Non-Chinese Mainland 833,758 (+9%) 8,485,765 (+16%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      8
+     ],
+     "name": "Provisional short-haul visitor arrivals to Hong Kong, September 2025",
+     "value": 461889.0,
+     "value_as_written": "461,889",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Short-haul 461,889 (+9%) 4,661,848 (+17%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      9
+     ],
+     "name": "Provisional long-haul visitor arrivals to Hong Kong, September 2025",
+     "value": 239475.0,
+     "value_as_written": "239,475",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Long-haul 239,475 (+14%) 2,412,106 (+18%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      10
+     ],
+     "name": "Provisional new markets visitor arrivals to Hong Kong, September 2025",
+     "value": 59196.0,
+     "value_as_written": "59,196",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "New markets 59,196 (+13%) 535,522 (+14%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      11
+     ],
+     "name": "Provisional Chinese Mainland visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+     "value": 27985883.0,
+     "value_as_written": "27,985,883",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Chinese Mainland 2,458,439 (+7%) 27,985,883 (+11%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      12
+     ],
+     "name": "Provisional non-Chinese Mainland visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+     "value": 8485765.0,
+     "value_as_written": "8,485,765",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Non-Chinese Mainland 833,758 (+9%) 8,485,765 (+16%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      13
+     ],
+     "name": "Provisional short-haul visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+     "value": 4661848.0,
+     "value_as_written": "4,661,848",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Short-haul 461,889 (+9%) 4,661,848 (+17%)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+     "via": "snapshot",
+     "page_date": "2025-10-15",
+     "snapshot_ts": "20251015203835",
+     "order": [
+      2,
+      14
+     ],
+     "name": "Provisional long-haul visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+     "value": 2412106.0,
+     "value_as_written": "2,412,106",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "visitor arrivals (person-trips)",
+     "period_start": "2025-01-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "2025-10-15",
+     "quote": "Long-haul 239,475 (+14%) 2,412,106 (+18%)",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [],
+   "wall_s": 211.0
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Hong Kong hotel occupancy rate 2026 monthly room nights sold",
+     "Hong Kong International Airport passenger traffic August 2026",
+     "High Speed Rail West Kowloon passenger numbers 2026 daily average MTR",
+     "HKTB visitor arrivals July 2026 overnight visitors share same-day"
+    ],
+    "urls": [
+     "https://partnernet.hktb.com/china/sc/home/index.html",
+     "https://cbsa.hkust.edu.hk/news/summer-events-draw-tourists-summer-spending-faces-uncertainty-chinese",
+     "https://www.immd.gov.hk/eng/facts/passenger-statistics.html?d=20260801",
+     "https://partnernet.hktb.com/en/research_statistics/research_publications/index.html?id=3634"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.00624936,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://partnernet.hktb.com/china/sc/home/index.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260730164207",
+     "page_date": "2026-07-30",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/4c35e302ecb17317.raw",
+     "text_chars": 116,
+     "leak_hits": [],
+     "chars_sent": 116,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://cbsa.hkust.edu.hk/news/summer-events-draw-tourists-summer-spending-faces-uncertainty-chinese",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.immd.gov.hk/eng/facts/passenger-statistics.html?d=20260801",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://partnernet.hktb.com/en/research_statistics/research_publications/index.html?id=3634",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20251107130830",
+     "page_date": "2025-11-07",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/29d1d890b369ed26.raw",
+     "text_chars": 1681,
+     "leak_hits": [],
+     "chars_sent": 1681,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 140.3
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Hong Kong Mid-Autumn Festival 2026 date September 25",
+     "Hong Kong Tourism Board monthly visitor arrivals statistics September",
+     "Hong Kong 2026 public holidays gazette Mid-Autumn Festival day following day September 26",
+     "Hong Kong typhoon signal September 2026 tropical cyclone disruption"
+    ],
+    "urls": [
+     "https://www.gov.hk/en/about/abouthk/holiday/2026.htm",
+     "https://www.gld.gov.hk/egazette/english/gazette/file.php?year=2025&vol=29&no=20&extra=0&type=0&number=2965",
+     "https://www.hko.gov.hk/en/Press-Releases/110730/Moon-watching-tips-for-Mid-Autumn-Festival-2026",
+     "https://www.chinadailyhk.com/hk/article/641143"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007012644,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.gov.hk/en/about/abouthk/holiday/2026.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260830105600",
+     "page_date": "2026-08-30",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/b33bca7f3778241d.raw",
+     "text_chars": 1910,
+     "leak_hits": [],
+     "chars_sent": 1910,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 2,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://www.gld.gov.hk/egazette/english/gazette/file.php?year=2025&vol=29&no=20&extra=0&type=0&number=2965",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "cdx_error": "URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+    },
+    {
+     "url": "https://www.hko.gov.hk/en/Press-Releases/110730/Moon-watching-tips-for-Mid-Autumn-Festival-2026",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.chinadailyhk.com/hk/article/641143",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.gov.hk/en/about/abouthk/holiday/2026.htm",
+     "via": "snapshot",
+     "page_date": "2026-08-30",
+     "snapshot_ts": "20260830105600",
+     "order": [
+      0,
+      0
+     ],
+     "reason": "period_end 2026-09-26 after as_of",
+     "name": "Hong Kong general holiday: day following the Chinese Mid-Autumn Festival (2026)",
+     "value_as_written": "26 September"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.gov.hk/en/about/abouthk/holiday/2026.htm",
+     "via": "snapshot",
+     "page_date": "2026-08-30",
+     "snapshot_ts": "20260830105600",
+     "order": [
+      0,
+      1
+     ],
+     "reason": "period_end 2026-10-01 after as_of",
+     "name": "Hong Kong general holiday: National Day (2026)",
+     "value_as_written": "1 October"
+    }
+   ],
+   "wall_s": 206.4
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "HKTB 2026 visitor arrivals forecast target full year",
+     "旅發局 2026 全年 訪港旅客 預測",
+     "旅發局 2026年8月 訪港旅客 初步數字 按年",
+     "HKTB August 2026 visitor arrivals million year-on-year",
+     "\"September\" 2025 Hong Kong visitor arrivals 3.3 million HKTB monthly"
+    ],
+    "urls": [
+     "https://www.chinadailyhk.com/hk/article/629562",
+     "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "https://e.vnexpress.net/news/travel/places/world-s-second-most-visited-city-records-40-million-tourists-in-nine-months-5133459.html",
+     "https://www.stheadline.com/daily-hongkong/3627277/%e7%9b%9b%e4%ba%8b%e6%b5%aa%e6%8e%a5%e6%b5%aa%e5%85%a8%e5%b9%b4%e6%97%85%e5%ae%a2%e5%8b%a2%e9%81%94%e6%a8%995380%e8%90%ac"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 30,
+    "web_search_requests": 5,
+    "usd": 0.006439248,
+    "usd_search_fee_assumed": 0.05
+   },
+   "pages": [
+    {
+     "url": "https://www.chinadailyhk.com/hk/article/629562",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260421102435",
+     "page_date": "2026-04-21",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/f8797a5df0462feb.raw",
+     "text_chars": 5388,
+     "leak_hits": [],
+     "chars_sent": 5388,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 12,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260610103727",
+     "page_date": "2026-06-10",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/6a58636f8466ce3b.raw",
+     "text_chars": 3503,
+     "leak_hits": [],
+     "chars_sent": 3503,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 5,
+     "n_points_verified": 1
+    },
+    {
+     "url": "https://e.vnexpress.net/news/travel/places/world-s-second-most-visited-city-records-40-million-tourists-in-nine-months-5133459.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.stheadline.com/daily-hongkong/3627277/%e7%9b%9b%e4%ba%8b%e6%b5%aa%e6%8e%a5%e6%b5%aa%e5%85%a8%e5%b9%b4%e6%97%85%e5%ae%a2%e5%8b%a2%e9%81%94%e6%a8%995380%e8%90%ac",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      1,
+      4
+     ],
+     "name": "Hong Kong visitor arrivals in first five months of 2026 (preliminary, approximately)",
+     "value": 23000000.0,
+     "value_as_written": "approximately 23 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "visitor arrivals",
+     "period_start": "2026-01-01",
+     "period_end": "2026-05-31",
+     "published_at_if_visible": "2026-06-09",
+     "quote": "in the first five months of this year alone, we welcomed approximately 23 million visitor arrivals",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      0
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "HKTB/government forecast: full-year 2026 visitor arrivals to Hong Kong (all source markets), stated forecast",
+     "value_as_written": "53.8 million"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      1
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Forecast year-on-year growth rate of full-year 2026 visitor arrivals to Hong Kong",
+     "value_as_written": "8 percent"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      2
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Prior-year (2025) visitor arrivals to Hong Kong, nearing figure cited as basis for 2026 forecast",
+     "value_as_written": "50 million"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      3
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of 2025 visitor arrivals to Hong Kong",
+     "value_as_written": "12 percent"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      4
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Visitor arrivals to Hong Kong during the recent Chinese New Year holiday",
+     "value_as_written": "1.77 million"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      5
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Year-on-year growth rate of visitor arrivals during the recent Chinese New Year holiday",
+     "value_as_written": "14 percent"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      6
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Peak annual visitor volume Hong Kong has managed to accommodate (stated capacity)",
+     "value_as_written": "65 million"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      7
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Government reimbursement to HKTB in 2026-27 Budget",
+     "value_as_written": "HK$1.66 billion"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      8
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Year-on-year funding boost for HKTB reimbursement",
+     "value_as_written": "35 percent"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      9
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Budget allocation for sports growth",
+     "value_as_written": "HK$1.2 billion"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      10
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Budget fund to revitalize rural tourism",
+     "value_as_written": "HK$200 million"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      0,
+      11
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Increase in subsidies for hosting events",
+     "value_as_written": "50 percent"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Hong Kong full-year 2026 projected total visitor arrivals (forecast)",
+     "value_as_written": "53.8 million"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Hong Kong full-year 2026 visitor arrivals forecast year-on-year increase",
+     "value_as_written": "8 per cent"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      1,
+      2
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Hong Kong 2025 total visitor arrivals (prior year, nearly)",
+     "value_as_written": "nearly 50 million"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      1,
+      3
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Hong Kong 2025 visitor arrivals year-on-year increase over 2024 (over)",
+     "value_as_written": "over 10 per cent"
+    }
+   ],
+   "wall_s": 209.3
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "hong kong tourism",
+     "visitor arrivals",
+     "september 2026"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 20
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "search": {
+    "queries": [
+     "HKTB provisional visitor arrivals August 2026",
+     "香港旅發局 2026年7月 訪港旅客 初步數字",
+     "旅發局 2026年6月 初步訪港旅客 數字 公布",
+     "HKTB September 2025 visitor arrivals provisional total 3.2 million"
+    ],
+    "urls": [
+     "https://partnernet.hktb.com/germany/de/industry_news/hktb_updates/index.html?id=9568",
+     "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9388",
+     "https://partnernet.hktb.com/china/sc/industry_news/hktb_updates/index.html?id=9328",
+     "https://partnernet.hktb.com/en/research_statistics/visitor_arrival_statistics/index.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005682588,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://partnernet.hktb.com/germany/de/industry_news/hktb_updates/index.html?id=9568",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9388",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://partnernet.hktb.com/china/sc/industry_news/hktb_updates/index.html?id=9328",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://partnernet.hktb.com/en/research_statistics/visitor_arrival_statistics/index.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 60.1
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "search": {
+    "queries": [
+     "Immigration Department monthly arrival passenger statistics 2026 Hong Kong control points",
+     "Hong Kong Tourism Board visitor arrivals July 2026 provisional figure",
+     "immd.gov.hk passenger-statistics 20260913 入境 內地訪客 其他訪客 總計",
+     "入境事務處 2026年8月 訪港旅客 初步數字 旅發局 公布"
+    ],
+    "urls": [
+     "https://www.immd.gov.hk/eng/facts/passenger-statistics.html?d=26",
+     "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9388",
+     "https://www.td.gov.hk/filemanager/en/content_5413/table82.xls",
+     "https://data.gov.hk/en-data/dataset/hk-immd-set5-statistics-daily-passenger-traffic"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 28,
+    "web_search_requests": 4,
+    "usd": 0.009763872,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.immd.gov.hk/eng/facts/passenger-statistics.html?d=26",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9388",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.td.gov.hk/filemanager/en/content_5413/table82.xls",
+     "status": "dropped",
+     "reason": "binary file type not supported in MVP",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://data.gov.hk/en-data/dataset/hk-immd-set5-statistics-daily-passenger-traffic",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260521200912",
+     "page_date": "2026-05-21",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/5aac1e0e6355680e.raw",
+     "text_chars": 1028,
+     "leak_hits": [],
+     "chars_sent": 1028,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 124.4
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "search": {
+    "queries": [
+     "HKTB 2026 full-year visitor arrivals forecast target",
+     "Hong Kong visitor arrivals 2026 forecast 46 million",
+     "Hong Kong Tourism Board visitor arrivals May 2026 monthly statistics press release",
+     "Hong Kong September 2025 visitor arrivals HKTB 3.3 million September"
+    ],
+    "urls": [
+     "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9129",
+     "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "https://www.chinadailyhk.com/hk/article/629562"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005137175999999999,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260610103727",
+     "page_date": "2026-06-10",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/6a58636f8466ce3b.raw",
+     "text_chars": 3503,
+     "leak_hits": [],
+     "chars_sent": 3503,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 5,
+     "n_points_verified": 1
+    },
+    {
+     "url": "https://partnernet.hktb.com/en/industry_news/hktb_updates/index.html?id=9129",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260418073806",
+     "page_date": "2026-04-18",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/a47fa0bf23250f18.raw",
+     "text_chars": 2053,
+     "leak_hits": [],
+     "chars_sent": 2053,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 11,
+     "n_points_verified": 8
+    },
+    {
+     "url": "https://www.chinadailyhk.com/hk/article/629562",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260421102435",
+     "page_date": "2026-04-21",
+     "raw_path": "data/raw/agent/fc_hk_visitors_2026_09/f8797a5df0462feb.raw",
+     "text_chars": 5388,
+     "leak_hits": [],
+     "chars_sent": 5388,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 13,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      0,
+      2
+     ],
+     "name": "Total visitor arrivals to Hong Kong, preliminary, first five months of 2026",
+     "value": 23000000.0,
+     "value_as_written": "23 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "visitor arrivals",
+     "period_start": "2026-01-01",
+     "period_end": "2026-05-31",
+     "published_at_if_visible": "2026-06-09",
+     "quote": "According to preliminary figures, in the first five months of this year alone, we welcomed approximately 23 million visitor arrivals",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      2
+     ],
+     "name": "Overall visitor arrivals to Hong Kong, full year 2025 (actual)",
+     "value": 49900000.0,
+     "value_as_written": "49.9 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "visitor arrivals",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "with overall visitor arrivals in 2025 reaching approximately 49.9 million, a 12 percent increase, the HKTB's 2026/27 work plan shows.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      3
+     ],
+     "name": "Year-on-year increase in overall visitor arrivals, full year 2025",
+     "value": 12.0,
+     "value_as_written": "12 percent",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "with overall visitor arrivals in 2025 reaching approximately 49.9 million, a 12 percent increase, the HKTB's 2026/27 work plan shows.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      4
+     ],
+     "name": "Overnight visitor arrivals to Hong Kong, full year 2025 (actual)",
+     "value": 23190000.0,
+     "value_as_written": "23.19 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "overnight visitor arrivals",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "despite their numbers increasing by 6 percent year-on-year to 23.19 million, according to the Hong Kong Tourism Board (HKTB).",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      5
+     ],
+     "name": "Year-on-year increase in overnight visitor arrivals, full year 2025",
+     "value": 6.0,
+     "value_as_written": "6 percent",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "despite their numbers increasing by 6 percent year-on-year to 23.19 million, according to the Hong Kong Tourism Board (HKTB).",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      6
+     ],
+     "name": "Average length of stay for overnight visitors, full year 2025",
+     "value": 3.1,
+     "value_as_written": "3.1 nights",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "nights",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "Hong Kong saw a decrease in the average length of stay for overnight visitors to 3.1 nights last year",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      7
+     ],
+     "name": "Year-on-year change in average length of stay for overnight visitors, full year 2025",
+     "value": 0.1,
+     "value_as_written": "0.1 nights",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "nights",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "a slight decrease of 0.1 nights compared to the previous year",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      8
+     ],
+     "name": "Per capita spending for overnight visitors, full year 2025",
+     "value": 5503.0,
+     "value_as_written": "HK$5,503",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "HKD per overnight visitor",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "Per capita spending for overnight visitors last year was HK$5,503, a figure similar to 2024",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      9
+     ],
+     "name": "Visitor satisfaction score (scale of 10), full year 2025",
+     "value": 8.9,
+     "value_as_written": "8.9",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "score out of 10",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "while visitor satisfaction, on a scale of 10, rose to 8.9, an increase of 0.1 points.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      0,
+      0
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Projected total visitor arrivals to Hong Kong, full year 2026 forecast",
+     "value_as_written": "53.8 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      0,
+      1
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Projected year-on-year increase in total visitor arrivals, full year 2026 forecast",
+     "value_as_written": "8 per cent"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      0,
+      3
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Total visitor arrivals to Hong Kong, full year 2025 (last year)",
+     "value_as_written": "50 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-10",
+     "snapshot_ts": "20260610103727",
+     "order": [
+      0,
+      4
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year increase in total visitor arrivals, full year 2025 over 2024",
+     "value_as_written": "10 per cent"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      0
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "HKTB forecast total visitor arrivals to Hong Kong, full year 2026",
+     "value_as_written": "53.8 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      1
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "HKTB forecast year-on-year growth in total visitor arrivals, full year 2026",
+     "value_as_written": "eight percent"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+     "via": "snapshot",
+     "page_date": "2026-04-18",
+     "snapshot_ts": "20260418073806",
+     "order": [
+      2,
+      10
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "HKTB forecast growth in per capita spending of overnight visitors, full year 2026",
+     "value_as_written": "0.5 percent"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      0
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "HKTB/government 2026 full-year visitor arrivals forecast (all source markets, all purposes)",
+     "value_as_written": "53.8 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      1
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Forecast year-on-year growth rate of 2026 full-year visitor arrivals",
+     "value_as_written": "8 percent"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      2
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "2025 full-year visitor arrivals (prior year base, nearing 50 million)",
+     "value_as_written": "nearing 50 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      3
+     ],
+     "reason": "period year 2025 does not appear in the page text or URL (likely mis-dated)",
+     "name": "2025 full-year visitor arrivals year-on-year growth rate",
+     "value_as_written": "12 percent"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      4
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Visitor arrivals during recent Chinese New Year holiday",
+     "value_as_written": "1.77 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      5
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Chinese New Year holiday visitor arrivals year-on-year growth rate",
+     "value_as_written": "14 percent"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      6
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Peak visitor number Hong Kong has managed to accommodate (stated capacity)",
+     "value_as_written": "65 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      7
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Government reimbursement to HKTB (2026-27 Budget)",
+     "value_as_written": "HK$1.66 billion"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      8
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "HKTB reimbursement in USD equivalent",
+     "value_as_written": "$212.2 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      9
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Year-on-year funding boost for HKTB reimbursement",
+     "value_as_written": "35 percent"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      10
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Sports growth funding allocation (2026-27 Budget)",
+     "value_as_written": "HK$1.2 billion"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      11
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Rural tourism revitalisation fund (2026-27 Budget)",
+     "value_as_written": "HK$200 million"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "https://www.chinadailyhk.com/hk/article/629562",
+     "via": "snapshot",
+     "page_date": "2026-04-21",
+     "snapshot_ts": "20260421102435",
+     "order": [
+      3,
+      12
+     ],
+     "reason": "period_end missing or unparseable",
+     "name": "Increase in subsidies for hosting events",
+     "value_as_written": "50 percent"
+    }
+   ],
+   "wall_s": 131.8
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2"
+     ],
+     "relation": "corroborating",
+     "note": "Same HKTB September 2025 release: p1 is the level and p2 the YoY change; internally consistent (3.29m, +8%). Both are the same underlying measurement, not independent."
+    },
+    {
+     "ids": [
+      "p1",
+      "p5",
+      "p7"
+     ],
+     "relation": "corroborating",
+     "note": "September 2025 total decomposes into Mainland (p5) + non-Mainland (p7); the parts sum to the total, confirming internal consistency of the same release."
+    },
+    {
+     "ids": [
+      "p5",
+      "p6"
+     ],
+     "relation": "corroborating",
+     "note": "Mainland September 2025 level and its YoY change from the same release."
+    },
+    {
+     "ids": [
+      "p7",
+      "p8",
+      "p9",
+      "p10",
+      "p11"
+     ],
+     "relation": "corroborating",
+     "note": "Non-Mainland sub-segments (short-haul, long-haul, new markets) are nested within the non-Mainland total; overlapping coverage, same source."
+    },
+    {
+     "ids": [
+      "p3",
+      "p4",
+      "p12",
+      "p13"
+     ],
+     "relation": "corroborating",
+     "note": "Cumulative Jan-Sep 2025 totals and their components from the same release; consistent with the monthly figures."
+    },
+    {
+     "ids": [
+      "p1",
+      "p16"
+     ],
+     "relation": "corroborating",
+     "note": "p16 (approx 23m in first five months of 2026) implies a 2026 run-rate well above 2025; consistent with continued growth from the 2025 base in p1/p3. Different period and source (govt speech vs HKTB release), so only directional corroboration."
+    }
+   ],
+   "decisions": [],
+   "extra_directions": [
+    {
+     "id": "b1",
+     "category": "own_history",
+     "perspective": "HKTB monthly release",
+     "hypothesis": "The most recent reported monthly arrivals (July and August 2026) would anchor the level for a September 2026 extrapolation via the September-to-August seasonal ratio; without them the estimate relies on the Jan-May 2026 run-rate and a transfer assumption.",
+     "data_to_find": "HKTB provisional total visitor arrivals for June, July and August 2026 (and Mainland split if available).",
+     "search_hints": [
+      "H",
+      "K",
+      "T",
+      "B"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b2",
+     "category": "related_series",
+     "perspective": "Immigration Department / control points",
+     "hypothesis": "Daily/monthly passenger throughput at land, sea and air control points for mid-2026 tracks HKTB arrivals with a stable coverage ratio, giving a near-real-time level for the September 2026 run-rate.",
+     "data_to_find": "Immigration Department monthly arrival passenger statistics for 2026 (especially July-August 2026) and the historical arrivals-to-throughput ratio.",
+     "search_hints": [
+      "I",
+      "m",
+      "m",
+      "i"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b3",
+     "category": "forecasts_markets",
+     "perspective": "Government/HKTB full-year 2026 target",
+     "hypothesis": "A full-year 2026 visitor arrival target combined with Jan-May 2026 actuals (p16) and the historical monthly distribution would constrain the September level and resolve uncertainty in the growth trend.",
+     "data_to_find": "HKTB or HKSAR government 2026 full-year visitor arrival forecast/target and any mid-year update.",
+     "search_hints": [
+      "B",
+      "u",
+      "d",
+      "g"
+     ],
+     "expected_information": 3
+    }
+   ],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p1 * a2",
+      "inputs": {
+       "p1": {
+        "id": "p1",
+        "role": "September 2025 total visitor arrivals to Hong Kong"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "2026 YoY growth factor for September relative to September 2025"
+       }
+      }
+     },
+     "unit": "visitor",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Anchors on the September 2025 provisional total (p1) and applies a 2026 growth factor (a2) derived from the strong Jan-May 2026 run-rate (p16) and the 2025 growth trend. Shared dependency: both p1 and a2 reflect HKTB's own measurement; failure mode is a sharp 2026 deceleration or September-specific disruption."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p1 * a2",
+      "inputs": {
+       "p1": {
+        "id": "p1",
+        "role": "September 2025 total visitor arrivals to Hong Kong"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "2026 YoY growth factor for September relative to September 2025"
+       }
+      }
+     },
+     "unit": "visitor",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Same structural route as m1 but retained as a distinct entry to reflect the growth-factor uncertainty; effectively a duplicate and should be treated as one route. Failure mode: growth factor mis-specified."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "September-to-August seasonal ratio",
+     "value": 0.92,
+     "low": 0.85,
+     "high": 1.0,
+     "unit": "ratio",
+     "rationale": "September is typically slightly below August in HK arrivals (post-summer, pre-Golden Week); historical Sep/Aug ratios cluster near 0.9-0.95. Used to convert an August 2026 level to September.",
+     "applies_when": "An August 2026 monthly level is available and September is expected to follow the normal seasonal pattern without major typhoon disruption.",
+     "falsified_by": "Evidence of an unusual September 2026 event (typhoon, policy change) or a Sep/Aug ratio outside 0.85-1.0 in recent years.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "2026 YoY growth factor for September vs September 2025",
+     "value": 1.12,
+     "low": 1.03,
+     "high": 1.22,
+     "unit": "ratio",
+     "rationale": "Jan-May 2026 arrivals (~23m, p16) imply strong double-digit growth over 2025; September 2025 was +8% YoY. A 2026 growth factor of ~1.12 is consistent with the 2026 run-rate, tempered toward the 2025 growth rate.",
+     "applies_when": "September 2026 growth resembles the 2026 year-to-date trend rather than reverting to the 2025 rate.",
+     "falsified_by": "Evidence that 2026 growth decelerated sharply or that September 2026 had a major disruption.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  },
+  {
+   "round": 2,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2"
+     ],
+     "relation": "corroborating",
+     "note": "p1 is the September 2025 total level and p2 is its YoY growth; both come from the same HKTB release, so they are internally consistent but not independent. p2 implies a September 2024 base of about 3.05m, consistent with the 2025 recovery trend."
+    },
+    {
+     "ids": [
+      "p1",
+      "p5",
+      "p7"
+     ],
+     "relation": "corroborating",
+     "note": "p5 (Mainland) + p7 (non-Mainland) sum to p1 (total), confirming the segment split is exhaustive for September 2025. Same source/release, so this is a definitional check, not independent confirmation."
+    },
+    {
+     "ids": [
+      "p5",
+      "p6",
+      "p7",
+      "p8",
+      "p9",
+      "p10",
+      "p11"
+     ],
+     "relation": "corroborating",
+     "note": "Segment YoY growth rates (Mainland +7%, non-Mainland +9%, short-haul +9%, long-haul +14%, new markets +13%) are all positive and bracket the total +8%, consistent with a broad-based recovery in September 2025."
+    },
+    {
+     "ids": [
+      "p3",
+      "p4",
+      "p12",
+      "p13"
+     ],
+     "relation": "corroborating",
+     "note": "Cumulative Jan-Sep 2025 totals and their YoY growth are internally consistent with the monthly September figures; same HKTB release."
+    },
+    {
+     "ids": [
+      "p16",
+      "p17"
+     ],
+     "relation": "redundant",
+     "note": "p16 and p17 are the same ~23 million Jan-May 2026 preliminary figure from the same government speech; they are duplicate copies, not independent corroboration."
+    },
+    {
+     "ids": [
+      "p16",
+      "p18",
+      "p19"
+     ],
+     "relation": "corroborating",
+     "note": "Full-year 2025 ~49.9m (p18) with +12% growth (p19) and Jan-May 2026 ~23m (p16) are consistent with continued strong 2026 momentum; the Jan-May 2026 run-rate (~4.6m/month) is above the 2025 monthly average (~4.16m/month), implying positive YoY growth into 2026."
+    },
+    {
+     "ids": [
+      "p20",
+      "p21",
+      "p22",
+      "p23",
+      "p24",
+      "p25"
+     ],
+     "relation": "corroborating",
+     "note": "Overnight arrivals, length of stay, per-capita spend and satisfaction are contextual quality metrics from the same HKTB work-plan reporting; they do not directly measure September 2026 total arrivals but support a stable-to-growing demand backdrop."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p17",
+     "keep": false,
+     "reason": "Redundant duplicate of p16 (same ~23 million Jan-May 2026 preliminary figure from the same government speech); keeping both adds no information."
+    }
+   ],
+   "extra_directions": [],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p1 * a1",
+      "inputs": {
+       "p1": {
+        "id": "p1",
+        "role": "September 2025 total visitor arrivals to Hong Kong"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "2026 YoY growth factor for September total arrivals relative to September 2025"
+       }
+      }
+     },
+     "unit": "visitor",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Anchors on the most recent same-month actual (September 2025, p1) and applies a YoY growth factor (a1) grounded in the 2025 +8% growth (p2) and the stronger Jan-May 2026 run-rate (p16 vs p18). The YoY factor already embeds the September seasonal level, so no separate month-over-month seasonal ratio is applied (that would double-count). Shared dependency: both p1 and a1 rely on HKTB's own measurement; failure mode is a structural break in 2026 travel demand or a definitional change in HKTB counting."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "2026 YoY growth factor for September total arrivals vs September 2025",
+     "value": 1.1,
+     "low": 1.02,
+     "high": 1.2,
+     "unit": "ratio",
+     "rationale": "September 2025 grew +8% YoY (p2). The Jan-May 2026 run-rate (~23m in 5 months, p16) is above the 2025 monthly average implied by p18 (~4.16m/month), indicating continued positive but moderating growth. Central factor 1.10 with a wide range reflecting uncertainty about H2 2026 momentum and any policy/visa changes.",
+     "applies_when": "September 2026 growth continues the 2025-2026 recovery trend without major disruption (typhoon, visa policy, economic shock).",
+     "falsified_by": "Evidence of a sharp 2026 slowdown, new travel restrictions, or a major disruption in September 2026 that breaks the trend.",
+     "route": "m1"
+    }
+   ],
+   "unknown_ids_in_decisions": [],
+   "unit_reviews": [
+    {
+     "check": 1,
+     "methods": [
+      {
+       "method": "m1",
+       "label": "m1",
+       "judge_unit": "visitor",
+       "checkers": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a1",
+            "reason": "growth factor, a pure ratio of 2026 arrivals to 2025 arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a1",
+            "reason": "growth factor, a pure ratio of 2026 arrivals to 2025 arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a1",
+            "reason": "growth factor, a pure ratio of 2026 arrivals to 2025 arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        }
+       ],
+       "arbiter": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "September 2025 total visitor arrivals to Hong Kong; the quote 'Total 3,292,197' and period 2025-09 confirm a count of visitor arrivals, so the recorded 'visitor arrivals (person-trips)' is a count of visitors (each arrival is one visitor trip); unit is visitor",
+            "unit": "visitor"
+           },
+           {
+            "name": "a1",
+            "reason": "growth factor 2026 vs 2025 arrivals, a pure ratio of visitor to visitor, so dimensionless; all checkers agree",
+            "unit": "1"
+           }
+          ],
+          "derivation": "visitor * 1 = visitor",
+          "result_unit": "visitor",
+          "fit_reason": "The formula gives a count of visitors over the month, the same kind of quantity as the target unit visitor (a total over the target period); no scale conversion needed beyond the factor 1",
+          "fits_target": true
+         },
+         "problem": ""
+        }
+       ],
+       "unit": "visitor",
+       "factor": 1.0
+      },
+      {
+       "method": "m2",
+       "label": "m2",
+       "judge_unit": "visitor",
+       "checkers": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals (person-trips) to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "dimensionless growth factor for 2026 relative to 2025",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "dimensionless seasonal ratio of September to August arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals (person-trips) to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "dimensionless growth factor for 2026 relative to 2025",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "dimensionless seasonal ratio of September to August arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals (person-trips) to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "dimensionless year-over-year growth factor for September arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "dimensionless September-to-August seasonal ratio",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        }
+       ],
+       "arbiter": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals (person-trips) to Hong Kong in September 2025; the quote 'Total 3,292,197' and the period 2025-09-01..2025-09-30 support a count of visitors, so the recorded unit 'visitor arrivals (person-trips)' reads as visitor",
+            "unit": "visitor"
+           },
+           {
+            "name": "a1",
+            "reason": "dimensionless year-over-year growth factor for 2026 relative to 2025; a ratio of two arrival counts, so it is a pure number",
+            "unit": "1"
+           },
+           {
+            "name": "a2",
+            "reason": "dimensionless September-to-August seasonal ratio of arrival counts, so it is a pure number",
+            "unit": "1"
+           }
+          ],
+          "derivation": "visitor * 1 * 1 = visitor",
+          "result_unit": "visitor",
+          "fit_reason": "The formula gives a count of visitors, the same kind of quantity as the target unit visitor (a total over the target period); no per-time part is involved, so only the scale could differ and here it does not.",
+          "fits_target": true
+         },
+         "problem": ""
+        }
+       ],
+       "unit": "visitor",
+       "factor": 1.0
+      }
+     ]
+    },
+    {
+     "check": 2,
+     "methods": [
+      {
+       "method": "m1",
+       "label": "m1",
+       "judge_unit": "visitor",
+       "checkers": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a1",
+            "reason": "growth factor, a pure ratio of 2026 arrivals to 2025 arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a1",
+            "reason": "growth factor, a pure ratio of 2026 to 2025 arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "number of visitor arrivals to Hong Kong in September 2025",
+            "unit": "visitor",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a1",
+            "reason": "growth factor, a pure ratio of 2026 arrivals to 2025 arrivals",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "visitor * 1 = visitor",
+          "result_unit": "visitor",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        }
+       ],
+       "arbiter": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "September 2025 total visitor arrivals to Hong Kong; the quote 'Total 3,292,197' and period 2025-09-01..2025-09-30 confirm a count of visitor arrivals, so the recorded 'visitor arrivals (person-trips)' is a count of visitors (each arrival is one visitor trip); all three checkers agree on visitor",
+            "unit": "visitor"
+           },
+           {
+            "name": "a1",
+            "reason": "2026 YoY growth factor, a pure ratio of 2026 arrivals to 2025 arrivals; dimensionless, all three checkers agree on 1",
+            "unit": "1"
+           }
+          ],
+          "derivation": "visitor * 1 = visitor",
+          "result_unit": "visitor",
+          "fit_reason": "The formula gives a count of visitors over the month, the same kind of quantity as the target unit visitor (a total over the target period), with no scale difference.",
+          "fits_target": true
+         },
+         "problem": ""
+        }
+       ],
+       "unit": "visitor",
+       "factor": 1.0
+      }
+     ]
+    }
+   ],
+   "repair": {
+    "attempt": 1,
+    "errors": [
+     "method m2 (formula_mc): input audit: a2: A September-to-August seasonal ratio is a month-over-month adjustment, but the formula already applies a YoY factor to a September 2025 base; multiplying by a Sep/Aug ratio double-counts seasonali"
+    ],
+    "previous_methods": [
+     {
+      "id": "m1",
+      "method": "formula_mc",
+      "params": {
+       "formula": "p1 * a1",
+       "inputs": {
+        "p1": {
+         "id": "p1",
+         "role": "September 2025 total visitor arrivals to Hong Kong"
+        },
+        "a1": {
+         "id": "a1",
+         "role": "2026 YoY growth factor for September total arrivals relative to September 2025"
+        }
+       }
+      },
+      "unit": "visitor",
+      "coverage": {
+       "kind": "full"
+      },
+      "rationale": "Anchors on the most recent same-month actual (September 2025, p1) and applies a YoY growth factor (a1) grounded in the 2025 +8% growth (p2) and the stronger Jan-May 2026 run-rate (p16 vs p18). Shared dependency: both p1 and a1 rely on HKTB's own measurement; failure mode is a structural break in 2026 travel demand or a definitional change in HKTB counting."
+     },
+     {
+      "id": "m2",
+      "method": "formula_mc",
+      "params": {
+       "formula": "p1 * a1 * a2",
+       "inputs": {
+        "p1": {
+         "id": "p1",
+         "role": "September 2025 total visitor arrivals to Hong Kong"
+        },
+        "a1": {
+         "id": "a1",
+         "role": "2026 YoY growth factor for September total arrivals relative to September 2025"
+        },
+        "a2": {
+         "id": "a2",
+         "role": "September-to-August seasonal ratio adjusting the September level for seasonal softness"
+        }
+       }
+      },
+      "unit": "visitor",
+      "coverage": {
+       "kind": "full"
+      },
+      "rationale": "Extends m1 with a seasonal adjustment (a2) to account for September typically running slightly below August. This route is only weakly identified because we lack the August 2026 anchor; a2 is a transfer assumption from historical seasonal patterns. Shared dependency with m1 on p1 and a1; failure mode is an atypical September 2026 calendar (early Mid-Autumn, typhoon) that breaks the seasonal ratio."
+     }
+    ],
+    "previous_assumptions": [
+     {
+      "id": "a1",
+      "name": "2026 YoY growth factor for September total arrivals vs September 2025",
+      "value": 1.1,
+      "low": 1.02,
+      "high": 1.2,
+      "unit": "ratio",
+      "rationale": "September 2025 grew +8% YoY (p2). Jan-May 2026 run-rate (~23m in 5 months, p16) is above the 2025 monthly average implied by p18 (~4.16m/month), indicating continued positive but moderating growth. Set central factor at 1.10 with a wide range reflecting uncertainty about H2 2026 momentum and any policy/visa changes.",
+      "applies_when": "September 2026 growth continues the 2025-2026 recovery trend without major disruption (typhoon, visa policy, economic shock).",
+      "falsified_by": "Evidence of a sharp 2026 slowdown, new travel restrictions, or a major disruption in September 2026 that breaks the trend.",
+      "route": "m1"
+     },
+     {
+      "id": "a2",
+      "name": "September-to-August seasonal ratio for total arrivals",
+      "value": 0.93,
+      "low": 0.86,
+      "high": 1.0,
+      "unit": "ratio",
+      "rationale": "September is typically a shoulder month before the October National Day Golden Week; historically September arrivals run slightly below August. A ratio near 0.93 with a range spanning 0.86-1.00 reflects typical seasonal softness and the possibility of early Golden Week pull-forward.",
+      "applies_when": "September 2026 seasonal pattern resembles prior years with no unusual calendar effects (Mid-Autumn timing, typhoon).",
+      "falsified_by": "Evidence that September 2026 has an unusually early Mid-Autumn or Golden Week pull-forward that lifts September above August.",
+      "route": "m2"
+     }
+    ],
+    "errors_after": []
+   },
+   "repairs": [
+    {
+     "attempt": 1,
+     "errors": [
+      "method m2 (formula_mc): input audit: a2: A September-to-August seasonal ratio is a month-over-month adjustment, but the formula already applies a YoY factor to a September 2025 base; multiplying by a Sep/Aug ratio double-counts seasonali"
+     ],
+     "previous_methods": [
+      {
+       "id": "m1",
+       "method": "formula_mc",
+       "params": {
+        "formula": "p1 * a1",
+        "inputs": {
+         "p1": {
+          "id": "p1",
+          "role": "September 2025 total visitor arrivals to Hong Kong"
+         },
+         "a1": {
+          "id": "a1",
+          "role": "2026 YoY growth factor for September total arrivals relative to September 2025"
+         }
+        }
+       },
+       "unit": "visitor",
+       "coverage": {
+        "kind": "full"
+       },
+       "rationale": "Anchors on the most recent same-month actual (September 2025, p1) and applies a YoY growth factor (a1) grounded in the 2025 +8% growth (p2) and the stronger Jan-May 2026 run-rate (p16 vs p18). Shared dependency: both p1 and a1 rely on HKTB's own measurement; failure mode is a structural break in 2026 travel demand or a definitional change in HKTB counting."
+      },
+      {
+       "id": "m2",
+       "method": "formula_mc",
+       "params": {
+        "formula": "p1 * a1 * a2",
+        "inputs": {
+         "p1": {
+          "id": "p1",
+          "role": "September 2025 total visitor arrivals to Hong Kong"
+         },
+         "a1": {
+          "id": "a1",
+          "role": "2026 YoY growth factor for September total arrivals relative to September 2025"
+         },
+         "a2": {
+          "id": "a2",
+          "role": "September-to-August seasonal ratio adjusting the September level for seasonal softness"
+         }
+        }
+       },
+       "unit": "visitor",
+       "coverage": {
+        "kind": "full"
+       },
+       "rationale": "Extends m1 with a seasonal adjustment (a2) to account for September typically running slightly below August. This route is only weakly identified because we lack the August 2026 anchor; a2 is a transfer assumption from historical seasonal patterns. Shared dependency with m1 on p1 and a1; failure mode is an atypical September 2026 calendar (early Mid-Autumn, typhoon) that breaks the seasonal ratio."
+      }
+     ],
+     "previous_assumptions": [
+      {
+       "id": "a1",
+       "name": "2026 YoY growth factor for September total arrivals vs September 2025",
+       "value": 1.1,
+       "low": 1.02,
+       "high": 1.2,
+       "unit": "ratio",
+       "rationale": "September 2025 grew +8% YoY (p2). Jan-May 2026 run-rate (~23m in 5 months, p16) is above the 2025 monthly average implied by p18 (~4.16m/month), indicating continued positive but moderating growth. Set central factor at 1.10 with a wide range reflecting uncertainty about H2 2026 momentum and any policy/visa changes.",
+       "applies_when": "September 2026 growth continues the 2025-2026 recovery trend without major disruption (typhoon, visa policy, economic shock).",
+       "falsified_by": "Evidence of a sharp 2026 slowdown, new travel restrictions, or a major disruption in September 2026 that breaks the trend.",
+       "route": "m1"
+      },
+      {
+       "id": "a2",
+       "name": "September-to-August seasonal ratio for total arrivals",
+       "value": 0.93,
+       "low": 0.86,
+       "high": 1.0,
+       "unit": "ratio",
+       "rationale": "September is typically a shoulder month before the October National Day Golden Week; historically September arrivals run slightly below August. A ratio near 0.93 with a range spanning 0.86-1.00 reflects typical seasonal softness and the possibility of early Golden Week pull-forward.",
+       "applies_when": "September 2026 seasonal pattern resembles prior years with no unusual calendar effects (Mid-Autumn timing, typhoon).",
+       "falsified_by": "Evidence that September 2026 has an unusually early Mid-Autumn or Golden Week pull-forward that lifts September above August.",
+       "route": "m2"
+      }
+     ],
+     "errors_after": []
+    }
+   ],
+   "audit_failed": {}
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    0
+   ],
+   "name": "Provisional total visitor arrivals to Hong Kong, September 2025",
+   "value": 3292197.0,
+   "value_as_written": "3,292,197",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Total 3,292,197 (+8%) 36,471,648 (+12%)",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    1
+   ],
+   "name": "Year-on-year change in total visitor arrivals to Hong Kong, September 2025",
+   "value": 8.0,
+   "value_as_written": "8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Hong Kong for September were close to 3.3 million, an 8% increase compared to the same month last year.",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    2
+   ],
+   "name": "Provisional total visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+   "value": 36471648.0,
+   "value_as_written": "36,471,648",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Total 3,292,197 (+8%) 36,471,648 (+12%)",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    3
+   ],
+   "name": "Year-on-year change in total visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+   "value": 12.0,
+   "value_as_written": "12%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "The preliminary visitor arrivals for the first three quarters of this year stand at over 36 million, representing a 12% increase compared to the same period last year.",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    4
+   ],
+   "name": "Provisional Chinese Mainland visitor arrivals to Hong Kong, September 2025",
+   "value": 2458439.0,
+   "value_as_written": "2,458,439",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Chinese Mainland 2,458,439 (+7%) 27,985,883 (+11%)",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    5
+   ],
+   "name": "Year-on-year change in Chinese Mainland visitor arrivals to Hong Kong, September 2025",
+   "value": 7.0,
+   "value_as_written": "7%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Chinese Mainland 2,458,439 (+7%) 27,985,883 (+11%)",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    6
+   ],
+   "name": "Provisional non-Chinese Mainland visitor arrivals to Hong Kong, September 2025",
+   "value": 833758.0,
+   "value_as_written": "833,758",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Non-Chinese Mainland 833,758 (+9%) 8,485,765 (+16%)",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    7
+   ],
+   "name": "Year-on-year change in non-Chinese Mainland visitor arrivals to Hong Kong, September 2025",
+   "value": 9.0,
+   "value_as_written": "9%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Non-Chinese Mainland 833,758 (+9%) 8,485,765 (+16%)",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    8
+   ],
+   "name": "Provisional short-haul visitor arrivals to Hong Kong, September 2025",
+   "value": 461889.0,
+   "value_as_written": "461,889",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Short-haul 461,889 (+9%) 4,661,848 (+17%)",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    9
+   ],
+   "name": "Provisional long-haul visitor arrivals to Hong Kong, September 2025",
+   "value": 239475.0,
+   "value_as_written": "239,475",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Long-haul 239,475 (+14%) 2,412,106 (+18%)",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    10
+   ],
+   "name": "Provisional new markets visitor arrivals to Hong Kong, September 2025",
+   "value": 59196.0,
+   "value_as_written": "59,196",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "New markets 59,196 (+13%) 535,522 (+14%)",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    11
+   ],
+   "name": "Provisional Chinese Mainland visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+   "value": 27985883.0,
+   "value_as_written": "27,985,883",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Chinese Mainland 2,458,439 (+7%) 27,985,883 (+11%)",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    12
+   ],
+   "name": "Provisional non-Chinese Mainland visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+   "value": 8485765.0,
+   "value_as_written": "8,485,765",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Non-Chinese Mainland 833,758 (+9%) 8,485,765 (+16%)",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    13
+   ],
+   "name": "Provisional short-haul visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+   "value": 4661848.0,
+   "value_as_written": "4,661,848",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Short-haul 461,889 (+9%) 4,661,848 (+17%)",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://dailyhongkong.com/wp-content/uploads/2025/10/10-September-Arrivals-E.pdf",
+   "via": "snapshot",
+   "page_date": "2025-10-15",
+   "snapshot_ts": "20251015203835",
+   "order": [
+    2,
+    14
+   ],
+   "name": "Provisional long-haul visitor arrivals to Hong Kong, January to September 2025 (cumulative)",
+   "value": 2412106.0,
+   "value_as_written": "2,412,106",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "visitor arrivals (person-trips)",
+   "period_start": "2025-01-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "2025-10-15",
+   "quote": "Long-haul 239,475 (+14%) 2,412,106 (+18%)",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-10",
+   "snapshot_ts": "20260610103727",
+   "order": [
+    1,
+    4
+   ],
+   "name": "Hong Kong visitor arrivals in first five months of 2026 (preliminary, approximately)",
+   "value": 23000000.0,
+   "value_as_written": "approximately 23 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "visitor arrivals",
+   "period_start": "2026-01-01",
+   "period_end": "2026-05-31",
+   "published_at_if_visible": "2026-06-09",
+   "quote": "in the first five months of this year alone, we welcomed approximately 23 million visitor arrivals",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.info.gov.hk/gia/general/202606/09/P2026060900749.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-10",
+   "snapshot_ts": "20260610103727",
+   "order": [
+    0,
+    2
+   ],
+   "name": "Total visitor arrivals to Hong Kong, preliminary, first five months of 2026",
+   "value": 23000000.0,
+   "value_as_written": "23 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "visitor arrivals",
+   "period_start": "2026-01-01",
+   "period_end": "2026-05-31",
+   "published_at_if_visible": "2026-06-09",
+   "quote": "According to preliminary figures, in the first five months of this year alone, we welcomed approximately 23 million visitor arrivals",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Redundant duplicate of p16 (same ~23 million Jan-May 2026 preliminary figure from the same government speech); keeping both adds no information."
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418073806",
+   "order": [
+    2,
+    2
+   ],
+   "name": "Overall visitor arrivals to Hong Kong, full year 2025 (actual)",
+   "value": 49900000.0,
+   "value_as_written": "49.9 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "visitor arrivals",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "with overall visitor arrivals in 2025 reaching approximately 49.9 million, a 12 percent increase, the HKTB's 2026/27 work plan shows.",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418073806",
+   "order": [
+    2,
+    3
+   ],
+   "name": "Year-on-year increase in overall visitor arrivals, full year 2025",
+   "value": 12.0,
+   "value_as_written": "12 percent",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "with overall visitor arrivals in 2025 reaching approximately 49.9 million, a 12 percent increase, the HKTB's 2026/27 work plan shows.",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418073806",
+   "order": [
+    2,
+    4
+   ],
+   "name": "Overnight visitor arrivals to Hong Kong, full year 2025 (actual)",
+   "value": 23190000.0,
+   "value_as_written": "23.19 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "overnight visitor arrivals",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "despite their numbers increasing by 6 percent year-on-year to 23.19 million, according to the Hong Kong Tourism Board (HKTB).",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418073806",
+   "order": [
+    2,
+    5
+   ],
+   "name": "Year-on-year increase in overnight visitor arrivals, full year 2025",
+   "value": 6.0,
+   "value_as_written": "6 percent",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "despite their numbers increasing by 6 percent year-on-year to 23.19 million, according to the Hong Kong Tourism Board (HKTB).",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418073806",
+   "order": [
+    2,
+    6
+   ],
+   "name": "Average length of stay for overnight visitors, full year 2025",
+   "value": 3.1,
+   "value_as_written": "3.1 nights",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "nights",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "Hong Kong saw a decrease in the average length of stay for overnight visitors to 3.1 nights last year",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418073806",
+   "order": [
+    2,
+    7
+   ],
+   "name": "Year-on-year change in average length of stay for overnight visitors, full year 2025",
+   "value": 0.1,
+   "value_as_written": "0.1 nights",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "nights",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "a slight decrease of 0.1 nights compared to the previous year",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418073806",
+   "order": [
+    2,
+    8
+   ],
+   "name": "Per capita spending for overnight visitors, full year 2025",
+   "value": 5503.0,
+   "value_as_written": "HK$5,503",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "HKD per overnight visitor",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "Per capita spending for overnight visitors last year was HK$5,503, a figure similar to 2024",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "https://www.thestandard.com.hk/news/article/328325/HKs-average-overnight-visitor-stay-shortens-by-01-night-despite-rise-in-numbers",
+   "via": "snapshot",
+   "page_date": "2026-04-18",
+   "snapshot_ts": "20260418073806",
+   "order": [
+    2,
+    9
+   ],
+   "name": "Visitor satisfaction score (scale of 10), full year 2025",
+   "value": 8.9,
+   "value_as_written": "8.9",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "score out of 10",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "while visitor satisfaction, on a scale of 10, rose to 8.9, an increase of 0.1 points.",
+   "verified_by": "quote_in_page",
+   "id": "p25",
+   "keep": true,
+   "judged_round": 2
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "formula_mc",
+    "params": {
+     "formula": "p1 * a1",
+     "inputs": {
+      "p1": {
+       "id": "p1",
+       "role": "September 2025 total visitor arrivals to Hong Kong"
+      },
+      "a1": {
+       "id": "a1",
+       "role": "2026 YoY growth factor for September total arrivals relative to September 2025"
+      }
+     }
+    },
+    "rationale": "Anchors on the most recent same-month actual (September 2025, p1) and applies a YoY growth factor (a1) grounded in the 2025 +8% growth (p2) and the stronger Jan-May 2026 run-rate (p16 vs p18). The YoY factor already embeds the September seasonal level, so no separate month-over-month seasonal ratio is applied (that would double-count). Shared dependency: both p1 and a1 rely on HKTB's own measureme",
+    "estimate": 3646152.658828927,
+    "backtest": [],
+    "notes": [],
+    "coverage": {
+     "kind": "full"
+    },
+    "used_ids": [
+     "p1"
+    ],
+    "used_assumptions": [
+     "a1"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p1",
+      "id": "p1",
+      "kind": "point",
+      "p10": 2743497.5,
+      "p90": 3950636.4,
+      "unit": "visitor arrivals (person-trips)"
+     },
+     {
+      "name": "a1",
+      "id": "a1",
+      "kind": "assumption",
+      "p10": 0.9895453501482384,
+      "p90": 1.2369316876852983,
+      "unit": "ratio"
+     }
+    ],
+    "unit_check": {
+     "unit": "visitor",
+     "target_unit": "visitor",
+     "factor": 1.0
+    },
+    "mc": {
+     "p10": 2945619.1357289907,
+     "p90": 4517677.426128492
+    },
+    "n_point_inputs": 1,
+    "n_assumption_inputs": 1,
+    "rests_mainly_on_assumptions": true
+   }
+  ],
+  "result": {
+   "central": 3646152.65882893,
+   "p10": 2646623.440666421,
+   "p90": 5023166.12450834,
+   "sigma_ln": 0.25,
+   "sigma_hist": null,
+   "sigma_spread": null,
+   "sigma_mc": 0.16685984460160155,
+   "n_backtest_folds": 0,
+   "weights": {
+    "m1": 1.0
+   },
+   "weight_rule": "equal",
+   "weight_basis": {
+    "m1": "equal"
+   },
+   "basis": "no_basis",
+   "assumption_weight_share": 1.0
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {
+   "a1": [
+    "m1"
+   ]
+  },
+  "excluded_by_input_audit": [],
+  "methods_from_round": 2
+ },
+ "assumptions": {
+  "kept": [
+   {
+    "id": "a1",
+    "name": "2026 YoY growth factor for September total arrivals vs September 2025",
+    "unit": "ratio",
+    "rationale": "September 2025 grew +8% YoY (p2). The Jan-May 2026 run-rate (~23m in 5 months, p16) is above the 2025 monthly average implied by p18 (~4.16m/month), indicating continued positive but moderating growth. Central factor 1.10 with a wide range reflecting uncertainty about H2 2026 momentum and any policy",
+    "applies_when": "September 2026 growth continues the 2025-2026 recovery trend without major disruption (typhoon, visa policy, economic shock).",
+    "falsified_by": "Evidence of a sharp 2026 slowdown, new travel restrictions, or a major disruption in September 2026 that breaks the trend.",
+    "route": "m1",
+    "value": 1.1,
+    "low": 1.02,
+    "high": 1.2,
+    "is_pct": false,
+    "p10_used": 0.9895453501482384,
+    "p90_used": 1.2369316876852983,
+    "widened_by_floor": true,
+    "used_by": [
+     "m1"
+    ],
+    "used_by_labels": [
+     "m1"
+    ]
+   }
+  ],
+  "rejected": [],
+  "from_round": 2,
+  "min_width": 2.0,
+  "max_per_run": 12,
+  "max_per_method": 6
+ },
+ "published": {
+  "status": "not_checked",
+  "note": "not checked: backtest or scored question (as_of before today, or an official value is registered), so the target cannot have been published by as_of"
+ },
+ "final": {
+  "template": "The best computed estimate for total visitor arrivals to Hong Kong (all source markets, all trip purposes, same-day and overnight) during September 2026, as the provisional HKTB figure, is [[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]]).\n\nThe estimate anchors on the observed September 2025 provisional total of [[p1_value]] and applies a YoY growth factor of [[a1_value]] (range [[a1_low]] to [[a1_high]]). That factor is an assumption, not an observation: it reflects September 2025's growth and the stronger early-2026 run-rate, with moderating momentum assumed. The YoY factor already embeds September seasonality, so no separate seasonal adjustment is applied. Only one method was used ([[n_methods]]), carrying weight [[m1_weight]], so the combination is effectively that single method rather than an independent cross-check.\n\nThe main risk is the assumed growth factor: H2 2026 momentum, policy changes, or a Mainland travel shift could move arrivals well outside the range. The most useful missing evidence would be actual July–August 2026 monthly arrivals, which would pin down the current run-rate before September.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 2026 YoY growth factor for September total arrivals vs September 2025: [[a1_value]] ratio, range [[a1_low]] to [[a1_high]] (range widened by code); used by m1. Overturned by: Evidence of a sharp 2026 slowdown, new travel restrictions, or a major disruption in September 2026 that breaks the trend.",
+  "text": "The best computed estimate for total visitor arrivals to Hong Kong (all source markets, all trip purposes, same-day and overnight) during September 2026, as the provisional HKTB figure, is 3,646,153 visitor (80% model-based interval 2,646,623 to 5,023,166 visitor).\n\nThe estimate anchors on the observed September 2025 provisional total of 3,292,197 visitor arrivals (person-trips) and applies a YoY growth factor of 1.1 (range 0.9895 to 1.237). That factor is an assumption, not an observation: it reflects September 2025's growth and the stronger early-2026 run-rate, with moderating momentum assumed. The YoY factor already embeds September seasonality, so no separate seasonal adjustment is applied. Only one method was used (1), carrying weight 100%, so the combination is effectively that single method rather than an independent cross-check.\n\nThe main risk is the assumed growth factor: H2 2026 momentum, policy changes, or a Mainland travel shift could move arrivals well outside the range. The most useful missing evidence would be actual July–August 2026 monthly arrivals, which would pin down the current run-rate before September.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 2026 YoY growth factor for September total arrivals vs September 2025: 1.1 ratio, range 0.9895 to 1.237 (range widened by code); used by m1. Overturned by: Evidence of a sharp 2026 slowdown, new travel restrictions, or a major disruption in September 2026 that breaks the trend.",
+  "placeholders": {
+   "estimate": "3,646,153",
+   "p10": "2,646,623",
+   "p90": "5,023,166",
+   "unit": "visitor",
+   "interval_level": "80% model-based",
+   "interval_basis": "too few backtest years, and neither method disagreement nor Monte Carlo sampling gave a wider interval, so code used its fixed default width",
+   "n_points_kept": "24",
+   "n_methods": "1",
+   "m1_estimate": "3,646,153",
+   "m1_weight": "100%",
+   "m1_backtest_error": "n/a",
+   "p1_value": "3,292,197 visitor arrivals (person-trips)",
+   "a1_value": "1.1",
+   "a1_low": "0.9895",
+   "a1_high": "1.237"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": true,
+  "model_text": "The best computed estimate for total visitor arrivals to Hong Kong (all source markets, all trip purposes, same-day and overnight) during September 2026, as the provisional HKTB figure, is [[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]]).\n\nThe estimate anchors on the observed September 2025 provisional total of [[p1_value]] and applies a YoY growth factor of [[a1_value]] (range [[a1_low]] to [[a1_high]]). That factor is an assumption, not an observation: it reflects September 2025's growth and the stronger early-2026 run-rate, with moderating momentum assumed. The YoY factor already embeds September seasonality, so no separate seasonal adjustment is applied. Only one method was used ([[n_methods]]), carrying weight [[m1_weight]], so the combination is effectively that single method rather than an independent cross-check.\n\nThe main risk is the assumed growth factor: H2 2026 momentum, policy changes, or a Mainland travel shift could move arrivals well outside the range. The most useful missing evidence would be actual July–August 2026 monthly arrivals, which would pin down the current run-rate before September."
+ },
+ "started_at": "20261019T083442Z",
+ "wall_s": 390.1,
+ "budget": {
+  "usd_total_assumed": 0.5132,
+  "usd_tokens": 0.1032,
+  "usd_search_fee_assumed": 0.41,
+  "usd_cap": 1.0,
+  "pages_used": 13,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 42,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 40,
+  "pages_snapshot": 13,
+  "pages_live_dated": 0,
+  "pages_dropped": 27,
+  "pages_sent_to_extractor": {
+   "total": 13,
+   "snapshot": 13,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "directions_voided": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "test2",
+ "settings": {
+  "max_tokens": {
+   "plan": 6000,
+   "extract": 16000,
+   "judge": 12000,
+   "repair": 12000,
+   "audit": 4000,
+   "unit_check": 4000,
+   "unit_arbiter": 4000,
+   "value_check": 2000,
+   "value_reread": 2000,
+   "published": 3000,
+   "early": 3000,
+   "final": 4000,
+   "search": 8192,
+   "naive": 500,
+   "structured": 6000,
+   "search_direct": 4096
+  },
+  "budget_defaults": {
+   "usd": 1.0,
+   "pages": 48,
+   "round1_pages": 40,
+   "llm_concurrency": 8,
+   "extra_directions": 3,
+   "urls_per_direction": 4,
+   "search_max_uses": 3,
+   "max_directions_hard": 16
+  },
+  "interval": {
+   "MIN_WIDTH": 2.0,
+   "MIN_WIDTH_CHANGE": 1.25,
+   "FALLBACK_SIGMA": 0.25,
+   "DEFAULT_REL_U": 0.2,
+   "EPS": 0.01
+  }
+ }
+}

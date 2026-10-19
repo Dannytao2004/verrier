@@ -1,0 +1,644 @@
+{
+ "qid": "fc_pola_teu_2026_09",
+ "question": "Assume today is 2026-09-10. You know nothing published after this date. Estimate the total container volume handled by the Port of Los Angeles in September 2026, in TEUs (twenty-foot equivalent units; loaded and empty imports and exports combined), as it will be first reported in the Port of Los Angeles's monthly cargo news release.",
+ "target": {
+  "unit": "",
+  "dims": "dimensionless",
+  "definition": "Total container volume in TEUs (loaded and empty imports and exports combined) handled by the Port of Los Angeles in September 2026, as first reported in its monthly cargo news release."
+ },
+ "inputs": [
+  {
+   "name": "annual_teu_2025",
+   "description": "Total TEUs handled by Port of Los Angeles in calendar year 2025",
+   "value": 9500000,
+   "low": 8500000,
+   "high": 10500000,
+   "unit": "TEUs",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Recent annual volumes have been roughly 8.5-10.5 million TEUs; 2025 likely near 9.5 million."
+   },
+   "count_nouns": [
+    "TEUs"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 8500000.0,
+    "high": 10500000.0,
+    "value": 9500000.0
+   },
+   "median": 9447221.813845592,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.012286679628198627,
+   "sensitivity_path_max": 0.09177037335564542
+  },
+  {
+   "name": "september_share_of_annual",
+   "description": "Fraction of annual TEU volume handled in September",
+   "value": 0.083,
+   "low": 0.075,
+   "high": 0.092,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September is near average but slightly elevated ahead of holidays; roughly 1/12 with seasonal variation."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.075,
+    "high": 0.092,
+    "value": 0.083
+   },
+   "median": 0.08306623862918075,
+   "used_by": [
+    "p1"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.012286679628198627,
+   "sensitivity_path_max": 0.08872656395385459
+  },
+  {
+   "name": "daily_teu_capacity",
+   "description": "Average daily TEU throughput capacity of the port",
+   "value": 28000,
+   "low": 24000,
+   "high": 32000,
+   "unit": "TEUs/day",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Annual volume divided by 365 gives ~26,000 TEU/day; capacity somewhat higher."
+   },
+   "count_nouns": [
+    "TEUs"
+   ],
+   "dims": "s**-1",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.2777777777777778,
+    "high": 0.37037037037037035,
+    "value": 0.32407407407407407
+   },
+   "median": 27712.812921102035,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0023176126937327624,
+   "sensitivity_path_max": 0.1249387366082999
+  },
+  {
+   "name": "days_in_september",
+   "description": "Number of days in September",
+   "value": 30,
+   "low": 30,
+   "high": 30,
+   "unit": "days",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September always has 30 days."
+   },
+   "count_nouns": [],
+   "dims": "s",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 2592000.0,
+    "high": 2592000.0,
+    "value": 2592000.0
+   },
+   "median": 30.0,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0,
+   "sensitivity_path_max": 0.0
+  },
+  {
+   "name": "utilization_rate",
+   "description": "Average utilization of daily capacity in September",
+   "value": 0.93,
+   "low": 0.85,
+   "high": 0.98,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "Ports typically operate near but below capacity; September is busy but not peak."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.85,
+    "high": 0.98,
+    "value": 0.93
+   },
+   "median": 0.9126883367283708,
+   "used_by": [
+    "p2"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.0023176126937327624,
+   "sensitivity_path_max": 0.06180714997820225
+  },
+  {
+   "name": "us_annual_teu_2025",
+   "description": "Total TEUs handled by all US container ports in 2025",
+   "value": 60000000,
+   "low": 55000000,
+   "high": 65000000,
+   "unit": "TEUs",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "US container imports plus exports roughly 55-65 million TEUs annually."
+   },
+   "count_nouns": [
+    "TEUs"
+   ],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 55000000.0,
+    "high": 65000000.0,
+    "value": 60000000.0
+   },
+   "median": 59791303.71550699,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.01460429232193139,
+   "sensitivity_path_max": 0.07255066714861158
+  },
+  {
+   "name": "la_share_of_us_teu",
+   "description": "Port of Los Angeles share of total US container TEU volume",
+   "value": 0.16,
+   "low": 0.13,
+   "high": 0.19,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "LA has historically handled about 15-18% of US container volume."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.13,
+    "high": 0.19,
+    "value": 0.16
+   },
+   "median": 0.15716233645501712,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.01460429232193139,
+   "sensitivity_path_max": 0.1648102486459928
+  },
+  {
+   "name": "september_share_of_us_annual",
+   "description": "Fraction of annual US TEU volume handled in September",
+   "value": 0.083,
+   "low": 0.075,
+   "high": 0.092,
+   "unit": "dimensionless",
+   "provenance": {
+    "type": "assumption",
+    "rationale": "September is roughly average for US container volumes."
+   },
+   "count_nouns": [],
+   "dims": "dimensionless",
+   "issues": [],
+   "status": "assumption",
+   "usable": true,
+   "si": {
+    "low": 0.075,
+    "high": 0.092,
+    "value": 0.083
+   },
+   "median": 0.08306623862918075,
+   "used_by": [
+    "p3"
+   ],
+   "n_dependents": 1,
+   "sensitivity": 0.01460429232193139,
+   "sensitivity_path_max": 0.08872656395385459
+  }
+ ],
+ "paths": [
+  {
+   "id": "p1",
+   "method": "top_down",
+   "description": "Allocate annual LA volume to September using seasonal share",
+   "formula": "annual_teu_2025 * september_share_of_annual",
+   "output_unit": "TEUs",
+   "issues": [],
+   "uses": [
+    "annual_teu_2025",
+    "september_share_of_annual"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 783787.2474521718,
+   "p10": 675801.6455291027,
+   "p90": 908330.5253363494,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": 0.002120514891833504
+  },
+  {
+   "id": "p2",
+   "method": "bottom_up",
+   "description": "Daily capacity times days times utilization",
+   "formula": "daily_teu_capacity * days_in_september * utilization_rate",
+   "output_unit": "TEUs",
+   "issues": [],
+   "uses": [
+    "daily_teu_capacity",
+    "days_in_september",
+    "utilization_rate"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 757403.4453062392,
+   "p10": 644914.3633900179,
+   "p90": 891934.026339557,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": -0.012750401829117774
+  },
+  {
+   "id": "p3",
+   "method": "proxy",
+   "description": "Scale from US total using LA share and September share",
+   "formula": "us_annual_teu_2025 * la_share_of_us_teu * september_share_of_us_annual",
+   "output_unit": "TEUs",
+   "issues": [],
+   "uses": [
+    "la_share_of_us_teu",
+    "september_share_of_us_annual",
+    "us_annual_teu_2025"
+   ],
+   "dims": "dimensionless",
+   "status": "valid",
+   "median": 779969.6038477365,
+   "p10": 617837.19471544,
+   "p90": 980180.0744570821,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": 2.8929823996598605e-16
+  }
+ ],
+ "errors": [],
+ "warnings": [],
+ "mc": {
+  "samples": 20000,
+  "seed": "20261015:fc_pola_teu_2026_09",
+  "input_distribution": "lognormal, low/high = P10/P90"
+ },
+ "result": {
+  "central": 779969.603847736,
+  "p10": 645996.2232375308,
+  "p90": 925522.0786711196,
+  "unit": "",
+  "n_valid_paths": 3,
+  "outliers": [],
+  "path_spread_oom": 0.014870916720951755
+ },
+ "graph": {
+  "nodes": [
+   {
+    "id": "target",
+    "kind": "target",
+    "label": "target",
+    "status": "estimated",
+    "definition": "Total container volume in TEUs (loaded and empty imports and exports combined) handled by the Port of Los Angeles in September 2026, as first reported in its monthly cargo news release.",
+    "unit": "",
+    "central": 779969.603847736,
+    "p10": 645996.2232375308,
+    "p90": 925522.0786711196,
+    "n_valid_paths": 3,
+    "outliers": []
+   },
+   {
+    "id": "path:p1",
+    "kind": "path",
+    "label": "p1 top_down",
+    "status": "valid",
+    "method": "top_down",
+    "description": "Allocate annual LA volume to September using seasonal share",
+    "formula": "annual_teu_2025 * september_share_of_annual",
+    "output_unit": "TEUs",
+    "issues": [],
+    "median": 783787.2474521718,
+    "p10": 675801.6455291027,
+    "p90": 908330.5253363494,
+    "log10_vs_central": 0.002120514891833504,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p2",
+    "kind": "path",
+    "label": "p2 bottom_up",
+    "status": "valid",
+    "method": "bottom_up",
+    "description": "Daily capacity times days times utilization",
+    "formula": "daily_teu_capacity * days_in_september * utilization_rate",
+    "output_unit": "TEUs",
+    "issues": [],
+    "median": 757403.4453062392,
+    "p10": 644914.3633900179,
+    "p90": 891934.026339557,
+    "log10_vs_central": -0.012750401829117774,
+    "n_dependents": 1
+   },
+   {
+    "id": "path:p3",
+    "kind": "path",
+    "label": "p3 proxy",
+    "status": "valid",
+    "method": "proxy",
+    "description": "Scale from US total using LA share and September share",
+    "formula": "us_annual_teu_2025 * la_share_of_us_teu * september_share_of_us_annual",
+    "output_unit": "TEUs",
+    "issues": [],
+    "median": 779969.6038477365,
+    "p10": 617837.19471544,
+    "p90": 980180.0744570821,
+    "log10_vs_central": 2.8929823996598605e-16,
+    "n_dependents": 1
+   },
+   {
+    "id": "input:annual_teu_2025",
+    "kind": "input",
+    "label": "annual_teu_2025",
+    "status": "assumption",
+    "description": "Total TEUs handled by Port of Los Angeles in calendar year 2025",
+    "value": 9500000,
+    "low": 8500000,
+    "high": 10500000,
+    "unit": "TEUs",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Recent annual volumes have been roughly 8.5-10.5 million TEUs; 2025 likely near 9.5 million."
+    },
+    "issues": [],
+    "count_nouns": [
+     "TEUs"
+    ],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.012286679628198627,
+    "sensitivity_path_max": 0.09177037335564542
+   },
+   {
+    "id": "input:september_share_of_annual",
+    "kind": "input",
+    "label": "september_share_of_annual",
+    "status": "assumption",
+    "description": "Fraction of annual TEU volume handled in September",
+    "value": 0.083,
+    "low": 0.075,
+    "high": 0.092,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September is near average but slightly elevated ahead of holidays; roughly 1/12 with seasonal variation."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p1"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.012286679628198627,
+    "sensitivity_path_max": 0.08872656395385459
+   },
+   {
+    "id": "input:daily_teu_capacity",
+    "kind": "input",
+    "label": "daily_teu_capacity",
+    "status": "assumption",
+    "description": "Average daily TEU throughput capacity of the port",
+    "value": 28000,
+    "low": 24000,
+    "high": 32000,
+    "unit": "TEUs/day",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Annual volume divided by 365 gives ~26,000 TEU/day; capacity somewhat higher."
+    },
+    "issues": [],
+    "count_nouns": [
+     "TEUs"
+    ],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0023176126937327624,
+    "sensitivity_path_max": 0.1249387366082999
+   },
+   {
+    "id": "input:days_in_september",
+    "kind": "input",
+    "label": "days_in_september",
+    "status": "assumption",
+    "description": "Number of days in September",
+    "value": 30,
+    "low": 30,
+    "high": 30,
+    "unit": "days",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September always has 30 days."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0,
+    "sensitivity_path_max": 0.0
+   },
+   {
+    "id": "input:utilization_rate",
+    "kind": "input",
+    "label": "utilization_rate",
+    "status": "assumption",
+    "description": "Average utilization of daily capacity in September",
+    "value": 0.93,
+    "low": 0.85,
+    "high": 0.98,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "Ports typically operate near but below capacity; September is busy but not peak."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p2"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.0023176126937327624,
+    "sensitivity_path_max": 0.06180714997820225
+   },
+   {
+    "id": "input:us_annual_teu_2025",
+    "kind": "input",
+    "label": "us_annual_teu_2025",
+    "status": "assumption",
+    "description": "Total TEUs handled by all US container ports in 2025",
+    "value": 60000000,
+    "low": 55000000,
+    "high": 65000000,
+    "unit": "TEUs",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "US container imports plus exports roughly 55-65 million TEUs annually."
+    },
+    "issues": [],
+    "count_nouns": [
+     "TEUs"
+    ],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.01460429232193139,
+    "sensitivity_path_max": 0.07255066714861158
+   },
+   {
+    "id": "input:la_share_of_us_teu",
+    "kind": "input",
+    "label": "la_share_of_us_teu",
+    "status": "assumption",
+    "description": "Port of Los Angeles share of total US container TEU volume",
+    "value": 0.16,
+    "low": 0.13,
+    "high": 0.19,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "LA has historically handled about 15-18% of US container volume."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.01460429232193139,
+    "sensitivity_path_max": 0.1648102486459928
+   },
+   {
+    "id": "input:september_share_of_us_annual",
+    "kind": "input",
+    "label": "september_share_of_us_annual",
+    "status": "assumption",
+    "description": "Fraction of annual US TEU volume handled in September",
+    "value": 0.083,
+    "low": 0.075,
+    "high": 0.092,
+    "unit": "dimensionless",
+    "provenance": {
+     "type": "assumption",
+     "rationale": "September is roughly average for US container volumes."
+    },
+    "issues": [],
+    "count_nouns": [],
+    "used_by": [
+     "p3"
+    ],
+    "n_dependents": 1,
+    "sensitivity": 0.01460429232193139,
+    "sensitivity_path_max": 0.08872656395385459
+   }
+  ],
+  "edges": [
+   {
+    "source": "path:p1",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:annual_teu_2025",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:september_share_of_annual",
+    "target": "path:p1",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p2",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:daily_teu_capacity",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:days_in_september",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:utilization_rate",
+    "target": "path:p2",
+    "kind": "used_by"
+   },
+   {
+    "source": "path:p3",
+    "target": "target",
+    "kind": "aggregated_into",
+    "included": true
+   },
+   {
+    "source": "input:la_share_of_us_teu",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:september_share_of_us_annual",
+    "target": "path:p3",
+    "kind": "used_by"
+   },
+   {
+    "source": "input:us_annual_teu_2025",
+    "target": "path:p3",
+    "kind": "used_by"
+   }
+  ]
+ }
+}

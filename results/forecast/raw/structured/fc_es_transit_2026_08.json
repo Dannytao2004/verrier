@@ -1,0 +1,406 @@
+{
+ "qid": "fc_es_transit_2026_08",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total number of passengers carried by public transport in Spain (urban, interurban and special/discretionary combined) during August 2026, as first reported in INE's provisional Passenger Transport Statistics.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_passengers_2025",
+      "description": "Total public transport passengers in Spain in calendar year 2025 (all modes combined)",
+      "value": 5600000000.0,
+      "low": 5000000000.0,
+      "high": 6200000000.0,
+      "unit": "passengers",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "INE ETP monthly totals in recent years run ~450-500 million passengers/month, implying ~5.5-6 billion/year"
+      }
+     },
+     {
+      "name": "august_share_of_year",
+      "description": "Fraction of annual public transport passengers carried in August (holiday month, lower commuting)",
+      "value": 0.075,
+      "low": 0.065,
+      "high": 0.085,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is below the 1/12 = 0.083 average due to reduced commuting, partly offset by tourism"
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Year-on-year growth factor of public transport passengers from 2025 to 2026",
+      "value": 1.03,
+      "low": 0.99,
+      "high": 1.07,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent Spanish public transport ridership has grown a few percent per year"
+      }
+     },
+     {
+      "name": "monthly_passengers_2025",
+      "description": "Average monthly public transport passengers in Spain in 2025",
+      "value": 467000000.0,
+      "low": 420000000.0,
+      "high": 520000000.0,
+      "unit": "passengers/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual total divided by 12"
+      }
+     },
+     {
+      "name": "august_seasonality_index",
+      "description": "Ratio of August passengers to the average month",
+      "value": 0.9,
+      "low": 0.8,
+      "high": 1.0,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August typically runs slightly below the annual average month"
+      }
+     },
+     {
+      "name": "population_spain",
+      "description": "Population of Spain in 2026",
+      "value": 49000000.0,
+      "low": 48000000.0,
+      "high": 50000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Spain's population is around 48-49 million and slowly rising"
+      }
+     },
+     {
+      "name": "trips_per_person_per_day",
+      "description": "Average public transport trips per person per day in August (residents plus tourists, averaged over population)",
+      "value": 0.38,
+      "low": 0.3,
+      "high": 0.46,
+      "unit": "trips/person/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Roughly 140 public transport trips per person per year, with August tourism raising the per-capita rate"
+      }
+     },
+     {
+      "name": "days_in_august",
+      "description": "Number of days in August",
+      "value": 31,
+      "low": 31,
+      "high": 31,
+      "unit": "day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calendar fact"
+      }
+     },
+     {
+      "name": "tourist_visitors_august",
+      "description": "Foreign and domestic tourists present in Spain during August 2026",
+      "value": 20000000.0,
+      "low": 15000000.0,
+      "high": 25000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Spain receives ~10 million foreign tourists in August plus domestic holidaymakers"
+      }
+     },
+     {
+      "name": "tourist_trips_per_day",
+      "description": "Public transport trips per tourist per day in August",
+      "value": 0.6,
+      "low": 0.4,
+      "high": 0.9,
+      "unit": "trips/person/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Tourists use buses, metro and coaches moderately while on holiday"
+      }
+     },
+     {
+      "name": "resident_trips_per_day",
+      "description": "Public transport trips per resident per day in August",
+      "value": 0.3,
+      "low": 0.24,
+      "high": 0.38,
+      "unit": "trips/person/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Lower than the annual average because of holidays and reduced commuting"
+      }
+     },
+     {
+      "name": "avg_trip_distance",
+      "description": "Average distance of a public transport trip in Spain",
+      "value": 12,
+      "low": 8,
+      "high": 18,
+      "unit": "km",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Blend of short urban trips and longer interurban and coach trips"
+      }
+     },
+     {
+      "name": "passenger_km_per_year",
+      "description": "Total public transport passenger-kilometres in Spain per year",
+      "value": 60000000000.0,
+      "low": 45000000000.0,
+      "high": 75000000000.0,
+      "unit": "passenger*km/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Roughly 5-6 billion trips times ~10-12 km average distance"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale last year's annual total by growth and the August share of the year",
+      "formula": "annual_passengers_2025 * annual_growth_factor * august_share_of_year",
+      "output_unit": "passengers"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Average month times August seasonality index times growth",
+      "formula": "monthly_passengers_2025 * august_seasonality_index * annual_growth_factor",
+      "output_unit": "passengers"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Residents plus tourists times daily trip rates times days in August",
+      "formula": "(population_spain * resident_trips_per_day + tourist_visitors_august * tourist_trips_per_day) * days_in_august",
+      "output_unit": "passengers"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_passengers_2025 ('passengers/month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Total number of passengers carried by public transport in Spain (urban, interurban and special/discretionary combined) during August 2026, as first reported in INE's provisional Passenger Transport Statistics.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_passengers_2025",
+      "description": "Total public transport passengers in Spain in calendar year 2025 (all modes combined)",
+      "value": 5600000000.0,
+      "low": 5000000000.0,
+      "high": 6200000000.0,
+      "unit": "passengers",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "INE ETP monthly totals in recent years run ~450-500 million passengers/month, implying ~5.5-6 billion/year"
+      }
+     },
+     {
+      "name": "august_share_of_year",
+      "description": "Fraction of annual public transport passengers carried in August (holiday month, lower commuting)",
+      "value": 0.075,
+      "low": 0.065,
+      "high": 0.085,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is below the 1/12 = 0.083 average due to reduced commuting, partly offset by tourism"
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Year-on-year growth factor of public transport passengers from 2025 to 2026",
+      "value": 1.03,
+      "low": 0.99,
+      "high": 1.07,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent Spanish public transport ridership has grown a few percent per year"
+      }
+     },
+     {
+      "name": "monthly_passengers_2025",
+      "description": "Average monthly public transport passengers in Spain in 2025",
+      "value": 467000000.0,
+      "low": 420000000.0,
+      "high": 520000000.0,
+      "unit": "passengers/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual total divided by 12"
+      }
+     },
+     {
+      "name": "august_seasonality_index",
+      "description": "Ratio of August passengers to the average month",
+      "value": 0.9,
+      "low": 0.8,
+      "high": 1.0,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August typically runs slightly below the annual average month"
+      }
+     },
+     {
+      "name": "period_length",
+      "description": "Length of the reporting period (one month) used to convert a monthly rate into a total",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The target is a single month's total"
+      }
+     },
+     {
+      "name": "population_spain",
+      "description": "Population of Spain in 2026",
+      "value": 49000000.0,
+      "low": 48000000.0,
+      "high": 50000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Spain's population is around 48-49 million and slowly rising"
+      }
+     },
+     {
+      "name": "trips_per_person_per_day",
+      "description": "Average public transport trips per person per day in August (residents plus tourists, averaged over population)",
+      "value": 0.38,
+      "low": 0.3,
+      "high": 0.46,
+      "unit": "trips/person/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Roughly 140 public transport trips per person per year, with August tourism raising the per-capita rate"
+      }
+     },
+     {
+      "name": "days_in_august",
+      "description": "Number of days in August",
+      "value": 31,
+      "low": 31,
+      "high": 31,
+      "unit": "day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calendar fact"
+      }
+     },
+     {
+      "name": "tourist_visitors_august",
+      "description": "Foreign and domestic tourists present in Spain during August 2026",
+      "value": 20000000.0,
+      "low": 15000000.0,
+      "high": 25000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Spain receives ~10 million foreign tourists in August plus domestic holidaymakers"
+      }
+     },
+     {
+      "name": "tourist_trips_per_day",
+      "description": "Public transport trips per tourist per day in August",
+      "value": 0.6,
+      "low": 0.4,
+      "high": 0.9,
+      "unit": "trips/person/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Tourists use buses, metro and coaches moderately while on holiday"
+      }
+     },
+     {
+      "name": "resident_trips_per_day",
+      "description": "Public transport trips per resident per day in August",
+      "value": 0.3,
+      "low": 0.24,
+      "high": 0.38,
+      "unit": "trips/person/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Lower than the annual average because of holidays and reduced commuting"
+      }
+     },
+     {
+      "name": "avg_trip_distance",
+      "description": "Average distance of a public transport trip in Spain",
+      "value": 12,
+      "low": 8,
+      "high": 18,
+      "unit": "km",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Blend of short urban trips and longer interurban and coach trips"
+      }
+     },
+     {
+      "name": "passenger_km_per_year",
+      "description": "Total public transport passenger-kilometres in Spain per year",
+      "value": 60000000000.0,
+      "low": 45000000000.0,
+      "high": 75000000000.0,
+      "unit": "passenger*km/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Roughly 5-6 billion trips times ~10-12 km average distance"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale last year's annual total by growth and the August share of the year",
+      "formula": "annual_passengers_2025 * annual_growth_factor * august_share_of_year",
+      "output_unit": "passengers"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Average monthly rate times August seasonality index times growth, multiplied by the one-month period",
+      "formula": "monthly_passengers_2025 * august_seasonality_index * annual_growth_factor * period_length",
+      "output_unit": "passengers"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Residents plus tourists times daily trip rates times days in August",
+      "formula": "(population_spain * resident_trips_per_day + tourist_visitors_august * tourist_trips_per_day) * days_in_august",
+      "output_unit": "passengers"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2
+}

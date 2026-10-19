@@ -333,7 +333,7 @@
    "formula": "monthly_births_2025_avg * july_seasonal_index",
    "output_unit": "births",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_births_2025_avg ('births/month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "july_seasonal_index",
@@ -365,7 +365,7 @@
   }
  ],
  "errors": [
-  "path p2: dimension mismatch: formula gives s**-1, target is dimensionless"
+  "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_births_2025_avg ('births/month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
  ],
  "warnings": [
   "path p2: declared output_unit 'births' (dimensionless) differs from computed s**-1; computed one is used"
@@ -425,7 +425,7 @@
     "formula": "monthly_births_2025_avg * july_seasonal_index",
     "output_unit": "births",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_births_2025_avg ('births/month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,

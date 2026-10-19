@@ -1,0 +1,17 @@
+{
+ "qid": "fc_meta_capex_2026_q3",
+ "arm": "naive",
+ "target_unit": "USD",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 16500000000.0,
+    "unit": "USD"
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

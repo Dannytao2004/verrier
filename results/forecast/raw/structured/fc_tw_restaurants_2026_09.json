@@ -1,0 +1,382 @@
+{
+ "qid": "fc_tw_restaurants_2026_09",
+ "arm": "structured",
+ "target_unit": "TWD",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Turnover of Taiwan's food and beverage services industry in September 2026, in current prices, as first reported by the Ministry of Economic Affairs Department of Statistics.",
+     "unit": "TWD"
+    },
+    "inputs": [
+     {
+      "name": "annual_food_service_turnover_2025",
+      "description": "Total food and beverage services industry turnover in Taiwan for calendar year 2025.",
+      "value": 1050000000000.0,
+      "low": 950000000000.0,
+      "high": 1150000000000.0,
+      "unit": "TWD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Extrapolated from recent MOEA annual food service turnover (~TWD 1.0 trillion in 2024) with modest growth."
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual food service turnover occurring in September.",
+      "value": 0.083,
+      "low": 0.078,
+      "high": 0.088,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a typical month; share near 1/12 with slight seasonal variation."
+      }
+     },
+     {
+      "name": "monthly_growth_factor_2025_to_2026",
+      "description": "Year-over-year growth factor for food service turnover from 2025 to 2026.",
+      "value": 1.04,
+      "low": 0.98,
+      "high": 1.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent nominal growth has been 3–8%; 4% central with uncertainty."
+      }
+     },
+     {
+      "name": "september_2025_turnover",
+      "description": "Food and beverage services turnover in September 2025 as reported by MOEA.",
+      "value": 85000000000.0,
+      "low": 80000000000.0,
+      "high": 90000000000.0,
+      "unit": "TWD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Based on recent monthly levels around TWD 80–90 billion."
+      }
+     },
+     {
+      "name": "yoy_growth_factor_sep",
+      "description": "Year-over-year growth factor for September food service turnover.",
+      "value": 1.04,
+      "low": 0.98,
+      "high": 1.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Similar to annual growth assumption."
+      }
+     },
+     {
+      "name": "number_of_food_service_establishments",
+      "description": "Number of food and beverage service establishments in Taiwan.",
+      "value": 160000,
+      "low": 140000,
+      "high": 180000,
+      "unit": "establishments",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Taiwan has roughly 150k–170k food service businesses including small vendors."
+      }
+     },
+     {
+      "name": "average_monthly_turnover_per_establishment",
+      "description": "Average monthly turnover per food service establishment.",
+      "value": 550000,
+      "low": 450000,
+      "high": 650000,
+      "unit": "TWD/establishment/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by annual turnover ~1e12 TWD / (160k * 12) ≈ 520k TWD."
+      }
+     },
+     {
+      "name": "september_seasonal_factor",
+      "description": "Multiplicative factor for September relative to an average month.",
+      "value": 1.0,
+      "low": 0.95,
+      "high": 1.05,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is near average; small seasonal effect."
+      }
+     },
+     {
+      "name": "household_consumption_expenditure_on_food_service",
+      "description": "Taiwan household final consumption expenditure on restaurants and hotels (proxy for food service) in 2025.",
+      "value": 1200000000000.0,
+      "low": 1000000000000.0,
+      "high": 1400000000000.0,
+      "unit": "TWD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "DGBAS national accounts: household consumption on restaurants/hotels is roughly TWD 1.2 trillion."
+      }
+     },
+     {
+      "name": "food_service_share_of_restaurant_hotel_consumption",
+      "description": "Share of restaurant and hotel household consumption attributable to food and beverage services.",
+      "value": 0.85,
+      "low": 0.75,
+      "high": 0.95,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Hotels are a small part; food service dominates."
+      }
+     },
+     {
+      "name": "september_share_of_annual_consumption",
+      "description": "Fraction of annual household consumption on restaurants/hotels occurring in September.",
+      "value": 0.083,
+      "low": 0.078,
+      "high": 0.088,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Uniform monthly distribution with slight variation."
+      }
+     },
+     {
+      "name": "consumption_growth_factor_2025_to_2026",
+      "description": "Growth factor for household consumption on restaurants/hotels from 2025 to 2026.",
+      "value": 1.04,
+      "low": 0.98,
+      "high": 1.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Nominal growth in line with GDP and inflation."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate annual food service turnover to September and apply growth.",
+      "formula": "annual_food_service_turnover_2025 * september_share_of_annual * monthly_growth_factor_2025_to_2026",
+      "output_unit": "TWD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Count establishments and multiply by average monthly turnover, adjusted for September seasonality and growth.",
+      "formula": "number_of_food_service_establishments * average_monthly_turnover_per_establishment * september_seasonal_factor * monthly_growth_factor_2025_to_2026",
+      "output_unit": "TWD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale household consumption on restaurants/hotels to food service September turnover.",
+      "formula": "household_consumption_expenditure_on_food_service * food_service_share_of_restaurant_hotel_consumption * september_share_of_annual_consumption * consumption_growth_factor_2025_to_2026",
+      "output_unit": "TWD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: average_monthly_turnover_per_establishment ('TWD/establishment/month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Turnover of Taiwan's food and beverage services industry in September 2026, in current prices, as first reported by the Ministry of Economic Affairs Department of Statistics.",
+     "unit": "TWD"
+    },
+    "inputs": [
+     {
+      "name": "annual_food_service_turnover_2025",
+      "description": "Total food and beverage services industry turnover in Taiwan for calendar year 2025.",
+      "value": 1050000000000.0,
+      "low": 950000000000.0,
+      "high": 1150000000000.0,
+      "unit": "TWD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Extrapolated from recent MOEA annual food service turnover (~TWD 1.0 trillion in 2024) with modest growth."
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual food service turnover occurring in September.",
+      "value": 0.083,
+      "low": 0.078,
+      "high": 0.088,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a typical month; share near 1/12 with slight seasonal variation."
+      }
+     },
+     {
+      "name": "monthly_growth_factor_2025_to_2026",
+      "description": "Year-over-year growth factor for food service turnover from 2025 to 2026.",
+      "value": 1.04,
+      "low": 0.98,
+      "high": 1.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent nominal growth has been 3–8%; 4% central with uncertainty."
+      }
+     },
+     {
+      "name": "september_2025_turnover",
+      "description": "Food and beverage services turnover in September 2025 as reported by MOEA.",
+      "value": 85000000000.0,
+      "low": 80000000000.0,
+      "high": 90000000000.0,
+      "unit": "TWD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Based on recent monthly levels around TWD 80–90 billion."
+      }
+     },
+     {
+      "name": "yoy_growth_factor_sep",
+      "description": "Year-over-year growth factor for September food service turnover.",
+      "value": 1.04,
+      "low": 0.98,
+      "high": 1.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Similar to annual growth assumption."
+      }
+     },
+     {
+      "name": "number_of_food_service_establishments",
+      "description": "Number of food and beverage service establishments in Taiwan.",
+      "value": 160000,
+      "low": 140000,
+      "high": 180000,
+      "unit": "establishments",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Taiwan has roughly 150k–170k food service businesses including small vendors."
+      }
+     },
+     {
+      "name": "average_monthly_turnover_per_establishment",
+      "description": "Average monthly turnover per food service establishment.",
+      "value": 550000,
+      "low": 450000,
+      "high": 650000,
+      "unit": "TWD/establishment/month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by annual turnover ~1e12 TWD / (160k * 12) ≈ 520k TWD."
+      }
+     },
+     {
+      "name": "september_seasonal_factor",
+      "description": "Multiplicative factor for September relative to an average month.",
+      "value": 1.0,
+      "low": 0.95,
+      "high": 1.05,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is near average; small seasonal effect."
+      }
+     },
+     {
+      "name": "period_length",
+      "description": "Length of the reporting period (one month) to cancel the per-month rate.",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The target is a single month's turnover."
+      }
+     },
+     {
+      "name": "household_consumption_expenditure_on_food_service",
+      "description": "Taiwan household final consumption expenditure on restaurants and hotels (proxy for food service) in 2025.",
+      "value": 1200000000000.0,
+      "low": 1000000000000.0,
+      "high": 1400000000000.0,
+      "unit": "TWD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "DGBAS national accounts: household consumption on restaurants/hotels is roughly TWD 1.2 trillion."
+      }
+     },
+     {
+      "name": "food_service_share_of_restaurant_hotel_consumption",
+      "description": "Share of restaurant and hotel household consumption attributable to food and beverage services.",
+      "value": 0.85,
+      "low": 0.75,
+      "high": 0.95,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Hotels are a small part; food service dominates."
+      }
+     },
+     {
+      "name": "september_share_of_annual_consumption",
+      "description": "Fraction of annual household consumption on restaurants/hotels occurring in September.",
+      "value": 0.083,
+      "low": 0.078,
+      "high": 0.088,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Uniform monthly distribution with slight variation."
+      }
+     },
+     {
+      "name": "consumption_growth_factor_2025_to_2026",
+      "description": "Growth factor for household consumption on restaurants/hotels from 2025 to 2026.",
+      "value": 1.04,
+      "low": 0.98,
+      "high": 1.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Nominal growth in line with GDP and inflation."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate annual food service turnover to September and apply growth.",
+      "formula": "annual_food_service_turnover_2025 * september_share_of_annual * monthly_growth_factor_2025_to_2026",
+      "output_unit": "TWD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Count establishments and multiply by average monthly turnover, adjusted for September seasonality and growth, over a one-month period.",
+      "formula": "number_of_food_service_establishments * average_monthly_turnover_per_establishment * september_seasonal_factor * monthly_growth_factor_2025_to_2026 * period_length",
+      "output_unit": "TWD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale household consumption on restaurants/hotels to food service September turnover.",
+      "formula": "household_consumption_expenditure_on_food_service * food_service_share_of_restaurant_hotel_consumption * september_share_of_annual_consumption * consumption_growth_factor_2025_to_2026",
+      "output_unit": "TWD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2
+}

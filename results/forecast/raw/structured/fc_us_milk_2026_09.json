@@ -1,0 +1,176 @@
+{
+ "qid": "fc_us_milk_2026_09",
+ "arm": "structured",
+ "target_unit": "lb",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total milk production in the 24 major U.S. states during September 2026, as first reported by USDA NASS in the monthly Milk Production report.",
+     "unit": "lb"
+    },
+    "inputs": [
+     {
+      "name": "us_milk_production_annual",
+      "description": "Total annual U.S. milk production (all states) in a recent year",
+      "value": 226000000000.0,
+      "low": 215000000000.0,
+      "high": 237000000000.0,
+      "unit": "lb",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "US annual milk production has been around 225-230 billion lb in recent years"
+      }
+     },
+     {
+      "name": "major24_share_of_us",
+      "description": "Share of U.S. milk production coming from the 24 major states",
+      "value": 0.97,
+      "low": 0.95,
+      "high": 0.99,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The 24 major states account for nearly all U.S. milk output"
+      }
+     },
+     {
+      "name": "september_share_of_year",
+      "description": "Fraction of annual production occurring in September",
+      "value": 0.082,
+      "low": 0.078,
+      "high": 0.086,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is 1/12 of the year with slight seasonal variation"
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Year-over-year growth factor for U.S. milk production from 2025 to 2026",
+      "value": 1.005,
+      "low": 0.99,
+      "high": 1.02,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Milk production has been roughly flat with small growth"
+      }
+     },
+     {
+      "name": "dairy_cows_major24",
+      "description": "Average number of milk cows in the 24 major states during September 2026",
+      "value": 8900000.0,
+      "low": 8500000.0,
+      "high": 9300000.0,
+      "unit": "cows",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "U.S. milk cow herd is about 9.3-9.4 million head, with the 24 major states holding most of it"
+      }
+     },
+     {
+      "name": "milk_per_cow_per_day",
+      "description": "Average daily milk yield per milk cow in the 24 major states",
+      "value": 65,
+      "low": 60,
+      "high": 70,
+      "unit": "lb/cow/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "U.S. average milk per cow is roughly 64-66 lb/day"
+      }
+     },
+     {
+      "name": "days_in_september",
+      "description": "Number of days in September",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September always has 30 days"
+      }
+     },
+     {
+      "name": "us_population",
+      "description": "U.S. population in 2026",
+      "value": 340000000.0,
+      "low": 330000000.0,
+      "high": 350000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "U.S. population is around 340 million"
+      }
+     },
+     {
+      "name": "milk_consumed_per_person_per_day",
+      "description": "Average daily per-capita consumption of fluid milk and dairy milk-equivalent in the U.S.",
+      "value": 1.5,
+      "low": 1.2,
+      "high": 1.8,
+      "unit": "lb/person/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Per-capita dairy consumption is roughly 1.5 lb milk-equivalent per day"
+      }
+     },
+     {
+      "name": "production_to_consumption_ratio",
+      "description": "Ratio of total U.S. milk production to domestic milk-equivalent consumption",
+      "value": 1.15,
+      "low": 1.05,
+      "high": 1.25,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The U.S. produces somewhat more milk than it consumes domestically, with exports"
+      }
+     },
+     {
+      "name": "september_share_of_year_proxy",
+      "description": "Fraction of annual production in September used in the proxy path",
+      "value": 0.082,
+      "low": 0.078,
+      "high": 0.086,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Same seasonal share as top-down path"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale annual U.S. production by major-24 share, September share, and growth",
+      "formula": "us_milk_production_annual * major24_share_of_us * september_share_of_year * annual_growth_factor",
+      "output_unit": "lb"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Count cows in the 24 major states times daily yield times days in September",
+      "formula": "dairy_cows_major24 * milk_per_cow_per_day * days_in_september",
+      "output_unit": "lb"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from U.S. population consumption times production-to-consumption ratio, major-24 share, and September share",
+      "formula": "us_population * milk_consumed_per_person_per_day * production_to_consumption_ratio * major24_share_of_us * september_share_of_year_proxy * days_in_september",
+      "output_unit": "lb"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

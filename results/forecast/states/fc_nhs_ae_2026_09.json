@@ -325,7 +325,7 @@
    "formula": "england_population * annual_attendances_per_person * september_share_of_annual * days_per_year",
    "output_unit": "attendances",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_attendances_per_person ('attendances/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "annual_attendances_per_person",
@@ -365,7 +365,7 @@
    "formula": "england_population * annual_gp_consultations_per_person * ae_to_gp_consultation_ratio * september_share_of_annual * days_per_year",
    "output_unit": "attendances",
    "issues": [
-    "dimension mismatch: formula gives s**-1, target is dimensionless"
+    "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_gp_consultations_per_person ('consultations/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ],
    "uses": [
     "ae_to_gp_consultation_ratio",
@@ -379,8 +379,8 @@
   }
  ],
  "errors": [
-  "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
-  "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+  "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_attendances_per_person ('attendances/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+  "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_gp_consultations_per_person ('consultations/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
  ],
  "warnings": [
   "path p1: declared output_unit 'attendances' (dimensionless) differs from computed s**-1; computed one is used",
@@ -425,7 +425,7 @@
     "formula": "england_population * annual_attendances_per_person * september_share_of_annual * days_per_year",
     "output_unit": "attendances",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_attendances_per_person ('attendances/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,
@@ -459,7 +459,7 @@
     "formula": "england_population * annual_gp_consultations_per_person * ae_to_gp_consultation_ratio * september_share_of_annual * days_per_year",
     "output_unit": "attendances",
     "issues": [
-     "dimension mismatch: formula gives s**-1, target is dimensionless"
+     "dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_gp_consultations_per_person ('consultations/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
     ],
     "median": null,
     "p10": null,

@@ -1,0 +1,188 @@
+{
+ "qid": "fc_mx_exports_2026_09",
+ "arm": "structured",
+ "target_unit": "USD",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total value of Mexico's merchandise exports (original, not seasonally adjusted) during September 2026, as first published in INEGI's timely trade balance bulletin.",
+     "unit": "USD"
+    },
+    "inputs": [
+     {
+      "name": "annual_exports_2025",
+      "description": "Mexico's total merchandise exports in calendar year 2025",
+      "value": 620000000000.0,
+      "low": 580000000000.0,
+      "high": 660000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Mexico exported roughly USD 590-620bn in recent years; 2025 assumed near that level"
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Year-over-year growth factor for Mexico's merchandise exports from 2025 to 2026",
+      "value": 1.03,
+      "low": 0.95,
+      "high": 1.1,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Near-flat trade growth with tariff uncertainty; modest upside/downside"
+      }
+     },
+     {
+      "name": "september_share_of_year",
+      "description": "Share of annual merchandise exports falling in September",
+      "value": 0.082,
+      "low": 0.075,
+      "high": 0.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is a normal-length month; monthly share averages ~1/12 with seasonal variation"
+      }
+     },
+     {
+      "name": "september_2025_exports",
+      "description": "Mexico's merchandise exports in September 2025 (original figures)",
+      "value": 51000000000.0,
+      "low": 47000000000.0,
+      "high": 55000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Monthly exports have run around USD 50-55bn in recent years"
+      }
+     },
+     {
+      "name": "september_yoy_factor",
+      "description": "Year-over-year growth factor for September exports, 2025 to 2026",
+      "value": 1.03,
+      "low": 0.93,
+      "high": 1.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Similar to annual trend; monthly noise wider"
+      }
+     },
+     {
+      "name": "daily_export_value",
+      "description": "Average daily merchandise export value in 2026",
+      "value": 1750000000.0,
+      "low": 1550000000.0,
+      "high": 1950000000.0,
+      "unit": "USD/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual exports ~USD 640bn divided by 365 days"
+      }
+     },
+     {
+      "name": "september_days",
+      "description": "Number of days in September",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calendar fact"
+      }
+     },
+     {
+      "name": "september_activity_factor",
+      "description": "Factor for September's daily export intensity relative to the annual average day",
+      "value": 1.0,
+      "low": 0.92,
+      "high": 1.08,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "No strong seasonal tilt in September; allow modest deviation"
+      }
+     },
+     {
+      "name": "us_imports_from_mexico_annual",
+      "description": "US goods imports from Mexico in 2025 (proxy for Mexico's exports to its main partner)",
+      "value": 510000000000.0,
+      "low": 470000000000.0,
+      "high": 550000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "US Census data show imports from Mexico around USD 500bn"
+      }
+     },
+     {
+      "name": "us_share_of_mexico_exports",
+      "description": "Share of Mexico's merchandise exports going to the United States",
+      "value": 0.8,
+      "low": 0.75,
+      "high": 0.85,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "US accounts for roughly 80% of Mexican exports"
+      }
+     },
+     {
+      "name": "september_share_of_us_annual",
+      "description": "Share of annual US imports from Mexico arriving in September",
+      "value": 0.082,
+      "low": 0.075,
+      "high": 0.09,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Roughly uniform monthly distribution with seasonal noise"
+      }
+     },
+     {
+      "name": "us_yoy_factor",
+      "description": "Year-over-year growth factor for US imports from Mexico, 2025 to 2026",
+      "value": 1.03,
+      "low": 0.93,
+      "high": 1.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Tracks overall trade trend"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate 2026 annual exports down to September",
+      "formula": "annual_exports_2025 * annual_growth_factor * september_share_of_year",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "September 2025 level grown to 2026",
+      "formula": "september_2025_exports * september_yoy_factor",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale US imports from Mexico to total Mexican exports and to September",
+      "formula": "us_imports_from_mexico_annual * us_yoy_factor * september_share_of_us_annual / us_share_of_mexico_exports",
+      "output_unit": "USD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

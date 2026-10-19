@@ -1,0 +1,178 @@
+{
+ "qid": "fc_de_cars_2026_09",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of new passenger cars (Pkw) registered in Germany in September 2026, as first reported by the KBA monthly press release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_new_pkw_registrations",
+      "description": "Total new passenger car registrations in Germany in 2026 (full year)",
+      "value": 2800000,
+      "low": 2500000,
+      "high": 3100000,
+      "unit": "cars",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual totals ~2.6-2.9M; 2026 expected similar with slight EV recovery"
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual new car registrations occurring in September",
+      "value": 0.085,
+      "low": 0.07,
+      "high": 0.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is historically a strong month due to new plate year and quarter-end push; ~8-9% of annual"
+      }
+     },
+     {
+      "name": "monthly_baseline_registrations",
+      "description": "Average monthly new passenger car registrations in Germany in 2026",
+      "value": 233000,
+      "low": 208000,
+      "high": 258000,
+      "unit": "cars",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual total divided by 12"
+      }
+     },
+     {
+      "name": "september_seasonal_factor",
+      "description": "Multiplicative factor for September relative to average month",
+      "value": 1.05,
+      "low": 0.9,
+      "high": 1.2,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September typically slightly above average due to new model year and quarter-end incentives"
+      }
+     },
+     {
+      "name": "daily_registration_rate",
+      "description": "Average new passenger car registrations per working day in Germany in 2026",
+      "value": 9000,
+      "low": 8000,
+      "high": 10000,
+      "unit": "cars/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual ~2.8M over ~250 working days gives ~11k, but recent monthly averages suggest ~9k per working day"
+      }
+     },
+     {
+      "name": "working_days_september",
+      "description": "Number of working days in September 2026 (Mon-Fri excluding public holidays)",
+      "value": 22,
+      "low": 21,
+      "high": 22,
+      "unit": "days",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September 2026 has 22 weekdays; no federal holidays except possibly regional"
+      }
+     },
+     {
+      "name": "september_working_day_factor",
+      "description": "Factor adjusting September daily rate relative to annual average daily rate",
+      "value": 1.0,
+      "low": 0.9,
+      "high": 1.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September daily rate similar to annual average"
+      }
+     },
+     {
+      "name": "germany_population",
+      "description": "Population of Germany in 2026",
+      "value": 84000000,
+      "low": 83000000,
+      "high": 85000000,
+      "unit": "people",
+      "provenance": {
+       "type": "sourced",
+       "source": "Destatis",
+       "url": "",
+       "quote": "Germany population approximately 84 million"
+      }
+     },
+     {
+      "name": "annual_cars_per_1000_people",
+      "description": "New passenger car registrations per 1000 people per year in Germany",
+      "value": 33,
+      "low": 30,
+      "high": 37,
+      "unit": "cars per 1000 people per year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual registrations ~2.8M / 84M = 33 per 1000"
+      }
+     },
+     {
+      "name": "september_share_of_year",
+      "description": "Fraction of year represented by September",
+      "value": 0.0833,
+      "low": 0.0833,
+      "high": 0.0833,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "1/12 of year"
+      }
+     },
+     {
+      "name": "september_seasonal_index",
+      "description": "Seasonal index for September relative to average month (1.0 = average)",
+      "value": 1.05,
+      "low": 0.9,
+      "high": 1.2,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September typically slightly above average"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Annual registrations allocated to September by seasonal share",
+      "formula": "annual_new_pkw_registrations * september_share_of_annual",
+      "output_unit": "cars"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Monthly baseline times September seasonal factor",
+      "formula": "monthly_baseline_registrations * september_seasonal_factor",
+      "output_unit": "cars"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Daily rate times working days in September",
+      "formula": "daily_registration_rate * working_days_september * september_working_day_factor",
+      "output_unit": "cars"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

@@ -1,0 +1,140 @@
+{
+ "qid": "fc_pola_teu_2026_09",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total container volume in TEUs (loaded and empty imports and exports combined) handled by the Port of Los Angeles in September 2026, as first reported in its monthly cargo news release.",
+     "unit": "TEUs"
+    },
+    "inputs": [
+     {
+      "name": "annual_teu_2025",
+      "description": "Total TEUs handled by Port of Los Angeles in calendar year 2025",
+      "value": 9500000,
+      "low": 8500000,
+      "high": 10500000,
+      "unit": "TEUs",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual volumes have been roughly 8.5-10.5 million TEUs; 2025 likely near 9.5 million."
+      }
+     },
+     {
+      "name": "september_share_of_annual",
+      "description": "Fraction of annual TEU volume handled in September",
+      "value": 0.083,
+      "low": 0.075,
+      "high": 0.092,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is near average but slightly elevated ahead of holidays; roughly 1/12 with seasonal variation."
+      }
+     },
+     {
+      "name": "daily_teu_capacity",
+      "description": "Average daily TEU throughput capacity of the port",
+      "value": 28000,
+      "low": 24000,
+      "high": 32000,
+      "unit": "TEUs/day",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual volume divided by 365 gives ~26,000 TEU/day; capacity somewhat higher."
+      }
+     },
+     {
+      "name": "days_in_september",
+      "description": "Number of days in September",
+      "value": 30,
+      "low": 30,
+      "high": 30,
+      "unit": "days",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September always has 30 days."
+      }
+     },
+     {
+      "name": "utilization_rate",
+      "description": "Average utilization of daily capacity in September",
+      "value": 0.93,
+      "low": 0.85,
+      "high": 0.98,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Ports typically operate near but below capacity; September is busy but not peak."
+      }
+     },
+     {
+      "name": "us_annual_teu_2025",
+      "description": "Total TEUs handled by all US container ports in 2025",
+      "value": 60000000,
+      "low": 55000000,
+      "high": 65000000,
+      "unit": "TEUs",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "US container imports plus exports roughly 55-65 million TEUs annually."
+      }
+     },
+     {
+      "name": "la_share_of_us_teu",
+      "description": "Port of Los Angeles share of total US container TEU volume",
+      "value": 0.16,
+      "low": 0.13,
+      "high": 0.19,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "LA has historically handled about 15-18% of US container volume."
+      }
+     },
+     {
+      "name": "september_share_of_us_annual",
+      "description": "Fraction of annual US TEU volume handled in September",
+      "value": 0.083,
+      "low": 0.075,
+      "high": 0.092,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "September is roughly average for US container volumes."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate annual LA volume to September using seasonal share",
+      "formula": "annual_teu_2025 * september_share_of_annual",
+      "output_unit": "TEUs"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Daily capacity times days times utilization",
+      "formula": "daily_teu_capacity * days_in_september * utilization_rate",
+      "output_unit": "TEUs"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale from US total using LA share and September share",
+      "formula": "us_annual_teu_2025 * la_share_of_us_teu * september_share_of_us_annual",
+      "output_unit": "TEUs"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

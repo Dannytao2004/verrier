@@ -1,0 +1,152 @@
+{
+ "qid": "fc_meta_capex_2026_q3",
+ "arm": "structured",
+ "target_unit": "USD",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Meta Platforms' capital expenditures including principal payments on finance leases for Q3 2026 (quarter ended September 30, 2026), as first reported in the Q3 2026 earnings press release.",
+     "unit": "USD"
+    },
+    "inputs": [
+     {
+      "name": "q2_2026_capex",
+      "description": "Meta's reported capex including finance lease principal payments in Q2 2026",
+      "value": 17000000000.0,
+      "low": 15000000000.0,
+      "high": 19000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Extrapolating Meta's 2025-2026 capex ramp (~$70-80B annualized run-rate by mid-2026)"
+      }
+     },
+     {
+      "name": "qoq_growth_factor",
+      "description": "Quarter-over-quarter growth factor for capex from Q2 to Q3 2026",
+      "value": 1.06,
+      "low": 0.95,
+      "high": 1.18,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Meta capex has grown roughly 5-15% QoQ during the AI infrastructure buildout, with some lumpiness"
+      }
+     },
+     {
+      "name": "fy2026_capex_guidance_midpoint",
+      "description": "Midpoint of Meta's full-year 2026 capex guidance (including finance leases) as of mid-2026",
+      "value": 72000000000.0,
+      "low": 65000000000.0,
+      "high": 80000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Meta's 2025 guidance was ~$60-65B; 2026 guidance likely raised to ~$65-80B given AI datacenter spend"
+      }
+     },
+     {
+      "name": "h1_2026_share_of_fy",
+      "description": "Share of full-year capex spent in H1 2026",
+      "value": 0.45,
+      "low": 0.4,
+      "high": 0.5,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Capex is typically back-half weighted as budgets ramp through the year"
+      }
+     },
+     {
+      "name": "q3_share_of_h2",
+      "description": "Share of H2 2026 capex falling in Q3",
+      "value": 0.48,
+      "low": 0.44,
+      "high": 0.52,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Q3 and Q4 are roughly balanced, with Q4 often slightly heavier"
+      }
+     },
+     {
+      "name": "annual_capex_per_gpu_cluster_dollar",
+      "description": "Annualized capex per dollar of AI compute cluster investment Meta is deploying (proxy scaling factor)",
+      "value": 1.0,
+      "low": 0.8,
+      "high": 1.2,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Placeholder scaling to relate infrastructure spend to reported capex"
+      }
+     },
+     {
+      "name": "meta_2026_revenue",
+      "description": "Meta's total revenue for full-year 2026",
+      "value": 210000000000.0,
+      "low": 195000000000.0,
+      "high": 225000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Meta 2025 revenue ~$190-200B growing ~8-10% into 2026"
+      }
+     },
+     {
+      "name": "capex_intensity",
+      "description": "Capex as a share of revenue for Meta in 2026",
+      "value": 0.34,
+      "low": 0.3,
+      "high": 0.38,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Capex intensity has risen from ~20% (2023) toward ~30-35% as AI infrastructure dominates"
+      }
+     },
+     {
+      "name": "q3_share_of_year",
+      "description": "Share of annual capex falling in Q3",
+      "value": 0.24,
+      "low": 0.22,
+      "high": 0.26,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "One quarter of the year, slightly below 25% due to back-half weighting"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate full-year 2026 guidance midpoint to Q3 via H1 share and Q3 share of H2",
+      "formula": "fy2026_capex_guidance_midpoint * (1 - h1_2026_share_of_fy) * q3_share_of_h2",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Grow Q2 2026 reported capex by the QoQ growth factor",
+      "formula": "q2_2026_capex * qoq_growth_factor",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale annual revenue by capex intensity, then take Q3's share of the year",
+      "formula": "meta_2026_revenue * capex_intensity * q3_share_of_year",
+      "output_unit": "USD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1
+}

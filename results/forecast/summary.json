@@ -173,7 +173,7 @@
     ]
    },
    "remaining_errors": [
-    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless"
+    "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_births_2025_avg ('births/month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ]
   }
  },
@@ -219,9 +219,10 @@
     ]
    },
    "remaining_errors": [
-    "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
-    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
-    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+    "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_birth_rate ('births per 1000 people per year'), days_in_september ('days'), days_in_year ('days'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_births_per_woman_20_39 ('births per woman per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: monthly_births_2025 ('births per month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "input 'annual_birth_rate': its unit 'births per 1000 people per year' contains the number 1000, which Python already applies when converting units, so a formula must not divide or multiply by 1000 again (neither as a number nor as an input equal to 1000)"
    ]
   }
  },
@@ -355,8 +356,8 @@
     ]
    },
    "remaining_errors": [
-    "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
-    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+    "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_attendances_per_person ('attendances/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_gp_consultations_per_person ('consultations/person/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
    ]
   }
  },
@@ -402,10 +403,373 @@
     ]
    },
    "remaining_errors": [
-    "path p1: dimension mismatch: formula gives s**-1, target is dimensionless",
-    "path p2: dimension mismatch: formula gives s**-1, target is dimensionless",
-    "path p3: dimension mismatch: formula gives s**-1, target is dimensionless"
+    "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_movers_per_1000 ('people per 1000 people per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: movers_per_1000_august ('people per 1000 people per month'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_household_move_rate ('moves per household per year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "input 'annual_movers_per_1000': its unit 'people per 1000 people per year' contains the number 1000, which Python already applies when converting units, so a formula must not divide or multiply by 1000 again (neither as a number nor as an input equal to 1000)",
+    "input 'movers_per_1000_august': its unit 'people per 1000 people per month' contains the number 1000, which Python already applies when converting units, so a formula must not divide or multiply by 1000 again (neither as a number nor as an input equal to 1000)",
+    "input 'people_per_1000': its unit 'people per 1000 people' contains the number 1000, which Python already applies when converting units, so a formula must not divide or multiply by 1000 again (neither as a number nor as an input equal to 1000)"
    ]
+  }
+ },
+ {
+  "id": "fc_pola_teu_2026_09",
+  "month": null,
+  "as_of": "2026-09-10",
+  "released": "2026-10-09",
+  "answer_value": 1042652,
+  "source": "https://portoflosangeles.org/references/2026-news-releases/news_100926_sept_cargo",
+  "last_year_same_month": {
+   "estimate": 883053,
+   "pct_err": -0.15307024779120937
+  },
+  "naive": {
+   "status": "ok",
+   "estimate": 780000.0,
+   "pct_err": -0.2519076355294,
+   "log10_err": -0.1260447779330374,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": 779969.603847736,
+   "pct_err": -0.251936788259423,
+   "log10_err": -0.1260617024694751,
+   "p10": 645996.2232375308,
+   "p90": 925522.0786711196,
+   "covered_80": false,
+   "n_valid_paths": 3,
+   "attempts": 1,
+   "paths": {
+    "p1": [
+     "top_down",
+     783787.2474521718
+    ],
+    "p2": [
+     "bottom_up",
+     757403.4453062392
+    ],
+    "p3": [
+     "proxy",
+     779969.6038477365
+    ]
+   },
+   "remaining_errors": []
+  }
+ },
+ {
+  "id": "fc_es_transit_2026_08",
+  "month": null,
+  "as_of": "2026-09-11",
+  "released": "2026-10-09",
+  "answer_value": 371623271,
+  "source": "https://www.ine.es/dyngs/Prensa/TV0826.htm",
+  "last_year_same_month": {
+   "estimate": 362445480,
+   "pct_err": -0.024696491625251338
+  },
+  "naive": {
+   "status": "ok",
+   "estimate": 480000000.0,
+   "pct_err": 0.2916306309569079,
+   "log10_err": 0.11113833573953483,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": 431746670.0495819,
+   "pct_err": 0.16178588302017793,
+   "log10_err": 0.06512609501532916,
+   "p10": 374130597.6329782,
+   "p90": 920633767.0611734,
+   "covered_80": false,
+   "n_valid_paths": 3,
+   "attempts": 2,
+   "paths": {
+    "p1": [
+     "top_down",
+     425554231.00284183
+    ],
+    "p2": [
+     "bottom_up",
+     431746670.04958224
+    ],
+    "p3": [
+     "proxy",
+     831494083.0638406
+    ]
+   },
+   "remaining_errors": []
+  }
+ },
+ {
+  "id": "fc_ca_rail_2026_07",
+  "month": null,
+  "as_of": "2026-08-29",
+  "released": "2026-09-28",
+  "answer_value": 31686803,
+  "source": "https://www150.statcan.gc.ca/n1/daily-quotidien/260928/dq260928a-eng.htm",
+  "last_year_same_month": {
+   "estimate": 30880543,
+   "pct_err": -0.0254446622462986
+  },
+  "naive": {
+   "status": "unit_unreconciled",
+   "estimate": null,
+   "pct_err": null,
+   "log10_err": null,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": null,
+   "pct_err": null,
+   "log10_err": null,
+   "p10": null,
+   "p90": null,
+   "covered_80": false,
+   "n_valid_paths": 0,
+   "attempts": 2,
+   "paths": {
+    "p1": [
+     "top_down",
+     null
+    ],
+    "p2": [
+     "bottom_up",
+     null
+    ],
+    "p3": [
+     "proxy",
+     null
+    ]
+   },
+   "remaining_errors": [
+    "path p1: dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)",
+    "path p2: dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)",
+    "path p3: dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+   ]
+  }
+ },
+ {
+  "id": "fc_de_cars_2026_09",
+  "month": null,
+  "as_of": "2026-09-05",
+  "released": "2026-10-05",
+  "answer_value": 256774,
+  "source": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+  "last_year_same_month": {
+   "estimate": 235528,
+   "pct_err": -0.08274202216735338
+  },
+  "naive": {
+   "status": "ok",
+   "estimate": 210000.0,
+   "pct_err": -0.1821601875579303,
+   "log10_err": -0.08733175181170402,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": 2337.3841124546584,
+   "pct_err": -0.9908971153136429,
+   "log10_err": -2.0408209587953383,
+   "p10": 1763.7909602516456,
+   "p90": 2773.5086412707124,
+   "covered_80": false,
+   "n_valid_paths": 3,
+   "attempts": 1,
+   "paths": {
+    "p1": [
+     "top_down",
+     2337.384112454659
+    ],
+    "p2": [
+     "bottom_up",
+     2410.9981644343866
+    ],
+    "p3": [
+     "proxy",
+     1913.3368636059733
+    ]
+   },
+   "remaining_errors": []
+  }
+ },
+ {
+  "id": "fc_hk_visitors_2026_09",
+  "month": null,
+  "as_of": "2026-09-14",
+  "released": "2026-10-15",
+  "answer_value": 4031090,
+  "source": "https://www.discoverhongkong.com/content/dam/dhk/intl/corporate/newsroom/press-release/hktb/2026/10-Sep-Visitor-Arrivals-E.pdf",
+  "last_year_same_month": {
+   "estimate": 3292197,
+   "pct_err": -0.1832985619274191
+  },
+  "naive": {
+   "status": "ok",
+   "estimate": 3200000.0,
+   "pct_err": -0.20617004333815425,
+   "log10_err": -0.10027251620303762,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": 3614797.1514228885,
+   "pct_err": -0.10327054185768902,
+   "log10_err": -0.04733856315227248,
+   "p10": 3016904.244775141,
+   "p90": 4200579.192467122,
+   "covered_80": true,
+   "n_valid_paths": 3,
+   "attempts": 2,
+   "paths": {
+    "p1": [
+     "top_down",
+     3614797.1514228894
+    ],
+    "p2": [
+     "bottom_up",
+     3396231.7576221246
+    ],
+    "p3": [
+     "proxy",
+     3770169.0111761484
+    ]
+   },
+   "remaining_errors": []
+  }
+ },
+ {
+  "id": "fc_us_starts_2026_08",
+  "month": null,
+  "as_of": "2026-08-17",
+  "released": "2026-09-17",
+  "answer_value": 1275000,
+  "source": "https://www.census.gov/construction/nrc/pdf/newresconst.pdf",
+  "last_year_same_month": {
+   "estimate": 1291000,
+   "pct_err": 0.012549019607843048
+  },
+  "naive": {
+   "status": "ok",
+   "estimate": 1350000.0,
+   "pct_err": 0.05882352941176472,
+   "log10_err": 0.024823583725032145,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": 1335707.7804621987,
+   "pct_err": 0.04761394546054798,
+   "log10_err": 0.02020127096382156,
+   "p10": 1113974.5313512348,
+   "p90": 1629544.2974413477,
+   "covered_80": true,
+   "n_valid_paths": 3,
+   "attempts": 1,
+   "paths": {
+    "p1": [
+     "top_down",
+     1396711.0346512897
+    ],
+    "p2": [
+     "bottom_up",
+     1335707.7804621982
+    ],
+    "p3": [
+     "proxy",
+     1312746.45863852
+    ]
+   },
+   "remaining_errors": []
+  }
+ },
+ {
+  "id": "fc_us_gen_2026_07",
+  "month": null,
+  "as_of": "2026-08-25",
+  "released": "2026-09-24",
+  "answer_value": 453744,
+  "source": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_1_01",
+  "last_year_same_month": {
+   "estimate": 446320,
+   "pct_err": -0.016361648859268607
+  },
+  "naive": {
+   "status": "unit_unreconciled",
+   "estimate": null,
+   "pct_err": null,
+   "log10_err": null,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": null,
+   "pct_err": null,
+   "log10_err": null,
+   "p10": null,
+   "p90": null,
+   "covered_80": false,
+   "n_valid_paths": 0,
+   "attempts": 2,
+   "paths": {
+    "p1": [
+     "top_down",
+     null
+    ],
+    "p2": [
+     "bottom_up",
+     null
+    ],
+    "p3": [
+     "proxy",
+     null
+    ]
+   },
+   "remaining_errors": [
+    "path p1: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)",
+    "path p2: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)",
+    "path p3: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+   ]
+  }
+ },
+ {
+  "id": "fc_kr_online_2026_08",
+  "month": null,
+  "as_of": "2026-09-01",
+  "released": "2026-10-01",
+  "answer_value": 24211800000000,
+  "source": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=447300",
+  "last_year_same_month": {
+   "estimate": 22480200000000,
+   "pct_err": -0.07151884618243998
+  },
+  "naive": {
+   "status": "ok",
+   "estimate": 21500000000000.0,
+   "pct_err": -0.11200323809051782,
+   "log10_err": -0.05158861787838975,
+   "attempts": 1
+  },
+  "structured": {
+   "estimate": 19062840058445.188,
+   "pct_err": -0.2126632444326656,
+   "log10_err": -0.10383947373584253,
+   "p10": 9267149811796.521,
+   "p90": 23427107220328.918,
+   "covered_80": false,
+   "n_valid_paths": 3,
+   "attempts": 2,
+   "paths": {
+    "p1": [
+     "top_down",
+     20571071068452.875
+    ],
+    "p2": [
+     "bottom_up",
+     11600339934103.078
+    ],
+    "p3": [
+     "proxy",
+     19062840058445.156
+    ]
+   },
+   "remaining_errors": []
   }
  }
 ]
