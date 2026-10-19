@@ -229,6 +229,8 @@ agent 用命令行 `--ask --auto-approve`，两个基线用 `probes/smoke_run.py
 | S20 | 已修（v2.8r） | 终稿和点表里乘过倍数的值配着原单位串（「47,741,300 万元 RMB」），裁判也据此写 role「in 10,000 CNY」 | `v28q_test` 终稿 | v2.8r 第 1、2 层 |
 | S21 | 记 | 单位裁定隐含密度：恒顺 v2.8i m2「吨 / (毫升/瓶)」被裁定成 1000000 bottle/year（默认 1 kg/L），量纲上缺一个密度输入 | `probes/out/unit_multiplier/replay.json` | 没改 |
 | S22 | 记（用户 10-18 指出） | 修正轮把裁判修不了的问题也交回裁判：恒顺 v2.8p 三轮修正都收到「m1 和 m3 差 3 倍以上」，真正原因在单位核对层，裁判看不到；m1 三轮结果逐位相同也不停，修正阶段占这次运行 43% 的 token | `v28p_test` 的 judge_rounds[1].repairs、calls.jsonl | 没改 |
+| S23 | 记（test2 未公布题，冻结版不修） | 墨西哥出口 `fc_mx_exports_2026_09` 没出数：173 个点裁判只保留 8 个，4 个方法引用的正是它自己丢掉的点（p43、p1、p110、p29，"id unknown or discarded"）；3 轮修正每轮换一个被丢的点去引用，都没修好。所有模型调用都成功，不是基础设施故障，按预注册记为失败 | `results/agent/fc_mx_exports_2026_09/test2/state.json` 的 judge_rounds[1].repairs | 没改 |
+| S24 | 记（test2 未公布题，冻结版不修） | 德文 / 欧式数字写法：千分位用「.」时，两个点的写法（`2.994.415`）因为有歧义被丢，一个点的写法（`-66.981`、`-44.000`）被当成小数读成 -66.981、-44.0。德国失业 `fc_de_unemployed_2026_10` 因此只剩读错的变化量，「水平值 + 负变化量」又没法按对数正态抽样，没出数。也会影响回测题里的 KBA（`256.774`）和 INE（`371,6 millones`） | `results/agent/fc_de_unemployed_2026_10/test2/state.json` 的 p11、p20 | 没改 |
 
 ## H. 我的做事方式（这些低级错误的来源）
 

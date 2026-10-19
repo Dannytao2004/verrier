@@ -3,6 +3,12 @@
 **冻结的代码：tag `frozen-v2.8r` = `v2.8r` = `258a53d`**（用户 10-18：「预注册就用这版」），取代 `frozen-v2.8n`。
 留出测试 2 的预注册见 `EVAL_TEST2_PLAN.md`（tag `test2-prereg`）：8 道题，`set: "test2"`，题目、真值、哨兵值在 `triangulate/forecast.py`。
 
+## 进度（10-19）
+
+6 道未公布题已在公布前跑完（10-19 04:49–05:06 UTC，tag `test2`）：Meta Q3 capex $42.33B、美国 24 州 9 月牛奶 185.77 亿磅、
+台湾 9 月餐饮 895.3 億元、Alphabet 每分钟 293.6 亿 token；墨西哥 9 月出口、德国 10 月失业没出数（BUGS S23、S24，都不是基础设施故障，
+按预注册记为失败、不重跑）。真值公布后（10-21 到 10-30）登记再打分。8 道回测题和两个基线臂还没跑（用户 10-19：「别的以后再说」）。
+
 ## 下一步
 
 1. 跑 agent：每题一次 `python -m triangulate agent --question <id> --tag test2 --auto-approve`（8 道，跑的过程中不改代码）。
