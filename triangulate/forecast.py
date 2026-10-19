@@ -118,6 +118,94 @@ QUESTIONS += [
 ]
 for _q in QUESTIONS[2:]:
     _q.update(answer_unit="", strict=False)
+# 留出测试 2（2026-10-18 选定，代码冻结在 frozen-v2.8r = 258a53d，在任何模型调用之前提交；见 EVAL_TEST2_PLAN.md）。
+# 选题标准同上（公布日 2026-09-11..10-17、as_of = 公布日前约 30 天、领域不和前 11 题重复），数值和公布日都由一个找题、
+# 一个复查的 agent 打开官方发布页核过。answer_unit 按题给（基线臂的量纲检查用；计数题留空，等于无量纲计数）。
+# leak_values = 真值 + 同一序列里公布日晚于 as_of 的已知官方值。
+QUESTIONS += [
+    # 洛杉矶港 2026-10-09 新闻稿：9 月 1,042,652 TEU（统计表 1,042,652.30，同比 +18.07%，历史纪录）；2025 年 9 月 883,053.25
+    # （historical-teu-statistics-2025）。晚于 as_of：同表的进出口分项、1-9 月累计 8,081,625.55。8 月新闻稿（09-09）没有存档。
+    {"id": "fc_pola_teu_2026_09", "set": "test2", "as_of": "2026-09-10", "released": "2026-10-09", "answer_value": 1042652,
+     "last_year": 883053, "source": "https://portoflosangeles.org/references/2026-news-releases/news_100926_sept_cargo",
+     "question": _ASOF.format(as_of="2026-09-10") + "Estimate the total container volume handled by the Port of Los Angeles in "
+                 "September 2026, in TEUs (twenty-foot equivalent units; loaded and empty imports and exports combined), as it "
+                 "will be first reported in the Port of Los Angeles's monthly cargo news release.",
+     "answer_unit": "", "unit_hint": "a count of TEUs",
+     "leak_values": [1042652, 1042652.3, 8081625.55, 545695.6, 125750.75, 371205.95]},
+    # 西班牙 INE 2026-10-09「Estadística de Transporte de Personas」TV0826：8 月公共交通乘客 371,623.271 千人次（+3.3%）；
+    # 2025 年 8 月首发 362,445.48 千（TV0825，本期已修订为约 359,817 千，推算）。晚于 as_of：urbano / interurbano / especial /
+    # metro / autobús urbano 分项。TV0426-TV0726 没有存档，存档里最新的 2026 年月份是 3 月。
+    {"id": "fc_es_transit_2026_08", "set": "test2", "as_of": "2026-09-11", "released": "2026-10-09", "answer_value": 371623271,
+     "last_year": 362445480, "source": "https://www.ine.es/dyngs/Prensa/TV0826.htm",
+     "question": _ASOF.format(as_of="2026-09-11") + "Estimate the total number of passengers who used public transport in Spain "
+                 "in August 2026 (urban, interurban and special/discretionary transport combined), as it will be first reported "
+                 "in the provisional data of the National Statistics Institute's (INE) Passenger Transport Statistics "
+                 "(Estadística de Transporte de Personas).",
+     "answer_unit": "", "unit_hint": "a count of passengers",
+     "leak_values": [371623271, 371623.271, 231892575, 119355913, 20374783, 88341988, 143550587]},
+    # Statistics Canada 2026-09-28 The Daily「Railway carloadings, July 2026」：31,686,803 吨（31.7 Mt，+2.6%；表 23-10-0216-01，
+    # v74869）。2025 年 7 月现表值 30,880,543（首发「30.7 million tonnes」）。晚于 as_of：non-intermodal 24.8 Mt、intermodal
+    # 3.2 Mt、US connections 3.8 Mt，以及同日修订的 1-6 月。6 月的 Daily 没有存档。
+    {"id": "fc_ca_rail_2026_07", "set": "test2", "as_of": "2026-08-29", "released": "2026-09-28", "answer_value": 31686803,
+     "last_year": 30880543, "source": "https://www150.statcan.gc.ca/n1/daily-quotidien/260928/dq260928a-eng.htm",
+     "question": _ASOF.format(as_of="2026-08-29") + "Estimate the total freight carried by Canadian railways in July 2026, in "
+                 "tonnes, as it will be first reported by Statistics Canada in its monthly Railway carloadings release (total "
+                 "traffic carried, Canada).",
+     "answer_unit": "tonne", "unit_hint": "a mass of freight in tonnes",
+     "leak_values": [31686803, 24800000, 3200000, 3800000]},
+    # KBA 2026-10-05 pm41：9 月新注册乘用车 256.774（+9,0%）；2025 年 9 月 235.528（pm39_2025）。晚于 as_of：1-9 月 2.221.798、
+    # BEV 88.599、全部 Kfz 306.292。8 月稿（09-03）首次存档是 09-08，回测里能读到的最新月份是 7 月。
+    {"id": "fc_de_cars_2026_09", "set": "test2", "as_of": "2026-09-05", "released": "2026-10-05", "answer_value": 256774,
+     "last_year": 235528,
+     "source": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+     "question": _ASOF.format(as_of="2026-09-05") + "Estimate the number of new passenger cars (Pkw) registered in Germany in "
+                 "September 2026, as it will be first reported in the Kraftfahrt-Bundesamt's (KBA) monthly press release on "
+                 "vehicle registrations.",
+     "answer_unit": "", "unit_hint": "a count of passenger cars",
+     "leak_values": [256774, 2221798, 88599, 306292]},
+    # 香港旅游发展局 2026-10-15 新闻稿：9 月访港旅客临时数 4,031,090（+22%）；2025 年 9 月 3,292,197。晚于 as_of：8 月临时数
+    # 5,456,320（2026-09-15 公布）、1-8 月约 36,672,650、9 月内地 3,170,122 / 非内地 860,968、1-9 月 40,703,740 / 内地 31,901,686。
+    {"id": "fc_hk_visitors_2026_09", "set": "test2", "as_of": "2026-09-14", "released": "2026-10-15", "answer_value": 4031090,
+     "last_year": 3292197,
+     "source": "https://www.discoverhongkong.com/content/dam/dhk/intl/corporate/newsroom/press-release/hktb/2026/10-Sep-Visitor-Arrivals-E.pdf",
+     "question": _ASOF.format(as_of="2026-09-14") + "Estimate the total number of visitor arrivals to Hong Kong in September 2026, "
+                 "as it will be first reported (provisional figure) in the Hong Kong Tourism Board's monthly visitor arrivals "
+                 "press release.",
+     "answer_unit": "", "unit_hint": "a count of visitor arrivals",
+     "leak_values": [4031090, 5456320, 36672650, 3170122, 860968, 40703740, 31901686]},
+    # 美国 Census / HUD 2026-09-17「Monthly New Residential Construction, August 2026」：私人住宅开工季调年率 1,275,000；
+    # 2025 年 8 月 1,291,000。晚于 as_of：7 月报告（08-18）的首发值约 1,239,000、7 月修订 1,309,000、8 月 permits 1,394,000、
+    # completions 1,128,000、NSA 110,500；1,415,000 是找题 agent 列的同表值，出处未核实。回测必须截断在 08-17。
+    {"id": "fc_us_starts_2026_08", "set": "test2", "as_of": "2026-08-17", "released": "2026-09-17", "answer_value": 1275000,
+     "last_year": 1291000, "source": "https://www.census.gov/construction/nrc/pdf/newresconst.pdf",
+     "question": _ASOF.format(as_of="2026-08-17") + "Estimate the seasonally adjusted annual rate of privately-owned housing starts "
+                 "in the United States in August 2026 (the number of housing units at an annual rate, as in '1,300,000'), as it "
+                 "will be first reported in the U.S. Census Bureau and HUD Monthly New Residential Construction release.",
+     "answer_unit": "", "unit_hint": "a count of housing units (seasonally adjusted annual rate)",
+     "leak_values": [1275000, 1239000, 1309000, 1394000, 1128000, 110500, 1415000]},
+    # 美国 EIA 2026-09-24 Electric Power Monthly Table 1.1：7 月公用事业规模净发电量 453,744 千 MWh（= GWh）；2025 年 7 月
+    # 446,320。晚于 as_of：6 月 399,671（08-26 公布）、1-7 月 2,629,899、滚动 12 个月 4,480,718、小规模光伏 10,925。
+    {"id": "fc_us_gen_2026_07", "set": "test2", "as_of": "2026-08-25", "released": "2026-09-24", "answer_value": 453744,
+     "last_year": 446320, "source": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_1_01",
+     "question": _ASOF.format(as_of="2026-08-25") + "Estimate total U.S. net electricity generation at utility-scale facilities "
+                 "(all sectors, all energy sources, excluding small-scale solar) in July 2026, in gigawatt-hours (GWh, equal to "
+                 "thousand megawatthours), as it will be first reported in the U.S. Energy Information Administration's Electric "
+                 "Power Monthly (Table 1.1).",
+     "answer_unit": "GWh", "unit_hint": "an amount of electricity in GWh",
+     "leak_values": [453744, 399671, 2629899, 4480718, 10925]},
+    # 韩国国家数据处（原统计厅）2026-10-01「2026년 8월 온라인쇼핑동향」：거래액 24조 2,118억원（+7.3%）、모바일 18조 9,021억원；
+    # 2025 年 8 月首发 22조 4,802억원（2025-10-01）。7 月稿在 as_of 当天（09-01）发布；发布方网站上 2026 年 1-7 月的稿都没有存档。
+    {"id": "fc_kr_online_2026_08", "set": "test2", "as_of": "2026-09-01", "released": "2026-10-01", "answer_value": 24211800000000,
+     "last_year": 22480200000000, "source": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=447300",
+     "question": _ASOF.format(as_of="2026-09-01") + "Estimate the total value of online shopping transactions in South Korea in "
+                 "August 2026, in Korean won (KRW), as it will be first reported in the national statistics agency's monthly "
+                 "Online Shopping Trends release (온라인쇼핑동향, National Data Office, formerly Statistics Korea).",
+     "answer_unit": "KRW", "unit_hint": "an amount of money in KRW",
+     "leak_values": [24211800000000, 18902100000000]},
+]
+for _q in QUESTIONS:
+    if _q.get("set") == "test2":
+        _q["strict"] = False
 FNS = {"naive": run_naive, "structured": run_structured}
 
 

@@ -1,3 +1,16 @@
+# 断点（2026-10-18 晚，冻结 v2.8r，留出测试 2 已预注册）
+
+**冻结的代码：tag `frozen-v2.8r` = `v2.8r` = `258a53d`**（用户 10-18：「预注册就用这版」），取代 `frozen-v2.8n`。
+留出测试 2 的预注册见 `EVAL_TEST2_PLAN.md`（tag `test2-prereg`）：8 道题，`set: "test2"`，题目、真值、哨兵值在 `triangulate/forecast.py`。
+
+## 下一步
+
+1. 跑 agent：每题一次 `python -m triangulate agent --question <id> --tag test2 --auto-approve`（8 道，跑的过程中不改代码）。
+2. 跑基线：`python -m triangulate forecast`（只补跑没有保存回复的题）。
+3. 打分并写报告：按 EVAL_TEST2_PLAN.md 的成功标准和单位口径；基线失败也要查原因。
+
+---
+
 # 断点（2026-10-18，v2.8o–v2.8r，冻结之后的改动）
 
 **`frozen-v2.8n` 不变。** v2.8o 在它之后，预注册要用哪一版还没定（用户说先频繁改，只跑基本测试）。
