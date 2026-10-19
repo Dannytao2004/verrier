@@ -14,3 +14,6 @@ docs/graphs/realfp/
 
 # probe raw outputs
 probes/out/
+
+# Aero UI 草稿用的第三方素材（SpaceX / NASA / Blue Origin 等，内部 demo 用，不进 git）
+triangulate/web/static/aero_assets/

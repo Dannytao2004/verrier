@@ -492,6 +492,12 @@ class TestApiSaved(unittest.TestCase):
     def test_pages_and_saved_run(self):
         self.assertIn("triangulate-agent", self.c.get("/").text)
         self.assertEqual(self.c.get("/static/app.js").status_code, 200)
+        # 新旧两版界面并列：都能打开，新版复用同一组共享脚本
+        self.assertEqual(self.c.get("/verrier").status_code, 200)
+        aero = self.c.get("/verrier/aero")
+        self.assertEqual(aero.status_code, 200)
+        for js in ("/static/verrier_evidence.js", "/static/verrier_graph.js", "/static/verrier_console.js"):
+            self.assertIn(js, aero.text)
         runs = self.c.get("/api/saved").json()["runs"]
         self.assertIn(("fc_jp_births_2026_07", "test1"), {(r["qid"], r["tag"]) for r in runs})
         v = self.c.get("/api/result", params={"qid": "fc_jp_births_2026_07", "tag": "test1"}).json()

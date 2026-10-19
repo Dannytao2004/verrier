@@ -43,6 +43,11 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
         # Verrier 宣传页 + 控制台（提问 → 人工确认 → 进度 → 结果），和经典界面用同一套 API
         return FileResponse(STATIC / "verrier_console.html", media_type="text/html; charset=utf-8")
 
+    @app.get("/verrier/aero")
+    def verrier_aero():
+        # 并列的新版界面（航天宣传风草稿）：同一套 API 和共享 JS，旧版 /verrier 不变；照片在 static/aero_assets/（不进 git）
+        return FileResponse(STATIC / "verrier_aero.html", media_type="text/html; charset=utf-8")
+
     # ---------- 网页运行 ----------
     @app.post("/api/runs")
     def start_run(body: dict = Body(...)):

@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VERRIER · Aero — Mission Control</title>
+<meta name="description" content="Verrier is an AI research agent that reconstructs figures nobody has published yet, from public evidence, with every step on the record.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Ccircle cx='27' cy='29' r='18' fill='none' stroke='%23F4F2EC' stroke-width='3'/%3E%3Ccircle cx='27' cy='29' r='3.5' fill='%23F4F2EC'/%3E%3Ccircle cx='46' cy='44' r='8' fill='%23F4F2EC'/%3E%3C/svg%3E">
+<script>
+/* 第一次绘制前设好语言（和经典版同一个 key 'verrier-lang'），并打开动效门控；aero.js 3 秒内没跑起来就撤掉门控，内容照常显示 */
+(function(){var r=document.documentElement,l=null;try{l=localStorage.getItem('verrier-lang')}catch(e){}
+if(l!=='en'&&l!=='zh')l=(navigator.language||'').toLowerCase().indexOf('zh')===0?'zh':'en';
+r.setAttribute('data-lang',l);r.lang=l==='zh'?'zh-CN':'en';r.classList.add('js');
+setTimeout(function(){if(!window.__aeroReady)r.classList.remove('js')},3000);})();
+</script>
+<link rel="preload" as="image" type="image/avif" imagesrcset="/static/aero_assets/img/aerospace-07-1920.avif 1920w, /static/aero_assets/img/aerospace-07-2560.avif 2560w, /static/aero_assets/img/aerospace-07-3840.avif 3840w" imagesizes="100vw" fetchpriority="high">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,300..800&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/verrier_aero.css">
+</head>
+<body data-view="0">
+<a class="skip" href="#main"><span class="en">Skip to content</span><span class="zh">跳到正文</span></a>
+
+<header class="top">
+  <a class="brand" href="#s0" aria-label="Verrier"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="27" cy="29" r="18" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="27" cy="29" r="3.5" fill="currentColor"/><circle cx="46" cy="44" r="8" fill="currentColor"/></svg><b>VERRIER</b></a>
+  <div class="pn">AI RESEARCH AGENT · REV C · 2026</div>
+  <a class="classic-top" href="/verrier"><span class="en">Classic UI</span><span class="zh">经典版</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+  <nav class="links" id="nav" data-aria-en="Sections" data-aria-zh="章节" aria-label="Sections">
+    <a href="#s1"><i>01</i><span class="en">Story</span><span class="zh">故事</span></a>
+    <a href="#s2"><i>02</i><span class="en">How it works</span><span class="zh">原理</span></a>
+    <a href="#s3"><i>03</i><span class="en">Trust</span><span class="zh">可信</span></a>
+    <a href="#s4"><i>04</i><span class="en">Results</span><span class="zh">成绩</span></a>
+    <a href="#s5"><i>05</i><span class="en">Use cases</span><span class="zh">场景</span></a>
+    <a href="#console" class="cx-nav"><i>06</i><span class="en">Console</span><span class="zh">控制台</span></a>
+  </nav>
+  <span class="secnow" id="secNow" aria-hidden="true">00 / 05</span>
+  <button class="lang" id="lang" type="button" data-aria-en="Switch language" data-aria-zh="切换语言" aria-label="Switch language"><span class="en"><b>EN</b> / 中</span><span class="zh">EN / <b>中</b></span></button>
+</header>
+
+<nav class="idx" id="idx" data-aria-en="Section index" data-aria-zh="章节索引" aria-label="Section index">
+  <a href="#s0"><span class="sr"><span class="en">Cover</span><span class="zh">封面</span></span><span aria-hidden="true">00</span><i aria-hidden="true"></i></a>
+  <a href="#s1"><span class="sr"><span class="en">Story</span><span class="zh">故事</span></span><span aria-hidden="true">01</span><i aria-hidden="true"></i></a>
+  <a href="#s2"><span class="sr"><span class="en">How it works</span><span class="zh">原理</span></span><span aria-hidden="true">02</span><i aria-hidden="true"></i></a>
+  <a href="#s3"><span class="sr"><span class="en">Trust</span><span class="zh">可信</span></span><span aria-hidden="true">03</span><i aria-hidden="true"></i></a>
+  <a href="#s4"><span class="sr"><span class="en">Results</span><span class="zh">成绩</span></span><span aria-hidden="true">04</span><i aria-hidden="true"></i></a>
+  <a href="#s5"><span class="sr"><span class="en">Use cases</span><span class="zh">场景</span></span><span aria-hidden="true">05</span><i aria-hidden="true"></i></a>
+</nav>
+
+<a class="ask" id="askBtn" href="#console" data-aria-en="Ask Verrier" data-aria-zh="向 Verrier 提问" aria-label="Ask Verrier">
+  <b><span class="en">Ask</span><span class="zh">提问</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></b>
+  <span class="ask-sub"><span class="en">Hand Verrier a number nobody has published.</span><span class="zh">把一个还没人公布的数字交给 Verrier。</span></span>
+</a>
+
+<main id="main">
+<!-- 00 hero：aerospace-07（阿尔忒弥斯二号「月球边缘外的地球」） -->
+<section class="sec hero" id="s0" aria-labelledby="h-s0">
+  <div class="stage">
+    <figure class="ph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAUEB//EACAQAAIBAwQDAAAAAAAAAAAAAAABAgMEIQUREjEUMkL/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A51fW/jV+K9XlGYpa1UjK5jCPysk0Ak30Ant0AP/Z');--pd:50% 45%;--pm:96% 45%" aria-hidden="true" data-id="aerospace-07"><picture><source type="image/avif" srcset="/static/aero_assets/img/aerospace-07-1920.avif 1920w, /static/aero_assets/img/aerospace-07-2560.avif 2560w, /static/aero_assets/img/aerospace-07-3840.avif 3840w" sizes="100vw"><img src="/static/aero_assets/img/aerospace-07-1920.jpg" width="1920" height="1280" alt="" loading="eager" decoding="async" fetchpriority="high"></picture></figure>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="reticle" id="reticle" aria-hidden="true">
+      <svg viewBox="-60 -60 120 120"><circle r="44"/><path d="M0 -58V-36M0 36V58M-58 0H-36M36 0H58"/></svg>
+      <span class="rt-label" id="rtLabel">EARTH · ARTEMIS II · 6 APR 2026</span>
+    </div>
+    <i class="lead" id="lead" aria-hidden="true"></i>
+    <div class="lockup">
+      <div class="lock-a">
+        <p class="kicker">A-01 · <span class="en">Public data · Unpublished numbers</span><span class="zh">公开的数据 · 未公布的数字</span></p>
+        <h1 id="h-s0"><span class="sr">Verrier — </span><span class="claim t9"><span class="en"><span class="ln"><span>See the number</span></span><span class="ln"><span>before it&#39;s published.</span></span></span><span class="zh"><span class="ln"><span>在数字公布之前，</span></span><span class="ln"><span>先看见它。</span></span></span></span></h1>
+      </div>
+      <div class="lock-b">
+        <p class="sub"><span class="en">Verrier reconstructs figures nobody has released yet — from public evidence, with every step on the record.</span><span class="zh">Verrier 用公开证据，推算出还没人公布的数字——每一步都有据可查。</span></p>
+        <div class="cta">
+          <a class="btn primary" href="#console"><span class="en">Start a mission</span><span class="zh">开始任务</span><span aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+          <a class="btn" href="#s4"><span class="en">Results</span><span class="zh">看成绩</span><span aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+        </div>
+      </div>
+    </div>
+    <div class="foot">
+      <ul class="stats">
+        <li class="stat"><b class="t7 num" data-num style="--dgp:0">1.1%</b><span class="lab"><span class="en">median error on questions it had never seen</span><span class="zh">从未见过的题，中位误差</span></span></li>
+        <li class="stat"><b class="t7 num" data-num style="--dgp:1">37.7 s</b><span class="lab"><span class="en">to recognise a figure that&#39;s already out</span><span class="zh">识别一个已公布的数字</span></span></li>
+        <li class="stat"><b class="t7 num" data-num style="--dgp:2">100%</b><span class="lab"><span class="en">of the arithmetic done by code</span><span class="zh">的计算由代码完成</span></span></li>
+      </ul>
+      <div class="fig1-wrap" id="fig1">
+        <p class="fig1"><b>FIG. 1<button class="rp" type="button" data-replay data-aria-en="Replay" data-aria-zh="重放" aria-label="Replay"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.34-5.66M4 4v4h4"/></svg></button></b><span class="en">1846 — Le Verrier pinpointed Neptune from the wobble of Uranus, before anyone had seen it.</span><span class="zh">1846 年，勒威耶仅凭天王星的「摆动」，在任何人看到它之前就锁定了海王星。</span></p>
+        <p class="credit">A-01 · EARTHSET — <a href="https://images.nasa.gov/details/art002e009284" target="_blank" rel="noopener noreferrer">NASA</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 01 story：aerospace-10（帕拉纳尔天文台上方的月全食） -->
+<section class="sec" id="s1" aria-labelledby="h-s1">
+  <div class="stage s-mid" data-rv>
+    <figure class="ph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAMEAQb/xAAeEAABBAIDAQAAAAAAAAAAAAABAAIDEQQTFSExcf/EABcBAAMBAAAAAAAAAAAAAAAAAAABAgP/xAAZEQACAwEAAAAAAAAAAAAAAAAAAgESQVH/2gAMAwEAAhEDEQA/AOE1kp0eFJICWtNAXaS3LbfYVXJyagxshAA8WjPwFSNJdZCFjsk0fPqE7qTWT//Z');--pd:50% 30%;--pm:53% 50%" aria-hidden="true" data-id="aerospace-10"><picture><source type="image/avif" srcset="/static/aero_assets/img/aerospace-10-1920.avif 1920w, /static/aero_assets/img/aerospace-10-2560.avif 2560w, /static/aero_assets/img/aerospace-10-3840.avif 3840w" sizes="100vw"><img src="/static/aero_assets/img/aerospace-10-1920.jpg" width="1920" height="1281" alt="" loading="lazy" decoding="async"></picture></figure>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="wrap"><div class="col">
+      <div class="head">
+        <p class="eyebrow rv" style="--i:0"><i></i><span class="en">01 · The idea</span><span class="zh">01 · 灵感</span></p>
+        <h2 class="h2 t8" id="h-s1"><span class="en"><span class="ln" style="--i:1"><span>Found with a pen.</span></span></span><span class="zh"><span class="ln" style="--i:1"><span>用一支笔</span></span><span class="ln" style="--i:2"><span>找到的行星。</span></span></span></h2>
+      </div>
+      <div class="body">
+        <p class="t4 prose rv" style="--i:3"><span class="en">In 1846 nobody had seen Neptune — and Urbain Le Verrier didn&#39;t need to. Uranus was drifting off course, and the drift could mean only one thing: <strong>something unseen was pulling on it.</strong> He worked out where it had to be and mailed the coordinates to Berlin.</span><span class="zh">1846 年，没人见过海王星，勒威耶也不需要见到它。天王星总在偏离轨道，而这种偏离只说明一件事：<strong>有一个看不见的东西在拉它。</strong>他算出了它该在哪儿，把坐标寄往柏林。</span></p>
+        <p class="t4 prose rv" style="--i:4"><span class="en">Johann Galle pointed a telescope there the night the letter arrived, and found a new planet within one degree.</span><span class="zh">伽勒在收到信的当晚把望远镜对准那里——在不到 1° 的地方，发现了一颗新行星。</span></p>
+        <div class="ruler" id="ruler" aria-hidden="true">
+          <div class="scale"></div>
+          <span class="num-l" style="left:0%">320°</span><span class="num-l" style="left:41.667%">325°</span><span class="num-l" style="left:83.333%">330°</span>
+          <div class="br br-l" style="--to:49.72%"><i class="mk"></i><i class="cap"></i><span class="rl">PRED λ 325°58′<br>31 AUG 1846</span></div>
+          <div class="br br-r" style="--to:57.92%"><i class="mk"></i><i class="cap"></i><span class="rl">OBS λ 326°57′<br>23 SEP 1846</span></div>
+        </div>
+        <div class="tl3" id="tl3">
+          <div><span class="lbl">31 AUG 1846</span><b class="num" data-num data-lock style="--base:0ms">325°58′</b><span class="cap3"><span class="en">Le Verrier&#39;s prediction</span><span class="zh">勒威耶的预测</span></span></div>
+          <div><span class="lbl">23 SEP 1846</span><b class="num" data-num data-lock style="--base:120ms">326°57′</b><span class="cap3"><span class="en">Galle finds Neptune</span><span class="zh">伽勒找到海王星</span></span></div>
+          <div><span class="lbl">MISS</span><b class="num" data-num data-lock style="--base:1450ms">&lt; 1°</b><span class="cap3"><span class="en">from a calculation on paper</span><span class="zh">纸上算出的结果</span></span></div>
+        </div>
+      </div>
+    </div></div>
+    <p class="credit">B-01 · ORIGIN · 1846 — <a href="https://www.eso.org/public/images/potw2136a/" target="_blank" rel="noopener noreferrer">Y. Beletsky (LCO)/ESO</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></p>
+  </div>
+  <div class="after punch" data-rv>
+    <p class="pq"><span class="en"><span class="rv p1" style="--i:0">Verrier brings the same idea to data:</span> <span class="rv p2" style="--i:1">the numbers that matter leave traces in the numbers that are public.</span></span><span class="zh kp"><span class="rv p1" style="--i:0">Verrier 把同样的思路<wbr>带进数据世界：</span><span class="rv p2" style="--i:1">重要的数字，<wbr>总会在<wbr>公开的数字里<wbr>留下痕迹。</span></span></p>
+  </div>
+</section>
+
+<!-- 02 how：transportation-06（铁路编组场） -->
+<section class="sec" id="s2" aria-labelledby="h-s2">
+  <div class="stage s-mid" data-rv>
+    <figure class="ph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAANABgDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAMEBf/EACQQAAICAAYABwAAAAAAAAAAAAECAAMEERIhIjEkMkFRYYGh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAH/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwDBrrdAAU6OyjoR6qKK2ut5ajkB7mPp4qfUsO5NYPHV0blFGf3CqMEhsILA8s9vmEMG7KdQPl2/YSj/2Q==');--pd:50% 50%;--pm:60% 50%" aria-hidden="true" data-id="transportation-06"><picture><source type="image/avif" srcset="/static/aero_assets/img/transportation-06-1920.avif 1920w, /static/aero_assets/img/transportation-06-2560.avif 2560w, /static/aero_assets/img/transportation-06-3840.avif 3840w" sizes="100vw"><img src="/static/aero_assets/img/transportation-06-1920.jpg" width="1920" height="1079" alt="" loading="lazy" decoding="async"></picture></figure>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="wrap"><div class="col">
+      <div class="head">
+        <p class="eyebrow rv" style="--i:0"><i></i><span class="en">02 · From question to answer</span><span class="zh">02 · 从问题到答案</span></p>
+        <h2 class="h2 t8" id="h-s2"><span class="en"><span class="ln" style="--i:1"><span>Ask. Approve.</span></span><span class="ln" style="--i:2"><span>Get the evidence.</span></span></span><span class="zh"><span class="ln" style="--i:1"><span>提问，确认，</span></span><span class="ln" style="--i:2"><span>拿到证据。</span></span></span></h2>
+      </div>
+      <div class="body">
+        <p class="sub rv" style="--i:3"><span class="en">One question in. One defensible number out.</span><span class="zh kp">输入一个问题，<wbr>输出一个<wbr>经得起追问的数字。</span></p>
+      </div>
+    </div></div>
+    <p class="credit">C-01 · HOW IT WORKS — <a href="https://www.pexels.com/photo/aerial-view-of-chattanooga-train-yard-31024352/" target="_blank" rel="noopener noreferrer">K / Pexels</a></p>
+  </div>
+  <div class="after flow">
+    <div class="wrap">
+      <ol class="steps" id="steps"><li><span class="n">01</span><div><h3><span class="en">Ask</span><span class="zh">提问</span></h3><p><span class="en">Name the number you need — next month's births, this quarter's deliveries, a figure no one reports.</span><span class="zh kp">说出你要的数字：下个月的出生数、本季度的交付量、没人统计的数据。</span></p></div></li><li><span class="n">02</span><div><h3><span class="en">Approve</span><span class="zh">确认</span></h3><p><span class="en">Verrier drafts the estimation routes and sources. You sign off before a single search runs.</span><span class="zh kp">Verrier 先拿出<wbr>推算路线<wbr>和数据来源，<wbr>你批准之后<wbr>才开始搜索。</span></p></div></li><li><span class="n">03</span><div><h3><span class="en">Gather</span><span class="zh">搜集</span></h3><p><span class="en">Parallel agents read the public record and bring back numbers with verbatim quotes.</span><span class="zh kp">多个 agent <wbr>并行阅读<wbr>公开记录，带回<wbr>附原文引用的数字。</span></p></div></li><li><span class="n">04</span><div><h3><span class="en">Compute</span><span class="zh">计算</span></h3><p><span class="en">Code — not the model — runs the math: formulas, Monte Carlo, weights earned in backtests.</span><span class="zh kp">计算交给代码<wbr>而不是模型：公式、Monte Carlo、<wbr>按回测表现加权。</span></p></div></li><li><span class="n">05</span><div><h3><span class="en">Deliver</span><span class="zh">交付</span></h3><p><span class="en">An estimate with a range, an evidence ledger and a dependency graph you can audit.</span><span class="zh kp">带区间的估计，<wbr>加上<wbr>可审计的<wbr>证据账本<wbr>和依赖图。</span></p></div></li></ol>
+      <p class="spec-bar"><span>LANGGRAPH</span><span>PARALLEL AGENTS</span><span>HUMAN GATE</span><span>≈ US$0.3–0.6 / ANSWER</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 trust：urban-08（从国际空间站看芝加哥夜景）；文字在右栏（湖面） -->
+<section class="sec" id="s3" aria-labelledby="h-s3">
+  <div class="stage s-mid" data-rv>
+    <figure class="ph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAAMEBQf/xAAfEAABBAICAwAAAAAAAAAAAAABAAIDIQQREjETJEH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AzuFrXUUyfF9byt+G0gHiNjpSmZG4DGRWukFchMkYGmihB//Z');--pd:50% 30%;--pm:55% 40%" aria-hidden="true" data-id="urban-08"><picture><source type="image/avif" srcset="/static/aero_assets/img/urban-08-1920.avif 1920w, /static/aero_assets/img/urban-08-2560.avif 2560w, /static/aero_assets/img/urban-08-3840.avif 3840w" sizes="100vw"><img src="/static/aero_assets/img/urban-08-1920.jpg" width="1920" height="1280" alt="" loading="lazy" decoding="async"></picture></figure>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="wrap"><div class="col">
+      <div class="head">
+        <p class="eyebrow rv" style="--i:0"><i></i><span class="en">03 · Why you can trust it</span><span class="zh">03 · 为什么可信</span></p>
+        <h2 class="h2 t8" id="h-s3"><span class="en"><span class="ln" style="--i:1"><span>Every answer</span></span><span class="ln" style="--i:2"><span>shows its work.</span></span></span><span class="zh"><span class="ln" style="--i:1"><span>每个答案</span></span><span class="ln" style="--i:2"><span>都摊开过程。</span></span></span></h2>
+      </div>
+      <div class="body">
+        <p class="sub rv" style="--i:3"><span class="en">Trace any number back, line by line, to where it came from.</span><span class="zh">任何一个数字，都能逐行追溯到出处。</span></p>
+      </div>
+    </div></div>
+    <p class="credit">D-01 · BUILT TO BE CHECKED — <a href="https://images.nasa.gov/details/iss073e0080182" target="_blank" rel="noopener noreferrer">NASA</a></p>
+  </div>
+  <div class="after trust">
+    <div class="wrap">
+      <div class="pillars" id="pillars"><div class="pl" style="--i:0"><span class="pt"><svg viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7"/></svg>T-01</span><h3><span class="en">Sourced</span><span class="zh">有出处</span></h3><p><span class="en">Every observed number carries a verbatim quote, checked against the page.</span><span class="zh kp">每个观测数字<wbr>都附原文引用，<wbr>并与网页<wbr>逐字核对。</span></p></div><div class="pl" style="--i:1"><span class="pt"><svg viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7"/></svg>T-02</span><h3><span class="en">Computed</span><span class="zh">代码计算</span></h3><p><span class="en">The model plans; Python calculates. No mental math, ever.</span><span class="zh kp">模型做规划，Python 做计算，从不「心算」。</span></p></div><div class="pl" style="--i:2"><span class="pt"><svg viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7"/></svg>T-03</span><h3><span class="en">Labelled</span><span class="zh">假设透明</span></h3><p><span class="en">Assumptions are flagged, bounded and falsifiable — never hidden.</span><span class="zh kp">假设会被标出、给出范围、可被证伪，绝不藏起来。</span></p></div><div class="pl" style="--i:3"><span class="pt"><svg viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7"/></svg>T-04</span><h3><span class="en">Audited</span><span class="zh">独立核对</span></h3><p><span class="en">An independent check catches inputs that don't mean what the formula needs.</span><span class="zh kp">独立核对，抓出「名不副实」的输入。</span></p></div><div class="pl" style="--i:4"><span class="pt"><svg viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7"/></svg>T-05</span><h3><span class="en">Leak-proof</span><span class="zh">回测防泄漏</span></h3><p><span class="en">Backtests read only archived pages from before the cutoff.</span><span class="zh kp">回测只读<wbr>截止日之前的<wbr>存档网页。</span></p></div><div class="pl" style="--i:5"><span class="pt"><svg viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7"/></svg>T-06</span><h3><span class="en">Fast when it can be</span><span class="zh">该快就快</span></h3><p><span class="en">Already published? It finds it and stops — <b>37.7 s</b> instead of <b>27 min</b>.</span><span class="zh kp">已经公布？找到就停——<b>37.7 秒</b>，而不是 <b>27 分钟</b>。</span></p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 results：aerospace-03（猎鹰 9 号夜间发射长曝光，SpaceX / Flickr，CC BY-NC 2.0，仅内部草案）；照片上只放 eyebrow + h2，误差条在下方黑底 -->
+<section class="sec" id="s4" aria-labelledby="h-s4">
+  <div class="stage" data-rv>
+    <figure class="ph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAAYBBAX/xAAfEAABBAIDAQEAAAAAAAAAAAABAAIDBAUREiIxIVH/xAAVAQEBAAAAAAAAAAAAAAAAAAABAv/EABYRAQEBAAAAAAAAAAAAAAAAAAEAEf/aAAwDAQACEQMRAD8ARq9Uc27OgVsvxb3VmSN7A+kKpj560rgydpI/R6me7cpUsY2Gr25jkS70KVrAla1XdF8AKFFzImQaJahJDl//2Q==');--pd:50% 70%;--pm:44% 60%" aria-hidden="true" data-id="aerospace-03"><picture><source type="image/avif" srcset="/static/aero_assets/img/aerospace-03-1920.avif 1920w, /static/aero_assets/img/aerospace-03-2560.avif 2560w, /static/aero_assets/img/aerospace-03-3840.avif 3840w" sizes="100vw"><img src="/static/aero_assets/img/aerospace-03-1920.jpg" width="1920" height="1280" alt="" loading="lazy" decoding="async"></picture></figure>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="wrap"><div class="col">
+      <div class="head">
+        <p class="eyebrow rv" style="--i:0"><i></i><span class="en">04 · Results</span><span class="zh">04 · 成绩</span></p>
+        <h2 class="h2 t8" id="h-s4"><span class="en"><span class="ln" style="--i:1"><span>Closer than asking</span></span><span class="ln" style="--i:2"><span>the model.</span></span></span><span class="zh"><span class="ln" style="--i:1"><span>比直接问模型</span></span><span class="ln" style="--i:2"><span>更准。</span></span></span></h2>
+      </div>
+    </div></div>
+    <p class="credit">E-01 · TELEMETRY · HELD-OUT — <a href="https://www.flickr.com/photos/spacex/51947052831/" target="_blank" rel="noopener noreferrer">SpaceX / Flickr</a> · <a href="https://creativecommons.org/licenses/by-nc/2.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 2.0</a></p>
+  </div>
+  <div class="after tele" data-rv>
+    <div class="wrap">
+      <div class="bars" id="trio">
+        <div class="bar us" style="--i:0"><span class="bl">VERRIER</span><span class="track"><i data-w="1.1" style="--w:.2444"></i></span><b class="num" data-num data-lock style="--base:960ms">1.1%</b></div>
+        <div class="bar" style="--i:1"><span class="bl"><span class="en">Reasoning, no web</span><span class="zh">只推理不联网</span></span><span class="track"><i data-w="2.5" style="--w:.5556"></i></span><b class="num" data-num data-lock style="--base:1080ms">2.5%</b></div>
+        <div class="bar" style="--i:2"><span class="bl"><span class="en">Asking the model</span><span class="zh">直接问模型</span></span><span class="track"><i data-w="4.0" style="--w:.8889"></i></span><b class="num" data-num data-lock style="--base:1200ms">4.0%</b></div>
+      </div>
+      <div class="tele-a">
+        <p class="sub rv" style="--i:0"><span class="en">On questions it had never seen — code frozen in advance, answers released after the model was trained — Verrier posted the lowest median error.</span><span class="zh kp">在从没见过的题上——<wbr>代码事先冻结，<wbr>答案在模型训练之后<wbr>才公布——<wbr>Verrier 的中位误差最低。</span></p>
+        <p class="fine rv" style="--i:1"><span class="en">Median absolute error, held-out test of 3 official monthly figures (2026). Full run logs in the repository.</span><span class="zh kp">绝对误差中位数；<wbr>留出测试，<wbr>3 个按月发布的<wbr>官方数字（2026）。<wbr>完整运行记录<wbr>见仓库。</span></p>
+      </div>
+      <div class="tele-b"><table class="manifest rv" style="--i:2">
+        <thead><tr><th scope="col"><span class="en">Target</span><span class="zh">目标</span></th><th scope="col"><span class="en">Error</span><span class="zh">误差</span></th><th scope="col">OFFICIAL</th></tr></thead>
+        <tbody>
+          <tr><td><span class="en">Taiwan births · Sep</span><span class="zh">台湾出生数 · 9 月</span></td><td class="e">+1.1%</td><td class="o">7,704</td></tr>
+          <tr><td><span class="en">Heathrow pax · Sep</span><span class="zh">希思罗旅客 · 9 月</span></td><td class="e">+3.0%</td><td class="o">7.18 M</td></tr>
+          <tr><td><span class="en">Japan births · Jul</span><span class="zh">日本出生数 · 7 月</span></td><td class="e">+0.8%</td><td class="o">62,479</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 use cases：urban-02（蓝调时刻的曼哈顿下城）+ 领域墙 + colophon -->
+<section class="sec" id="s5" aria-labelledby="h-s5">
+  <div class="stage" data-rv>
+    <figure class="ph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAMABgDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAABQACBP/EACAQAAEEAgEFAAAAAAAAAAAAAAEAAgMRBBMhEhQiMTL/xAAWAQEBAQAAAAAAAAAAAAAAAAAEAAH/xAAcEQACAgIDAAAAAAAAAAAAAAAAAgEDE1EUMUH/2gAMAwEAAhEDEQA/ACukgLTYHlmyvC6tAyZU7zZkK6G5M3aE7Hcu9JzXtHUBVpifRQxFv0KUhZsucizI7lSuQ2jMC7P/2Q==');--pd:50% 55%;--pm:59% 50%" aria-hidden="true" data-id="urban-02"><picture><source type="image/avif" srcset="/static/aero_assets/img/urban-02-1920.avif 1920w, /static/aero_assets/img/urban-02-2560.avif 2560w, /static/aero_assets/img/urban-02-3840.avif 3840w" sizes="100vw"><img src="/static/aero_assets/img/urban-02-1920.jpg" width="1920" height="960" alt="" loading="lazy" decoding="async"></picture></figure>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="wrap"><div class="col">
+      <div class="head">
+        <p class="eyebrow rv" style="--i:0"><i></i><span class="en">05 · What it&#39;s for</span><span class="zh">05 · 用在哪里</span></p>
+        <h2 class="h2 t8" id="h-s5"><span class="en"><span class="ln" style="--i:1"><span>What will</span></span><span class="ln" style="--i:2"><span>you ask?</span></span></span><span class="zh"><span class="ln" style="--i:1"><span>你想问</span></span><span class="ln" style="--i:2"><span>什么？</span></span></span></h2>
+      </div>
+      <div class="body">
+        <div class="uses rv" style="--i:3">
+          <div class="use"><span class="lbl">U-01</span><div><h3><span class="en">Company metrics</span><span class="zh">公司指标</span></h3><p><span class="en">Deliveries, subscribers, store traffic — before the earnings call.</span><span class="zh kp">交付量、订阅数、门店客流——在财报会之前。</span></p></div></div>
+          <div class="use"><span class="lbl">U-02</span><div><h3><span class="en">Macro prints</span><span class="zh">宏观数据</span></h3><p><span class="en">CPI, payrolls, rate decisions — with a probability for every outcome.</span><span class="zh kp">CPI、非农、议息——给出<wbr>每种结果的概率。</span></p></div></div>
+          <div class="use"><span class="lbl">U-03</span><div><h3><span class="en">Local figures</span><span class="zh">地方数据</span></h3><p><span class="en">Births in a county, visitors to a park — numbers no one tracks.</span><span class="zh kp">某个县的出生数、某个公园的游客——没人统计的数字。</span></p></div></div>
+        </div>
+      </div>
+    </div></div>
+    <p class="credit">F-01 · USE CASES — <a href="https://commons.wikimedia.org/wiki/File:Lower_Manhattan_from_Jersey_City_November_2014_panorama_3.jpg" target="_blank" rel="noopener noreferrer">King of Hearts / Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/3.0" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a></p>
+  </div>
+  <div class="after" id="s5after">
+    <div class="wrap">
+      <p class="nextm"><span class="stencil">NEXT MISSION</span><span><span class="en">A pre-registered showcase on four new questions is armed.</span><span class="zh">四道新题的预注册展示评测已就位。</span></span></p>
+      <ul class="wall" id="wall"><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAAYDBAX/xAAgEAACAwACAQUAAAAAAAAAAAABAgADEQQhBRIiMVGR/8QAFgEBAQEAAAAAAAAAAAAAAAAAAQID/8QAFhEBAQEAAAAAAAAAAAAAAAAAAREA/9oADAMBAAIRAxEAPwBAq47uuqjEfYEnbg3BAxQ5NfxzBaLGrKBQOwR8yxbZYKi4avNzPTCqzaAS5fXi2AdofyEZq7HDY9lQ1QR7YSsTf//Z');--pd:45% 50%" data-id="transportation-04"><picture><source type="image/avif" srcset="/static/aero_assets/img/transportation-04-1280.avif 1280w, /static/aero_assets/img/transportation-04-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/transportation-04-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-01</span><span><span class="en">Container ports</span><span class="zh">集装箱港口</span></span></p></li><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAUGBP/EAB8QAAEEAgIDAAAAAAAAAAAAAAEAAgMFESEEEjFRkf/EABcBAAMBAAAAAAAAAAAAAAAAAAABAwT/xAAYEQADAQEAAAAAAAAAAAAAAAAAAQMRMf/aAAwDAQACEQMRAD8ARNtnZ8pvX2Dn4yRv6oiOQ9htUdfY8MGJnWJsmhknarSnMM8Y422Vh5RDNoWedpbFn2hNMHp//9k=');--pd:50% 50%" data-id="transportation-01"><picture><source type="image/avif" srcset="/static/aero_assets/img/transportation-01-1280.avif 1280w, /static/aero_assets/img/transportation-01-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/transportation-01-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-02</span><span><span class="en">Exports</span><span class="zh">出口</span></span></p></li><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAMCBAUG/8QAIBAAAQMDBQEAAAAAAAAAAAAAAQACAwQREgUGITFBYf/EABYBAQEBAAAAAAAAAAAAAAAAAAMAAf/EABkRAAIDAQAAAAAAAAAAAAAAAAABAgMRMf/aAAwDAQACEQMRAD8Ai3ec7ZXkszYegfE+j3fdxFQ028ICqUejRwXZVujmI7wPSTqmmU0ElqVxlce2DjFTsxcMUdfToI910fFw/wC8IWFSbellfhI8gBuRt4EInbMRQR//2Q==');--pd:60% 70%" data-id="transportation-07"><picture><source type="image/avif" srcset="/static/aero_assets/img/transportation-07-1280.avif 1280w, /static/aero_assets/img/transportation-07-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/transportation-07-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-03</span><span><span class="en">Freight rail</span><span class="zh">铁路货运</span></span></p></li><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAQCAwUG/8QAIRAAAgICAQQDAAAAAAAAAAAAAgMAAQQRURITIUEUIjH/xAAVAQEBAAAAAAAAAAAAAAAAAAADAv/EABwRAAICAgMAAAAAAAAAAAAAAAABAiEREhMUQf/aAAwDAQACEQMRAD8A57GEiTR9P15jXYYQUVL3V/ku+AABQrN1L979SdKSK9DnFVceJed7iBwzivDNycdoKthBoavW4R0hQ4DW7LOw48QirdU0B15O3g//2Q==');--pd:50% 45%" data-id="transportation-11"><picture><source type="image/avif" srcset="/static/aero_assets/img/transportation-11-1280.avif 1280w, /static/aero_assets/img/transportation-11-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/transportation-11-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-04</span><span><span class="en">New cars</span><span class="zh">新车</span></span></p></li><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABQAC/8QAIhAAAgEEAgEFAAAAAAAAAAAAAQIDAAQREgUhFSIxQWFx/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAECA//EAB0RAAICAQUAAAAAAAAAAAAAAAECAANSBBESE0H/2gAMAwEAAhEDEQA/AN+FMS5Eox90dNyMVlcGFk31+VrfK888RMKIuCMZJ7oe0ia5kLFV2cenY+9aC+x/YNpaUOwEZi59dDmBfyqg5GmgdkdFVl6IxVS5NkZPSmAn/9k=');--pd:55% 50%" data-id="transportation-10"><picture><source type="image/avif" srcset="/static/aero_assets/img/transportation-10-1280.avif 1280w, /static/aero_assets/img/transportation-10-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/transportation-10-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-05</span><span><span class="en">Air travel &amp; visitors</span><span class="zh">航空与访客</span></span></p></li><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAABQACBP/EACAQAAIBBAIDAQAAAAAAAAAAAAECAwAEERIFITFBYZH/xAAWAQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgAhMf/aAAwDAQACEQMRAD8A6hA4iLpqfec1u1vwyBDBJ11kigeN5ecqItxhRSMV20xzt+GiM4JWSkvbcdyFlH0iqh+RUywaqpJB8VVlV0PNZI+7/9k=');--pd:50% 50%" data-id="transportation-12"><picture><source type="image/avif" srcset="/static/aero_assets/img/transportation-12-1280.avif 1280w, /static/aero_assets/img/transportation-12-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/transportation-12-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-06</span><span><span class="en">Parcels &amp; logistics</span><span class="zh">电商与物流</span></span></p></li><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAAYBAwf/xAAgEAACAgEDBQAAAAAAAAAAAAABAgADEQYSIQQFFEGB/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABURAQEAAAAAAAAAAAAAAAAAAAAR/9oADAMBAAIRAxEAPwDQfJXHDCV2XblypGYoV6gLruqqLfZA1Dfna3T449GCm0vkYJEIot3y1VJcQgr/2Q==');--pd:60% 45%" data-id="energy-02"><picture><source type="image/avif" srcset="/static/aero_assets/img/energy-02-1280.avif 1280w, /static/aero_assets/img/energy-02-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/energy-02-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-07</span><span><span class="en">Power generation</span><span class="zh">发电量</span></span></p></li><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAIEA//EAB8QAAEEAgIDAAAAAAAAAAAAAAEAAgMEERIFIRRBQv/EABQBAQAAAAAAAAAAAAAAAAAAAAP/xAAbEQABBQEBAAAAAAAAAAAAAAABAAIDBBFBUf/aAAwDAQACEQMRAD8AZvHPPyU3gtj1MrXEOOAGrWSLkDDJsAA4dYOcKdp5KnX31MpI6afSV9+UjAMRMoxA6TqW5JWqwbmm/GcEl3aFLagu3YS58TtnDJaEIBYm64pjBF4F/9k=');--pd:50% 55%" data-id="urban-10"><picture><source type="image/avif" srcset="/static/aero_assets/img/urban-10-1280.avif 1280w, /static/aero_assets/img/urban-10-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/urban-10-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-08</span><span><span class="en">Housing starts</span><span class="zh">住房开工</span></span></p></li><li class="tile" data-tile><figure class="tph" style="--lqip:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAMFBv/EACAQAAEEAgIDAQAAAAAAAAAAAAEAAgMEERITIRUiQTH/xAAVAQEBAAAAAAAAAAAAAAAAAAABAv/EABoRAQEAAgMAAAAAAAAAAAAAAAEAAgMEFCH/2gAMAwEAAhEDEQA/AFeQqRv9nEHHQTq96vYafQ7ZwMn9WRitNtSN61cAqFcni2PRDviOwj7UahrEs8fI44Zq1ChQThrnNkP3oFCMuUkmov/Z');--pd:45% 45%" data-id="urban-01"><picture><source type="image/avif" srcset="/static/aero_assets/img/urban-01-1280.avif 1280w, /static/aero_assets/img/urban-01-1920.avif 1920w" sizes="(min-width:1024px) 19vw, 46vw"><img src="/static/aero_assets/img/urban-01-1280.jpg" width="1280" height="853" alt="" loading="lazy" decoding="async"></picture></figure><p class="tcap"><span class="tn">W-09</span><span><span class="en">Jobs &amp; cities</span><span class="zh">就业与城市</span></span></p></li><li class="tile tile-cta"><span class="tn">W-10 · <span class="en">Your number</span><span class="zh">你的数字</span></span><p><span class="en">Have a number nobody publishes?<br>That&#39;s Verrier&#39;s next mission.</span><span class="zh kp">有一个<wbr>没人公布的数字？<br>那就是 Verrier 的<wbr>下一个任务。</span></p><a class="btn primary" href="#console"><span class="en">Start a mission</span><span class="zh">开始任务</span><span aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a></li></ul>
+      <footer class="colo">
+        <svg class="badge" viewBox="0 0 120 120" aria-hidden="true">
+          <defs><path id="aeroRing" d="M60,60 m-45,0 a45,45 0 1,1 90,0 a45,45 0 1,1 -90,0"/></defs>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(244,242,236,.28)" stroke-width="1"/>
+          <text><textPath href="#aeroRing" textLength="282" lengthAdjust="spacing">PUBLIC DATA · UNPUBLISHED NUMBERS · VERRIER · MISSION 01 ·</textPath></text>
+          <g transform="translate(43 43) scale(.53)" fill="#F4F2EC"><circle cx="27" cy="29" r="18" fill="none" stroke="#F4F2EC" stroke-width="3"/><circle cx="27" cy="29" r="3.5"/><circle cx="46" cy="44" r="8"/></g>
+        </svg>
+        <div class="txt">
+          <p><span class="en">VERRIER · research prototype · 2026 · figures as of 16 Oct 2026 · not investment advice.</span><span class="zh">VERRIER · 研究原型 · 2026 · 数字截至 2026 年 10 月 16 日 · 不构成投资建议。</span></p>
+          <p><span class="en">Neptune&#39;s rings are named Galle, Le Verrier, Lassell, Arago and Adams — after the people who found it.</span><span class="zh kp">海王星的光环分别以 Galle、Le Verrier、Lassell、Arago、Adams 命名——<wbr>正是发现它的那些人。</span></p>
+          <p class="tape" aria-label="PUBLIC DATA, UNPUBLISHED NUMBERS, HUMAN GATE, CODE DOES THE MATH, EVERY STEP ON THE RECORD"><span>PUBLIC DATA</span><span>UNPUBLISHED NUMBERS</span><span>HUMAN GATE</span><span>CODE DOES THE MATH</span><span>EVERY STEP ON THE RECORD</span></p>
+          <div class="btns">
+            <a class="btn primary" href="#console"><span class="en">Start a mission</span><span class="zh">开始任务</span><span aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+            <button class="btn sq" type="button" data-replay data-aria-en="Replay" data-aria-zh="重放" aria-label="Replay"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.34-5.66M4 4v4h4"/></svg></button>
+            <a class="btn sq" href="#s0" data-aria-en="Back to top" data-aria-zh="回到顶部" aria-label="Back to top"><span aria-hidden="true">↑</span></a>
+            <a class="btn" href="/verrier"><span class="en">Classic UI</span><span class="zh">经典版</span><span aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></a>
+          </div>
+        </div>
+        <div class="credits">
+          <h3><span class="en">Photo credits</span><span class="zh">照片来源</span></h3>
+          <ol><li><span class="lbl">A-01</span><span>Earthset over the lunar limb, Artemis II, 6 Apr 2026 — <a href="https://images.nasa.gov/details/art002e009284" target="_blank" rel="noopener noreferrer">NASA (Artemis II crew photo)</a> · NASA media · no endorsement implied</span></li><li><span class="lbl">B-01</span><span>Eclipsed Moon at Paranal (ESO potw2136a) — <a href="https://www.eso.org/public/images/potw2136a/" target="_blank" rel="noopener noreferrer">Y. Beletsky (LCO)/ESO</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span></li><li><span class="lbl">C-01</span><span>Freight rail classification yard, aerial — <a href="https://www.pexels.com/photo/aerial-view-of-chattanooga-train-yard-31024352/" target="_blank" rel="noopener noreferrer">Photo by K (kelly) on Pexels</a> · Pexels License</span></li><li><span class="lbl">D-01</span><span>Chicago street grid and Lake Michigan from the ISS, 15 May 2025 — <a href="https://images.nasa.gov/details/iss073e0080182" target="_blank" rel="noopener noreferrer">NASA (ISS crew photo)</a> · NASA media · no endorsement implied</span></li><li><span class="lbl">E-01</span><span>Starlink mission, Falcon 9 night launch, long exposure, 19 Mar 2022 — <a href="https://www.flickr.com/photos/spacex/51947052831/" target="_blank" rel="noopener noreferrer">SpaceX, via Flickr</a> · <a href="https://creativecommons.org/licenses/by-nc/2.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 2.0</a> · non-commercial; internal draft only</span></li><li><span class="lbl">F-01</span><span>Lower Manhattan from Exchange Place, blue hour — <a href="https://commons.wikimedia.org/wiki/File:Lower_Manhattan_from_Jersey_City_November_2014_panorama_3.jpg" target="_blank" rel="noopener noreferrer">King of Hearts / Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/3.0" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0 (cropped / resized)</a></span></li><li><span class="lbl">M-01</span><span>Orbital sunrise over the Atlantic from the ISS, 12 Jan 2020 (console) — <a href="https://images.nasa.gov/details/iss061e123824" target="_blank" rel="noopener noreferrer">NASA (ISS Expedition 61 crew photo)</a> · NASA media · no endorsement implied</span></li><li><span class="lbl">W-01</span><span>Centerm container terminal at night, Port of Vancouver — <a href="https://commons.wikimedia.org/wiki/File:Centerm_at_night_as_seen_from_Canada_Place.jpg" target="_blank" rel="noopener noreferrer">Dllu, via Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0 (cropped / resized)</a></span></li><li><span class="lbl">W-02</span><span>Loaded container ship at sea, top-down — <a href="https://www.pexels.com/photo/fully-loaded-cargo-ship-on-a-sea-12530455/" target="_blank" rel="noopener noreferrer">Photo by K (kelly) on Pexels</a> · Pexels License</span></li><li><span class="lbl">W-03</span><span>Freight train at Morant&#x27;s Curve, Banff NP — <a href="https://commons.wikimedia.org/wiki/File:CP_GE_AC4400CW_8608_Morant%27s_Curve.jpg" target="_blank" rel="noopener noreferrer">Kabelleger / David Gubler, via Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0 (cropped / resized)</a></span></li><li><span class="lbl">W-04</span><span>Car carrier loaded with new cars, top-down — <a href="https://www.pexels.com/photo/green-cargo-boat-beside-dock-2217513/" target="_blank" rel="noopener noreferrer">Photo by Tom Fisk on Pexels</a> · Pexels License</span></li><li><span class="lbl">W-05</span><span>Airliner at the gate at dusk — <a href="https://www.pexels.com/photo/closeup-of-an-airplane-on-an-airport-at-dusk-12932352/" target="_blank" rel="noopener noreferrer">Photo by Atlantic Ambience on Pexels</a> · Pexels License</span></li><li><span class="lbl">W-06</span><span>Distribution centre with docked trucks, aerial — <a href="https://www.pexels.com/photo/aerial-view-of-logistics-center-2804929/" target="_blank" rel="noopener noreferrer">Photo by Marcin Jozwiak on Pexels</a> · Pexels License</span></li><li><span class="lbl">W-07</span><span>Block Island Wind Farm, 1 Oct 2016 — <a href="https://commons.wikimedia.org/wiki/File:Block_Island_Wind_Farm_3.jpg" target="_blank" rel="noopener noreferrer">U.S. Department of Energy, via Wikimedia Commons</a> · Public domain</span></li><li><span class="lbl">W-08</span><span>Housing under construction, Bowmanville, 26 Sep 2026 — <a href="https://commons.wikimedia.org/wiki/File:Suburban_Housing_Construction_in_Bowmanville,_September_26_2026_(07).jpg" target="_blank" rel="noopener noreferrer">Dillan Payne / Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0 (cropped / resized)</a></span></li><li><span class="lbl">W-09</span><span>Hong Kong harbour from Victoria Peak, 11 Jun 2019 — <a href="https://commons.wikimedia.org/wiki/File:Hong_Kong_Harbour_Night_2019-06-11.jpg" target="_blank" rel="noopener noreferrer">Benh LIEU SONG (Flickr) / Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0 (cropped / resized)</a></span></li></ol>
+          <p class="fine note"><span class="en">Internal draft. Third-party photos are used for review only; licences must be re-checked (and ShareAlike crops handled) before anything is published. Verrier is not affiliated with or endorsed by NASA, ESO or any company.</span><span class="zh">内部草案。第三方照片仅用于评审；公开发布前要重新核对许可证（并按 ShareAlike 处理裁切版）。Verrier 与 NASA、ESO 及任何公司均无关联，也未获其背书。</span></p>
+        </div>
+      </footer>
+      <div class="end-pad" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- 06 控制台：verrier_console.js 渲染（证据页面板由 verrier_evidence.js 画，依赖图由 verrier_graph.js 画）。四个静态 id：cx、cxBody、cxCode、cxClose -->
+<div class="cx" id="cx" hidden>
+  <div class="cx-bg" id="cxBgAero" aria-hidden="true"></div>
+  <div class="card cx-card" role="dialog" aria-modal="true" tabindex="-1" data-aria-en="Mission control" data-aria-zh="任务控制台" aria-label="Mission control">
+    <div class="bh"><span>M-01 · MISSION CONTROL</span><i class="hz"></i><span class="sp"></span><span id="cxCode">STANDBY</span><button class="cx-x" type="button" id="cxClose" data-aria-en="Close" data-aria-zh="关闭" aria-label="Close">✕ ESC</button></div>
+    <div class="cx-body" id="cxBody"></div>
+    <div class="hud" id="aeroHud" hidden aria-hidden="true">
+      <div class="hud-st" id="hudSt"><i class="dot"></i><span class="tx"><b id="hudStatus">—</b><span id="hudView">—</span></span><span class="live">LIVE</span></div>
+      <div class="hud-ph" id="hudPh"><ol>
+        <li><i></i><em><span class="en">PLAN</span><span class="zh">规划</span></em></li><li><i></i><em><span class="en">GATE</span><span class="zh">确认</span></em></li><li><i></i><em><span class="en">FIELD</span><span class="zh">取证</span></em></li>
+        <li><i></i><em><span class="en">JUDGE</span><span class="zh">裁判</span></em></li><li><i></i><em><span class="en">COMPUTE</span><span class="zh">计算</span></em></li><li><i></i><em><span class="en">DONE</span><span class="zh">交付</span></em></li>
+      </ol></div>
+      <div class="hud-clk"><b id="hudClock">T+00:00:00</b><span><span class="en">ELAPSED</span><span class="zh">用时</span></span></div>
+      <div class="hud-cost" id="hudCost">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><g transform="rotate(135 28 28)">
+          <circle class="trk" cx="28" cy="28" r="24" pathLength="100" stroke-dasharray="75 100"/>
+          <circle class="zone" cx="28" cy="28" r="24" pathLength="100" stroke-dasharray="0 60 15 25"/>
+          <circle class="val" id="hudArc" cx="28" cy="28" r="24" pathLength="100" stroke-dasharray="75 100" stroke-dashoffset="75"/>
+        </g></svg>
+        <span class="tx"><b id="hudUsd">—</b><span id="hudCap">—</span><span id="hudAsof">—</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/verrier_aero.js"></script>
+<script src="/static/verrier_evidence.js"></script>
+<script src="/static/verrier_graph.js"></script>
+<script src="/static/verrier_console.js"></script>
+</body>
+</html>
