@@ -511,11 +511,12 @@ def report():
         row = {k: q.get(k) for k in ("id", "month", "as_of", "released", "answer_value", "source")}
         row["last_year_same_month"] = {"estimate": q["last_year"], "pct_err": _pct(q["last_year"], ans)}
         if (n := _load(_raw("naive", q["id"]))) is not None:
-            status, est, _ = check_naive(final_reply(n), "", strict_target=False)
+            status, est, _ = check_naive(final_reply(n), q["answer_unit"], strict_target=False)
             row["naive"] = {"status": status, "estimate": est, "pct_err": _pct(est, ans),
                             "log10_err": errors_for(est, ans)[0], "attempts": len(n["attempts"])}
         if (s := _load(_raw("structured", q["id"]))) is not None:
-            state = _clean(evaluate_structured(final_reply(s), "", q["id"], strict_target=False, question=q["question"]))
+            state = _clean(evaluate_structured(final_reply(s), q["answer_unit"], q["id"], strict_target=False,
+                                               question=q["question"]))
             r = state["result"]
             est = r["central"]
             row["structured"] = {"estimate": est, "pct_err": _pct(est, ans), "log10_err": errors_for(est, ans)[0],
