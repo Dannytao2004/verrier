@@ -203,8 +203,68 @@ QUESTIONS += [
      "answer_unit": "KRW", "unit_hint": "an amount of money in KRW",
      "leak_values": [24211800000000, 18902100000000]},
 ]
+# 留出测试 2 的未公布题（2026-10-19 加入，在任何模型调用之前提交；见 EVAL_TEST2_PLAN.md「补充」一节）。真实使用：as_of = 跑的那天，
+# 没有真值，公布后另行登记再打分。四道月度官方统计 + 两道上市公司财报里的 AI 指标（用户 10-19：token 和算力建设各一，
+# 过往财报披露过、下次财报可核实）。公布日都来自官方发布日历或公司公告；计分用基本单位（磅、新台币、美元、人、token/分钟）。
+_LIVE = "2026-10-19"
+QUESTIONS += [
+    # USDA NASS「Milk Production」：日历 Thu 10/22/26 3:00 pm ET。2025 年 9 月 24 州首发 18,279 百万磅（2025-11-10，停摆延迟；
+    # 现修订为 18,230）；最新 2026 年 8 月 19,172 百万磅（+1.8%）。
+    {"id": "fc_us_milk_2026_09", "set": "test2_live", "as_of": _LIVE, "expected_release": "2026-10-22",
+     "last_year": 18279000000, "source": "https://www.nass.usda.gov/Publications/Calendar/reports_by_date.php?view=l&month=10&year=2026",
+     "question": _ASOF.format(as_of=_LIVE) + "Estimate total milk production in the 24 major States of the United States in "
+                 "September 2026, in pounds (the report states it in million pounds), as it will be first reported in the USDA "
+                 "National Agricultural Statistics Service's monthly Milk Production report.",
+     "answer_unit": "lb", "unit_hint": "a mass of milk in pounds"},
+    # 台湾经济部统计处「批發、零售及餐飲業營業額統計」：9 月份资料订于 115 年 10 月 23 日下午 4:00 公布（8 月稿原文）。
+    # 2025 年 9 月餐饮业营业额 835 億元（年减 0.9%）；最新 2026 年 8 月 950 億元（+1.8%）。
+    {"id": "fc_tw_restaurants_2026_09", "set": "test2_live", "as_of": _LIVE, "expected_release": "2026-10-23",
+     "last_year": 83500000000, "source": "https://www.moea.gov.tw/Mns/dos/bulletin/Bulletin.aspx?kind=8&html=1&menu_id=6727&bull_id=16913",
+     "question": _ASOF.format(as_of=_LIVE) + "Estimate the turnover of Taiwan's food and beverage services industry (餐飲業營業額, "
+                 "current prices) in September 2026, in New Taiwan dollars (TWD), as it will be first reported in the Ministry of "
+                 "Economic Affairs Department of Statistics' monthly release on wholesale, retail and food services turnover "
+                 "(批發、零售及餐飲業營業額統計).",
+     "answer_unit": "TWD", "unit_hint": "an amount of money in TWD"},
+    # INEGI「Balanza Comercial de Mercancías de México, información oportuna」：2026 日历 27/octubre（06:00 墨西哥城）。
+    # 2025 年 9 月出口及时数 56,487.9 百万美元；最新 2026 年 8 月 78,010.5 百万美元（+40.4%）。计分用 10-27 的及时数。
+    {"id": "fc_mx_exports_2026_09", "set": "test2_live", "as_of": _LIVE, "expected_release": "2026-10-27",
+     "last_year": 56487900000, "source": "https://www.inegi.org.mx/contenidos/saladeprensa/doc/cal_2026.pdf",
+     "question": _ASOF.format(as_of=_LIVE) + "Estimate Mexico's total merchandise exports in September 2026, in US dollars "
+                 "(original figures, not seasonally adjusted), as they will be first reported in INEGI's timely trade balance "
+                 "bulletin (Balanza Comercial de Mercancías de México, información oportuna).",
+     "answer_unit": "USD", "unit_hint": "an amount of money in USD"},
+    # 联邦劳动局（BA）Veröffentlichungskalender：Oktober 2026，Stichtag 13.10.2026，Veröffentlichung Freitag 30.10.2026 10:00。
+    # 2025 年 10 月登记失业 2.911.000（原值）；最新 2026 年 9 月 2.994.000。计分用新闻稿里取整到千的全国原值。
+    {"id": "fc_de_unemployed_2026_10", "set": "test2_live", "as_of": _LIVE, "expected_release": "2026-10-30",
+     "last_year": 2911000,
+     "source": "https://statistik.arbeitsagentur.de/DE/Navigation/Service/Veroeffentlichungskalender/Veroeffentlichungskalender-Nav.html",
+     "question": _ASOF.format(as_of=_LIVE) + "Estimate the number of registered unemployed persons in Germany in October 2026 "
+                 "(not seasonally adjusted, all of Germany), as it will be first reported in the Federal Employment Agency's "
+                 "(Bundesagentur für Arbeit) monthly labour market press release.",
+     "answer_unit": "", "unit_hint": "a count of registered unemployed persons"},
+    # Alphabet：10-06 公告 Q3 2026 电话会 10-28（earnings release 在电话会前发）。过往：Q3'25 7B、Q4'25 over 10B、Q1'26 more than
+    # 16B、Q2'26 22B tokens per minute（earnings release 正文）。计分取 earnings release 里的数（没有就用 CEO 电话会讲稿），
+    # 忽略 over / more than / approximately；两份材料都没给这个数，本题作废（报告里写明）。
+    {"id": "fc_googl_tokens_2026_q3", "set": "test2_live", "as_of": _LIVE, "expected_release": "2026-10-28",
+     "last_year": 7000000000,
+     "source": "https://abc.xyz/investor/news/news-details/2026/Alphabet-Announces-Date-of-Third-Quarter-2026-Financial-Results-Conference-Call-2026-8tpGZsLS6v/default.aspx",
+     "question": _ASOF.format(as_of=_LIVE) + "Estimate the number of tokens per minute that Alphabet's first-party models (such as "
+                 "Gemini) process via direct API use by customers, as it will be first stated with Alphabet's third-quarter 2026 "
+                 "results (earnings press release or CEO earnings-call remarks); in Q2 2026 Alphabet stated this as 'Gemini models "
+                 "now process 22 billion API tokens per minute'. Answer in tokens per minute.",
+     "answer_unit": "token/minute", "unit_hint": "a rate in tokens per minute"},
+    # Meta：10-12 公告 Q3 2026 结果 10-21 盘后发布。每份新闻稿都有「Capital expenditures, including principal payments on finance
+    # leases, were $X billion」：Q3'25 $19.37B、Q4'25 $22.14B、Q1'26 $19.84B、Q2'26 $31.08B；2026 全年指引 $130-145B（Q2 稿）。
+    {"id": "fc_meta_capex_2026_q3", "set": "test2_live", "as_of": _LIVE, "expected_release": "2026-10-21",
+     "last_year": 19370000000,
+     "source": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-to-Announce-Third-Quarter-2026-Results/default.aspx",
+     "question": _ASOF.format(as_of=_LIVE) + "Estimate Meta Platforms' capital expenditures, including principal payments on finance "
+                 "leases, for the third quarter of 2026 (quarter ended September 30, 2026), in US dollars, as it will be first "
+                 "reported in Meta's third-quarter 2026 earnings press release.",
+     "answer_unit": "USD", "unit_hint": "an amount of money in USD"},
+]
 for _q in QUESTIONS:
-    if _q.get("set") == "test2":
+    if _q.get("set") in ("test2", "test2_live"):
         _q["strict"] = False
 FNS = {"naive": run_naive, "structured": run_structured}
 
