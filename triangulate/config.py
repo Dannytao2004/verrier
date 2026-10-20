@@ -29,6 +29,33 @@ API_URL = "https://api.deepseek.com/chat/completions"
 MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
 MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
 
+# v2.9a：按角色打开 DeepSeek 思考模式（实验臂；默认全关，请求和 frozen-v2.8r 逐字相同）。
+# 环境变量 TRIANGULATE_THINKING，例如 "plan=high,judge=high,repair=high,audit=low,unit_arbiter=low"。
+# 档位只有 low / high / max（官方 Thinking Mode 文档：medium 按 high 处理）。角色取 arm 的第一段，"judge:rN:repair" 算 repair。
+# 思考 token 计入 max_tokens（probes/thinking_probe.py 实测：max_tokens=150 时思考用满、content 为空、finish_reason=length），
+# 所以开了思考的角色在 MAX_TOKENS 之外再加 THINKING_EXTRA_TOKENS。思考 token 计在 completion_tokens 里，usd_cost 不用改。
+THINKING_LEVELS = ("low", "high", "max")
+
+
+def parse_thinking(spec: str) -> dict:
+    out = {}
+    for part in filter(None, (p.strip() for p in spec.split(","))):
+        role, _, level = part.partition("=")
+        role, level = role.strip(), level.strip().lower()
+        if not role or level not in THINKING_LEVELS:
+            raise ValueError(f"TRIANGULATE_THINKING: bad entry {part!r} (want role=low|high|max)")
+        out[role] = level
+    return out
+
+
+def thinking_role(arm: str) -> str:
+    parts = arm.split(":")
+    return "repair" if "repair" in parts[1:] else parts[0]
+
+
+THINKING = parse_thinking(os.environ.get("TRIANGULATE_THINKING", ""))
+THINKING_EXTRA_TOKENS = int(os.environ.get("TRIANGULATE_THINKING_EXTRA", "24000"))
+
 # 每个角色一次调用的输出上限（max_tokens）。只有这一个来源：各调用处和预算预扣（agent/pipeline.Budget）都查这张表，
 # 每次 agent 运行的 state.json 里也记一份（agent/run.save_run 的 settings）。v2.5.3 只是收拢，值和收拢前各处写的相同。
 MAX_TOKENS = {

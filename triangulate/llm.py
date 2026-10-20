@@ -10,7 +10,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-from .config import API_URL, CALLS, MODEL, read_key, usd_cost
+from .config import API_URL, CALLS, MODEL, THINKING, THINKING_EXTRA_TOKENS, read_key, thinking_role, usd_cost
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
 TOTAL_TIMEOUT_S = 1200
@@ -55,11 +55,16 @@ class LLM:
         """返回 (parsed_dict_or_None, raw_text, error_or_None)，error 只表示模型输出本身的问题。
         传输层失败（超时、5xx、空 body）内部重试最多 3 次，仍失败则抛 TransportError。
         3xx 跳转不跟随、不重试，直接抛 TransportError（D9）。"""
+        effort = THINKING.get(thinking_role(arm))
         payload = {"model": self.model, "messages": messages,
-                   "thinking": {"type": "disabled"}, "response_format": {"type": "json_object"},
-                   "temperature": 0, "max_tokens": max_tokens, "stream": False}
+                   "thinking": {"type": "enabled" if effort else "disabled"}, "response_format": {"type": "json_object"},
+                   "temperature": 0, "max_tokens": max_tokens + (THINKING_EXTRA_TOKENS if effort else 0), "stream": False}
+        if effort:
+            payload["reasoning_effort"] = effort
         body = json.dumps(payload).encode("utf-8")
         rec = {"arm": arm, "qid": qid, "attempt": attempt, "model": self.model}
+        if effort:
+            rec["thinking"] = effort
         for http_try in range(1, 4):
             started = datetime.now(timezone.utc)
             t0 = time.time()
@@ -117,6 +122,8 @@ class LLM:
                        prompt_cache_miss_tokens=usage.get("prompt_cache_miss_tokens", 0),
                        completion_tokens=usage.get("completion_tokens", 0),
                        usd=round(usd_cost(usage, started, self.model), 6))
+            if effort:
+                rec["reasoning_tokens"] = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens", 0)
             text = (choice.get("message") or {}).get("content") or ""
             # 先查截断：被截断的 JSON 几乎总是解析失败，先解析的话截断会被误报成「不是合法 JSON」
             if choice.get("finish_reason") == "length":

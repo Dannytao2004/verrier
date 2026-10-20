@@ -13,7 +13,7 @@ from datetime import date, datetime, timezone
 
 from langgraph.types import Command
 
-from ..config import MAX_TOKENS, RESULTS
+from ..config import MAX_TOKENS, RESULTS, THINKING, THINKING_EXTRA_TOKENS
 from . import ablation as AB
 from . import assumptions as AS
 from . import discrete as D
@@ -169,9 +169,12 @@ def run_settings() -> dict:
     各角色的 max_tokens、Budget 的默认参数、区间常数。"""
     budget = {k: p.default for k, p in inspect.signature(Budget.__init__).parameters.items()
               if p.default is not inspect.Parameter.empty}
-    return {"max_tokens": dict(MAX_TOKENS), "budget_defaults": budget,
-            "interval": {"MIN_WIDTH": AS.MIN_WIDTH, "MIN_WIDTH_CHANGE": AS.MIN_WIDTH_CHANGE,
-                         "FALLBACK_SIGMA": M.FALLBACK_SIGMA, "DEFAULT_REL_U": M.DEFAULT_REL_U, "EPS": M.EPS}}
+    out = {"max_tokens": dict(MAX_TOKENS), "budget_defaults": budget,
+           "interval": {"MIN_WIDTH": AS.MIN_WIDTH, "MIN_WIDTH_CHANGE": AS.MIN_WIDTH_CHANGE,
+                        "FALLBACK_SIGMA": M.FALLBACK_SIGMA, "DEFAULT_REL_U": M.DEFAULT_REL_U, "EPS": M.EPS}}
+    if THINKING:  # v2.9a：只有开了思考的实验运行才记，默认运行的 settings 和以前一样
+        out["thinking"] = {"by_role": dict(THINKING), "extra_max_tokens": THINKING_EXTRA_TOKENS}
+    return out
 
 
 def save_run(h: dict, approvals: list) -> dict:
