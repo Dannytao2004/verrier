@@ -53,6 +53,11 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
         # 第三版并列界面（浅色产品页风格草稿）：同一套 API 和共享 JS；首屏结果卡实时读 /api/result，读不到用页面里的快照
         return FileResponse(STATIC / "verrier_apple.html", media_type="text/html; charset=utf-8")
 
+    @app.get("/verrier/manuscript")
+    def verrier_manuscript():
+        # 第四版并列界面（欧洲古典天文学手稿风草稿）：同一套 API 和共享 JS；首屏账页实时读 /api/result，读不到用页面里的快照
+        return FileResponse(STATIC / "verrier_manuscript.html", media_type="text/html; charset=utf-8")
+
     # ---------- 网页运行 ----------
     @app.post("/api/runs")
     def start_run(body: dict = Body(...)):

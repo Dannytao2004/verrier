@@ -494,7 +494,7 @@ class TestApiSaved(unittest.TestCase):
         self.assertEqual(self.c.get("/static/app.js").status_code, 200)
         # 新旧两版界面并列：都能打开，新版复用同一组共享脚本
         self.assertEqual(self.c.get("/verrier").status_code, 200)
-        for route in ("/verrier/aero", "/verrier/apple"):
+        for route in ("/verrier/aero", "/verrier/apple", "/verrier/manuscript"):
             page = self.c.get(route)
             self.assertEqual(page.status_code, 200, route)
             for js in ("/static/verrier_evidence.js", "/static/verrier_graph.js", "/static/verrier_console.js"):

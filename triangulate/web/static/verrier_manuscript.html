@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verrier&nbsp;— See the number before it’s published</title>
+<meta name="description" content="Verrier is an AI research agent that reconstructs figures nobody has published yet, from public evidence, with every step on the record.">
+<meta name="theme-color" content="#efe5cf">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f1e8d4'/%3E%3Ccircle cx='27' cy='29' r='18' fill='none' stroke='%232a211a' stroke-width='3' stroke-dasharray='2 3'/%3E%3Ccircle cx='27' cy='29' r='4' fill='%232a211a'/%3E%3Ccircle cx='46' cy='44' r='8' fill='%232a211a'/%3E%3Cpath d='M38 36l16 16M54 36L38 52' stroke='%23a63a24' stroke-width='2.5'/%3E%3C/svg%3E">
+<script>
+/* 第一次绘制前：语言（和另外三版同一个 key 'verrier-lang'）、动效门控 .enh / .rm。
+   verrier_manuscript.js 3 秒内没把 __apReady 置真，就撤掉 .enh，内容照常显示 */
+(function(){var r=document.documentElement,l=null;try{l=localStorage.getItem('verrier-lang')}catch(e){}
+if(l!=='en'&&l!=='zh')l=(navigator.language||'').toLowerCase().indexOf('zh')===0?'zh':'en';
+r.setAttribute('data-lang',l);r.lang=l==='zh'?'zh-CN':'en';
+var rm=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);r.classList.add(rm?'rm':'enh');
+setTimeout(function(){if(!window.__apReady)r.classList.remove('enh')},3000);})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=IM+Fell+DW+Pica:ital@0;1&family=EB+Garamond:ital,wght@0,400..700;1,400..600&family=Meddon&family=Noto+Serif+SC:wght@400;600;700&family=Long+Cang&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/verrier_manuscript.css">
+</head>
+<body>
+<a class="skip" href="#main"><span class="en">Skip to content</span><span class="zh">跳到正文</span></a>
+
+<!-- 全页共用的画法：墨线抖动、排线、交叉排线、点刻、箭头 -->
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" x="-4%" y="-4%" width="108%" height="108%"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.1" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="roughS" x="-4%" y="-4%" width="108%" height="108%"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="1" seed="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <pattern id="hatch" width="4.2" height="4.2" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="4.2" stroke="#2a211a" stroke-width=".95"/></pattern>
+    <pattern id="hatchL" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2a211a" stroke-width=".55"/></pattern>
+    <pattern id="xhatch" width="4.2" height="4.2" patternUnits="userSpaceOnUse" patternTransform="rotate(48)"><line x1="0" y1="0" x2="0" y2="4.2" stroke="#2a211a" stroke-width=".85"/></pattern>
+    <pattern id="hatchR" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="4.5" stroke="#a63a24" stroke-width="1"/></pattern>
+    <pattern id="stip" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1.2" cy="1.4" r=".55" fill="#2a211a"/><circle cx="3.6" cy="3.7" r=".45" fill="#2a211a"/></pattern>
+    <radialGradient id="sealG" cx="42%" cy="38%" r="68%"><stop offset="0" stop-color="#c4553c"/><stop offset=".55" stop-color="#a63a24"/><stop offset="1" stop-color="#7a2414"/></radialGradient>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1.5L10 5L0 8.5z" fill="#2a211a"/></marker>
+  </defs>
+</svg>
+
+<header class="mh" id="lnav">
+  <div class="mh-in">
+    <a class="brand" href="#s0" aria-label="Verrier"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="27" cy="29" r="18" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="2 3"/><circle cx="27" cy="29" r="4" fill="currentColor"/><circle cx="46" cy="44" r="8" fill="currentColor"/></svg><b>Verrier</b></a>
+    <nav id="nav" data-aria-en="Chapters" data-aria-zh="章节" aria-label="Chapters">
+      <a href="#s1"><i>I</i><span class="en">Story</span><span class="zh">故事</span></a><a href="#s2"><i>II</i><span class="en">Method</span><span class="zh">方法</span></a><a href="#s3"><i>III</i><span class="en">Testimony</span><span class="zh">佐证</span></a><a href="#s4"><i>IV</i><span class="en">Tables</span><span class="zh">成绩</span></a><a href="#s5"><i>V</i><span class="en">Questions</span><span class="zh">场景</span></a>
+    </nav>
+    <div class="vers" data-aria-en="Other versions" data-aria-zh="其他版本" aria-label="Other versions" role="group">
+      <a href="/verrier"><span class="en">Classic</span><span class="zh">经典版</span></a><a href="/verrier/aero"><span class="en">Aero</span><span class="zh">航天版</span></a><a href="/verrier/apple"><span class="en">Light</span><span class="zh">浅色版</span></a>
+    </div>
+    <button class="lang" id="lang" type="button" data-aria-en="Switch language" data-aria-zh="切换语言" aria-label="Switch language"><span class="en"><b>EN</b> / 中</span><span class="zh">EN / <b>中</b></span></button>
+    <button class="mnav" id="mnav" type="button" aria-expanded="false" aria-controls="nav" data-aria-en="Chapters" data-aria-zh="章节" aria-label="Chapters"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></button>
+    <a class="cx-nav" href="#console"><span class="en">Ask</span><span class="zh">提问</span></a>
+  </div>
+</header>
+
+<main id="main">
+<!-- ========== fol. 1：扉页 + 图版 I ========== -->
+<section class="sec hero" id="s0" aria-labelledby="h0">
+  <div class="spread">
+    <div class="page pl" data-fol="fol. 1v">
+      <div class="tp">
+        <p class="tp-tr" aria-hidden="true">TRACTATVS DE NVMERIS NONDVM EDITIS</p>
+        <div class="tp-orn" aria-hidden="true"><i></i><span>✦</span><i></i></div>
+        <p class="tp-name" aria-hidden="true">VERRIER</p>
+        <h1 class="tp-claim" id="h0"><span class="sr">Verrier&nbsp;— </span><span class="en">See the number<br>before it’s published.</span><span class="zh">在数字公布之前，<br>先看见它。</span></h1>
+        <p class="tp-lede ink"><span class="en">Verrier reconstructs figures nobody has released yet&nbsp;— from public evidence, with every step on the record.</span><span class="zh">Verrier 用公开证据，推算出还没人公布的数字——每一步都有据可查。</span></p>
+        <div class="tp-orn sm" aria-hidden="true"><i></i><span>❦</span><i></i></div>
+        <div class="cta">
+          <a class="seal" href="#console"><span class="seal-disc" aria-hidden="true"><svg viewBox="0 0 100 100"><path class="seal-edge" d="M50 4 C62 3 70 9 79 13 C88 18 94 28 96 40 C99 52 95 63 90 72 C84 82 74 90 62 94 C50 98 38 96 28 90 C17 84 9 75 5 63 C1 51 3 38 9 27 C16 15 30 5 50 4Z"/><circle class="seal-ring" cx="50" cy="50" r="34"/><text x="50" y="62" text-anchor="middle">V</text></svg></span><span class="seal-t"><span class="en">Start a mission</span><span class="zh">开始任务</span></span></a>
+          <a class="tl" href="#s4"><span class="en">Results</span><span class="zh">看成绩</span> <span aria-hidden="true">→</span></a>
+        </div>
+        <p class="tp-imp">ANNO MMXXVI · <span class="en">a research prototype</span><span class="zh">研究原型</span></p>
+      </div>
+      <p class="catch" aria-hidden="true">Tabula</p>
+    </div>
+    <div class="page pr" data-fol="fol. 2r">
+      <figure class="plate hplate" id="hplate">
+        <svg id="hsvg" viewBox="0 0 600 600" role="img" data-aria-en="Plate I, drawn by compass and quill: Uranus drifts from its predicted orbit, the drift points to an unseen mass, the predicted place is marked in red, and Neptune is drawn within one degree of it." data-aria-zh="图版 I，用圆规和鹅毛笔画出：天王星偏离预测轨道，偏差指向一颗看不见的行星，红笔标出预测位置，海王星就画在离它不到 1° 的地方。" aria-label="Plate I, drawn by compass and quill: Uranus drifts from its predicted orbit, the drift points to an unseen mass, the predicted place is marked in red, and Neptune is drawn within one degree of it."></svg>
+        <figcaption><b>Tab. I.</b> <span class="en">Discovery by inference. In 1846 Le Verrier computed where an unseen planet had to be from the pull it exerted on Uranus; Galle found Neptune within one degree of the place. Schematic, not to scale.</span><span class="zh">靠推理的发现。1846 年，勒威耶从天王星被拉偏的轨道，算出一颗看不见的行星应在何处；伽勒在离那里不到 1° 的地方找到了海王星。示意图，不按比例。</span></figcaption>
+        <button class="redraw" type="button" data-replay data-aria-en="Redraw the plate" data-aria-zh="重绘图版" aria-label="Redraw the plate">↻ <span class="en">Redraw</span><span class="zh">重绘</span></button>
+      </figure>
+      <p class="catch" aria-hidden="true">Observatio</p>
+    </div>
+  </div>
+
+  <div class="spread one">
+    <div class="page wide" data-fol="fol. 2v">
+      <div class="lgrid">
+        <article class="ledger" id="pcard" aria-labelledby="pcQ">
+          <p class="lg-top"><span class="rub"><span class="en">Delivered</span><span class="zh">已交付</span></span><span class="lg-sub"><span class="en">As of <span class="nw">2026-09-12</span> · Backtest</span><span class="zh">截至 <span class="nw">2026-09-12</span> · 回测</span></span></p>
+          <h2 class="lg-q" id="pcQ"><span class="en">Heathrow passengers&nbsp;· September&nbsp;2026</span><span class="zh">希思罗机场旅客&nbsp;· 2026&nbsp;年 9&nbsp;月</span><sup class="fn"><a href="#fn-1" data-aria-en="Footnote 1" data-aria-zh="脚注 1" aria-label="Footnote 1">1</a></sup></h2>
+          <p class="lg-big fit"><span class="num" data-k="central">7,395,676</span></p>
+          <p class="lg-u"><span class="en">passengers · Verrier’s estimate</span><span class="zh">人次 · Verrier 的估计</span></p>
+          <div class="rg hero-rg" data-p10="4989648.181212653" data-p90="10961901.15614232" data-c="7395676.450898756" data-o="7180000" data-live="1" style="--c:41.63%;--o:38.51%"><div class="rg-trk" aria-hidden="true"><i class="rg-band"></i><i class="rg-off"></i><i class="rg-dot"></i></div><b class="rg-ol"><span class="en">Official</span><span class="zh">官方</span> <span class="num" data-k="official">7,180,000</span><sup class="fn"><a href="#fn-1" data-aria-en="Footnote 1" data-aria-zh="脚注 1" aria-label="Footnote 1">1</a></sup></b><div class="rg-ends"><span data-k="p10">4,989,648</span><span data-k="p90">10,961,901</span></div><p class="rg-note"><span class="en">80% interval (model-based)</span><span class="zh">80% 区间（model-based）</span><sup class="fn"><a href="#fn-2" data-aria-en="Footnote 2" data-aria-zh="脚注 2" aria-label="Footnote 2">2</a></sup></p></div>
+          <div class="ea" style="--ev:59.6%"><div class="ea-trk" aria-hidden="true"><i></i></div>
+            <p><span class="en">Evidence</span><span class="zh">证据</span> <span class="num" data-k="ev">60%</span> · <span class="en">Assumptions</span><span class="zh">假设</span> <span class="num" data-k="as">40%</span></p></div>
+          <dl class="lg-meta">
+            <div><dt><span class="en">Kept points</span><span class="zh">保留的点</span></dt><dd class="num" data-k="kept">48</dd></div>
+            <div><dt><span class="en">Discarded</span><span class="zh">丢弃的点</span></dt><dd class="num" data-k="disc">117</dd></div>
+            <div><dt><span class="en">Methods computed</span><span class="zh">算出的方法</span></dt><dd class="num" data-k="meth">3/4</dd></div>
+            <div><dt><span class="en">Cost</span><span class="zh">花费</span></dt><dd><span class="num" data-k="usd">$0.489</span><sup class="fn"><a href="#fn-3" data-aria-en="Footnote 3" data-aria-zh="脚注 3" aria-label="Footnote 3">3</a></sup></dd></div>
+          </dl>
+          <div class="lg-foot">
+            <p class="mode"><span class="m-live"><span class="en">Live · read from the saved run</span><span class="zh">实时数据 · 读自保存的运行</span></span><span class="m-snap"><span class="en">Offline snapshot · copied <span class="nw">2026-10-19</span></span><span class="zh">离线快照 · <span class="nw">2026-10-19</span> 抄录</span></span></p>
+            <a class="tl m-live" href="#console/result/fc_lhr_pax_2026_09/test1"><span class="en">Open in console</span><span class="zh">在控制台打开</span> <span aria-hidden="true">→</span></a>
+            <a class="tl m-snap" href="#console"><span class="en">Open console</span><span class="zh">打开控制台</span> <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+        <div class="slips">
+          <div class="slip f-q" data-st>
+            <p class="sl-h"><span class="en">Quote · checked verbatim</span><span class="zh">引文 · 逐字核对</span> <span class="ck" aria-hidden="true">✓</span></p>
+            <table class="sl-tb" data-aria-en="Row from the source table, quoted verbatim" data-aria-zh="来源表格里的一行，逐字引用" aria-label="Row from the source table, quoted verbatim"><tr><td>Total</td><td><mark>7,348</mark></td><td>0.8</td><td>63,275</td><td aria-hidden="true">…</td></tr></table>
+            <p class="sl-n">mediacentre.heathrow.com · <span class="en nw">archived snapshot 2025-10-26</span><span class="zh nw">存档快照 2025-10-26</span></p>
+            <p class="sl-r hand"><span class="en">→ 7,348,000 passengers, Sep 2025</span><span class="zh">→ 7,348,000&nbsp;人次（2025&nbsp;年 9&nbsp;月）</span></p>
+          </div>
+          <div class="stampbox f-o" data-st>
+            <p class="st-h"><span class="en">Official</span><span class="zh">官方值</span> <b class="num" data-k="official">7,180,000</b></p>
+            <p class="st-n"><span class="en">Released </span><span class="nw" data-k="released">2026-10-12</span><span class="zh"> 公布</span></p>
+            <p class="st-e"><span class="en">Error</span><span class="zh">误差</span> <b class="num" data-k="err">+3.0%</b></p>
+            <p class="st-n" data-k="cov"><span class="en">inside the 80% interval</span><span class="zh">落在 80% 区间内</span></p>
+          </div>
+        </div>
+        <aside class="margin stats" data-st data-aria-en="In the margin" data-aria-zh="页边批注" aria-label="In the margin">
+          <div><p class="mg-n num">1.1%</p><p class="mg-t"><span class="en">median error on 3 held-out questions</span><span class="zh">3 道留出题，中位误差</span><sup class="fn"><a href="#fn-4" data-aria-en="Footnote 4" data-aria-zh="脚注 4" aria-label="Footnote 4">4</a></sup></p></div>
+          <div><p class="mg-n num"><span class="en">37.7&nbsp;s</span><span class="zh">37.7&nbsp;秒</span></p><p class="mg-t"><span class="en">to recognise a figure that’s already out</span><span class="zh">识别一个已公布的数字</span><sup class="fn"><a href="#fn-5" data-aria-en="Footnote 5" data-aria-zh="脚注 5" aria-label="Footnote 5">5</a></sup></p></div>
+          <div><p class="mg-n num">100%</p><p class="mg-t"><span class="en">of the arithmetic done by code</span><span class="zh">的计算由代码完成</span><sup class="fn"><a href="#fn-6" data-aria-en="Footnote 6" data-aria-zh="脚注 6" aria-label="Footnote 6">6</a></sup></p></div>
+          <p class="hand mg-note" aria-hidden="true"><span class="en">all from one saved run ☞</span><span class="zh">皆出自一次存档的运行 ☞</span></p>
+        </aside>
+      </div>
+      <p class="catch" aria-hidden="true">Historia</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== fol. 3：故事 ========== -->
+<section class="sec story" id="s1" aria-labelledby="h1s">
+  <div class="spread">
+    <div class="page pl" data-fol="fol. 3v">
+      <p class="eb"><span class="en">Caput I · The idea</span><span class="zh">第一章 · 灵感</span></p>
+      <h2 class="h2" id="h1s"><span class="en">Found with a pen.</span><span class="zh">用一支笔<br>找到的行星。</span></h2>
+      <p class="lead ink"><span class="en">1846&nbsp;— Le Verrier pinpointed Neptune from the wobble of Uranus, before anyone had seen it.</span><span class="zh">1846&nbsp;年，勒威耶仅凭天王星的“摆动”，在任何人看到它之前就锁定了海王星。</span></p>
+      <div class="txt" data-st>
+        <p class="ink"><span class="en"><span class="dc" aria-hidden="true">I</span><span class="sr">I</span>n 1846 nobody had seen Neptune&nbsp;— and Urbain Le Verrier didn’t need to. Uranus was drifting off course, and the drift could mean only one thing: <b>something unseen was pulling on it.</b> He worked out where it had to be and mailed the coordinates to Berlin.</span><span class="zh"><span class="dc" aria-hidden="true">一</span><span class="sr">一</span>八四六年，没人见过海王星，勒威耶也不需要见到它。天王星总在偏离轨道，而这种偏离只说明一件事：<b>有一个看不见的东西在拉它。</b>他算出了它该在哪儿，把坐标寄往柏林。</span></p>
+        <p class="ink"><span class="en">Johann Galle pointed a telescope there the night the letter arrived, and found a new planet within one degree.</span><span class="zh">伽勒在收到信的当晚把望远镜对准那里——在不到 1° 的地方，发现了一颗新行星。</span></p>
+      </div>
+      <p class="hand mnote" aria-hidden="true"><span class="en">the drift that betrayed it</span><span class="zh">就是这一点偏差，出卖了它</span></p>
+      <p class="punch ink"><span class="en">Verrier brings the same idea to data: the numbers that matter leave traces in the numbers that are public.</span><span class="zh">Verrier 把同样的思路带进数据世界：重要的数字，总会在公开的数字里留下痕迹。</span></p>
+      <p class="catch" aria-hidden="true">Tab. II</p>
+    </div>
+    <div class="page pr" data-fol="fol. 4r">
+      <figure class="plate ruler draw" id="ruler" role="img" data-aria-en="Plate II, a ruled scale of ecliptic longitude from 320° to 332°: predicted 325°58′, observed 326°57′, a difference of 0°59′." data-aria-zh="图版 II，黄经 320° 到 332° 的刻度尺：预测 325°58′，观测 326°57′，相差 0°59′。" aria-label="Plate II, a ruled scale of ecliptic longitude from 320° to 332°: predicted 325°58′, observed 326°57′, a difference of 0°59′.">
+        <svg id="rsvg" viewBox="0 0 560 230" aria-hidden="true"></svg>
+        <figcaption><b>Tab. II.</b> <span class="en">The miss, measured on a scale of ecliptic longitude.</span><span class="zh">把误差量在黄经刻度上。</span></figcaption>
+      </figure>
+      <table class="annals" data-st>
+        <caption class="sr"><span class="en">Three dates</span><span class="zh">三个日期</span></caption>
+        <tr><th scope="row">31 Aug. 1846</th><td class="num">325°58′</td><td><span class="en">Le Verrier’s prediction</span><span class="zh">勒威耶的预测</span></td></tr>
+        <tr><th scope="row">23 Sept. 1846</th><td class="num">326°57′</td><td><span class="en">Galle finds Neptune</span><span class="zh">伽勒找到海王星</span></td></tr>
+        <tr class="sum"><th scope="row"><span class="en">The miss</span><span class="zh">误差</span></th><td class="num">&lt; 1°</td><td><span class="en">from a calculation on paper</span><span class="zh">纸上算出的结果</span></td></tr>
+      </table>
+      <p class="catch" aria-hidden="true">Methodus</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== fol. 5：方法 ========== -->
+<section class="sec how" id="s2" aria-labelledby="h2s">
+  <div class="spread">
+    <div class="page pl" data-fol="fol. 5v">
+      <p class="eb"><span class="en">Caput II · From question to answer</span><span class="zh">第二章 · 从问题到答案</span></p>
+      <h2 class="h2" id="h2s"><span class="en">Ask. Approve. Get the evidence.</span><span class="zh">提问，确认，拿到证据。</span></h2>
+      <p class="lead ink"><span class="en">One question in. One defensible number out.</span><span class="zh">输入一个问题，输出一个经得起追问的数字。</span></p>
+      <ol class="props" id="props">
+        <li data-i="0"><b class="pn">Prop. I.</b><div><h3><span class="en">Ask</span><span class="zh">提问</span></h3><p><span class="en">Name the number you need&nbsp;— next month’s births, this quarter’s deliveries, a figure no one reports.</span><span class="zh">说出你要的数字：下个月的出生数、本季度的交付量、没人统计的数据。</span></p></div></li>
+        <li data-i="1"><b class="pn">Prop. II.</b><div><h3><span class="en">Approve</span><span class="zh">确认</span></h3><p><span class="en">Verrier drafts the estimation routes and sources. You sign off before a single search runs.</span><span class="zh">Verrier 先拿出推算路线和数据来源，你批准之后才开始搜索。</span><sup class="fn"><a href="#fn-7" data-aria-en="Footnote 7" data-aria-zh="脚注 7" aria-label="Footnote 7">7</a></sup></p></div></li>
+        <li data-i="2"><b class="pn">Prop. III.</b><div><h3><span class="en">Gather</span><span class="zh">搜集</span></h3><p><span class="en">Parallel agents read the public record and bring back numbers with verbatim quotes.</span><span class="zh">多个 agent 并行阅读公开记录，带回附原文引用的数字。</span></p></div></li>
+        <li data-i="3"><b class="pn">Prop. IV.</b><div><h3><span class="en">Compute</span><span class="zh">计算</span></h3><p><span class="en">Code&nbsp;— not the model&nbsp;— runs the math: formulas, Monte&nbsp;Carlo, weights earned in backtests.</span><span class="zh">计算交给代码而不是模型：公式、Monte&nbsp;Carlo、按回测表现加权。</span></p></div></li>
+        <li data-i="4"><b class="pn">Prop. V.</b><div><h3><span class="en">Deliver</span><span class="zh">交付</span></h3><p><span class="en">An estimate with a range, an evidence ledger and a dependency graph you can audit.</span><span class="zh">带区间的估计，加上可审计的证据账本和依赖图。</span></p></div></li>
+      </ol>
+      <p class="specs"><span>LANGGRAPH</span><span>PARALLEL AGENTS</span><span>HUMAN GATE</span><span>≈ US$0.3–0.6 / ANSWER</span></p>
+      <p class="catch" aria-hidden="true">Tab. III</p>
+    </div>
+    <div class="page pr" data-fol="fol. 6r">
+      <figure class="plate spheres draw" id="spheres">
+        <svg id="ssvg" viewBox="0 0 520 520" role="img" data-aria-en="Plate III, the method drawn as five nested spheres: ask, approve, gather, compute, deliver." data-aria-zh="图版 III，把方法画成五层嵌套的天球：提问、确认、搜集、计算、交付。" aria-label="Plate III, the method drawn as five nested spheres: ask, approve, gather, compute, deliver."></svg>
+        <figcaption><b>Tab. III.</b> <span class="en">The method as nested spheres, after the old cosmographies: the question at the centre, the delivered number at the edge.</span><span class="zh">仿照古代宇宙志，把方法画成层层嵌套的天球：问题在中心，交付的数字在最外层。</span></figcaption>
+      </figure>
+      <a class="tl big" href="#console"><span class="en">Start a mission</span><span class="zh">开始任务</span> <span aria-hidden="true">→</span></a>
+      <p class="catch" aria-hidden="true">Testimonia</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== fol. 7：可信 ========== -->
+<section class="sec trust" id="s3" aria-labelledby="h3s">
+  <div class="spread one">
+    <div class="page wide" data-fol="fol. 7r">
+      <div class="shead">
+        <p class="eb"><span class="en">Caput III · Why you can trust it</span><span class="zh">第三章 · 为什么可信</span></p>
+        <h2 class="h2" id="h3s"><span class="en">Every answer shows its work.</span><span class="zh">每个答案都摊开过程。</span></h2>
+        <p class="lead ink"><span class="en">Trace any number back, line by line, to where it came from.</span><span class="zh">任何一个数字，都能逐行追溯到出处。</span></p>
+      </div>
+      <div class="testi" data-st>
+        <article class="tm">
+          <h3><b>Test. I.</b> <span class="en">Sourced.</span><span class="zh">有出处。</span></h3>
+          <p><span class="en">Every observed number carries a verbatim quote, checked against the page.</span><span class="zh">每个观测数字都附原文引用，并与网页逐字核对。</span></p>
+          <ul class="qrows"><li><b class="num">p1</b><span class="cells"><i>Total</i><i><mark>7,348</mark></i><i>0.8</i><i>63,275</i><i>0.3</i><i>84,065</i><i>1.5</i></span><span class="qn"><span class="en">Sep 2025 · terminal passengers (000s)</span><span class="zh">2025&nbsp;年 9&nbsp;月 · 旅客（千人次）</span></span></li><li><b class="num">p103</b><span class="cells"><i>Total</i><i><mark>8,036</mark></i><i>0.8</i><i>55,927</i><i>0.3</i><i>84,003</i><i>1.6</i></span><span class="qn"><span class="en">Aug 2025 · terminal passengers (000s)</span><span class="zh">2025&nbsp;年 8&nbsp;月 · 旅客（千人次）</span></span></li></ul>
+          <div class="gloss"><p class="k"><span class="en">Rejected by code: 77 points. Reasons, verbatim:</span><span class="zh">代码拒收 77&nbsp;条，原因原文：</span></p>
+            <ul class="rej"><li><b class="num">42</b><code>period_end missing or unparseable</code></li><li><b class="num">11</b><code>number: unknown scale word '000s'</code></li><li><b class="num">10</b><code>period_end 2026-12-31 after as_of</code></li><li><b class="num">9</b><code>number: no number in value_as_written</code></li><li><b class="num">4</b><code>scale word 'billion' not supported by quote or table header</code></li><li><b class="num">1</b><code>period_end 2029-12-31 after as_of</code></li></ul>
+            <p class="src">fc_lhr_pax_2026_09 / test1</p></div>
+        </article>
+        <article class="tm">
+          <h3><b>Test. II.</b> <span class="en">Computed.</span><span class="zh">代码计算。</span></h3>
+          <p><span class="en">The model plans; Python calculates. No mental math, ever.</span><span class="zh">模型做规划，Python 做计算，从不“心算”。</span></p>
+          <div class="calc hand-sheet">
+            <p><code>m1 = p1 × a1</code><span><span class="en">formula · from the model</span><span class="zh">公式 · 模型给的</span></span></p>
+            <p><code>p1 = 7,348,000</code><span><span class="en">observed · quoted</span><span class="zh">观测 · 有引文</span></span></p>
+            <p><code>a1 P10–P90 0.90–1.13</code><span><span class="en">assumption · sampled</span><span class="zh">假设 · 采样</span></span></p>
+            <p class="out"><code>→ 7,423,488</code><span>Python · Monte&nbsp;Carlo</span></p>
+          </div>
+          <p class="tn"><span class="en">Evaluated by a whitelist parser, not <code>eval</code></span><span class="zh">白名单解析器求值，不用 <code>eval</code></span><sup class="fn"><a href="#fn-6" data-aria-en="Footnote 6" data-aria-zh="脚注 6" aria-label="Footnote 6">6</a></sup></p>
+        </article>
+        <article class="tm">
+          <h3><b>Test. III.</b> <span class="en">Labelled.</span><span class="zh">假设透明。</span></h3>
+          <p><span class="en">Assumptions are flagged, bounded and falsifiable&nbsp;— never hidden.</span><span class="zh">假设会被标出、给出范围、可被证伪，绝不藏起来。</span></p>
+          <p class="fchip"><code>a1 = 1.01</code> <span><span class="en">(0.97–1.05)</span><span class="zh">（0.97–1.05）</span></span></p>
+          <div class="share" style="--sh:40.4%"><div class="sh-trk" aria-hidden="true"><i></i><em></em></div>
+            <p class="tn"><span class="en">Assumption share 40% · a warning lights up above 50%</span><span class="zh">假设占比 40% · 超过 50% 会亮警告</span></p></div>
+        </article>
+        <article class="tm">
+          <h3><b>Test. IV.</b> <span class="en">Audited.</span><span class="zh">独立核对。</span></h3>
+          <p><span class="en">An independent check catches inputs that don’t mean what the formula needs.</span><span class="zh">独立核对，抓出“名不副实”的输入。</span></p>
+          <blockquote class="audit"><code lang="en">input audit: p124: Wowprime is a single restaurant chain; its YoY growth is not the industry-wide growth, and no conversion input bridges chain-level to industry-level growth.</code>
+            <p class="zh"><span class="tag">译文</span>输入核对：p124：王品是单一的连锁餐饮集团，它的同比增长不等于全行业的增长，也没有任何换算输入能把连锁层面的增长折算成行业层面的增长。</p></blockquote>
+          <p class="src">fc_tw_restaurants_2026_09 / test2<sup class="fn"><a href="#fn-9" data-aria-en="Footnote 9" data-aria-zh="脚注 9" aria-label="Footnote 9">9</a></sup></p>
+        </article>
+        <article class="tm">
+          <h3><b>Test. V.</b> <span class="en">Leak-proof.</span><span class="zh">回测防泄漏。</span></h3>
+          <p><span class="en">Backtests read only archived pages from before the cutoff.</span><span class="zh">回测只读截止日之前的存档网页。</span></p>
+          <ul class="lk">
+            <li><span class="en"><b class="num">44</b> candidate pages</span><span class="zh"><b class="num">44</b> 页候选</span></li><li><span class="en"><b class="num">19</b> archived snapshots</span><span class="zh"><b class="num">19</b> 页存档快照</span></li>
+            <li><span class="en"><b class="num">0</b> live pages</span><span class="zh"><b class="num">0</b> 页实时网页</span></li><li><span class="en"><b class="num">0</b> points dated after the cutoff</span><span class="zh">晚于截止日的数据点 <b class="num">0</b> 条</span></li>
+          </ul>
+          <p class="src">fc_lhr_pax_2026_09 / test1</p>
+          <p class="tn"><span class="en">Another run: on <code>ycharts.com/indicators/us_housing_completed</code> the sentinel recognised a registered official value and excluded the whole page</span><span class="zh">另一次运行：在 <code>ycharts.com/indicators/us_housing_completed</code> 上认出已登记的官方值，整页排除</span><sup class="fn"><a href="#fn-10" data-aria-en="Footnote 10" data-aria-zh="脚注 10" aria-label="Footnote 10">10</a></sup></p>
+          <p class="src">fc_us_starts_2026_08 / test2</p>
+        </article>
+        <article class="tm">
+          <h3><b>Test. VI.</b> <span class="en">Fast when it can be.</span><span class="zh">该快就快。</span></h3>
+          <p><span class="en">Already published? It finds it and stops.</span><span class="zh">已经公布？找到就停。</span></p>
+          <div class="vs">
+            <div><p class="vn num">37.7<span class="u"><span class="en">s</span><span class="zh">秒</span></span></p><p class="tn"><span class="en">Second run: stopped once it recognised the published value</span><span class="zh">第二次：认出已公布值后停下</span></p></div>
+            <div class="slow"><p class="vn num">27<span class="u"><span class="en">min</span><span class="zh">分钟</span></span></p><p class="tn"><span class="en">First run: ran the full pipeline (1,631.9&nbsp;s)</span><span class="zh">第一次：走完全程（1,631.9&nbsp;秒）</span><sup class="fn"><a href="#fn-5" data-aria-en="Footnote 5" data-aria-zh="脚注 5" aria-label="Footnote 5">5</a></sup></p></div>
+          </div>
+        </article>
+      </div>
+      <p class="checks"><span>✓ HUMAN GATE</span><span>✓ CODE DOES THE MATH</span><span>✓ EVERY STEP ON THE RECORD</span></p>
+      <p class="catch" aria-hidden="true">Tabula</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== fol. 8：成绩 ========== -->
+<section class="sec results" id="s4" aria-labelledby="h4s">
+  <div class="spread one">
+    <div class="page wide" data-fol="fol. 8r">
+      <div class="shead">
+        <p class="eb"><span class="en">Caput IV · Results</span><span class="zh">第四章 · 成绩</span></p>
+        <h2 class="h2" id="h4s"><span class="en">Closer than asking the model.</span><span class="zh">比直接问模型更准。</span></h2>
+        <p class="lead ink"><span class="en">On 3 held-out questions&nbsp;— code frozen in advance, answers released after the model was trained&nbsp;— Verrier posted the lowest median error. Three questions is a small sample.</span><span class="zh">在 3 道留出题上——代码事先冻结，答案在模型训练之后才公布——Verrier 的中位误差最低。3 道题，样本很小。</span></p>
+      </div>
+      <div class="rgrid">
+        <figure class="plate playfair" id="trio">
+          <p class="pf-h"><span class="en">Median absolute error, per cent</span><span class="zh">绝对误差中位数（%）</span></p>
+          <div class="pf">
+            <div class="pf-r v" style="--w:26.9%"><span class="pf-l">Verrier<sup class="fn"><a href="#fn-4" data-aria-en="Footnote 4" data-aria-zh="脚注 4" aria-label="Footnote 4">4</a></sup></span><span class="pf-b"><i></i></span><b class="num">1.1</b></div>
+            <div class="pf-r" style="--w:60.4%"><span class="pf-l"><span class="en">Reasoning, no web</span><span class="zh">只推理不联网</span><sup class="fn"><a href="#fn-11" data-aria-en="Footnote 11" data-aria-zh="脚注 11" aria-label="Footnote 11">11</a></sup></span><span class="pf-b"><i></i></span><b class="num">2.4</b></div>
+            <div class="pf-r" style="--w:100%"><span class="pf-l"><span class="en">Asking the model</span><span class="zh">直接问模型</span></span><span class="pf-b"><i></i></span><b class="num">4.0</b></div>
+          </div>
+          <div class="pf-ax" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span></div>
+          <figcaption><span class="en">A fourth baseline&nbsp;— last year’s figure for the same month&nbsp;— had a median error of 2.4%.</span><span class="zh">第四个基线“去年同月”（直接用去年同月的官方值）中位误差 2.4%。</span><sup class="fn"><a href="#fn-12" data-aria-en="Footnote 12" data-aria-zh="脚注 12" aria-label="Footnote 12">12</a></sup></figcaption>
+        </figure>
+        <div class="tbwrap" data-st>
+          <table class="obs">
+            <caption><span class="en">Tabula observationum · held-out test</span><span class="zh">观测表 · 留出测试</span></caption>
+            <thead><tr><th scope="col"><span class="en">Question</span><span class="zh">题目</span></th><th scope="col"><span class="en">Official</span><span class="zh">官方值</span></th><th scope="col" class="v">Verrier</th><th scope="col"><span class="en">Ask the model</span><span class="zh">直接问模型</span></th><th scope="col"><span class="en">No web</span><span class="zh">不联网</span></th><th scope="col"><span class="en">Last year</span><span class="zh">去年同月</span><sup class="fn"><a href="#fn-12" data-aria-en="Footnote 12" data-aria-zh="脚注 12" aria-label="Footnote 12">12</a></sup></th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><span class="en">Taiwan births · Sep</span><span class="zh">台湾出生数 · 9&nbsp;月</span><small><span class="en">assumption share 78%</span><span class="zh">假设占比 78%</span> <span class="warn" aria-hidden="true">✠</span><sup class="fn"><a href="#fn-13" data-aria-en="Footnote 13" data-aria-zh="脚注 13" aria-label="Footnote 13">13</a></sup></small></th><td class="num">7,704<small>2026-10-08</small></td><td class="num v">+1.1%<small>7,788</small></td><td class="num">+42.8%</td><td><span class="en">no answer</span><span class="zh">没出数</span><sup class="fn"><a href="#fn-11" data-aria-en="Footnote 11" data-aria-zh="脚注 11" aria-label="Footnote 11">11</a></sup></td><td class="num">+11.7%</td></tr>
+              <tr><th scope="row"><span class="en">Heathrow passengers · Sep</span><span class="zh">希思罗旅客 · 9&nbsp;月</span><small><span class="en">assumption share 40%</span><span class="zh">假设占比 40%</span></small></th><td class="num">7,180,000<sup class="fn"><a href="#fn-1" data-aria-en="Footnote 1" data-aria-zh="脚注 1" aria-label="Footnote 1">1</a></sup><small>2026-10-12</small></td><td class="num v">+3.0%<small>7,395,676</small></td><td class="num beat">+0.3%</td><td class="num beat">−2.5%</td><td class="num beat">+2.4%</td></tr>
+              <tr><th scope="row"><span class="en">Japan births · Jul</span><span class="zh">日本出生数 · 7&nbsp;月</span><small><span class="en">assumption share 83%</span><span class="zh">假设占比 83%</span> <span class="warn" aria-hidden="true">✠</span><sup class="fn"><a href="#fn-14" data-aria-en="Footnote 14" data-aria-zh="脚注 14" aria-label="Footnote 14">14</a></sup></small></th><td class="num">62,479<small>2026-09-25</small></td><td class="num v">+0.8%<small>62,965</small></td><td class="num">+4.0%</td><td class="num">−2.4%</td><td class="num">+1.5%</td></tr>
+            </tbody>
+          </table>
+          <p class="hand tnote"><span class="en">Heathrow: all three baselines were closer than Verrier on this one.</span><span class="zh">希思罗这题：三个基线都比 Verrier 准。</span></p>
+          <p class="fine"><span class="en">Median absolute error, held-out test of 3 official monthly figures (2026). Full run logs in the repository.</span><span class="zh">绝对误差中位数；留出测试，3&nbsp;个按月发布的官方数字（2026）。完整运行记录见仓库。</span> <a class="tl" href="/#/saved" target="_blank" rel="noopener"><span class="en">All saved runs and backtests in the classic view</span><span class="zh">在经典界面看全部运行和回测</span> ↗</a></p>
+        </div>
+      </div>
+      <p class="catch" aria-hidden="true">Quaestiones</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== fol. 9：场景 + 收尾 ========== -->
+<section class="sec uses-sec" id="s5" aria-labelledby="h5s">
+  <div class="spread one">
+    <div class="page wide" data-fol="fol. 9r">
+      <div class="shead center">
+        <p class="eb"><span class="en">Caput V · What it’s for</span><span class="zh">第五章 · 用在哪里</span></p>
+        <h2 class="h2" id="h5s"><span class="en">What will you ask?</span><span class="zh">你想问什么？</span></h2>
+      </div>
+      <div class="uses" data-st>
+        <article class="use"><svg class="vg draw" viewBox="0 0 160 110" aria-hidden="true"><g class="ink-l" filter="url(#roughS)"><path pathLength="1" d="M80 18 V92 M58 96 H102 M66 92 H94"/><path pathLength="1" d="M30 30 H130"/><circle pathLength="1" cx="80" cy="18" r="4"/><path pathLength="1" d="M30 30 L18 62 M30 30 L42 62 M130 30 L118 56 M130 30 L142 56"/><path pathLength="1" d="M14 62 Q30 74 46 62 Z" fill="url(#hatchL)"/><path pathLength="1" d="M114 56 Q130 68 146 56 Z" fill="url(#hatchL)"/><path pathLength="1" d="M74 8 L80 2 L86 8" /></g></svg>
+          <p class="u-id">U-01</p><h3><span class="en">Company metrics</span><span class="zh">公司指标</span></h3><p><span class="en">Deliveries, subscribers, store traffic&nbsp;— before the earnings call.</span><span class="zh">交付量、订阅数、门店客流——在财报会之前。</span></p></article>
+        <article class="use"><svg class="vg draw" viewBox="0 0 160 110" aria-hidden="true"><g class="ink-l" filter="url(#roughS)"><path pathLength="1" d="M34 96 V20 A76 76 0 0 1 110 96 Z" fill="none"/><path pathLength="1" d="M34 96 V20 A76 76 0 0 1 110 96" fill="url(#hatchL)" fill-opacity=".25"/><path pathLength="1" d="M40 90 A62 62 0 0 0 40 28"/><path class="tk" pathLength="1" d="M34 30 l6 1 M45 31 l5 3 M58 36 l4 4 M70 44 l3 5 M80 54 l2 5 M88 66 l1 5 M93 78 l0 5 M96 90 l0 5"/><path pathLength="1" d="M34 96 L96 46"/><path pathLength="1" d="M70 96 V104 M66 104 H74"/><circle pathLength="1" cx="34" cy="96" r="3"/></g></svg>
+          <p class="u-id">U-02</p><h3><span class="en">Macro prints</span><span class="zh">宏观数据</span></h3><p><span class="en">CPI, payrolls, rate decisions&nbsp;— with a probability for every outcome.</span><span class="zh">CPI、非农、议息——给出每种结果的概率。</span></p></article>
+        <article class="use"><svg class="vg draw" viewBox="0 0 160 110" aria-hidden="true"><g class="ink-l" filter="url(#roughS)"><circle pathLength="1" cx="118" cy="40" r="22"/><path pathLength="1" d="M118 12 L122 36 L118 40 L114 36 Z M118 68 L114 44 L118 40 L122 44 Z M90 40 L114 36 L118 40 L114 44 Z M146 40 L122 44 L118 40 L122 36 Z"/><path pathLength="1" d="M12 96 H96 M18 96 V70 L30 60 L42 70 V96 M50 96 V64 H74 V96 M56 64 L62 52 L68 64 M80 96 V76 L88 70 L96 76 V96"/><path pathLength="1" d="M24 96 V84 H36 V96" fill="url(#hatchL)"/><path pathLength="1" d="M8 104 Q60 96 150 104"/></g></svg>
+          <p class="u-id">U-03</p><h3><span class="en">Local figures</span><span class="zh">地方数据</span></h3><p><span class="en">Births in a county, visitors to a park&nbsp;— numbers no one tracks.</span><span class="zh">某个县的出生数、某个公园的游客——没人统计的数字。</span></p></article>
+      </div>
+      <div class="closing" data-st>
+        <p class="cl-h"><span class="en">Have a number nobody publishes?<br>That’s Verrier’s next mission.</span><span class="zh">有一个没人公布的数字？<br>那就是 Verrier 的下一个任务。</span></p>
+        <p class="lead ink"><span class="en">Ask in one sentence, approve the plan, get the number with its evidence.</span><span class="zh">用一句话提问，批准路线，拿到带证据的数字。</span></p>
+        <div class="cta center">
+          <a class="seal" href="#console"><span class="seal-disc" aria-hidden="true"><svg viewBox="0 0 100 100"><path class="seal-edge" d="M50 4 C62 3 70 9 79 13 C88 18 94 28 96 40 C99 52 95 63 90 72 C84 82 74 90 62 94 C50 98 38 96 28 90 C17 84 9 75 5 63 C1 51 3 38 9 27 C16 15 30 5 50 4Z"/><circle class="seal-ring" cx="50" cy="50" r="34"/><text x="50" y="62" text-anchor="middle">V</text></svg></span><span class="seal-t"><span class="en">Start a mission</span><span class="zh">开始任务</span></span></a>
+          <button class="redraw" type="button" data-replay data-aria-en="Redraw Plate I" data-aria-zh="重绘图版 I" aria-label="Redraw Plate I">↻ <span class="en">Redraw Plate I</span><span class="zh">重绘图版 I</span></button>
+          <a class="tl" href="#s0"><span class="en">Back to the title page</span><span class="zh">回到扉页</span> ↑</a>
+        </div>
+        <p class="finis" aria-hidden="true">FINIS</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="ft" id="ft">
+  <div class="spread one">
+    <div class="page wide notes">
+      <p class="eb" aria-hidden="true">Annotationes · <span class="en">Footnotes</span><span class="zh">脚注</span></p>
+      <section class="sosumi" aria-labelledby="fnH">
+      <h2 class="sr" id="fnH"><span class="en">Footnotes</span><span class="zh">脚注</span></h2>
+      <ol><li id="fn-1"><span class="en">Original question: “Assume today is <span class="nw">2026-09-12</span> … Estimate the number of passengers at London Heathrow Airport in September 2026, as reported in Heathrow's monthly traffic statistics.” The official value is taken from a <a href="https://www.sharecast.com/news/other-company-news/heathrow-airport-travel-tourism-london-passenger-traffic-uk--23819142.html" target="_blank" rel="noopener noreferrer">sharecast.com report</a> (<span class="nw">2026-10-12</span>). Run: <code>results/agent/fc_lhr_pax_2026_09/test1/</code> (model deepseek-flash).</span><span class="zh">原题：“Assume today is <span class="nw">2026-09-12</span> … Estimate the number of passengers at London Heathrow Airport in September 2026, as reported in Heathrow's monthly traffic statistics.”。官方值取自 <a href="https://www.sharecast.com/news/other-company-news/heathrow-airport-travel-tourism-london-passenger-traffic-uk--23819142.html" target="_blank" rel="noopener noreferrer">sharecast.com 的报道</a>（<span class="nw">2026-10-12</span>）。运行目录 <code>results/agent/fc_lhr_pax_2026_09/test1/</code>（模型 deepseek-flash）。</span></li><li id="fn-2"><span class="en">Interval basis (basis_text, verbatim): <i>too few backtest years, so the interval width comes from Monte Carlo sampling of the formula inputs and reflects input uncertainty only</i>.</span><span class="zh">回测年份太少，区间宽度来自对公式输入的 Monte&nbsp;Carlo 抽样，只反映输入的不确定性。basis_text 原文：<i>too few backtest years, so the interval width comes from Monte Carlo sampling of the formula inputs and reflects input uncertainty only</i>。</span></li><li id="fn-3"><span class="en">The search fee in the cost is booked at an assumed unit price: tokens $0.0688 + search $0.42.</span><span class="zh">花费里的搜索费是按假设单价记的：token $0.0688 + 搜索 $0.42。</span></li><li id="fn-4"><span class="en">test1 held-out test: 3 official monthly figures (Taiwan births, September 2026; Heathrow passengers, September 2026; Japan births, July 2026); median absolute error; only 3 questions. In test2 (<span class="nw">2026-10-19</span>, 8 questions) Verrier produced a number on 6 of 8, with a median error of 11.2%; fc_de_cars estimated 249 against an official 256,774, an error of −99.9%. Data: <code>results/agent/summary_test1.json</code>, <code>summary_test2.json</code>.</span><span class="zh">test1 留出测试：3 道按月发布的官方数字（台湾 2026&nbsp;年 9&nbsp;月出生数、希思罗 2026&nbsp;年 9&nbsp;月旅客、日本 2026&nbsp;年 7&nbsp;月出生数），绝对误差中位数，样本只有 3&nbsp;题。<span class="nw">2026-10-19</span> 的 test2 共 8&nbsp;题，Verrier 有 6&nbsp;题出数，中位误差 11.2%；fc_de_cars 估计 249，官方 256,774，误差 −99.9%。数据来自 <code>results/agent/summary_test1.json</code>、<code>summary_test2.json</code>。</span></li><li id="fn-5"><span class="en">The same question (UK new-car registrations, September 2026, SMMT) was run twice. published2 recognised the published value 350,536 in 37.7&nbsp;s and stopped; published1 ran the whole pipeline before confirming it, taking 1,631.9&nbsp;s. Directory <code>results/agent/ask_a63174a0/</code>.</span><span class="zh">同一问题（英国 2026&nbsp;年 9&nbsp;月新车注册量，SMMT）跑了两次。published2 用 37.7&nbsp;秒认出已公布值 350,536 后停下；published1 走完全程才确认，用了 1,631.9&nbsp;秒。<span class="nw">目录 <code>results/agent/ask_a63174a0/</code></span>。</span></li><li id="fn-6"><span class="en">The model only proposes the structure of formulas; formula evaluation (a whitelist parser, not <code>eval</code>), unit conversion and Monte Carlo are run by Python (README.md, lines 3 and 6).</span><span class="zh">模型只提公式结构；公式求值（白名单解析器，不用 <code>eval</code>）、单位换算、Monte&nbsp;Carlo 都由 Python 执行（README.md 第 3、6&nbsp;行）。</span></li><li id="fn-7"><span class="en">Backtest runs are approved by a script (auto-approve); when you ask in the console, this step stops and waits for you to tick the routes.</span><span class="zh">回测运行由脚本自动批准（auto-approve）；在控制台提问时，这一步会停下来等你勾选。</span></li><li id="fn-8"><span class="en">In m4, p9 cancels out algebraically, so its result equals m1; this run effectively had two independent routes. The assumption a3 used by m3 was rejected by code.</span><span class="zh">m4 里 p9 在代数上约掉，结果和 m1 相同，所以这次实际是两条独立路线。m3 用的假设 a3 被代码拒收。</span></li><li id="fn-9"><span class="en">The example in the “Audited” tile comes from the round-2 input audit of a different run, fc_tw_restaurants_2026_09 / test2. The Chinese translation is ours.</span><span class="zh">“独立核对”一格的例子来自另一次运行 fc_tw_restaurants_2026_09 / test2 第 2&nbsp;轮的 input audit；中文是我们的译文。</span></li><li id="fn-10"><span class="en">The sentinel only knows the common formats of registered official values. run.py, verbatim: <i>The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.</i></span><span class="zh">哨兵只认得已登记官方值的常见写法。run.py 原文：<i>The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.</i></span></li><li id="fn-11"><span class="en">Reasoning-no-web gave no answer on the Taiwan question: both attempts were rejected by the dimension check (<code>dimension mismatch: formula gives s**-1, target is dimensionless</code>). 2.4% is the median over the 2 questions it answered; on the 2 questions where all three arms answered, the median errors were Verrier 1.9%, asking the model 2.2%, reasoning-no-web 2.4%.</span><span class="zh">只推理不联网在台湾这题没出数：两次尝试都被量纲检查拒收（<code>dimension mismatch: formula gives s**-1, target is dimensionless</code>）。2.4% 是它答出的 2&nbsp;题的中位数；三方都有数的 2&nbsp;题上，中位误差是 Verrier 1.9%、直接问模型 2.2%、只推理不联网 2.4%。</span></li><li id="fn-12"><span class="en">The “same month last year” baseline uses last year’s official figure for the same month as the estimate (<code>last_year_same_period</code> in <code>results/agent/summary_test1.json</code>): Taiwan +11.7%, Heathrow +2.4%, Japan +1.5%; median absolute error 2.37%. On Heathrow it was closer than Verrier.</span><span class="zh">“去年同月”基线直接拿去年同月的官方值当估计（<code>results/agent/summary_test1.json</code> 里的 <code>last_year_same_period</code>）：台湾 +11.7%、希思罗 +2.4%、日本 +1.5%，绝对误差中位数 2.37%。希思罗这题它比 Verrier 准。</span></li><li id="fn-13"><span class="en">The Taiwan question’s assumption share is 78%, above the 50% warning line.</span><span class="zh">台湾这题假设占比 78%，超过 50% 的警戒线。</span></li><li id="fn-14"><span class="en">The Japan estimate rests mainly on one clinic’s monthly deliveries, multiplied by an assumed factor a1 = 1,100 (550–2,200); assumption share 83%.</span><span class="zh">日本这题的估计主要来自一家诊所的月分娩数，乘以假设系数 a1 = 1,100（550–2,200）；假设占比 83%。</span></li></ol>
+    </section>
+      <div class="colo">
+        <p class="tagline">PUBLIC DATA · UNPUBLISHED NUMBERS · VERRIER · MISSION 01</p>
+        <p><span class="en">Verrier · research prototype · 2026 · figures as of 19 Oct 2026 · not investment advice.</span><span class="zh">Verrier · 研究原型 · 2026 · 数字截至 2026&nbsp;年 10&nbsp;月 19&nbsp;日 · 不构成投资建议。</span></p>
+        <p><span class="en">Neptune’s rings are named Galle, Le Verrier, Lassell, Arago and Adams&nbsp;— after the people who found it.</span><span class="zh">海王星的光环分别以 Galle、Le Verrier、Lassell、Arago、Adams 命名——正是发现它的那些人。</span></p>
+        <p><span class="en">Set in IM Fell and EB Garamond; marginalia in Meddon and Long Cang. Plates are drawn in the browser, schematic and not to scale; no third-party images are used.</span><span class="zh">正文用 IM Fell 和 EB Garamond，页边批注用 Meddon 和龙藏体。图版都在浏览器里画成，均为示意图、不按比例；本页没有使用第三方图片。</span></p>
+        <p class="vline"><span class="en">Versions:</span><span class="zh">版本：</span> <a href="/verrier"><span class="en">Classic</span><span class="zh">经典版</span></a> · <a href="/verrier/aero"><span class="en">Aero</span><span class="zh">航天版</span></a> · <a href="/verrier/apple"><span class="en">Light</span><span class="zh">浅色版</span></a> · <b><span class="en">Manuscript</span><span class="zh">手稿版</span></b></p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="cx" id="cx" hidden>
+  <div class="card cx-card" role="dialog" aria-modal="true" tabindex="-1" data-aria-en="Mission control" data-aria-zh="任务控制台" aria-label="Mission control">
+    <div class="bh"><span class="cx-title"><span class="en">Mission control</span><span class="zh">任务控制台</span></span><i class="hz"></i><span class="sp"></span><div class="ap-prog" id="apProg" hidden aria-hidden="true"><span class="ap-segs"><i></i><i></i><i></i><i></i><i></i><i></i></span><b id="apSt"></b><span class="num" id="apClk"></span><span class="num" id="apUsd"></span></div><span id="cxCode">STANDBY</span><button class="cx-x" type="button" id="cxClose" data-aria-en="Close" data-aria-zh="关闭" aria-label="Close"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
+    <div class="cx-body" id="cxBody"></div>
+  </div>
+</div>
+
+<script src="/static/verrier_manuscript.js"></script>
+<script src="/static/verrier_evidence.js"></script>
+<script src="/static/verrier_graph.js"></script>
+<script src="/static/verrier_console.js"></script>
+</body>
+</html>
