@@ -1,3 +1,16 @@
+# 断点（2026-10-20，思考模式实验 v2.9a/b，先停在这里）
+
+- **做了什么**：`TRIANGULATE_THINKING` 按角色打开 DeepSeek 思考（v2.9a，默认关，请求和 frozen-v2.8r 逐字相同）；v2.9b 只多记 invalid_json 的上下文。
+  实验设置 `plan=high,judge=high,repair=high,audit=low,unit_arbiter=low`，有真值的 17 题全跑（tag `test2_think` / `think`；加拿大第 2 次 `test2_think_r2`），
+  4 道未公布题在公布前跑完（`test2_think`；Alphabet 第一次段错误崩溃，留作 `test2_think_crash1`，重跑一次）。
+- **结果（单次运行、样本内）**：思考臂中位误差 2.2%（±10% 内 13/17，没出数 2），去年同月 3.3%，思考的直接问 7.2%（`results/agent/test2_think_naive.json`）。
+  德国新车 −6.4% 来自碰巧取到的英文页，不是思考的功劳。早期 9 题的「之前的 agent」是 v2.1–v2.5 旧代码，只有 test2 8 题是同版本对照。
+- **最大的问题**：思考模式下裁判 JSON 常不合法（BUGS S25）。用户 10-20：先不修，以后再说。
+- **待办**：未公布题按公布日打分（Meta 10-21、牛奶 10-22、台湾 10-23、Alphabet 10-28），思考臂和冻结版两套都打；
+  基线重打分分支 `claude/strange-brahmagupta-99c76d`（tag `baseline-g8`）还没合并进 main。
+
+---
+
 # 断点（2026-10-18 晚，冻结 v2.8r，留出测试 2 已预注册）
 
 **冻结的代码：tag `frozen-v2.8r` = `v2.8r` = `258a53d`**（用户 10-18：「预注册就用这版」），取代 `frozen-v2.8n`。
