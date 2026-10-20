@@ -1,0 +1,65 @@
+[
+ {
+  "qid": "fc_ca_rail_2026_07",
+  "thinking": "high",
+  "estimate": 32000000.0,
+  "unit": "tonne",
+  "truth": 31686803,
+  "pct_err": 0.0099,
+  "problems": []
+ },
+ {
+  "qid": "fc_us_gen_2026_07",
+  "thinking": "high",
+  "estimate": 448000,
+  "unit": "GWh",
+  "truth": 453744,
+  "pct_err": -0.0127,
+  "problems": []
+ },
+ {
+  "qid": "fc_es_transit_2026_08",
+  "thinking": "high",
+  "estimate": 510000000.0,
+  "unit": "",
+  "truth": 371623271,
+  "pct_err": 0.3724,
+  "problems": []
+ },
+ {
+  "qid": "fc_meta_capex_2026_q3",
+  "thinking": "high",
+  "estimate": 30500000000.0,
+  "unit": "USD",
+  "truth": null,
+  "pct_err": null,
+  "problems": []
+ },
+ {
+  "qid": "fc_us_milk_2026_09",
+  "thinking": "high",
+  "estimate": 18300000000.0,
+  "unit": "lb",
+  "truth": null,
+  "pct_err": null,
+  "problems": []
+ },
+ {
+  "qid": "fc_tw_restaurants_2026_09",
+  "thinking": "high",
+  "estimate": 93000000000.0,
+  "unit": "TWD",
+  "truth": null,
+  "pct_err": null,
+  "problems": []
+ },
+ {
+  "qid": "fc_googl_tokens_2026_q3",
+  "thinking": "high",
+  "estimate": 30000000000.0,
+  "unit": "token/minute",
+  "truth": null,
+  "pct_err": null,
+  "problems": []
+ }
+]

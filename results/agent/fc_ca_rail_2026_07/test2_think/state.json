@@ -1,0 +1,3081 @@
+{
+ "qid": "fc_ca_rail_2026_07",
+ "question": "Assume today is 2026-08-29. You know nothing published after this date. Estimate the total freight carried by Canadian railways in July 2026, in tonnes, as it will be first reported by Statistics Canada in its monthly Railway carloadings release (total traffic carried, Canada).",
+ "as_of": "2026-08-29",
+ "plan": {
+  "target": {
+   "what": "Total freight carried by Canadian railways in July 2026, as first reported by Statistics Canada in its monthly Railway carloadings release; working interpretation is Canada-level total revenue-freight tonnage carried during the calendar month, including all commodities and intermodal traffic in the ",
+   "unit": "metric tonnes",
+   "period_start": "2026-07-01",
+   "period_end": "2026-07-31",
+   "publisher": "Statistics Canada (Railway carloadings, Table 23-10-0086-01)",
+   "cadence": "monthly",
+   "caveats": "Target month ended before the 2026-08-29 cutoff, but the official first-reported figure is assumed unavailable at cutoff. 'Total traffic carried' may differ from carload counts, revenue ton-miles, domestic-origin carloadings only, or port throughput. Working interpretation uses the Canada-level publ",
+   "outcome_type": "continuous",
+   "unit_canonical": "t"
+  },
+  "market_keywords": [],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "Statistics Canada historical-series analyst",
+    "hypothesis": "July total tonnage has recurring seasonal patterns and a recent trend; prior July values and Jan-Jun 2026 year-over-year changes constrain July 2026 even without the July print.",
+    "data_to_find": "Monthly total tonnes carried by Canadian railways for Jan 2023-Jun 2026, especially July 2023, July 2024, July 2025, and May/June 2026; commodity detail if available. Minimum evidence: July 2025 total and any 2026 monthly prints through June.",
+    "search_hints": [
+     "Statistics Canada railway carloadings July 2025 total tonnes",
+     "Table 23-10-0086-01 railway carloadings monthly Canada",
+     "Railway carloadings Canada June 2026 Statistics Canada"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "rail operator weekly performance monitor",
+    "hypothesis": "July 2026 total tonnes can be reconstructed from weekly carloads by commodity multiplied by average payloads; weekly carloads are an early indicator of the monthly total.",
+    "data_to_find": "Weekly Canadian railway carloads and/or tonnage for weeks covering July 2026, by commodity where possible; CN and CPKC weekly operating metrics; AAR or industry weekly rail data. Minimum evidence: at least partial July 2026 weekly carloads by commodity, or total weekly carloads.",
+    "search_hints": [
+     "July 2026 weekly railway carloadings Canada",
+     "Canadian railways carloads week ending July 2026",
+     "Ag Transport Coalition weekly rail carloads July 2026"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "related_series",
+    "perspective": "commodity supply and export analyst",
+    "hypothesis": "Total rail tonnage is the sum of major commodity flows (grain, coal, potash, crude oil, forest products, metals, intermodal); July 2026 export/production indicators for these commodities plus rail shares can approximate most of the total, with a residual allowance.",
+    "data_to_find": "July 2026 Canadian rail/export volumes or production for grain, coal, potash, crude oil, forest products, metals, and containerized intermodal; rail modal shares by commodity. Minimum evidence: July 2026 grain, coal, potash, and oil rail/export flows plus an intermodal indicator.",
+    "search_hints": [
+     "Canada grain rail shipments July 2026",
+     "Canada potash rail shipments July 2026",
+     "Canada coal exports July 2026 rail"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "physical_flow",
+    "perspective": "port terminal throughput analyst",
+    "hypothesis": "Rail-served export throughput at major Canadian ports is a large identifiable component of total rail tonnage; port July 2026 cargo by rail plus an allowance for domestic and transborder traffic constrains the total.",
+    "data_to_find": "July 2026 cargo throughput at Vancouver, Prince Rupert, Montreal, Halifax and other rail-served ports by commodity (grain, coal, potash, containers), plus rail modal share at each port. Minimum evidence: July 2026 grain/coal/potash rail-served port volumes and container rail lift counts.",
+    "search_hints": [
+     "Port of Vancouver July 2026 grain rail shipments",
+     "Prince Rupert port July 2026 coal grain volumes",
+     "Montreal Halifax port July 2026 rail cargo"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "capacity_consumption",
+    "perspective": "rail operations planner",
+    "hypothesis": "Realised tonnage is constrained by loaded-car capacity, loaded-car utilisation, train starts, and operating days; July 2026 operating metrics such as car miles, average train weight, and loaded cars track the tonnage level.",
+    "data_to_find": "July 2026 weekly or monthly operating metrics for Canadian railways: train starts, car miles, average train tonnage, loaded cars, dwell, locomotive availability; CN/CPKC earnings or operating reports if available by cutoff. Minimum evidence: any July 2026 carload or car-mile metric for Canadian operations.",
+    "search_hints": [
+     "CN Rail July 2026 carloads revenue ton miles",
+     "CPKC July 2026 carloads operating metrics",
+     "Canadian railway operating metrics July 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "related_series",
+    "perspective": "industrial statistics and modal-share analyst",
+    "hypothesis": "Non-export domestic rail tonnage relates to Canadian industrial shipments by sector multiplied by rail mode share; July 2026 manufacturing, mining, and agricultural marketings constrain the domestic component.",
+    "data_to_find": "July 2026 or latest Canadian manufacturing shipments, mining production, forestry output, and farm marketings; rail mode share by sector in tonnes. Minimum evidence: June/July 2026 industrial shipment index or sector output and a recent rail share estimate.",
+    "search_hints": [
+     "Statistics Canada manufacturing shipments July 2026",
+     "Canada mining production July 2026",
+     "rail mode share Canada freight tonnes by commodity"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "base_rates",
+    "perspective": "freight conversion analyst",
+    "hypothesis": "Carload counts convert to tonnes via commodity-specific average payloads and intermodal TEU weights; these parameters bridge weekly carload evidence to the tonnage target.",
+    "data_to_find": "Average tonnes per carload by commodity for Canadian railways, loaded/empty car ratios, average intermodal container payload, and any recent changes in payload mix. Minimum evidence: average payload for grain, coal, potash, oil, and intermodal.",
+    "search_hints": [
+     "average tonnes per railcar Canada grain coal potash",
+     "intermodal rail container average tonnes Canada",
+     "Statistics Canada railway carloadings average weight per car"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c8",
+    "category": "shocks",
+    "perspective": "disruption and calendar-effects analyst",
+    "hypothesis": "July 2026 tonnage may deviate from seasonal baseline because of wildfires, labour disruptions, port closures, tariffs, or grain harvest timing; dated events up to the cutoff can adjust the baseline directionally or quantitatively.",
+    "data_to_find": "Dated July 2026 Canadian railway disruptions, wildfire closures, strikes, port outages, trade policy changes, and any quantified rail impact; grain harvest timing relative to normal. Minimum evidence: confirmed event dates and any reported carload or tonnage impact.",
+    "search_hints": [
+     "Canada railway disruption July 2026",
+     "wildfires rail Canada July 2026",
+     "CPKC CN strike July 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 8 candidate directions in 6 categories; running 8 (budget cap 10)"
+ ],
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "Statistics Canada historical-series analyst",
+   "hypothesis": "July total tonnage has recurring seasonal patterns and a recent trend; prior July values and Jan-Jun 2026 year-over-year changes constrain July 2026 even without the July print.",
+   "data_to_find": "Monthly total tonnes carried by Canadian railways for Jan 2023-Jun 2026, especially July 2023, July 2024, July 2025, and May/June 2026; commodity detail if available. Minimum evidence: July 2025 total and any 2026 monthly prints through June.",
+   "search_hints": [
+    "Statistics Canada railway carloadings July 2025 total tonnes",
+    "Table 23-10-0086-01 railway carloadings monthly Canada",
+    "Railway carloadings Canada June 2026 Statistics Canada"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "related_series",
+   "perspective": "rail operator weekly performance monitor",
+   "hypothesis": "July 2026 total tonnes can be reconstructed from weekly carloads by commodity multiplied by average payloads; weekly carloads are an early indicator of the monthly total.",
+   "data_to_find": "Weekly Canadian railway carloads and/or tonnage for weeks covering July 2026, by commodity where possible; CN and CPKC weekly operating metrics; AAR or industry weekly rail data. Minimum evidence: at least partial July 2026 weekly carloads by commodity, or total weekly carloads.",
+   "search_hints": [
+    "July 2026 weekly railway carloadings Canada",
+    "Canadian railways carloads week ending July 2026",
+    "Ag Transport Coalition weekly rail carloads July 2026"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d3",
+   "category": "related_series",
+   "perspective": "commodity supply and export analyst",
+   "hypothesis": "Total rail tonnage is the sum of major commodity flows (grain, coal, potash, crude oil, forest products, metals, intermodal); July 2026 export/production indicators for these commodities plus rail shares can approximate most of the total, with a residual allowance.",
+   "data_to_find": "July 2026 Canadian rail/export volumes or production for grain, coal, potash, crude oil, forest products, metals, and containerized intermodal; rail modal shares by commodity. Minimum evidence: July 2026 grain, coal, potash, and oil rail/export flows plus an intermodal indicator.",
+   "search_hints": [
+    "Canada grain rail shipments July 2026",
+    "Canada potash rail shipments July 2026",
+    "Canada coal exports July 2026 rail"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d4",
+   "category": "physical_flow",
+   "perspective": "port terminal throughput analyst",
+   "hypothesis": "Rail-served export throughput at major Canadian ports is a large identifiable component of total rail tonnage; port July 2026 cargo by rail plus an allowance for domestic and transborder traffic constrains the total.",
+   "data_to_find": "July 2026 cargo throughput at Vancouver, Prince Rupert, Montreal, Halifax and other rail-served ports by commodity (grain, coal, potash, containers), plus rail modal share at each port. Minimum evidence: July 2026 grain/coal/potash rail-served port volumes and container rail lift counts.",
+   "search_hints": [
+    "Port of Vancouver July 2026 grain rail shipments",
+    "Prince Rupert port July 2026 coal grain volumes",
+    "Montreal Halifax port July 2026 rail cargo"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d5",
+   "category": "capacity_consumption",
+   "perspective": "rail operations planner",
+   "hypothesis": "Realised tonnage is constrained by loaded-car capacity, loaded-car utilisation, train starts, and operating days; July 2026 operating metrics such as car miles, average train weight, and loaded cars track the tonnage level.",
+   "data_to_find": "July 2026 weekly or monthly operating metrics for Canadian railways: train starts, car miles, average train tonnage, loaded cars, dwell, locomotive availability; CN/CPKC earnings or operating reports if available by cutoff. Minimum evidence: any July 2026 carload or car-mile metric for Canadian operations.",
+   "search_hints": [
+    "CN Rail July 2026 carloads revenue ton miles",
+    "CPKC July 2026 carloads operating metrics",
+    "Canadian railway operating metrics July 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d6",
+   "category": "related_series",
+   "perspective": "industrial statistics and modal-share analyst",
+   "hypothesis": "Non-export domestic rail tonnage relates to Canadian industrial shipments by sector multiplied by rail mode share; July 2026 manufacturing, mining, and agricultural marketings constrain the domestic component.",
+   "data_to_find": "July 2026 or latest Canadian manufacturing shipments, mining production, forestry output, and farm marketings; rail mode share by sector in tonnes. Minimum evidence: June/July 2026 industrial shipment index or sector output and a recent rail share estimate.",
+   "search_hints": [
+    "Statistics Canada manufacturing shipments July 2026",
+    "Canada mining production July 2026",
+    "rail mode share Canada freight tonnes by commodity"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "d7",
+   "category": "base_rates",
+   "perspective": "freight conversion analyst",
+   "hypothesis": "Carload counts convert to tonnes via commodity-specific average payloads and intermodal TEU weights; these parameters bridge weekly carload evidence to the tonnage target.",
+   "data_to_find": "Average tonnes per carload by commodity for Canadian railways, loaded/empty car ratios, average intermodal container payload, and any recent changes in payload mix. Minimum evidence: average payload for grain, coal, potash, oil, and intermodal.",
+   "search_hints": [
+    "average tonnes per railcar Canada grain coal potash",
+    "intermodal rail container average tonnes Canada",
+    "Statistics Canada railway carloadings average weight per car"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d8",
+   "category": "shocks",
+   "perspective": "disruption and calendar-effects analyst",
+   "hypothesis": "July 2026 tonnage may deviate from seasonal baseline because of wildfires, labour disruptions, port closures, tariffs, or grain harvest timing; dated events up to the cutoff can adjust the baseline directionally or quantitatively.",
+   "data_to_find": "Dated July 2026 Canadian railway disruptions, wildfire closures, strikes, port outages, trade policy changes, and any quantified rail impact; grain harvest timing relative to normal. Minimum evidence: confirmed event dates and any reported carload or tonnage impact.",
+   "search_hints": [
+    "Canada railway disruption July 2026",
+    "wildfires rail Canada July 2026",
+    "CPKC CN strike July 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c8"
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Statistics Canada railway carloadings July 2025 total tonnes",
+     "Table 23-10-0086-01 railway carloadings monthly Canada",
+     "\"Railway carloadings\" June 2026 Statistics Canada Daily tonnes",
+     "statcan 23-10-0086-01 railway carloadings total tonnage transported monthly table"
+    ],
+    "urls": [
+     "https://tdih-cdit.tc.canada.ca/en/search/23100216?facets_query=&23100216_facets%5B0%5D=23100216_components%3ACanola&23100216_facets%5B1%5D=23100216_components%3AContainer-on-flat-car&23100216_facets%5B2%5D=23100216_components%3AOther%20metallic%20ores%20and%20concentrates&23100216_facets%5B3%5D=23100216_components%3AOther%20non-metallic%20mineral%20products&23100216_facets%5B4%5D=23100216_components%3AOther%20oil%20seeds%20and%20nuts%2C%20other%20agricultural%20product&23100216_facets%5B5%5D=23100216_components%3APotash&23100216_facets%5B6%5D=23100216_components%3ATotal%20non-intermodal%20traffic%20loaded",
+     "https://www.ceicdata.com.cn/zh-hans/canada/railway-carloadings/railway-carloading-statistics-total-traffic-carried",
+     "https://www.statcan.gc.ca/o1/en/app/8532-railway-carloadings-july-2025",
+     "https://www150.statcan.gc.ca/n1/daily-quotidien/250226/cg-d001-eng.htm"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 27,
+    "web_search_requests": 4,
+    "usd": 0.008253431999999998,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://tdih-cdit.tc.canada.ca/en/search/23100216?facets_query=&23100216_facets%5B0%5D=23100216_components%3ACanola&23100216_facets%5B1%5D=23100216_components%3AContainer-on-flat-car&23100216_facets%5B2%5D=23100216_components%3AOther%20metallic%20ores%20and%20concentrates&23100216_facets%5B3%5D=23100216_components%3AOther%20non-metallic%20mineral%20products&23100216_facets%5B4%5D=23100216_components%3AOther%20oil%20seeds%20and%20nuts%2C%20other%20agricultural%20product&23100216_facets%5B5%5D=23100216_components%3APotash&23100216_facets%5B6%5D=23100216_components%3ATotal%20non-intermodal%20traffic%20loaded",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ceicdata.com.cn/zh-hans/canada/railway-carloadings/railway-carloading-statistics-total-traffic-carried",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.statcan.gc.ca/o1/en/app/8532-railway-carloadings-july-2025",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www150.statcan.gc.ca/n1/daily-quotidien/250226/cg-d001-eng.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 32.9
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "July 2026 weekly railway carloadings Canada Statistics Canada",
+     "Canadian railways carloads week ending July 2026",
+     "AAR week 30 2026 Canadian railroads carloads week ending August 1",
+     "StatCan table 23-10-0086-01 railway carloadings weekly tonnage July 2026"
+    ],
+    "urls": [
+     "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "https://local.newsbreak.com/trains-com-315688185/4785269414182-upswing-continues-for-u-s-rail-traffic",
+     "https://www.aar.org/news/aar-reports-weekly-rail-traffic-for-the-week-ending-august-1-2026/",
+     "https://www.aar.org/wp-content/uploads/2026/07/2026-07-08-railtraffic.pdf"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 28,
+    "web_search_requests": 4,
+    "usd": 0.005246544,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20150512061019",
+     "page_date": "2015-05-12",
+     "raw_path": "data/raw/agent/fc_ca_rail_2026_07/61164efceb190f85.raw",
+     "text_chars": 5531,
+     "leak_hits": [],
+     "chars_sent": 5531,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 15
+    },
+    {
+     "url": "https://local.newsbreak.com/trains-com-315688185/4785269414182-upswing-continues-for-u-s-rail-traffic",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.aar.org/news/aar-reports-weekly-rail-traffic-for-the-week-ending-august-1-2026/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.aar.org/wp-content/uploads/2026/07/2026-07-08-railtraffic.pdf",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      0
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of May 2 2015 (AAR Weekly Rail Traffic)",
+     "value": 143722.0,
+     "value_as_written": "143722.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-04-26",
+     "period_end": "2015-05-02",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "Canadian Rail Traffic is at a current level of 143722.0, up from last week and down from 146911.0 one year ago.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      1
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of April 25 2015",
+     "value": 144067.0,
+     "value_as_written": "144067.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-04-19",
+     "period_end": "2015-04-25",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| April 25, 2015 | 144067.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      2
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of April 18 2015",
+     "value": 144149.0,
+     "value_as_written": "144149.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-04-12",
+     "period_end": "2015-04-18",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| April 18, 2015 | 144149.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      3
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of April 11 2015",
+     "value": 142746.0,
+     "value_as_written": "142746.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-04-05",
+     "period_end": "2015-04-11",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| April 11, 2015 | 142746.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      4
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of April 4 2015",
+     "value": 139656.0,
+     "value_as_written": "139656.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-03-29",
+     "period_end": "2015-04-04",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| April 4, 2015 | 139656.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      5
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of March 28 2015",
+     "value": 145439.0,
+     "value_as_written": "145439.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-03-22",
+     "period_end": "2015-03-28",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| March 28, 2015 | 145439.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      6
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of March 21 2015",
+     "value": 136550.0,
+     "value_as_written": "136550.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-03-15",
+     "period_end": "2015-03-21",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| March 21, 2015 | 136550.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      7
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of March 14 2015",
+     "value": 138016.0,
+     "value_as_written": "138016.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-03-08",
+     "period_end": "2015-03-14",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| March 14, 2015 | 138016.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      8
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of March 7 2015",
+     "value": 134937.0,
+     "value_as_written": "134937.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-03-01",
+     "period_end": "2015-03-07",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| March 7, 2015 | 134937.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      9
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of Feb. 28 2015",
+     "value": 133541.0,
+     "value_as_written": "133541.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-02-22",
+     "period_end": "2015-02-28",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| Feb. 28, 2015 | 133541.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      10
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of Feb. 21 2015",
+     "value": 119858.0,
+     "value_as_written": "119858.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-02-15",
+     "period_end": "2015-02-21",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| Feb. 21, 2015 | 119858.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      11
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of Feb. 14 2015",
+     "value": 137383.0,
+     "value_as_written": "137383.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-02-08",
+     "period_end": "2015-02-14",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| Feb. 14, 2015 | 137383.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      12
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of Feb. 7 2015",
+     "value": 131685.0,
+     "value_as_written": "131685.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-02-01",
+     "period_end": "2015-02-07",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| Feb. 7, 2015 | 131685.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      13
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of Jan. 31 2015",
+     "value": 141291.0,
+     "value_as_written": "141291.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-01-25",
+     "period_end": "2015-01-31",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| Jan. 31, 2015 | 141291.0 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+     "via": "snapshot",
+     "page_date": "2015-05-12",
+     "snapshot_ts": "20150512061019",
+     "order": [
+      0,
+      14
+     ],
+     "name": "Canadian rail traffic weekly carloads, week of Jan. 24 2015",
+     "value": 139540.0,
+     "value_as_written": "139540.0",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "carloads",
+     "period_start": "2015-01-18",
+     "period_end": "2015-01-24",
+     "published_at_if_visible": "2015-05-07",
+     "quote": "| Jan. 24, 2015 | 139540.0 |",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [],
+   "wall_s": 97.8
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Canada grain rail shipments July 2026 Statistics Canada railway carloadings",
+     "Statistics Canada railway carloadings July 2026 total tonnage",
+     "Canada potash rail shipments July 2026 potash exports Canpotex",
+     "Canada coal exports July 2026 Vancouver Prince Rupert coal terminal volumes"
+    ],
+    "urls": [
+     "https://www.grainmonitor.ca/Downloads/MonthlyReports/MonthlyReport202607.pdf",
+     "https://www.ceicdata.com.cn/zh-hans/canada/railway-carloadings/railway-carloading-statistics-total-traffic-carried",
+     "https://tradersunion.com/news/financial-news/show/3543020-canadian-rail-freight-july-rise/",
+     "https://www.railwayage.com/intermodal/potash-is-in-the-headlines-here-is-where-it-actually-goes/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007906428,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.grainmonitor.ca/Downloads/MonthlyReports/MonthlyReport202607.pdf",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ceicdata.com.cn/zh-hans/canada/railway-carloadings/railway-carloading-statistics-total-traffic-carried",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://tradersunion.com/news/financial-news/show/3543020-canadian-rail-freight-july-rise/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.railwayage.com/intermodal/potash-is-in-the-headlines-here-is-where-it-actually-goes/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 41.7
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Port of Vancouver July 2026 grain rail shipments",
+     "Prince Rupert port July 2026 coal grain volumes",
+     "Vancouver Fraser Port Authority July 2026 monthly cargo volumes statistics",
+     "Statistics Canada Railway carloadings July 2026 million tonnes"
+    ],
+    "urls": [
+     "https://www.grainmonitor.ca/Downloads/MonthlyReports/MonthlyReport202607.pdf",
+     "https://coal.mysteel.com/a/26082609/A849CD92468EF9A5.html",
+     "https://airfreight.news/articles/full/ajot-robust-cargo-trends-continue-at-port-of-prince-rupert",
+     "https://www.jetro.go.jp/biznews/2026/07/bdc45ab5cefd02fb.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.00624354,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.grainmonitor.ca/Downloads/MonthlyReports/MonthlyReport202607.pdf",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://coal.mysteel.com/a/26082609/A849CD92468EF9A5.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://airfreight.news/articles/full/ajot-robust-cargo-trends-continue-at-port-of-prince-rupert",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.jetro.go.jp/biznews/2026/07/bdc45ab5cefd02fb.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 92.7
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Statistics Canada Railway carloadings July 2026",
+     "CN Rail July 2026 carloads revenue ton miles",
+     "CPKC July 2026 carloads operating metrics",
+     "Canadian railway operating metrics July 2026 car miles train starts"
+    ],
+    "urls": [
+     "https://www.ceicdata.com.cn/zh-hans/canada/railway-carloadings/railway-carloading-statistics-total-traffic-carried",
+     "https://getfea.com/transportation/canadian-rail-freight-volume-rises-2-6-year-over-year-in-july",
+     "https://investor.cpkcr.com/key-metrics/default.aspx?section=Definitions",
+     "http://ecprod.cn.ca/corp/en/investors/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005048112,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.ceicdata.com.cn/zh-hans/canada/railway-carloadings/railway-carloading-statistics-total-traffic-carried",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://getfea.com/transportation/canadian-rail-freight-volume-rises-2-6-year-over-year-in-july",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://investor.cpkcr.com/key-metrics/default.aspx?section=Definitions",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260222082659",
+     "page_date": "2026-02-22",
+     "raw_path": "data/raw/agent/fc_ca_rail_2026_07/8f63c993528dfee7.raw",
+     "text_chars": 2963,
+     "leak_hits": [],
+     "chars_sent": 2963,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "http://ecprod.cn.ca/corp/en/investors/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 44.9
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Statistics Canada Railway carloadings monthly total tonnage 2026",
+     "Statistics Canada manufacturing shipments June 2026",
+     "\"Railway carloadings, June 2026\" Statistics Canada The Daily",
+     "\"Railway carloadings, July 2025\" Statistics Canada million tonnes"
+    ],
+    "urls": [
+     "https://www.ceicdata.com.cn/en/canada/railway-carloadings/railway-carloading-statistics-total-traffic-carried",
+     "https://www150.statcan.gc.ca/n1/daily-quotidien/260224/cg-c001-eng.htm",
+     "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "https://in.marketscreener.com/news/canada-manufacturing-sales-rise-for-fifth-straight-month-in-june-update-ce7859ded08aff23"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 29,
+    "web_search_requests": 4,
+    "usd": 0.007727484,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.ceicdata.com.cn/en/canada/railway-carloadings/railway-carloading-statistics-total-traffic-carried",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260224/cg-c001-eng.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260615232806",
+     "page_date": "2026-06-15",
+     "raw_path": "data/raw/agent/fc_ca_rail_2026_07/82da8ae4808735a7.raw",
+     "text_chars": 4440,
+     "leak_hits": [],
+     "chars_sent": 4440,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 15
+    },
+    {
+     "url": "https://in.marketscreener.com/news/canada-manufacturing-sales-rise-for-fifth-straight-month-in-june-update-ce7859ded08aff23",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      0
+     ],
+     "name": "Total cargo carried by Canadian railways, February 2026",
+     "value": 29400000.0,
+     "value_as_written": "29.4 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "metric tonnes",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "In February, the volume of cargo carried by Canadian railways totalled 29.4 million tonnes, up 9.8% from February 2025",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      1
+     ],
+     "name": "Year-over-year change in total cargo carried by Canadian railways, February 2026",
+     "value": 9.8,
+     "value_as_written": "9.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "29.4 million metric tonnes February 2026 9.8% (12-month change)",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      2
+     ],
+     "name": "High for February total cargo carried by Canadian railways (February 2024)",
+     "value": 30700000.0,
+     "value_as_written": "30.7 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "metric tonnes",
+     "period_start": "2024-02-01",
+     "period_end": "2024-02-29",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "just under the high of 30.7 million tonnes from February 2024",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      3
+     ],
+     "name": "Non-intermodal commodity traffic in Canada, February 2026",
+     "value": 23200000.0,
+     "value_as_written": "23.2 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "metric tonnes",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "commodity traffic in Canada grew 8.3% to 23.2 million tonnes in February 2026",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      4
+     ],
+     "name": "Year-over-year growth in commodity traffic in Canada, February 2026",
+     "value": 8.3,
+     "value_as_written": "8.3%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "commodity traffic in Canada grew 8.3% to 23.2 million tonnes in February 2026",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      5
+     ],
+     "name": "Intermodal shipments originating in Canada, February 2026",
+     "value": 3000000.0,
+     "value_as_written": "3.0 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "metric tonnes",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "intermodal shipments-mainly containers-originating in Canada rose 15.0% year over year to 3.0 million tonnes",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      6
+     ],
+     "name": "Year-over-year change in intermodal shipments originating in Canada, February 2026",
+     "value": 15.0,
+     "value_as_written": "15.0%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "intermodal shipments-mainly containers-originating in Canada rose 15.0% year over year to 3.0 million tonnes",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      7
+     ],
+     "name": "Freight loadings from US rail connections into Canada, February 2026",
+     "value": 3200000.0,
+     "value_as_written": "3.2 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "metric tonnes",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "Tonnage was up 16.1% from February 2025 to reach 3.2 million tonnes",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      8
+     ],
+     "name": "Year-over-year change in freight loadings from US rail connections into Canada, February 2026",
+     "value": 16.1,
+     "value_as_written": "16.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "Tonnage was up 16.1% from February 2025 to reach 3.2 million tonnes",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      9
+     ],
+     "name": "Five-year average of February freight loadings from US rail connections into Canada",
+     "value": 3400000.0,
+     "value_as_written": "3.4 million",
+     "scale_word": "million",
+     "scale_basis": "quote",
+     "unit": "metric tonnes",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "remained below the previous five-year average of 3.4 million tonnes for the month of February",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      10
+     ],
+     "name": "Average monthly share of total rail tonnage from US rail connections into Canada, 2023-2024",
+     "value": 12.0,
+     "value_as_written": "12.0%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2023-01-01",
+     "period_end": "2024-12-31",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "Over 2023 and 2024, freight loadings from US rail connections into Canada represented an average of 12.0% of total rail tonnage each month.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      11
+     ],
+     "name": "Average share of total rail tonnage from US rail connections into Canada, 2025",
+     "value": 10.4,
+     "value_as_written": "10.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "This share declined throughout 2025, averaging 10.4% during the year",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      12
+     ],
+     "name": "Share of total rail tonnage from US rail connections into Canada, January and February 2026",
+     "value": 11.0,
+     "value_as_written": "11.0%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "then approached 11.0% in January and February 2026",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      13
+     ],
+     "name": "Year-over-year increase in potash loadings, February 2026",
+     "value": 26.8,
+     "value_as_written": "26.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "Leading the gain was potash, with loadings rising sharply by 26.8% (+438 000 tonnes) from February 2025.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+     "via": "snapshot",
+     "page_date": "2026-06-15",
+     "snapshot_ts": "20260615232806",
+     "order": [
+      2,
+      14
+     ],
+     "name": "Year-over-year increase in canola loadings, February 2026",
+     "value": 59.1,
+     "value_as_written": "59.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-02-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-27",
+     "quote": "loadings of canola grew 59.1% (+325 000 tonnes) in February 2026 compared with February 2025",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [],
+   "wall_s": 99.3
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Statistics Canada railway carloadings average tonnes per carload by commodity",
+     "average tonnes per railcar grain coal potash Canada payload",
+     "intermodal rail container average tonnes Canada Statistics Canada carloadings",
+     "Table 23-10-0086-01 railway carloadings weight tonnes commodity Canada"
+    ],
+    "urls": [
+     "https://sdr-daily-alpha.cloud.statcan.ca/en/thedaily/11027/11030-railway-carloadings-april-2026",
+     "https://www150.statcan.gc.ca/n1/en/daily-quotidien/240920/dq240920c-eng.pdf",
+     "https://tdih-cdit.tc.canada.ca/en/search/23100216",
+     "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.006831444,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://sdr-daily-alpha.cloud.statcan.ca/en/thedaily/11027/11030-railway-carloadings-april-2026",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www150.statcan.gc.ca/n1/en/daily-quotidien/240920/dq240920c-eng.pdf",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://tdih-cdit.tc.canada.ca/en/search/23100216",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20230222132509",
+     "page_date": "2023-02-22",
+     "raw_path": "data/raw/agent/fc_ca_rail_2026_07/5df64c571a572858.raw",
+     "text_chars": 5508,
+     "leak_hits": [],
+     "chars_sent": 5508,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 15
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      0
+     ],
+     "name": "Wheat carloads, Eastern Division, October 2013",
+     "value": 929.0,
+     "value_as_written": "929",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rail cars",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Wheat | 929 | 85,951 | 848 | 79,007 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      1
+     ],
+     "name": "Wheat tonnage, Eastern Division, October 2013",
+     "value": 85951.0,
+     "value_as_written": "85,951",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "metric tonnes",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Wheat | 929 | 85,951 | 848 | 79,007 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      2
+     ],
+     "name": "Coal carloads, Eastern Division, October 2013",
+     "value": 1305.0,
+     "value_as_written": "1,305",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rail cars",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Coal | 1,305 | 106,400 | 1,221 | 101,492 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      3
+     ],
+     "name": "Coal tonnage, Eastern Division, October 2013",
+     "value": 106400.0,
+     "value_as_written": "106,400",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "metric tonnes",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Coal | 1,305 | 106,400 | 1,221 | 101,492 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      4
+     ],
+     "name": "Potash carloads, Eastern Division, October 2013",
+     "value": 547.0,
+     "value_as_written": "547",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rail cars",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Potash | 547 | 55,003 | 811 | 81,502 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      5
+     ],
+     "name": "Potash tonnage, Eastern Division, October 2013",
+     "value": 55003.0,
+     "value_as_written": "55,003",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "metric tonnes",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Potash | 547 | 55,003 | 811 | 81,502 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      6
+     ],
+     "name": "Fuel oils and crude petroleum carloads, Eastern Division, October 2013",
+     "value": 4084.0,
+     "value_as_written": "4,084",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rail cars",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Fuel oils and crude petroleum | 4,084 | 336,576 | 4,536 | 368,629 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      7
+     ],
+     "name": "Fuel oils and crude petroleum tonnage, Eastern Division, October 2013",
+     "value": 336576.0,
+     "value_as_written": "336,576",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "metric tonnes",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Fuel oils and crude petroleum | 4,084 | 336,576 | 4,536 | 368,629 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      8
+     ],
+     "name": "Iron ores and concentrates carloads, Eastern Division, October 2013",
+     "value": 36986.0,
+     "value_as_written": "36,986",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rail cars",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Iron ores and concentrates | 36,986 | 3,422,749 | 33,783 | 3,103,328 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      9
+     ],
+     "name": "Iron ores and concentrates tonnage, Eastern Division, October 2013",
+     "value": 3422749.0,
+     "value_as_written": "3,422,749",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "metric tonnes",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Iron ores and concentrates | 36,986 | 3,422,749 | 33,783 | 3,103,328 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      10
+     ],
+     "name": "Total non-intermodal traffic loaded, number of rail cars, Eastern Division, October 2013",
+     "value": 138465.0,
+     "value_as_written": "138,465",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rail cars",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Total non-intermodal traffic loaded 2 | 138,465 | 9,922,701 | 132,810 | 9,378,990 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      11
+     ],
+     "name": "Total non-intermodal traffic loaded, metric tonnes, Eastern Division, October 2013",
+     "value": 9922701.0,
+     "value_as_written": "9,922,701",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "metric tonnes",
+     "period_start": "2013-10-01",
+     "period_end": "2013-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Total non-intermodal traffic loaded 2 | 138,465 | 9,922,701 | 132,810 | 9,378,990 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      12
+     ],
+     "name": "Total non-intermodal traffic loaded, number of rail cars, Eastern Division, October 2012",
+     "value": 132810.0,
+     "value_as_written": "132,810",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "rail cars",
+     "period_start": "2012-10-01",
+     "period_end": "2012-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Total non-intermodal traffic loaded 2 | 138,465 | 9,922,701 | 132,810 | 9,378,990 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      13
+     ],
+     "name": "Total non-intermodal traffic loaded, metric tonnes, Eastern Division, October 2012",
+     "value": 9378990.0,
+     "value_as_written": "9,378,990",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "metric tonnes",
+     "period_start": "2012-10-01",
+     "period_end": "2012-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Total non-intermodal traffic loaded 2 | 138,465 | 9,922,701 | 132,810 | 9,378,990 |",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+     "via": "snapshot",
+     "page_date": "2023-02-22",
+     "snapshot_ts": "20230222132509",
+     "order": [
+      3,
+      14
+     ],
+     "name": "Coal tonnage, Eastern Division, October 2012",
+     "value": 101492.0,
+     "value_as_written": "101,492",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "metric tonnes",
+     "period_start": "2012-10-01",
+     "period_end": "2012-10-31",
+     "published_at_if_visible": "",
+     "quote": "| Coal | 1,305 | 106,400 | 1,221 | 101,492 |",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [],
+   "wall_s": 52.4
+  },
+  {
+   "direction_id": "d8",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Canada railway disruption July 2026 wildfires rail",
+     "Statistics Canada Railway carloadings July 2026",
+     "British Columbia wildfires railway CN CPKC service disruption July 2026",
+     "Vancouver port rail strike July 2026 Canada freight disruption"
+    ],
+    "urls": [
+     "https://www.portvancouver.com/article/port-vancouver-operations-update-1-wildfire-near-boston-bar-british-columbia",
+     "https://www.theglobeandmail.com/business/article-northern-ontario-wildfires-disrupt-rail-forestry-operations/",
+     "https://sdr-daily-alpha.cloud.statcan.ca/en/thedaily/searchindicators?title=Chargements+ferroviaires,+tonnage+total&wbdisable=true",
+     "https://iamovers.org/news/b-c-wildfires-keep-pressure-on-rail-corridor/"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005770728,
+    "usd_search_fee_assumed": 0.04
+   },
+   "pages": [
+    {
+     "url": "https://www.portvancouver.com/article/port-vancouver-operations-update-1-wildfire-near-boston-bar-british-columbia",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.theglobeandmail.com/business/article-northern-ontario-wildfires-disrupt-rail-forestry-operations/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://sdr-daily-alpha.cloud.statcan.ca/en/thedaily/searchindicators?title=Chargements+ferroviaires,+tonnage+total&wbdisable=true",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://iamovers.org/news/b-c-wildfires-keep-pressure-on-rail-corridor/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 8.3
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [],
+    "markets": [],
+    "points": [],
+    "note": "no market keywords from plan"
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "error": "reply is not valid JSON"
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    0
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of May 2 2015 (AAR Weekly Rail Traffic)",
+   "value": 143722.0,
+   "value_as_written": "143722.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-04-26",
+   "period_end": "2015-05-02",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "Canadian Rail Traffic is at a current level of 143722.0, up from last week and down from 146911.0 one year ago.",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    1
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of April 25 2015",
+   "value": 144067.0,
+   "value_as_written": "144067.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-04-19",
+   "period_end": "2015-04-25",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| April 25, 2015 | 144067.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    2
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of April 18 2015",
+   "value": 144149.0,
+   "value_as_written": "144149.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-04-12",
+   "period_end": "2015-04-18",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| April 18, 2015 | 144149.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    3
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of April 11 2015",
+   "value": 142746.0,
+   "value_as_written": "142746.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-04-05",
+   "period_end": "2015-04-11",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| April 11, 2015 | 142746.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    4
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of April 4 2015",
+   "value": 139656.0,
+   "value_as_written": "139656.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-03-29",
+   "period_end": "2015-04-04",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| April 4, 2015 | 139656.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    5
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of March 28 2015",
+   "value": 145439.0,
+   "value_as_written": "145439.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-03-22",
+   "period_end": "2015-03-28",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| March 28, 2015 | 145439.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    6
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of March 21 2015",
+   "value": 136550.0,
+   "value_as_written": "136550.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-03-15",
+   "period_end": "2015-03-21",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| March 21, 2015 | 136550.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    7
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of March 14 2015",
+   "value": 138016.0,
+   "value_as_written": "138016.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-03-08",
+   "period_end": "2015-03-14",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| March 14, 2015 | 138016.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    8
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of March 7 2015",
+   "value": 134937.0,
+   "value_as_written": "134937.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-03-01",
+   "period_end": "2015-03-07",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| March 7, 2015 | 134937.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    9
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of Feb. 28 2015",
+   "value": 133541.0,
+   "value_as_written": "133541.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-02-22",
+   "period_end": "2015-02-28",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| Feb. 28, 2015 | 133541.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    10
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of Feb. 21 2015",
+   "value": 119858.0,
+   "value_as_written": "119858.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-02-15",
+   "period_end": "2015-02-21",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| Feb. 21, 2015 | 119858.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    11
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of Feb. 14 2015",
+   "value": 137383.0,
+   "value_as_written": "137383.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-02-08",
+   "period_end": "2015-02-14",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| Feb. 14, 2015 | 137383.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    12
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of Feb. 7 2015",
+   "value": 131685.0,
+   "value_as_written": "131685.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-02-01",
+   "period_end": "2015-02-07",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| Feb. 7, 2015 | 131685.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    13
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of Jan. 31 2015",
+   "value": 141291.0,
+   "value_as_written": "141291.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-01-25",
+   "period_end": "2015-01-31",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| Jan. 31, 2015 | 141291.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": true
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://ycharts.com/indicators/canadian_weekly_rail_traffic",
+   "via": "snapshot",
+   "page_date": "2015-05-12",
+   "snapshot_ts": "20150512061019",
+   "order": [
+    0,
+    14
+   ],
+   "name": "Canadian rail traffic weekly carloads, week of Jan. 24 2015",
+   "value": 139540.0,
+   "value_as_written": "139540.0",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "carloads",
+   "period_start": "2015-01-18",
+   "period_end": "2015-01-24",
+   "published_at_if_visible": "2015-05-07",
+   "quote": "| Jan. 24, 2015 | 139540.0 |",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    0
+   ],
+   "name": "Total cargo carried by Canadian railways, February 2026",
+   "value": 29400000.0,
+   "value_as_written": "29.4 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "metric tonnes",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "In February, the volume of cargo carried by Canadian railways totalled 29.4 million tonnes, up 9.8% from February 2025",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    1
+   ],
+   "name": "Year-over-year change in total cargo carried by Canadian railways, February 2026",
+   "value": 9.8,
+   "value_as_written": "9.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "29.4 million metric tonnes February 2026 9.8% (12-month change)",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    2
+   ],
+   "name": "High for February total cargo carried by Canadian railways (February 2024)",
+   "value": 30700000.0,
+   "value_as_written": "30.7 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "metric tonnes",
+   "period_start": "2024-02-01",
+   "period_end": "2024-02-29",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "just under the high of 30.7 million tonnes from February 2024",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    3
+   ],
+   "name": "Non-intermodal commodity traffic in Canada, February 2026",
+   "value": 23200000.0,
+   "value_as_written": "23.2 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "metric tonnes",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "commodity traffic in Canada grew 8.3% to 23.2 million tonnes in February 2026",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    4
+   ],
+   "name": "Year-over-year growth in commodity traffic in Canada, February 2026",
+   "value": 8.3,
+   "value_as_written": "8.3%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "commodity traffic in Canada grew 8.3% to 23.2 million tonnes in February 2026",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    5
+   ],
+   "name": "Intermodal shipments originating in Canada, February 2026",
+   "value": 3000000.0,
+   "value_as_written": "3.0 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "metric tonnes",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "intermodal shipments-mainly containers-originating in Canada rose 15.0% year over year to 3.0 million tonnes",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    6
+   ],
+   "name": "Year-over-year change in intermodal shipments originating in Canada, February 2026",
+   "value": 15.0,
+   "value_as_written": "15.0%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "intermodal shipments-mainly containers-originating in Canada rose 15.0% year over year to 3.0 million tonnes",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    7
+   ],
+   "name": "Freight loadings from US rail connections into Canada, February 2026",
+   "value": 3200000.0,
+   "value_as_written": "3.2 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "metric tonnes",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "Tonnage was up 16.1% from February 2025 to reach 3.2 million tonnes",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    8
+   ],
+   "name": "Year-over-year change in freight loadings from US rail connections into Canada, February 2026",
+   "value": 16.1,
+   "value_as_written": "16.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "Tonnage was up 16.1% from February 2025 to reach 3.2 million tonnes",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    9
+   ],
+   "name": "Five-year average of February freight loadings from US rail connections into Canada",
+   "value": 3400000.0,
+   "value_as_written": "3.4 million",
+   "scale_word": "million",
+   "scale_basis": "quote",
+   "unit": "metric tonnes",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "remained below the previous five-year average of 3.4 million tonnes for the month of February",
+   "verified_by": "quote_in_page",
+   "id": "p25",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    10
+   ],
+   "name": "Average monthly share of total rail tonnage from US rail connections into Canada, 2023-2024",
+   "value": 12.0,
+   "value_as_written": "12.0%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2023-01-01",
+   "period_end": "2024-12-31",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "Over 2023 and 2024, freight loadings from US rail connections into Canada represented an average of 12.0% of total rail tonnage each month.",
+   "verified_by": "quote_in_page",
+   "id": "p26",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    11
+   ],
+   "name": "Average share of total rail tonnage from US rail connections into Canada, 2025",
+   "value": 10.4,
+   "value_as_written": "10.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "This share declined throughout 2025, averaging 10.4% during the year",
+   "verified_by": "quote_in_page",
+   "id": "p27",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    12
+   ],
+   "name": "Share of total rail tonnage from US rail connections into Canada, January and February 2026",
+   "value": 11.0,
+   "value_as_written": "11.0%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "then approached 11.0% in January and February 2026",
+   "verified_by": "quote_in_page",
+   "id": "p28",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    13
+   ],
+   "name": "Year-over-year increase in potash loadings, February 2026",
+   "value": 26.8,
+   "value_as_written": "26.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "Leading the gain was potash, with loadings rising sharply by 26.8% (+438 000 tonnes) from February 2025.",
+   "verified_by": "quote_in_page",
+   "id": "p29",
+   "keep": true
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/260427/dq260427a-eng.htm",
+   "via": "snapshot",
+   "page_date": "2026-06-15",
+   "snapshot_ts": "20260615232806",
+   "order": [
+    2,
+    14
+   ],
+   "name": "Year-over-year increase in canola loadings, February 2026",
+   "value": 59.1,
+   "value_as_written": "59.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-02-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-27",
+   "quote": "loadings of canola grew 59.1% (+325 000 tonnes) in February 2026 compared with February 2025",
+   "verified_by": "quote_in_page",
+   "id": "p30",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    0
+   ],
+   "name": "Wheat carloads, Eastern Division, October 2013",
+   "value": 929.0,
+   "value_as_written": "929",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rail cars",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Wheat | 929 | 85,951 | 848 | 79,007 |",
+   "verified_by": "quote_in_page",
+   "id": "p31",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    1
+   ],
+   "name": "Wheat tonnage, Eastern Division, October 2013",
+   "value": 85951.0,
+   "value_as_written": "85,951",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "metric tonnes",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Wheat | 929 | 85,951 | 848 | 79,007 |",
+   "verified_by": "quote_in_page",
+   "id": "p32",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    2
+   ],
+   "name": "Coal carloads, Eastern Division, October 2013",
+   "value": 1305.0,
+   "value_as_written": "1,305",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rail cars",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Coal | 1,305 | 106,400 | 1,221 | 101,492 |",
+   "verified_by": "quote_in_page",
+   "id": "p33",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    3
+   ],
+   "name": "Coal tonnage, Eastern Division, October 2013",
+   "value": 106400.0,
+   "value_as_written": "106,400",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "metric tonnes",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Coal | 1,305 | 106,400 | 1,221 | 101,492 |",
+   "verified_by": "quote_in_page",
+   "id": "p34",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    4
+   ],
+   "name": "Potash carloads, Eastern Division, October 2013",
+   "value": 547.0,
+   "value_as_written": "547",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rail cars",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Potash | 547 | 55,003 | 811 | 81,502 |",
+   "verified_by": "quote_in_page",
+   "id": "p35",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    5
+   ],
+   "name": "Potash tonnage, Eastern Division, October 2013",
+   "value": 55003.0,
+   "value_as_written": "55,003",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "metric tonnes",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Potash | 547 | 55,003 | 811 | 81,502 |",
+   "verified_by": "quote_in_page",
+   "id": "p36",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    6
+   ],
+   "name": "Fuel oils and crude petroleum carloads, Eastern Division, October 2013",
+   "value": 4084.0,
+   "value_as_written": "4,084",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rail cars",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Fuel oils and crude petroleum | 4,084 | 336,576 | 4,536 | 368,629 |",
+   "verified_by": "quote_in_page",
+   "id": "p37",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    7
+   ],
+   "name": "Fuel oils and crude petroleum tonnage, Eastern Division, October 2013",
+   "value": 336576.0,
+   "value_as_written": "336,576",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "metric tonnes",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Fuel oils and crude petroleum | 4,084 | 336,576 | 4,536 | 368,629 |",
+   "verified_by": "quote_in_page",
+   "id": "p38",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    8
+   ],
+   "name": "Iron ores and concentrates carloads, Eastern Division, October 2013",
+   "value": 36986.0,
+   "value_as_written": "36,986",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rail cars",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Iron ores and concentrates | 36,986 | 3,422,749 | 33,783 | 3,103,328 |",
+   "verified_by": "quote_in_page",
+   "id": "p39",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    9
+   ],
+   "name": "Iron ores and concentrates tonnage, Eastern Division, October 2013",
+   "value": 3422749.0,
+   "value_as_written": "3,422,749",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "metric tonnes",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Iron ores and concentrates | 36,986 | 3,422,749 | 33,783 | 3,103,328 |",
+   "verified_by": "quote_in_page",
+   "id": "p40",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    10
+   ],
+   "name": "Total non-intermodal traffic loaded, number of rail cars, Eastern Division, October 2013",
+   "value": 138465.0,
+   "value_as_written": "138,465",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rail cars",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Total non-intermodal traffic loaded 2 | 138,465 | 9,922,701 | 132,810 | 9,378,990 |",
+   "verified_by": "quote_in_page",
+   "id": "p41",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    11
+   ],
+   "name": "Total non-intermodal traffic loaded, metric tonnes, Eastern Division, October 2013",
+   "value": 9922701.0,
+   "value_as_written": "9,922,701",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "metric tonnes",
+   "period_start": "2013-10-01",
+   "period_end": "2013-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Total non-intermodal traffic loaded 2 | 138,465 | 9,922,701 | 132,810 | 9,378,990 |",
+   "verified_by": "quote_in_page",
+   "id": "p42",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    12
+   ],
+   "name": "Total non-intermodal traffic loaded, number of rail cars, Eastern Division, October 2012",
+   "value": 132810.0,
+   "value_as_written": "132,810",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "rail cars",
+   "period_start": "2012-10-01",
+   "period_end": "2012-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Total non-intermodal traffic loaded 2 | 138,465 | 9,922,701 | 132,810 | 9,378,990 |",
+   "verified_by": "quote_in_page",
+   "id": "p43",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    13
+   ],
+   "name": "Total non-intermodal traffic loaded, metric tonnes, Eastern Division, October 2012",
+   "value": 9378990.0,
+   "value_as_written": "9,378,990",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "metric tonnes",
+   "period_start": "2012-10-01",
+   "period_end": "2012-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Total non-intermodal traffic loaded 2 | 138,465 | 9,922,701 | 132,810 | 9,378,990 |",
+   "verified_by": "quote_in_page",
+   "id": "p44",
+   "keep": true
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "source_url": "https://www150.statcan.gc.ca/n1/pub/52-001-x/2013010/t003-eng.htm",
+   "via": "snapshot",
+   "page_date": "2023-02-22",
+   "snapshot_ts": "20230222132509",
+   "order": [
+    3,
+    14
+   ],
+   "name": "Coal tonnage, Eastern Division, October 2012",
+   "value": 101492.0,
+   "value_as_written": "101,492",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "metric tonnes",
+   "period_start": "2012-10-01",
+   "period_end": "2012-10-31",
+   "published_at_if_visible": "",
+   "quote": "| Coal | 1,305 | 106,400 | 1,221 | 101,492 |",
+   "verified_by": "quote_in_page",
+   "id": "p45",
+   "keep": true
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [],
+  "result": {
+   "central": null,
+   "p10": null,
+   "p90": null,
+   "weights": {},
+   "basis": "no_method",
+   "assumption_weight_share": 0
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {},
+  "excluded_by_input_audit": [],
+  "methods_from_round": null
+ },
+ "assumptions": {
+  "kept": [],
+  "rejected": [],
+  "from_round": null,
+  "min_width": 2.0,
+  "max_per_run": 12,
+  "max_per_method": 6
+ },
+ "published": {
+  "status": "not_checked",
+  "note": "not checked: backtest or scored question (as_of before today, or an official value is registered), so the target cannot have been published by as_of"
+ },
+ "final": {
+  "template": "Estimate: [[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]], basis: [[interval_basis]]), from [[n_methods]] method(s) over [[n_points_kept]] kept data points.",
+  "text": "No estimate: no estimation method could be computed from the verified evidence.",
+  "placeholders": {
+   "estimate": "n/a",
+   "p10": "n/a",
+   "p90": "n/a",
+   "unit": "t",
+   "interval_level": "80% model-based",
+   "interval_basis": "no method produced an estimate, so there is no interval",
+   "n_points_kept": "0",
+   "n_methods": "0"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": false,
+  "model_text": null
+ },
+ "started_at": "20261020T034206Z",
+ "wall_s": 256.8,
+ "budget": {
+  "usd_total_assumed": 0.425,
+  "usd_tokens": 0.105,
+  "usd_search_fee_assumed": 0.32,
+  "usd_cap": 1.0,
+  "pages_used": 4,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 15,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 32,
+  "pages_snapshot": 4,
+  "pages_live_dated": 0,
+  "pages_dropped": 28,
+  "pages_sent_to_extractor": {
+   "total": 4,
+   "snapshot": 4,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "directions_voided": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "test2_think",
+ "settings": {
+  "max_tokens": {
+   "plan": 6000,
+   "extract": 16000,
+   "judge": 12000,
+   "repair": 12000,
+   "audit": 4000,
+   "unit_check": 4000,
+   "unit_arbiter": 4000,
+   "value_check": 2000,
+   "value_reread": 2000,
+   "published": 3000,
+   "early": 3000,
+   "final": 4000,
+   "search": 8192,
+   "naive": 500,
+   "structured": 6000,
+   "search_direct": 4096
+  },
+  "budget_defaults": {
+   "usd": 1.0,
+   "pages": 48,
+   "round1_pages": 40,
+   "llm_concurrency": 8,
+   "extra_directions": 3,
+   "urls_per_direction": 4,
+   "search_max_uses": 3,
+   "max_directions_hard": 16
+  },
+  "interval": {
+   "MIN_WIDTH": 2.0,
+   "MIN_WIDTH_CHANGE": 1.25,
+   "FALLBACK_SIGMA": 0.25,
+   "DEFAULT_REL_U": 0.2,
+   "EPS": 0.01
+  },
+  "thinking": {
+   "by_role": {
+    "plan": "high",
+    "judge": "high",
+    "repair": "high",
+    "audit": "low",
+    "unit_arbiter": "low"
+   },
+   "extra_max_tokens": 24000
+  }
+ }
+}
