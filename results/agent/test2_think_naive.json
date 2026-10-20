@@ -61,5 +61,131 @@
   "truth": null,
   "pct_err": null,
   "problems": []
+ },
+ {
+  "qid": "fc_pola_teu_2026_09",
+  "thinking": "high",
+  "estimate": 900000,
+  "unit": "",
+  "truth": 1042652,
+  "pct_err": -0.1368,
+  "problems": []
+ },
+ {
+  "qid": "fc_hk_visitors_2026_09",
+  "thinking": "high",
+  "estimate": 4000000,
+  "unit": "",
+  "truth": 4031090,
+  "pct_err": -0.0077,
+  "problems": []
+ },
+ {
+  "qid": "fc_us_starts_2026_08",
+  "thinking": "high",
+  "estimate": 1360000,
+  "unit": "",
+  "truth": 1275000,
+  "pct_err": 0.0667,
+  "problems": []
+ },
+ {
+  "qid": "fc_kr_online_2026_08",
+  "thinking": "high",
+  "estimate": 23000000000000.0,
+  "unit": "KRW",
+  "truth": 24211800000000,
+  "pct_err": -0.05,
+  "problems": []
+ },
+ {
+  "qid": "fc_de_cars_2026_09",
+  "thinking": "high",
+  "estimate": 225000,
+  "unit": "",
+  "truth": 256774,
+  "pct_err": -0.1237,
+  "problems": []
+ },
+ {
+  "qid": "fc_tw_births_2026_09",
+  "thinking": "high",
+  "estimate": 10500,
+  "unit": "",
+  "truth": 7704,
+  "pct_err": 0.3629,
+  "problems": []
+ },
+ {
+  "qid": "fc_lhr_pax_2026_09",
+  "thinking": "high",
+  "estimate": 7600000,
+  "unit": "",
+  "truth": 7180000,
+  "pct_err": 0.0585,
+  "problems": []
+ },
+ {
+  "qid": "fc_jp_births_2026_07",
+  "thinking": "high",
+  "estimate": 58000,
+  "unit": "",
+  "truth": 62479,
+  "pct_err": -0.0717,
+  "problems": []
+ },
+ {
+  "qid": "fc_nhs_ae_2026_09",
+  "thinking": "high",
+  "estimate": 2300000,
+  "unit": "",
+  "truth": 2440000,
+  "pct_err": -0.0574,
+  "problems": []
+ },
+ {
+  "qid": "fc_jp_movers_2026_08",
+  "thinking": "high",
+  "estimate": 470000,
+  "unit": "",
+  "truth": 356920,
+  "pct_err": 0.3168,
+  "problems": []
+ },
+ {
+  "qid": "fc_yell_2026_08",
+  "thinking": "high",
+  "estimate": 900000,
+  "unit": "",
+  "truth": 856467,
+  "pct_err": 0.0508,
+  "problems": []
+ },
+ {
+  "qid": "fc_yell_2026_09",
+  "thinking": "high",
+  "estimate": 740000,
+  "unit": "",
+  "truth": 868450,
+  "pct_err": -0.1479,
+  "problems": []
+ },
+ {
+  "qid": "fc_jnto_2026_08",
+  "thinking": "high",
+  "estimate": 3800000,
+  "unit": "",
+  "truth": 3098900,
+  "pct_err": 0.2262,
+  "problems": []
+ },
+ {
+  "qid": "fc_kr_births_2026_07",
+  "thinking": "high",
+  "estimate": 22500,
+  "unit": "",
+  "truth": 24275,
+  "pct_err": -0.0731,
+  "problems": []
  }
 ]

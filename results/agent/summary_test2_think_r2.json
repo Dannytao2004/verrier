@@ -1,0 +1,57 @@
+[
+ {
+  "id": "fc_ca_rail_2026_07",
+  "as_of": "2026-08-29",
+  "answer_value": 31686803,
+  "source": "https://www150.statcan.gc.ca/n1/daily-quotidien/260928/dq260928a-eng.htm",
+  "estimate": 29472904.815575108,
+  "p10": 15641779.505566409,
+  "p90": 55534098.14777307,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 9,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "a6",
+   "a7",
+   "a8",
+   "a9",
+   "a10"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.06986814619401305,
+  "abs_log10_err": 0.03145548228328019,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 29472904.815575108,
+    "pct_err": -0.06986814619401305,
+    "abs_log10_err": 0.03145548228328019
+   },
+   "naive": null,
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.8573,
+  "usd_tokens": 0.4173,
+  "wall_s": 967.2
+ }
+]
