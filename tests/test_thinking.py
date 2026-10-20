@@ -58,6 +58,25 @@ class TestPayload(unittest.TestCase):
         self.assertEqual(rec["thinking"], "high")
         self.assertEqual(rec["reasoning_tokens"], 25)
 
+    def test_invalid_json_is_logged_with_context(self):
+        bad = '{"keep": [1, 2,]} trailing'
+
+        def fake_post(req, **k):
+            reply = {"choices": [{"message": {"content": bad}, "finish_reason": "stop"}], "usage": {}}
+            return 200, json.dumps(reply).encode()
+
+        with mock.patch.object(llm, "read_key", return_value="k"), \
+                mock.patch.object(llm.LLM, "_post", staticmethod(fake_post)), mock.patch.object(llm.LLM, "_log") as log:
+            out, text, err = llm.LLM().json_call([{"role": "user", "content": "json"}], arm="judge:r1", qid="q",
+                                                 attempt=1)
+        self.assertIsNone(out)
+        self.assertEqual(err, "reply is not valid JSON")
+        rec = log.call_args[0][0]
+        self.assertEqual(rec["error"], "invalid_json")
+        self.assertEqual(rec["text_len"], len(bad))
+        self.assertTrue(rec["text_head"].startswith('{"keep"'))
+        self.assertIn("at ", rec["json_error"])
+
     def test_other_roles_stay_off(self):
         body, _ = self._call({"repair": "high"}, "judge:r2")
         self.assertEqual(body["thinking"], {"type": "disabled"})

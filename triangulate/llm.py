@@ -132,8 +132,10 @@ class LLM:
                 return None, text, "reply was truncated (finish_reason=length)"
             try:
                 out = json.loads(text)
-            except json.JSONDecodeError:
-                rec.update(ok=False, error="invalid_json")
+            except json.JSONDecodeError as e:
+                # v2.9b：思考模式下裁判常回不合法的 JSON（finish_reason=stop，没截断）。只多记诊断：长度、出错位置、首尾各 200 字符
+                rec.update(ok=False, error="invalid_json", text_len=len(text), json_error=f"{e.msg} at {e.pos}",
+                           text_head=text[:200], text_tail=text[-200:], text_at_error=text[max(0, e.pos - 100):e.pos + 100])
                 self._log(rec)
                 return None, text, "reply is not valid JSON"
             if not isinstance(out, dict):
