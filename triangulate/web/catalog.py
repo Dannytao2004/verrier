@@ -3,13 +3,15 @@
 只读 providers.py（PROVIDERS、MODELS、各家 adapter）和 config.PRICES 里已有的东西，不另写一份模型清单。
 花费估计 = DeepSeek 实测的一次运行的 token 构成（RUN_PROFILE）x 这个模型的官方价（峰时价；缓存的处理同 Budget.profile_usd，偏保守），
 方向数按这个模型在这个上限下的 Budget.for_model(...).directions 算。只是给人看的估计，不参与预算（预算照旧按预扣守上限）。
+v2.10f：「会不会中止」改成看一次最小的运行（规划 + 一次搜索 + 抽取一页 + 裁判）最坏情况的预扣合计（run_floor）：预扣放不下只是因为
+在途的调用时，自带 key 的运行会等（pipeline.Budget.wait_for_room），第一轮同时在途的预扣合计不再让运行中止。合计超过上限时，
+网页运行由 Registry.start 在服务端拒跑（web/runs.py）。
 """
 import inspect
 import math
 
 from .. import providers as PV
-from ..agent.pipeline import Budget
-from ..agent.search import SEARCH_QUERIES_MAX_TOKENS
+from ..agent.pipeline import Budget, configure_byok
 from ..config import MAX_TOKENS, PRICES
 
 # 一次运行的 token 构成（只用来估花费）。来源：results/agent/**/calls.jsonl 里 2026-10-18 起的 deepseek-flash 运行（同 frozen-v2.8r 的代码），
@@ -24,8 +26,13 @@ RUN_PROFILE = {
     "thinking_out_reasoning": 47_300,    # plan / judge / repair 开思考时多出的思考 token（每次运行；DeepSeek high 实测，别的档位也按它算）
     "thinking_out_per_call_low": 870,    # 其余角色开 low 时每次调用的思考 token（DeepSeek low 实测：audit / unit_arbiter）
 }
-MIN_CAP_SCAN_STEP, MIN_CAP_SCAN_MAX = 0.5, 100.0
+MIN_CAP_STEP = 0.5            # 「放得下的最小上限」按 0.5 美元一档往上取整
 EXTRACT_PAGE_CHARS = 40_000   # 「抽取一页」的预扣按这么长的页面算（PROVIDERS.md 各家预扣表里的「抽取（4 万字符）」）
+# v2.10f：一次最小的运行（run_floor）里规划、裁判两次调用按多长的 prompt 算：规划的 prompt（PLAN_SYSTEM + PLAN_USER + 清单）约 9,000 字符，
+# 加上最长 2,000 字符的题目取 20,000（PROVIDERS.md 各家预扣表的「plan（2 万字符）」）；裁判取 100,000（已存 355 次 DeepSeek 裁判调用的
+# prompt p99 约 25,400 token，英文按约 4 字符 / token）
+PLAN_PROMPT_CHARS = 20_000
+JUDGE_PROMPT_CHARS = 100_000
 _DEFAULTS = {k: p.default for k, p in inspect.signature(Budget.__init__).parameters.items()
              if p.default is not inspect.Parameter.empty}
 LLM_CONCURRENCY = _DEFAULTS["llm_concurrency"]   # 第一轮同时在途的调用最多这么多（Budget.sem）
@@ -34,9 +41,12 @@ THINK_KEYS = ("thinking", "reasoning_effort", "output_config")   # 各家请求�
 ESTIMATE_NOTE = {
     "en": "Rough estimate, not a quote: token counts measured on DeepSeek Flash runs (50 runs from 2026-10-18; thinking from 22 "
           "thinking runs) priced at this model's official price (peak price, no cache discount). Other tokenizers and thinking "
-          "lengths differ (not measured). The spending cap is what limits a run: each call reserves its worst case first.",
+          "lengths differ (not measured). The spending cap is what limits a run: each call first reserves an estimate of its "
+          "worst case (and waits while other calls are in flight); a cap that cannot cover the worst case of a minimal run is "
+          "refused. The estimate is not a hard limit: a call that uses more than its reservation can overshoot the cap a little.",
     "zh": "只是粗估：token 数取自 DeepSeek Flash 的实测运行（2026-10-18 起 50 次；思考部分取自 22 次思考实验），按这个模型的官方价"
-          "（峰时价、不算缓存折扣）计价。别家的 tokenizer 和思考长度不同（没测过）。真正限住花费的是上限：每次调用先按最坏情况预扣。",
+          "（峰时价、不算缓存折扣）计价。别家的 tokenizer 和思考长度不同（没测过）。真正限住花费的是上限：每次调用先按估计的最坏情况预扣"
+          "（别的调用在途、放不下时先等）；放不下一次最小运行的上限会被拒跑。预扣是估计，不是硬上限：用得比预扣多的调用会让花费略超上限。",
 }
 
 PROVIDER_NOTES = {
@@ -122,47 +132,48 @@ def sends(model: str, effort) -> dict:
     return {k: payload[k] for k in THINK_KEYS if k in payload}
 
 
-def _search_tokens(model: str, level: str) -> int:
-    ad = PV.ADAPTERS[PV.MODELS[model]["provider"]]
-    search_max = SEARCH_QUERIES_MAX_TOKENS if getattr(ad, "search_mode", "model") == "queries" else MAX_TOKENS["search"]
-    return PV.tokens_for_model(model, level, "search", search_max)[1]
-
-
 def _budget(pid: str, model: str, level: str, cap: float) -> Budget:
-    b = Budget.for_model(pid, usd=cap)
-    b.search_tokens = _search_tokens(model, level)   # 同 pipeline.Context：搜索的预扣按实际发出的 max_tokens
-    return b
+    """和真正运行的预算同样设置（pipeline.Context -> configure_byok：搜索按实际发出的 max_tokens 和 p99 的输入预扣）。"""
+    return configure_byok(Budget.for_model(pid, usd=cap), model, level, PV.ADAPTERS[PV.MODELS[model]["provider"]])
 
 
 def _round1_hold(b: Budget) -> float:
-    """第一轮各方向同时搜索时的预扣合计（最多 LLM_CONCURRENCY 个在途）。超过上限，Budget.hold 就会中止整次运行。"""
+    """第一轮各方向同时搜索时的预扣合计（最多 LLM_CONCURRENCY 个在途）。v2.10f：超过上限时搜索排队（等在途的结束），不再中止运行。"""
     return min(b.directions, LLM_CONCURRENCY) * b.search_reserve()
 
 
+def _call_hold(pid: str, model: str, level: str, role: str, chars: int) -> float:
+    """一次 JSON 调用（这个角色、prompt 有 chars 个字符）的预扣：同 AgentLLM.ask，按发出的 max_tokens（含思考余量）。"""
+    return Budget.llm_reserve(chars, PV.tokens_for_model(model, level, role, MAX_TOKENS[role])[1], pid)
+
+
 def _extract_hold(pid: str, model: str, level: str) -> float:
-    """抽取一个 EXTRACT_PAGE_CHARS 字符的页面时的预扣（同 AgentLLM.ask：按发出的 max_tokens，含思考余量）。"""
-    return Budget.llm_reserve(EXTRACT_PAGE_CHARS, PV.tokens_for_model(model, level, "extract", MAX_TOKENS["extract"])[1], pid)
+    """抽取一个 EXTRACT_PAGE_CHARS 字符的页面时的预扣。"""
+    return _call_hold(pid, model, level, "extract", EXTRACT_PAGE_CHARS)
 
 
-def _fits(b: Budget, extract_hold: float) -> bool:
-    return _round1_hold(b) <= b.usd_cap and extract_hold <= b.usd_cap
+def run_floor(model: str, region: str, level: str) -> dict:
+    """v2.10f：一次最小的运行（一个方向：规划 + 一次搜索 + 抽取一页 + 裁判一次）各步最坏情况的预扣和合计（usd）。预扣是一步一步拿的，
+    每一步都要「已花 + 这一次」放得下；前面的调用按预扣算（最坏情况）。合计放不下上限的运行在最坏情况下拿不到裁判那一步，网页拒跑。
+    不随上限变（上限只决定方向数）。"""
+    ad = PV.ADAPTERS[PV.MODELS[model]["provider"]]
+    pid = PV.price_id(model, region, ad)
+    parts = {"plan": _call_hold(pid, model, level, "plan", PLAN_PROMPT_CHARS),
+             "search": _budget(pid, model, level, 1.0).search_reserve(),
+             "extract": _extract_hold(pid, model, level),
+             "judge": _call_hold(pid, model, level, "judge", JUDGE_PROMPT_CHARS)}
+    return {"parts": {k: round(v, 4) for k, v in parts.items()}, "usd": sum(parts.values())}
 
 
-def min_cap(pid: str, model: str, level: str, cap: float):
-    """不低于 cap、第一轮的预扣放得下的最小上限（按 MIN_CAP_SCAN_STEP 美元一档往上找；到 MIN_CAP_SCAN_MAX 还找不到是 None）。
-    只往上找：上限低到只剩一个方向时预扣也可能放得下，但那不是「调高上限」的建议。"""
-    ex = _extract_hold(pid, model, level)
-    c = math.ceil(cap / MIN_CAP_SCAN_STEP - 1e-9) * MIN_CAP_SCAN_STEP
-    while c <= MIN_CAP_SCAN_MAX + 1e-9:
-        if _fits(_budget(pid, model, level, c), ex):
-            return round(c, 2)
-        c += MIN_CAP_SCAN_STEP
-    return None
+def min_cap(floor_usd: float) -> float:
+    """放得下一次最小运行的最小上限：floor_usd 按 MIN_CAP_STEP 往上取整。"""
+    return round(math.ceil(floor_usd / MIN_CAP_STEP - 1e-9) * MIN_CAP_STEP, 2)
 
 
 def estimate(model: str, region: str, level: str, cap: float) -> dict:
     """这个模型 / 区域 / 档位 / 上限下：第一轮方向数、估计的每次运行花费、第一轮的预扣（同时搜索的合计、抽取一页），
-    会不会因为预扣放不下而在第一轮就中止（stops_early；这时给 min_cap_usd）。"""
+    一次最小运行的最坏情况预扣（run_floor_usd）放不放得下（stops_early = 放不下，网页会拒跑；这时给 min_cap_usd），
+    第一轮的搜索会不会排队（round1_queues：同时在途的预扣合计超过上限）。"""
     ad = PV.ADAPTERS[PV.MODELS[model]["provider"]]
     pid = PV.price_id(model, region, ad)
     b = _budget(pid, model, level, cap)
@@ -177,11 +188,13 @@ def estimate(model: str, region: str, level: str, cap: float) -> dict:
         think += rp["thinking_out_per_call_low"] * (rp["calls_per_direction"] * n_dirs + rp["other_calls"])
     usd += think * Budget.peak_rates(pid, 0)[2] / 1e6
     ex = _extract_hold(pid, model, level)
+    floor = run_floor(model, region, level)
     out = {"price_id": pid, "directions": b.directions, "est_usd": round(usd, 2), "over_cap": usd > cap,
            "round1_search_hold_usd": round(_round1_hold(b), 2), "extract_hold_usd": round(ex, 2),
-           "stops_early": not _fits(b, ex)}
+           "round1_queues": _round1_hold(b) > cap, "run_floor_usd": round(floor["usd"], 2), "run_floor": floor["parts"],
+           "stops_early": floor["usd"] > cap}
     if out["stops_early"]:
-        out["min_cap_usd"] = min_cap(pid, model, level, cap)
+        out["min_cap_usd"] = min_cap(floor["usd"])
     return out
 
 

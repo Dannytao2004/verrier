@@ -235,10 +235,14 @@ class TestChatReply(_FakeServerCase):
 
     def test_missing_usage_is_flagged_not_retried(self):
         """stream_options 文档：流被打断时可能收不到最后的 usage chunk。收到 [DONE] 却没有 usage：照常用回复（重试会重复计费），
-        日志标 usage_missing，usd 记 0。"""
+        日志标 usage_missing。v2.10f：usd 按这次调用的预扣（最坏情况）记，不记 0（审查发现：预算会漏掉这次），usd_basis 写明。"""
         out, seen, log = self.chat(ok(include_usage=False))
         self.assertEqual((out[0], len(seen)), ({"a": 1}, 1))
-        self.assertEqual((log[0]["usage_missing"], log[0]["usd"]), (True, 0.0))
+        sent = seen[0]["body"]
+        want = P.Budget.llm_reserve(sum(len(m["content"]) for m in MSGS), sent["max_completion_tokens"], "kimi-k2.6")
+        self.assertGreater(want, 0)
+        self.assertEqual((log[0]["usage_missing"], log[0]["usd"], log[0]["usd_basis"]), (True, round(want, 6), "reserve (usage missing)"))
+        self.assertNotIn("usd_basis", self.chat(ok())[2][0])   # 有 usage 的回复照旧按 usage 计价
 
     def test_json_is_not_repaired(self):
         """用户决定 4：不做 JSON 修补（不剥代码块）。"""
@@ -303,7 +307,8 @@ class TestChatErrors(_FakeServerCase):
                 out, _, log = self.chat(("json", status, body))
                 rb.assert_not_called()
                 self.assertIsInstance(out, llm.KeyRejected)
-                self.assertEqual(str(out), f"Kimi rejected the API key (HTTP {status})")
+                self.assertEqual(str(out), "Kimi rejected the API key (HTTP 401)" if status == 401
+                                 else "Kimi rejected the API key or the request (HTTP 403)")   # v2.10f：403 的说法
                 self.assertNotIn("server_error", log[0])
 
     def test_redirects_are_not_followed(self):
@@ -363,8 +368,9 @@ class TestKimiCost(unittest.TestCase):
     def test_reservations_and_the_context_budget(self):
         """预扣：输入按 miss 和 5 分钟写入价中较高的；国内站按折算后的价格。Context 按 spec.price_id 计价；搜索的预扣按「生成查询词」
         那次调用发出的 max_completion_tokens（K3 永远在想：+24,000）加 (2 × max_uses + 2) 次搜索费。"""
-        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "kimi-k3"), (50_000 * 3 + 1000 * 15) / 1e6)
-        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "kimi-k3@cn"), (50_000 * 20 + 1000 * 100) / 1e6 / FX)
+        # v2.10f：别家的 tokenizer 没测过，输入按 1 个字符 1 个 token 预扣（DeepSeek 照旧 2 个字符）
+        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "kimi-k3"), (100_000 * 3 + 1000 * 15) / 1e6)
+        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "kimi-k3@cn"), (100_000 * 20 + 1000 * 100) / 1e6 / FX)
         ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("kimi-k3", "high", region="cn"))
         self.assertEqual((ctx.budget.model, ctx.budget.usd_cap), ("kimi-k3@cn", 2.0))
         self.assertEqual(ctx.budget.search_tokens, S.SEARCH_QUERIES_MAX_TOKENS + EXTRA)
@@ -578,7 +584,8 @@ class TestKeyCheck(_FakeServerCase):
         self.assertEqual(out["error"], "balance")
         self.assertIn("exceeded_current_quota_error", out["message"])
         out, _ = self.check(("json", 403, FK.error_body("permission_denied_error", "The API you are accessing is not open")))
-        self.assertEqual(out["error"], "key_rejected")
+        self.assertEqual(out["error"], "forbidden")   # v2.10f：403 单独记（不一定是 key 错了）
+        self.assertEqual(out["message"], "Kimi rejected the API key or the request (HTTP 403)")
         out, _ = self.check(("raw", 200, b"<html>"))
         self.assertEqual(out["error"], "bad_response_body")
         out, _ = self.check(("redirect", 302, self.fake.url("/x")))

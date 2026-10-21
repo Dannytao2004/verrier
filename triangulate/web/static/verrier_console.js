@@ -199,7 +199,7 @@
     const [runs, saved] = await Promise.all([api("/api/runs"), api("/api/saved").catch(() => ({runs: []}))]);
     if (tok !== token) return;
     $("cxRuns").innerHTML = runs.runs.length ? `<div class="cx-list">${runs.runs.map(r => `<a class="cx-li" href="#console/run/${encodeURIComponent(r.id)}">
-      ${badge(r.status)}<span title="${esc(r.question)}">${esc(r.question)}</span><span class="lbl">${r.run_spec ? esc(r.run_spec.model) + " · " : ""}${esc(r.as_of)}</span></a>`).join("")}</div>
+      ${badge(r.status)}<span title="${esc(r.question)}">${esc(r.question)}${r.error ? `<br><span class="cx-bad" title="${esc(r.error)}">${esc(String(r.error).slice(0, 160))}</span>` : ""}</span><span class="lbl">${r.run_spec ? esc(r.run_spec.model) + " · " : ""}${esc(r.as_of)}</span></a>`).join("")}</div>
       <p class="fine">${T(`At most ${esc(runs.max_active)} unfinished runs at a time.`, `同时最多 ${esc(runs.max_active)} 个没结束的运行。`)}</p>` : T("None yet.", "还没有。");
     const sv = (saved.runs || []).slice().sort((a, b) => String(b.started_at || "").localeCompare(String(a.started_at || ""))).slice(0, 8);
     $("cxSaved").innerHTML = sv.length ? `<div class="cx-list">${sv.map(r => `<a class="cx-li" href="#console/result/${encodeURIComponent(r.qid)}/${encodeURIComponent(r.tag || "")}">
@@ -313,9 +313,11 @@
       <div class="cx-est-n"><span class="lbl">${T("First-round routes", "第一轮方向数")}</span><b>${esc(e.directions)}</b></div>
       <div class="cx-est-t">
         ${e.over_cap ? `<p class="cx-bad">${T(`The estimate is above the cap: the run stops when it reaches ${money(cap)}.`, `估计超过上限：花到 ${money(cap)} 时运行就会停下。`)}</p>` : ""}
-        ${e.stops_early ? `<p class="cx-bad">${T(`At this cap the first round's worst-case holds (searches in flight ${money(e.round1_search_hold_usd)}, one page extraction ${money(e.extract_hold_usd)}) do not fit, so the run will likely stop in round 1.`,
-          `这个上限下，第一轮最坏情况的预扣（同时在途的搜索 ${money(e.round1_search_hold_usd)}、抽取一页 ${money(e.extract_hold_usd)}）放不下，运行很可能在第一轮就停下。`)}
-          ${e.min_cap_usd ? T(`Raise the cap to at least ${money(e.min_cap_usd)} or pick a cheaper model.`, `把上限调到至少 ${money(e.min_cap_usd)}，或者换便宜的模型。`) : T("Pick a cheaper model.", "换便宜的模型。")}</p>` : ""}
+        ${e.stops_early ? `<p class="cx-bad">${T(`This cap cannot cover the worst case of a minimal run (plan + one search + one page + judge: ${money(e.run_floor_usd)}), so the server will refuse to start it.`,
+          `这个上限放不下一次最小运行的最坏情况预扣（规划 + 一次搜索 + 抽取一页 + 裁判：${money(e.run_floor_usd)}），服务端会拒跑。`)}
+          ${e.min_cap_usd ? T(`Raise the cap to at least ${money(e.min_cap_usd)} or pick a cheaper model.`, `把上限调到至少 ${money(e.min_cap_usd)}，或者换便宜的模型。`) : T("Pick a cheaper model.", "换便宜的模型。")}</p>`
+          : e.round1_queues ? `<p class="fine">${T(`The first round's searches in flight would reserve ${money(e.round1_search_hold_usd)} in the worst case, more than the cap: they queue and run a few at a time.`,
+          `第一轮同时在途的搜索最坏情况要预扣 ${money(e.round1_search_hold_usd)}，超过上限：会排队，几个几个地跑。`)}</p>` : ""}
         <p class="fine">${bi(cat.estimate_note)}</p></div>`;
   }
   function cfgRender() { normalize(); cfgSave(); fillSelects(); cfgNotes(); }
@@ -578,6 +580,7 @@
     const keep = body.scrollTop, key = stageKey(r), cur = stations(r).find(s => s.status !== "done");
     $("cxRunTop").innerHTML = `<div id="cxStrip">${strip(r)}</div>
       ${r.error ? `<div class="cx-err">${esc(r.error)}</div>` : ""}
+      ${r.stopped && !r.error ? `<div class="cx-err">${T("Stopped early (the estimate was computed before it)", "中途停下（估计在这之前已经算出）")}: ${esc(r.stopped)}</div>` : ""}
       <p class="cx-q">${esc(r.question)}</p><p class="fine">${T("question id", "题 id")} ${esc(r.qid)} · tag ${esc(r.tag)}${specLine(r)}</p>`;
     thinkSet($("cxThink"), key, cur ? T(...cur.label) : "");
     $("cxRunMain").innerHTML = `${picking ? gate(r) : ""}

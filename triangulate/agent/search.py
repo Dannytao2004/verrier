@@ -19,7 +19,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 from .. import llm
-from ..config import MAX_TOKENS, MODEL, price, read_key
+from ..config import MAX_TOKENS, MODEL, read_key, require_deepseek
 from ..providers import DEEPSEEK, DEEPSEEK_SEARCH_FEE_ASSUMED_USD, anthropic_usage_to_cost  # noqa: F401（search_direct 从这里取）
 from ..providers import search_fee_usd
 from .prompts import SEARCH_QUERIES_SYSTEM, SEARCH_QUERIES_USER
@@ -60,12 +60,15 @@ class _QueryLLM(llm.LLM):
 
 class Searcher:
     spec = None   # v2.10a：这次运行的 ModelSpec；None = 命令行 / 回测（基线的 DirectClient 继承这个构造）
+    # v2.10f：续接（Claude 的 pause_turn）之前重新预扣一次搜索的预扣；pipeline.Context 在自带 key 的运行里设成
+    # Budget.renew_current（换掉这个线程已用掉的那份预扣，放不下就返回 False：不续，不中止整次运行）。None = 不预扣（命令行不续接）
+    renew = None
 
     def __init__(self, log, model: str = MODEL, spec=None):
         if spec is not None:   # key 只留在 spec 里，见 llm.LLM.__init__
             self.spec, self.model, self._key = spec, spec.model, None
         else:
-            price(model)   # 没有价格的模型拒跑
+            require_deepseek(model)   # 没有价格的模型拒跑；v2.10f：别家的模型也拒跑（没有 spec 时只有 DeepSeek 的 key）
             self.model = model
             self._key = read_key()
         self._log = log  # callable(rec)
@@ -82,10 +85,15 @@ class Searcher:
         fee = SEARCH_FEE_ASSUMED_USD if sp is None else search_fee_usd(sp.price_id)
         price_model = self.model if sp is None else sp.price_id
         effort, out_tokens = (None, MAX_TOKENS["search"]) if sp is None else sp.tokens_for("search", MAX_TOKENS["search"])
-        headers, payload = ad.search_request(self.model, self._key if sp is None else sp.key, prompt,
-                                             max_tokens=out_tokens, max_uses=max_uses, effort=effort)
+        # v2.10f：自带 key 的运行用 adapter 的 search_request_spec（有的话：DeepSeek 在请求体里写明关思考）；命令行照旧 search_request
+        build = ad.search_request if sp is None else getattr(ad, "search_request_spec", ad.search_request)
+        headers, payload = build(self.model, self._key if sp is None else sp.key, prompt,
+                                 max_tokens=out_tokens, max_uses=max_uses, effort=effort)
         rounds, error = [], None
         for n in range(ad.max_search_continuations + 1):
+            if n and self.renew is not None and not self.renew():   # v2.10f：续接也按最坏情况预扣，放不下就不续
+                error = "not sent: the spending cap has no room for another worst-case search request"
+                break
             rec = {"arm": role, "qid": qid, "model": self.model, "kind": "search"}
             if n:
                 rec["continuation"] = n
@@ -234,13 +242,13 @@ class Searcher:
             if why:   # v2.10a：余额不足，不重试；日志行和 v2.9b 记 http_402 的那行相同
                 rec.update(ok=False, error=f"http_{status}")
                 self._log(rec)
-                raise llm.BalanceExhausted(f"insufficient balance: {ad.label} {why} ({role} {qid}); the run was stopped "
-                                           f"without retrying. {ad.balance_hint}")
+                raise llm.BalanceExhausted(llm.balance_message(ad, why, f"{role} {qid}"))
             if status in ad.retry_statuses and http_try < 3:
                 time.sleep(llm.retry_wait(3 * http_try, wait_hint))
                 continue
-            if status != 200:
-                rec.update(ok=False, error=f"http_{status}", **llm.server_error(ad, raw))
+            if status != 200:   # v2.10f：服务端说明先 redact（这次运行的 key）再截断
+                rec.update(ok=False, error=f"http_{status}",
+                           **llm.server_error(ad, raw, None if self.spec is None else self.spec.redact))
                 return None
             try:
                 d = json.loads(raw)

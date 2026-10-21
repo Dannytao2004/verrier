@@ -22,6 +22,9 @@ THINKING_UI = ("off", "low", "medium", "high")   # 网页上的一个总档位
 REASONING_ROLES = ("plan", "judge", "repair")    # 档位只作用于这三个角色（config.thinking_role 的取值）；其余角色能关就关
 DEFAULT_USD_CAP = 2.00
 KEY_MIN_CHARS, KEY_MAX_CHARS = 8, 512
+# v2.10f：key 只收这些字符（各家真实的 key：sk-... 的 base64url、GLM 的 hex.secret 都在里面）。不收 " \ & < > ' 等：
+# 兜底的 redact 是在序列化之后的文字上找 key，JSON 转义（\" \\）和 HTML 转义（&amp; 等）会让它找不到
+KEY_CHARS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~+/=-")
 
 # DeepSeek 价格页（2026-10-21 查看）列了独立的 Search API（$0.75 / 1000 次成功请求，2026-11-01 起按次计费），没有单列
 # Anthropic 兼容接口里服务端 web_search 工具的价格。预算里照旧按 Anthropic 公开价 $10 / 1000 次记账（保守假设，报告里单列）
@@ -89,6 +92,9 @@ class DeepSeekAdapter:
     chat_timeouts = {}                  # 用 LLM._post 的默认值（单次读 180 秒，整次 1200 秒）
     max_search_continuations = 0        # 搜索不续 pause_turn（v2.9b 原样）
     balance_hint = "Top up the DeepSeek account and run again."
+    # v2.10f：预扣把输入字符数换成 token 时每个 token 按几个字符算（pipeline.Budget.llm_reserve）。DeepSeek 照旧 2（命令行的预扣不变）；
+    # 别家的 tokenizer 没测过，按 1 个字符 1 个 token（审查发现：按 2 算时中文页面会低估）
+    reserve_chars_per_token = 2
 
     def chat_url(self, region: str) -> str:
         return self.regions[region]["chat"]
@@ -147,11 +153,22 @@ class DeepSeekAdapter:
         return None
 
     def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None):
-        """effort 不用：DeepSeek 搜索请求体保持 v2.9b 原样（不带 thinking 字段，见 PROVIDERS.md 第 8 节）。"""
+        """effort 不用：DeepSeek 搜索请求体保持 v2.9b 原样（不带 thinking 字段，见 PROVIDERS.md 第 8 节）。命令行、回测、基线走这里。"""
         payload = {"model": model, "max_tokens": max_tokens,
                    "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": max_uses}],
                    "messages": [{"role": "user", "content": prompt}]}
         return {"Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01"}, payload
+
+    def search_request_spec(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None):
+        """v2.10f：自带 key 的运行（有 ModelSpec）的搜索请求：在 search_request 的请求体后面加控制思考的字段。Thinking Mode 文档
+        （2026-10-21 查看页面 HTML 的表格：开关 {"thinking": {"type": "enabled/disabled"}} 跨 OpenAI / Anthropic 两栏，深度在 Anthropic
+        格式里是 output_config.effort；思考默认开、默认 high）。搜索不是 plan / judge / repair，DeepSeek 两个模型都能关：thinking disabled。
+        命令行的 search_request 不变（金样本逐字节相同）。"""
+        headers, payload = self.search_request(model, key, prompt, max_tokens=max_tokens, max_uses=max_uses)
+        payload["thinking"] = {"type": "enabled" if effort else "disabled"}
+        if effort:
+            payload["output_config"] = {"effort": effort}
+        return headers, payload
 
     search_unpack = staticmethod(anthropic_search_unpack)
 
@@ -291,7 +308,8 @@ class ClaudeAdapter:
     search_fee_usd = CLAUDE_SEARCH_FEE_USD
     # 除 401 / 403（key 被拒，不读）以外的错误都读 body：400 / 402 / 429 判断余额、额度（billing_error、credit balance、
     # spend limit、enforced_spend_limit_reached）；其余只把 error.type / message 记进日志（log_server_error）
-    error_body_statuses = frozenset({400, 402, 404, 409, 413, 429, 500, 502, 503, 504, 529})
+    # v2.10f：403 也读，只取 error.type（permission_error 等）显示，不取 message（llm.forbidden_info）
+    error_body_statuses = frozenset({400, 402, 403, 404, 409, 413, 429, 500, 502, 503, 504, 529})
     balance_statuses = frozenset({400, 402, 429})
     retry_statuses = frozenset({429, 500, 502, 503, 504, 529})   # 529 overloaded_error：官方 Errors 页说退避重试
     honor_retry_after = True     # Rate limits 页：响应带 retry-after 时等那么多秒再重试
@@ -532,7 +550,9 @@ class OpenAIAdapter:
     search_fee_usd = OPENAI_SEARCH_FEE_USD
     # 除 401 / 403（key 被拒，不读：401 的 message 会回显打了码的 key 片段）以外的错误都读 body：429 判断余额 / 额度
     # （error.code），其余只把 error.type / code / message 记进日志
-    error_body_statuses = frozenset({400, 404, 409, 413, 422, 429, 500, 502, 503, 504})
+    # v2.10f：403（Error codes 页：Country, region, or territory not supported）也读，只取 error.type / code 显示，不取 message
+    # （401 的 message 才回显打了码的 key；401 照旧不读）
+    error_body_statuses = frozenset({400, 403, 404, 409, 413, 422, 429, 500, 502, 503, 504})
     balance_statuses = frozenset({429})
     retry_statuses = frozenset({429, 500, 502, 503, 504})   # Error codes / Rate limits 页：429 限流、slow_down，503 server_is_overloaded
     honor_retry_after = True     # Rate limits 页：Retry-After 是重试前最少要等的秒数
@@ -911,13 +931,16 @@ def glm_usage_cost(usage: dict, price_id: str) -> float:
     return (max(0, inp - read) * miss + read * hit + out * outp) / 1e6
 
 
-# 错误码页（两站同表）：429 里这些码重试没用，整次运行停下（BalanceExhausted）。1113 是余额不足；其余是用量上限、套餐过期 / 不含这个模型、
-# 套餐类型不对的 key（要到给出的重置时间、续订或换 key 才能恢复），和 OpenAI 的 spend / usage limit 一样处理。1302（限流）、1305（过载）重试
+# 错误码页（两站同表）：429 里这些码重试没用，整次运行停下（BalanceExhausted）。1113 是余额不足；GLM_LIMIT_CODES 是用量上限，
+# GLM_PLAN_CODES 是套餐过期 / 不含这个模型 / 套餐类型不对的 key（要到给出的重置时间、续订或换 key 才能恢复），和 OpenAI 的 spend / usage
+# limit 一样停下，但说明的开头不写成 insufficient balance（stop_prefix，v2.10f）。1302（限流）、1305（过载）、1313（公平使用策略下的
+# 频率限制，v2.10f 起按限流重试：调研只把 1113 列为余额不足）重试
 GLM_BALANCE_CODES = {
     "1113": "code 1113 (insufficient balance or no resource package)",
+}
+GLM_LIMIT_CODES = {
     "1308": "code 1308 (usage limit reached; it resets at the time given by the server)",
     "1310": "code 1310 (weekly / monthly usage limit exhausted)",
-    "1313": "code 1313 (request frequency limited under the fair usage policy)",
     "1316": "code 1316 (5-hour usage limit reached and the balance is too low for extra usage)",
     "1317": "code 1317 (7-day usage limit reached and the balance is too low for extra usage)",
     "1318": "code 1318 (5-hour usage limit reached; extra usage blocked by a monthly spend limit)",
@@ -1093,27 +1116,39 @@ class GLMAdapter:
 
     @staticmethod
     def parse_error(raw: bytes) -> dict:
-        """llm.server_error 用：读过的错误 body 只取 code 和 message 前 200 字（GLM 的错误没有 type）。"""
+        """llm.server_error 用：读过的错误 body 只取 code 和 message（GLM 的错误没有 type）。v2.10f：message 不在这里截断：
+        llm.server_error 先 redact、去掉像 key 的片段，再截到 200 字（先截断的话，截在 key 中间的半截认不出来）。"""
         got = glm_error(raw)
         if got is None:
             return {}
         code, msg = got
-        out = {"server_error": msg[:200]}
+        out = {"server_error": msg}
         if code:
             out["server_error_code"] = code[:60]
         return out
 
     def balance_exhausted(self, status: int, body: bytes):
         """余额 / 用量上限 / 套餐 key 的问题就返回一句说明（不含服务端原文），否则 None。错误码页：HTTP 429 + 业务码 1113 = 余额不足或
-        没有资源包；1308–1321 是用量上限和套餐的问题（GLM_BALANCE_CODES / GLM_PLAN_CODES）。同为 429 的 1302（限流）、1305（过载）重试。"""
+        没有资源包；1308–1321（1313 除外）是用量上限和套餐的问题（GLM_LIMIT_CODES / GLM_PLAN_CODES）。同为 429 的 1302（限流）、
+        1305（过载）、1313（公平使用策略的频率限制，v2.10f）重试。"""
         if status not in self.balance_statuses:
             return None
         got = glm_error(body)
         if got is None or got[0] is None:
             return None
         code = got[0]
-        why = GLM_BALANCE_CODES.get(code) or GLM_PLAN_CODES.get(code)
+        why = GLM_BALANCE_CODES.get(code) or GLM_LIMIT_CODES.get(code) or GLM_PLAN_CODES.get(code)
         return f"HTTP {status} {why}" if why else None
+
+    @staticmethod
+    def stop_prefix(why: str) -> str:
+        """v2.10f：停下整次运行的说明的开头（llm.balance_message）：只有 1113 是余额不足；用量上限、套餐 key 的码分开写。"""
+        code = why.split("code ", 1)[1].split(" ", 1)[0] if "code " in why else None
+        if code in GLM_LIMIT_CODES:
+            return "usage limit reached"
+        if code in GLM_PLAN_CODES:
+            return "key or plan not accepted"
+        return "insufficient balance"
 
     def key_check_request(self, region: str, key: str):
         """GET {base}/models（Bearer）。两站的文档都没有列这个接口，但它存在：10-20 / 10-21 不带 key、带假 key 实测都是 401
@@ -1202,10 +1237,11 @@ MODELS = {
 }
 PROVIDERS = {"deepseek": {"label": "DeepSeek", "models": ("deepseek-flash", "deepseek-v4-pro"),
                           "default_model": "deepseek-flash"},
-             # 默认 Opus 5.5：官方推荐的默认模型（claude-api 参考，2026-10-21）。$2 上限下它的方向数和预扣见 PROVIDERS.md 第 9 节
+             # v2.10f：默认改成 Sonnet 5.5（审查发现：Opus 5.5 + 默认 $2 上限放不下一次最坏情况的运行，网页会拒跑）。和 GPT / Kimi 选
+             # 默认模型的口径一致：默认上限下能跑完、能关思考。官方推荐的默认模型是 Opus 5.5（claude-api 参考），要用它把上限调高
              "claude": {"label": "Claude", "models": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5",
                                                       "claude-fable-5-1"),
-                        "default_model": "claude-opus-5-5"},
+                        "default_model": "claude-sonnet-5-5"},
              # 默认 Luna：$2 上限下只有它能跑满 10 个方向（6.1 Sol 约 5 个、Astra 1 个，PROVIDERS.md 第 10 节），也是三个里
              # 唯一能关思考的（ModelSpec 的默认档位是 off）。官方「新项目从 Astra 开始」，要改随时说
              "gpt": {"label": "GPT (OpenAI)", "models": ("gpt-6-luna", "gpt-6.1-sol", "gpt-6-astra"),
@@ -1227,6 +1263,18 @@ def adapter_for_model(model: str):
             return ADAPTERS[PRICES[model].get("provider", "deepseek")]
         raise UnknownModel(f"model {model!r} has no price entry in config.PRICES; add one (with source and date) first")
     return ADAPTERS[m["provider"]]
+
+
+def stop_prefix(ad, why: str) -> str:
+    """v2.10f：余额 / 额度问题停下整次运行时说明的开头。adapter 有 stop_prefix（GLM：用量上限、套餐 key 不算余额不足）就用它，
+    否则 "insufficient balance"（DeepSeek、Claude、OpenAI、Kimi 的文字不变）。"""
+    f = getattr(ad, "stop_prefix", None)
+    return f(why) if f is not None else "insufficient balance"
+
+
+def reserve_chars_per_token(model: str) -> float:
+    """v2.10f：预扣时输入的「每个 token 几个字符」：按模型所属 provider 的 adapter（DeepSeek 2，其余 1）。model 是计价 id。"""
+    return getattr(adapter_for_model(model), "reserve_chars_per_token", 1)
 
 
 def search_fee_usd(model: str) -> float:
@@ -1275,15 +1323,16 @@ def _redact_deep(obj, key: str):
 
 
 def clean_key(api_key) -> str:
-    """去掉首尾空白（粘贴时常带换行）；只收可打印 ASCII、中间不能有空白，长度 8–512。
-    否则 urllib 拼请求头时会抛带着整把 key 的 ValueError / UnicodeEncodeError（research：已实测），这里先拦下。消息里不带 key。"""
+    """去掉首尾空白（粘贴时常带换行）；长度 8–512，中间不能有空白。
+    否则 urllib 拼请求头时会抛带着整把 key 的 ValueError / UnicodeEncodeError（research：已实测），这里先拦下。消息里不带 key。
+    v2.10f：只收 KEY_CHARS（字母、数字和 . _ ~ + / = -），不再收所有可打印 ASCII（见 KEY_CHARS 的说明）。"""
     if not isinstance(api_key, str):
         raise SpecError("API key must be a string")
     k = api_key.strip()
     if not KEY_MIN_CHARS <= len(k) <= KEY_MAX_CHARS:
         raise SpecError(f"API key must be {KEY_MIN_CHARS}-{KEY_MAX_CHARS} characters after trimming whitespace")
-    if not all("!" <= c <= "~" for c in k):
-        raise SpecError("API key may only contain printable ASCII characters without spaces")
+    if not all(c in KEY_CHARS for c in k):
+        raise SpecError("API key may only contain letters, digits and . _ ~ + / = - (no spaces or other characters)")
     return k
 
 

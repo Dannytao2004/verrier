@@ -21,8 +21,8 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-from .config import API_URL, CALLS, MODEL, THINKING, THINKING_EXTRA_TOKENS, price, read_key, thinking_role
-from .providers import DEEPSEEK
+from .config import API_URL, CALLS, MODEL, THINKING, THINKING_EXTRA_TOKENS, read_key, require_deepseek, thinking_role
+from .providers import DEEPSEEK, stop_prefix
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
 TOTAL_TIMEOUT_S = 1200
@@ -101,18 +101,30 @@ def retry_wait(default_s: float, retry_after) -> float:
 # v2.10c：OpenAI 401 的 message 会回显打了码的 key（10-21 实测："Incorrect API key provided: sk-proj-****...0000"）。401 / 403 的 body
 # 本来就不读；这里再兜底：日志里像 key 的片段一律换成 sk-***
 _MASKED_KEY_RE = re.compile(r"\bsk-[A-Za-z0-9_\-*]+")
+# v2.10f：GLM 的 key 是「32 位 hex.16 位」，不以 sk- 开头（审查发现：截在中间的半截认不出来）
+_GLM_KEY_RE = re.compile(r"\b[0-9a-fA-F]{32}\.[A-Za-z0-9]{16}\b")
+SERVER_TEXT_MAX_CHARS = 200
 
 
-def server_error(ad, raw: bytes) -> dict:
+def scrub_server_text(text, redact=None, limit: int = SERVER_TEXT_MAX_CHARS) -> str:
+    """v2.10f：服务端的说明进日志 / 异常文字之前：先把这次运行的整把 key 换成 ***（redact = spec.redact），再换像 key 的片段
+    （sk-...、GLM 形状的 key），最后才截断。先截断的话，截在 key 中间的半截就认不出来了。"""
+    t = str(text)
+    if redact is not None:
+        t = redact(t)
+    return _GLM_KEY_RE.sub("***", _MASKED_KEY_RE.sub("sk-***", t))[:limit]
+
+
+def server_error(ad, raw: bytes, redact=None) -> dict:
     """v2.10b：adapter 允许时（Claude、OpenAI），读过的错误 body 只取 error.type 和 error.message 前 200 字记进日志
-    （v2.10c 另记 error.code）；否则什么都不记。"""
+    （v2.10c 另记 error.code）；否则什么都不记。v2.10f：message 先 redact（这次运行的 key）、去掉像 key 的片段，再截断。"""
     if not getattr(ad, "log_server_error", False) or not raw:
         return {}
     parse = getattr(ad, "parse_error", None)
     if parse is not None:   # v2.10e GLM：错误只有 code 和 message（可能没有外层 error），由 adapter 解析
         out = parse(raw)
         if "server_error" in out:
-            out["server_error"] = _MASKED_KEY_RE.sub("sk-***", out["server_error"])[:200]
+            out["server_error"] = scrub_server_text(out["server_error"], redact)
         return out
     try:
         err = json.loads(raw).get("error")
@@ -121,10 +133,45 @@ def server_error(ad, raw: bytes) -> dict:
     if not isinstance(err, dict):
         return {}
     out = {"server_error_type": str(err.get("type", ""))[:40],
-           "server_error": _MASKED_KEY_RE.sub("sk-***", str(err.get("message", "")))[:200]}
+           "server_error": scrub_server_text(err.get("message", ""), redact)}
     if err.get("code"):   # v2.10c：OpenAI 的 error.code（rate_limit_exceeded、slow_down、server_is_overloaded 等）
         out["server_error_code"] = str(err["code"])[:60]
     return out
+
+
+def forbidden_info(ad, status: int, raw: bytes) -> dict:
+    """v2.10f：403 的 body 读过（adapter 把 403 放进 error_body_statuses：Claude、OpenAI）时，只取 error.type 和 error.code
+    （OpenAI 的 403 可能是地区不支持，Claude 是 permission_error），不取 message。"""
+    if status != 403 or not raw:
+        return {}
+    try:
+        err = json.loads(raw).get("error")
+    except (ValueError, AttributeError):
+        return {}
+    if not isinstance(err, dict):
+        return {}
+    out = {}
+    if err.get("type"):
+        out["server_error_type"] = scrub_server_text(err["type"], limit=40)
+    if err.get("code"):
+        out["server_error_code"] = scrub_server_text(err["code"], limit=60)
+    return out
+
+
+def key_rejected_message(ad, status: int, info: dict | None = None) -> str:
+    """401：key 被拒（文字和以前相同）。v2.10f：403 不一定是 key 错了（OpenAI：地区不支持；Claude：key 没有这个资源的权限），
+    写成「key 或这个请求被拒」，读过 body 时附上 error.type / code。"""
+    if status != 403:
+        return f"{ad.label} rejected the API key (HTTP {status})"
+    info = info or {}
+    tc = "/".join(x for x in (info.get("server_error_type"), info.get("server_error_code")) if x)
+    return f"{ad.label} rejected the API key or the request (HTTP 403{': ' + tc if tc else ''})"
+
+
+def balance_message(ad, why: str, where: str) -> str:
+    """余额不足 / 用量上限停下整次运行时的文字（不含服务端原文）。v2.10f：开头按 adapter 分（GLM 的用量上限、套餐 key 不写成
+    insufficient balance，providers.stop_prefix）；其余 provider 和以前相同。"""
+    return f"{stop_prefix(ad, why)}: {ad.label} {why} ({where}); the run was stopped without retrying. {ad.balance_hint}"
 
 
 def server_error_detail(rec: dict) -> str:
@@ -155,13 +202,14 @@ def check_key(spec, timeout: float = 30) -> dict:
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         return {**out, "error": "network", "message": f"could not reach {ad.label} ({type(e).__name__})"}
     out["status"] = status
-    if status in (401, 403):
-        return {**out, "error": "key_rejected", "message": f"{ad.label} rejected the API key (HTTP {status})"}
+    if status in (401, 403):   # v2.10f：403 单独记 forbidden（不一定是 key 错了，见 key_rejected_message）
+        return {**out, "error": "key_rejected" if status == 401 else "forbidden",
+                "message": key_rejected_message(ad, status, forbidden_info(ad, status, raw))}
     if 300 <= status < 400:
         return {**out, "error": "redirect", "message": f"HTTP {status} redirect not followed (the API key is only sent to {url})"}
     why = ad.balance_exhausted(status, raw)
     if why:
-        return {**out, "error": "balance", "message": f"insufficient balance: {ad.label} {why}. {ad.balance_hint}"}
+        return {**out, "error": "balance", "message": f"{stop_prefix(ad, why)}: {ad.label} {why}. {ad.balance_hint}"}
     if status != 200:
         return {**out, "error": f"http_{status}", "message": f"{ad.label} models list returned HTTP {status}"}
     try:
@@ -186,7 +234,9 @@ class LLM:
             # key 只留在 spec 里（每次发请求时才取），运行结束时 spec.drop_key() 一处清掉
             self.spec, self.model, self.calls_path, self._key = spec, spec.model, calls_path, None
             return
-        price(model)   # 没有价格的模型拒跑（config.UnknownModel），在读 key 之前
+        # 没有价格的模型拒跑（config.UnknownModel），在读 key 之前。v2.10f：别家的模型也拒跑（config.UnsupportedModel）：
+        # 没有 spec 时只有 DeepSeek adapter 和 DeepSeek 的 key，别家的模型 id 不能发到 api.deepseek.com
+        require_deepseek(model)
         self.model = model
         self.calls_path = calls_path
         self._key = read_key()
@@ -202,6 +252,16 @@ class LLM:
 
     def _auth_key(self) -> str:
         return self._key if self.spec is None else self.spec.key
+
+    @property
+    def _redact(self):
+        """v2.10f：服务端说明进日志之前用的 redact（这次运行的 key -> ***）；没有 spec 时 None。"""
+        return None if self.spec is None else self.spec.redact
+
+    def _reserve_usd(self, messages: list, out_tokens: int) -> float:
+        """v2.10f：回复没给 usage（Kimi 流式回复被打断）时这次调用按预扣（最坏情况，pipeline.Budget.llm_reserve）记账，不按 0。"""
+        from .agent.pipeline import Budget   # 这里才 import：pipeline 本身 import 本模块
+        return Budget.llm_reserve(sum(len(str(m["content"])) for m in messages), out_tokens, self.price_model)
 
     def effort_and_tokens(self, arm: str, max_tokens: int):
         """(这次调用的思考档位或 None, 实际发出的 max_tokens)。开了思考的调用多给 THINKING_EXTRA_TOKENS（思考 token 计入
@@ -242,10 +302,11 @@ class LLM:
             latency = round(time.time() - t0, 2)
             rec.update(http=status, http_try=http_try, latency_s=latency, at=started.isoformat(timespec="seconds"))
             if status in (401, 403):
-                # key 被拒：不重试，直接停整轮；只记状态码
-                rec.update(ok=False, error=f"http_{status}")
+                # key 被拒：不重试，直接停整轮；只记状态码（v2.10f：403 读过 body 时另记 error.type / code，不记 message）
+                info = forbidden_info(ad, status, raw)
+                rec.update(ok=False, error=f"http_{status}", **info)
                 self._log(rec)
-                raise KeyRejected(f"{ad.label} rejected the API key (HTTP {status})")
+                raise KeyRejected(key_rejected_message(ad, status, info))
             if 300 <= status < 400:
                 # 跳转没有跟随（urlopen_no_redirect）：跟过去的请求会带着 Authorization 头发到新地址
                 rec.update(ok=False, error=f"http_{status}")
@@ -257,13 +318,12 @@ class LLM:
                 # 余额不足：不重试，整次运行停下（v2.10a）；日志行和 v2.9b 记 http_402 的那行相同
                 rec.update(ok=False, error=f"http_{status}")
                 self._log(rec)
-                raise BalanceExhausted(f"insufficient balance: {ad.label} {why} ({arm} {qid} attempt {attempt}); "
-                                       f"the run was stopped without retrying. {ad.balance_hint}")
+                raise BalanceExhausted(balance_message(ad, why, f"{arm} {qid} attempt {attempt}"))
             if status in ad.retry_statuses and http_try < 3:
                 time.sleep(retry_wait(2 * http_try, wait_hint))
                 continue
             if status != 200:
-                rec.update(ok=False, error=f"http_{status}", **server_error(ad, raw))
+                rec.update(ok=False, error=f"http_{status}", **server_error(ad, raw, self._redact))
                 break
             try:
                 data = ad.chat_decode(raw)
@@ -277,7 +337,7 @@ class LLM:
                     d = json.loads(raw)
                     rec["body_keys"] = sorted(d)[:10] if isinstance(d, dict) else type(d).__name__
                     if isinstance(d, dict) and isinstance(d.get("error"), dict):
-                        rec["server_error"] = _MASKED_KEY_RE.sub("sk-***", str(d["error"].get("message", "")))[:200]
+                        rec["server_error"] = scrub_server_text(d["error"].get("message", ""), self._redact)
                 except ValueError:
                     rec["body_keys"] = "not_json"
                 if http_try < 3:
@@ -286,6 +346,8 @@ class LLM:
                     continue
                 break
             rec.update(ad.chat_meter(unpacked, started, self.price_model, effort))
+            if rec.get("usage_missing"):   # v2.10f：没有 usage（Kimi）：按这次调用的预扣记账（以前记 0，预算会漏掉这次）
+                rec.update(usd=round(self._reserve_usd(messages, out_tokens), 6), usd_basis="reserve (usage missing)")
             text = ad.chat_text(unpacked)
             # 先查截断：被截断的 JSON 几乎总是解析失败，先解析的话截断会被误报成「不是合法 JSON」
             # （v2.10b：adapter 的 chat_problem 统一报回复本身的问题；DeepSeek 只有截断，Claude 另有拒答、暂停）

@@ -607,7 +607,10 @@ def build(ctx: Context):
                         "compute": {"result": res, "methods": [], "estimate_result": None,
                                     "skipped": "published value confirmed early; no estimate was made"}}
         if state.get("aborted") or b.aborted:
-            return {**upd, "judge_rounds": [{"round": rnd, "skipped": b.aborted or state.get("aborted")}]}
+            # v2.10f：中止原因也写进 state 的 aborted（审查发现：子 agent 阶段余额不足 / 预扣放不下时只有 budget.aborted 有原因，
+            # 网页据 state 把运行标成 done、看不到原因）
+            why = b.aborted or state.get("aborted")
+            return {**upd, "aborted": why, "judge_rounds": [{"round": rnd, "skipped": why}]}
         dirs = "\n".join(f"- {d['id']} [{d['category']}] {d['hypothesis']}" for d in state["directions"])
         target0 = state["plan"]["target"]
         disc, orec = D.is_discrete(target0), state.get("outcomes")   # orec：之前的轮次定下的结果列表（离散目标）
@@ -848,6 +851,11 @@ def build(ctx: Context):
             out["final"] = {**out["final"], "text": out["final"]["text"] + note, "template": out["final"]["template"] + note}
         return out
 
+    def _no_estimate(text: str, state: AgentState) -> str:
+        """v2.10f：没有估计的终稿：运行被中止了（余额不足、上限放不下、取消）就写中止原因，不写成「证据算不出」。"""
+        stop = b.aborted or state.get("aborted")
+        return f"No estimate: the run was stopped before an estimate could be made ({stop})." if stop else text
+
     def final_estimate(state: AgentState):
         comp = state.get("compute") or {}
         r = comp.get("result") or {}
@@ -918,7 +926,7 @@ def build(ctx: Context):
             parts += eparts[1:]
         rendered = "".join(p if i % 2 == 0 else ph.get(p, "[unknown placeholder]") for i, p in enumerate(parts))
         if r.get("central") is None:
-            rendered = "No estimate: no estimation method could be computed from the verified evidence."
+            rendered = _no_estimate("No estimate: no estimation method could be computed from the verified evidence.", state)
         elif not state["plan"]["target"].get("unit_canonical"):   # v2.7e：U1 没钉住单位（plan note 记了原因），终稿写明
             text, rendered = text + "\n\n" + UNIT_NOT_PINNED, rendered + "\n\n" + UNIT_NOT_PINNED
         if r.get("central") is not None and comp.get("audit_overridden"):   # v2.8l：兜底用了输入核对有异议的方法，终稿写明
@@ -987,9 +995,9 @@ def build(ctx: Context):
         rendered = "\n\n".join("".join(p if i % 2 == 0 else ph.get(p, "[unknown placeholder]")
                                        for i, p in enumerate(PLACEHOLDER.split(s))) for s in segs)
         if r.get("most_likely") is None:
-            rendered = ("No estimate: no outcome-probability method could be computed from the verified evidence."
-                        if r.get("outcomes") else "No estimate: the judge did not define a valid outcome list for this "
-                                                  "discrete target.")
+            rendered = _no_estimate("No estimate: no outcome-probability method could be computed from the verified evidence."
+                                    if r.get("outcomes") else "No estimate: the judge did not define a valid outcome list for this "
+                                                              "discrete target.", state)
         return {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
                 "model_error": err, "used_model_text": model_text is not None, "model_text": model_text}
 

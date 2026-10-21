@@ -123,7 +123,9 @@ class TestProvidersApi(_Client):
         self.assertIn("cannot be turned off", m["gpt-6-astra"]["notes"][0]["en"])
 
     def test_estimates_follow_the_cap_and_the_budget(self):
-        """方向数 = Budget.for_model(price_id, usd=cap).directions；估计 = RUN_PROFILE 按官方价；第一轮预扣放不下时给提示和最小上限。"""
+        """方向数 = Budget.for_model(price_id, usd=cap).directions；估计 = RUN_PROFILE 按官方价。v2.10f：「会中止」= 一次最小运行
+        （规划 + 一次搜索 + 抽取一页 + 裁判）最坏情况的预扣合计放不下上限（网页拒跑），给最小上限；第一轮同时在途的搜索预扣超过上限
+        只是排队（round1_queues），不再算中止。"""
         from triangulate.agent.pipeline import Budget
         from triangulate.web import catalog as C
 
@@ -140,19 +142,37 @@ class TestProvidersApi(_Client):
         self.assertTrue(0.4 < flash["est_usd"] < 0.9, flash)   # 实测 50 次运行平均 $0.52（峰时价估计偏高一点）
         self.assertFalse(flash["stops_early"])
         self.assertGreater(est(2, "deepseek-flash", level="high")["est_usd"], flash["est_usd"])   # 思考 token 按输出价另计
+        self.assertEqual(flash["run_floor_usd"], round(sum(flash["run_floor"].values()), 2))
         opus = est(2, "claude-opus-5-5")
-        self.assertEqual((opus["directions"], opus["stops_early"], opus["min_cap_usd"]), (3, True, 7.0))
-        self.assertAlmostEqual(opus["round1_search_hold_usd"], 2.53, places=2)   # PROVIDERS.md 9.8：3 x $0.844
+        # Opus 5.5（low，关不掉思考：每次调用 +24,000 输出 token）：输入按 1 字符 1 token、$4 / $20
+        want = {"plan": (20_000 * 4 + (6000 + 24_000) * 20) / 1e6, "extract": (40_000 * 4 + (16_000 + 24_000) * 20) / 1e6,
+                "judge": (100_000 * 4 + (12_000 + 24_000) * 20) / 1e6,
+                "search": (72_000 * 4 + (8192 + 24_000) * 20) / 1e6 + 8 * 0.01}
+        for k, v in want.items():
+            self.assertAlmostEqual(opus["run_floor"][k], round(v, 4), places=4)
+        self.assertEqual((opus["directions"], opus["stops_early"], opus["run_floor_usd"], opus["min_cap_usd"]),
+                         (3, True, round(sum(want.values()), 2), 4.0))
+        self.assertAlmostEqual(opus["round1_search_hold_usd"], round(3 * want["search"], 2))
+        self.assertTrue(opus["round1_queues"])   # 3 个搜索同时在途放不下：排队，不中止
         self.assertTrue(opus["over_cap"])
-        self.assertFalse(est(7, "claude-opus-5-5")["stops_early"])
-        fable = est(2, "claude-fable-5-1")   # 只有 1 个方向，搜索放得下，但抽取一页的预扣（$2.20）就超过上限
+        self.assertFalse(est(4, "claude-opus-5-5")["stops_early"])
+        self.assertTrue(est(3.5, "claude-opus-5-5")["stops_early"])   # 3.77 > 3.5
+        fable = est(2, "claude-fable-5-1")
         self.assertEqual(fable["directions"], 1)
-        self.assertLess(fable["round1_search_hold_usd"], 2)
-        self.assertGreater(fable["extract_hold_usd"], 2)
         self.assertTrue(fable["stops_early"])
-        self.assertGreaterEqual(fable["min_cap_usd"], fable["extract_hold_usd"])
+        self.assertGreaterEqual(fable["min_cap_usd"], fable["run_floor_usd"])
+        self.assertLess(fable["min_cap_usd"] - fable["run_floor_usd"], C.MIN_CAP_STEP)
+        sonnet = est(2, "claude-sonnet-5-5")   # 新的默认：$2 放得下
+        self.assertFalse(sonnet["stops_early"])
+        self.assertNotIn("min_cap_usd", sonnet)
         cn = est(2, "kimi-k3", "cn")
         self.assertEqual(cn["price_id"], "kimi-k3@cn")
+        # 每家的默认模型 + 默认档位在 $2 下都放得下（网页的默认组合不会被拒）
+        v = self.c.get("/api/providers").json()
+        for p in v["providers"]:
+            m = next(x for x in p["models"] if x["id"] == p["default_model"])
+            e = m["by_region"][p["default_region"]]["by_thinking"][m["thinking"]["default"]]
+            self.assertFalse(e["stops_early"], (p["id"], e))
 
     def test_bad_cap(self):
         for bad in ("0", "-1", "nan", "inf"):

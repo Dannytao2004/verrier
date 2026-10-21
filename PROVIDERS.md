@@ -12,6 +12,7 @@
 | `v2.10d` | Kimi adapter（国际站 / 国内站两个区域；JSON 调用走流式 Chat Completions；搜索 = 一次 JSON 调用生成查询词 + `POST /v1/tools/search`）；国内站按 CNY 官方价折算（`ModelSpec.price_id`）；429 余额不足立刻停；Kimi key 校验 | 第 11 节 |
 | `v2.10e` | GLM adapter（Z.ai 国际站 / 智谱开放平台国内站两个区域；JSON 调用走非流式 Chat Completions；搜索同 Kimi：生成查询词 + `POST /web_search`）；国内站按 CNY 官方价折算；429 余额不足（1113）和用量上限 / 套餐 key 的码立刻停；只收 Standard API Key（网页提示 `GLM_KEY_NOTE`）；GLM key 校验 | 第 12 节 |
 | `web-v0.9` | 网页接上 BYOK：`GET /api/providers`（provider、区域、模型、思考档位、每次运行的花费估计）、`POST /api/key/check`、`POST /api/runs` 必须带 key；key 只在这次运行的内存里，结束就清；经典界面只浏览；/verrier 控制台的「模型 · key · 上限」表单 | 第 13 节 |
+| `v2.10f` | 审查修正：自带 key 的运行里预扣放不下只是因为在途时等、上限放不下一次最小运行就在服务端拒跑、Claude 默认改 Sonnet 5.5；中途停下的运行标 failed 并写原因；预扣的估计（搜索输入 p99、别家 1 字符 1 token、续接另预扣、缺 usage 按预扣记）；先 redact 再截断、GLM 形状的 key、key 字符集；等人工确认 30 分钟超时；DeepSeek 自带 key 的搜索关思考；命令行只收 DeepSeek 模型；403 的说法；GLM 1313 重试；五家的端到端测试 | 第 14 节 |
 
 ## 1. Scope and binding decisions（用户 10-20 / 10-21 定的，摘要）
 
@@ -30,7 +31,7 @@
 |---|---|
 | 有 spec = BYOK 运行 | `prepare_run(q, tag, spec=...)` -> `Context(spec=...)` -> `AgentLLM(spec=)`、`Searcher(spec=)`、`Budget.for_model(spec.model, usd=spec.usd_cap)`。没有 spec（命令行、回测、基线、现有测试）时和 v2.9b 完全相同 |
 | 校验（`SpecError`，消息里不带 key） | provider、model 必须在白名单里（`PROVIDERS` / `MODELS`）；model 必须有价格（`config.price`，否则 `UnknownModel`）；region 必须是这家的；thinking 必须是这个模型能选的档位；usd_cap 是有限正数 |
-| key 格式 | 去首尾空白（粘贴常带换行）后 8–512 个可打印 ASCII 字符、中间没有空白。理由：urllib 拼请求头遇到 `\r\n` 会抛 `ValueError: Invalid header value b'Bearer <整把 key>'`，非 latin-1 字符会抛带字符的 `UnicodeEncodeError`（代码调查阶段在 Python 3.14.3 上实测）；入口拦下就不会走到这条路 |
+| key 格式 | 去首尾空白（粘贴常带换行）后 8–512 个字符、中间没有空白；v2.10f 起只收字母、数字和 `. _ ~ + / = -`（第 14.4 节）。理由：urllib 拼请求头遇到 `\r\n` 会抛 `ValueError: Invalid header value b'Bearer <整把 key>'`，非 latin-1 字符会抛带字符的 `UnicodeEncodeError`（代码调查阶段在 Python 3.14.3 上实测）；入口拦下就不会走到这条路 |
 | key 只有一份 | `LLM._key`、`Searcher._key` 在 spec 运行里是 `None`，每次发请求时才 `spec.key`；`save_run` 写完结果后 `run.release(h)` -> `spec.drop_key()`，之后再发请求抛 `KeyDropped` |
 | 不能被顺手序列化 | `repr` / `str` / `public()` 不含 key；`pickle` / `copy` / `deepcopy` 抛 `TypeError`；spec 只挂在 `ctx` 上，不进题目 dict、不进 LangGraph state |
 | 兜底 | `run_direction` 记的 `error` 文字、`LLM._log` 写的 calls.jsonl 行、`save_run` 写的 state.json / ledger.md / graph.html 都先 `spec.redact()`（把 key 换成 `***`）。正常路径上 key 本来就不会出现在这些文字里 |
@@ -141,7 +142,8 @@ Haiku 5.5 的 prompt 长度 = input + cache 读 + cache 写（官方 Long contex
   一个方向的 token 构成 `DIRECTION_PROFILE` 取自已存的 1251 个 deepseek-flash 方向的平均（搜索 + 抽取：cache hit 13,600、miss 25,700、
   输出 3,600 token，4 次搜索），只用来算比例。flash 仍是 0.06（`Budget().directions` 仍是 10）；v4-pro 约 $0.102 / 方向：
   $1 上限 5 个方向、$2 上限 10 个（页数上限 40 / 4）。
-- 预扣（`llm_reserve`、`search_reserve`）用这次运行的模型的峰时价和这家的搜索费。
+- 预扣（`llm_reserve`、`search_reserve`）用这次运行的模型的峰时价和这家的搜索费。v2.10f：自带 key 的运行里输入的 token 估计、
+  搜索输入、续接、等在途的规则见第 14.1 / 14.3 节（命令行不变）。
 - v2.10b Claude：请求里不写 `cache_control` 就没有缓存（`prompt_cache: "explicit"`），所以 `DIRECTION_PROFILE` 里 DeepSeek 自动命中的
   13,600 token 在 Claude 上按 base input 算。Haiku 5.5 的预扣在估计的 prompt（字符数 / 2）超过 100,000 token 时按高价（`Budget.peak_rates`）。
   `$2` 上限下的方向数和几个典型预扣见第 9.8 节。
@@ -169,7 +171,7 @@ agent 里 `AgentLLM.ask` 和 `run_direction` 的搜索把它变成 `Budget.halt(
 
 （v2.10b 起 Claude 相关的限制在第 9.8 节；下面是 v2.10a 记的，「key 校验」一条已在 v2.10b 实现。）
 
-- **DeepSeek 搜索角色的思考没关**：搜索请求不带 `thinking` 字段（v2.9b 原样），服务端默认；`search_direct.py` 的注释记过这个接口默认返回 thinking 块。
+- ~~**DeepSeek 搜索角色的思考没关**~~（v2.10f 已改，只改自带 key 的路径，第 14.6 节）：搜索请求不带 `thinking` 字段（v2.9b 原样），服务端默认；`search_direct.py` 的注释记过这个接口默认返回 thinking 块。
   用户决定 6 说「其余角色能关就关」，但关掉要往搜索请求体里加字段（改变冻结的请求体），而且 DeepSeek 的 Anthropic 兼容文档只写了 `thinking`
   「Supported」、没写 `type: disabled` 的效果（未核实）。本阶段没动，等用户定。
 - ~~**网页还没接**~~：web-v0.9 已接（第 13 节）。
@@ -296,7 +298,9 @@ Haiku 5.5 总 prompt > 100,000 整次按高价；`inference_geo == "us"` 乘 1.1
 
   Opus：第一轮 3 个方向同时搜索，预扣合计 $2.53 > $2，第三个搜索就会让整次运行中止；Fable：一次 4 万字符的抽取预扣就超过 $2。
   Sonnet 在 8 个并发抽取时也很可能撞上。可选的修法（没做，等你定）：自带 key 的运行里，预扣放不下只是因为「在途的预扣」时就等在途调用结束，
-  只有「已花 + 这一次」放不下才中止；或者给贵模型更高的默认上限 / 更低的并发。上限本身照样守得住（预扣是最坏情况）。
+  只有「已花 + 这一次」放不下才中止；或者给贵模型更高的默认上限 / 更低的并发。~~上限本身照样守得住（预扣是最坏情况）。~~
+  **更正（v2.10f）**：这句不对。预扣不是严格的最坏情况（搜索输入按估计的 token 数、字符数换 token 是估计、续接没另预扣），上限可能被
+  在途调用的超出部分超过（第 14.3 节）。等在途、拒跑、默认模型已在 v2.10f 改（第 14.1 节）。
 - **没开 refusal fallback**。claude-api 参考建议 Opus 5.5 / Sonnet 5.5 / Fable 5.1 默认带服务端 `fallbacks: "default"`（beta 头
   `server-side-fallback-2026-07-01`）：被安全分类器拒答时 API 自动换别的模型重跑。没开的理由：它会换到别的模型、按那个模型的价格计费，
   和「按所选模型的官方价计价」（用户决定 7）、「照原样报错」（决定 4）冲突，也是 beta。要开随时说。
@@ -309,7 +313,7 @@ Haiku 5.5 总 prompt > 100,000 整次按高价；`inference_geo == "us"` 乘 1.1
   这种 key 会在第一个调用报 400（message 原文进错误文字）。网页上应提示用户建单 workspace 的 key。
 - 「Your credit balance is too low」的状态码文档没写；按 message 原文认。
 - Haiku 5.5 的 100K 门槛在服务端工具循环（一次搜索请求内多轮）里怎么算没写；这里按整次请求的 usage 合计判断，可能高估。
-- 预扣的 token 估计仍是「字符数 / 2」；官方说 4.7 以后的 tokenizer 同样文字多约 30% token，和 DeepSeek 的差距没测，中文页面可能低估。
+- ~~预扣的 token 估计仍是「字符数 / 2」~~（v2.10f：别家按 1 个字符 1 个 token，第 14.3 节）；官方说 4.7 以后的 tokenizer 同样文字多约 30% token，和 DeepSeek 的差距没测。
 - `DIRECTION_PROFILE` 是 DeepSeek 实测的 token 构成；Claude 的 tokenizer、Opus / Fable 关不掉的思考会让真实的一个方向更贵（未测）。上限靠预扣守住。
 - Claude 没有中国区 endpoint；Supported Regions Policy 不含中国大陆、香港、澳门（research 记录），网页阶段要写明。
 - 网页还没接（同第 8 节）：`check_key`、Claude 选项、key 输入框都留给网页阶段。
@@ -482,7 +486,7 @@ explicit 断点只缓存固定的提示词（要改请求体的消息格式）�
 - **缓存写入的默认行为没改**（10.6，要你定）。
 - **搜索没有固定用 Luna**：搜索内容 token 按所选模型的 input 价计，Astra 的搜索比 Luna 贵约 100 倍（调研的建议是 Searcher 固定用 Luna）。
   固定用 Luna 等于「用户选了 Astra，搜索却换成 Luna」，和「按所选模型」不一致，没做，要不要做你定。
-- 每次搜索的内容 token 数文档没给；搜索上下文窗口最大 128K（web search 指南）。预扣照旧假设每次搜索输入 30,000 token（DeepSeek 实测），
+- 每次搜索的内容 token 数文档没给；搜索上下文窗口最大 128K（web search 指南）。预扣照旧假设每次搜索输入 30,000 token（DeepSeek 实测；v2.10f 起自带 key 的运行按 p99 72,000，第 14.3 节），
   Sol / Astra 的真实搜索可能更贵，超出部分事后计入（`Budget.add`），上限可能被一次搜索超过一点。
 - 非流式：生成完才回 body。单次读超时设 1,200 秒、整次 1,800 秒（`chat_timeouts`）；Astra / Sol 开 high 的长回复要多久，没实测。读超时后会重试，
   而服务端那次请求可能已经计费。搜索沿用 600 秒（Searcher 共用）。
@@ -491,7 +495,7 @@ explicit 断点只缓存固定的提示词（要改请求体的消息格式）�
 - `temperature` 在 effort 不是 none 时发了会 400 还是被忽略，文档没写（未核实）；代码不发，所以不影响。
 - 中国大陆、香港、澳门不在 OpenAI supported countries 列表里（调研记录；官方警告 accessing or offering access 可能导致封号），网页阶段要写明。
 - 调研说 Free 档能不能用 GPT-6、reasoning summary 要不要组织验证，没查到（未核实）；本项目不请求 summary。
-- 预扣的 token 估计仍是「字符数 / 2」；OpenAI 的 tokenizer 英文约 4 字符 / token，偏保守。`DIRECTION_PROFILE` 是 DeepSeek 不开思考时的输出量，
+- ~~预扣的 token 估计仍是「字符数 / 2」~~（v2.10f：按 1 个字符 1 个 token，第 14.3 节）；OpenAI 的 tokenizer 英文约 4 字符 / token，偏保守。`DIRECTION_PROFILE` 是 DeepSeek 不开思考时的输出量，
   Sol / Astra 关不掉思考，真实的一个方向会更贵（未测），靠预扣守住上限。
 - 网页还没接（同第 8 节）。
 
@@ -563,7 +567,7 @@ an error, so do not pass it explicitly"；用户决定 5）；`prompt_cache_opti
 | `finish_reason = "length"` | 报截断（`truncated`，说明文字和 DeepSeek 相同）；`AgentLLM.ask` 照旧要求「短一点再答一次」 |
 | 其余（不带工具时出现 `tool_calls`、流里没给 finish_reason） | 报 `unexpected_finish`，不解析（Chat API 的枚举只有 stop / length / tool_calls） |
 | 没收到 `[DONE]`、流里来了 `error` 对象 | `StreamError` -> `bad_response_body`（`stream_error` 记类型），按已有逻辑重试 |
-| 收到 `[DONE]` 却没有 usage | 照常用回复，日志 `usage_missing: true`、`usd: 0`（文档：流被打断时可能收不到 usage；重试会重复计费）。这次调用的成本漏记，见 11.9 |
+| 收到 `[DONE]` 却没有 usage | 照常用回复，日志 `usage_missing: true`（文档：流被打断时可能收不到 usage；重试会重复计费）。v2.10f：`usd` 按这次调用的预扣记（`usd_basis: "reserve (usage missing)"`），不再记 0 |
 | 内容审核 | HTTP 400 `content_filter`（不是 finish_reason），照原样报 |
 
 单次读最多 600 秒、整次 3,600 秒（`chat_timeouts`，没实测）。
@@ -709,7 +713,7 @@ CNY 原价存在 `PRICES[...]["listed"]`，`peak` / `search_fee_usd` 是除以 6
 - **新账户（Tier0：累计充值 $1）基本跑不动**：并发 1、RPM 3、TPD 150 万、搜索 QPS 1（Recharge and Rate Limits 页）。agent 默认并发 8，会连续撞 429 `rate_limit_reached_error`，
   3 次重试后这些调用失败；调研估计一次运行约 100 万 token，一天大约只够一次。Tier1（累计 $10：并发 15、RPM 100、QPS 3）以上才正常。没做自动降并发 / 本地排队，网页上要写明。
 - K2.6 的上下文是 262,144：输入 + max_completion_tokens 超过就 400（照原样报）。抽取最多发 40 万字符，中文页按官方「1 token 约 1.5–2 个汉字」可能接近或超过上限；预扣仍按「字符数 / 2」估。
-- 流式回复收到 `[DONE]` 却没有 usage 时，这次调用的成本按 0 记（`usage_missing: true`），预算会少算这一次；文档说只有流被打断才会这样。
+- ~~流式回复收到 `[DONE]` 却没有 usage 时，这次调用的成本按 0 记~~（v2.10f：按这次调用的预扣记，第 14.3 节）；文档说只有流被打断才会这样。
 - 生成查询词只调一次、失败就没有 URL；搜索结果只按名次交替合并，没有像其他 provider 那样由模型在看过结果之后挑 URL（只允许一次小的 JSON 调用）。这一步的效果没有真 key 实测。
 - 搜索接口的余额不足错误没写在文档里（11.5）；搜索接口的 403（Account inactive or suspended）照原样记，不停整次运行。
 - json_object + 流式 + K3 思考的组合、K2.6 关思考时的 json_object 表现、`timeout_seconds: 30` 是否够，都只按文档写，没有真 key 实测。
@@ -816,8 +820,9 @@ API 细节在 2026-10-21 对照两站官方 `.md` 原文（页面地址加 `.md`
 |---|---|---|
 | 401（1000 / 1001 / 1003 / 1005）、403（1220） | `KeyRejected`，不重试，不读 body | 1000 Authentication Failed 等；10-21 实测见 12.8 |
 | 429 **1113** | `BalanceExhausted`，不重试，整次运行停下（第 6 节） | Insufficient balance or no resource package. Please recharge.（国内站：您的账户已欠费，请充值后重试） |
-| 429 1308 / 1310 / 1313 / 1316–1321 | 同上（我定的，见 12.9） | 用量上限（要到服务端给的重置时间）、公平使用限制、5 小时 / 7 天上限且余额或月消费上限不允许超额：重试都没用 |
-| 429 1309 / 1311 / 1314 / 1315 | 同上，说明里提示换 Standard API Key | Coding Plan 过期、套餐不含这个模型、企业套餐过期、key 只限企业编程套餐 |
+| 429 1308 / 1310 / 1316–1321 | 同上（我定的，见 12.9）；v2.10f 起说明开头是 `usage limit reached`，不写成余额不足 | 用量上限（要到服务端给的重置时间）、5 小时 / 7 天上限且余额或月消费上限不允许超额：重试都没用 |
+| 429 1313 | v2.10f 起按限流重试（以前和余额不足一样停下） | 公平使用策略下的频率限制（调研只把 1113 列为余额不足） |
+| 429 1309 / 1311 / 1314 / 1315 | 同上，说明里提示换 Standard API Key；v2.10f 起说明开头是 `key or plan not accepted` | Coding Plan 过期、套餐不含这个模型、企业套餐过期、key 只限企业编程套餐 |
 | 429 1302（限流）、1305（过载）；500（1200 / 1230 / 1234）、502、503、504 | 最多 3 次，2 / 4 秒退避（搜索接口 3 / 6 秒）；服务端给了 `Retry-After` 就至少等那么久（最多 60 秒；文档没写这个头） | Rate limit reached / service may be temporarily overloaded / network error, please try again later |
 | 其余 4xx（1210 / 1213 / 1214 / 1215 参数、1211 模型不存在、1261 prompt 超长、1301 内容安全） | 不重试；业务码和 message 进日志和异常文字 | 同上表 |
 | 3xx | 不跟随（D9），`TransportError` | 同 v2.6g |
@@ -905,7 +910,7 @@ then run again.`（不含服务端原文。）
 
 - **国际站 GLM-5.3 在 `$2` 下很紧**（12.7，要你定，和 Opus / Sol / K3 同一个问题）。
 - **5.3 的 high -> max 映射**同 Kimi K3，和另外三家的口径不同（12.3，要你定）。
-- **1113 以外的 429 码也停下整次运行**（12.4）：这是我定的。任务只写了「1113 停、1302 / 1305 重试」；1308–1321 是用量上限和套餐的问题，重试几秒没用（要等服务端给的重置时间、续订或换 key），
+- **1113 以外的 429 码也停下整次运行**（12.4）：这是我定的；v2.10f：1313 改成重试，停下的说明和余额不足分开写（第 14.9 节）。任务只写了「1113 停、1302 / 1305 重试」；1308–1321 是用量上限和套餐的问题，重试几秒没用（要等服务端给的重置时间、续订或换 key），
   照 OpenAI 那边把 spend / usage limit 当成停下的先例处理。只按原样报、不停也可以（每个调用会先重试 3 次再失败），要改随时说。
 - **GLM-4.7-FlashX 的国际站 id 没核实**：`glm-4.7-flashx` 取自国内站 API 参考的 model enum；国际站 API 参考的 enum 只有 5.3 / 5.2 / 5.1 / 5 / 4.7 / 4.6，国际站价格页的 Other Pricing 里有 GLM-4.7-FlashX。
   国际站要是不收这个 id，第一个调用会报 400 1211（Unknown Model），照原样显示。它的上下文只有 200K：抽取最多发 40 万字符，可能超出（400 1261 Prompt too long，照原样报）。
@@ -955,7 +960,7 @@ then run again.`（不含服务端原文。）
 1. `spec_from_body` -> `ModelSpec`（`clean_key`：去首尾空白，8–512 个可打印 ASCII）。
 2. `Registry.start` 必须有 spec（没有就 `ValueError(NEED_KEY)`，防别的调用方绕过 app）；登记之前任何一步出错（题目不合法、`Busy`）先 `spec.drop_key()` 再抛。
 3. `WebRun._spec` 和 `prepare_run(q, tag, spec=spec)` 的 `ctx.spec`：只在内存里。默认的 prepare 就是命令行同一个 `run.prepare_run`，所以 LLM / Searcher / Budget 走的都是 v2.10a–e 的 spec 路径，**不读 key 文件**（测试把 `config.read_key`、`llm.read_key`、`search.read_key` 换成直接报错来证明）；Jev 对照臂照 v2.10a 跳过。
-4. 停在人工确认时 key 留着（批准后还要用）。
+4. 停在人工确认时 key 留着（批准后还要用）；v2.10f：超过 30 分钟没批准就按「不批准」结束、清 key（第 14.5 节）。
 5. 运行结束（完成 / 失败 / 取消，都经过 `_guard` 的 `finally`）：`WebRun._release()` 先把内存里已存的文字（题目、错误、目标、方向、裁判摘要、计算结果、批准记录……）过一遍 `spec.redact_obj`，再 `drop_key()`。
    `_after_stream` 调 `save_run(h, approvals, keep_key=True)`：`save_run` 新加的 `keep_key` 参数让它写完文件不清 key，由 `_release` 统一清（不然 save 先清了 key，之后就认不出文字里的 key 了）。命令行照旧 `keep_key=False`。
 6. 错误文字（`_guard` 的异常、`state.aborted`）经 `WebRun._clip`：先 redact 再截到 500 字（先截的话，截在 key 中间的半截就认不出来了）。
@@ -984,7 +989,7 @@ then run again.`（不含服务端原文。）
 - 计价：`Budget.profile_usd(price_id, profile)`（新，从 `typical_direction_usd` 里提出来，算法不变）：峰时价，缓存的处理同方向数缩放（Claude 不写 cache_control 按 base input；GPT 输入按 30 分钟写入价；Kimi / GLM 按 miss 价），思考 token 按输出价。
 - 方向数：`Budget.for_model(price_id, usd=cap).directions`（和真正运行的预算同一个函数）。
 - 对照：deepseek-flash 估 $0.62，50 次实测平均 $0.52（峰时价 + 方向数按上限算，偏高约 20%）。
-- **第一轮会不会因为预扣放不下而中止**（`stops_early`）：第一轮同时在途的搜索预扣合计（min(方向数, 8) × `search_reserve`）或抽取一个 4 万字符页面的预扣（`llm_reserve`，含思考余量）超过上限就标出来，并从当前上限往上按 $0.5 一档找放得下的最小上限（`min_cap_usd`）。只往上找：上限低到只剩一个方向时也可能放得下，但那不是「调高上限」的建议。
+- ~~**第一轮会不会因为预扣放不下而中止**~~（v2.10f 起 `stops_early` 换成「一次最小运行放不放得下」，见第 14.1 节）（`stops_early`）：第一轮同时在途的搜索预扣合计（min(方向数, 8) × `search_reserve`）或抽取一个 4 万字符页面的预扣（`llm_reserve`，含思考余量）超过上限就标出来，并从当前上限往上按 $0.5 一档找放得下的最小上限（`min_cap_usd`）。只往上找：上限低到只剩一个方向时也可能放得下，但那不是「调高上限」的建议。
 
 `$2` 上限下（默认档位；「估计（high）」是 plan / judge / repair 开 high）：
 
@@ -1014,17 +1019,17 @@ Astra 的 $2.50 是「只剩 1 个方向时放得下」的上限（往上找到�
 
 ### 13.5 已知限制、没做的
 
-- **贵模型在 $2 下第一轮就中止**（13.4、第 9.8 / 10.7 / 11.7 / 12.7 节）：网页只提示、给最小上限，预算逻辑没改，等你定。
+- ~~**贵模型在 $2 下第一轮就中止**~~（v2.10f：等在途 + 服务端拒跑 + 默认 Sonnet，第 14.1 节）。
 - 估计用的是 DeepSeek 的 token 数：别家的 tokenizer、思考长度、搜索带进来的内容 token 都没测；Kimi / GLM 的搜索不经过模型，按 DeepSeek 的搜索 token 算是高估。思考 token 不分档位（low 也按 high 的实测量算）。
-- 「第一轮会中止」只查了第一轮同时搜索和抽取一个 4 万字符页面两种预扣；更长的页面、第二轮、裁判的预扣没查。
-- 停在人工确认的运行一直占着 key（在内存里），直到你批准、取消或者服务退出；没有超时自动清。
+- ~~「第一轮会中止」只查了第一轮同时搜索和抽取一个 4 万字符页面两种预扣~~（v2.10f：改成规划 + 搜索 + 抽取 + 裁判，第 14.1 节；更长的页面照旧没查）。
+- ~~停在人工确认的运行一直占着 key（在内存里），直到你批准、取消或者服务退出；没有超时自动清。~~（v2.10f：30 分钟超时，第 14.5 节）
 - 浏览器里的 key：sessionStorage / localStorage 对这个页面的任何脚本都可读。页面只加载本仓库的脚本和 Google Fonts 的 CSS，所有服务端文字都经过 `esc()`；没有做 CSP。勾「记住」时是明文。
 - key 从浏览器发到本机服务走的是 `http://127.0.0.1`（没有 TLS；只在本机回环上）。
 - 服务器内存里的 key 是 Python 字符串，`drop_key()` 只是去掉引用，不能保证内存里的那份立刻被覆盖（Python 做不到）。
 - 「校验 key」只说明这家接受这把 key：余额够不够、K3 是否解锁、GLM 的 key 是不是 Standard API Key，都要到第一次计费调用才知道（第 11.8 / 12.8 节）。
 - 经典界面的运行页还能批准 / 取消已有的运行（不发起新运行）。
 - aero / apple / manuscript 三个页面的表单没有专门的样式。
-- DeepSeek 搜索角色的思考没关（第 8 节），仍等你定。
+- ~~DeepSeek 搜索角色的思考没关（第 8 节），仍等你定。~~（v2.10f 已改，第 14.6 节）
 
 ### 13.6 Verification（web-v0.9）
 
@@ -1036,6 +1041,157 @@ Astra 的 $2.50 是「只剩 1 个方向时放得下」的上限（往上找到�
 - 浏览器（假演示服务，10-21）：/verrier 上切 DeepSeek / Kimi / GLM / Claude、K3 的 off 是 disabled、上限 2 -> 4 -> 2 时估计和提示跟着变、GLM 两站分别存 key、记住 / 取消记住、校验、发起 -> 批准 -> 完成；/verrier/aero、/verrier/apple、/verrier/manuscript 表单能用、没有脚本错误；经典界面首页只剩浏览。
 - 没有真 key。真实网络只有一处意外：前两轮变异检查里，「没 key 时用服务器的 key」那处变异让 `test_classic_page_is_browse_only` 用默认的 `Registry()` 真的发起了运行，向 `api.deepseek.com/chat/completions` 发了 2 次带假 key（`sk-server-default-key`）的请求，都是 401、不花钱，在 `results/agent/` 下多出的目录已删。之后测试的 client 默认改成 prepare 直接报错的 Registry（保护失效时只会测试失败、不会连真 API），再跑变异检查没有再发真实请求。
 
+## 14. 审查修正（v2.10f）
+
+10-21 的对抗式审查（自己写的端到端：真实的 Registry -> prepare_run -> AgentLLM / Searcher -> save_run，接 127.0.0.1 上的假服务，用假 key）
+找出 1 个 high、2 个 medium、8 个 low。全部按审查给的修法改了，各条的做法和没做的部分如下。命令行、回测、三个基线臂（没有 ModelSpec）
+的请求体和预算行为都没变（24 组 DeepSeek 金样本逐字节相同，`TestCommandLineBudgetUnchanged`）。
+
+### 14.1 预算：等在途的调用、放不下就拒跑、Claude 默认模型（high）
+
+问题：方向数按「典型花费」缩放，真正让运行中止的却是按最坏情况的预扣（`Budget.hold`：已花 + 在途 + 这一次 > 上限就中止整次运行）。
+Claude 的默认组合（Opus 5.5 + $2）第一轮就中止（规划和两次搜索的钱已经花了，没有估计）；Fable 第一个搜索就中止；6.1 Sol、Astra、K3 同理。
+
+做法（审查给的 (b) + (c)）：
+
+- **等在途的调用**（`Budget.wait_for_room`，只在自带 key 的运行里开，`pipeline.configure_byok` 设）：预扣放不下、但「已花 + 这一次」放得下、而且有在途的
+  预扣时，等（`threading.Condition`：预扣退回、花费记入、中止都会叫醒；另外每 0.5 秒醒一次）。只有「已花 + 这一次」放不下，或者没有在途的调用可等时
+  才中止，原因的文字和以前相同。等过几次、等了多久记在 state.json 的 `budget.waited_for_room` / `wait_s`（只有自带 key 的运行有这两项）。
+  - 为什么不会死锁：`hold` 不嵌套（只有 `AgentLLM.ask` 和 `run_direction` 的搜索两处；Kimi / GLM 搜索里生成查询词的那次调用不另预扣）；在途的预扣
+    都在发 HTTP，一定会结束；续接的 `renew_current` 先退回自己那份再等（14.3），不会等自己。等的线程占着并发名额，名额照旧最多 8 个。
+  - 网页取消、余额不足（`Budget.halt`）会叫醒等着的预扣，它们马上放弃。`WebRun._abort_budget` 改成经 `halt`（保留第一个原因，同以前）。
+- **放不下一次最小运行就拒跑**：`web/catalog.run_floor(model, region, level)` = 规划（2 万字符的 prompt）+ 一次搜索 + 抽取一页（4 万字符）+ 裁判一次
+  （10 万字符：已存 355 次裁判调用 prompt 的 p99 约 2.5 万 token）各自的最坏情况预扣之和。预扣是一步一步拿的，每一步都要「已花 + 这一次」放得下，
+  合计放不下上限的组合在最坏情况下拿不到裁判那一步。`Registry.start` 在登记之前算（`check_spec_cap`），超过上限就抛 `CapTooLow`（ValueError，
+  网页回 400，中英两句，写出最小上限），不发任何请求，key 清掉。目录接口的 `stops_early` 改成同一个判据（`run_floor_usd`、各步的 `run_floor`），
+  `min_cap_usd` = 合计按 $0.5 往上取整。原来的「第一轮同时在途的搜索预扣合计」只剩提示 `round1_queues`（会排队，不会中止）。
+- **Claude 默认改成 Sonnet 5.5**（`PROVIDERS["claude"]["default_model"]`）：和 GPT / Kimi 选默认模型的口径一致（默认上限下跑得完、能关思考）。
+  官方推荐的默认模型是 Opus 5.5，要用它把上限调到 $4 以上。
+- 没做审查的 (a)（方向数再按预扣缩放）：有了等待，第一轮同时在途的预扣不会再让运行中止；按预扣缩放会让贵模型在高上限下也只剩很少的方向
+  （Opus $7 只剩 3 个方向）。
+
+`$2` 上限、默认档位（`catalog.estimate`，v2.10f 的预扣估计）：
+
+| 计价 id（档位） | 第一轮方向数 | 估计 | 一次最小运行的最坏情况预扣 | 拒跑 | 最小上限 | 第一轮搜索排队 |
+|---|---|---|---|---|---|---|
+| deepseek-flash（off） | 10 | $0.62 | $0.18 | 否 | — | 否 |
+| deepseek-v4-pro（off） | 10 | $1.14 | $0.45 | 否 | — | 否 |
+| claude-haiku-5-5（off） | 10 | $0.53 | $0.12 | 否 | — | 否 |
+| claude-sonnet-5-5（off，新默认） | 6 | $1.37 | $0.97 | 否 | — | 否 |
+| claude-opus-5-5（low） | 3 | $2.95 | $3.77 | 是 | $4.00 | 是 |
+| claude-fable-5-1（low） | 1 | $5.48 | $9.31 | 是 | $9.50 | 是 |
+| gpt-6-luna（off） | 10 | $0.55 | $0.13 | 否 | — | 否 |
+| gpt-6.1-sol（low） | 5 | $2.10 | $2.04 | 是 | $2.50 | 是 |
+| gpt-6-astra（low） | 1 | $5.77 | $9.89 | 是 | $10.00 | 是 |
+| kimi-k2.6 / kimi-k2.6@cn（off） | 10 | $0.81 / $0.80 | $0.34 / $0.34 | 否 | — | 否 |
+| kimi-k3 / kimi-k3@cn（low） | 5 | $2.63 / $2.60 | $2.57 / $2.54 | 是 | $3.00 | 是 |
+| glm-4.7-flashx / @cn（off） | 10 | $0.51 / $0.13 | $0.11 / $0.04 | 否 | — | 否 |
+| glm-5.2 / glm-5.2@cn（off） | 9 / 10 | $1.31 / $0.93 | $0.50 / $0.39 | 否 | — | 否 |
+| glm-5.3 / glm-5.3@cn（low） | 9 / 10 | $1.69 / $1.30 | $0.93 / $0.79 | 否 | — | 否 |
+
+### 14.2 中途停下的运行：网页状态和终稿（medium）
+
+问题：子 agent 阶段（搜索、抽取）余额不足或预扣放不下时，只有 `budget.aborted` 有原因，图 state 的 `aborted` 是空的，网页把运行标成 done，
+error 为空，终稿写「no estimation method could be computed from the verified evidence」。
+
+做法：
+- `graph.judge`：预算已中止时，返回值里也写 `aborted`（同 `budget.aborted`）。
+- `WebRun._after_stream`：原因取 `state.aborted`，没有就取 `budget.aborted`；没有估计就标 failed，error 写原因（先 redact 再截断）。有估计但后面的调用
+  停了（终稿等）照旧 done，原因另记在状态视图的 `stopped`（运行页显示「中途停下」）。运行列表（`brief`）也带 `error`，控制台的列表显示前 160 字。
+- 终稿（连续值和离散目标）：没有估计、运行又被中止时写「No estimate: the run was stopped before an estimate could be made (<原因>).」。
+
+### 14.3 预扣的估计（medium）
+
+问题：预扣不是最坏情况，上限可能被超过。本阶段改了四处（只在自带 key 的运行里；命令行的预扣不变）：
+
+| 处 | 以前 | v2.10f | 依据 |
+|---|---|---|---|
+| 搜索输入（模型自己搜的 DeepSeek / Claude / GPT） | 每次 30,000 token | 72,000 token（`Budget.SEARCH_INPUT_TOKENS_BYOK`） | 已存 1,262 次 DeepSeek 搜索的 input + cache read：中位 27,719、p90 44,283、p99 71,669、最大 265,681，42% 超过 30,000 |
+| Claude 的 pause_turn 续接 | 同一份预扣下最多 3 次请求 | 每次续接之前另预扣一份（`Searcher.renew` -> `Budget.renew_current`：换掉已用掉的那份）；放不下就不续，用已有的结果，`error` 写 `continuation n: not sent: ...`，不中止整次运行 | 审查发现 |
+| JSON 调用输入的 token 估计 | 字符数 / 2 | 别家按 1 个字符 1 个 token（adapter 的 `reserve_chars_per_token`；DeepSeek 照旧 2） | 别家的 tokenizer 没测过；中文按 2 个字符算会低估 |
+| Kimi 流式回复没给 usage | 这次调用记 $0 | 按这次调用的预扣记（`usd_basis: "reserve (usage missing)"`） | 审查发现 |
+
+Kimi / GLM（生成查询词 + 搜索接口）的搜索预扣照旧按 30,000 token 输入：唯一的模型调用是生成查询词，输入是几千字符的 brief，30,000 已是上界。
+
+**上限能不能守住（更正第 9.8 节的说法）**：每次调用之前按这次调用的估计最坏情况预扣，放不下就不发；实际花费超出预扣的部分（搜索输入超过 72,000 token，
+约 1% 的搜索；tokenizer 让一个字符超过一个 token；GLM 的思考 token 是否计入 max_tokens 未核实）事后才记入，`Budget.add` 一旦发现超过上限就中止之后的调用。
+所以上限可能被**在途调用的超出部分之和**超过，不是严格的硬上限。
+
+### 14.4 key 不留在文字里（low）
+
+- `llm.scrub_server_text`：服务端的说明先 `spec.redact`（这次运行的整把 key）、再换像 key 的片段（`sk-...`，和新加的 GLM 形状 `<32 位 hex>.<16 位>`），
+  最后才截到 200 字。`llm.server_error(ad, raw, redact)`、`json_call` 的 bad_response_body 分支、`Searcher._request` 都经过它；`GLMAdapter.parse_error`
+  不再自己截断。审查的「leaky」场景（400 的 message 是 185 个 x + key，截断落在 key 中间）：GLM 以前在 calls.jsonl、state.json、/api/result 里留下 key
+  的前 10 个字符，现在哪里都没有（`test_server_message_quoting_the_key_leaves_no_fragment`，GLM / Claude / Kimi）。
+- 网页：`WebRun._on_update` 先 `redact_obj` 整个更新，再做裁判摘要（摘要会截断）。
+- `clean_key` 只收 `KEY_CHARS`（字母、数字和 `. _ ~ + / = -`）：兜底的 redact 是在序列化之后的文字上找 key，带 `"`、`\`、`&`、`<`、`>`、`'` 的 key
+  经 JSON / HTML 转义以后就找不到了。各家真实的 key（`sk-...` 的 base64url、GLM 的 hex.secret）都在这个字符集里。
+
+### 14.5 等人工确认的超时（low）
+
+停在人工确认超过 `runs.APPROVAL_TIMEOUT_S`（30 分钟）：`WebRun._approval_expired` 走已有的取消路径（`cancel(by="web-timeout")`），按「不批准」结束，
+状态 cancelled，error 写「not approved within 30 minutes: ...」，key 随 `_release` 清掉，名额退回。批准或取消时计时器停掉。`Registry(approval_timeout_s=...)`
+可以改（测试用 0.5 秒）。
+
+### 14.6 DeepSeek 自带 key 的搜索关思考（low）
+
+Thinking Mode 文档（2026-10-21 看了页面 HTML 的表格，WebFetch 的摘要分不清列）：开关 `{"thinking": {"type": "enabled/disabled"}}` 这一格横跨
+OpenAI / Anthropic 两种格式（colspan=2），Anthropic 格式的深度是 `output_config.effort`；思考默认开、默认 high。Anthropic 兼容接口的页面写 thinking
+「Supported (budget_tokens is ignored)」。所以 `DeepSeekAdapter.search_request_spec`（只有自带 key 的运行用，Searcher 有 spec 时选它）在请求体末尾加
+`"thinking": {"type": "disabled"}`（搜索不是 plan / judge / repair，DeepSeek 两个模型都能关）。命令行的 `search_request` 不变（金样本逐字节相同）。
+没有真 key，这个字段的实际效果没测（有效 key 时会不会被拒、会不会真的不思考，未核实）。
+
+### 14.7 命令行只收 DeepSeek 模型（low）
+
+没有 spec 时 `LLM()` / `Searcher()`（含基线的 `DirectClient`）用 `config.require_deepseek`：没有价格抛 `UnknownModel`（同以前），有价格但不是 DeepSeek 的
+模型抛 `UnsupportedModel`（`UnknownModel` 的子类），都在读 key 之前。以前 `TRIANGULATE_MODEL=claude-haiku-5-5` 会带着 DeepSeek 的 key 把 Claude 的模型 id
+发到 api.deepseek.com，预算又按 Claude 的价格算。
+
+### 14.8 403 的说法（low）
+
+401 照旧「X rejected the API key (HTTP 401)」。403 改成「X rejected the API key or the request (HTTP 403[: type/code])」：OpenAI 的 403 可能是地区不支持
+（Error codes 页），Claude 的 403 是 permission_error（Errors 页），不一定是 key 错了。Claude、OpenAI 把 403 放进 `error_body_statuses`，`llm.forbidden_info`
+只取 `error.type` / `error.code`（不取 message）。Kimi / GLM / DeepSeek 的 403 照旧不读 body，只改说法。`check_key` 对 403 返回 `error: "forbidden"`。
+
+### 14.9 GLM 1313（low）
+
+1313（公平使用策略下的频率限制）从「停下整次运行」改成按限流重试（2 / 4 秒，同 1302 / 1305）；3 次仍是 1313 就照原样报传输错误。1308 / 1310 / 1316–1321
+（`GLM_LIMIT_CODES`）和 1309 / 1311 / 1314 / 1315（`GLM_PLAN_CODES`）照旧停下，但说明的开头分别是 `usage limit reached` / `key or plan not accepted`，
+只有 1113 写 `insufficient balance`（`GLMAdapter.stop_prefix`；`llm.balance_message`、`check_key` 都用 `providers.stop_prefix`，其余 provider 的文字不变）。
+
+### 14.10 Verification（v2.10f）
+
+- `tests/test_providers_e2e.py`（8 个，审查脚本 e2e_all.py 整理而来）：一个 127.0.0.1 上的假服务接五家的所有 URL，走 POST /api/runs -> Registry ->
+  真实的 prepare_run / AgentLLM / Searcher / save_run。11 个组合（DeepSeek high、Haiku / Sonnet off、Opus high、Luna off、Sol medium、K2.6 off、K3 国内站 high、
+  GLM-5.2 off、5.3 国内站 low、4.7-FlashX high）全部 done、估计 1210；每个请求都带着用户的 key；Claude / Kimi / GLM 不发 temperature、GPT 只在 none 时发、
+  max tokens 不超过模型上限、DeepSeek 自带 key 的搜索带 thinking disabled；写出的文件和 7 个 API 返回里没有 key（整把和三段半截）；搜索阶段余额不足
+  （五家各自文档写的 402 / 429）-> failed、error 和运行列表里有说明、终稿写明停下；中途花费超过上限 -> failed；Opus / Fable / Astra / Sol / K3 在 $2 下被拒（400，
+  一个请求都没发）；Opus 6 个方向、$5、搜索慢：排队跑完（`waited_for_room > 0`，不中止）；服务端说明里带 key（截断落在 key 中间）不留半截；等确认超时自动结束、
+  按时批准不受影响。
+- `tests/test_budget_wait.py`（12 个）：命令行的预算行为不变；等在途、放不下就中止、没有在途不等、等的时候在途的花掉了就中止、取消叫醒等着的预扣、20 个并发
+  预扣不超过上限也不死锁；`renew_current`（换掉已用掉的那份、放不下返回 False 不中止、等别的线程）；Claude 续接另预扣、放不下不续；各家的搜索输入估计。
+- `tests/test_review_v210f.py`（11 个）：key 字符集；命令行拒收别家模型（读 key 之前）；先 redact 再截断（GLM 形状、parse_error 不截断、网页裁判摘要）；
+  DeepSeek 自带 key 的搜索请求体；原因只在 budget.aborted 时的网页状态（failed / done + stopped）；拒跑并清 key。
+- 改过的旧测试：Claude / GPT / Kimi / GLM 的预扣测试（1 字符 1 token、72,000）、403 的说法、Kimi 缺 usage 按预扣、GLM 1313 重试和说明开头、Claude 默认模型、
+  DeepSeek 自带 key 搜索的请求体（末尾多一个 thinking，其余和默认路径相同）、网页估计（新判据：Opus $2 拒跑、最小上限 $4.00；五家的默认组合在 $2 下都不拒跑）。
+- 变异检查 26 处（关掉等待、裁判不写 aborted、网页只看 state.aborted、有估计时不记 stopped、终稿不写原因、先截断再 redact、去掉 GLM 形状的正则、parse_error 先截断、
+  不续接预扣、renew 不先退回自己那份、搜索输入回到 30,000、别家回到 2 字符 / token、旧的 key 字符集、缺 usage 记 0、不启动 / 不停掉确认计时器、不拒跑、
+  最小运行不算裁判、命令行不拦别家模型、1313 又算停下、用量上限写成余额不足、DeepSeek 自带 key 的搜索不关思考、网页摘要不先 redact、OpenAI 403 不读 body、
+  403 用旧说法、运行列表不带 error）：全部被测试抓到。第一轮有 2 处没抓到（「网页只看 state.aborted」：裁判已经把原因写进 state，两处修正互相兜底；「不停掉确认计时器」：
+  计时器到时 cancel 会因为状态不对而什么都不做），补了 `TestWebStatusAfterBudgetStop` 和计时器的断言后抓到。「renew 不先退回自己那份」表现为测试卡死（自己等自己，正是设计里要避免的死锁），手动结束进程后记为抓到。
+- DeepSeek 默认路径的 24 组金样本仍逐字节相同；G2（`probes/compare_continuous_prompts.py`）：`365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4`（和 v2.10e 相同，没改提示词）。
+- 没有真 key，没有任何付费请求。本阶段的真实网络只有不带 key 的 GET：DeepSeek 两页文档（WebFetch）和 `probes/deepseek_thinking_doc_probe.py`（打印 Thinking Mode 页的表格）。
+- 全套测试：674 个通过（v2.10e + web-v0.9 时 643 个）。
+
+### 14.11 已知限制、没做的
+
+- 上限不是严格的硬上限（14.3 最后一段）。
+- 第一轮可能把上限花到裁判放不下：方向数按典型花费只用上限的 60%，但第一轮的调用只要「已花 + 这一次」放得下就会发，最坏情况下会把钱花到裁判那一步
+  放不下（没有给裁判单独留钱）。`run_floor` 只保证一个方向的最小运行放得下。
+- 一页很长（最多 40 万字符）的抽取预扣可能放不下，这时整次运行停下（预扣放不下就中止的规则没变，只是不再因为在途的调用中止）。
+- 等在途会让贵模型的运行变慢（第一轮的搜索几个几个地跑）；没有给网页显示「正在等预扣」。
+- 拒跑的判据用固定的 prompt 长度（规划 2 万、抽取 4 万、裁判 10 万字符），不是这道题的实际长度。
+- DeepSeek 搜索的 thinking disabled、各家的 403 body、GLM 1313 的重试效果，都只按文档写，没有真 key 实测。
 ## Official docs（Claude，2026-10-21 查看）
 
 - Messages API（请求字段、stop_reason、usage、流式事件类型）：https://platform.claude.com/docs/en/api/messages/create

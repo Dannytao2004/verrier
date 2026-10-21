@@ -10,7 +10,7 @@ from datetime import date, datetime, timezone
 
 from ..config import MAX_TOKENS, MODEL, price
 from ..llm import LLM, BalanceExhausted, TransportError
-from ..providers import search_fee_usd
+from ..providers import reserve_chars_per_token, search_fee_usd, tokens_for_model
 from . import evidence as ev
 from .fetch import fetch_live, fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
@@ -24,13 +24,24 @@ class BudgetExceeded(RuntimeError):
     pass
 
 
+class _Hold:
+    """v2.10f：一份在途预扣（Budget.hold 的 with 里拿到）。size = 要的金额；amount = 现在占着的金额（renew 放不下时为 0）。"""
+    __slots__ = ("size", "amount", "live")
+
+    def __init__(self, size: float):
+        self.size, self.amount, self.live = size, size, True
+
+
 class Budget:
     """每题的上限。USD 包括 token 成本和按假设单价记的搜索费。
     每次调用前在锁里按「最坏情况」预扣（hold），调用结束后退回预扣、只留实际花费；已花 + 在途预扣 + 这次预扣
     超过上限就不发这次调用（抛 BudgetExceeded，各节点据此干净收尾）。预扣按上限估：LLM 按输入字符数 / 2 个 token
-    和 max_tokens 个输出 token、峰时价；搜索按 token 上限加 (2 x max_uses + 2) 次搜索费（实测最多 6 次 / max_uses 3）。
+    （v2.10f：别家的模型按 1 个字符 1 个 token）和 max_tokens 个输出 token、峰时价；搜索按 token 上限加 (2 x max_uses + 2) 次搜索费
+    （实测最多 6 次 / max_uses 3）。预扣是估计的最坏情况，不是严格的上界（PROVIDERS.md 第 14.3 节）。
     v2.5.5：先拿并发名额（sem）再预扣，排队等名额的调用不占预扣，在途预扣最多 llm_concurrency 份。
-    方向数不写死，由页面和美元预算推出来（max_directions）。"""
+    方向数不写死，由页面和美元预算推出来（max_directions）。
+    v2.10f（自带 key 的运行，wait_for_room = True，configure_byok 设）：放不下只是因为在途的预扣时，等在途的调用结束再预扣；
+    只有「已花 + 这一次」放不下（或者没有在途的调用可等）才中止。命令行、回测没有 spec，照旧放不下就中止（行为和以前相同）。"""
 
     # 规划方向数用的「一个方向的典型花费」：实测搜索中位 $0.047（含假设的搜索费）+ 4 次抽取约 $0.006 + 挑页 $0.002。
     # 这是 deepseek-flash 的值（REFERENCE_MODEL）；别的模型按 DIRECTION_PROFILE 的价格比例放大（typical_direction_usd）
@@ -42,6 +53,14 @@ class Budget:
     ROUND1_USD_SHARE = 0.6   # 第一轮方向最多用掉上限的 60%，其余留给 base-rate 方向、裁判、终稿
     model = None   # v2.10a：计价用的模型；None = config.MODEL（命令行、回测）。Budget.for_model 设
     search_tokens = None   # v2.10b：一次搜索发出的 max_tokens；None = MAX_TOKENS["search"]（有 ModelSpec 时 Context 设成实际发出的值）
+    # 一次搜索请求预扣的输入 token。命令行（没有 spec）照旧 30,000；v2.10f 自带 key 的运行（模型自己搜的 provider）按已存 1,262 次
+    # DeepSeek 搜索 input + cache read 的 p99（71,669；中位 27,719，p90 44,283，最大 265,681，42% 超过 30,000）取 72,000。
+    # 「生成查询词 + 搜索接口」的 provider（Kimi、GLM）的模型调用只有生成查询词（输入是几千字符的 brief），照旧 30,000
+    SEARCH_INPUT_TOKENS = 30_000
+    SEARCH_INPUT_TOKENS_BYOK = 72_000
+    search_input_tokens = None   # None = SEARCH_INPUT_TOKENS；configure_byok 设
+    wait_for_room = False        # v2.10f：见类说明；configure_byok 设 True
+    WAIT_POLL_S = 0.5            # 等在途调用时每隔这么久再看一次（取消、余额不足的中止不会漏看）
 
     def __init__(self, usd: float = 1.00, pages: int = 48, round1_pages: int = 40, llm_concurrency: int = 8,
                  extra_directions: int = 3, urls_per_direction: int = 4, search_max_uses: int = 3,
@@ -59,6 +78,10 @@ class Budget:
         self.aborted = ""
         self.sem = threading.BoundedSemaphore(llm_concurrency)
         self._lock = threading.Lock()
+        self._room = threading.Condition(self._lock)   # v2.10f：预扣退回、花费记入、中止时叫醒等着的预扣
+        self._n_holds = 0                              # 在途的预扣份数
+        self._tls = threading.local()                  # 这个线程当前占着的预扣（renew_current 用）
+        self.n_waits, self.wait_s = 0, 0.0             # 等过在途调用的预扣次数、合计秒数（只有 wait_for_room 时记进 snapshot）
 
     @classmethod
     def for_model(cls, model: str, **kw) -> "Budget":
@@ -102,6 +125,7 @@ class Budget:
         （同网页的「取消」）。已经因为别的原因中止的，保留第一个原因。返回最终的中止原因。"""
         with self._lock:
             self.aborted = self.aborted or reason
+            self._room.notify_all()
             return self.aborted
 
     @property
@@ -115,21 +139,81 @@ class Budget:
             self.usd_search_fee += float(rec.get("usd_search_fee_assumed") or 0)
             if self.usd > self.usd_cap and not self.aborted:
                 self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"
+            self._room.notify_all()
+
+    def _room_for(self, amount: float) -> str:
+        """在锁里调：等到放得下（返回 ""），或者返回放不下的原因。wait_for_room 时只因为在途的预扣放不下就等（在途的调用都在发 HTTP，
+        一定会结束；本线程自己没有占着预扣：hold 不嵌套，renew 先退回自己那份）。"""
+        t0 = None
+        try:
+            while True:
+                if self.aborted:
+                    return self.aborted
+                if self.usd + self.reserved + amount <= self.usd_cap:
+                    return ""
+                if self.wait_for_room and self._n_holds > 0 and self.usd + amount <= self.usd_cap:
+                    if t0 is None:
+                        t0 = time.time()
+                        self.n_waits += 1
+                    self._room.wait(self.WAIT_POLL_S)
+                    continue
+                return (f"usd cap {self.usd_cap} would be exceeded "
+                        f"(spent {self.usd:.4f} + in flight {self.reserved:.4f} + {amount:.4f})")
+        finally:
+            if t0 is not None:
+                self.wait_s += time.time() - t0
+
+    def _stack(self) -> list:
+        st = getattr(self._tls, "stack", None)
+        if st is None:
+            st = self._tls.stack = []
+        return st
 
     @contextmanager
     def hold(self, amount: float):
-        """预扣 amount；已花 + 在途预扣 + amount 超过上限就抛 BudgetExceeded。退出时退回预扣（实际花费已由 add 记入）。"""
-        with self._lock:
-            if self.aborted or self.usd + self.reserved + amount > self.usd_cap:
-                self.aborted = self.aborted or (f"usd cap {self.usd_cap} would be exceeded "
-                                                f"(spent {self.usd:.4f} + in flight {self.reserved:.4f} + {amount:.4f})")
+        """预扣 amount；已花 + 在途预扣 + amount 超过上限就抛 BudgetExceeded（v2.10f 自带 key 的运行：只是在途的预扣放不下时先等）。
+        退出时退回预扣（实际花费已由 add 记入）。with 拿到的是这份预扣（_Hold）。"""
+        with self._room:
+            why = self._room_for(amount)
+            if why:
+                self.aborted = self.aborted or why
                 raise BudgetExceeded(self.aborted)
             self.reserved += amount
+            self._n_holds += 1
+        h = _Hold(amount)
+        st = self._stack()
+        st.append(h)
         try:
-            yield
+            yield h
         finally:
-            with self._lock:
-                self.reserved -= amount
+            st.remove(h)
+            with self._room:
+                if h.live:
+                    self.reserved -= h.amount
+                    self._n_holds -= 1
+                    h.live, h.amount = False, 0.0
+                self._room.notify_all()
+
+    def renew_current(self) -> bool:
+        """v2.10f：这个线程当前那份预扣已经用掉（那次请求的实际花费已由 add 记入），换成同样大小的新一份，给同一次调用里的下一个请求
+        （Claude 搜索的 pause_turn 续接）。先退回旧的那份再等，所以不会等自己。放不下就返回 False（调用方不发这个请求），不中止整次运行。
+        不在任何预扣里时返回 True。"""
+        st = self._stack()
+        if not st:
+            return True
+        h = st[-1]
+        with self._room:
+            if h.live:
+                self.reserved -= h.amount
+                self._n_holds -= 1
+                h.live, h.amount = False, 0.0
+                self._room.notify_all()
+            if self._room_for(h.size):
+                return False
+            self.reserved += h.size
+            self._n_holds += 1
+            h.live, h.amount = True, h.size
+            return True
 
     @staticmethod
     def peak_rates(model: str, prompt_tokens: float) -> tuple:
@@ -154,14 +238,21 @@ class Budget:
 
     @staticmethod
     def llm_reserve(prompt_chars: int, max_tokens: int, model: str | None = None) -> float:
-        hit, miss, out = Budget.reserve_rates(model or MODEL, prompt_chars / 2)
-        return (prompt_chars / 2 * miss + max_tokens * out) / 1e6
+        """一次 JSON 调用的预扣：输入按字符数换成 token（v2.10f：DeepSeek 照旧每个 token 2 个字符，别家按 1 个，
+        providers.reserve_chars_per_token），输出按发出的 max_tokens，都按峰时价（reserve_rates）。"""
+        m = model or MODEL
+        tokens_in = prompt_chars / reserve_chars_per_token(m)
+        hit, miss, out = Budget.reserve_rates(m, tokens_in)
+        return (tokens_in * miss + max_tokens * out) / 1e6
 
     def search_reserve(self) -> float:
+        """一次搜索请求的预扣：search_input_tokens 个输入 token + 发出的 max_tokens 个输出 token + (2 x max_uses + 2) 次搜索费。
+        v2.10f：Claude 的 pause_turn 续接每次另预扣同样一份（Searcher.renew -> renew_current）。"""
         m = self.model or MODEL
-        hit, miss, out = self.reserve_rates(m, 30_000)
+        n_in = self.SEARCH_INPUT_TOKENS if self.search_input_tokens is None else self.search_input_tokens
+        hit, miss, out = self.reserve_rates(m, n_in)
         tokens = MAX_TOKENS["search"] if self.search_tokens is None else self.search_tokens
-        return (30_000 * miss + tokens * out) / 1e6 + (2 * self.search_max_uses + 2) * search_fee_usd(m)
+        return (n_in * miss + tokens * out) / 1e6 + (2 * self.search_max_uses + 2) * search_fee_usd(m)
 
     def reserve_page(self, round_no: int) -> bool:
         cap = self.round1_pages if round_no == 1 else self.pages_cap
@@ -176,11 +267,26 @@ class Budget:
             self.pages_used -= 1
 
     def snapshot(self):
-        return {"usd_total_assumed": round(self.usd, 4), "usd_tokens": round(self.usd_tokens, 4),
-                "usd_search_fee_assumed": round(self.usd_search_fee, 4), "usd_cap": self.usd_cap,
-                "pages_used": self.pages_used, "pages_cap": self.pages_cap, "round1_pages": self.round1_pages,
-                "max_directions": self.directions, "urls_per_direction": self.urls_per_direction,
-                "n_calls_logged": self.n_calls, "aborted": self.aborted}
+        out = {"usd_total_assumed": round(self.usd, 4), "usd_tokens": round(self.usd_tokens, 4),
+               "usd_search_fee_assumed": round(self.usd_search_fee, 4), "usd_cap": self.usd_cap,
+               "pages_used": self.pages_used, "pages_cap": self.pages_cap, "round1_pages": self.round1_pages,
+               "max_directions": self.directions, "urls_per_direction": self.urls_per_direction,
+               "n_calls_logged": self.n_calls, "aborted": self.aborted}
+        if self.wait_for_room:   # v2.10f：只有自带 key 的运行记（命令行的 state.json 不变）
+            out.update(waited_for_room=self.n_waits, wait_s=round(self.wait_s, 1),
+                       search_input_tokens_reserved=self.search_input_tokens)
+        return out
+
+
+def configure_byok(b: Budget, model: str, level: str, adapter) -> Budget:
+    """v2.10f：自带 key 的运行的预扣设置（pipeline.Context 和网页的花费估计 web/catalog.py 共用，两边一致）：
+    搜索预扣按实际发出的 max_tokens（含思考余量；「生成查询词」的 provider 按那次调用的 max_tokens）、模型自己搜的 provider 输入按 p99；
+    预扣放不下只是因为在途的预扣时等（wait_for_room）。"""
+    queries = getattr(adapter, "search_mode", "model") == "queries"
+    b.search_tokens = tokens_for_model(model, level, "search", SEARCH_QUERIES_MAX_TOKENS if queries else MAX_TOKENS["search"])[1]
+    b.search_input_tokens = Budget.SEARCH_INPUT_TOKENS if queries else Budget.SEARCH_INPUT_TOKENS_BYOK
+    b.wait_for_room = True
+    return b
 
 
 class AgentLLM(LLM):
@@ -240,11 +346,12 @@ class Context:
         self.calls_path = calls_path
         if spec is not None:   # v2.10b：搜索也开思考的模型（Opus 5.5 / Fable 5.1）预扣按带余量的 max_tokens
             # v2.10d：「生成查询词 + 搜索接口」的 provider（Kimi），搜索里唯一的模型调用是生成查询词，预扣按它发出的 max_tokens
-            search_max = (SEARCH_QUERIES_MAX_TOKENS if getattr(spec.adapter, "search_mode", "model") == "queries"
-                          else MAX_TOKENS["search"])
-            self.budget.search_tokens = spec.tokens_for("search", search_max)[1]
+            # v2.10f：搜索输入按 p99、放不下只因为在途时等（configure_byok）
+            configure_byok(self.budget, spec.model, spec.thinking, spec.adapter)
         self.llm = AgentLLM(calls_path, self.budget, spec=spec)
         self.searcher = Searcher(log=self.llm._log, spec=spec)
+        if spec is not None:   # v2.10f：Claude 搜索的 pause_turn 续接之前再预扣一份（放不下就不续）
+            self.searcher.renew = self.budget.renew_current
         # 哨兵只在代码里用：真值（和其他 as_of 之后才公布的已知值）不进任何 prompt。可以是一个数或一组数
         self.leak_patterns = ev.leak_patterns(leak_value) if leak_value else []
         self.leak_values = leak_value   # v2.8p：抽取员读出的数（单词、分数）也按数值和它比，见 _process_page

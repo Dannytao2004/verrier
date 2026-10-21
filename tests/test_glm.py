@@ -276,21 +276,37 @@ class TestChatErrors(_FakeServerCase):
                 self.assertNoKeyIn(str(out), log)
 
     def test_usage_limit_and_plan_codes_also_stop(self):
-        """错误码页：1308 / 1310 / 1313 / 1316–1321 是用量上限（要到服务端给的重置时间才恢复），1309 / 1311 / 1314 / 1315 是套餐过期、
-        套餐不含这个模型、套餐类型的 key：重试都没用，整次运行停下；套餐类的说明里提示要用 Standard API Key。"""
-        for code in ("1308", "1310", "1313", "1316", "1317", "1318", "1319", "1320", "1321"):
+        """错误码页：1308 / 1310 / 1316–1321 是用量上限（要到服务端给的重置时间才恢复），1309 / 1311 / 1314 / 1315 是套餐过期、
+        套餐不含这个模型、套餐类型的 key：重试都没用，整次运行停下；套餐类的说明里提示要用 Standard API Key。
+        v2.10f：这两类的说明开头不写成 insufficient balance（审查发现）；1313（公平使用策略的频率限制）按限流重试。"""
+        for code in ("1308", "1310", "1316", "1317", "1318", "1319", "1320", "1321"):
             with self.subTest(code=code):
                 out, seen, _ = self.chat(err(429, code, "Usage limit reached"))
                 self.assertIsInstance(out, llm.BalanceExhausted)
                 self.assertEqual(len(seen), 1)
-                self.assertIn(f"GLM HTTP 429 {PV.GLM_BALANCE_CODES[code]}", str(out))
+                self.assertTrue(str(out).startswith(f"usage limit reached: GLM HTTP 429 {PV.GLM_LIMIT_CODES[code]}"), str(out))
+                self.assertNotIn("insufficient balance", str(out))
         for code in ("1309", "1311", "1314", "1315"):
             with self.subTest(code=code):
                 out, seen, _ = self.chat(err(429, code, "Your GLM Coding Plan package has expired"))
                 self.assertIsInstance(out, llm.BalanceExhausted)
                 self.assertEqual(len(seen), 1)
+                self.assertTrue(str(out).startswith("key or plan not accepted: GLM HTTP 429 code"), str(out))
                 self.assertIn("this app needs a Standard API Key", str(out))
         self.assertEqual(self.sleeps, [])
+        self.assertNotIn("1313", PV.GLM_BALANCE_CODES)
+        self.assertNotIn("1313", PV.GLM_LIMIT_CODES)
+        fair = "Request frequency limited under the fair usage policy"
+        out, seen, _ = self.chat(err(429, 1313, fair), ok())   # 1313：限流，退避后重试成功
+        self.assertEqual((out[0], len(seen)), ({"a": 1}, 2))
+        self.assertEqual(self.sleeps, [2])
+        self.sleeps.clear()
+        out, seen, log = self.chat(*[err(429, 1313, fair)] * 3)   # 3 次仍是 1313：传输错误（照原样报），不是余额不足
+        self.assertIsInstance(out, llm.TransportError)
+        self.assertNotIsInstance(out, llm.BalanceExhausted)
+        self.assertIn(f"(code 1313: {fair})", str(out))
+        self.assertEqual(PV.GLM.stop_prefix("HTTP 429 " + PV.GLM_BALANCE_CODES["1113"]),
+                         "insufficient balance")
 
     def test_rate_limits_and_overload_are_retried(self):
         """429 的 1302（限流）、1305（过载）是临时的：退避重试（服务端给了 Retry-After 就至少等那么久）；500 的 1234（网络错误）同样重试。
@@ -332,7 +348,9 @@ class TestChatErrors(_FakeServerCase):
                 out, _, log = self.chat(("json", status, body))
                 rb.assert_not_called()
                 self.assertIsInstance(out, llm.KeyRejected)
-                self.assertEqual(str(out), f"GLM rejected the API key (HTTP {status})")
+                # v2.10f：403 不一定是 key 错了：写成「key 或这个请求被拒」（GLM 的 403 不读 body）
+                self.assertEqual(str(out), "GLM rejected the API key (HTTP 401)" if status == 401
+                                 else "GLM rejected the API key or the request (HTTP 403)")
                 self.assertNotIn("server_error", log[0])
 
     def test_error_body_shapes(self):
@@ -402,8 +420,9 @@ class TestGLMCost(unittest.TestCase):
     def test_reservations_and_the_context_budget(self):
         """预扣：输入按 input 价（没有写入价）；国内站按折算后的价格。Context 按 spec.price_id 计价；搜索的预扣按「生成查询词」那次调用
         发出的 max_tokens（5.3 永远在想：+24,000）加 (2 × max_uses + 2) 次搜索费。"""
-        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "glm-5.3"), (50_000 * 1.4 + 1000 * 4.4) / 1e6)
-        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "glm-5.3@cn"), (50_000 * 8 + 1000 * 28) / 1e6 / FX)
+        # v2.10f：别家的 tokenizer 没测过，输入按 1 个字符 1 个 token 预扣（DeepSeek 照旧 2 个字符）
+        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "glm-5.3"), (100_000 * 1.4 + 1000 * 4.4) / 1e6)
+        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "glm-5.3@cn"), (100_000 * 8 + 1000 * 28) / 1e6 / FX)
         ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("glm-5.3", "high", region="cn"))
         self.assertEqual((ctx.budget.model, ctx.budget.usd_cap), ("glm-5.3@cn", 2.0))
         self.assertEqual(ctx.budget.search_tokens, S.SEARCH_QUERIES_MAX_TOKENS + EXTRA)

@@ -273,8 +273,14 @@ class TestChatReply(_FakeServerCase):
             with self.subTest(status=status):
                 out, seen, log = self.chat(("json", status, body))
                 self.assertIsInstance(out, llm.KeyRejected)
-                self.assertEqual(str(out), f"Claude rejected the API key (HTTP {status})")
-                self.assertNotIn("server_error", log[0])
+                self.assertEqual(len(seen), 1)   # 不重试
+                self.assertNotIn("server_error", log[0])   # message 不记
+                if status == 401:
+                    self.assertEqual(str(out), "Claude rejected the API key (HTTP 401)")
+                    self.assertNotIn("server_error_type", log[0])
+                else:   # v2.10f：403 读 body，只取 error.type 显示（不一定是 key 错了：key 没有这个资源的权限）
+                    self.assertEqual(str(out), "Claude rejected the API key or the request (HTTP 403: permission_error)")
+                    self.assertEqual(log[0]["server_error_type"], "permission_error")
 
     def test_redirects_are_not_followed(self):
         out, seen, _ = self.chat(("redirect", 307, self.fake.url("/elsewhere")))
@@ -336,13 +342,18 @@ class TestClaudeCost(unittest.TestCase):
         self.assertEqual(P.Budget.typical_direction_usd("deepseek-flash"), 0.06)
 
     def test_reservations(self):
-        """预扣：Haiku 5.5 的 prompt 估计超过 100,000 token 时按高价；搜索也开思考的模型（Opus 5.5）按带余量的 max_tokens 预扣。"""
-        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "claude-haiku-5-5"), (50_000 * 0.10 + 1000 * 0.5) / 1e6)
-        self.assertAlmostEqual(P.Budget.llm_reserve(400_000, 1000, "claude-haiku-5-5"), (200_000 * 0.50 + 1000 * 2.5) / 1e6)
+        """预扣：Haiku 5.5 的 prompt 估计超过 100,000 token 时按高价；搜索也开思考的模型（Opus 5.5）按带余量的 max_tokens 预扣。
+        v2.10f：输入按 1 个字符 1 个 token 估（Claude 的 tokenizer 没测过；按 2 个字符算时中文页面会低估）；搜索的输入按已存搜索的 p99
+        （72,000 token）预扣。"""
+        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "claude-haiku-5-5"), (100_000 * 0.10 + 1000 * 0.5) / 1e6)
+        self.assertAlmostEqual(P.Budget.llm_reserve(150_000, 1000, "claude-haiku-5-5"), (150_000 * 0.50 + 1000 * 2.5) / 1e6)
+        self.assertAlmostEqual(P.Budget.llm_reserve(400_000, 1000, "claude-haiku-5-5"), (400_000 * 0.50 + 1000 * 2.5) / 1e6)
         ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("claude-opus-5-5", "low"))
         self.assertEqual(ctx.budget.search_tokens, config.MAX_TOKENS["search"] + config.THINKING_EXTRA_TOKENS)
+        self.assertEqual(ctx.budget.search_input_tokens, 72_000)
+        self.assertTrue(ctx.budget.wait_for_room)
         self.assertAlmostEqual(ctx.budget.search_reserve(),
-                               (30_000 * 4 + ctx.budget.search_tokens * 20) / 1e6 + 8 * 0.01)
+                               (72_000 * 4 + ctx.budget.search_tokens * 20) / 1e6 + 8 * 0.01)
         ctx2 = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("claude-haiku-5-5", "high"))
         self.assertEqual(ctx2.budget.search_tokens, config.MAX_TOKENS["search"])   # 搜索角色关思考
 
@@ -518,7 +529,8 @@ class TestModelSpecClaude(unittest.TestCase):
     def test_choices_and_public_view(self):
         self.assertEqual(PV.PROVIDERS["claude"]["models"],
                          ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"))
-        self.assertEqual(PV.PROVIDERS["claude"]["default_model"], "claude-opus-5-5")
+        # v2.10f：默认 Sonnet 5.5（Opus 5.5 + 默认 $2 上限放不下一次最小运行的最坏情况，网页会拒跑）
+        self.assertEqual(PV.PROVIDERS["claude"]["default_model"], "claude-sonnet-5-5")
         sp = spec("claude-fable-5-1", "high", usd_cap=5)
         self.assertEqual(sp.public(), {"provider": "claude", "model": "claude-fable-5-1", "region": "global", "thinking": "high",
                                        "thinking_by_role": {"plan": "high", "judge": "high", "repair": "high", "*": "low"},

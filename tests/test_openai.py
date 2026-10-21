@@ -251,11 +251,17 @@ class TestChatErrors(_FakeServerCase):
                                                                               "Country, region, or territory not supported"))):
             with self.subTest(status=status), mock.patch.object(llm, "read_error_body", wraps=llm.read_error_body) as rb:
                 out, seen, log = self.chat(("json", status, body))
-                rb.assert_not_called()
                 self.assertIsInstance(out, llm.KeyRejected)
-                self.assertEqual(str(out), f"OpenAI rejected the API key (HTTP {status})")
-                self.assertNotIn("server_error", log[0])
+                self.assertNotIn("server_error", log[0])   # message 一律不记
                 self.assertNotIn("sk-proj", json.dumps(log))
+                if status == 401:   # 401 的 message 回显打了码的 key：照旧不读 body
+                    rb.assert_not_called()
+                    self.assertEqual(str(out), "OpenAI rejected the API key (HTTP 401)")
+                else:   # v2.10f：403 读 body，只取 error.type / code（不一定是 key 错了：例如地区不支持）
+                    rb.assert_called_once()
+                    self.assertEqual(str(out), "OpenAI rejected the API key or the request (HTTP 403: invalid_request_error)")
+                    self.assertEqual(log[0]["server_error_type"], "invalid_request_error")
+                    self.assertNotIn("Country", json.dumps(log))
 
     def test_masked_keys_in_server_messages_are_scrubbed(self):
         """兜底：读过的错误 body 里像 key 的片段（OpenAI 会回显 sk-proj-****0000）不进日志。"""
@@ -331,14 +337,16 @@ class TestOpenAICost(unittest.TestCase):
     def test_reservations_include_the_cache_write_rate(self):
         """预扣：输入按 30 分钟写入价（最坏情况），超过 272K 按 long context 的写入价；搜索按 Searcher 实际发的 max_output_tokens。
         DeepSeek / Claude 的预扣和 peak_rates 相同（不变）。"""
-        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "gpt-6-luna"), (50_000 * 0.125 + 1000 * 0.5) / 1e6)
-        self.assertAlmostEqual(P.Budget.llm_reserve(600_000, 1000, "gpt-6-luna"), (300_000 * 0.25 + 1000 * 0.75) / 1e6)
+        # v2.10f：输入按 1 个字符 1 个 token 估（DeepSeek 照旧 2 个）
+        self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "gpt-6-luna"), (100_000 * 0.125 + 1000 * 0.5) / 1e6)
+        self.assertAlmostEqual(P.Budget.llm_reserve(300_000, 1000, "gpt-6-luna"), (300_000 * 0.25 + 1000 * 0.75) / 1e6)
+        self.assertAlmostEqual(P.Budget.llm_reserve(600_000, 1000, "gpt-6-luna"), (600_000 * 0.25 + 1000 * 0.75) / 1e6)
         for m in ("deepseek-flash", "claude-haiku-5-5", "claude-opus-5-5"):
             with self.subTest(model=m):
                 self.assertEqual(P.Budget.reserve_rates(m, 1000), P.Budget.peak_rates(m, 1000))
         ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("gpt-6-astra", "low"))
         self.assertEqual(ctx.budget.search_tokens, config.MAX_TOKENS["search"] + config.THINKING_EXTRA_TOKENS)
-        self.assertAlmostEqual(ctx.budget.search_reserve(), (30_000 * 12.5 + ctx.budget.search_tokens * 50) / 1e6 + 8 * 0.01)
+        self.assertAlmostEqual(ctx.budget.search_reserve(), (72_000 * 12.5 + ctx.budget.search_tokens * 50) / 1e6 + 8 * 0.01)
         ctx2 = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("gpt-6-luna", "high"))
         self.assertEqual(ctx2.budget.search_tokens, config.MAX_TOKENS["search"])   # 搜索角色关思考（none）
 
@@ -469,7 +477,9 @@ class TestKeyCheck(_FakeServerCase):
         self.assertEqual(out["error"], "balance")
         self.assertIn("credit_balance_exhausted", out["message"])
         out, _ = self.check(("json", 403, FO.error_body("invalid_request_error", "Country, region, or territory not supported")))
-        self.assertEqual(out["error"], "key_rejected")
+        self.assertEqual(out["error"], "forbidden")   # v2.10f：403 单独记，说明里有 error.type（不一定是 key 错了）
+        self.assertEqual(out["message"], "OpenAI rejected the API key or the request (HTTP 403: invalid_request_error)")
+        self.assertNotIn("Country", out["message"])   # message 不取
         out, _ = self.check(("raw", 200, b"<html>"))
         self.assertEqual(out["error"], "bad_response_body")
         out, _ = self.check(("redirect", 302, self.fake.url("/x")))

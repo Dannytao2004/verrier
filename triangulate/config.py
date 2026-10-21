@@ -211,10 +211,26 @@ class UnknownModel(ValueError):
     """config.PRICES 里没有这个模型：不能计价，就不跑。"""
 
 
+class UnsupportedModel(UnknownModel):
+    """v2.10f：命令行、回测、基线（没有 ModelSpec）只走 DeepSeek + key 文件；TRIANGULATE_MODEL 设成别家（有价格）的模型时拒跑，
+    不把别家的模型 id 带着 DeepSeek 的 key 发到 api.deepseek.com、又按别家的价格记账。"""
+
+
 def price(model: str) -> dict:
     p = PRICES.get(model)
     if p is None:
         raise UnknownModel(f"model {model!r} has no price entry in config.PRICES; add one (with source and date) first")
+    return p
+
+
+def require_deepseek(model: str) -> dict:
+    """没有 ModelSpec 的调用（命令行、回测、基线）用：有价格、而且是 DeepSeek 的模型。否则抛 UnknownModel / UnsupportedModel。"""
+    p = price(model)
+    provider = p.get("provider", "deepseek")
+    if provider != "deepseek":
+        raise UnsupportedModel(f"model {model!r} is a {provider} model; command-line runs, backtests and baselines only use "
+                               "DeepSeek models with the key file (TRIANGULATE_MODEL); other providers are only available in "
+                               "bring-your-own-key web runs")
     return p
 
 

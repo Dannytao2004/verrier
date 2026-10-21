@@ -12,6 +12,11 @@
 web-v0.9：网页运行一律自带 key（providers.ModelSpec，「BYOK」），没有 spec 就拒跑；永远不读服务器的 key 文件。
 spec 只在这个 WebRun 和 prepare 出来的 ctx 上（内存里），运行结束（完成 / 失败 / 取消）时 _release() 先把已存的文字过一遍
 redact_obj、再 drop_key()；运行中返回的状态视图也先过 redact_obj。spec.public()（provider、模型、区域、档位、上限）可以给网页看。
+
+v2.10f：
+- 运行中途（子 agent 的搜索 / 抽取）余额不足或预扣放不下时，原因在 budget.aborted：没有估计就标 failed，error 写原因（以前标成 done）。
+- 停在人工确认超过 APPROVAL_TIMEOUT_S（30 分钟）自动按「不批准」结束（走取消的路径），key 随之清掉，名额也退回。
+- 上限放不下一次最小运行的最坏情况预扣（web/catalog.run_floor）的组合，Registry.start 直接拒跑（CapTooLow，400），不花钱。
 """
 import hashlib
 import json
@@ -23,16 +28,21 @@ from datetime import date, datetime, timezone
 from langgraph.types import Command
 
 from ..agent import run as agent_run
+from . import catalog
 
 ACTIVE = ("planning", "awaiting_approval", "running")
 FINISHED = ("done", "failed", "cancelled")
 MAX_ACTIVE = 2
 CANCEL_REASON = "cancelled from the web UI"
 ERROR_MAX_CHARS = 500
+APPROVAL_TIMEOUT_S = 30 * 60   # v2.10f：停在人工确认最多这么久（key 一直在服务器内存里），到时按「不批准」结束
+APPROVAL_TIMEOUT_REASON = ("not approved within {minutes:g} minutes: the run was ended without running the routes, and the API key "
+                           "was dropped from server memory")
 NEED_KEY = ("需要你自己的 API key：网页运行只用你填的 key，从不使用服务器上的 key 文件。"
             "/ Your own API key is required: web runs only use the key you enter and never the server's key file.")
 # 运行结束清 key 之前要过一遍 redact_obj 的字段（状态视图里的文字都来自这些）
-_SCRUB_FIELDS = ("q", "error", "target", "proposed", "plan_notes", "dirs", "markets", "judge", "compute", "approvals", "result")
+_SCRUB_FIELDS = ("q", "error", "stopped", "target", "proposed", "plan_notes", "dirs", "markets", "judge", "compute", "approvals",
+                 "result")
 
 
 class Busy(RuntimeError):
@@ -41,6 +51,10 @@ class Busy(RuntimeError):
 
 class BadState(RuntimeError):
     pass
+
+
+class CapTooLow(ValueError):
+    """v2.10f：这个上限放不下一次最小运行（规划 + 一次搜索 + 抽取一页 + 裁判）的最坏情况预扣：运行会在拿到估计之前停下，不发起。"""
 
 
 def ask_id(question: str, as_of: str) -> str:
@@ -53,8 +67,10 @@ def _iso(t):
 
 
 class WebRun:
-    def __init__(self, run_id: str, q: dict, tag: str, prepare, save, spec=None):
+    def __init__(self, run_id: str, q: dict, tag: str, prepare, save, spec=None, approval_timeout_s: float = APPROVAL_TIMEOUT_S):
         self.id, self.q, self.tag = run_id, q, tag
+        self.approval_timeout_s = approval_timeout_s
+        self._timer = None   # v2.10f：等人工确认的计时器
         self._prepare, self._save = prepare, save
         self._spec = spec   # providers.ModelSpec（含 key，只在内存里）；Registry.start 保证网页运行一定有
         self.lock = threading.Lock()
@@ -70,6 +86,7 @@ class WebRun:
         self.judge = {}                      # 轮次 -> 摘要
         self.compute, self.final_done = None, False
         self.result = None
+        self.stopped = None   # v2.10f：有估计、但运行中途停了（预算 / 余额）时的原因
 
     @property
     def qid_tag(self):
@@ -140,24 +157,50 @@ class WebRun:
                     self.status = "awaiting_approval"
             if cancelled:
                 self._resume(self.approvals[-1])
+            else:
+                self._start_approval_timer()
             return
         state = self._save(self.h, self.approvals, keep_key=True)   # key 留到 _release 统一清（先 redact 已存的文字）
         r = ((state or {}).get("compute") or {}).get("result") or {}
+        # v2.10f：中途（子 agent 的搜索 / 抽取）余额不足或预扣放不下时，原因只在 budget.aborted（审查发现：以前只看 state.aborted，
+        # 这种运行被标成 done，原因在运行页和列表里都看不到）
+        reason = (state or {}).get("aborted") or ((state or {}).get("budget") or {}).get("aborted")
         with self.lock:
             self.result = {"qid": self.q["id"], "tag": self.h["tag"]}
             if self.cancel_requested:
                 self.status = "cancelled"
-            elif (state or {}).get("aborted") and r.get("central") is None and r.get("most_likely") is None:
-                self.status, self.error = "failed", self._clip(str(state["aborted"]))
+            elif reason and r.get("central") is None and r.get("most_likely") is None:
+                self.status, self.error = "failed", self._clip(str(reason))
             else:
                 self.status = "done"
+            if reason and self.status == "done":   # 有估计，但后面的调用（终稿等）停了：照旧 done，原因另记
+                self.stopped = self._clip(str(reason))
             self.finished = time.time()
 
-    def _abort_budget(self):
-        """取消 = 用图里已有的预算中止路径：之后每次调用前的预扣都会抛 BudgetExceeded，各节点干净收尾。"""
-        b = self.h["ctx"].budget
-        if not b.aborted:
-            b.aborted = CANCEL_REASON
+    def _abort_budget(self, reason: str = CANCEL_REASON):
+        """取消 = 用图里已有的预算中止路径：之后每次调用前的预扣都会抛 BudgetExceeded，各节点干净收尾。
+        v2.10f：经 Budget.halt（保留第一个原因，同以前），顺便叫醒等着预扣的调用。"""
+        self.h["ctx"].budget.halt(reason)
+
+    def _start_approval_timer(self):
+        """v2.10f：等人工确认的计时器；到时还在等就按「不批准」结束（_approval_expired）。"""
+        if not self.approval_timeout_s or self.approval_timeout_s <= 0:
+            return
+        t = threading.Timer(self.approval_timeout_s, self._approval_expired)
+        t.daemon = True
+        self._timer = t
+        t.start()
+
+    def _stop_approval_timer(self):
+        t, self._timer = self._timer, None
+        if t is not None:
+            t.cancel()
+
+    def _approval_expired(self):
+        try:
+            self.cancel(by="web-timeout", note=APPROVAL_TIMEOUT_REASON.format(minutes=round(self.approval_timeout_s / 60, 2)))
+        except BadState:   # 已经批准、取消或结束了
+            pass
 
     # ---------- 用户操作 ----------
     def approve(self, keep_ids=None):
@@ -179,22 +222,29 @@ class WebRun:
                 decision["directions"] = [d for d in self.proposed if d.get("id") in keep]
             self.approvals.append(decision)
             self.status = "running"
+        self._stop_approval_timer()
         self._spawn(self._resume, decision)
         return decision
 
-    def cancel(self):
+    def cancel(self, by: str = "web-cancel", note: str | None = None):
+        """取消（by = web-cancel）；v2.10f：等人工确认超时也走这里（by = web-timeout，note 记进 error 给网页看）。"""
         with self.lock:
             if self.status not in ACTIVE:
                 raise BadState(f"run is {self.status}")
             if getattr(self, "final_done", False):  # 最终答案已经写完、只差存盘：不再接受取消（否则完整结果会被标成 cancelled）
                 raise BadState("run has finished computing; it is being saved")
+            if by == "web-timeout" and (self.status != "awaiting_approval" or self.cancel_requested):
+                raise BadState(f"run is {self.status}, not awaiting_approval")
             self.cancel_requested = True
+            if note:
+                self.error = self._clip(note)
             waiting = self.status == "awaiting_approval"
             if waiting:
-                self.approvals.append({"approved": False, "by": "web-cancel"})
+                self.approvals.append({"approved": False, "by": by})
                 self.status = "running"
+        self._stop_approval_timer()
         if self.h is not None:
-            self._abort_budget()
+            self._abort_budget(note or CANCEL_REASON)
         if waiting:  # 和命令行里回答 N 一样：不批准，图直接结束
             self._spawn(self._resume, self.approvals[-1])
 
@@ -235,6 +285,9 @@ class WebRun:
                          stopped=ev.get("stopped"))
 
     def _on_update(self, chunk: dict):
+        sp = self._spec
+        if sp is not None:   # v2.10f：先 redact 再做摘要（摘要会截断文字，先截断的话截在 key 中间的半截就认不出来了）
+            chunk = sp.redact_obj(chunk)
         with self.lock:
             for node, upd in (chunk or {}).items():
                 upd = upd if isinstance(upd, dict) else {}
@@ -342,7 +395,8 @@ class WebRun:
             b = self.h["ctx"].budget if self.h else None
             end = self.finished or time.time()
             view = {"id": self.id, "qid": self.q["id"], "tag": self.tag, "question": self.q["question"], "as_of": self.q["as_of"],
-                    "status": self.status, "error": self.error, "cancel_requested": self.cancel_requested,
+                    "status": self.status, "error": self.error, "stopped": self.stopped,
+                    "cancel_requested": self.cancel_requested,
                     "created_at": _iso(self.created), "finished_at": _iso(self.finished),
                     "elapsed_s": round(end - self.created, 1),
                     "usd": None if b is None else round(b.usd, 4), "usd_cap": None if b is None else b.usd_cap,
@@ -358,8 +412,8 @@ class WebRun:
     def brief(self) -> dict:
         with self.lock:
             return self._public({"id": self.id, "qid": self.q["id"], "tag": self.tag, "question": self.q["question"][:200],
-                                 "as_of": self.q["as_of"], "status": self.status, "created_at": _iso(self.created),
-                                 "result": self.result})
+                                 "as_of": self.q["as_of"], "status": self.status, "error": self.error,
+                                 "created_at": _iso(self.created), "result": self.result})
 
 
 def _judge_summary(jr: dict) -> dict:
@@ -383,13 +437,30 @@ def _judge_summary(jr: dict) -> dict:
             "extra_directions": [x.get("id") for x in jr.get("extra_directions") or []]}
 
 
+def check_spec_cap(spec):
+    """v2.10f：这次运行的上限放不下一次最小运行（规划 + 一次搜索 + 抽取一页 + 裁判，catalog.run_floor）的最坏情况预扣就抛 CapTooLow。
+    预扣放不下只是因为在途的调用时运行会等（pipeline.Budget.wait_for_room），但单次的最坏情况放不下，运行在拿到估计之前就会停下、钱已经花了。"""
+    floor = catalog.run_floor(spec.model, spec.region, spec.thinking)
+    if floor["usd"] > spec.usd_cap:
+        need = catalog.min_cap(floor["usd"])
+        raise CapTooLow(
+            f"花费上限 ${spec.usd_cap:.2f} 放不下 {spec.model}（思考 {spec.thinking}）一次最小运行的最坏情况预扣 ${floor['usd']:.2f}"
+            f"（规划 + 一次搜索 + 抽取一页 + 裁判），运行会在拿到估计之前停下；请把上限调到至少 ${need:.2f}，或者换便宜的模型。"
+            f" / The spending cap ${spec.usd_cap:.2f} cannot cover the worst case of a minimal run with {spec.model} "
+            f"(thinking {spec.thinking}): ${floor['usd']:.2f} for plan + one search + one page + judge, so the run would stop "
+            f"before it reaches an estimate. Raise the cap to at least ${need:.2f} or pick a cheaper model.")
+
+
 class Registry:
     """本进程里的网页运行。prepare / save 默认是 agent.run 的 prepare_run / save_run（测试里可以换成假的）。"""
 
-    def __init__(self, prepare=None, save=None, max_active: int = MAX_ACTIVE):
+    def __init__(self, prepare=None, save=None, max_active: int = MAX_ACTIVE, approval_timeout_s: float = APPROVAL_TIMEOUT_S,
+                 check_cap: bool = True):
         self._prepare = prepare or agent_run.prepare_run
         self._save = save or agent_run.save_run
         self.max_active = max_active
+        self.approval_timeout_s = approval_timeout_s
+        self.check_cap = check_cap   # v2.10f：上限放不下一次最小运行的组合拒跑（check_spec_cap）
         self.runs = {}
         self.lock = threading.Lock()
 
@@ -420,6 +491,8 @@ class Registry:
             raise ValueError("as_of 必须是 YYYY-MM-DD") from None
         if d > today:
             raise ValueError(f"as_of 不能晚于今天（{today.isoformat()}）")
+        if self.check_cap:
+            check_spec_cap(spec)
         with self.lock:
             active = [r for r in self.runs.values() if r.status in ACTIVE]
             if len(active) >= self.max_active:
@@ -430,7 +503,7 @@ class Registry:
             while any(r.qid_tag == (qid, tag) for r in self.runs.values()) or (agent_run.RES / qid / tag).exists():
                 tag, n = f"web_{stamp}_{n}", n + 1
             run = WebRun(uuid.uuid4().hex[:12], {"id": qid, "question": question, "as_of": d.isoformat()}, tag,
-                         self._prepare, self._save, spec=spec)
+                         self._prepare, self._save, spec=spec, approval_timeout_s=self.approval_timeout_s)
             self.runs[run.id] = run
         run.start()
         return run
