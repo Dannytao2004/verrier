@@ -7,7 +7,8 @@
 | tag | 内容 | 状态 |
 |---|---|---|
 | `v2.10a` | adapter 层 + 每次运行的 `ModelSpec`，目前只有 DeepSeek；按模型计价、没有价格的模型拒跑、方向数按模型价格缩放、余额不足立刻停、key 不落盘、BYOK 运行关掉 Jev | 本文件第 1–7 节 |
-| 之后 | Claude、GPT、Kimi、GLM 的 adapter；网页（填 key、选模型、校验 key、每次运行的花费估计） | 未开始 |
+| `v2.10b` | Claude adapter（原生 Messages API，流式）和 Claude 搜索（服务端 web_search，pause_turn 续上）；用 models 列表校验 key（`llm.check_key`，DeepSeek 也有）；adapter 接口补了解码、可重试状态码、超时、回复问题、续搜索几个钩子 | 第 3、5、9 节 |
+| 之后 | GPT、Kimi、GLM 的 adapter；网页（填 key、选模型、校验 key、每次运行的花费估计） | 未开始 |
 
 ## 1. Scope and binding decisions（用户 10-20 / 10-21 定的，摘要）
 
@@ -50,8 +51,22 @@ adapter 只管各家不同的部分：
 | `chat_unpack(data)` | 回复骨架；形状不对抛 KeyError / IndexError / TypeError，外层记 `bad_response_body` 并重试 |
 | `chat_meter(...)`、`chat_text(...)`、`chat_truncated(...)` | calls.jsonl 的计量字段（含 usd）、回复文字、是否被输出上限截断 |
 | `search_request(...)`、`search_unpack(d)`、`search_meter(...)`、`search_fee_usd` | 搜索的请求、解析（查询词、结果 URL、文字块、搜索次数、搜索错误数）、token 计价、每次搜索的费用 |
-| `balance_exhausted(status, body)` | 余额不足就返回一句说明，外层抛 `llm.BalanceExhausted` |
-| `error_body_statuses` | 哪些错误状态码要读 body 给 `balance_exhausted` 判断（DeepSeek 为空：只看 402）。读到的 body 不写日志：有的 provider 会回显部分 key |
+| `balance_exhausted(status, body)` | 余额不足就返回一句说明，外层抛 `llm.BalanceExhausted`；`balance_hint` 是说明后面那句「怎么办」 |
+| `error_body_statuses` | 哪些错误状态码要读 body 给 `balance_exhausted` 判断（DeepSeek 为空：只看 402）。读到的 body 不整段写日志：有的 provider 会回显部分 key |
+| v2.10b：`chat_decode(raw)` | 回复 body -> dict。DeepSeek 是 `json.loads`（不变）；Claude 是 `parse_sse_message`（流式回复拼回完整 Message） |
+| v2.10b：`chat_problem(unpacked)` | 不解析 JSON 就先报的回复问题：`None` 或 `(日志 error, 说明)`。DeepSeek 只有截断（文字和 v2.9b 相同）；Claude 另有拒答、暂停 |
+| v2.10b：`retry_statuses`、`honor_retry_after` | 哪些状态码退避重试（DeepSeek 和 v2.9b 的 `RETRY_STATUS` 相同；Claude 多 529），要不要按 `retry-after` 等（`llm.retry_wait`，最多 60 秒） |
+| v2.10b：`log_server_error` | 读过的错误 body 里 `error.type` 和 `error.message` 前 200 字记进日志和异常文字（`llm.server_error`；DeepSeek 关） |
+| v2.10b：`chat_timeouts` | `LLM._post` 的单次读 / 整次超时（DeepSeek 为空 = 180 / 1200 秒不变） |
+| v2.10b：`search_continue(payload, d)`、`max_search_continuations` | 搜索回复要不要续（Claude 的 pause_turn）；DeepSeek 返回 None、0 次（不变） |
+| v2.10b：`key_check_request(region, key)`、`models_unpack(d)` | `llm.check_key(spec)` 用：models 列表接口的 GET 和解析 |
+
+`ModelSpec.tokens_for(role, max_tokens)`（v2.10b）：这个角色的思考档位和实际发出的 max_tokens（开思考 +`THINKING_EXTRA_TOKENS`，不超过模型最大输出），
+JSON 调用、搜索、预扣都用它。`Budget.search_tokens`：spec 运行里搜索实际发出的 max_tokens（Opus 5.5 / Fable 5.1 的搜索也开思考，预扣跟着变大）。
+
+`llm.check_key(spec)`（v2.10b）：用这次运行的 key GET models 列表，返回给网页看的 dict：`ok`、`status`、`error`（key_rejected / balance /
+redirect / http_<code> / bad_response_body / network）、`message`、`model_listed`（所选模型在不在列表里；列表不完整又没找到时是 None）、`n_models`。
+不含 key、不含服务端原文。网页阶段接。
 
 没有 spec 时 `LLM` / `Searcher` 用 `providers.DEEPSEEK`，URL 仍取 `llm.API_URL` / `search.SEARCH_URL`（测试 patch 这两个名字的做法照旧有效），key 仍由 `read_key()` 从 key 文件读。
 
@@ -91,6 +106,20 @@ temperature 照旧发 0（用户决定 5：DeepSeek 保留 temperature 0）。
 
 ## 5. Pricing, directions and the cap
 
+Claude 的价格（v2.10b，USD / 百万 token；https://platform.claude.com/docs/en/about-claude/pricing ，2026-10-21 查看；没有分时价，
+`peak` = `offpeak` = (cache hit, base input, output)，另记 5 分钟 / 1 小时 cache 写入价）：
+
+| 模型 | base input | 5m cache 写 | 1h cache 写 | cache hit | output |
+|---|---|---|---|---|---|
+| `claude-haiku-5-5`（prompt ≤ 100K） | 0.10 | 0.125 | 0.20 | 0.01 | 0.50 |
+| `claude-haiku-5-5`（prompt > 100K，整次请求） | 0.50 | 0.625 | 1.00 | 0.05 | 2.50 |
+| `claude-sonnet-5-5` | 2.00 | 2.50 | 4.00 | 0.10 | 10.00 |
+| `claude-opus-5-5` | 4.00 | 5.00 | 8.00 | 0.20 | 20.00 |
+| `claude-fable-5-1` | 10.00 | 12.50 | 20.00 | 0.25 | 50.00 |
+
+Haiku 5.5 的 prompt 长度 = input + cache 读 + cache 写（官方 Long context pricing）。web search $10 / 1,000 次（每次 $0.01，出错的不计费），
+搜索结果按 input token 另计。回复的 `usage.inference_geo` 是 `"us"` 时乘 1.1（Data residency pricing；请求里不写，默认 global）。
+
 - **没有价格就不跑**：`config.price(model)` 找不到就抛 `UnknownModel`；`usd_cost`、`Budget`、`LLM()` / `Searcher()` 的构造、`ModelSpec` 都经过它。
   v2.9b 的 `PRICES.get(model, PRICES["deepseek-flash"])` 静默回落已删（命令行设了没价格的 `TRIANGULATE_MODEL` 现在在读 key 之前就报错）。
 - **方向数按模型价格缩放**：`Budget.typical_direction_usd(model)` = 0.06（deepseek-flash 实测）×（这个模型 / flash 按峰时价算的一个方向的价格比）。
@@ -98,6 +127,9 @@ temperature 照旧发 0（用户决定 5：DeepSeek 保留 temperature 0）。
   输出 3,600 token，4 次搜索），只用来算比例。flash 仍是 0.06（`Budget().directions` 仍是 10）；v4-pro 约 $0.102 / 方向：
   $1 上限 5 个方向、$2 上限 10 个（页数上限 40 / 4）。
 - 预扣（`llm_reserve`、`search_reserve`）用这次运行的模型的峰时价和这家的搜索费。
+- v2.10b Claude：请求里不写 `cache_control` 就没有缓存（`prompt_cache: "explicit"`），所以 `DIRECTION_PROFILE` 里 DeepSeek 自动命中的
+  13,600 token 在 Claude 上按 base input 算。Haiku 5.5 的预扣在估计的 prompt（字符数 / 2）超过 100,000 token 时按高价（`Budget.peak_rates`）。
+  `$2` 上限下的方向数和几个典型预扣见第 9.8 节。
 
 ## 6. Insufficient balance stop
 
@@ -120,14 +152,179 @@ agent 里 `AgentLLM.ask` 和 `run_direction` 的搜索把它变成 `Budget.halt(
 
 ## 8. Known limits / open items
 
+（v2.10b 起 Claude 相关的限制在第 9.8 节；下面是 v2.10a 记的，「key 校验」一条已在 v2.10b 实现。）
+
 - **DeepSeek 搜索角色的思考没关**：搜索请求不带 `thinking` 字段（v2.9b 原样），服务端默认；`search_direct.py` 的注释记过这个接口默认返回 thinking 块。
   用户决定 6 说「其余角色能关就关」，但关掉要往搜索请求体里加字段（改变冻结的请求体），而且 DeepSeek 的 Anthropic 兼容文档只写了 `thinking`
   「Supported」、没写 `type: disabled` 的效果（未核实）。本阶段没动，等用户定。
 - **网页还没接**：`web/runs.py` 的 `prepare(q, tag)` 还不传 spec；运行失败（`_guard`）时还没调 `run.release(h)` 和 `spec.redact`；
   `app.py` 不收 provider / model / key；网页没有 key 输入框、模型选择、花费估计。留给网页阶段。
 - 搜索遇到 401 / 403 仍然只记 `http_401` 返回空 URL（v2.9b 原样），不像 JSON 调用那样抛 `KeyRejected`。
-- key 校验（models 列表接口）还没实现。
+- ~~key 校验（models 列表接口）还没实现。~~ v2.10b：`llm.check_key`（DeepSeek `GET /models`、Claude `GET /v1/models`），网页还没接。
 - 其他四家（Claude、GPT、Kimi、GLM）的 adapter、价格、模型清单还没加；调研结果在 `providers_research.json`（2026-10-20）。
+
+## 9. Claude adapter（`ClaudeAdapter`，v2.10b）
+
+走原生 Messages API，不用 OpenAI 兼容层（官方说它会忽略 `response_format` 和 `reasoning_effort`、不支持缓存、不适合生产）。
+用标准库 urllib 直接发 HTTP，不装官方 Python SDK：项目里所有 provider 共用一套外层循环（重试、不跟随跳转、日志、预算、假 urlopen 的测试），
+SDK 自带重试和 httpx 传输层，D9「不跟随跳转」和现有测试的拦截都得重做（代码调查阶段的结论），也是一个新依赖。
+
+### 9.1 JSON 调用发什么
+
+`POST https://api.anthropic.com/v1/messages`，请求头 `Content-Type: application/json`、`Authorization: Bearer <key>`、`anthropic-version: 2023-06-01`
+（Authentication 页：直接发 HTTP 时用 Bearer，`x-api-key` 是 legacy、仍支持）。body 依次是：
+
+| 字段 | 值 | 为什么 |
+|---|---|---|
+| `model` | `claude-haiku-5-5` / `claude-sonnet-5-5` / `claude-opus-5-5` / `claude-fable-5-1` | 用户决定 9 的清单 |
+| `max_tokens` | 角色的 `MAX_TOKENS`，开思考 +24,000，最多 128,000 | 原生 API 只有这一个上限，思考 + 正文共用（Thinking 页）；四个模型同步请求最大输出 128K |
+| `system` | 开头的 system 消息（原样） | 原生 API 没有 system 角色的输入消息，放顶层 |
+| `messages` | 其余的 user / assistant 消息；内容为空的 assistant 消息不发 | `TextBlockParam.text` 最少 1 个字；两条 user 由 API 合并成一轮（Messages API）。最后一条总是 user（5.5 代不支持 prefill） |
+| `thinking` | 开思考 `{"type": "adaptive"}`；关思考 Haiku `{"type": "disabled"}`、Sonnet `{"type": "between_tools"}` | 见 9.2 |
+| `output_config` | `{"effort": ...}` | 见 9.2；不写 `format`（用户决定 10：不用 JSON schema） |
+| `stream` | `true` | Errors 页 Long requests：max_tokens 大的请求用流式或 Batch，避免长时间空闲的连接被网络断开；官方 SDK 在非流式请求预计超过 10 分钟时直接拒绝 |
+
+不发 `temperature` / `top_p` / `top_k`：这四个模型上传非默认值一律 400（Messages API：Models released after Claude Opus 4.6 do not support setting temperature …）。
+不写 `cache_control`（没要求做缓存）、不写 `inference_geo`、不加任何 beta 头。
+
+回复：流式事件按 Streaming 页拼回完整的 Message（`providers.parse_sse_message`：message_start -> content_block_start / delta / stop -> message_delta（usage 累计）
+-> message_stop；ping 和未知事件忽略）。只拼 `type == "text"` 的块（thinking 块在 display 默认 omitted 时是空字符串），直接 `json.loads`；
+不剥代码块、不修补（用户决定 4：照原样报错）。流里来了 `error` 事件（如 `overloaded_error`）或没收到 `message_stop`：记 `bad_response_body`
+（`stream_error` = 错误类型 / `incomplete_stream`），按已有逻辑重试。单次读最多等 600 秒、整次 3600 秒（`chat_timeouts`）。
+
+### 9.2 思考档位
+
+| 模型 | 网页可选 | plan / judge / repair | 其余角色 |
+|---|---|---|---|
+| Haiku 5.5 | off / low / medium / high | off：`disabled` + effort `medium`；其余：`adaptive` + 同名 effort | `disabled` + effort `medium` |
+| Sonnet 5.5 | off / low / medium / high | off：`between_tools` + effort `high`；其余：`adaptive` + 同名 effort | `between_tools` + effort `high` |
+| Opus 5.5 | low / medium / high（思考关不掉，不给 off） | `adaptive` + 同名 effort | `adaptive` + `low`（最低一档） |
+| Fable 5.1 | low / medium / high（同上） | `adaptive` + 同名 effort | `adaptive` + `low` |
+
+依据：Errors 页 Thinking cannot be disabled（Opus 5.5 / Fable 5.1 发 disabled 在任何 effort 下 400；Sonnet 5.5 发 disabled 400，要关用 between_tools；
+Haiku 5.5 接受 disabled；between_tools / disabled 在 xhigh / max 下 400）；Effort 页（effort 作用于所有输出 token，开不开思考都有效；
+Opus 5.5、Haiku 5.5 默认 medium，其余默认 high；把 effort 设成默认值等于不写）。关思考的调用把 effort 显式写成模型默认值，
+是为了换模型、官方改默认值时请求不悄悄变（Effort 页 Best practices 第 1 条：Set effort explicitly）。网页档位 high 对应 `high`，不用 xhigh / max。
+开了思考的调用（含 Opus / Fable 的所有调用）max_tokens +24,000（不超过 128,000）；between_tools / disabled 的调用不加。
+
+### 9.3 stop_reason
+
+| stop_reason | 处理 |
+|---|---|
+| `end_turn`、`stop_sequence` | 解析 JSON |
+| `max_tokens`、`model_context_window_exceeded` | 报截断（`truncated`，说明里写 stop_reason），不解析；`AgentLLM.ask` 照旧要求「短一点再答一次」 |
+| `refusal` | 报 `refusal`（日志记 `stop_category` = `stop_details.category`），不解析；`AgentLLM.ask` 照旧带错误重问一次。拒答也计费（按 usage） |
+| `pause_turn` | JSON 调用不带工具，正常不会出现；出现就报 `paused` |
+| 搜索的 `pause_turn` | 见 9.5：续上 |
+
+### 9.4 错误、重试、余额
+
+| 情况 | 处理 | 依据 |
+|---|---|---|
+| 401 / 403 | `KeyRejected`，不重试，不读 body | Errors 页；10-21 实测假 key 401 `invalid x-api-key`、`x-should-retry: false` |
+| 429 rate_limit_error、500、502、503、504、529 overloaded_error | 最多 3 次；有 `retry-after` 就等那么久（最多 60 秒），否则 2 / 4 秒（搜索 3 / 6 秒） | Errors 页、Rate limits 页 |
+| 402 billing_error | `BalanceExhausted`，不重试 | Errors 页 |
+| 400，message 以 `You have reached your specified API usage limits` / `... workspace API usage limits` 开头 | `BalanceExhausted`（用户在 Console 设的 spend limit） | Rate limits 页 Setting your own spend limit |
+| 429，`error.details.error_code = enforced_spend_limit_reached` | `BalanceExhausted`（用量档的月度上限；没有 retry-after，重试没用） | Rate limits 页 Reaching your spend cap |
+| message 以 `Your credit balance is too low to access the Anthropic API` 开头（400 / 402 / 429 都认） | `BalanceExhausted` | API credits 页给了原文；**状态码文档没写**（未核实） |
+| 其余 4xx（参数不对、组织关了 web search、身份绑定的 key 没带 workspace id 等） | 不重试；`error.type` 和 message 前 200 字进日志和异常文字 | Errors 页、Authentication 页、Web search tool 页 |
+| 3xx | 不跟随（D9），`TransportError` | 同 v2.6g |
+
+`BalanceExhausted` 的文字：`insufficient balance: Claude <原因> (...); the run was stopped without retrying. Check Plans & Billing and the spend limits in the Claude Console, then run again.`
+（不含服务端原文。）agent 运行里它照旧变成 `Budget.halt`，整次运行停下（第 6 节）。
+
+### 9.5 搜索
+
+`POST https://api.anthropic.com/v1/messages`（非流式），请求头同上；body：`model`、`max_tokens`（8192，开思考 +24,000）、
+`tools: [{"type": "web_search_20250305", "name": "web_search", "max_uses": 3}]`、`messages`（一条 user）、`thinking`、`output_config`（规则同 9.2，
+搜索不是 plan / judge / repair：Haiku / Sonnet 关思考，Opus / Fable 用 low）。
+
+- 工具版本：`web_search_20250305`（基础版）。所有当前模型都能用、ZDR-eligible、结果块直接在顶层 content 里；带 dynamic filtering 的
+  `web_search_20260209` / `20260318` 会在内部跑 code execution，结果块嵌套、带 `caller` 字段，默认不算 ZDR。这里只要 URL，用不上过滤。
+- 解析（`anthropic_search_unpack`，和 DeepSeek 共用）：`server_tool_use.input.query` -> 查询词；`web_search_tool_result.content`（列表）的
+  `url`、`title` -> 结果；出错时 content 是一个错误对象（HTTP 仍是 200）-> 记一个搜索错误；`text` 块 -> 模型挑的 URL。
+  标题解析出来但不出 Searcher（分析角色只看得到 URL，设计同 v2.9b）。
+- 计价：token 按 9.6；搜索费 = `usage.server_tool_use.web_search_requests` × $0.01（官方价，字段名仍叫 `usd_search_fee_assumed`）。
+- `pause_turn`（Server tools 页）：把这次的 content 原样作为 assistant 消息接在后面，工具不变，再发；最多续 2 次（`max_search_continuations`）。
+  每次请求各记一行日志（续的那行带 `continuation: n`），查询词、URL、搜索次数、费用合并；续的时候失败就用已经拿到的结果，
+  返回里加 `error: "continuation n: ..."`。
+- 余额不足同 9.4（抛 `BalanceExhausted`）；组织关了 web search 时是 400 invalid_request_error，照原样记在 `error` 里。
+
+### 9.6 用量和成本
+
+`claude_usage_cost`：`input_tokens × base + cache_read × hit + 5 分钟写 × 1.25 倍价 + 1 小时写 × 2 倍价 + output_tokens × output`
+（`usage.cache_creation` 有分档就按分档，没有就全按 5 分钟）。总 prompt = input + cache 读 + cache 写（Messages API usage 说明）。
+Haiku 5.5 总 prompt > 100,000 整次按高价；`inference_geo == "us"` 乘 1.1。calls.jsonl 每行：`finish_reason`（= stop_reason）、`prompt_tokens`（总 prompt）、
+`input_tokens`、`cache_read_input_tokens`、`cache_creation_input_tokens`、`completion_tokens`（= output_tokens，含思考）、`usd`，
+开思考时 `reasoning_tokens`（= `usage.output_tokens_details.thinking_tokens`），拒答时 `stop_category`。`report.py` 按 prompt / completion / finish_reason 汇总照样能用。
+
+### 9.7 key 校验
+
+`GET https://api.anthropic.com/v1/models?limit=1000`（List Models：limit 1–1000，默认 20），请求头 Bearer + anthropic-version。不生成 token；
+带有效 key 是否完全免费，官方页没写价格（未核实，按「免费的 models 列表」用，用户决定 2）。
+10-21 实测（`probes/claude_key_probe.py`，没花钱）：不带 key -> 401 `{"type":"error","error":{"type":"authentication_error","message":"x-api-key header is required"},...}`、
+`x-should-retry: false`；假 key（Bearer）走 `check_key` -> `{"ok": false, "status": 401, "error": "key_rejected", "message": "Claude rejected the API key (HTTP 401)"}`
+（服务端 message 是 `invalid x-api-key`，不进返回值）。
+
+### 9.8 已知限制、没做的、要你定的
+
+- **`$2` 上限下贵的模型几乎跑不起来（最要紧，要你定）**。预扣按最坏情况（输入字符数 / 2 个 token × 输入价 + 发出的 max_tokens × 输出价），
+  而且一次预扣放不下就把整次运行标成中止（`Budget.hold`，DeepSeek 时代的设计，本阶段没改）。按现在的价格和余量算（`$2` 上限、默认思考档）：
+
+  | 模型 | 一个方向 | `$2` 方向数 | 一次搜索预扣 | plan（2 万字符） | 抽取（4 万字符） | 抽取（40 万字符） | judge（10 万字符） |
+  |---|---|---|---|---|---|---|---|
+  | deepseek-flash | $0.060 | 10 | $0.099 | $0.010 | $0.025 | $0.079 | $0.029 |
+  | claude-haiku-5-5（off） | $0.053 | 10 | $0.087 | $0.004 | $0.010 | $0.140 | $0.011 |
+  | claude-sonnet-5-5（off） | $0.178 | 6 | $0.222 | $0.080 | $0.200 | $0.560 | $0.220 |
+  | claude-opus-5-5（low） | $0.310 | 3 | $0.844 | $0.640 | $0.880 | $1.600 | $0.920 |
+  | claude-fable-5-1（low） | $0.706 | 1 | $1.990 | $1.600 | $2.200 | $4.000 | $2.300 |
+
+  Opus：第一轮 3 个方向同时搜索，预扣合计 $2.53 > $2，第三个搜索就会让整次运行中止；Fable：一次 4 万字符的抽取预扣就超过 $2。
+  Sonnet 在 8 个并发抽取时也很可能撞上。可选的修法（没做，等你定）：自带 key 的运行里，预扣放不下只是因为「在途的预扣」时就等在途调用结束，
+  只有「已花 + 这一次」放不下才中止；或者给贵模型更高的默认上限 / 更低的并发。上限本身照样守得住（预扣是最坏情况）。
+- **没开 refusal fallback**。claude-api 参考建议 Opus 5.5 / Sonnet 5.5 / Fable 5.1 默认带服务端 `fallbacks: "default"`（beta 头
+  `server-side-fallback-2026-07-01`）：被安全分类器拒答时 API 自动换别的模型重跑。没开的理由：它会换到别的模型、按那个模型的价格计费，
+  和「按所选模型的官方价计价」（用户决定 7）、「照原样报错」（决定 4）冲突，也是 beta。要开随时说。
+- **没开 prompt caching**（没要求）。抽取的 system prompt 每页都一样，写 `cache_control` 可以省钱，但要改请求体、改计价假设，留给你定。
+- 流式回复里 ping 事件多久一次，官方只写「may include any number of ping events」；display omitted 时思考期间可能长时间没有字节。
+  单次读超时设 600 秒（同官方 SDK 默认的 10 分钟），没实测。
+- 搜索是非流式的；Opus / Fable 的搜索开思考，max_tokens 是 32,192，超过官方 SDK 允许的非流式上限（约 21,333）。服务端的工具循环跑得长时会
+  自己回 pause_turn，单次请求时长应该有界；socket 超时 600 秒。没实测。
+- 身份绑定、又没限定到单个 workspace 的 key：每个请求都要 `anthropic-workspace-id` 头，否则 400（Authentication 页）。没做 workspace id 输入，
+  这种 key 会在第一个调用报 400（message 原文进错误文字）。网页上应提示用户建单 workspace 的 key。
+- 「Your credit balance is too low」的状态码文档没写；按 message 原文认。
+- Haiku 5.5 的 100K 门槛在服务端工具循环（一次搜索请求内多轮）里怎么算没写；这里按整次请求的 usage 合计判断，可能高估。
+- 预扣的 token 估计仍是「字符数 / 2」；官方说 4.7 以后的 tokenizer 同样文字多约 30% token，和 DeepSeek 的差距没测，中文页面可能低估。
+- `DIRECTION_PROFILE` 是 DeepSeek 实测的 token 构成；Claude 的 tokenizer、Opus / Fable 关不掉的思考会让真实的一个方向更贵（未测）。上限靠预扣守住。
+- Claude 没有中国区 endpoint；Supported Regions Policy 不含中国大陆、香港、澳门（research 记录），网页阶段要写明。
+- 网页还没接（同第 8 节）：`check_key`、Claude 选项、key 输入框都留给网页阶段。
+
+### 9.9 Verification（v2.10b）
+
+- `tests/test_claude.py`（31 个）全部对着 127.0.0.1 上的假 Anthropic 服务（`tests/fake_claude.py`）跑，真实走 urllib + `urlopen_no_redirect`：
+  请求头 / 请求体（逐字段）、四个模型 × 档位 × 角色的 thinking / effort / max_tokens、空 assistant 消息不发、流式解析（多个 text 块、思考块、ping、
+  未知事件、input_json_delta、CRLF、usage 累计）、各种 stop_reason、529 / 流内 error / 断流重试、retry-after、四种余额 / 额度停下、普通 400 照原样报、
+  401 / 403、3xx 不跟随、cache 两档 / Haiku 长上下文 / geo 计价、方向数、预扣、搜索请求体、URL / 标题 / 搜索费、错误对象、pause_turn 续两次和续失败、
+  搜索 400 / 402 / 529、key 校验（含 10-21 实测的两种 401 body）、DeepSeek key 校验、端到端（prepare_run -> 图 -> save_run，402 干净停下，结果目录没有 key）。
+- DeepSeek 默认路径：`tests/test_providers.py` 的 24 组金样本仍逐字节相同（adapter 接口加钩子以后）。
+- G2（`probes/compare_continuous_prompts.py`）：`365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4`，和 v2.10a 相同。
+- 真实网络只发了不花钱的请求（`probes/claude_key_probe.py`：不带 key、假 key 调 `/v1/models`，都是 401）。没有真 key，没有发过 `/v1/messages`。
+
+## Official docs（Claude，2026-10-21 查看）
+
+- Messages API（请求字段、stop_reason、usage、流式事件类型）：https://platform.claude.com/docs/en/api/messages/create
+- Streaming：https://platform.claude.com/docs/en/build-with-claude/streaming
+- Errors：https://platform.claude.com/docs/en/api/errors
+- Rate limits（spend cap、spend limit、retry-after）：https://platform.claude.com/docs/en/api/rate-limits
+- API credits（credit balance too low 原文）：https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers
+- Authentication：https://platform.claude.com/docs/en/manage-claude/authentication
+- Effort：https://platform.claude.com/docs/en/build-with-claude/effort
+- Thinking：https://platform.claude.com/docs/en/build-with-claude/thinking
+- Pricing：https://platform.claude.com/docs/en/about-claude/pricing
+- Web search tool：https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool
+- Server tools（pause_turn、allowed_callers）：https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools
+- List Models：https://platform.claude.com/docs/en/api/models/list
+- OpenAI SDK 兼容层（为什么不用）：https://platform.claude.com/docs/en/cli-sdks-libraries/libraries/openai-sdk
 
 ## Official docs（DeepSeek，2026-10-21 查看）
 

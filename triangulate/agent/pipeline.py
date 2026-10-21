@@ -41,6 +41,7 @@ class Budget:
     DIRECTION_PROFILE = {"hit": 13_600, "miss": 25_700, "out": 3_600, "searches": 4}
     ROUND1_USD_SHARE = 0.6   # 第一轮方向最多用掉上限的 60%，其余留给 base-rate 方向、裁判、终稿
     model = None   # v2.10a：计价用的模型；None = config.MODEL（命令行、回测）。Budget.for_model 设
+    search_tokens = None   # v2.10b：一次搜索发出的 max_tokens；None = MAX_TOKENS["search"]（有 ModelSpec 时 Context 设成实际发出的值）
 
     def __init__(self, usd: float = 1.00, pages: int = 48, round1_pages: int = 40, llm_concurrency: int = 8,
                  extra_directions: int = 3, urls_per_direction: int = 4, search_max_uses: int = 3,
@@ -76,7 +77,10 @@ class Budget:
             return cls.TYPICAL_DIRECTION_USD
 
         def cost(m):
-            hit, miss, out = price(m)["peak"]
+            p = price(m)
+            hit, miss, out = p["peak"]
+            if p.get("prompt_cache") == "explicit":   # v2.10b Claude：不写 cache_control 就没有缓存，DeepSeek 命中的那部分按 base input 算
+                hit = miss
             pr = cls.DIRECTION_PROFILE
             return (pr["hit"] * hit + pr["miss"] * miss + pr["out"] * out) / 1e6 + pr["searches"] * search_fee_usd(m)
         return cls.TYPICAL_DIRECTION_USD * cost(model) / cost(cls.REFERENCE_MODEL)
@@ -120,14 +124,22 @@ class Budget:
                 self.reserved -= amount
 
     @staticmethod
+    def peak_rates(model: str, prompt_tokens: float) -> tuple:
+        """预扣用的 (cache hit, 输入, 输出) 单价：峰时价；v2.10b 有按 prompt 长度分档的模型（Haiku 5.5），超过门槛按高价。"""
+        p = price(model)
+        lc = p.get("long_context")
+        return lc["peak"] if lc and prompt_tokens > lc["threshold_tokens"] else p["peak"]
+
+    @staticmethod
     def llm_reserve(prompt_chars: int, max_tokens: int, model: str | None = None) -> float:
-        hit, miss, out = price(model or MODEL)["peak"]
+        hit, miss, out = Budget.peak_rates(model or MODEL, prompt_chars / 2)
         return (prompt_chars / 2 * miss + max_tokens * out) / 1e6
 
     def search_reserve(self) -> float:
         m = self.model or MODEL
-        hit, miss, out = price(m)["peak"]
-        return (30_000 * miss + MAX_TOKENS["search"] * out) / 1e6 + (2 * self.search_max_uses + 2) * search_fee_usd(m)
+        hit, miss, out = self.peak_rates(m, 30_000)
+        tokens = MAX_TOKENS["search"] if self.search_tokens is None else self.search_tokens
+        return (30_000 * miss + tokens * out) / 1e6 + (2 * self.search_max_uses + 2) * search_fee_usd(m)
 
     def reserve_page(self, round_no: int) -> bool:
         cap = self.round1_pages if round_no == 1 else self.pages_cap
@@ -203,6 +215,8 @@ class Context:
         self.early = None        # v2.5 提前停（published.EarlyWatch）：同上
         self.budget = budget or (Budget() if spec is None else Budget.for_model(spec.model, usd=spec.usd_cap))
         self.calls_path = calls_path
+        if spec is not None:   # v2.10b：搜索也开思考的模型（Opus 5.5 / Fable 5.1）预扣按带余量的 max_tokens
+            self.budget.search_tokens = spec.tokens_for("search", MAX_TOKENS["search"])[1]
         self.llm = AgentLLM(calls_path, self.budget, spec=spec)
         self.searcher = Searcher(log=self.llm._log, spec=spec)
         # 哨兵只在代码里用：真值（和其他 as_of 之后才公布的已知值）不进任何 prompt。可以是一个数或一组数

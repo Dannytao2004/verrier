@@ -3,6 +3,8 @@
 v2.10a：建请求、解析回复、计价交给 provider adapter（triangulate/providers.py）；重试、先查截断、JSON 解析、日志留在这里。
 没有 ModelSpec（命令行、回测、基线）时用 DeepSeek adapter + key 文件 + 下面的 API_URL，请求体和 v2.9b 逐字节相同。
 有 ModelSpec（自带 key 的运行）时 provider / 模型 / key / 思考档位都按它。
+v2.10b：各家不同的解码（Claude 是流式 SSE）、可重试的状态码、超时、回复本身的问题（截断 / 拒答 / 暂停）也由 adapter 给；
+check_key() 用 models 列表接口校验 key。
 
 每次调用记一行到 results/calls.jsonl：arm、题 id、第几次尝试、token、延迟、finish_reason、估算 USD。
 日志里不记 prompt、不记 key。（v2.9b 起，回复不是合法 JSON 时记首尾各 200 字符的诊断。）
@@ -56,11 +58,73 @@ def urlopen_no_redirect(req, timeout: float):
 
 
 def read_error_body(e: urllib.error.HTTPError, limit: int = 65536) -> bytes:
-    """出错时服务端的 body（只给 adapter 判断错误类型用，不写日志：有的 provider 会回显部分 key）。"""
+    """出错时服务端的 body（只给 adapter 判断错误类型用，不整段写日志：有的 provider 会回显部分 key）。"""
     try:
         return e.read(limit) or b""
     except Exception:  # noqa: BLE001
         return b""
+
+
+RETRY_AFTER_MAX_S = 60
+
+
+def retry_wait(default_s: float, retry_after) -> float:
+    """重试前等多久：默认 default_s；adapter 要求看 retry-after（Claude）且服务端给了秒数时，等两者中较长的，最多 60 秒。"""
+    try:
+        ra = float(retry_after) if retry_after is not None else None
+    except ValueError:
+        ra = None
+    return default_s if ra is None or ra < 0 else max(default_s, min(ra, RETRY_AFTER_MAX_S))
+
+
+def server_error(ad, raw: bytes) -> dict:
+    """v2.10b：adapter 允许时（Claude），读过的错误 body 只取 error.type 和 error.message 前 200 字记进日志；否则什么都不记。"""
+    if not getattr(ad, "log_server_error", False) or not raw:
+        return {}
+    try:
+        err = json.loads(raw).get("error")
+    except (ValueError, AttributeError):
+        return {}
+    if not isinstance(err, dict):
+        return {}
+    return {"server_error_type": str(err.get("type", ""))[:40], "server_error": str(err.get("message", ""))[:200]}
+
+
+def check_key(spec, timeout: float = 30) -> dict:
+    """v2.10b：用这次运行的 key 调这家的 models 列表（Claude：GET /v1/models；DeepSeek：GET /models），不生成 token。
+    返回可以给网页看的 dict：ok、status、error（key_rejected / balance / redirect / http_<code> / bad_response_body / network）、
+    message、model_listed（所选模型在不在列表里；列表不完整又没找到时是 None）、n_models。不含 key，不含服务端原文。"""
+    ad = spec.adapter
+    url, headers = ad.key_check_request(spec.region, spec.key)
+    out = {"provider": spec.provider, "model": spec.model, "ok": False}
+    req = urllib.request.Request(url, method="GET", headers=headers)
+    try:
+        with urlopen_no_redirect(req, timeout=timeout) as r:
+            status, raw = r.status, r.read()
+    except urllib.error.HTTPError as e:
+        status, raw = e.code, (read_error_body(e) if e.code in ad.error_body_statuses else b"")
+        e.close()
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
+        return {**out, "error": "network", "message": f"could not reach {ad.label} ({type(e).__name__})"}
+    out["status"] = status
+    if status in (401, 403):
+        return {**out, "error": "key_rejected", "message": f"{ad.label} rejected the API key (HTTP {status})"}
+    if 300 <= status < 400:
+        return {**out, "error": "redirect", "message": f"HTTP {status} redirect not followed (the API key is only sent to {url})"}
+    why = ad.balance_exhausted(status, raw)
+    if why:
+        return {**out, "error": "balance", "message": f"insufficient balance: {ad.label} {why}. {ad.balance_hint}"}
+    if status != 200:
+        return {**out, "error": f"http_{status}", "message": f"{ad.label} models list returned HTTP {status}"}
+    try:
+        ids, complete = ad.models_unpack(json.loads(raw))
+    except (ValueError, KeyError, TypeError, AttributeError):
+        return {**out, "error": "bad_response_body", "message": f"{ad.label} models list returned an unexpected body"}
+    listed = True if spec.model in ids else (False if complete else None)
+    return {**out, "ok": True, "model_listed": listed, "n_models": len(ids),
+            "message": f"{ad.label} accepted the API key" + ("" if listed else
+                                                             f"; {spec.model} is not in the models list" if listed is False
+                                                             else f"; {spec.model} was not on the first page of the models list")}
 
 
 class LLM:
@@ -87,11 +151,10 @@ class LLM:
         """(这次调用的思考档位或 None, 实际发出的 max_tokens)。开了思考的调用多给 THINKING_EXTRA_TOKENS（思考 token 计入
         输出上限）；有 ModelSpec 时不超过模型的最大输出。没有 ModelSpec 时档位来自 TRIANGULATE_THINKING（v2.9a，默认全关）。"""
         role = thinking_role(arm)
-        effort = THINKING.get(role) if self.spec is None else self.spec.effort(role)
-        tokens = max_tokens + (THINKING_EXTRA_TOKENS if effort else 0)
         if self.spec is not None:
-            tokens = min(tokens, self.spec.max_output)
-        return effort, tokens
+            return self.spec.tokens_for(role, max_tokens)
+        effort = THINKING.get(role)
+        return effort, max_tokens + (THINKING_EXTRA_TOKENS if effort else 0)
 
     def json_call(self, messages: list, *, arm: str, qid: str, attempt: int, max_tokens: int = 4000):
         """返回 (parsed_dict_or_None, raw_text, error_or_None)，error 只表示模型输出本身的问题。
@@ -109,10 +172,13 @@ class LLM:
             started = datetime.now(timezone.utc)
             t0 = time.time()
             req = urllib.request.Request(url, data=body, method="POST", headers=headers)
+            retry_after = None
             try:
-                status, raw = self._post(req)
+                status, raw = self._post(req, **ad.chat_timeouts)
             except urllib.error.HTTPError as e:
                 status, raw = e.code, (read_error_body(e) if e.code in ad.error_body_statuses else b"")
+                retry_after = e.headers.get("retry-after") if ad.honor_retry_after and e.headers else None
+                e.close()
             except (urllib.error.URLError, TimeoutError, OSError) as e:
                 rec.update(ok=False, error=type(e).__name__, http_try=http_try)
                 time.sleep(2 * http_try)
@@ -136,19 +202,21 @@ class LLM:
                 rec.update(ok=False, error=f"http_{status}")
                 self._log(rec)
                 raise BalanceExhausted(f"insufficient balance: {ad.label} {why} ({arm} {qid} attempt {attempt}); "
-                                       f"the run was stopped without retrying. Top up the {ad.label} account and run again.")
-            if status in RETRY_STATUS and http_try < 3:
-                time.sleep(2 * http_try)
+                                       f"the run was stopped without retrying. {ad.balance_hint}")
+            if status in ad.retry_statuses and http_try < 3:
+                time.sleep(retry_wait(2 * http_try, retry_after))
                 continue
             if status != 200:
-                rec.update(ok=False, error=f"http_{status}")
+                rec.update(ok=False, error=f"http_{status}", **server_error(ad, raw))
                 break
             try:
-                data = json.loads(raw)
+                data = ad.chat_decode(raw)
                 unpacked = ad.chat_unpack(data)
-            except (ValueError, KeyError, IndexError, TypeError):
+            except (ValueError, KeyError, IndexError, TypeError) as e:
                 # 只记诊断信息：长度、顶层键、服务端 error.message（不含回复内容，也不含 key）
                 rec.update(ok=False, error="bad_response_body", body_bytes=len(raw), body_head_is_ws=raw[:1].isspace())
+                if getattr(e, "error_type", None):   # v2.10b：Claude 流里的 error 事件 / 流没收完
+                    rec["stream_error"] = e.error_type
                 try:
                     d = json.loads(raw)
                     rec["body_keys"] = sorted(d)[:10] if isinstance(d, dict) else type(d).__name__
@@ -164,10 +232,12 @@ class LLM:
             rec.update(ad.chat_meter(unpacked, started, self.model, effort))
             text = ad.chat_text(unpacked)
             # 先查截断：被截断的 JSON 几乎总是解析失败，先解析的话截断会被误报成「不是合法 JSON」
-            if ad.chat_truncated(unpacked):
-                rec.update(ok=False, error="truncated")
+            # （v2.10b：adapter 的 chat_problem 统一报回复本身的问题；DeepSeek 只有截断，Claude 另有拒答、暂停）
+            problem = ad.chat_problem(unpacked)
+            if problem:
+                rec.update(ok=False, error=problem[0])
                 self._log(rec)
-                return None, text, "reply was truncated (finish_reason=length)"
+                return None, text, problem[1]
             try:
                 out = json.loads(text)
             except json.JSONDecodeError as e:
@@ -184,7 +254,8 @@ class LLM:
             self._log(rec)
             return out, text, None
         self._log(rec)
-        raise TransportError(f"{arm} {qid} attempt {attempt}: {rec.get('error', 'request failed')}")
+        detail = f" ({rec['server_error_type']}: {rec.get('server_error', '')})" if rec.get("server_error_type") else ""
+        raise TransportError(f"{arm} {qid} attempt {attempt}: {rec.get('error', 'request failed')}{detail}")
 
     @staticmethod
     def _post(req, sock_timeout: float = 180, total_timeout: float = TOTAL_TIMEOUT_S):

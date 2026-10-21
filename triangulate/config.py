@@ -88,6 +88,30 @@ PRICES = {
                         "source": DEEPSEEK_PRICING, "checked": "2026-10-21"},
 }
 
+# v2.10b：Claude（Anthropic 官方 Pricing 页，2026-10-21 查看）。没有分时价：peak = offpeak = (cache hit, base input, output)。
+# cache 写入另有两档价（5 分钟 / 1 小时，providers.claude_usage_cost 用）。prompt_cache = "explicit"：只有请求里写了
+# cache_control 才缓存（本项目不写），所以按 DeepSeek 实测的「一个方向」估价时，DeepSeek 自动缓存命中的那部分按 base input 算
+# （pipeline.Budget.typical_direction_usd）。Haiku 5.5 按单次请求的 prompt 长度分两档：prompt（input + cache 读 + cache 写）
+# 超过 100,000 token 的请求整次按高价（long_context）。请求里不写 inference_geo（默认 global，标准价）；回复里 usage.inference_geo
+# 是 "us" 时按官方 1.1 倍算
+CLAUDE_PRICING = "https://platform.claude.com/docs/en/about-claude/pricing"
+
+
+def _claude_price(base_in, write_5m, write_1h, hit, out, **extra) -> dict:
+    return {"provider": "claude", "offpeak": (hit, base_in, out), "peak": (hit, base_in, out),
+            "cache_write_5m": write_5m, "cache_write_1h": write_1h, "prompt_cache": "explicit",
+            "source": CLAUDE_PRICING, "checked": "2026-10-21", **extra}
+
+
+PRICES.update({
+    "claude-haiku-5-5": _claude_price(0.10, 0.125, 0.20, 0.01, 0.50, long_context={
+        "threshold_tokens": 100_000, "peak": (0.05, 0.50, 2.50), "cache_write_5m": 0.625, "cache_write_1h": 1.00}),
+    "claude-sonnet-5-5": _claude_price(2.00, 2.50, 4.00, 0.10, 10.00),
+    "claude-opus-5-5": _claude_price(4.00, 5.00, 8.00, 0.20, 20.00),
+    "claude-fable-5-1": _claude_price(10.00, 12.50, 20.00, 0.25, 50.00),
+})
+CLAUDE_US_GEO_MULTIPLIER = 1.1   # Pricing 页 Data residency：inference_geo "us" 所有 token 类别 1.1 倍
+
 
 class UnknownModel(ValueError):
     """config.PRICES 里没有这个模型：不能计价，就不跑。"""
