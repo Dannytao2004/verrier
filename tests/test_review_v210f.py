@@ -83,19 +83,14 @@ class TestServerTextRedaction(unittest.TestCase):
 
 
 class TestDeepSeekSpecSearch(unittest.TestCase):
-    def test_spec_search_turns_thinking_off_cli_body_unchanged(self):
-        """DeepSeek Thinking Mode 文档：思考默认开（high）；开关 {"thinking": {"type": "enabled/disabled"}} 两种格式通用，Anthropic 格式的
-        深度是 output_config.effort。自带 key 的搜索请求在末尾加 thinking；命令行的 search_request 不变。"""
+    def test_spec_search_body_same_as_cli(self):
+        """用户 10-21：DeepSeek 搜索「保持原本一样即可」。自带 key 的运行也不加 thinking，请求体和命令行逐字相同（v2.10g 撤回 v2.10f 的改动）。"""
         ds = PV.DEEPSEEK
+        self.assertFalse(hasattr(ds, "search_request_spec"))
         h0, b0 = ds.search_request("deepseek-flash", "k", "p", max_tokens=8192, max_uses=3)
-        h1, b1 = ds.search_request_spec("deepseek-flash", "k", "p", max_tokens=8192, max_uses=3)
-        self.assertEqual(h0, h1)
         self.assertEqual(list(b0), ["model", "max_tokens", "tools", "messages"])
-        self.assertEqual(b1, {**b0, "thinking": {"type": "disabled"}})
-        _, b2 = ds.search_request_spec("deepseek-flash", "k", "p", max_tokens=8192, max_uses=3, effort="high")
-        self.assertEqual((b2["thinking"], b2["output_config"]), ({"type": "enabled"}, {"effort": "high"}))
         sp = PV.ModelSpec("deepseek", "deepseek-flash", "sk-0123456789abcdef", thinking="high")
-        self.assertIsNone(sp.effort("search"))   # 搜索不是 plan / judge / repair：关
+        self.assertIsNone(sp.effort("search"))   # 搜索不是 plan / judge / repair
 
 
 class TestWebStatusAfterBudgetStop(unittest.TestCase):

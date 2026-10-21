@@ -153,22 +153,13 @@ class DeepSeekAdapter:
         return None
 
     def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None):
-        """effort 不用：DeepSeek 搜索请求体保持 v2.9b 原样（不带 thinking 字段，见 PROVIDERS.md 第 8 节）。命令行、回测、基线走这里。"""
+        """effort 不用：DeepSeek 搜索请求体保持 v2.9b 原样（不带 thinking 字段）。命令行和自带 key 的运行都走这里：
+        用户 10-21 定「保持原本一样即可」，v2.10g 撤回了 v2.10f 给自带 key 的运行加的 thinking disabled（PROVIDERS.md 第 8、14.6 节）。"""
         payload = {"model": model, "max_tokens": max_tokens,
                    "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": max_uses}],
                    "messages": [{"role": "user", "content": prompt}]}
         return {"Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01"}, payload
 
-    def search_request_spec(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None):
-        """v2.10f：自带 key 的运行（有 ModelSpec）的搜索请求：在 search_request 的请求体后面加控制思考的字段。Thinking Mode 文档
-        （2026-10-21 查看页面 HTML 的表格：开关 {"thinking": {"type": "enabled/disabled"}} 跨 OpenAI / Anthropic 两栏，深度在 Anthropic
-        格式里是 output_config.effort；思考默认开、默认 high）。搜索不是 plan / judge / repair，DeepSeek 两个模型都能关：thinking disabled。
-        命令行的 search_request 不变（金样本逐字节相同）。"""
-        headers, payload = self.search_request(model, key, prompt, max_tokens=max_tokens, max_uses=max_uses)
-        payload["thinking"] = {"type": "enabled" if effort else "disabled"}
-        if effort:
-            payload["output_config"] = {"effort": effort}
-        return headers, payload
 
     search_unpack = staticmethod(anthropic_search_unpack)
 

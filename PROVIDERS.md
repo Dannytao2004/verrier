@@ -12,7 +12,7 @@
 | `v2.10d` | Kimi adapter（国际站 / 国内站两个区域；JSON 调用走流式 Chat Completions；搜索 = 一次 JSON 调用生成查询词 + `POST /v1/tools/search`）；国内站按 CNY 官方价折算（`ModelSpec.price_id`）；429 余额不足立刻停；Kimi key 校验 | 第 11 节 |
 | `v2.10e` | GLM adapter（Z.ai 国际站 / 智谱开放平台国内站两个区域；JSON 调用走非流式 Chat Completions；搜索同 Kimi：生成查询词 + `POST /web_search`）；国内站按 CNY 官方价折算；429 余额不足（1113）和用量上限 / 套餐 key 的码立刻停；只收 Standard API Key（网页提示 `GLM_KEY_NOTE`）；GLM key 校验 | 第 12 节 |
 | `web-v0.9` | 网页接上 BYOK：`GET /api/providers`（provider、区域、模型、思考档位、每次运行的花费估计）、`POST /api/key/check`、`POST /api/runs` 必须带 key；key 只在这次运行的内存里，结束就清；经典界面只浏览；/verrier 控制台的「模型 · key · 上限」表单 | 第 13 节 |
-| `v2.10f` | 审查修正：自带 key 的运行里预扣放不下只是因为在途时等、上限放不下一次最小运行就在服务端拒跑、Claude 默认改 Sonnet 5.5；中途停下的运行标 failed 并写原因；预扣的估计（搜索输入 p99、别家 1 字符 1 token、续接另预扣、缺 usage 按预扣记）；先 redact 再截断、GLM 形状的 key、key 字符集；等人工确认 30 分钟超时；DeepSeek 自带 key 的搜索关思考；命令行只收 DeepSeek 模型；403 的说法；GLM 1313 重试；五家的端到端测试 | 第 14 节 |
+| `v2.10f` | 审查修正：自带 key 的运行里预扣放不下只是因为在途时等、上限放不下一次最小运行就在服务端拒跑、Claude 默认改 Sonnet 5.5；中途停下的运行标 failed 并写原因；预扣的估计（搜索输入 p99、别家 1 字符 1 token、续接另预扣、缺 usage 按预扣记）；先 redact 再截断、GLM 形状的 key、key 字符集；等人工确认 30 分钟超时；~~DeepSeek 自带 key 的搜索关思考~~（v2.10g 按用户决定撤回）；命令行只收 DeepSeek 模型；403 的说法；GLM 1313 重试；五家的端到端测试 | 第 14 节 |
 
 ## 1. Scope and binding decisions（用户 10-20 / 10-21 定的，摘要）
 
@@ -171,7 +171,7 @@ agent 里 `AgentLLM.ask` 和 `run_direction` 的搜索把它变成 `Budget.halt(
 
 （v2.10b 起 Claude 相关的限制在第 9.8 节；下面是 v2.10a 记的，「key 校验」一条已在 v2.10b 实现。）
 
-- ~~**DeepSeek 搜索角色的思考没关**~~（v2.10f 已改，只改自带 key 的路径，第 14.6 节）：搜索请求不带 `thinking` 字段（v2.9b 原样），服务端默认；`search_direct.py` 的注释记过这个接口默认返回 thinking 块。
+- **DeepSeek 搜索角色的思考不关（用户 10-21 定：「保持原本一样即可，我觉得无所谓」）**：v2.10f 曾在自带 key 的路径里加 thinking disabled，v2.10g 撤回。搜索请求不带 `thinking` 字段（v2.9b 原样），服务端默认；`search_direct.py` 的注释记过这个接口默认返回 thinking 块。
   用户决定 6 说「其余角色能关就关」，但关掉要往搜索请求体里加字段（改变冻结的请求体），而且 DeepSeek 的 Anthropic 兼容文档只写了 `thinking`
   「Supported」、没写 `type: disabled` 的效果（未核实）。本阶段没动，等用户定。
 - ~~**网页还没接**~~：web-v0.9 已接（第 13 节）。
@@ -1268,3 +1268,8 @@ OpenAI / Anthropic 两种格式（colspan=2），Anthropic 格式的深度是 `o
 - 国内站错误码：https://docs.bigmodel.cn/cn/faq/api-code ；API 定价：https://docs.bigmodel.cn/cn/guide/start/pricing ；模型概览：https://docs.bigmodel.cn/cn/guide/start/model-overview
 - 国内站深度思考：https://docs.bigmodel.cn/cn/guide/capabilities/thinking ；核心参数：https://docs.bigmodel.cn/cn/guide/start/concept-param ；HTTP API 调用：https://docs.bigmodel.cn/cn/guide/develop/http/introduction
 - 国内站 API Key 分类管理说明：https://docs.bigmodel.cn/cn/coding-plan/notice/api-key-management ；Coding Plan 使用须知：https://docs.bigmodel.cn/cn/coding-plan/usage-notes
+
+
+## 15. v2.10g：DeepSeek 搜索请求保持原样（用户 10-21 决定）
+
+用户 10-21：「保持原本一样即可，我觉得无所谓」。v2.10f 在自带 key 的 DeepSeek 搜索请求末尾加的 `thinking: disabled`（及 `output_config`）撤回，`DeepSeekAdapter.search_request_spec` 删除；命令行和自带 key 的运行发出的搜索请求体都和 v2.9b 逐字相同（不带 thinking 字段，服务端默认）。第 14.6 节的这一条作废。

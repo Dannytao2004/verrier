@@ -85,7 +85,7 @@ class Searcher:
         fee = SEARCH_FEE_ASSUMED_USD if sp is None else search_fee_usd(sp.price_id)
         price_model = self.model if sp is None else sp.price_id
         effort, out_tokens = (None, MAX_TOKENS["search"]) if sp is None else sp.tokens_for("search", MAX_TOKENS["search"])
-        # v2.10f：自带 key 的运行用 adapter 的 search_request_spec（有的话：DeepSeek 在请求体里写明关思考）；命令行照旧 search_request
+        # 自带 key 的运行用 adapter 的 search_request_spec（有的话）；DeepSeek 没有这个方法（v2.10g：用户 10-21 定搜索请求保持原样）
         build = ad.search_request if sp is None else getattr(ad, "search_request_spec", ad.search_request)
         headers, payload = build(self.model, self._key if sp is None else sp.key, prompt,
                                  max_tokens=out_tokens, max_uses=max_uses, effort=effort)

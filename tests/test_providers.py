@@ -87,15 +87,10 @@ class TestSpecPathDeepSeek(unittest.TestCase):
         sa, ra = _send(lambda: S.Searcher(log=logged.append), [OK_SEARCH], lambda s: s.search("p", role="search:d1", qid="t"))
         sb, rb = _send(lambda: S.Searcher(log=logged.append, spec=spec()), [OK_SEARCH],
                        lambda s: s.search("p", role="search:d1", qid="t"))
-        # v2.10f：自带 key 的搜索请求体在末尾多一个 thinking disabled（DeepSeek 默认开思考；搜索不是 plan / judge / repair），
-        # 其余（URL、请求头、超时、前面的字段和顺序、返回值、日志）和默认路径相同；默认路径的请求体不变（金样本）
+        # v2.10g（用户 10-21「保持原本一样即可」）：自带 key 的搜索请求和默认路径逐字相同，不加 thinking
         self.assertEqual(ra, rb)
-        self.assertEqual([{k: v for k, v in x.items() if k != "body"} for x in sa],
-                         [{k: v for k, v in x.items() if k != "body"} for x in sb])
-        a_body, b_body = json.loads(sa[0]["body"]), json.loads(sb[0]["body"])
-        self.assertNotIn("thinking", a_body)
-        self.assertEqual(list(b_body), list(a_body) + ["thinking"])
-        self.assertEqual(b_body, {**a_body, "thinking": {"type": "disabled"}})
+        self.assertEqual(sa, sb)
+        self.assertNotIn("thinking", json.loads(sb[0]["body"]))
         self.assertEqual(GD._norm_log(logged[:1]), GD._norm_log(logged[1:]))
         self.assertEqual(dict(sb[0]["headers"])["X-api-key"], KEY)
 

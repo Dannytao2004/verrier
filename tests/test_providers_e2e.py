@@ -334,8 +334,8 @@ class TestEveryProviderRunsToTheEnd(_E2E):
                     if prov == "gpt" and x["role"] != "search":   # GPT：只有 reasoning_effort = none 时发 temperature 0
                         self.assertEqual("temperature" in b, b.get("reasoning_effort") == "none", x["role"])
                         self.assertIs(b["store"], False)
-                    if prov == "deepseek" and x["role"] == "search":   # v2.10f：自带 key 的 DeepSeek 搜索写明关思考
-                        self.assertEqual(b["thinking"], {"type": "disabled"})
+                    if prov == "deepseek" and x["role"] == "search":   # v2.10g：DeepSeek 搜索保持 v2.9b 原样（用户 10-21），不带 thinking
+                        self.assertNotIn("thinking", b)
                 state = self.state(st)
                 self.assertEqual((state["provider"], state["settings"]["run_spec"]["model"]), (prov, model))
                 self.assertTrue(state["budget"]["waited_for_room"] >= 0)
