@@ -6,6 +6,7 @@ v2.10a：建请求、解析回复、计价交给 provider adapter（triangulate/
 v2.10b：各家不同的解码（Claude 是流式 SSE）、可重试的状态码、超时、回复本身的问题（截断 / 拒答 / 暂停）也由 adapter 给；
 check_key() 用 models 列表接口校验 key。
 v2.10c：OpenAI（Chat Completions）；读过的错误 body 另记 error.code，像 key 的片段换成 sk-***。
+v2.10d：Kimi（流式 Chat Completions）；计量按 spec.price_id（国内站的价格）；retry_after() 另认 Kimi 搜索接口的 X-RateLimit-Reset。
 
 每次调用记一行到 results/calls.jsonl：arm、题 id、第几次尝试、token、延迟、finish_reason、估算 USD。
 日志里不记 prompt、不记 key。（v2.9b 起，回复不是合法 JSON 时记首尾各 200 字符的诊断。）
@@ -68,6 +69,22 @@ def read_error_body(e: urllib.error.HTTPError, limit: int = 65536) -> bytes:
 
 
 RETRY_AFTER_MAX_S = 60
+
+
+def retry_after(ad, headers):
+    """v2.10d：出错的回复要求等多少秒（交给 retry_wait）：adapter 不看（honor_retry_after = False，DeepSeek）或没有响应头时 None；
+    先取 retry-after；没有时，adapter 指定了 reset_header（Kimi 搜索接口的 X-RateLimit-Reset，Unix 秒）就换成距现在的秒数。
+    v2.10b / c 的 Claude、OpenAI 只看 retry-after，行为不变。"""
+    if not ad.honor_retry_after or not headers:
+        return None
+    ra = headers.get("retry-after")
+    name = getattr(ad, "reset_header", None)
+    if ra is None and name and headers.get(name) is not None:
+        try:
+            ra = float(headers.get(name)) - time.time()
+        except ValueError:
+            ra = None
+    return ra
 
 
 def retry_wait(default_s: float, retry_after) -> float:
@@ -164,6 +181,11 @@ class LLM:
     def adapter(self):
         return DEEPSEEK if self.spec is None else self.spec.adapter
 
+    @property
+    def price_model(self) -> str:
+        """v2.10d：计价用的 id：没有 spec 时就是 model；有 spec 时是 spec.price_id（Kimi 国内站 "kimi-k3@cn"，其余等于 model）。"""
+        return self.model if self.spec is None else self.spec.price_id
+
     def _auth_key(self) -> str:
         return self._key if self.spec is None else self.spec.key
 
@@ -192,12 +214,12 @@ class LLM:
             started = datetime.now(timezone.utc)
             t0 = time.time()
             req = urllib.request.Request(url, data=body, method="POST", headers=headers)
-            retry_after = None
+            wait_hint = None
             try:
                 status, raw = self._post(req, **ad.chat_timeouts)
             except urllib.error.HTTPError as e:
                 status, raw = e.code, (read_error_body(e) if e.code in ad.error_body_statuses else b"")
-                retry_after = e.headers.get("retry-after") if ad.honor_retry_after and e.headers else None
+                wait_hint = retry_after(ad, e.headers)
                 e.close()
             except (urllib.error.URLError, TimeoutError, OSError) as e:
                 rec.update(ok=False, error=type(e).__name__, http_try=http_try)
@@ -224,7 +246,7 @@ class LLM:
                 raise BalanceExhausted(f"insufficient balance: {ad.label} {why} ({arm} {qid} attempt {attempt}); "
                                        f"the run was stopped without retrying. {ad.balance_hint}")
             if status in ad.retry_statuses and http_try < 3:
-                time.sleep(retry_wait(2 * http_try, retry_after))
+                time.sleep(retry_wait(2 * http_try, wait_hint))
                 continue
             if status != 200:
                 rec.update(ok=False, error=f"http_{status}", **server_error(ad, raw))
@@ -249,7 +271,7 @@ class LLM:
                     time.sleep(5 * http_try)
                     continue
                 break
-            rec.update(ad.chat_meter(unpacked, started, self.model, effort))
+            rec.update(ad.chat_meter(unpacked, started, self.price_model, effort))
             text = ad.chat_text(unpacked)
             # 先查截断：被截断的 JSON 几乎总是解析失败，先解析的话截断会被误报成「不是合法 JSON」
             # （v2.10b：adapter 的 chat_problem 统一报回复本身的问题；DeepSeek 只有截断，Claude 另有拒答、暂停）

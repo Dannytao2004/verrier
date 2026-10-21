@@ -14,7 +14,7 @@ from ..providers import search_fee_usd
 from . import evidence as ev
 from .fetch import fetch_live, fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
-from .search import Searcher
+from .search import SEARCH_QUERIES_MAX_TOKENS, Searcher
 
 MAX_CHARS_TO_EXTRACTOR = 400_000   # v2.8b 从 24_000 放宽（HTML 和 PDF 都适用）：长的统计页不再只发开头
 QUOTE_STORE_CHARS = 200
@@ -83,6 +83,8 @@ class Budget:
                 hit = miss
             elif p.get("prompt_cache") == "implicit_write":   # v2.10c GPT：默认在 user 消息末尾写缓存，输入都按 30 分钟写入价（保守）
                 hit = miss = p["cache_write_30m"]
+            elif p.get("prompt_cache") == "implicit":   # v2.10d Kimi：自动缓存，但这里的命中率没测过，输入都按 miss / 5 分钟写入价（保守）
+                hit = miss = max(miss, p.get("cache_write_5m", miss))
             pr = cls.DIRECTION_PROFILE
             return (pr["hit"] * hit + pr["miss"] * miss + pr["out"] * out) / 1e6 + pr["searches"] * search_fee_usd(m)
         return cls.TYPICAL_DIRECTION_USD * cost(model) / cost(cls.REFERENCE_MODEL)
@@ -135,12 +137,15 @@ class Budget:
     @staticmethod
     def reserve_rates(model: str, prompt_tokens: float) -> tuple:
         """预扣用的 (cache hit, 每个输入 token 的最坏单价, 输出)：peak_rates；v2.10c 默认会写缓存的模型（GPT，prompt_cache =
-        implicit_write）输入按 30 分钟写入价（1.25 倍 input 价，同一档 long context 的写入价）。DeepSeek / Claude 和 peak_rates 相同。"""
+        implicit_write）输入按 30 分钟写入价（1.25 倍 input 价，同一档 long context 的写入价）；v2.10d Kimi（implicit）按 miss 和
+        5 分钟写入价中较高的。DeepSeek / Claude 和 peak_rates 相同。model 是计价 id（ModelSpec.price_id）。"""
         p = price(model)
         hit, miss, out = Budget.peak_rates(model, prompt_tokens)
         if p.get("prompt_cache") == "implicit_write":
             lc = p.get("long_context")
             miss = max(miss, (lc if lc and prompt_tokens > lc["threshold_tokens"] else p)["cache_write_30m"])
+        elif p.get("prompt_cache") == "implicit":   # v2.10d Kimi：默认 5 分钟档写缓存（K3 的写入价 = miss 价；K2 没有单列）
+            miss = max(miss, p.get("cache_write_5m", miss))
         return hit, miss, out
 
     @staticmethod
@@ -226,10 +231,14 @@ class Context:
         self.check_published = False  # v2.4「答案已公布」检查（published.py）：只有 run.prepare_run 在真实使用时打开
         self.live_fetch = False  # v2.5 直接抓 live 页（fetch_live）：同上，只在真实使用时打开
         self.early = None        # v2.5 提前停（published.EarlyWatch）：同上
-        self.budget = budget or (Budget() if spec is None else Budget.for_model(spec.model, usd=spec.usd_cap))
+        # v2.10d：按 spec.price_id 计价（Kimi 国内站是 "kimi-k3@cn"，其余就是模型名）
+        self.budget = budget or (Budget() if spec is None else Budget.for_model(spec.price_id, usd=spec.usd_cap))
         self.calls_path = calls_path
         if spec is not None:   # v2.10b：搜索也开思考的模型（Opus 5.5 / Fable 5.1）预扣按带余量的 max_tokens
-            self.budget.search_tokens = spec.tokens_for("search", MAX_TOKENS["search"])[1]
+            # v2.10d：「生成查询词 + 搜索接口」的 provider（Kimi），搜索里唯一的模型调用是生成查询词，预扣按它发出的 max_tokens
+            search_max = (SEARCH_QUERIES_MAX_TOKENS if getattr(spec.adapter, "search_mode", "model") == "queries"
+                          else MAX_TOKENS["search"])
+            self.budget.search_tokens = spec.tokens_for("search", search_max)[1]
         self.llm = AgentLLM(calls_path, self.budget, spec=spec)
         self.searcher = Searcher(log=self.llm._log, spec=spec)
         # 哨兵只在代码里用：真值（和其他 as_of 之后才公布的已知值）不进任何 prompt。可以是一个数或一组数

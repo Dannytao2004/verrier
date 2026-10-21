@@ -9,7 +9,8 @@
 | `v2.10a` | adapter 层 + 每次运行的 `ModelSpec`，目前只有 DeepSeek；按模型计价、没有价格的模型拒跑、方向数按模型价格缩放、余额不足立刻停、key 不落盘、BYOK 运行关掉 Jev | 本文件第 1–7 节 |
 | `v2.10b` | Claude adapter（原生 Messages API，流式）和 Claude 搜索（服务端 web_search，pause_turn 续上）；用 models 列表校验 key（`llm.check_key`，DeepSeek 也有）；adapter 接口补了解码、可重试状态码、超时、回复问题、续搜索几个钩子 | 第 3、5、9 节 |
 | `v2.10c` | GPT adapter（OpenAI：JSON 调用走 Chat Completions，搜索走 Responses API 的 web_search）；按官方价计价（含 cache 写入价、272K 长上下文档）；429 余额 / 额度错误立刻停；GPT key 校验 | 第 10 节 |
-| 之后 | Kimi、GLM 的 adapter；网页（填 key、选模型、校验 key、每次运行的花费估计） | 未开始 |
+| `v2.10d` | Kimi adapter（国际站 / 国内站两个区域；JSON 调用走流式 Chat Completions；搜索 = 一次 JSON 调用生成查询词 + `POST /v1/tools/search`）；国内站按 CNY 官方价折算（`ModelSpec.price_id`）；429 余额不足立刻停；Kimi key 校验 | 第 11 节 |
+| 之后 | GLM 的 adapter；网页（填 key、选模型、校验 key、每次运行的花费估计） | 未开始 |
 
 ## 1. Scope and binding decisions（用户 10-20 / 10-21 定的，摘要）
 
@@ -63,6 +64,11 @@ adapter 只管各家不同的部分：
 | v2.10b：`key_check_request(region, key)`、`models_unpack(d)` | `llm.check_key(spec)` 用：models 列表接口的 GET 和解析 |
 | v2.10c：`llm.server_error` 另记 `server_error_code` | 读过的错误 body 有 `error.code`（OpenAI）时记下，异常文字写成 `(type/code: message)`（`llm.server_error_detail`）；message 里像 key 的片段（`sk-...`）换成 `sk-***`。Claude 的错误没有 `code`，文字不变 |
 | v2.10c：`Budget.reserve_rates(model, prompt_tokens)` | 预扣用的单价：`peak_rates`，默认会写缓存的模型（`prompt_cache = "implicit_write"`，GPT）输入按 30 分钟写入价。DeepSeek / Claude 和 `peak_rates` 相同 |
+| v2.10d：`ModelSpec.price_id`、`providers.price_id(model, region, ad)` | 计价 id（`config.PRICES` 的键）：这家的默认区域就是模型名（DeepSeek / Claude / GPT 只有一个区域，不变），别的区域是 `模型@区域`（Kimi 国内站 `kimi-k3@cn`）。`LLM.price_model`、`Searcher` 的计量、`Budget.for_model`、`ModelSpec` 的价格校验都用它；请求里发的仍是模型名，calls.jsonl 的 `model` 也仍是模型名 |
+| v2.10d：`providers.search_fee_usd(price_id)` | 价格表里写了 `search_fee_usd` 的（Kimi，按区域）用它，否则用这家 adapter 的 `search_fee_usd`（其余三家不变） |
+| v2.10d：`search_mode`、`tools_search_request(key, query, limit=)`、`tools_search_unpack(d)` | `search_mode = "queries"`（Kimi）：`Searcher.search` 不走 `search_request` 那条路，改走 `_search_by_queries`（第 11.5 节）。没有这个属性的 adapter 照旧（`"model"`） |
+| v2.10d：`reset_header`、`llm.retry_after(ad, headers)` | 出错时要等多少秒：先看 `retry-after`；没有、且 adapter 指定了 `reset_header`（Kimi 搜索接口的 `X-RateLimit-Reset`，Unix 秒）时换成距现在的秒数。`honor_retry_after = False`（DeepSeek）时照旧不看；Claude / OpenAI 没有 `reset_header`，行为不变 |
+| v2.10d：`region_labels`、`MODELS[m]["thinking_param"]` / `["thinking_depth"]` | 网页用：区域的说明；这个模型用哪个字段控制思考、有没有深度档位（K2.6 没有：low / medium / high 都是「开」） |
 
 `ModelSpec.tokens_for(role, max_tokens)`（v2.10b）：这个角色的思考档位和实际发出的 max_tokens（开思考 +`THINKING_EXTRA_TOKENS`，不超过模型最大输出），
 JSON 调用、搜索、预扣都用它。`Budget.search_tokens`：spec 运行里搜索实际发出的 max_tokens（Opus 5.5 / Fable 5.1 的搜索也开思考，预扣跟着变大）。
@@ -164,8 +170,8 @@ agent 里 `AgentLLM.ask` 和 `run_direction` 的搜索把它变成 `Budget.halt(
   `app.py` 不收 provider / model / key；网页没有 key 输入框、模型选择、花费估计。留给网页阶段。
 - 搜索遇到 401 / 403 仍然只记 `http_401` 返回空 URL（v2.9b 原样），不像 JSON 调用那样抛 `KeyRejected`。
 - ~~key 校验（models 列表接口）还没实现。~~ v2.10b：`llm.check_key`（DeepSeek `GET /models`、Claude `GET /v1/models`），网页还没接。
-- ~~其他四家（Claude、GPT、Kimi、GLM）的 adapter、价格、模型清单还没加~~：Claude 见第 9 节（v2.10b），GPT 见第 10 节（v2.10c）；
-  Kimi、GLM 还没加，调研结果在 `providers_research.json`（2026-10-20）。
+- ~~其他四家（Claude、GPT、Kimi、GLM）的 adapter、价格、模型清单还没加~~：Claude 见第 9 节（v2.10b），GPT 见第 10 节（v2.10c），
+  Kimi 见第 11 节（v2.10d）；GLM 还没加，调研结果在 `providers_research.json`（2026-10-20）。
 
 ## 9. Claude adapter（`ClaudeAdapter`，v2.10b）
 
@@ -502,6 +508,227 @@ explicit 断点只缓存固定的提示词（要改请求体的消息格式）�
   没发过 `/v1/chat/completions`、`/v1/responses`。
 - 测试改动：`tests/test_providers.py` 里两个「没有价格的模型」测试原来拿 `gpt-6-luna` 当例子，现在它有价格了，换成 `no-such-model-x`。
 
+## 11. Kimi adapter（`KimiAdapter`，v2.10d）
+
+Moonshot AI 开放平台。同前两家：标准库 urllib，不装 SDK（官方示例用 OpenAI SDK 换 base_url；这里直接发 HTTP，和其余 provider 共用外层循环、
+不跟随跳转、假服务测试）。JSON 调用走 OpenAI 兼容的 Chat Completions；Responses / Anthropic Messages 兼容接口文档里只支持 `kimi-k3`，不用
+（K2.6 只能走 Chat Completions）。API 细节在 2026-10-21 对照官方 `.md` 原文（页面地址加 `.md`）逐条核过，价格表是 JS 渲染的，数字取自页面 HTML
+里编译后的表格（见 11.6）。
+
+### 11.1 区域和 key
+
+| `region` | 平台（控制台） | API 地址 | 计价 |
+|---|---|---|---|
+| `global`（默认） | 国际站 platform.kimi.ai（旧域名 platform.moonshot.ai 会 301 过去） | `https://api.moonshot.ai/v1` | USD |
+| `cn` | 国内站 platform.kimi.com（旧域名 platform.moonshot.cn） | `https://api.moonshot.cn/v1` | CNY，按 2026-10-21 人民币汇率中间价 1 USD = 6.7192 CNY 折成 USD |
+
+- 两站的账户、余额、key 完全独立，混用返回 401（Common Error Codes 页 Platform key isolation；List Models 页）。网页上用户自己选区域。
+  调研里提到的「401 时换另一站自动判断」没做（等于拿用户的 key 去另一个地址试）。
+- 计价 id：国际站就是模型名（`kimi-k2.6`、`kimi-k3`），国内站 `kimi-k2.6@cn`、`kimi-k3@cn`（`ModelSpec.price_id`）。请求里发的、calls.jsonl 里记的
+  `model` 都是模型名；`state.json` 的 `settings.run_spec` 在国内站另记 `price_id` 和 `fx`（汇率、来源、日期）。
+- 汇率来源：中国人民银行授权中国外汇交易中心公布的 2026-10-21 人民币汇率中间价（https://www.pbc.gov.cn/zhengcehuobisi/125207/125217/125925/2026102108513972558/index.html ）。
+  固定常数 `config.CNY_PER_USD`，不随行情更新；汇率变动 1% 时成本估计差 1%。
+- 调研记录（本阶段没再核实）：Kimi Code 订阅的 key 不能用在开放平台；美国用户能否用信用卡给国际站充值文档没写清。
+
+### 11.2 JSON 调用发什么
+
+`POST {base}/chat/completions`，请求头 `Content-Type: application/json`、`Authorization: Bearer <key>`。body 依次是：
+
+| 字段 | 值 | 为什么 |
+|---|---|---|
+| `model` | `kimi-k2.6` / `kimi-k3` | 用户决定 9 的清单 |
+| `messages` | 原样（Kimi 收 `system` 角色）；内容为空的 assistant 消息不发 | Chat API：content must not be empty（AgentLLM.ask 重问时，回复被思考用完、正文为空，就会出现空的 assistant 消息） |
+| `thinking`（K2.6） | `{"type": "disabled"}` / `{"type": "enabled"}` | K2.6 默认 enabled，要关必须显式写；不支持 `reasoning_effort`（Model Parameter Reference） |
+| `reasoning_effort`（K3） | `low` / `high` / `max` | K3 永远在想，顶层 `reasoning_effort`，省略时默认 `max`（最贵），所以每次都显式写；文档：K3 不发 `thinking` |
+| `response_format` | `{"type": "json_object"}` | 用户决定 4 / 10：普通 JSON 写法，不用 json_schema。文档要求在 prompt 里写明 JSON 的字段（现有 prompt 都写了） |
+| `max_completion_tokens` | 角色的 `MAX_TOKENS`，开思考 +24,000，最多 K2.6 262,144 / K3 1,048,576 | Chat API：`max_tokens` 已 Deprecated；思考 token 和正文共用这个上限（Thinking 指南：the sum of tokens in reasoning_content and content must be less than or equal to max_tokens） |
+| `stream` | `true` | Common Error Codes 页：服务端 900 秒没回就 504，Common with long non-streaming requests. Use streaming output；Thinking 指南也建议思考模型开流式 |
+| `stream_options` | `{"include_usage": true}` | 不写就拿不到 usage（Chat API：usage 在 `[DONE]` 之前的最后一个 chunk） |
+
+不发：`temperature`、`top_p`、`n`、`presence_penalty`、`frequency_penalty`（Model Parameter Reference：三个模型上都是固定值，"passing any other value returns
+an error, so do not pass it explicitly"；用户决定 5）；`prompt_cache_options`（省略 = 默认 5 分钟档的隐式缓存写入，没要求做缓存）；`tools`、`tool_choice`、
+`partial`（文档：Partial Mode 不要和 json_object 混用）、`prompt_cache_key`、`safety_identifier`。
+
+回复（`providers.parse_chat_sse`）：每个事件一行 `data: <chunk>`，`choices[0].delta.content` 累加，`finish_reason` 取最后一个非空值，`usage` 取带 usage 的 chunk，
+`data: [DONE]` 结束；`delta.reasoning_content`（思考内容，总在 content 之前）不拼、不记；`:` 开头的注释行和 CRLF 都认。只 `json.loads(content)`，不剥代码块、不修补。
+
+| 情况 | 处理 |
+|---|---|
+| `finish_reason = "stop"` | 解析 JSON |
+| `finish_reason = "length"` | 报截断（`truncated`，说明文字和 DeepSeek 相同）；`AgentLLM.ask` 照旧要求「短一点再答一次」 |
+| 其余（不带工具时出现 `tool_calls`、流里没给 finish_reason） | 报 `unexpected_finish`，不解析（Chat API 的枚举只有 stop / length / tool_calls） |
+| 没收到 `[DONE]`、流里来了 `error` 对象 | `StreamError` -> `bad_response_body`（`stream_error` 记类型），按已有逻辑重试 |
+| 收到 `[DONE]` 却没有 usage | 照常用回复，日志 `usage_missing: true`、`usd: 0`（文档：流被打断时可能收不到 usage；重试会重复计费）。这次调用的成本漏记，见 11.9 |
+| 内容审核 | HTTP 400 `content_filter`（不是 finish_reason），照原样报 |
+
+单次读最多 600 秒、整次 3,600 秒（`chat_timeouts`，没实测）。
+
+### 11.3 思考档位
+
+| 模型 | 网页可选 | plan / judge / repair | 其余角色（含生成查询词） |
+|---|---|---|---|
+| K2.6 | off / low / medium / high（没有深度：low / medium / high 都是「开」，`thinking_depth = False`，网页合并显示） | off：`disabled`；其余：`enabled` + 24,000 | `disabled` |
+| K3 | low / medium / high（永远在想，不给 off） | low -> `low`、medium -> `high`、high -> `max`（+24,000） | `low`（+24,000） |
+
+- K3 的映射按调研的建议（`providers_research.json` 的 suggested_mapping：medium -> high，high -> max）。**和另外三家不一样**：DeepSeek / Claude / GPT 的网页 high
+  都对应 `high`、不用 max / xhigh。K3 只有三档、默认就是 max，所以这里 high 用了 max；要统一成「high -> high」随时说（medium 和 high 会变成同一档）。
+- Model Parameter Reference：切换档位会让前缀缓存失效。本项目各角色的 prompt 本来就不同，影响不大。
+- K3 的多轮对话要求把 API 返回的完整 assistant 消息（含 `reasoning_content`）原样传回（Reasoning Effort 页）。`AgentLLM.ask` 带错误重问时只传正文的前 2,000 字（所有
+  provider 共用的协议，本阶段没改），K3 上这样做会怎样文档没写（未核实）。
+
+### 11.4 错误、重试、余额
+
+| 情况 | 处理 | 依据 |
+|---|---|---|
+| 401 / 403 | `KeyRejected`，不重试，不读 body | Common Error Codes 页（401 invalid_authentication_error / incorrect_api_key_error；403 permission_denied_error：API 没开放、IP 不在白名单）。10-21 实测见 11.8 |
+| 429 `exceeded_current_quota_error` | `BalanceExhausted`，不重试，整次运行停下（第 6 节） | Common Error Codes 页：Account balance is insufficient or the account has been disabled / Token quota is insufficient -> Top up |
+| 429 `engine_overloaded_error`、`rate_limit_reached_error`；500、502、503、504 | 最多 3 次；有 `Retry-After` 就至少等那么久（最多 60 秒），否则 2 / 4 秒 | 同上页：overloaded 按 Retry-After 退避；组织并发 / RPM / TPM / TPD 超限等一会儿再试 |
+| 其余 4xx（400 参数不对、输入 + max_completion_tokens 超过上下文、content_filter；404 模型不存在或账户没权限，例如 K3 没解锁） | 不重试；`error.type` 和 message 前 200 字进日志和异常文字 | 同上页 |
+| 3xx | 不跟随（D9），`TransportError` | 同 v2.6g |
+
+`BalanceExhausted` 的文字：`insufficient balance: Kimi HTTP 429 exceeded_current_quota_error (balance insufficient, account in arrears or disabled, or token quota used up)
+(...); the run was stopped without retrying. Top up the Kimi account on the platform where the key was created (platform.kimi.ai or platform.kimi.com), then run again.`（不含服务端原文。）
+Kimi 文档里没有 402；也没有像 OpenAI 那样分「用户自设的消费上限」的错误码（国际站项目可设每日预算，到额后拒绝请求，调研记录有约 10 分钟延迟；返回什么错误没查到，未核实）。
+
+### 11.5 搜索：生成查询词 + `POST /v1/tools/search`
+
+为什么不用模型自己搜：内置工具 `$web_search` 在 2026-10-20 下线（WebSearch Pricing 页：expected to be deprecated on October 20, 2026；For new integrations, please use the
+`/v1/tools/search` endpoint）；Anthropic 兼容接口文档里没有 web_search 服务端工具（调研记录）；Responses API 的 web_search 只支持 K3、计费页没列价格（调研记录）；官方工具 `web-search`
+的结果是加密的、拿不到 URL（调研记录）。所以搜索由代码驱动（`search_mode = "queries"`，`Searcher._search_by_queries`）：
+
+1. **生成查询词**：一次 `LLM.json_call`（同一个 adapter、同一套重试和日志，日志交给 Searcher 的 log，agent 里就是写 calls.jsonl 并计入预算），arm 是 `search:<方向>:queries`
+   （思考角色还是 `search`：K2.6 关思考、K3 用 low），`max_completion_tokens` = `SEARCH_QUERIES_MAX_TOKENS`（2,000，开思考 +24,000）。只调一次，不像 `AgentLLM.ask` 那样
+   带错误重问（调用方 `run_direction` 已经占着并发名额和预扣；在里面再拿名额可能死锁）。失败（不是合法 JSON、截断、没有 `queries` 列表、列表为空、传输错误、key 被拒）就没有 URL，
+   `error` 以 `queries:` 开头，不发搜索请求；余额不足照样抛 `BalanceExhausted`。查询词只做最少的整理：去首尾空白、去掉空的 / 重复的 / 非字符串的，最多 `max_uses`（3）个。
+2. **搜索**：每个查询词 `POST {base}/tools/search`，Bearer，body `{"text_query": <查询词>, "limit": <cap，即 urls_per_direction 4>, "timeout_seconds": 30}`
+   （Web Search Basic 页：`text_query` 必填；`limit` 1–20，默认 5；`timeout_seconds` 1–60，省略 = 不限时；`include_content` 用默认 false，页面由 fetch 自己取）。
+   查询词按顺序一个一个发（不并发：Tier0 的搜索 QPS 只有 1）。一个失败不影响其余的，原因合在 `error` 里（`query 2: http_400 (invalid_request: ...)`）。
+3. **合并**：`search_results[].url`（和 `title`）按名次交替合并（每个查询词的第 1 名，再第 2 名……），经 `parse_urls` 去重、去 `#fragment`，取 `cap` 个。标题解析出来但不出 Searcher
+   （分析角色只拿得到 URL，同其他 provider）；snippet 不用。返回的字段同其他 provider（`queries` 是生成的查询词，照旧进 state.json 审计和回测的泄漏检查）。
+
+生成查询词的 prompt（`agent/prompts.py`，新加的，只有这类 provider 用；搜索角色收到的仍是 `SEARCH_USER` 填好的那段，原样放进 `{brief}`；DeepSeek / Claude / GPT 的搜索、G2 都不经过它）：
+
+```text
+SEARCH_QUERIES_SYSTEM:
+You write web search queries for a research assistant. In this step you cannot browse: a search engine will run your queries exactly as written, and code will collect the result URLs. Reply with one JSON object only.
+
+SEARCH_QUERIES_USER:
+Below is a research brief written for an assistant that searches the web itself. Here your only job is to write the searches: up to {n} queries that, run as written in a web search engine, are most likely to return the pages the brief asks for.
+
+- Write each query as a search engine query (keywords and names), not as a question addressed to a person.
+- Make the queries differ from one another: different sources, terms, or angles taken from the brief.
+- Ignore the brief's final instruction about listing URLs; code collects the URLs from the search results.
+
+Research brief:
+<<<
+{brief}
+>>>
+
+Reply with one JSON object: {"queries": ["first query", "second query"]}
+```
+
+（`{n}` = `max_uses` = 3。brief 末尾那句「After searching, reply with at most N URLs ...」是给会自己搜的模型的，这里让模型忽略。）
+
+计费和日志：生成查询词那次按 token 计价（11.6）；搜索按次：只有 HTTP 200 且 `search_results` 非空才收（Web Search Basic 页、WebSearch Pricing 页），国际站 $0.002 / 次、
+国内站 ¥0.01 / 次（折 USD）。calls.jsonl：一行 `search:<方向>:queries`（同 JSON 调用的字段），每个查询词一行 `kind: "search"`、`query_n`、`web_search_requests`（0 或 1）、
+`n_result_urls`、`usd: 0.0`、`usd_search_fee_assumed`（字段名沿用，值是官方价）。
+
+重试：搜索接口的 429 `rate_limited` 带 `X-RateLimit-Limit` / `Remaining`，按秒限速时还有 `X-RateLimit-Reset`（Unix 秒）：没有 `Retry-After` 时等到 reset（`llm.retry_after`，
+至少 3 / 6 秒，最多 60 秒）；`rate_limit_unavailable`、500 `internal_error`、502 `upstream_failed`、504 `timeout` 退避重试。401 / 403 没有 body（文档；10-21 实测 401 的
+Content-Length 是 0），不读、不抛，记 `http_401`（和其他 provider 的搜索一样，见第 8 节）。搜索接口的错误码表没列余额不足；按聊天接口的规则（429 `exceeded_current_quota_error`）认，
+未核实它是不是用同一个 type。
+
+预扣：`run_direction` 照旧在整个 `Searcher.search` 外面 `hold(search_reserve())`。Kimi 的 `Budget.search_tokens` = 生成查询词那次发出的 max_completion_tokens（K2.6 2,000，K3 26,000），
+输入照旧按 30,000 token 估，搜索费按 `(2 × max_uses + 2)` 次，都偏保守。
+
+### 11.6 价格和成本
+
+`config.PRICES`（每百万 token；不含税；没有分时价，`peak` = `offpeak` = (cache hit, cache miss, output)）。国际站 https://platform.kimi.ai/docs/pricing/chat 、
+国内站 https://platform.kimi.com/docs/pricing/chat ，2026-10-21 查看。K3 表的列：Cache Write Price (TTL 5min) / (TTL 1h) / Cached Input Price / Input Price / Output Price；
+K2 表的列：Input Price (Cache Hit) / (Cache Miss) / Output Price。
+
+| 计价 id | cache hit | cache miss | 5 分钟写入 | 1 小时写入 | output | 搜索 / 次 |
+|---|---|---|---|---|---|---|
+| `kimi-k3` | $0.30 | $3.00 | $3.00 | $6.00 | $15.00 | $0.002 |
+| `kimi-k2.6` | $0.16 | $0.95 | —（不单列，按 miss） | — | $4.00 | $0.002 |
+| `kimi-k3@cn` | ¥2.00 | ¥20.00 | ¥20.00 | ¥40.00 | ¥100.00 | ¥0.01 |
+| `kimi-k2.6@cn` | ¥1.10 | ¥6.50 | — | — | ¥27.00 | ¥0.01 |
+
+CNY 原价存在 `PRICES[...]["listed"]`，`peak` / `search_fee_usd` 是除以 6.7192 以后的 USD。K3 的价格另由 Context Caching 指南正文核对（$3.00 / $3.00 / $6.00 / $0.30）；
+搜索价由 WebSearch Pricing 页正文核对（$0.002；国内站表格 ￥0.01）。
+
+`kimi_usage_cost`（Chat API usage 说明）：`prompt_tokens` 是全部输入；`prompt_tokens_details.cached_tokens`（命中）、`cache_write_tokens`（写入）和未缓存部分互斥、相加等于
+`prompt_tokens`。命中按 hit 价，写入按 5 分钟写入价（不写 `prompt_cache_options` 就是 5 分钟档；K2 没有单列写入价，按 miss），其余按 miss，`completion_tokens`（含思考）按 output。
+没有 `prompt_tokens_details` 时用顶层 `cached_tokens`。calls.jsonl：`finish_reason`、`prompt_tokens`、`cached_tokens`、`cache_write_tokens`、`completion_tokens`、`usd`；
+`completion_tokens_details.reasoning_tokens` 有才记（Chat API 的 usage 没写这个字段）。
+
+方向数：`prompt_cache = "implicit"`：服务端自动缓存，但这个 agent 在 Kimi 上的命中率没测过，`DIRECTION_PROFILE` 的 hit 和 miss 两部分都按 miss（K3 的 5 分钟写入价同 miss）算，
+加 4 次 × 每次搜索费。预扣（`Budget.reserve_rates`）：输入按 miss 和 5 分钟写入价中较高的。
+
+### 11.7 `$2` 上限下的方向数和预扣
+
+| 计价 id（档位） | 一个方向 | `$2` 方向数 | 一次搜索预扣 | plan（2 万字符） | 抽取（4 万字符） | 抽取（40 万字符） | judge（10 万字符） |
+|---|---|---|---|---|---|---|---|
+| deepseek-flash（对照） | $0.060 | 10 | $0.099 | $0.010 | $0.025 | $0.079 | $0.029 |
+| kimi-k2.6（off） | $0.069 | 10 | $0.052 | $0.034 | $0.083 | $0.254 | $0.096 |
+| kimi-k2.6（high） | $0.069 | 10 | $0.052 | $0.130 | $0.083 | $0.254 | $0.192 |
+| kimi-k3（low / high 相同） | $0.207 | 5 | $0.496 | $0.480 | $0.660 | $1.200 | $0.690 |
+| kimi-k2.6@cn（off） | $0.067 | 10 | $0.049 | $0.034 | $0.084 | $0.258 | $0.097 |
+| kimi-k3@cn（low） | $0.203 | 5 | $0.488 | $0.476 | $0.655 | $1.191 | $0.685 |
+
+- **K3 在 `$2` 下第一轮会中止**（同第 9.8 / 10.7 节的 Opus / 6.1 Sol 问题）：5 个方向同时搜索，预扣合计约 $2.48 > $2。大头是思考余量：K3 关不掉思考，每次调用都 +24,000 token × $15 / 百万 = $0.36。
+  修法同前（自带 key 的运行里预扣只是因为在途调用放不下时等在途调用结束；或者贵模型默认上限更高、并发更低），等你定。
+- 默认模型 K2.6（`PROVIDERS["kimi"]["default_model"]`）：`$2` 下跑满 10 个方向、能关思考（同 GPT 选 Luna 的理由）；调研记录官方 FAQ 讲成本时也推荐它（本阶段没再核实）。K3 还要先充值才解锁（K3 quickstart：minimum $1）。
+
+### 11.8 key 校验
+
+`GET {base}/models`，Bearer（List Models 页：返回 `{"object": "list", "data": [{"id", "context_length", "supports_reasoning", ...}]}`，没有分页，所以列表是完整的）。
+不生成 token；有效 key 是否完全免费，文档没写价格（未核实）。余额为 0 的 key 能不能通过 `/models` 没查到（未核实）；K3 没解锁时校验也可能通过，到调用时才 404。
+10-21 实测（`probes/kimi_key_probe.py`，没花钱）：
+
+| 请求 | 状态 | body |
+|---|---|---|
+| 国际站 `GET /v1/models` 不带 key | 401 | `{"error":{"message":"Incorrect API key provided","type":"incorrect_api_key_error"}}` |
+| 国际站 `GET /v1/models` 假 key | 401 | `{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}` |
+| 国内站 `GET /v1/models` 假 key | 401 | 同上 |
+| 国际站 `POST /v1/tools/search` 假 key | 401 | 空（Content-Length 0，带 `X-Msh-Track-Id` / `X-Msh-Chat-Id`） |
+| 国际站 `POST /v1/chat/completions` 假 key | 401 | 同 `/models` 假 key |
+| 假 key 走 `check_key`（国际站、国内站） | — | `{"provider": "kimi", "model": ..., "ok": false, "status": 401, "error": "key_rejected", "message": "Kimi rejected the API key (HTTP 401)"}` |
+
+两个 API 主机都没有跳转。服务端的 401 message 没有回显 key。
+
+### 11.9 已知限制、没做的、要你定的
+
+- **K3 在 `$2` 下第一轮中止**（11.7，要你定，和 Opus / Sol 同一个问题）。
+- **K3 的 high -> max 映射**和另外三家的口径不同（11.3，要你定）。
+- **新账户（Tier0：累计充值 $1）基本跑不动**：并发 1、RPM 3、TPD 150 万、搜索 QPS 1（Recharge and Rate Limits 页）。agent 默认并发 8，会连续撞 429 `rate_limit_reached_error`，
+  3 次重试后这些调用失败；调研估计一次运行约 100 万 token，一天大约只够一次。Tier1（累计 $10：并发 15、RPM 100、QPS 3）以上才正常。没做自动降并发 / 本地排队，网页上要写明。
+- K2.6 的上下文是 262,144：输入 + max_completion_tokens 超过就 400（照原样报）。抽取最多发 40 万字符，中文页按官方「1 token 约 1.5–2 个汉字」可能接近或超过上限；预扣仍按「字符数 / 2」估。
+- 流式回复收到 `[DONE]` 却没有 usage 时，这次调用的成本按 0 记（`usage_missing: true`），预算会少算这一次；文档说只有流被打断才会这样。
+- 生成查询词只调一次、失败就没有 URL；搜索结果只按名次交替合并，没有像其他 provider 那样由模型在看过结果之后挑 URL（只允许一次小的 JSON 调用）。这一步的效果没有真 key 实测。
+- 搜索接口的余额不足错误没写在文档里（11.5）；搜索接口的 403（Account inactive or suspended）照原样记，不停整次运行。
+- json_object + 流式 + K3 思考的组合、K2.6 关思考时的 json_object 表现、`timeout_seconds: 30` 是否够，都只按文档写，没有真 key 实测。
+- 国内站的价格按固定汇率折算（11.1）。
+- 网页还没接（同第 8 节）：区域选择、K2.6「没有深度」的提示、Tier0 的提示都留给网页阶段。
+
+### 11.10 Verification（v2.10d）
+
+- `tests/test_kimi.py`（33 个）全部对着 127.0.0.1 上的假 Kimi 服务（`tests/fake_kimi.py`，复用 `fake_claude.py` 的脚本化服务；国内站接在 `/cn/...`）跑，真实走 urllib +
+  `urlopen_no_redirect`：请求头 / 请求体（键顺序、禁发的采样参数）、两个模型 × 档位 × 角色的 `thinking` / `reasoning_effort` / `max_completion_tokens`、余量封顶、区域路由、
+  空 assistant 消息、流式拼接（CRLF、注释行、思考内容不进返回值和日志）、usage 计价（命中、写入、K2 写入按 miss、国内站折算）、截断 / 意外 finish_reason / 断流 / 流内 error / 缺 usage、
+  不修 JSON、余额 429 不重试、overload / rate limit / 503 重试、400 / 404 照原样报、401 / 403 不读 body、3xx 不跟随、价格表、方向数、预扣、按区域的搜索费、
+  查询词调用的 prompt 和参数、搜索请求体、交替合并、空结果不计费、单个查询词失败、`X-RateLimit-Reset` 等待、搜索 401 / 形状不对、生成查询词的六种失败、查询词整理、
+  两处余额不足、一个方向的端到端（查询词 -> 搜索 -> 取页 -> 抽取 -> 核对，三次调用计入预算）、key 校验（含 10-21 实测的两种 401 body）、ModelSpec、
+  整次运行端到端（国内站 K3，429 余额不足干净停下，结果目录没有 key，key 已清掉，settings 记 price_id / 汇率 / 搜索设置）。
+- 变异检查 26 处（发 temperature、去掉 stream_options、K3 high 改 high、K2.6 总开思考、认错余额 type、写入按命中价、未缓存不扣写入、合并改成拼接、空结果也计费、计量不用 price_id、
+  预算不用 price_id、搜索费不分区域、不看 X-RateLimit-Reset、保留空 assistant、把思考拼进正文、没有 [DONE] 也接受、意外 finish_reason 照样解析、搜索预扣用 8192、读 401 body、
+  查询词调用用 8192、不发 timeout_seconds、国内站地址写错、方向估价算缓存命中、吞掉查询词调用的余额错误、不整理查询词、不限查询词个数）：全部被测试抓到。
+- DeepSeek 默认路径：`tests/test_providers.py` 的 24 组金样本仍逐字节相同；Claude、GPT 的测试不变（`llm.retry_after` 对它们的行为和以前相同）。
+- G2（`probes/compare_continuous_prompts.py`）：HEAD（v2.10c）和本阶段都是 `365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4`。新加的 `SEARCH_QUERIES_*` 不在 G2 的路径上。
+- 真实网络只发了 7 个不花钱的请求（`probes/kimi_key_probe.py`，全部 401）。没有真 key，没有发过成功的 `/chat/completions`、`/tools/search`。
+- 本阶段对其他代码的改动：`config.MAX_TOKENS` 没动（新常数 `SEARCH_QUERIES_MAX_TOKENS` 放在 `agent/search.py`，免得 DeepSeek 运行的 settings 变）；
+  `ModelSpec` 先校验区域再查价格（按 price_id）。
+
 ## Official docs（Claude，2026-10-21 查看）
 
 - Messages API（请求字段、stop_reason、usage、流式事件类型）：https://platform.claude.com/docs/en/api/messages/create
@@ -541,3 +768,22 @@ explicit 断点只缓存固定的提示词（要改请求体的消息格式）�
 - Rate limits（Retry-After、slow_down）：https://developers.openai.com/api/docs/guides/rate-limits
 - List models：https://developers.openai.com/api/reference/resources/models/methods/list
 - Your data（store、Responses 默认保存 30 天）：https://developers.openai.com/api/docs/guides/your-data
+
+## Official docs（Kimi，2026-10-21 查看；页面加 `.md` 可取原始 markdown，价格 / 限速表要看页面 HTML）
+
+- Chat Completions API（请求字段、流式格式、stream_options、usage、prompt_tokens_details、finish_reason、JSON mode、Partial Mode）：https://platform.kimi.ai/docs/api/chat
+- Model Parameter Reference（thinking / reasoning_effort / 固定的 temperature、top_p、n、penalty）：https://platform.kimi.ai/docs/api/models-overview
+- Reasoning Effort（K3：low / high / max，默认 max）：https://platform.kimi.ai/docs/guide/use-reasoning-effort
+- Thinking Mode（reasoning_content、思考 token 计入 max_tokens、建议流式）：https://platform.kimi.ai/docs/guide/use-thinking-models
+- Kimi K3 quickstart（解锁条件、流式、结构化输出）：https://platform.kimi.ai/docs/guide/kimi-k3-quickstart
+- Kimi K2.6 quickstart（默认 max_tokens 32K、thinking 开关、固定采样参数）：https://platform.kimi.ai/docs/guide/kimi-k2-6-quickstart
+- Common Error Codes（400 / 401 / 403 / 404 / 429 exceeded_current_quota_error / 504）：https://platform.kimi.ai/docs/api/errors
+- Web Search Basic（/v1/tools/search 的请求、返回、错误码、计费条件）：https://platform.kimi.ai/docs/api/tools-search
+- WebSearch Pricing（$0.002 / 次，$web_search 2026-10-20 下线）：https://platform.kimi.ai/docs/pricing/websearch
+- Model Inference Pricing（K3 / K2 价格表）：https://platform.kimi.ai/docs/pricing/chat
+- Context Caching（缓存写入 5m / 1h、K3 价格正文）：https://platform.kimi.ai/docs/guide/context-caching
+- Recharge and Rate Limits（Tier0–Tier5）：https://platform.kimi.ai/docs/pricing/limits
+- List Models：https://platform.kimi.ai/docs/api/list-models
+- 国内站同名页面：https://platform.kimi.com/docs/api/chat 、https://platform.kimi.com/docs/api/tools-search 、https://platform.kimi.com/docs/api/errors 、
+  https://platform.kimi.com/docs/pricing/chat 、https://platform.kimi.com/docs/pricing/websearch
+- 人民币汇率中间价（2026-10-21，1 美元对人民币 6.7192 元）：https://www.pbc.gov.cn/zhengcehuobisi/125207/125217/125925/2026102108513972558/index.html

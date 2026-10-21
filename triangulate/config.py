@@ -136,6 +136,45 @@ PRICES.update({   # input, cached input, 30m write, 12h write, output；long con
     "gpt-6-astra": _openai_price(10.00, 1.00, 12.50, 25.00, 50.00, long=(20.00, 2.00, 25.00, 50.00, 75.00)),
 })
 
+# v2.10d：Kimi（Moonshot AI 开放平台，2026-10-21 查看）。国际站（api.moonshot.ai）按 USD、国内站（api.moonshot.cn）按 CNY，
+# 两站的 key、余额、价格各自独立，所以价格按「模型@区域」记：国际站用模型名本身，国内站是 "kimi-k3@cn"（ModelSpec.price_id）。
+# 价格表在页面里由 JS 渲染（.md 导出是空表），数字取自页面 HTML 里编译后的表格（列名见 PROVIDERS.md 第 11.6 节）。
+# 没有分时价：peak = offpeak = (cache hit, cache miss, output)。K3 另列缓存写入（5 分钟 / 1 小时）；本项目不写 prompt_cache_options，
+# 按官方默认是 5 分钟档（K3 的 5 分钟写入价 = cache miss 价）。K2 系列没有单列写入价（写入按 cache miss 计）。
+# prompt_cache = "implicit"：服务端自动缓存重复前缀，但这个 agent 在 Kimi 上的命中率没测过，「一个方向」的估价把输入全按 miss 价算。
+# search_fee_usd：POST /v1/tools/search（Web Search Basic）每次的价格，只有 HTTP 200 且 search_results 非空才收费。
+# 国内站的 CNY 价按下面的汇率折成 USD（这次运行的上限是美元）：中国人民银行授权中国外汇交易中心公布的 2026-10-21 人民币汇率中间价
+KIMI_PRICING = "https://platform.kimi.ai/docs/pricing/chat"
+KIMI_PRICING_CN = "https://platform.kimi.com/docs/pricing/chat"
+KIMI_SEARCH_PRICING = "https://platform.kimi.ai/docs/pricing/websearch"
+KIMI_SEARCH_PRICING_CN = "https://platform.kimi.com/docs/pricing/websearch"
+CNY_PER_USD = 6.7192
+CNY_PER_USD_SOURCE = "https://www.pbc.gov.cn/zhengcehuobisi/125207/125217/125925/2026102108513972558/index.html"
+CNY_PER_USD_DATE = "2026-10-21"
+
+
+def _kimi_price(currency, hit, miss, out, search_fee, write_5m=None, write_1h=None) -> dict:
+    """Kimi 一个模型在一个区域的价格。currency 是 "USD" 或 "CNY"（CNY 按 CNY_PER_USD 折成 USD，原价另存在 "listed" 里）。"""
+    r = 1.0 if currency == "USD" else 1.0 / CNY_PER_USD
+    p = {"provider": "kimi", "offpeak": (hit * r, miss * r, out * r), "peak": (hit * r, miss * r, out * r),
+         "prompt_cache": "implicit", "search_fee_usd": search_fee * r, "currency": currency,
+         "listed": {"hit": hit, "miss": miss, "out": out, "search_fee": search_fee, "write_5m": write_5m, "write_1h": write_1h},
+         "source": KIMI_PRICING if currency == "USD" else KIMI_PRICING_CN,
+         "search_source": KIMI_SEARCH_PRICING if currency == "USD" else KIMI_SEARCH_PRICING_CN, "checked": "2026-10-21"}
+    if write_5m is not None:
+        p["cache_write_5m"], p["cache_write_1h"] = write_5m * r, write_1h * r
+    if currency != "USD":
+        p["fx"] = {"cny_per_usd": CNY_PER_USD, "source": CNY_PER_USD_SOURCE, "date": CNY_PER_USD_DATE}
+    return p
+
+
+PRICES.update({   # cache hit, cache miss, output, 每次搜索；K3 另有 5 分钟 / 1 小时缓存写入
+    "kimi-k3": _kimi_price("USD", 0.30, 3.00, 15.00, 0.002, write_5m=3.00, write_1h=6.00),
+    "kimi-k2.6": _kimi_price("USD", 0.16, 0.95, 4.00, 0.002),
+    "kimi-k3@cn": _kimi_price("CNY", 2.00, 20.00, 100.00, 0.01, write_5m=20.00, write_1h=40.00),
+    "kimi-k2.6@cn": _kimi_price("CNY", 1.10, 6.50, 27.00, 0.01),
+})
+
 
 class UnknownModel(ValueError):
     """config.PRICES 里没有这个模型：不能计价，就不跑。"""

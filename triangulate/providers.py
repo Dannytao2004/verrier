@@ -1,5 +1,7 @@
 """v2.10a：每次运行的模型设置（ModelSpec）和各家 API 的请求格式（adapter）。v2.10b 加 Claude（原生 Messages API）。
 v2.10c 加 GPT（OpenAI：JSON 调用走 Chat Completions，搜索走 Responses API 的 web_search）。
+v2.10d 加 Kimi（国际站 / 国内站两个区域；JSON 调用走 OpenAI 兼容的流式 Chat Completions，搜索是「生成查询词 + /v1/tools/search」）；
+国内站按 CNY 价折算，计价用 ModelSpec.price_id（"kimi-k3@cn"）。
 
 ModelSpec = provider、model、region、思考档位、这次运行的花费上限，加上用户自己的 key（只在内存里，见 ModelSpec 的说明）。
 有 ModelSpec 的运行就是「自带 key」（BYOK）的运行：pipeline.Context(spec=...) 把它交给 AgentLLM、Searcher 和 Budget。
@@ -662,10 +664,220 @@ class OpenAIAdapter:
         return [str(x.get("id")) for x in d["data"] if isinstance(x, dict)], True
 
 
+# ---------- v2.10d Kimi ----------
+
+def parse_chat_sse(raw: bytes) -> dict:
+    """OpenAI 兼容的流式回复（Kimi Chat Completions，stream: true）拼回非流式回复的形状。官方 Chat API 页：每个事件一行
+    "data: <chunk JSON>"，内容在 choices[0].delta.content 里累加，finish_reason 只在最后一个 choice 上非空；
+    stream_options.include_usage 时 "data: [DONE]" 之前多一个 usage chunk（choices 为空数组）。delta.reasoning_content
+    （思考内容）不拼、不记。没收到 [DONE] 或流里来了 error 对象：StreamError（LLM.json_call 记 bad_response_body 并重试）。
+    收到 [DONE] 却没有 usage（文档：流被打断时可能收不到）：照常返回，usage_missing = True（不重试，免得重复计费）。"""
+    content, finish, usage, done = [], None, None, False
+    for chunk in raw.decode("utf-8").replace("\r\n", "\n").split("\n\n"):
+        data = [ln[5:].removeprefix(" ") for ln in chunk.split("\n") if ln.startswith("data:")]
+        if not data:
+            continue
+        payload = "\n".join(data).strip()
+        if payload == "[DONE]":
+            done = True
+            break
+        ev = json.loads(payload)
+        if not isinstance(ev, dict):
+            raise StreamError("stream chunk is not an object", "malformed_stream")
+        if isinstance(ev.get("error"), dict):
+            etype = str(ev["error"].get("type") or "unknown")
+            raise StreamError(f"error object in the stream: {etype}", etype)
+        for ch in ev.get("choices") or []:
+            if not isinstance(ch, dict) or ch.get("index", 0) != 0:
+                continue
+            piece = (ch.get("delta") or {}).get("content")
+            if piece:
+                content.append(piece)
+            if ch.get("finish_reason") is not None:
+                finish = ch["finish_reason"]
+        if isinstance(ev.get("usage"), dict):
+            usage = ev["usage"]
+    if not done:
+        raise StreamError("stream ended before data: [DONE]", "incomplete_stream")
+    return {"choices": [{"index": 0, "message": {"role": "assistant", "content": "".join(content)}, "finish_reason": finish}],
+            "usage": usage or {}, "usage_missing": usage is None}
+
+
+def kimi_usage_cost(usage: dict, price_id: str) -> float:
+    """Kimi 的 usage 按 config.PRICES[price_id]（国内站已折成 USD）计价。Chat API 页：prompt_tokens 是全部输入；
+    prompt_tokens_details 里 cached_tokens（命中）、cache_write_tokens（写入）和未缓存的部分互斥、相加等于 prompt_tokens。
+    命中按 cache hit 价；写入按 5 分钟写入价（本项目不写 prompt_cache_options，官方默认 5 分钟档；K2 系列没有单列写入价，按 miss 价）；
+    其余按 miss 价；completion_tokens（含思考）按 output 价。没有 prompt_tokens_details 时用顶层的 cached_tokens。"""
+    p = price(price_id)
+    hit, miss, outp = p["peak"]
+    inp = usage.get("prompt_tokens", 0) or 0
+    det = usage.get("prompt_tokens_details")
+    det = det if isinstance(det, dict) else {"cached_tokens": usage.get("cached_tokens", 0)}
+    read, write = det.get("cached_tokens", 0) or 0, det.get("cache_write_tokens", 0) or 0
+    plain = max(0, inp - read - write)
+    out = usage.get("completion_tokens", 0) or 0
+    return (plain * miss + read * hit + write * p.get("cache_write_5m", miss) + out * outp) / 1e6
+
+
+def _kimi_turns(messages: list) -> list:
+    """Chat API：messages 里每条的 content must not be empty。内容为空的 assistant 消息（AgentLLM.ask 重问时，回复被思考用完、
+    正文为空的情况）不发；其余原样（Kimi 收 system 角色）。"""
+    return [{"role": m["role"], "content": m["content"]} for m in messages
+            if not (m["role"] == "assistant" and not str(m["content"]).strip())]
+
+
+KIMI_BALANCE_TYPES = {   # Common Error Codes 页：429 + 这个 error.type = 余额不足 / 账户欠费或停用 / token 额度不足（充值）
+    "exceeded_current_quota_error": "exceeded_current_quota_error (balance insufficient, account in arrears or disabled, "
+                                    "or token quota used up)",
+}
+
+
+class KimiAdapter:
+    """Kimi（Moonshot AI 开放平台）。国际站 api.moonshot.ai（USD）和国内站 api.moonshot.cn（CNY）两个区域，key 不能混用（混用 401）。
+    JSON 调用走 OpenAI 兼容的 Chat Completions（POST /v1/chat/completions）：response_format json_object（用户决定：不用 JSON
+    schema）、max_completion_tokens（max_tokens 已 deprecated；思考 token 计入）、思考按模型（K3 顶层 reasoning_effort，永远在想，
+    不发 thinking；K2.6 thinking enabled / disabled，没有深度）；temperature / top_p / n / 两个 penalty 都是固定值，不发；
+    stream: true + stream_options.include_usage（错误码页：非流式请求 900 秒没回就 504，要用流式）。
+    搜索：模型侧的 $web_search 已在 2026-10-20 下线，改成「一次小的 JSON 调用生成查询词 + 每个查询词 POST /v1/tools/search」
+    （search_mode = "queries"，流程在 agent/search.Searcher._search_by_queries）。设计说明和官方文档链接见 PROVIDERS.md 第 11 节。"""
+
+    provider, label = "kimi", "Kimi"
+    regions = {"global": {"chat": "https://api.moonshot.ai/v1/chat/completions",
+                          "search": "https://api.moonshot.ai/v1/tools/search",
+                          "models": "https://api.moonshot.ai/v1/models"},
+               "cn": {"chat": "https://api.moonshot.cn/v1/chat/completions",
+                      "search": "https://api.moonshot.cn/v1/tools/search",
+                      "models": "https://api.moonshot.cn/v1/models"}}
+    region_labels = {"global": "International (platform.kimi.ai, billed in USD)",
+                     "cn": "China (platform.kimi.com, billed in CNY)"}
+    default_region = "global"
+    search_fee_usd = 0.002            # 国际站 Web Search Basic；按区域的价格在 config.PRICES 的 search_fee_usd（providers.search_fee_usd）
+    search_mode = "queries"           # Searcher：先生成查询词，再逐个调搜索接口（不是模型自己搜）
+    search_limit_max = 20             # /v1/tools/search 的 limit 取值 1–20
+    search_timeout_seconds = 30       # /v1/tools/search 的 timeout_seconds（1–60，省略 = 不限时）
+    # 除 401 / 403（key 被拒；搜索接口文档写明这两种没有 body）以外的错误都读 body：429 判断余额（error.type），
+    # 其余只把 error.type / message 记进日志
+    error_body_statuses = frozenset({400, 404, 408, 413, 422, 429, 500, 502, 503, 504})
+    balance_statuses = frozenset({429})
+    # 429 engine_overloaded_error / rate_limit_reached_error（搜索：rate_limited / rate_limit_unavailable）、500、502、503、504 重试
+    retry_statuses = frozenset({429, 500, 502, 503, 504})
+    honor_retry_after = True          # 错误码页：engine_overloaded_error 按 Retry-After 等
+    reset_header = "x-ratelimit-reset"   # 搜索接口的 429 带 X-RateLimit-Reset（Unix 秒），没有 Retry-After 时按它等（llm.retry_after）
+    log_server_error = True
+    chat_timeouts = {"sock_timeout": 600, "total_timeout": 3600}   # 流式：单次读最多 600 秒，整次 3600 秒（没实测）
+    max_search_continuations = 0
+    balance_hint = ("Top up the Kimi account on the platform where the key was created (platform.kimi.ai or platform.kimi.com), "
+                    "then run again.")
+
+    def chat_url(self, region: str) -> str:
+        return self.regions[region]["chat"]
+
+    def search_url(self, region: str) -> str:
+        return self.regions[region]["search"]
+
+    @staticmethod
+    def _headers(key: str) -> dict:
+        return {"Content-Type": "application/json", "Authorization": f"Bearer {key}"}
+
+    @staticmethod
+    def thinking_fields(model: str, effort) -> dict:
+        """K3：只有顶层 reasoning_effort（low / high / max，省略时 max；不发 thinking：文档 should not）。
+        K2.6：thinking.type enabled / disabled（没有深度；不支持 reasoning_effort）。"""
+        if MODELS[model]["thinking_param"] == "reasoning_effort":
+            if not effort:
+                raise ValueError(f"{model} always thinks; it needs a reasoning_effort")
+            return {"reasoning_effort": effort}
+        return {"thinking": {"type": "enabled" if effort else "disabled"}}
+
+    def chat_request(self, model: str, key: str, messages: list, *, max_tokens: int, effort):
+        payload = {"model": model, "messages": _kimi_turns(messages)}
+        payload.update(self.thinking_fields(model, effort))
+        payload.update({"response_format": {"type": "json_object"}, "max_completion_tokens": max_tokens, "stream": True,
+                        "stream_options": {"include_usage": True}})
+        return self._headers(key), payload
+
+    chat_decode = staticmethod(parse_chat_sse)
+
+    @staticmethod
+    def chat_unpack(data: dict):
+        choice = data["choices"][0]
+        if not isinstance(choice.get("message"), dict):
+            raise TypeError("choices[0].message is not an object")
+        return choice, data.get("usage") or {}, bool(data.get("usage_missing"))
+
+    @staticmethod
+    def chat_meter(unpacked, started, model: str, effort) -> dict:
+        """model 是计价用的 id（ModelSpec.price_id：国内站是 "kimi-k3@cn"）。"""
+        choice, u, missing = unpacked
+        det = u.get("prompt_tokens_details") if isinstance(u.get("prompt_tokens_details"), dict) else {}
+        m = {"finish_reason": choice.get("finish_reason"), "prompt_tokens": u.get("prompt_tokens", 0),
+             "cached_tokens": det.get("cached_tokens", u.get("cached_tokens", 0)) or 0,
+             "cache_write_tokens": det.get("cache_write_tokens", 0) or 0,
+             "completion_tokens": u.get("completion_tokens", 0), "usd": round(kimi_usage_cost(u, model), 6)}
+        if "reasoning_tokens" in (u.get("completion_tokens_details") or {}):   # Chat API 的 usage 没写这个字段；有才记
+            m["reasoning_tokens"] = u["completion_tokens_details"]["reasoning_tokens"]
+        if missing:
+            m["usage_missing"] = True
+        return m
+
+    @staticmethod
+    def chat_text(unpacked) -> str:
+        return unpacked[0]["message"].get("content") or ""
+
+    @staticmethod
+    def chat_problem(unpacked):
+        """finish_reason（Chat API）：stop 照常解析 JSON；length = 撞到 max_completion_tokens（思考 + 正文共用）；
+        其余（不带工具时不该出现的 tool_calls、流里没给 finish_reason）照原样报，不解析。内容审核是 HTTP 400 content_filter。"""
+        fr = unpacked[0].get("finish_reason")
+        if fr == "length":
+            return "truncated", "reply was truncated (finish_reason=length)"
+        if fr != "stop":
+            return "unexpected_finish", f"reply ended with finish_reason={fr}"
+        return None
+
+    def tools_search_request(self, key: str, query: str, *, limit: int):
+        """Web Search Basic：POST /v1/tools/search，body text_query（必填）、limit（1–20，默认 5）、timeout_seconds（1–60）；
+        include_content 用默认 false（页面由 fetch 自己取）。"""
+        return self._headers(key), {"text_query": query, "limit": max(1, min(self.search_limit_max, int(limit))),
+                                    "timeout_seconds": self.search_timeout_seconds}
+
+    @staticmethod
+    def tools_search_unpack(d: dict) -> list:
+        """search_results[] -> [(url, title)]（只要有 url 的）。没有 search_results 列表时抛 KeyError / TypeError（形状不对）。"""
+        res = d["search_results"]
+        if not isinstance(res, list):
+            raise TypeError("search_results is not a list")
+        return [(str(x["url"]), str(x.get("title") or "")) for x in res if isinstance(x, dict) and x.get("url")]
+
+    def balance_exhausted(self, status: int, body: bytes):
+        """余额不足就返回一句说明（不含服务端原文），否则 None。错误码页：429 + error.type = exceeded_current_quota_error
+        （余额不足或账户停用 / token 额度不足）；同为 429 的 engine_overloaded_error、rate_limit_reached_error 是限流，重试。
+        搜索接口的错误码表没列余额不足（未核实它用不用同一个 type）；按同一规则认。"""
+        if status not in self.balance_statuses:
+            return None
+        try:
+            err = json.loads(body).get("error") or {}
+        except (ValueError, AttributeError):
+            return None
+        if not isinstance(err, dict):
+            return None
+        etype = err.get("type")
+        return f"HTTP {status} {KIMI_BALANCE_TYPES[etype]}" if etype in KIMI_BALANCE_TYPES else None
+
+    def key_check_request(self, region: str, key: str):
+        """List Models：GET /v1/models（Bearer），返回 {"object": "list", "data": [{"id", "context_length", ...}]}，没有分页。"""
+        return self.regions[region]["models"], {"Authorization": f"Bearer {key}"}
+
+    @staticmethod
+    def models_unpack(d: dict):
+        return [str(x.get("id")) for x in d["data"] if isinstance(x, dict)], True
+
+
 DEEPSEEK = DeepSeekAdapter()
 CLAUDE = ClaudeAdapter()
 OPENAI = OpenAIAdapter()
-ADAPTERS = {"deepseek": DEEPSEEK, "claude": CLAUDE, "gpt": OPENAI}
+KIMI = KimiAdapter()
+ADAPTERS = {"deepseek": DEEPSEEK, "claude": CLAUDE, "gpt": OPENAI, "kimi": KIMI}
 
 # 网页上可选的模型（2026-10-21 按官方 Models & Pricing 页）。max_output = 官方写的最大输出 token 数；思考 token 计入输出上限，
 # 开思考的调用多给的余量（config.THINKING_EXTRA_TOKENS）不超过它。efforts：网页档位 -> 这家 API 的取值；
@@ -702,6 +914,17 @@ MODELS = {
                     "efforts": {"low": "low", "medium": "medium", "high": "high"}},
     "gpt-6-astra": {"provider": "gpt", "label": "GPT-6 Astra", "max_output": 128_000, "thinking_off": False,
                     "efforts": {"low": "low", "medium": "medium", "high": "high"}},
+    # v2.10d Kimi（官方 Model Parameter Reference / Reasoning Effort / Chat API，2026-10-21）。
+    # K3：1M 上下文，max_completion_tokens 最大 1,048,576（输入 + 输出不能超过上下文）；永远在想，顶层 reasoning_effort 只有
+    # low / high / max（默认 max）。网页档位按调研的映射：low -> low、medium -> high、high -> max；不给 off，其余角色 low。
+    # K2.6：262,144 上下文（输入 + max_completion_tokens 不能超过）；thinking enabled / disabled，没有深度档位，所以 low / medium /
+    # high 都是「开」（thinking_depth = False，网页上合并显示）。thinking_param = 这个模型用哪个字段控制思考
+    "kimi-k2.6": {"provider": "kimi", "label": "Kimi K2.6", "max_output": 262_144, "context": 262_144, "thinking_off": True,
+                  "thinking_param": "thinking", "thinking_depth": False,
+                  "efforts": {"low": "enabled", "medium": "enabled", "high": "enabled"}},
+    "kimi-k3": {"provider": "kimi", "label": "Kimi K3", "max_output": 1_048_576, "context": 1_048_576, "thinking_off": False,
+                "thinking_param": "reasoning_effort", "thinking_depth": True,
+                "efforts": {"low": "low", "medium": "high", "high": "max"}},
 }
 PROVIDERS = {"deepseek": {"label": "DeepSeek", "models": ("deepseek-flash", "deepseek-v4-pro"),
                           "default_model": "deepseek-flash"},
@@ -712,7 +935,10 @@ PROVIDERS = {"deepseek": {"label": "DeepSeek", "models": ("deepseek-flash", "dee
              # 默认 Luna：$2 上限下只有它能跑满 10 个方向（6.1 Sol 约 5 个、Astra 1 个，PROVIDERS.md 第 10 节），也是三个里
              # 唯一能关思考的（ModelSpec 的默认档位是 off）。官方「新项目从 Astra 开始」，要改随时说
              "gpt": {"label": "GPT (OpenAI)", "models": ("gpt-6-luna", "gpt-6.1-sol", "gpt-6-astra"),
-                     "default_model": "gpt-6-luna"}}
+                     "default_model": "gpt-6-luna"},
+             # 默认 K2.6：$2 上限下能跑满 10 个方向、能关思考（同 GPT 选 Luna 的理由）；调研记录官方 FAQ 讲成本时也推荐它。
+             # K3 要先充值才解锁，$2 下第一轮会因预扣放不下而中止（PROVIDERS.md 第 11.7 节）
+             "kimi": {"label": "Kimi (Moonshot AI)", "models": ("kimi-k2.6", "kimi-k3"), "default_model": "kimi-k2.6"}}
 DEFAULT_PROVIDER = "deepseek"
 
 
@@ -726,7 +952,14 @@ def adapter_for_model(model: str):
 
 
 def search_fee_usd(model: str) -> float:
-    return adapter_for_model(model).search_fee_usd
+    """每次搜索的费用（USD）。model 是计价 id；v2.10d：价格表里按区域写了 search_fee_usd 的（Kimi）用它，否则用这家 adapter 的。"""
+    p = PRICES.get(model) or {}
+    return p["search_fee_usd"] if "search_fee_usd" in p else adapter_for_model(model).search_fee_usd
+
+
+def price_id(model: str, region: str, ad) -> str:
+    """计价 id：这家的默认区域用模型名本身（DeepSeek / Claude / GPT 只有一个区域，和以前相同），其余区域 "模型@区域"。"""
+    return model if region == ad.default_region else f"{model}@{region}"
 
 
 def thinking_levels(model: str) -> tuple:
@@ -764,10 +997,10 @@ class ModelSpec:
         p, ad = PROVIDERS[provider], ADAPTERS[provider]
         if model not in p["models"] or MODELS.get(model, {}).get("provider") != provider:
             raise SpecError(f"model {model!r} is not offered for {ad.label}; choose one of {', '.join(p['models'])}")
-        price(model)   # 没有价格的模型拒跑（UnknownModel），不按别的模型计价
         region = region or ad.default_region
         if region not in ad.regions:
             raise SpecError(f"unknown region {region!r} for {ad.label}; choose one of {', '.join(ad.regions)}")
+        price(price_id(model, region, ad))   # 没有价格的模型（或区域）拒跑（UnknownModel），不按别的模型计价
         level = str(thinking).strip().lower()
         if level not in thinking_levels(model):
             raise SpecError(f"thinking level {thinking!r} is not available for {model}; choose one of "
@@ -815,6 +1048,12 @@ class ModelSpec:
         return ADAPTERS[self.provider]
 
     @property
+    def price_id(self) -> str:
+        """v2.10d：计价用的 id（config.PRICES 的键）：默认区域是模型名本身，别的区域是 "模型@区域"（Kimi 国内站 "kimi-k3@cn"，
+        按 CNY 价折算）。请求里发的仍是 model。LLM / Searcher 的计量和 Budget 都用它。"""
+        return price_id(self.model, self.region, self.adapter)
+
+    @property
     def max_output(self) -> int:
         return MODELS[self.model]["max_output"]
 
@@ -841,6 +1080,12 @@ class ModelSpec:
         return out
 
     def public(self) -> dict:
-        """记进 state.json settings、可以给网页看的部分（不含 key）。"""
-        return {"provider": self.provider, "model": self.model, "region": self.region, "thinking": self.thinking,
-                "thinking_by_role": self.thinking_by_role(), "usd_cap": self.usd_cap, "byok": True}
+        """记进 state.json settings、可以给网页看的部分（不含 key）。v2.10d：计价 id 和模型名不同时（Kimi 国内站）另记
+        price_id 和折算用的汇率。"""
+        out = {"provider": self.provider, "model": self.model, "region": self.region, "thinking": self.thinking,
+               "thinking_by_role": self.thinking_by_role(), "usd_cap": self.usd_cap, "byok": True}
+        if self.price_id != self.model:
+            out["price_id"] = self.price_id
+            if "fx" in PRICES[self.price_id]:
+                out["fx"] = dict(PRICES[self.price_id]["fx"])
+        return out
