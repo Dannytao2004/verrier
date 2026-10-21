@@ -5,11 +5,13 @@ v2.10a：建请求、解析回复、计价交给 provider adapter（triangulate/
 有 ModelSpec（自带 key 的运行）时 provider / 模型 / key / 思考档位都按它。
 v2.10b：各家不同的解码（Claude 是流式 SSE）、可重试的状态码、超时、回复本身的问题（截断 / 拒答 / 暂停）也由 adapter 给；
 check_key() 用 models 列表接口校验 key。
+v2.10c：OpenAI（Chat Completions）；读过的错误 body 另记 error.code，像 key 的片段换成 sk-***。
 
 每次调用记一行到 results/calls.jsonl：arm、题 id、第几次尝试、token、延迟、finish_reason、估算 USD。
 日志里不记 prompt、不记 key。（v2.9b 起，回复不是合法 JSON 时记首尾各 200 字符的诊断。）
 """
 import json
+import re
 import threading
 import time
 import urllib.error
@@ -34,7 +36,7 @@ class TransportError(RuntimeError):
 
 
 class BalanceExhausted(TransportError):
-    """v2.10a：账户余额不足（DeepSeek 402）。不重试；agent 运行据此立刻停下（pipeline.AgentLLM / run_direction 把它变成
+    """v2.10a：账户余额不足（DeepSeek 402；v2.10b / c 起也包括 Claude、OpenAI 的余额和额度上限）。不重试；agent 运行据此立刻停下（pipeline.AgentLLM / run_direction 把它变成
     预算中止，之后的调用都不再发）。是 TransportError 的子类，所以基线（forecast / runner 只接 TransportError）照旧跳过这道题。"""
 
 
@@ -77,8 +79,14 @@ def retry_wait(default_s: float, retry_after) -> float:
     return default_s if ra is None or ra < 0 else max(default_s, min(ra, RETRY_AFTER_MAX_S))
 
 
+# v2.10c：OpenAI 401 的 message 会回显打了码的 key（10-21 实测："Incorrect API key provided: sk-proj-****...0000"）。401 / 403 的 body
+# 本来就不读；这里再兜底：日志里像 key 的片段一律换成 sk-***
+_MASKED_KEY_RE = re.compile(r"\bsk-[A-Za-z0-9_\-*]+")
+
+
 def server_error(ad, raw: bytes) -> dict:
-    """v2.10b：adapter 允许时（Claude），读过的错误 body 只取 error.type 和 error.message 前 200 字记进日志；否则什么都不记。"""
+    """v2.10b：adapter 允许时（Claude、OpenAI），读过的错误 body 只取 error.type 和 error.message 前 200 字记进日志
+    （v2.10c 另记 error.code）；否则什么都不记。"""
     if not getattr(ad, "log_server_error", False) or not raw:
         return {}
     try:
@@ -87,7 +95,19 @@ def server_error(ad, raw: bytes) -> dict:
         return {}
     if not isinstance(err, dict):
         return {}
-    return {"server_error_type": str(err.get("type", ""))[:40], "server_error": str(err.get("message", ""))[:200]}
+    out = {"server_error_type": str(err.get("type", ""))[:40],
+           "server_error": _MASKED_KEY_RE.sub("sk-***", str(err.get("message", "")))[:200]}
+    if err.get("code"):   # v2.10c：OpenAI 的 error.code（rate_limit_exceeded、slow_down、server_is_overloaded 等）
+        out["server_error_code"] = str(err["code"])[:60]
+    return out
+
+
+def server_error_detail(rec: dict) -> str:
+    """异常文字里服务端说明的那一段：" (type: message)"，有 error.code 时 " (type/code: message)"（v2.10c）；没读过 body 时为空。"""
+    if not rec.get("server_error_type"):
+        return ""
+    code = f"/{rec['server_error_code']}" if rec.get("server_error_code") else ""
+    return f" ({rec['server_error_type']}{code}: {rec.get('server_error', '')})"
 
 
 def check_key(spec, timeout: float = 30) -> dict:
@@ -221,7 +241,7 @@ class LLM:
                     d = json.loads(raw)
                     rec["body_keys"] = sorted(d)[:10] if isinstance(d, dict) else type(d).__name__
                     if isinstance(d, dict) and isinstance(d.get("error"), dict):
-                        rec["server_error"] = str(d["error"].get("message", ""))[:200]
+                        rec["server_error"] = _MASKED_KEY_RE.sub("sk-***", str(d["error"].get("message", "")))[:200]
                 except ValueError:
                     rec["body_keys"] = "not_json"
                 if http_try < 3:
@@ -254,8 +274,7 @@ class LLM:
             self._log(rec)
             return out, text, None
         self._log(rec)
-        detail = f" ({rec['server_error_type']}: {rec.get('server_error', '')})" if rec.get("server_error_type") else ""
-        raise TransportError(f"{arm} {qid} attempt {attempt}: {rec.get('error', 'request failed')}{detail}")
+        raise TransportError(f"{arm} {qid} attempt {attempt}: {rec.get('error', 'request failed')}{server_error_detail(rec)}")
 
     @staticmethod
     def _post(req, sock_timeout: float = 180, total_timeout: float = TOTAL_TIMEOUT_S):

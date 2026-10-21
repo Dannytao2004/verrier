@@ -1,6 +1,7 @@
 """SEARCHER：默认是 DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。v2.10a：请求格式、解析和计价交给
 provider adapter（triangulate/providers.py），有 ModelSpec 的运行按它选 provider / 模型 / key；没有时和 v2.9b 逐字节相同。
 v2.10b：Claude 走官方 api.anthropic.com 的同一个工具；回复是 pause_turn 时续上（见 Searcher.search）。
+v2.10c：GPT 走 OpenAI Responses API 的 hosted web_search（解析见 providers.openai_search_unpack）。
 
 只有这一个角色看得到搜索结果。它的输出由代码用正则只取 URL，其余文字（标题、摘要、模型的话）全部丢弃，
 分析角色（extractor / judge / final）永远看不到。每次调用记一行 calls.jsonl（不含内容、不含 key）。
@@ -49,7 +50,7 @@ class Searcher:
         self._log = log  # callable(rec)
 
     def search(self, prompt: str, *, role: str, qid: str, max_uses: int = 3, cap: int = 5) -> dict:
-        """返回查询词、URL 和计量。余额不足（DeepSeek 402、Claude 402 等）抛 llm.BalanceExhausted（run_direction 据此停下整次运行）；
+        """返回查询词、URL 和计量。余额不足（DeepSeek 402、Claude 402、OpenAI 429 credit_balance_exhausted 等）抛 llm.BalanceExhausted（run_direction 据此停下整次运行）；
         其余 HTTP 错误照旧记在返回的 error 里，不抛。v2.10b：adapter 允许时（Claude），回复的 stop_reason 是 pause_turn 就把这次的
         content 原样回传续上（最多 adapter.max_search_continuations 次），每次请求各记一行日志，结果合并。"""
         sp = self.spec
@@ -67,8 +68,7 @@ class Searcher:
             got = self._request(ad, url, headers, payload, rec, role, qid)
             if got is None:   # 这次请求失败：第一次就失败照旧返回空结果；续的时候失败就用已经拿到的结果
                 self._log(rec)
-                error = rec.get("error", "request failed") + (f" ({rec['server_error_type']}: {rec.get('server_error', '')})"
-                                                              if rec.get("server_error_type") else "")
+                error = rec.get("error", "request failed") + llm.server_error_detail(rec)
                 break
             d, started = got
             parsed = ad.search_unpack(d)

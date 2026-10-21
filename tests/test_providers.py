@@ -212,9 +212,9 @@ class TestPricing(unittest.TestCase):
     def test_unknown_model_is_not_priced_as_flash(self):
         t = datetime(2026, 10, 21, tzinfo=timezone.utc)
         with self.assertRaises(config.UnknownModel):
-            config.usd_cost({"completion_tokens": 10}, t, "gpt-6-luna")
+            config.usd_cost({"completion_tokens": 10}, t, "no-such-model-x")
         with self.assertRaises(config.UnknownModel):
-            PV.adapter_for_model("gpt-6-luna")
+            PV.adapter_for_model("no-such-model-x")
         self.assertAlmostEqual(config.usd_cost({"prompt_cache_hit_tokens": 10 ** 6, "prompt_cache_miss_tokens": 10 ** 6,
                                                 "completion_tokens": 10 ** 6}, datetime(2026, 10, 18, 2, tzinfo=timezone.utc),
                                                "deepseek-v4-pro"), 0.022 + 0.66 + 1.98)   # 周日 = 闲时
@@ -242,7 +242,7 @@ class TestPricing(unittest.TestCase):
         self.assertEqual(P.Budget.for_model("deepseek-v4-pro", usd=1.0).directions, int(0.6 / pro))
         self.assertEqual(P.Budget.for_model("deepseek-v4-pro", usd=2.0).directions, 10)   # 页数上限 40 / 4
         with self.assertRaises(config.UnknownModel):
-            P.Budget.for_model("gpt-6-luna")
+            P.Budget.for_model("no-such-model-x")
 
     def test_reservations_use_the_runs_model(self):
         hit, miss, out = config.PRICES["deepseek-v4-pro"]["peak"]

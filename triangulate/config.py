@@ -112,6 +112,30 @@ PRICES.update({
 })
 CLAUDE_US_GEO_MULTIPLIER = 1.1   # Pricing 页 Data residency：inference_geo "us" 所有 token 类别 1.1 倍
 
+# v2.10c：OpenAI（官方 Pricing 页 Standard 档，2026-10-21 查看）。没有分时价：peak = offpeak = (cached input, input, output)。
+# GPT-5.6 及以后的模型 cache 写入单独计价（Prompt caching 页：30 分钟 1.25 倍、12 小时 2.5 倍 input 价，不是另加的费用，
+# 而是这部分 input 改按写入价算）。默认的 implicit 模式在最后一条 user 消息末尾写缓存（本项目不改这个默认，见 PROVIDERS.md），
+# 所以 prompt_cache = "implicit_write"：预扣和「一个方向」的估价把输入都按 30 分钟写入价算（最坏情况）。
+# 单次请求 input 超过 272K token 时整次按 long_context 价（Pricing 页：Short context ≤272K input tokens）。
+# 只用 api.openai.com（global）；data residency 端点（us. / eu.）对 2026-03-05 以后的模型加价 10%，不提供
+OPENAI_PRICING = "https://developers.openai.com/api/docs/pricing"
+
+
+def _openai_price(base_in, hit, write_30m, write_12h, out, long) -> dict:
+    lbase, lhit, lw30, lw12, lout = long
+    return {"provider": "gpt", "offpeak": (hit, base_in, out), "peak": (hit, base_in, out),
+            "cache_write_30m": write_30m, "cache_write_12h": write_12h, "prompt_cache": "implicit_write",
+            "long_context": {"threshold_tokens": 272_000, "peak": (lhit, lbase, lout),
+                             "cache_write_30m": lw30, "cache_write_12h": lw12},
+            "source": OPENAI_PRICING, "checked": "2026-10-21"}
+
+
+PRICES.update({   # input, cached input, 30m write, 12h write, output；long context 同顺序
+    "gpt-6-luna": _openai_price(0.10, 0.01, 0.125, 0.25, 0.50, long=(0.20, 0.02, 0.25, 0.50, 0.75)),
+    "gpt-6.1-sol": _openai_price(2.00, 0.10, 2.50, 5.00, 10.00, long=(4.00, 0.20, 5.00, 10.00, 15.00)),
+    "gpt-6-astra": _openai_price(10.00, 1.00, 12.50, 25.00, 50.00, long=(20.00, 2.00, 25.00, 50.00, 75.00)),
+})
+
 
 class UnknownModel(ValueError):
     """config.PRICES 里没有这个模型：不能计价，就不跑。"""

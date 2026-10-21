@@ -81,6 +81,8 @@ class Budget:
             hit, miss, out = p["peak"]
             if p.get("prompt_cache") == "explicit":   # v2.10b Claude：不写 cache_control 就没有缓存，DeepSeek 命中的那部分按 base input 算
                 hit = miss
+            elif p.get("prompt_cache") == "implicit_write":   # v2.10c GPT：默认在 user 消息末尾写缓存，输入都按 30 分钟写入价（保守）
+                hit = miss = p["cache_write_30m"]
             pr = cls.DIRECTION_PROFILE
             return (pr["hit"] * hit + pr["miss"] * miss + pr["out"] * out) / 1e6 + pr["searches"] * search_fee_usd(m)
         return cls.TYPICAL_DIRECTION_USD * cost(model) / cost(cls.REFERENCE_MODEL)
@@ -131,13 +133,24 @@ class Budget:
         return lc["peak"] if lc and prompt_tokens > lc["threshold_tokens"] else p["peak"]
 
     @staticmethod
+    def reserve_rates(model: str, prompt_tokens: float) -> tuple:
+        """预扣用的 (cache hit, 每个输入 token 的最坏单价, 输出)：peak_rates；v2.10c 默认会写缓存的模型（GPT，prompt_cache =
+        implicit_write）输入按 30 分钟写入价（1.25 倍 input 价，同一档 long context 的写入价）。DeepSeek / Claude 和 peak_rates 相同。"""
+        p = price(model)
+        hit, miss, out = Budget.peak_rates(model, prompt_tokens)
+        if p.get("prompt_cache") == "implicit_write":
+            lc = p.get("long_context")
+            miss = max(miss, (lc if lc and prompt_tokens > lc["threshold_tokens"] else p)["cache_write_30m"])
+        return hit, miss, out
+
+    @staticmethod
     def llm_reserve(prompt_chars: int, max_tokens: int, model: str | None = None) -> float:
-        hit, miss, out = Budget.peak_rates(model or MODEL, prompt_chars / 2)
+        hit, miss, out = Budget.reserve_rates(model or MODEL, prompt_chars / 2)
         return (prompt_chars / 2 * miss + max_tokens * out) / 1e6
 
     def search_reserve(self) -> float:
         m = self.model or MODEL
-        hit, miss, out = self.peak_rates(m, 30_000)
+        hit, miss, out = self.reserve_rates(m, 30_000)
         tokens = MAX_TOKENS["search"] if self.search_tokens is None else self.search_tokens
         return (30_000 * miss + tokens * out) / 1e6 + (2 * self.search_max_uses + 2) * search_fee_usd(m)
 

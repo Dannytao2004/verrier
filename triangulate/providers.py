@@ -1,4 +1,5 @@
 """v2.10a：每次运行的模型设置（ModelSpec）和各家 API 的请求格式（adapter）。v2.10b 加 Claude（原生 Messages API）。
+v2.10c 加 GPT（OpenAI：JSON 调用走 Chat Completions，搜索走 Responses API 的 web_search）。
 
 ModelSpec = provider、model、region、思考档位、这次运行的花费上限，加上用户自己的 key（只在内存里，见 ModelSpec 的说明）。
 有 ModelSpec 的运行就是「自带 key」（BYOK）的运行：pipeline.Context(spec=...) 把它交给 AgentLLM、Searcher 和 Budget。
@@ -430,9 +431,241 @@ class ClaudeAdapter:
         return [str(x.get("id")) for x in d["data"] if isinstance(x, dict)], not d.get("has_more", False)
 
 
+OPENAI_SEARCH_FEE_USD = 0.01   # Pricing 页 Tools：Web search $10.00 / 1k calls（只有 search 动作计次，web search 指南），另按 token 计
+# Error codes 页：这些 429 是额度 / 余额 / 用量上限，重试没用（Retrying billing, spend, or quota errors won't restore API access）；
+# error.type 也可能是 insufficient_quota
+OPENAI_BALANCE_CODES = {
+    "credit_balance_exhausted": "credit_balance_exhausted (no prepaid credits left)",
+    "organization_spend_limit_exceeded": "organization_spend_limit_exceeded (the organization's spend limit)",
+    "project_spend_limit_exceeded": "project_spend_limit_exceeded (the project's spend limit)",
+    "organization_usage_limit_exceeded": "organization_usage_limit_exceeded (the OpenAI-assigned monthly usage limit)",
+    "insufficient_quota": "insufficient_quota",
+}
+
+
+def openai_usage_cost(usage: dict, model: str) -> float:
+    """OpenAI 的 usage 按 config.PRICES 计价；Chat Completions（prompt_tokens / prompt_tokens_details）和 Responses
+    （input_tokens / input_tokens_details）两种字段名都认。Prompt caching 页的算法：普通 input = input - cached - cache_write，
+    cached 按 cached input 价，写入按 30 分钟 / 12 小时写入价（Responses 的 cache_write_tokens_details 有分档；Chat Completions
+    只有 30 分钟一档），output（含 reasoning token）按 output 价。input 超过 272K token 的请求整次按 long context 价。"""
+    p = price(model)
+    if "input_tokens" in usage or "input_tokens_details" in usage:
+        inp, det, out = usage.get("input_tokens", 0) or 0, usage.get("input_tokens_details") or {}, usage.get("output_tokens", 0) or 0
+    else:
+        inp, det, out = usage.get("prompt_tokens", 0) or 0, usage.get("prompt_tokens_details") or {}, usage.get("completion_tokens", 0) or 0
+    read, write = det.get("cached_tokens", 0) or 0, det.get("cache_write_tokens", 0) or 0
+    split = det.get("cache_write_tokens_details") or {}
+    w12 = split.get("ttl_12h_tokens", 0) or 0
+    w30 = max(0, write - w12)
+    tier = p
+    lc = p.get("long_context")
+    if lc and inp > lc["threshold_tokens"]:
+        tier = lc
+    hit, base, outp = tier["peak"]
+    plain = max(0, inp - read - write)
+    return (plain * base + read * hit + w30 * tier["cache_write_30m"] + w12 * tier["cache_write_12h"] + out * outp) / 1e6
+
+
+def _openai_turns(messages: list) -> list:
+    """Chat Completions 的消息：system 角色改成 developer（API 参考：With o1 models and newer, use developer messages for this
+    purpose instead；GPT-6 都是推理模型）。内容不变。"""
+    return [{"role": "developer" if m["role"] == "system" else m["role"], "content": m["content"]} for m in messages]
+
+
+def openai_search_unpack(d: dict) -> dict:
+    """Responses API 的回复（output 项数组）里取：查询词、URL（和标题）、文字、搜索次数、出错的搜索数。
+    web_search_call.action：search（queries / query；include 了 web_search_call.action.sources 时带 sources[]，只有 url）、
+    open_page（url）、find_in_page。只有 search 动作计次收费（web search 指南：Search actions incur a tool call cost）。
+    message 项的 output_text：文字 + url_citation 注解（url、title）。URL 顺序：引用的 -> sources -> open_page；标题只有引用有，
+    只在这里解析（Searcher 不往外传）。"""
+    usage = d.get("usage") or {}
+    cited, cited_titles, sources, opened, queries, texts = [], [], [], [], [], []
+    n_req = n_err = 0
+    for item in d.get("output") or []:
+        if not isinstance(item, dict):
+            continue
+        t = item.get("type")
+        if t == "web_search_call":
+            a = item.get("action") or {}
+            if item.get("status") == "failed":
+                n_err += 1
+            kind = a.get("type")
+            if kind in ("search", None):   # 没有 action 的调用也按一次搜索计费（保守）
+                n_req += 1
+                qs = a.get("queries") or ([a["query"]] if a.get("query") else [])
+                queries += [str(q)[:200] for q in qs]
+                sources += [s["url"] for s in a.get("sources") or [] if isinstance(s, dict) and s.get("url")]
+            elif kind == "open_page" and a.get("url"):
+                opened.append(a["url"])
+        elif t == "message":
+            for c in item.get("content") or []:
+                if isinstance(c, dict) and c.get("type") == "output_text":
+                    texts.append(c.get("text") or "")
+                    for ann in c.get("annotations") or []:
+                        if isinstance(ann, dict) and ann.get("type") == "url_citation" and ann.get("url"):
+                            cited.append(ann["url"])
+                            cited_titles.append(str(ann.get("title") or ""))
+    result_urls = cited + sources + opened
+    result_titles = cited_titles + [""] * (len(sources) + len(opened))
+    status = d.get("status")
+    reason = (d.get("incomplete_details") or {}).get("reason")
+    return {"usage": usage, "n_req": n_req, "queries": queries, "result_urls": result_urls, "result_titles": result_titles,
+            "texts": texts, "n_err": n_err, "stop": f"{status}:{reason}" if reason else status}
+
+
+class OpenAIAdapter:
+    """GPT（OpenAI 官方 API，api.openai.com）。JSON 调用走 Chat Completions（POST /v1/chat/completions）：response_format
+    json_object（用户决定：不用 JSON schema）、reasoning_effort 按模型和角色、max_completion_tokens（含 reasoning token；
+    max_tokens 已 deprecated）、reasoning_effort 不是 none 时不发 temperature（GPT-6 迁移指南）、store: false。
+    搜索走 Responses API（POST /v1/responses，hosted web_search 工具只在 Responses 里有）：tool_choice required、
+    max_tool_calls、include web_search_call.action.sources、store: false。设计说明和官方文档链接见 PROVIDERS.md。"""
+
+    provider, label = "gpt", "OpenAI"
+    regions = {"global": {"chat": "https://api.openai.com/v1/chat/completions",
+                          "search": "https://api.openai.com/v1/responses",
+                          "models": "https://api.openai.com/v1/models"}}
+    default_region = "global"
+    search_fee_usd = OPENAI_SEARCH_FEE_USD
+    # 除 401 / 403（key 被拒，不读：401 的 message 会回显打了码的 key 片段）以外的错误都读 body：429 判断余额 / 额度
+    # （error.code），其余只把 error.type / code / message 记进日志
+    error_body_statuses = frozenset({400, 404, 409, 413, 422, 429, 500, 502, 503, 504})
+    balance_statuses = frozenset({429})
+    retry_statuses = frozenset({429, 500, 502, 503, 504})   # Error codes / Rate limits 页：429 限流、slow_down，503 server_is_overloaded
+    honor_retry_after = True     # Rate limits 页：Retry-After 是重试前最少要等的秒数
+    log_server_error = True
+    # 非流式：生成完才回 body，思考档高的长回复单次读可能要等很久（没实测）。单次读最多等 1200 秒，整次 1800 秒
+    chat_timeouts = {"sock_timeout": 1200, "total_timeout": 1800}
+    max_search_continuations = 0   # Responses 没有 pause_turn；status = incomplete 就照原样用已有的结果
+    balance_hint = "Add credits or raise the spend limits in the OpenAI Platform settings (Billing / Limits), then run again."
+
+    def chat_url(self, region: str) -> str:
+        return self.regions[region]["chat"]
+
+    def search_url(self, region: str) -> str:
+        return self.regions[region]["search"]
+
+    @staticmethod
+    def _headers(key: str) -> dict:
+        return {"Content-Type": "application/json", "Authorization": f"Bearer {key}"}
+
+    @staticmethod
+    def api_effort(model: str, effort) -> str:
+        """ModelSpec.effort 的结果 -> reasoning effort。None（关思考，只有能关的模型会走到这里）-> "none"：省略时 Luna 默认按
+        medium 思考（Reasoning 指南），要关必须显式写 none。"""
+        if effort:
+            return effort
+        off = MODELS[model].get("off_effort")
+        if off is None:
+            raise ValueError(f"{model} cannot turn reasoning off")
+        return off
+
+    def chat_request(self, model: str, key: str, messages: list, *, max_tokens: int, effort):
+        eff = self.api_effort(model, effort)
+        payload = {"model": model, "messages": _openai_turns(messages), "reasoning_effort": eff,
+                   "response_format": {"type": "json_object"}}
+        if eff == "none":   # GPT-6 迁移指南：只有 effort 是 none 时才能带 temperature（DeepSeek 同样发 0）
+            payload["temperature"] = 0
+        payload["max_completion_tokens"] = max_tokens
+        payload["store"] = False
+        return self._headers(key), payload
+
+    chat_decode = staticmethod(json.loads)
+
+    @staticmethod
+    def chat_unpack(data: dict):
+        choice = data["choices"][0]
+        if not isinstance(choice.get("message"), dict):
+            raise TypeError("choices[0].message is not an object")
+        return choice, data.get("usage") or {}
+
+    @staticmethod
+    def chat_meter(unpacked, started, model: str, effort) -> dict:
+        choice, u = unpacked
+        det = u.get("prompt_tokens_details") or {}
+        m = {"finish_reason": choice.get("finish_reason"), "prompt_tokens": u.get("prompt_tokens", 0),
+             "cached_tokens": det.get("cached_tokens", 0) or 0, "cache_write_tokens": det.get("cache_write_tokens", 0) or 0,
+             "completion_tokens": u.get("completion_tokens", 0), "usd": round(openai_usage_cost(u, model), 6)}
+        if effort:   # reasoning token 计在 completion_tokens 里（已计价），这里单独记一下
+            m["reasoning_tokens"] = (u.get("completion_tokens_details") or {}).get("reasoning_tokens", 0)
+        if choice["message"].get("refusal"):
+            m["refusal"] = True   # 拒答的文字不记（日志不记回复内容）
+        return m
+
+    @staticmethod
+    def chat_text(unpacked) -> str:
+        return unpacked[0]["message"].get("content") or ""
+
+    @staticmethod
+    def chat_problem(unpacked):
+        """message.refusal 有值 = 安全拒答（没有 JSON）；finish_reason：length = 撞到 max_completion_tokens，content_filter =
+        内容被过滤（JSON 可能不完整）。Structured Outputs 指南的 JSON mode 一节要求先处理这几种情况。"""
+        choice = unpacked[0]
+        if choice["message"].get("refusal"):
+            return "refusal", "the model declined to answer (message.refusal)"
+        fr = choice.get("finish_reason")
+        if fr == "length":
+            return "truncated", "reply was truncated (finish_reason=length)"
+        if fr == "content_filter":
+            return "content_filter", "reply was stopped by the content filter (finish_reason=content_filter)"
+        return None
+
+    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None):
+        """Responses API + hosted web_search（新集成用 {"type": "web_search"}）。tool_choice required：web search 指南
+        Limitations「With tool_choice: "auto", search is optional. Use tool_choice: "required" ... when search must run」。
+        max_tool_calls = max_uses（所有内置工具调用合计，含 open_page / find_in_page）。sources 要 include 才返回。
+        store: false（默认 true，保存至少 30 天）。"""
+        payload = {"model": model, "input": prompt, "tools": [{"type": "web_search"}], "tool_choice": "required",
+                   "max_tool_calls": max_uses, "include": ["web_search_call.action.sources"],
+                   "reasoning": {"effort": self.api_effort(model, effort)}, "max_output_tokens": max_tokens, "store": False}
+        return self._headers(key), payload
+
+    search_unpack = staticmethod(openai_search_unpack)
+
+    @staticmethod
+    def search_continue(payload: dict, d: dict):
+        return None
+
+    @staticmethod
+    def search_meter(unpacked: dict, started, model: str):
+        u = unpacked["usage"]
+        det, odet = u.get("input_tokens_details") or {}, u.get("output_tokens_details") or {}
+        return ({"input_tokens": u.get("input_tokens", 0), "cached_tokens": det.get("cached_tokens", 0) or 0,
+                 "cache_write_tokens": det.get("cache_write_tokens", 0) or 0, "output_tokens": u.get("output_tokens", 0),
+                 "reasoning_tokens": odet.get("reasoning_tokens", 0) or 0},
+                openai_usage_cost(u, model))
+
+    def balance_exhausted(self, status: int, body: bytes):
+        """余额 / 额度用完就返回一句说明（不含服务端原文），否则 None。Error codes 页：429 + error.code 是
+        credit_balance_exhausted / organization_spend_limit_exceeded / project_spend_limit_exceeded /
+        organization_usage_limit_exceeded；error.type 可能仍是 insufficient_quota。普通限流（rate_limit_exceeded、slow_down）不算。"""
+        if status not in self.balance_statuses:
+            return None
+        try:
+            err = json.loads(body).get("error") or {}
+        except (ValueError, AttributeError):
+            return None
+        if not isinstance(err, dict):
+            return None
+        code, etype = err.get("code"), err.get("type")
+        if code in OPENAI_BALANCE_CODES:
+            return f"HTTP {status} {OPENAI_BALANCE_CODES[code]}"
+        if etype == "insufficient_quota":
+            return f"HTTP {status} insufficient_quota" + (f" ({code})" if code else "")
+        return None
+
+    def key_check_request(self, region: str, key: str):
+        """List models：GET /v1/models（不生成 token），返回 {"object": "list", "data": [{"id", ...}]}，没有分页。"""
+        return self.regions[region]["models"], {"Authorization": f"Bearer {key}"}
+
+    @staticmethod
+    def models_unpack(d: dict):
+        return [str(x.get("id")) for x in d["data"] if isinstance(x, dict)], True
+
+
 DEEPSEEK = DeepSeekAdapter()
 CLAUDE = ClaudeAdapter()
-ADAPTERS = {"deepseek": DEEPSEEK, "claude": CLAUDE}
+OPENAI = OpenAIAdapter()
+ADAPTERS = {"deepseek": DEEPSEEK, "claude": CLAUDE, "gpt": OPENAI}
 
 # 网页上可选的模型（2026-10-21 按官方 Models & Pricing 页）。max_output = 官方写的最大输出 token 数；思考 token 计入输出上限，
 # 开思考的调用多给的余量（config.THINKING_EXTRA_TOKENS）不超过它。efforts：网页档位 -> 这家 API 的取值；
@@ -459,13 +692,27 @@ MODELS = {
                         "default_effort": "medium", "efforts": {"low": "low", "medium": "medium", "high": "high"}},
     "claude-fable-5-1": {"provider": "claude", "label": "Claude Fable 5.1", "max_output": 128_000, "thinking_off": False,
                          "default_effort": "high", "efforts": {"low": "low", "medium": "medium", "high": "high"}},
+    # v2.10c GPT（官方模型页 / Reasoning 指南 / GPT-6 迁移指南，2026-10-21）：三个模型都是 1,050,000 上下文、最大输出 128,000。
+    # 思考深度：Chat Completions 用 reasoning_effort、Responses 用 reasoning.effort，取值同名（这里只用 low / medium / high）。
+    # off_effort = 关思考时发的值：只有 Luna 支持 none（省略时默认 medium，所以要显式写）；6.1 Sol 和 Astra 不支持 none
+    # （发了 HTTP 400），网页不给 off，其余角色用最低一档 low
+    "gpt-6-luna": {"provider": "gpt", "label": "GPT-6 Luna", "max_output": 128_000, "thinking_off": True, "off_effort": "none",
+                   "efforts": {"low": "low", "medium": "medium", "high": "high"}},
+    "gpt-6.1-sol": {"provider": "gpt", "label": "GPT-6.1 Sol", "max_output": 128_000, "thinking_off": False,
+                    "efforts": {"low": "low", "medium": "medium", "high": "high"}},
+    "gpt-6-astra": {"provider": "gpt", "label": "GPT-6 Astra", "max_output": 128_000, "thinking_off": False,
+                    "efforts": {"low": "low", "medium": "medium", "high": "high"}},
 }
 PROVIDERS = {"deepseek": {"label": "DeepSeek", "models": ("deepseek-flash", "deepseek-v4-pro"),
                           "default_model": "deepseek-flash"},
              # 默认 Opus 5.5：官方推荐的默认模型（claude-api 参考，2026-10-21）。$2 上限下它的方向数和预扣见 PROVIDERS.md 第 9 节
              "claude": {"label": "Claude", "models": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5",
                                                       "claude-fable-5-1"),
-                        "default_model": "claude-opus-5-5"}}
+                        "default_model": "claude-opus-5-5"},
+             # 默认 Luna：$2 上限下只有它能跑满 10 个方向（6.1 Sol 约 5 个、Astra 1 个，PROVIDERS.md 第 10 节），也是三个里
+             # 唯一能关思考的（ModelSpec 的默认档位是 off）。官方「新项目从 Astra 开始」，要改随时说
+             "gpt": {"label": "GPT (OpenAI)", "models": ("gpt-6-luna", "gpt-6.1-sol", "gpt-6-astra"),
+                     "default_model": "gpt-6-luna"}}
 DEFAULT_PROVIDER = "deepseek"
 
 
