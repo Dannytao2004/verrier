@@ -7,6 +7,8 @@ v2.10b：各家不同的解码（Claude 是流式 SSE）、可重试的状态码
 check_key() 用 models 列表接口校验 key。
 v2.10c：OpenAI（Chat Completions）；读过的错误 body 另记 error.code，像 key 的片段换成 sk-***。
 v2.10d：Kimi（流式 Chat Completions）；计量按 spec.price_id（国内站的价格）；retry_after() 另认 Kimi 搜索接口的 X-RateLimit-Reset。
+v2.10e：GLM（非流式 Chat Completions）；adapter 有 parse_error 时错误 body 由它解析（GLM 只有 code / message）；check_key 认
+「列表全不全不知道」（GLM 的 models 接口没有文档）。
 
 每次调用记一行到 results/calls.jsonl：arm、题 id、第几次尝试、token、延迟、finish_reason、估算 USD。
 日志里不记 prompt、不记 key。（v2.9b 起，回复不是合法 JSON 时记首尾各 200 字符的诊断。）
@@ -106,6 +108,12 @@ def server_error(ad, raw: bytes) -> dict:
     （v2.10c 另记 error.code）；否则什么都不记。"""
     if not getattr(ad, "log_server_error", False) or not raw:
         return {}
+    parse = getattr(ad, "parse_error", None)
+    if parse is not None:   # v2.10e GLM：错误只有 code 和 message（可能没有外层 error），由 adapter 解析
+        out = parse(raw)
+        if "server_error" in out:
+            out["server_error"] = _MASKED_KEY_RE.sub("sk-***", out["server_error"])[:200]
+        return out
     try:
         err = json.loads(raw).get("error")
     except (ValueError, AttributeError):
@@ -120,7 +128,10 @@ def server_error(ad, raw: bytes) -> dict:
 
 
 def server_error_detail(rec: dict) -> str:
-    """异常文字里服务端说明的那一段：" (type: message)"，有 error.code 时 " (type/code: message)"（v2.10c）；没读过 body 时为空。"""
+    """异常文字里服务端说明的那一段：" (type: message)"，有 error.code 时 " (type/code: message)"（v2.10c）；没读过 body 时为空。
+    v2.10e：只有 code 没有 type 的（GLM，记录里没有 server_error_type 这个键）写成 " (code 1214: message)"。"""
+    if "server_error_type" not in rec and rec.get("server_error_code"):
+        return f" (code {rec['server_error_code']}: {rec.get('server_error', '')})"
     if not rec.get("server_error_type"):
         return ""
     code = f"/{rec['server_error_code']}" if rec.get("server_error_code") else ""
@@ -158,10 +169,13 @@ def check_key(spec, timeout: float = 30) -> dict:
     except (ValueError, KeyError, TypeError, AttributeError):
         return {**out, "error": "bad_response_body", "message": f"{ad.label} models list returned an unexpected body"}
     listed = True if spec.model in ids else (False if complete else None)
+    if listed is None and complete is None:   # v2.10e GLM：models 接口没有文档，列表全不全不知道
+        unlisted = f"; whether {spec.model} is offered was not checked (the models list endpoint is undocumented)"
+    else:
+        unlisted = (f"; {spec.model} is not in the models list" if listed is False
+                    else f"; {spec.model} was not on the first page of the models list")
     return {**out, "ok": True, "model_listed": listed, "n_models": len(ids),
-            "message": f"{ad.label} accepted the API key" + ("" if listed else
-                                                             f"; {spec.model} is not in the models list" if listed is False
-                                                             else f"; {spec.model} was not on the first page of the models list")}
+            "message": f"{ad.label} accepted the API key" + ("" if listed else unlisted)}
 
 
 class LLM:

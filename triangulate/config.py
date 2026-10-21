@@ -175,6 +175,37 @@ PRICES.update({   # cache hit, cache miss, output, 每次搜索；K3 另有 5 �
     "kimi-k2.6@cn": _kimi_price("CNY", 1.10, 6.50, 27.00, 0.01),
 })
 
+# v2.10e：GLM（Z.ai 国际站 api.z.ai 按 USD；智谱开放平台国内站 open.bigmodel.cn 按 CNY，2026-10-21 查看）。同 Kimi：两站的 key、余额、
+# 价格各自独立，价格按「模型@区域」记（国际站是模型名本身，国内站 "glm-5.3@cn"），CNY 按上面同一个汇率中间价折成 USD。
+# 没有分时价：peak = offpeak = (cached input, input, output)。缓存是隐式自动的（Context Caching 指南），没有写入费；缓存存储
+# 「限时免费」（两站价格页），这里不计。prompt_cache = "implicit"：这个 agent 在 GLM 上的命中率没测过，「一个方向」的估价和预扣把输入
+# 全按 input 价算（同 Kimi）。search_fee_usd：POST /web_search 每次的价格。国际站价格页只列了 Built-in Tools 的「Web Search
+# $0.01 / use」，没说是否就是独立接口 search-prime 的价格（未核实，按它记）；国内站 Search-Std ¥0.01 / 次（按实际调用次数计费）
+GLM_PRICING = "https://docs.z.ai/guides/overview/pricing"
+GLM_PRICING_CN = "https://docs.bigmodel.cn/cn/guide/start/pricing"
+
+
+def _glm_price(currency, hit, miss, out, search_fee) -> dict:
+    """GLM 一个模型在一个区域的价格（同 _kimi_price 的形状：CNY 折成 USD，原价存在 "listed" 里）。"""
+    r = 1.0 if currency == "USD" else 1.0 / CNY_PER_USD
+    p = {"provider": "glm", "offpeak": (hit * r, miss * r, out * r), "peak": (hit * r, miss * r, out * r),
+         "prompt_cache": "implicit", "search_fee_usd": search_fee * r, "currency": currency,
+         "listed": {"hit": hit, "miss": miss, "out": out, "search_fee": search_fee},
+         "source": GLM_PRICING if currency == "USD" else GLM_PRICING_CN, "checked": "2026-10-21"}
+    if currency != "USD":
+        p["fx"] = {"cny_per_usd": CNY_PER_USD, "source": CNY_PER_USD_SOURCE, "date": CNY_PER_USD_DATE}
+    return p
+
+
+PRICES.update({   # cached input, input, output, 每次搜索
+    "glm-5.3": _glm_price("USD", 0.26, 1.4, 4.4, 0.01),
+    "glm-5.2": _glm_price("USD", 0.26, 1.4, 4.4, 0.01),
+    "glm-4.7-flashx": _glm_price("USD", 0.01, 0.07, 0.4, 0.01),   # 国际站价格页 Other Pricing
+    "glm-5.3@cn": _glm_price("CNY", 2, 8, 28, 0.01),
+    "glm-5.2@cn": _glm_price("CNY", 2, 8, 28, 0.01),
+    "glm-4.7-flashx@cn": _glm_price("CNY", 0.1, 0.5, 3, 0.01),      # 国内站价格页「更多文本模型」
+})
+
 
 class UnknownModel(ValueError):
     """config.PRICES 里没有这个模型：不能计价，就不跑。"""

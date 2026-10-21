@@ -10,7 +10,8 @@
 | `v2.10b` | Claude adapter（原生 Messages API，流式）和 Claude 搜索（服务端 web_search，pause_turn 续上）；用 models 列表校验 key（`llm.check_key`，DeepSeek 也有）；adapter 接口补了解码、可重试状态码、超时、回复问题、续搜索几个钩子 | 第 3、5、9 节 |
 | `v2.10c` | GPT adapter（OpenAI：JSON 调用走 Chat Completions，搜索走 Responses API 的 web_search）；按官方价计价（含 cache 写入价、272K 长上下文档）；429 余额 / 额度错误立刻停；GPT key 校验 | 第 10 节 |
 | `v2.10d` | Kimi adapter（国际站 / 国内站两个区域；JSON 调用走流式 Chat Completions；搜索 = 一次 JSON 调用生成查询词 + `POST /v1/tools/search`）；国内站按 CNY 官方价折算（`ModelSpec.price_id`）；429 余额不足立刻停；Kimi key 校验 | 第 11 节 |
-| 之后 | GLM 的 adapter；网页（填 key、选模型、校验 key、每次运行的花费估计） | 未开始 |
+| `v2.10e` | GLM adapter（Z.ai 国际站 / 智谱开放平台国内站两个区域；JSON 调用走非流式 Chat Completions；搜索同 Kimi：生成查询词 + `POST /web_search`）；国内站按 CNY 官方价折算；429 余额不足（1113）和用量上限 / 套餐 key 的码立刻停；只收 Standard API Key（网页提示 `GLM_KEY_NOTE`）；GLM key 校验 | 第 12 节 |
+| 之后 | 网页（填 key、选模型、校验 key、每次运行的花费估计） | 未开始 |
 
 ## 1. Scope and binding decisions（用户 10-20 / 10-21 定的，摘要）
 
@@ -69,6 +70,11 @@ adapter 只管各家不同的部分：
 | v2.10d：`search_mode`、`tools_search_request(key, query, limit=)`、`tools_search_unpack(d)` | `search_mode = "queries"`（Kimi）：`Searcher.search` 不走 `search_request` 那条路，改走 `_search_by_queries`（第 11.5 节）。没有这个属性的 adapter 照旧（`"model"`） |
 | v2.10d：`reset_header`、`llm.retry_after(ad, headers)` | 出错时要等多少秒：先看 `retry-after`；没有、且 adapter 指定了 `reset_header`（Kimi 搜索接口的 `X-RateLimit-Reset`，Unix 秒）时换成距现在的秒数。`honor_retry_after = False`（DeepSeek）时照旧不看；Claude / OpenAI 没有 `reset_header`，行为不变 |
 | v2.10d：`region_labels`、`MODELS[m]["thinking_param"]` / `["thinking_depth"]` | 网页用：区域的说明；这个模型用哪个字段控制思考、有没有深度档位（K2.6 没有：low / medium / high 都是「开」） |
+| v2.10e：`tools_search_request(key, query, limit=, region=)`、`search_settings(region)` | 搜索请求按区域建（GLM 两站的引擎和必填字段不同；Kimi 不用 region）；`run_settings` 的 `search_queries` 里记哪些搜索设置（Kimi 仍是 `timeout_seconds`，GLM 是引擎等） |
+| v2.10e：`search_bills_every_ok_response` | 「查询词」模式的计费：没有这个属性（Kimi）= 只有结果非空才记一次；GLM 为 True = 每个 HTTP 200 都记一次（含空结果、形状不对的） |
+| v2.10e：`parse_error(raw)` | adapter 有它时 `llm.server_error` 用它解析错误 body（GLM：只有 `code` / `message`，可能没有外层 `error`），日志记 `server_error_code` / `server_error`、不记 `server_error_type`；`llm.server_error_detail` 对这种记录写 `(code 1214: message)`。其余 provider 没有这个钩子，文字不变 |
+| v2.10e：`models_unpack` 第二项可以是 `None` | 「列表全不全不知道」（GLM 的 models 接口没有文档）：所选模型不在里面时 `check_key` 的 `model_listed` 是 None，message 写「没核对」而不是「不在列表里」 |
+| v2.10e：`key_note`、`key_pages`（GLM） | 网页上要显示的 key 说明（只收 Standard API Key、不收 Coding Plan key）和两站建 key 的页面；`PROVIDERS["glm"]["key_note"]` 是同一段 |
 
 `ModelSpec.tokens_for(role, max_tokens)`（v2.10b）：这个角色的思考档位和实际发出的 max_tokens（开思考 +`THINKING_EXTRA_TOKENS`，不超过模型最大输出），
 JSON 调用、搜索、预扣都用它。`Budget.search_tokens`：spec 运行里搜索实际发出的 max_tokens（Opus 5.5 / Fable 5.1 的搜索也开思考，预扣跟着变大）。
@@ -171,7 +177,7 @@ agent 里 `AgentLLM.ask` 和 `run_direction` 的搜索把它变成 `Budget.halt(
 - 搜索遇到 401 / 403 仍然只记 `http_401` 返回空 URL（v2.9b 原样），不像 JSON 调用那样抛 `KeyRejected`。
 - ~~key 校验（models 列表接口）还没实现。~~ v2.10b：`llm.check_key`（DeepSeek `GET /models`、Claude `GET /v1/models`），网页还没接。
 - ~~其他四家（Claude、GPT、Kimi、GLM）的 adapter、价格、模型清单还没加~~：Claude 见第 9 节（v2.10b），GPT 见第 10 节（v2.10c），
-  Kimi 见第 11 节（v2.10d）；GLM 还没加，调研结果在 `providers_research.json`（2026-10-20）。
+  Kimi 见第 11 节（v2.10d），GLM 见第 12 节（v2.10e）。
 
 ## 9. Claude adapter（`ClaudeAdapter`，v2.10b）
 
@@ -729,6 +735,209 @@ CNY 原价存在 `PRICES[...]["listed"]`，`peak` / `search_fee_usd` 是除以 6
 - 本阶段对其他代码的改动：`config.MAX_TOKENS` 没动（新常数 `SEARCH_QUERIES_MAX_TOKENS` 放在 `agent/search.py`，免得 DeepSeek 运行的 settings 变）；
   `ModelSpec` 先校验区域再查价格（按 price_id）。
 
+## 12. GLM adapter（`GLMAdapter`，v2.10e）
+
+Z.ai 国际站和智谱开放平台国内站。同前几家：标准库 urllib，不装官方 SDK（`zai-sdk`）：和其余 provider 共用外层循环、不跟随跳转、假服务测试。
+JSON 调用走 OpenAI 兼容的 Chat Completions（两站的 API 参考都写明）；Anthropic Messages 兼容端点和 Responses 兼容端点支持哪些参数没写全（调研记录），不用。
+API 细节在 2026-10-21 对照两站官方 `.md` 原文（页面地址加 `.md`）逐条核过；国际站和国内站的同名页面有出入时分开写。
+
+### 12.1 区域和 key
+
+| `region` | 平台（控制台） | API 地址（通用端点） | 计价 |
+|---|---|---|---|
+| `global`（默认） | Z.ai（z.ai） | `https://api.z.ai/api/paas/v4` | USD（价格页：All prices are in USD） |
+| `cn` | 智谱开放平台（bigmodel.cn） | `https://open.bigmodel.cn/api/paas/v4` | CNY，按 2026-10-21 中间价 1 USD = 6.7192 CNY 折成 USD（同 Kimi，`config.CNY_PER_USD`） |
+
+- **只收 Standard API Key**。两站 10-16 的公告（API Key Management Guide / API Key 分类管理说明）：从 2026-10-16 起标准 API 的 key 和 GLM Coding Plan 的 key
+  分开管理，key 的类型决定计费方式（换端点不改变）；Coding Plan 的使用规范：只能在官方支持的工具里用，违规可能被限流、冻结，多次违规封号。
+  所以：只用通用端点 `/api/paas/v4`，代码里没有 Coding Plan 端点 `/api/coding/paas/v4`（测试检查 regions 里没有 `coding`）；网页上显示 `GLM_KEY_NOTE`
+  （`providers.GLM_KEY_NOTE`，也挂在 `GLMAdapter.key_note` 和 `PROVIDERS["glm"]["key_note"]`）：
+
+  > Use a Standard API Key: on Z.ai, API Keys -> Standard API Key (https://z.ai/manage-apikey/apikey-list); on bigmodel.cn, the standard API Keys page
+  > (https://bigmodel.cn/usercenter/proj-mgmt/apikeys). GLM Coding Plan keys (Personal / Team Coding Plan) are not allowed: since 2026-10-16 they are a
+  > separate key type, and the usage policy limits them to officially supported coding tools (violations can lead to rate limiting or a frozen account).
+  > This app only calls the general endpoint /api/paas/v4, never the Coding Plan endpoint /api/coding/paas/v4.
+
+  有人填了 Coding Plan 的 key：服务端如果回 429 + 1309 / 1311 / 1314 / 1315（套餐过期、套餐不含这个模型、企业套餐 key），整次运行停下并提示换 Standard API Key（12.4）。
+  文档没写 Coding Plan key 打通用端点会怎样（是否直接拒绝），未核实。
+- 两站的 key 能不能互通没写（调研记录），按两个独立平台处理；用户自己选区域。计价 id：国际站是模型名，国内站 `glm-5.3@cn` 等（`ModelSpec.price_id`），
+  `state.json` 的 `run_spec` 在国内站另记 `price_id` 和 `fx`。
+- 国际站 FAQ：账单按天显示前一天（n-1）的消费，刚跑完看不到扣费是正常的；信用卡充值不支持 3DS。网页阶段要写明。
+
+### 12.2 JSON 调用发什么
+
+`POST {base}/chat/completions`，请求头 `Content-Type: application/json`、`Authorization: Bearer <key>`（两站的 HTTP API 页；可选的 `Accept-Language` 不发）。body 依次是：
+
+| 字段 | 值 | 为什么 |
+|---|---|---|
+| `model` | `glm-4.7-flashx` / `glm-5.2` / `glm-5.3` | 用户决定 9 的清单 |
+| `messages` | 原样（GLM 收 `system` 角色） | API 参考没要求 assistant 的 content 非空（不像 Kimi / Claude），所以 `AgentLLM.ask` 重问时的空 assistant 消息照原样发 |
+| `thinking` | `{"type": "enabled"}` / `{"type": "disabled"}` | ChatThinking：默认 enabled；5.3 只能 enabled（disabled 报错）；5.2 和 4.7 系列能 disabled |
+| `reasoning_effort`（5.3 / 5.2，开思考时） | 5.3：`low` / `high` / `max`；5.2：`high` / `max` | 只在 thinking 为 enabled 时生效、默认 max（最贵），所以每次都显式写；4.7 系列没有这个参数（只有 5.2 及以上有） |
+| `response_format` | `{"type": "json_object"}` | 用户决定 4 / 10：普通 JSON 写法（enum 只有 text / json_object，没有 json_schema）。结构化输出指南的做法是 prompt 里写明格式（现有 prompt 都写了） |
+| `max_tokens` | 角色的 `MAX_TOKENS`，开思考 +24,000，最多 131,072 | API 参考 / Core Parameters：参数名是 `max_tokens`（没有 max_completion_tokens），1–131,072，不写默认 65,536。思考 token 算不算进 `max_tokens` 文档没写（未核实），按 DeepSeek 的做法给余量 |
+| `stream` | `false` | 非流式：文档没写非流式请求的服务端超时（不像 Kimi 的 900 秒）；而流式调用时推理中途出错不回错误码、只在 `finish_reason` 里写原因（错误码页的注），非流式出错直接是 HTTP 状态 + 业务码，好处理 |
+
+不发：`temperature`、`top_p`、`do_sample`（默认 temperature 1.0、top_p 0.95 就是迁移指南推荐的值，建议两个只调一个；temperature 的说明同时写了「[0.0, 1.0]」和
+「must be a positive number」，0 能不能用有歧义；Claude / Kimi / GPT 推理档也都用默认采样）；`tools`、`tool_choice`、`stop`、`request_id`、`user_id`、`tool_stream`。
+
+回复：`choices[0].message.content` 是最终答案，只对它 `json.loads`（不剥代码块、不修补）；思考在 `message.reasoning_content`（Deep Thinking 指南的示例），不拼、不记。
+
+| `finish_reason`（API 参考） | 处理 |
+|---|---|
+| `stop` | 解析 JSON |
+| `length` / `model_context_window_exceeded` | 报截断（`truncated`，`reply was truncated (finish_reason=...)`）；`AgentLLM.ask` 照旧要求「短一点再答一次」（同 Claude 的 model_context_window_exceeded） |
+| `sensitive` | 报 `sensitive`：被内容安全审核拦截，不解析 |
+| `network_error`（推理异常）、`tool_calls`（不带工具时不该出现）、没给 | 报 `unexpected_finish`，不解析；`AgentLLM.ask` 照旧带着错误重问一次 |
+| 没有 `choices`、`message` 不是对象 | `bad_response_body`，按已有逻辑重试 |
+
+单次读最多 1,200 秒、整次 1,800 秒（`chat_timeouts`，同 OpenAI，没实测）。
+
+### 12.3 思考档位
+
+| 模型 | 网页可选 | plan / judge / repair | 其余角色（含生成查询词） |
+|---|---|---|---|
+| GLM-5.3 | low / medium / high（永远在想，不给 off） | low -> `low`、medium -> `high`、high -> `max`（+24,000） | `low`（+24,000） |
+| GLM-5.2 | off / low / medium / high | off：`disabled`；low、medium -> `high`；high -> `max`（+24,000） | `disabled` |
+| GLM-4.7-FlashX | off / low / medium / high（没有深度：low / medium / high 都是「开」，`thinking_depth = False`，网页合并显示） | off：`disabled`；其余 `enabled`（+24,000） | `disabled` |
+
+- GLM-5.3：Deep Thinking 指南 / 模型页：thinking 只能 enabled，reasoning_effort 只收 low / high / max（其他值报错），迁移提示写明「原来用 disabled 的改成 enabled +
+  low」，所以其余角色用 low。映射同 Kimi K3（调研的建议；**和 DeepSeek / Claude / GPT 的「high -> high」不一样**，K3 的同一个问题还等你定）。
+- GLM-5.2：reasoning_effort 收 7 个值，但 low / medium 映射成 high、xhigh 映射成 max、none / minimal 等于不思考，实际只有关 / high / max。这里发映射后的值
+  （网页 low 也发 `high`），日志和 settings 里看得到实际档位；所以网页的 low 和 medium 是同一档。enabled 时 5.2「由模型自动决定要不要思考」（ChatThinking）。
+- GLM-4.7 系列：enabled 时强制思考（ChatThinking），没有 reasoning_effort。
+
+### 12.4 错误、重试、余额
+
+错误 body 有两种写法：错误码页（两站）和 10-21 实测都是 `{"error": {"code": "1000", "message": "..."}}`（code 是字符串），API 参考的 Error schema 却是
+`{"code": 1214, "message": "..."}`（没有外层 error、code 是整数）。`providers.glm_error` 两种都认，code 统一成字符串。GLM 的错误没有 type：日志记
+`server_error_code` 和 `server_error`（message 前 200 字），异常文字写成 `http_400 (code 1214: Parameter ... is invalid ...)`。
+
+| 情况 | 处理 | 依据（错误码页，两站同表） |
+|---|---|---|
+| 401（1000 / 1001 / 1003 / 1005）、403（1220） | `KeyRejected`，不重试，不读 body | 1000 Authentication Failed 等；10-21 实测见 12.8 |
+| 429 **1113** | `BalanceExhausted`，不重试，整次运行停下（第 6 节） | Insufficient balance or no resource package. Please recharge.（国内站：您的账户已欠费，请充值后重试） |
+| 429 1308 / 1310 / 1313 / 1316–1321 | 同上（我定的，见 12.9） | 用量上限（要到服务端给的重置时间）、公平使用限制、5 小时 / 7 天上限且余额或月消费上限不允许超额：重试都没用 |
+| 429 1309 / 1311 / 1314 / 1315 | 同上，说明里提示换 Standard API Key | Coding Plan 过期、套餐不含这个模型、企业套餐过期、key 只限企业编程套餐 |
+| 429 1302（限流）、1305（过载）；500（1200 / 1230 / 1234）、502、503、504 | 最多 3 次，2 / 4 秒退避（搜索接口 3 / 6 秒）；服务端给了 `Retry-After` 就至少等那么久（最多 60 秒；文档没写这个头） | Rate limit reached / service may be temporarily overloaded / network error, please try again later |
+| 其余 4xx（1210 / 1213 / 1214 / 1215 参数、1211 模型不存在、1261 prompt 超长、1301 内容安全） | 不重试；业务码和 message 进日志和异常文字 | 同上表 |
+| 3xx | 不跟随（D9），`TransportError` | 同 v2.6g |
+
+`BalanceExhausted` 的文字：`insufficient balance: GLM HTTP 429 code 1113 (insufficient balance or no resource package) (...); the run was stopped without retrying.
+Top up the GLM account (or check its limits) on the platform where the key was created (z.ai/manage-apikey/billing or bigmodel.cn), make sure it is a Standard API Key,
+then run again.`（不含服务端原文。）
+
+### 12.5 搜索：生成查询词 + `POST {base}/web_search`
+
+为什么不用模型自己搜：Chat Completions 的内置 `web_search` 工具是「检索结果喂给模型再生成」，不像 Anthropic 的服务端工具那样多轮自主搜，而且 API 参考写的引擎
+`search_pro_jina` 和指南示例的 `search-prime` 对不上（调研记录）；独立的 Web Search API 直接给结构化结果（title / link / content），正好只要 URL。
+所以走 Kimi 那条路（`search_mode = "queries"`，`Searcher._search_by_queries`，第 11.5 节）：一次 JSON 调用生成最多 3 个查询词（同一个 `SEARCH_QUERIES_*` prompt，
+没改），再逐个调搜索接口，按名次交替合并 URL。
+
+| 区域 | body | 依据 |
+|---|---|---|
+| `global` | `{"search_engine": "search-prime", "search_query": <查询词>, "count": <cap，即 4>}` | 国际站 Web Search API：`search_engine`（必填，enum 只有 search-prime）、`search_query`（必填）、`count`（1–50，默认 10；字段说明写「Supported search engines: search_pro_jina」，但指南的 search-prime 示例用了 count=15） |
+| `cn` | `{"search_query": <查询词，最多 70 个字符>, "search_engine": "search_std", "search_intent": false, "count": 4}` | 国内站网络搜索：`search_query`（必填，maxLength 70、建议不超过 70 个字符）、`search_engine`（必填：search_std 基础版 / search_pro / search_pro_sogou / search_pro_quark）、`search_intent`（必填；false = 跳过意图识别、直接搜：查询词已经是写好的搜索词）、`count`（1–50） |
+
+- 国内站查询词超过 70 个字符时截到 70 以内最后一个空格（没有合适的空格就直接截，例如中文）。截的是发出去的那份；返回的 `queries`（进 state.json 审计）仍是生成的原文。国际站没写长度上限，不截。
+- `search_domain_filter`、`search_recency_filter`、`content_size` 用默认（不限域名、不限时间；摘要不用）。回复 `search_result[]` 取 `link`（和 `title`），标题不出 Searcher。
+- 计费：国际站价格页只列了 Built-in Tools 的「Web Search $0.01 / use」，没说是否就是独立接口 search-prime 的价（未核实，按它记）；国内站「搜索工具按照实际调用次数计费」，
+  Search-Std ¥0.01 / 次。文档没说空结果免费，所以每个 HTTP 200 都按一次记（`search_bills_every_ok_response`，含空结果、形状不对的；Kimi 只记结果非空的），失败的请求不记。
+- 错误：同 12.4（429 1113 停下，1302 / 1305 重试；搜索接口的 401 和其他 provider 的搜索一样只记 `http_401`、不抛）。国内站另列了 1701（搜索并发到上限，稍后重试）、1702（没有可用的搜索引擎）、
+  1703（搜索引擎没返回有效数据），没写对应的 HTTP 状态：是 429 / 5xx 就按状态重试，其余照原样记在 `error` 里。
+- 预扣：同 Kimi，`Budget.search_tokens` = 生成查询词那次发出的 max_tokens（5.2 / 4.7-FlashX 关思考 2,000；5.3 26,000），输入按 30,000 token 估，搜索费按 `(2 × max_uses + 2)` 次。
+- `run_settings` 的 `search_queries`：`max_tokens`、`endpoint`，加 `search_engine`（国内站另有 `search_intent: false`、`query_max_chars: 70`）。
+
+### 12.6 价格和成本
+
+`config.PRICES`（每百万 token；没有分时价，`peak` = `offpeak` = (cached input, input, output)）。国际站 https://docs.z.ai/guides/overview/pricing 、
+国内站 https://docs.bigmodel.cn/cn/guide/start/pricing ，2026-10-21 查看。
+
+| 计价 id | cached input | input | output | 搜索 / 次 |
+|---|---|---|---|---|
+| `glm-5.3` | $0.26 | $1.4 | $4.4 | $0.01 |
+| `glm-5.2` | $0.26 | $1.4 | $4.4 | $0.01 |
+| `glm-4.7-flashx` | $0.01 | $0.07 | $0.4 | $0.01 |
+| `glm-5.3@cn` | ¥2 | ¥8 | ¥28 | ¥0.01 |
+| `glm-5.2@cn` | ¥2 | ¥8 | ¥28 | ¥0.01 |
+| `glm-4.7-flashx@cn` | ¥0.1 | ¥0.5 | ¥3 | ¥0.01 |
+
+- 缓存是隐式自动的（Context Caching 指南），没有写入费；缓存存储两站都写「限时免费」，不计（免费期结束后的价格没公布）。国际站 FAQ：缓存机制还在公测，命中规则和保留时长没公布。
+- `glm_usage_cost`：`prompt_tokens - cached_tokens` 按 input 价，`prompt_tokens_details.cached_tokens` 按 cached input 价，`completion_tokens` 按 output 价。usage 里没有 reasoning_tokens，
+  思考 token 是否就计在 `completion_tokens` 里文档没写（未核实；按它计价）。calls.jsonl：`finish_reason`、`prompt_tokens`、`cached_tokens`、`completion_tokens`、`usd`；
+  `completion_tokens_details.reasoning_tokens` 有才记。
+- 方向数和预扣：`prompt_cache = "implicit"`（同 Kimi）：这个 agent 在 GLM 上的命中率没测过，`DIRECTION_PROFILE` 的输入全按 input 价算；预扣的输入也按 input 价。
+
+### 12.7 `$2` 上限下的方向数和预扣
+
+| 计价 id（档位） | 一个方向 | `$2` 方向数 | 一次搜索预扣 | plan（2 万字符） | 抽取（4 万字符） | 抽取（40 万字符） | judge（10 万字符） |
+|---|---|---|---|---|---|---|---|
+| deepseek-flash（对照） | $0.060 | 10 | $0.099 | $0.010 | $0.025 | $0.079 | $0.029 |
+| glm-4.7-flashx（off） | $0.051 | 10 | $0.083 | $0.003 | $0.008 | $0.020 | $0.008 |
+| glm-4.7-flashx（high） | $0.051 | 10 | $0.083 | $0.013 | $0.008 | $0.020 | $0.018 |
+| glm-5.2（off） | $0.128 | 9 | $0.131 | $0.040 | $0.098 | $0.350 | $0.123 |
+| glm-5.2（high） | $0.128 | 9 | $0.131 | $0.146 | $0.098 | $0.350 | $0.228 |
+| glm-5.3（low / high 相同） | $0.128 | 9 | $0.236 | $0.146 | $0.204 | $0.456 | $0.228 |
+| glm-5.2@cn（off） | $0.078 | 10 | $0.056 | $0.037 | $0.090 | $0.305 | $0.110 |
+| glm-5.3@cn（low） | $0.078 | 10 | $0.156 | $0.137 | $0.190 | $0.405 | $0.210 |
+
+- **国际站 GLM-5.3 在 `$2` 下很紧**（同第 9.8 / 10.7 / 11.7 节的问题）：第一轮 8 个方向同时搜索（并发 8），预扣合计 $1.89，加上规划已花的钱接近 $2；之后 8 个并发抽取每个预扣 $0.20–0.46，
+  很可能撞上「已花 + 在途 + 这一次 > 上限」而中止。大头是关不掉的思考：每次调用 +24,000 token × $4.4 / 百万 ≈ $0.11。修法同前，等你定。
+- 默认模型 GLM-5.2（`PROVIDERS["glm"]["default_model"]`）：国际站 API 参考的 model enum 里有它、能关思考（ModelSpec 的默认档位是 off），`$2` 下 9 个方向。
+  最便宜的 4.7-FlashX（10 个方向）国际站 id 没核实（12.9），5.3 是官方的默认旗舰但关不掉思考。要改随时说。
+
+### 12.8 key 校验
+
+`GET {base}/models`（Bearer）。两站的文档（`llms.txt` 索引和 API 参考）都没有这个接口，但它存在：10-21 实测（`probes/glm_key_probe.py`，没花钱，全是 401）：
+
+| 请求 | 状态 | body |
+|---|---|---|
+| 国际站 `GET /models` 不带 key | 401 | `{"error":{"code":"1001","message":"Authentication parameter not received in Header, unable to authenticate"}}` |
+| 国际站 `GET /models` 假 key | 401 | `{"error":{"code":"1000","message":"Authentication Failed"}}` |
+| 国内站 `GET /models` 假 key | 401 | `{"error":{"code":"1000","message":"身份验证失败。"}}` |
+| 两站 `POST /chat/completions`、`POST /web_search` 假 key | 401 | 同上（国际站英文、国内站中文） |
+| 假 key 走 `check_key`（国际站 4.7-FlashX、国内站 5.3） | — | `{"provider": "glm", "model": ..., "ok": false, "status": 401, "error": "key_rejected", "message": "GLM rejected the API key (HTTP 401)"}` |
+
+两个 API 主机都没有跳转；服务端的 401 没有回显 key（探针检查了 key 和 key 的 id 段）。有效 key 的回复形状没核实（手上没有 key）：是 OpenAI 的形状（`data` 列表、每项有 `id`）就看
+所选模型在不在里面；列表全不全不知道（`models_unpack` 第二项是 None），不在里面时 `model_listed` 是 None、message 写「没核对」；形状不认识也照样算 key 通过（HTTP 200 本身说明 key 被接受）。
+`GET /models` 查不出余额：余额不足要到第一次计费调用才报 429 1113（调研记录）。
+
+### 12.9 已知限制、没做的、要你定的
+
+- **国际站 GLM-5.3 在 `$2` 下很紧**（12.7，要你定，和 Opus / Sol / K3 同一个问题）。
+- **5.3 的 high -> max 映射**同 Kimi K3，和另外三家的口径不同（12.3，要你定）。
+- **1113 以外的 429 码也停下整次运行**（12.4）：这是我定的。任务只写了「1113 停、1302 / 1305 重试」；1308–1321 是用量上限和套餐的问题，重试几秒没用（要等服务端给的重置时间、续订或换 key），
+  照 OpenAI 那边把 spend / usage limit 当成停下的先例处理。只按原样报、不停也可以（每个调用会先重试 3 次再失败），要改随时说。
+- **GLM-4.7-FlashX 的国际站 id 没核实**：`glm-4.7-flashx` 取自国内站 API 参考的 model enum；国际站 API 参考的 enum 只有 5.3 / 5.2 / 5.1 / 5 / 4.7 / 4.6，国际站价格页的 Other Pricing 里有 GLM-4.7-FlashX。
+  国际站要是不收这个 id，第一个调用会报 400 1211（Unknown Model），照原样显示。它的上下文只有 200K：抽取最多发 40 万字符，可能超出（400 1261 Prompt too long，照原样报）。
+- 思考 token 算不算进 `max_tokens`、算不算进 `completion_tokens` 计费，文档都没写（未核实）。
+- 国际站搜索的单价按 Built-in Tools 的 $0.01 / use 记（12.5，未核实）；空结果也按一次记（保守）。
+- 文档没写 Coding Plan key 打通用端点会怎样（12.1）；只能在网页上提示、在收到 1309 / 1311 / 1314 / 1315 时停下。
+- 国内站的价格按固定汇率折算（同 Kimi）。
+- 并发和限流额度不公开，要到控制台看（调研记录）；agent 默认并发 8，额度低的账户会连续撞 1302，3 次重试后这些调用失败。没做自动降并发。
+- json_object + 思考的组合、5.2 关思考时的 json_object 表现、非流式长请求的超时，都只按文档写，没有真 key 实测。
+- 网页还没接（同第 8 节）：区域选择、`GLM_KEY_NOTE`、4.7-FlashX「没有深度」和 5.2「low = medium」的提示、账单 n-1 延迟的提示都留给网页阶段。
+
+### 12.10 Verification（v2.10e）
+
+- `tests/test_glm.py`（31 个）全部对着 127.0.0.1 上的假 GLM 服务（`tests/fake_glm.py`，复用 `fake_claude.py` 的脚本化服务；国内站接在 `/cn/...`）跑，真实走 urllib +
+  `urlopen_no_redirect`：请求头 / 请求体（键顺序、禁发的采样参数、不发 max_completion_tokens）、三个模型 × 档位 × 角色的 `thinking` / `reasoning_effort` / `max_tokens`、余量封顶、
+  区域路由、思考内容不进返回值和日志、usage 计价（命中、国内站折算）、六种 finish_reason、不修 JSON、形状不对重试、两种错误 body 形状、1113 不重试（两种形状、中英文）、
+  1308–1321 / 1309–1315 停下、1302 / 1305 / 500 重试、Retry-After、400 照原样报（业务码和 message）、401 / 403 不读 body、3xx 不跟随、价格表、方向数、预扣、按区域的搜索费、
+  查询词调用的 prompt 和参数、两站的搜索请求体、国内站 70 字符截断、交替合并、空结果 / 形状不对也计费、单个查询词失败、搜索 401 / 1302 / 1113、生成查询词的六种失败、
+  一个方向的端到端（查询词 -> 搜索 -> 取页 -> 抽取 -> 核对，三次调用计入预算）、key 校验（含 10-21 实测的三种 401 body、models 列表形状不认识）、ModelSpec、key 说明、
+  整次运行端到端（国内站 5.3，429 1113 干净停下，结果目录没有 key，key 已清掉，settings 记 price_id / 汇率 / 搜索设置）。
+- 变异检查 36 处（发 temperature、stream true、改成 max_completion_tokens、5.3 high 改 high、5.2 low 发 low、开思考不写 thinking、5.2 关思考发 none、4.7 发 reasoning_effort、
+  命中按 input 价、没扣命中部分、context window 当成 stop、不认 sensitive、network_error 照样解析、只认带外层 error 的形状、code 不转字符串、1113 不算余额、1305 算余额、
+  套餐码重试、429 不重试、读 401 body、国内站不发 search_intent、国际站引擎写错、国内站不截断、空结果不计费、取 url 不取 link、国内站写成 Coding 端点、models 列表当成完整、
+  llm 不用 parse_error、异常文字不写业务码、国内站价格写错、Searcher 不传 region、形状不对不计费、把思考拼进正文、key 说明不提 Coding Plan、settings 记 Kimi 的字段、默认模型改成 4.7-FlashX）：
+  全部被测试抓到。
+- 其他 provider：DeepSeek 默认路径的 24 组金样本仍逐字节相同；Kimi 的 33 个测试不变（`tools_search_request` 多收一个不用的 `region`，`run_settings` 改由 `search_settings` 给字段，值相同）。
+- G2（`probes/compare_continuous_prompts.py`）：v2.10d 的导出和本阶段都是 `365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4`。
+- 真实网络只发了不花钱的请求（`probes/glm_key_probe.py`，跑了两次，全部 401）。没有真 key，没有发过成功的 `/chat/completions`、`/web_search`。
+- 本阶段对其他代码的改动：`llm.server_error`（`parse_error` 钩子）、`llm.server_error_detail`（只有 code 的记录）、`llm.check_key`（列表全不全不知道时的文字）、
+  `Searcher._search_by_queries`（传 region、按 adapter 计费）、`run.run_settings`（`search_settings`）、`KimiAdapter`（`region` 参数、`search_settings`）。
+
 ## Official docs（Claude，2026-10-21 查看）
 
 - Messages API（请求字段、stop_reason、usage、流式事件类型）：https://platform.claude.com/docs/en/api/messages/create
@@ -787,3 +996,21 @@ CNY 原价存在 `PRICES[...]["listed"]`，`peak` / `search_fee_usd` 是除以 6
 - 国内站同名页面：https://platform.kimi.com/docs/api/chat 、https://platform.kimi.com/docs/api/tools-search 、https://platform.kimi.com/docs/api/errors 、
   https://platform.kimi.com/docs/pricing/chat 、https://platform.kimi.com/docs/pricing/websearch
 - 人民币汇率中间价（2026-10-21，1 美元对人民币 6.7192 元）：https://www.pbc.gov.cn/zhengcehuobisi/125207/125217/125925/2026102108513972558/index.html
+
+## Official docs（GLM，2026-10-21 查看；页面加 `.md` 可取原始 markdown）
+
+- 国际站 API Introduction（通用端点 /api/paas/v4、Bearer、Standard API Key）：https://docs.z.ai/api-reference/introduction
+- 国际站 Chat Completion（请求字段、thinking、reasoning_effort、response_format、max_tokens、usage、finish_reason、Error schema）：https://docs.z.ai/api-reference/llm/chat-completion
+- 国际站 Errors（业务码、错误 body 形状）：https://docs.z.ai/api-reference/api-code
+- 国际站 Web Search API（search-prime、count）：https://docs.z.ai/api-reference/tools/web-search ；指南：https://docs.z.ai/guides/tools/web-search
+- 国际站 Deep Thinking（各模型的 thinking / reasoning_effort）：https://docs.z.ai/guides/capabilities/thinking
+- 国际站 Core Parameters（max_tokens 默认 / 最大、采样参数）：https://docs.z.ai/guides/overview/concept-param
+- 国际站 Migrate to GLM-5.3（采样参数推荐、disabled 改成 enabled + low）：https://docs.z.ai/guides/overview/migrate-to-glm-new
+- 国际站模型页：https://docs.z.ai/guides/llm/glm-5.3 、https://docs.z.ai/guides/llm/glm-5.2 、https://docs.z.ai/guides/llm/glm-4.7
+- 国际站 Structured Output（json_object）：https://docs.z.ai/guides/capabilities/struct-output ；Context Caching：https://docs.z.ai/guides/capabilities/cache
+- 国际站 Pricing：https://docs.z.ai/guides/overview/pricing ；FAQ（缓存公测、账单 n-1、3DS）：https://docs.z.ai/help/faq
+- 国际站 API Key Management Guide（10-16 起 Standard / Coding Plan key 分开）：https://docs.z.ai/devpack/notice/api-key-management ；Coding Plan Usage Policy：https://docs.z.ai/devpack/usage-policy
+- 国内站对话补全：https://docs.bigmodel.cn/api-reference/模型-api/对话补全 ；网络搜索：https://docs.bigmodel.cn/api-reference/工具-api/网络搜索
+- 国内站错误码：https://docs.bigmodel.cn/cn/faq/api-code ；API 定价：https://docs.bigmodel.cn/cn/guide/start/pricing ；模型概览：https://docs.bigmodel.cn/cn/guide/start/model-overview
+- 国内站深度思考：https://docs.bigmodel.cn/cn/guide/capabilities/thinking ；核心参数：https://docs.bigmodel.cn/cn/guide/start/concept-param ；HTTP API 调用：https://docs.bigmodel.cn/cn/guide/develop/http/introduction
+- 国内站 API Key 分类管理说明：https://docs.bigmodel.cn/cn/coding-plan/notice/api-key-management ；Coding Plan 使用须知：https://docs.bigmodel.cn/cn/coding-plan/usage-notes

@@ -2,6 +2,8 @@
 v2.10c 加 GPT（OpenAI：JSON 调用走 Chat Completions，搜索走 Responses API 的 web_search）。
 v2.10d 加 Kimi（国际站 / 国内站两个区域；JSON 调用走 OpenAI 兼容的流式 Chat Completions，搜索是「生成查询词 + /v1/tools/search」）；
 国内站按 CNY 价折算，计价用 ModelSpec.price_id（"kimi-k3@cn"）。
+v2.10e 加 GLM（Z.ai 国际站 / 智谱开放平台国内站；JSON 调用走 OpenAI 兼容的非流式 Chat Completions，搜索同 Kimi：生成查询词 +
+POST /web_search）；只收 Standard API Key（GLM_KEY_NOTE）。
 
 ModelSpec = provider、model、region、思考档位、这次运行的花费上限，加上用户自己的 key（只在内存里，见 ModelSpec 的说明）。
 有 ModelSpec 的运行就是「自带 key」（BYOK）的运行：pipeline.Context(spec=...) 把它交给 AgentLLM、Searcher 和 Budget。
@@ -835,11 +837,15 @@ class KimiAdapter:
             return "unexpected_finish", f"reply ended with finish_reason={fr}"
         return None
 
-    def tools_search_request(self, key: str, query: str, *, limit: int):
+    def tools_search_request(self, key: str, query: str, *, limit: int, region: str | None = None):
         """Web Search Basic：POST /v1/tools/search，body text_query（必填）、limit（1–20，默认 5）、timeout_seconds（1–60）；
-        include_content 用默认 false（页面由 fetch 自己取）。"""
+        include_content 用默认 false（页面由 fetch 自己取）。两站的 body 相同，region 不用（v2.10e 起 Searcher 传进来，GLM 要用）。"""
         return self._headers(key), {"text_query": query, "limit": max(1, min(self.search_limit_max, int(limit))),
                                     "timeout_seconds": self.search_timeout_seconds}
+
+    def search_settings(self, region: str) -> dict:
+        """记进 run settings 的搜索设置（run.run_settings 的 search_queries）。"""
+        return {"timeout_seconds": self.search_timeout_seconds}
 
     @staticmethod
     def tools_search_unpack(d: dict) -> list:
@@ -873,11 +879,262 @@ class KimiAdapter:
         return [str(x.get("id")) for x in d["data"] if isinstance(x, dict)], True
 
 
+# ---------- v2.10e GLM ----------
+
+def glm_error(raw: bytes):
+    """GLM 的错误 body -> (code, message) 或 None。错误码页（两站）的形状是 {"error": {"code": "1113", "message": ...}}（code 是字符串；
+    2026-10-21 实测 401 也是这样），API 参考里的 Error schema 却写成没有外层 error、code 是 integer 的 {"code": 1113, "message": ...}：
+    两种都认，code 统一成字符串。"""
+    try:
+        d = json.loads(raw)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(d, dict):
+        return None
+    err = d["error"] if isinstance(d.get("error"), dict) else d
+    code, msg = err.get("code"), err.get("message")
+    if code is None and msg is None:
+        return None
+    return (None if code is None else str(code).strip()), ("" if msg is None else str(msg))
+
+
+def glm_usage_cost(usage: dict, price_id: str) -> float:
+    """GLM 的 usage 按 config.PRICES[price_id]（国内站已折成 USD）计价。Chat Completion API：prompt_tokens 是全部输入，
+    prompt_tokens_details.cached_tokens 是其中命中缓存的部分（按 cached input 价），其余按 input 价；completion_tokens 按 output 价
+    （思考 token 是否计在 completion_tokens 里文档没写，usage 里也没有 reasoning_tokens：按 completion_tokens 计价，未核实）。
+    缓存是隐式的，没有写入费；缓存存储限时免费，不计。"""
+    hit, miss, outp = price(price_id)["peak"]
+    inp = usage.get("prompt_tokens", 0) or 0
+    det = usage.get("prompt_tokens_details") if isinstance(usage.get("prompt_tokens_details"), dict) else {}
+    read = det.get("cached_tokens", 0) or 0
+    out = usage.get("completion_tokens", 0) or 0
+    return (max(0, inp - read) * miss + read * hit + out * outp) / 1e6
+
+
+# 错误码页（两站同表）：429 里这些码重试没用，整次运行停下（BalanceExhausted）。1113 是余额不足；其余是用量上限、套餐过期 / 不含这个模型、
+# 套餐类型不对的 key（要到给出的重置时间、续订或换 key 才能恢复），和 OpenAI 的 spend / usage limit 一样处理。1302（限流）、1305（过载）重试
+GLM_BALANCE_CODES = {
+    "1113": "code 1113 (insufficient balance or no resource package)",
+    "1308": "code 1308 (usage limit reached; it resets at the time given by the server)",
+    "1310": "code 1310 (weekly / monthly usage limit exhausted)",
+    "1313": "code 1313 (request frequency limited under the fair usage policy)",
+    "1316": "code 1316 (5-hour usage limit reached and the balance is too low for extra usage)",
+    "1317": "code 1317 (7-day usage limit reached and the balance is too low for extra usage)",
+    "1318": "code 1318 (5-hour usage limit reached; extra usage blocked by a monthly spend limit)",
+    "1319": "code 1319 (7-day usage limit reached; extra usage blocked by a monthly spend limit)",
+    "1320": "code 1320 (5-hour usage limit reached; extra usage blocked by the enterprise monthly spend limit)",
+    "1321": "code 1321 (7-day usage limit reached; extra usage blocked by the enterprise monthly spend limit)",
+}
+_GLM_PLAN_KEY = "this looks like a GLM Coding Plan / package key; this app needs a Standard API Key"
+GLM_PLAN_CODES = {
+    "1309": f"code 1309 (the GLM Coding Plan has expired; {_GLM_PLAN_KEY})",
+    "1311": f"code 1311 (the subscription plan does not include this model; {_GLM_PLAN_KEY})",
+    "1314": f"code 1314 (the enterprise package has expired; {_GLM_PLAN_KEY})",
+    "1315": f"code 1315 (the key is limited to enterprise coding package scenarios; {_GLM_PLAN_KEY})",
+}
+GLM_KEY_NOTE = ("Use a Standard API Key: on Z.ai, API Keys -> Standard API Key (https://z.ai/manage-apikey/apikey-list); on "
+                "bigmodel.cn, the standard API Keys page (https://bigmodel.cn/usercenter/proj-mgmt/apikeys). GLM Coding Plan keys "
+                "(Personal / Team Coding Plan) are not allowed: since 2026-10-16 they are a separate key type, and the usage policy "
+                "limits them to officially supported coding tools (violations can lead to rate limiting or a frozen account). "
+                "This app only calls the general endpoint /api/paas/v4, never the Coding Plan endpoint /api/coding/paas/v4.")
+
+
+def _cut_query(q: str, n: int) -> str:
+    """查询词最多 n 个字符：超了就截到 n 以内最后一个空格（没有合适的空格时直接截断，例如中文）。"""
+    if len(q) <= n:
+        return q
+    cut = q[:n]
+    sp = cut.rfind(" ")
+    return (cut[:sp] if sp >= n // 2 else cut).rstrip()
+
+
+class GLMAdapter:
+    """GLM（Z.ai 国际站 api.z.ai / 智谱开放平台国内站 open.bigmodel.cn，用户选区域；两站的账户、key、价格、搜索引擎都不同）。
+    只用通用端点 /api/paas/v4（不用 Coding Plan 端点），只收 Standard API Key（网页提示见 GLM_KEY_NOTE）。
+    JSON 调用：OpenAI 兼容的 Chat Completions（POST {base}/chat/completions），非流式；response_format json_object（用户决定：不用 JSON
+    schema；GLM 也没有）、max_tokens（1–131072）、思考按模型族（5.3：thinking enabled + reasoning_effort low / high / max，关不掉；
+    5.2：disabled，或 enabled + reasoning_effort；4.7 系列：enabled / disabled，没有 reasoning_effort）；temperature / top_p / do_sample
+    不发（官方默认 temperature 1.0、top_p 0.95 就是推荐值）。回复按 finish_reason 分：stop 解析，length / model_context_window_exceeded
+    报截断，sensitive 报内容审核，其余照原样报。错误 body 的 code 可能是字符串或整数、可能没有外层 error（glm_error）。
+    搜索：同 Kimi，先用一次 JSON 调用生成查询词，再逐个 POST {base}/web_search（国际站 search-prime，国内站 search_std）。
+    设计说明和官方文档链接见 PROVIDERS.md 第 12 节。"""
+
+    provider, label = "glm", "GLM"
+    regions = {"global": {"chat": "https://api.z.ai/api/paas/v4/chat/completions",
+                          "search": "https://api.z.ai/api/paas/v4/web_search",
+                          "models": "https://api.z.ai/api/paas/v4/models"},
+               "cn": {"chat": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                      "search": "https://open.bigmodel.cn/api/paas/v4/web_search",
+                      "models": "https://open.bigmodel.cn/api/paas/v4/models"}}
+    region_labels = {"global": "International (Z.ai, z.ai, billed in USD)",
+                     "cn": "China (Zhipu BigModel open platform, bigmodel.cn, billed in CNY)"}
+    key_note = GLM_KEY_NOTE
+    key_pages = {"global": "https://z.ai/manage-apikey/apikey-list", "cn": "https://bigmodel.cn/usercenter/proj-mgmt/apikeys"}
+    default_region = "global"
+    search_fee_usd = 0.01             # 国际站；按区域的价格在 config.PRICES 的 search_fee_usd（providers.search_fee_usd）
+    search_mode = "queries"           # Searcher：先生成查询词，再逐个调搜索接口（同 Kimi）
+    search_bills_every_ok_response = True   # 文档：按实际调用次数计费（没说空结果免费）-> 每个 HTTP 200 都按一次记（保守）
+    # 搜索引擎：国际站 Web Search API 的 enum 只有 search-prime；国内站用 search_std（基础版，¥0.01 / 次）
+    search_engines = {"global": "search-prime", "cn": "search_std"}
+    search_count_max = 50             # count：1–50（默认 10）
+    search_query_max_chars = {"cn": 70}   # 国内站 search_query 的 maxLength 是 70（建议不超过 70 个字符）；国际站没写上限
+    # 除 401 / 403（key 被拒，不读）以外的错误都读 body：429 判断余额 / 用量上限（code），其余只把 code / message 记进日志
+    error_body_statuses = frozenset({400, 404, 413, 429, 500, 502, 503, 504})
+    balance_statuses = frozenset({429})
+    retry_statuses = frozenset({429, 500, 502, 503, 504})   # 429 的 1302 限流、1305 过载（余额 / 上限的码先被 balance_exhausted 拦下）
+    honor_retry_after = True          # 文档没写 Retry-After；服务端给了就照它等（最多 60 秒），没给照常退避
+    log_server_error = True
+    # 非流式：生成完才回 body（文档没写服务端的超时）。单次读最多等 1200 秒，整次 1800 秒（同 OpenAI，没实测）
+    chat_timeouts = {"sock_timeout": 1200, "total_timeout": 1800}
+    max_search_continuations = 0
+    balance_hint = ("Top up the GLM account (or check its limits) on the platform where the key was created "
+                    "(z.ai/manage-apikey/billing or bigmodel.cn), make sure it is a Standard API Key, then run again.")
+
+    def chat_url(self, region: str) -> str:
+        return self.regions[region]["chat"]
+
+    def search_url(self, region: str) -> str:
+        return self.regions[region]["search"]
+
+    @staticmethod
+    def _headers(key: str) -> dict:
+        """两站的 HTTP API 页：Content-Type: application/json，Authorization: Bearer <API Key>。"""
+        return {"Content-Type": "application/json", "Authorization": f"Bearer {key}"}
+
+    @staticmethod
+    def thinking_fields(model: str, effort) -> dict:
+        """MODELS[model]["thinking_param"]：
+        "reasoning_effort"（5.3 / 5.2）：开思考 = thinking enabled + reasoning_effort（官方示例两个都写）；关（只有 5.2 能关）= thinking
+        disabled，不发 reasoning_effort（文档：只在 enabled 时生效）。5.3 传 disabled 会报错，这里防御性地拒绝。
+        "thinking"（4.7 系列）：thinking enabled（强制思考）/ disabled；不支持 reasoning_effort（只有 5.2 及以上有）。"""
+        m = MODELS[model]
+        if m["thinking_param"] == "reasoning_effort":
+            if effort:
+                return {"thinking": {"type": "enabled"}, "reasoning_effort": effort}
+            if not m["thinking_off"]:
+                raise ValueError(f"{model} always thinks; it needs a reasoning_effort")
+            return {"thinking": {"type": "disabled"}}
+        return {"thinking": {"type": "enabled" if effort else "disabled"}}
+
+    def chat_request(self, model: str, key: str, messages: list, *, max_tokens: int, effort):
+        """body 依次是 model、messages（原样：GLM 收 system 角色）、thinking（和 reasoning_effort）、response_format、max_tokens、stream。"""
+        payload = {"model": model, "messages": [{"role": m["role"], "content": m["content"]} for m in messages]}
+        payload.update(self.thinking_fields(model, effort))
+        payload.update({"response_format": {"type": "json_object"}, "max_tokens": max_tokens, "stream": False})
+        return self._headers(key), payload
+
+    chat_decode = staticmethod(json.loads)
+
+    @staticmethod
+    def chat_unpack(data: dict):
+        choice = data["choices"][0]
+        if not isinstance(choice.get("message"), dict):
+            raise TypeError("choices[0].message is not an object")
+        return choice, data.get("usage") or {}
+
+    @staticmethod
+    def chat_meter(unpacked, started, model: str, effort) -> dict:
+        """model 是计价用的 id（ModelSpec.price_id：国内站是 "glm-5.3@cn"）。"""
+        choice, u = unpacked
+        det = u.get("prompt_tokens_details") if isinstance(u.get("prompt_tokens_details"), dict) else {}
+        m = {"finish_reason": choice.get("finish_reason"), "prompt_tokens": u.get("prompt_tokens", 0),
+             "cached_tokens": det.get("cached_tokens", 0) or 0, "completion_tokens": u.get("completion_tokens", 0),
+             "usd": round(glm_usage_cost(u, model), 6)}
+        if "reasoning_tokens" in (u.get("completion_tokens_details") or {}):   # API 参考的 usage 没有这个字段；有才记
+            m["reasoning_tokens"] = u["completion_tokens_details"]["reasoning_tokens"]
+        return m
+
+    @staticmethod
+    def chat_text(unpacked) -> str:
+        """只取 message.content（最终答案）；思考内容在 message.reasoning_content，不拼、不记。"""
+        return unpacked[0]["message"].get("content") or ""
+
+    @staticmethod
+    def chat_problem(unpacked):
+        """finish_reason（API 参考：stop / tool_calls / length / sensitive / model_context_window_exceeded / network_error）：
+        stop 照常解析 JSON；length = 撞到 max_tokens、model_context_window_exceeded = 超出上下文窗口：输出没写完，报截断；
+        sensitive = 被内容安全审核拦截；其余（不带工具时的 tool_calls、network_error = 推理异常、没给 finish_reason）照原样报，不解析。"""
+        fr = unpacked[0].get("finish_reason")
+        if fr in ("length", "model_context_window_exceeded"):
+            return "truncated", f"reply was truncated (finish_reason={fr})"
+        if fr == "sensitive":
+            return "sensitive", "reply was stopped by content moderation (finish_reason=sensitive)"
+        if fr != "stop":
+            return "unexpected_finish", f"reply ended with finish_reason={fr}"
+        return None
+
+    def tools_search_request(self, key: str, query: str, *, limit: int, region: str | None = None):
+        """Web Search API：POST {base}/web_search。国际站 body：search_engine（必填，只有 search-prime）、search_query（必填）、count
+        （1–50，默认 10）。国内站：search_query（必填，maxLength 70）、search_engine（必填，search_std）、search_intent（必填；false =
+        跳过意图识别、直接搜：查询词已经是写好的搜索词）、count。search_domain_filter / search_recency_filter / content_size 用默认。"""
+        region = region or self.default_region
+        n = self.search_query_max_chars.get(region)
+        q = _cut_query(query, n) if n else query
+        count = max(1, min(self.search_count_max, int(limit)))
+        if region == "cn":
+            body = {"search_query": q, "search_engine": self.search_engines[region], "search_intent": False, "count": count}
+        else:
+            body = {"search_engine": self.search_engines[region], "search_query": q, "count": count}
+        return self._headers(key), body
+
+    @staticmethod
+    def tools_search_unpack(d: dict) -> list:
+        """search_result[] -> [(link, title)]（只要有 link 的）。没有 search_result 列表时抛 KeyError / TypeError（形状不对）。"""
+        res = d["search_result"]
+        if not isinstance(res, list):
+            raise TypeError("search_result is not a list")
+        return [(str(x["link"]), str(x.get("title") or "")) for x in res if isinstance(x, dict) and x.get("link")]
+
+    def search_settings(self, region: str) -> dict:
+        out = {"search_engine": self.search_engines[region]}
+        if region == "cn":
+            out.update(search_intent=False, query_max_chars=self.search_query_max_chars["cn"])
+        return out
+
+    @staticmethod
+    def parse_error(raw: bytes) -> dict:
+        """llm.server_error 用：读过的错误 body 只取 code 和 message 前 200 字（GLM 的错误没有 type）。"""
+        got = glm_error(raw)
+        if got is None:
+            return {}
+        code, msg = got
+        out = {"server_error": msg[:200]}
+        if code:
+            out["server_error_code"] = code[:60]
+        return out
+
+    def balance_exhausted(self, status: int, body: bytes):
+        """余额 / 用量上限 / 套餐 key 的问题就返回一句说明（不含服务端原文），否则 None。错误码页：HTTP 429 + 业务码 1113 = 余额不足或
+        没有资源包；1308–1321 是用量上限和套餐的问题（GLM_BALANCE_CODES / GLM_PLAN_CODES）。同为 429 的 1302（限流）、1305（过载）重试。"""
+        if status not in self.balance_statuses:
+            return None
+        got = glm_error(body)
+        if got is None or got[0] is None:
+            return None
+        code = got[0]
+        why = GLM_BALANCE_CODES.get(code) or GLM_PLAN_CODES.get(code)
+        return f"HTTP {status} {why}" if why else None
+
+    def key_check_request(self, region: str, key: str):
+        """GET {base}/models（Bearer）。两站的文档都没有列这个接口，但它存在：10-20 / 10-21 不带 key、带假 key 实测都是 401
+        （probes/glm_key_probe.py）。有效 key 的回复是什么形状没核实（手上没有 key）。"""
+        return self.regions[region]["models"], {"Authorization": f"Bearer {key}"}
+
+    @staticmethod
+    def models_unpack(d):
+        """接口没有文档：回复是 OpenAI 的形状（data 列表，每项有 id）就取出模型 id，否则空列表。第二项 None = 不知道列表全不全
+        （llm.check_key 据此不说「模型不在列表里」）。HTTP 200 本身已经说明 key 被接受。"""
+        data = d.get("data") if isinstance(d, dict) else None
+        ids = [str(x.get("id")) for x in data if isinstance(x, dict) and x.get("id")] if isinstance(data, list) else []
+        return ids, None
+
+
 DEEPSEEK = DeepSeekAdapter()
 CLAUDE = ClaudeAdapter()
 OPENAI = OpenAIAdapter()
 KIMI = KimiAdapter()
-ADAPTERS = {"deepseek": DEEPSEEK, "claude": CLAUDE, "gpt": OPENAI, "kimi": KIMI}
+GLM = GLMAdapter()
+ADAPTERS = {"deepseek": DEEPSEEK, "claude": CLAUDE, "gpt": OPENAI, "kimi": KIMI, "glm": GLM}
 
 # 网页上可选的模型（2026-10-21 按官方 Models & Pricing 页）。max_output = 官方写的最大输出 token 数；思考 token 计入输出上限，
 # 开思考的调用多给的余量（config.THINKING_EXTRA_TOKENS）不超过它。efforts：网页档位 -> 这家 API 的取值；
@@ -925,6 +1182,23 @@ MODELS = {
     "kimi-k3": {"provider": "kimi", "label": "Kimi K3", "max_output": 1_048_576, "context": 1_048_576, "thinking_off": False,
                 "thinking_param": "reasoning_effort", "thinking_depth": True,
                 "efforts": {"low": "low", "medium": "high", "high": "max"}},
+    # v2.10e GLM（Z.ai / 智谱官方 Chat Completion API、Deep Thinking、Core Parameters、模型页，2026-10-21）：max_tokens 最大 131,072。
+    # GLM-5.3：1M 上下文；永远在想（thinking 只能 enabled），reasoning_effort 只有 low / high / max（默认 max）。网页档位同 Kimi K3：
+    # low -> low、medium -> high、high -> max；不给 off，其余角色 low。
+    # GLM-5.2：1M 上下文；能关（thinking disabled）；reasoning_effort 收 7 个值，但 low / medium 都映射成 high、xhigh 映射成 max，实际只有
+    # 关 / high / max 三档：网页 low、medium 都发 high（发映射后的值，日志里看得到实际档位），high 发 max。
+    # GLM-4.7-FlashX：200K 上下文；thinking enabled（4.7 系列开了就强制思考）/ disabled，没有 reasoning_effort（只有 5.2 及以上有）：
+    # low / medium / high 都是「开」（thinking_depth = False，网页上合并显示）。模型 id 取自国内站 API 参考的 model enum；国际站 API 参考的
+    # enum 里没有它（国际站价格页 Other Pricing 有 GLM-4.7-FlashX），国际站是否收这个 id 没核实
+    "glm-5.3": {"provider": "glm", "label": "GLM-5.3", "max_output": 131_072, "context": 1_000_000, "thinking_off": False,
+                "thinking_param": "reasoning_effort", "thinking_depth": True,
+                "efforts": {"low": "low", "medium": "high", "high": "max"}},
+    "glm-5.2": {"provider": "glm", "label": "GLM-5.2", "max_output": 131_072, "context": 1_000_000, "thinking_off": True,
+                "thinking_param": "reasoning_effort", "thinking_depth": True,
+                "efforts": {"low": "high", "medium": "high", "high": "max"}},
+    "glm-4.7-flashx": {"provider": "glm", "label": "GLM-4.7-FlashX", "max_output": 131_072, "context": 200_000,
+                       "thinking_off": True, "thinking_param": "thinking", "thinking_depth": False,
+                       "efforts": {"low": "enabled", "medium": "enabled", "high": "enabled"}},
 }
 PROVIDERS = {"deepseek": {"label": "DeepSeek", "models": ("deepseek-flash", "deepseek-v4-pro"),
                           "default_model": "deepseek-flash"},
@@ -938,7 +1212,11 @@ PROVIDERS = {"deepseek": {"label": "DeepSeek", "models": ("deepseek-flash", "dee
                      "default_model": "gpt-6-luna"},
              # 默认 K2.6：$2 上限下能跑满 10 个方向、能关思考（同 GPT 选 Luna 的理由）；调研记录官方 FAQ 讲成本时也推荐它。
              # K3 要先充值才解锁，$2 下第一轮会因预扣放不下而中止（PROVIDERS.md 第 11.7 节）
-             "kimi": {"label": "Kimi (Moonshot AI)", "models": ("kimi-k2.6", "kimi-k3"), "default_model": "kimi-k2.6"}}
+             "kimi": {"label": "Kimi (Moonshot AI)", "models": ("kimi-k2.6", "kimi-k3"), "default_model": "kimi-k2.6"},
+             # 默认 GLM-5.2：国际站 API 参考里有这个 id、能关思考（ModelSpec 的默认档位是 off），$2 上限下 9 个方向。最便宜的 4.7-FlashX
+             # （10 个方向）国际站 id 没核实；5.3（官方默认的旗舰）关不掉思考。PROVIDERS.md 第 12 节。key_note：网页上要显示的 key 说明
+             "glm": {"label": "GLM (Z.ai / Zhipu)", "models": ("glm-4.7-flashx", "glm-5.2", "glm-5.3"), "default_model": "glm-5.2",
+                     "key_note": GLM_KEY_NOTE}}
 DEFAULT_PROVIDER = "deepseek"
 
 

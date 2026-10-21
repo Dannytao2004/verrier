@@ -5,6 +5,8 @@ v2.10c：GPT 走 OpenAI Responses API 的 hosted web_search（解析见 provider
 v2.10d：Kimi 的模型侧搜索（$web_search）已下线，adapter.search_mode = "queries"：先用一次小的 JSON 调用把同一段搜索 prompt
 变成几个查询词（prompts.SEARCH_QUERIES_*，只有这类 provider 用），再逐个调 POST /v1/tools/search，按名次交替合并 URL
 （Searcher._search_by_queries）。DeepSeek / Claude / GPT 的搜索路径不变。
+v2.10e：GLM 走同一条路（POST {base}/web_search）；搜索请求按区域建（adapter.tools_search_request 多收 region），每个 HTTP 200
+都按一次计费（adapter.search_bills_every_ok_response）。
 
 只有这一个角色看得到搜索结果。它的输出由代码用正则只取 URL，其余文字（标题、摘要、模型的话）全部丢弃，
 分析角色（extractor / judge / final）永远看不到。每次调用记一行 calls.jsonl（不含内容、不含 key）。
@@ -129,12 +131,12 @@ class Searcher:
         return out
 
     def _search_by_queries(self, ad, brief: str, *, role: str, qid: str, max_uses: int, cap: int) -> dict:
-        """v2.10d（adapter.search_mode = "queries"，Kimi）：一次 JSON 调用把搜索 prompt（brief）变成最多 max_uses 个查询词，
+        """v2.10d（adapter.search_mode = "queries"，Kimi；v2.10e 起 GLM）：一次 JSON 调用把搜索 prompt（brief）变成最多 max_uses 个查询词，
         再逐个 POST 搜索接口（adapter.tools_search_request），每次请求记一行日志（kind = search，query_n = 第几个）。
         URL 按名次交替合并（每个查询词的第 1 名、再第 2 名……），去重后取 cap 个；标题解析出来但不往外传（同其他 provider）。
         一个查询词失败不影响其余的，失败原因合在返回的 error 里；生成查询词失败就没有 URL（error 以 "queries:" 开头）。
         余额不足（生成查询词或搜索）抛 llm.BalanceExhausted。返回的字段同 search()；usd 是生成查询词的 token 成本，
-        usd_search_fee_assumed 是搜索接口的按次费用（只有返回非空结果的才收费）。"""
+        usd_search_fee_assumed 是搜索接口的按次费用（Kimi：只有返回非空结果的才收费；GLM：每个 HTTP 200 都算）。"""
         sp = self.spec
         fee = search_fee_usd(sp.price_id)
         queries, usd, err = self._write_queries(brief, role=role, qid=qid, n=max_uses)
@@ -143,9 +145,11 @@ class Searcher:
         if err:
             out["error"] = err
             return out
-        url, per_query, errors = ad.search_url(sp.region), [], []
+        url, per_query, errors, n_req = ad.search_url(sp.region), [], [], 0
+        # v2.10e：Kimi 只有 HTTP 200 且结果非空才收费；GLM 文档只说按调用次数计费，每个 HTTP 200 都按一次记（含空结果、形状不对的）
+        every_ok = getattr(ad, "search_bills_every_ok_response", False)
         for i, q in enumerate(queries, 1):
-            headers, payload = ad.tools_search_request(sp.key, q, limit=cap)
+            headers, payload = ad.tools_search_request(sp.key, q, limit=cap, region=sp.region)
             rec = {"arm": role, "qid": qid, "model": self.model, "kind": "search", "query_n": i}
             got, hits = self._request(ad, url, headers, payload, rec, role, qid), None
             if got is not None:
@@ -153,17 +157,19 @@ class Searcher:
                     hits = ad.tools_search_unpack(got[0])
                 except (KeyError, TypeError):
                     rec.update(ok=False, error="bad_response_body")
+            billed = 1 if hits or (got is not None and every_ok) else 0
+            n_req += billed
             if hits is None:
+                if billed:   # GLM：HTTP 200 但形状不对，也按一次计费（计入预算）
+                    rec.update(web_search_requests=1, usd=0.0, usd_search_fee_assumed=round(fee, 6))
                 self._log(rec)
                 errors.append(f"query {i}: {rec.get('error', 'request failed')}{llm.server_error_detail(rec)}")
                 continue
-            n_req = 1 if hits else 0   # 官方计费：HTTP 200 且 search_results 非空才收一次
-            rec.update(ok=True, web_search_requests=n_req, n_result_urls=len(hits), usd=0.0,
-                       usd_search_fee_assumed=round(n_req * fee, 6))
+            rec.update(ok=True, web_search_requests=billed, n_result_urls=len(hits), usd=0.0,
+                       usd_search_fee_assumed=round(billed * fee, 6))
             self._log(rec)
             per_query.append(hits)
         merged = [h[rank] for rank in range(max((len(h) for h in per_query), default=0)) for h in per_query if rank < len(h)]
-        n_req = sum(1 for h in per_query if h)
         out.update(urls=parse_urls("\n".join(u for u, _title in merged), cap=cap), n_result_urls=len(merged),
                    web_search_requests=n_req, usd_search_fee_assumed=n_req * fee)
         if errors:
