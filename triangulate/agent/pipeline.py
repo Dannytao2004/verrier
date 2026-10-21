@@ -8,12 +8,13 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
 
-from ..config import MAX_TOKENS, MODEL, PRICES
-from ..llm import LLM, TransportError
+from ..config import MAX_TOKENS, MODEL, price
+from ..llm import LLM, BalanceExhausted, TransportError
+from ..providers import search_fee_usd
 from . import evidence as ev
 from .fetch import fetch_live, fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
-from .search import SEARCH_FEE_ASSUMED_USD, Searcher
+from .search import Searcher
 
 MAX_CHARS_TO_EXTRACTOR = 400_000   # v2.8b 从 24_000 放宽（HTML 和 PDF 都适用）：长的统计页不再只发开头
 QUOTE_STORE_CHARS = 200
@@ -31,9 +32,15 @@ class Budget:
     v2.5.5：先拿并发名额（sem）再预扣，排队等名额的调用不占预扣，在途预扣最多 llm_concurrency 份。
     方向数不写死，由页面和美元预算推出来（max_directions）。"""
 
-    # 规划方向数用的「一个方向的典型花费」：实测搜索中位 $0.047（含假设的搜索费）+ 4 次抽取约 $0.006 + 挑页 $0.002
+    # 规划方向数用的「一个方向的典型花费」：实测搜索中位 $0.047（含假设的搜索费）+ 4 次抽取约 $0.006 + 挑页 $0.002。
+    # 这是 deepseek-flash 的值（REFERENCE_MODEL）；别的模型按 DIRECTION_PROFILE 的价格比例放大（typical_direction_usd）
     TYPICAL_DIRECTION_USD = 0.06
+    REFERENCE_MODEL = "deepseek-flash"
+    # v2.10a：一个方向的 token 构成（已存 deepseek-flash 运行 1251 个方向的平均：搜索 + 抽取的 cache hit / miss 输入、输出 token，
+    # 搜索次数），只用来算两个模型的价格比例，不用来记账
+    DIRECTION_PROFILE = {"hit": 13_600, "miss": 25_700, "out": 3_600, "searches": 4}
     ROUND1_USD_SHARE = 0.6   # 第一轮方向最多用掉上限的 60%，其余留给 base-rate 方向、裁判、终稿
+    model = None   # v2.10a：计价用的模型；None = config.MODEL（命令行、回测）。Budget.for_model 设
 
     def __init__(self, usd: float = 1.00, pages: int = 48, round1_pages: int = 40, llm_concurrency: int = 8,
                  extra_directions: int = 3, urls_per_direction: int = 4, search_max_uses: int = 3,
@@ -41,8 +48,8 @@ class Budget:
         self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages
         self.extra_directions = extra_directions
         self.urls_per_direction, self.search_max_uses = urls_per_direction, search_max_uses
-        self.directions = max(1, min(max_directions_hard, round1_pages // urls_per_direction,
-                                     int(self.ROUND1_USD_SHARE * usd / self.TYPICAL_DIRECTION_USD)))
+        self.max_directions_hard = max_directions_hard
+        self.directions = self._max_directions()
         self.usd_tokens = 0.0
         self.usd_search_fee = 0.0
         self.reserved = 0.0
@@ -51,6 +58,39 @@ class Budget:
         self.aborted = ""
         self.sem = threading.BoundedSemaphore(llm_concurrency)
         self._lock = threading.Lock()
+
+    @classmethod
+    def for_model(cls, model: str, **kw) -> "Budget":
+        """v2.10a：按这个模型的价格计价的预算（自带 key 的运行）。没有价格的模型抛 config.UnknownModel。"""
+        price(model)
+        b = cls(**kw)
+        b.model = model
+        b.directions = b._max_directions()
+        return b
+
+    @classmethod
+    def typical_direction_usd(cls, model: str) -> float:
+        """一个方向的典型花费：deepseek-flash 是实测的 TYPICAL_DIRECTION_USD；别的模型乘以 DIRECTION_PROFILE 按峰时价算的价格比例
+        （含各家的搜索费），这样贵的模型第一轮方向少一些，上限照样守得住。"""
+        if model == cls.REFERENCE_MODEL:
+            return cls.TYPICAL_DIRECTION_USD
+
+        def cost(m):
+            hit, miss, out = price(m)["peak"]
+            pr = cls.DIRECTION_PROFILE
+            return (pr["hit"] * hit + pr["miss"] * miss + pr["out"] * out) / 1e6 + pr["searches"] * search_fee_usd(m)
+        return cls.TYPICAL_DIRECTION_USD * cost(model) / cost(cls.REFERENCE_MODEL)
+
+    def _max_directions(self) -> int:
+        return max(1, min(self.max_directions_hard, self.round1_pages // self.urls_per_direction,
+                          int(self.ROUND1_USD_SHARE * self.usd_cap / self.typical_direction_usd(self.model or MODEL))))
+
+    def halt(self, reason: str) -> str:
+        """v2.10a：立刻停下整次运行（余额不足）。之后每次预扣都抛 BudgetExceeded，各节点按预算中止的路径干净收尾
+        （同网页的「取消」）。已经因为别的原因中止的，保留第一个原因。返回最终的中止原因。"""
+        with self._lock:
+            self.aborted = self.aborted or reason
+            return self.aborted
 
     @property
     def usd(self):
@@ -80,13 +120,14 @@ class Budget:
                 self.reserved -= amount
 
     @staticmethod
-    def llm_reserve(prompt_chars: int, max_tokens: int) -> float:
-        hit, miss, out = PRICES.get(MODEL, PRICES["deepseek-flash"])["peak"]
+    def llm_reserve(prompt_chars: int, max_tokens: int, model: str | None = None) -> float:
+        hit, miss, out = price(model or MODEL)["peak"]
         return (prompt_chars / 2 * miss + max_tokens * out) / 1e6
 
     def search_reserve(self) -> float:
-        hit, miss, out = PRICES.get(MODEL, PRICES["deepseek-flash"])["peak"]
-        return (30_000 * miss + MAX_TOKENS["search"] * out) / 1e6 + (2 * self.search_max_uses + 2) * SEARCH_FEE_ASSUMED_USD
+        m = self.model or MODEL
+        hit, miss, out = price(m)["peak"]
+        return (30_000 * miss + MAX_TOKENS["search"] * out) / 1e6 + (2 * self.search_max_uses + 2) * search_fee_usd(m)
 
     def reserve_page(self, round_no: int) -> bool:
         cap = self.round1_pages if round_no == 1 else self.pages_cap
@@ -111,8 +152,8 @@ class Budget:
 class AgentLLM(LLM):
     """llm.LLM 加两件事：调用前先占一个并发名额、再查预算；每条日志同时计入预算。"""
 
-    def __init__(self, calls_path, budget: Budget):
-        super().__init__(calls_path=calls_path)
+    def __init__(self, calls_path, budget: Budget, spec=None):
+        super().__init__(calls_path=calls_path, spec=spec)
         self.budget = budget
 
     def _log(self, rec: dict):
@@ -124,11 +165,15 @@ class AgentLLM(LLM):
         """返回 (dict|None, error)。输出无效时带着错误信息重试一次。"""
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         err = None
+        # 预扣按发出去的 max_tokens 算：有 ModelSpec 时含思考余量；没有时照旧只按 max_tokens（和 v2.9b 相同）
+        reserve_tokens = max_tokens if self.spec is None else self.effort_and_tokens(role, max_tokens)[1]
         for attempt in range(1, tries + 1):
-            need = Budget.llm_reserve(sum(len(m["content"]) for m in msgs), max_tokens)
+            need = Budget.llm_reserve(sum(len(m["content"]) for m in msgs), reserve_tokens, self.budget.model)
             with self.budget.sem, self.budget.hold(need):
                 try:
                     out, text, err = self.json_call(msgs, arm=role, qid=qid, attempt=attempt, max_tokens=max_tokens)
+                except BalanceExhausted as e:   # v2.10a：余额不足 -> 整次运行停下（预算中止的路径）
+                    raise BudgetExceeded(self.budget.halt(str(e))) from None
                 except TransportError as e:
                     return None, f"transport: {e}"
             if out is not None:
@@ -141,24 +186,35 @@ class AgentLLM(LLM):
 
 
 class Context:
-    """一题一个：预算、LLM、SEARCHER、哨兵、as_of。图的节点通过闭包拿到它，不放进 LangGraph state。"""
+    """一题一个：预算、LLM、SEARCHER、哨兵、as_of。图的节点通过闭包拿到它，不放进 LangGraph state。
+    v2.10a：spec（providers.ModelSpec）= 自带 key 的运行：LLM、SEARCHER 用它的 provider / 模型 / key / 思考档位，
+    预算按它的模型计价、上限是它的 usd_cap，Jev 对照臂（服务器主人的 TypeSafe key）不跑。None = 命令行 / 回测，和以前相同。"""
+
+    spec = None   # 类级默认：测试会用 object.__new__ 绕过 __init__
 
     def __init__(self, qid: str, question: str, as_of: str, calls_path, leak_value=None, budget: Budget | None = None,
-                 ablate_own_history: bool = False):
+                 ablate_own_history: bool = False, spec=None):
+        self.spec = spec
         self.qid, self.question, self.as_of_s = qid, question, as_of
         self.as_of = date.fromisoformat(as_of)
         self.ablate_own_history = ablate_own_history  # 回测消融：见 ablation.py
         self.check_published = False  # v2.4「答案已公布」检查（published.py）：只有 run.prepare_run 在真实使用时打开
         self.live_fetch = False  # v2.5 直接抓 live 页（fetch_live）：同上，只在真实使用时打开
         self.early = None        # v2.5 提前停（published.EarlyWatch）：同上
-        self.budget = budget or Budget()
+        self.budget = budget or (Budget() if spec is None else Budget.for_model(spec.model, usd=spec.usd_cap))
         self.calls_path = calls_path
-        self.llm = AgentLLM(calls_path, self.budget)
-        self.searcher = Searcher(log=self.llm._log)
+        self.llm = AgentLLM(calls_path, self.budget, spec=spec)
+        self.searcher = Searcher(log=self.llm._log, spec=spec)
         # 哨兵只在代码里用：真值（和其他 as_of 之后才公布的已知值）不进任何 prompt。可以是一个数或一组数
         self.leak_patterns = ev.leak_patterns(leak_value) if leak_value else []
         self.leak_values = leak_value   # v2.8p：抽取员读出的数（单词、分数）也按数值和它比，见 _process_page
         self.progress = None  # 可选的进度回调 progress(event: dict)，网页用；只读通知，不影响运行
+
+
+def redact(ctx, text):
+    """v2.10a 兜底：自带 key 的运行里，把文字中出现的 key 换成 ***（正常路径上 key 不会进任何错误文字）。"""
+    spec = getattr(ctx, "spec", None)
+    return text if spec is None else spec.redact(text)
 
 
 def _emit(ctx, **event):
@@ -382,8 +438,11 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
                                     **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end", "publisher")},
                                     **{k: str(d.get(k, ""))[:600] for k in ("category", "perspective", "hypothesis", "data_to_find")})
         with b.sem, b.hold(b.search_reserve()):
-            s = ctx.searcher.search(prompt, role=f"search:{d['id']}", qid=ctx.qid, max_uses=b.search_max_uses,
-                                    cap=b.urls_per_direction)
+            try:
+                s = ctx.searcher.search(prompt, role=f"search:{d['id']}", qid=ctx.qid, max_uses=b.search_max_uses,
+                                        cap=b.urls_per_direction)
+            except BalanceExhausted as e:   # v2.10a：余额不足 -> 整次运行停下
+                raise BudgetExceeded(b.halt(str(e))) from None
         out["search"] = s
         _emit(ctx, kind="searched", direction_id=d["id"], n_urls=len(s.get("urls", [])[: b.urls_per_direction]))
         allow_no_period = d.get("category") == "base_rates"
@@ -409,7 +468,7 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
     except BudgetExceeded as e:
         out["aborted"] = str(e)
     except Exception as e:  # noqa: BLE001  一个方向的意外错误不拖垮整题，记下来
-        out["error"] = f"{type(e).__name__}: {e}"[:300]
+        out["error"] = redact(ctx, f"{type(e).__name__}: {e}")[:300]
     out["wall_s"] = round(time.time() - t0, 1)
     _emit(ctx, kind="direction_done", direction_id=d["id"], round=round_no, n_points=len(out["points"]),
           stopped=out.get("error") or out.get("aborted") or out.get("stopped"))

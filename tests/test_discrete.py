@@ -385,10 +385,11 @@ def judge_reply(outcomes=JUDGE_OUTS, basis=BASIS, methods=None, **kw):
     return r
 
 
-def discrete_graph_run(jev_post=None, allow_discrete=None, judge=None):
+def discrete_graph_run(jev_post=None, allow_discrete=None, judge=None, spec=None):
     """假模型跑一遍离散目标的整张图，返回最终 state 和看到的 prompt。jev_post 给了就配置一个临时 key 文件和假 HTTP 层。
     allow_discrete 给了就设到 ctx 上（run.prepare_run 对有真值的题的做法）。
-    judge：裁判各次调用（r1、r1:repair、r2 ...）依次给的回复；默认每次都是 judge_reply()。"""
+    judge：裁判各次调用（r1、r1:repair、r2 ...）依次给的回复；默认每次都是 judge_reply()。
+    spec：v2.10a 自带 key 的运行（providers.ModelSpec），挂到 ctx.spec 上（模型和搜索仍是假的）。"""
     from langgraph.types import Command
 
     from triangulate.agent import graph as G
@@ -398,6 +399,8 @@ def discrete_graph_run(jev_post=None, allow_discrete=None, judge=None):
     ctx.budget, ctx.leak_patterns, ctx.ablate_own_history = P.Budget(), [], False
     if allow_discrete is not None:
         ctx.allow_discrete = allow_discrete
+    if spec is not None:
+        ctx.spec = spec
     seen = {}
     replies = list(judge or [judge_reply()])
 

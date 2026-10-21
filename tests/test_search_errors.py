@@ -42,7 +42,7 @@ def run(content):
 
     logged = []
     s = object.__new__(S.Searcher)   # 不走 __init__：不读 key
-    s.model, s._key, s._log = "fake", "not-a-key", logged.append
+    s.model, s._key, s._log = "deepseek-flash", "not-a-key", logged.append
     with mock.patch("triangulate.llm.urlopen_no_redirect", lambda req, timeout: Resp()):
         out = s.search("p", role="search:d1", qid="t")
     return out, logged[-1]

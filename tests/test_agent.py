@@ -661,7 +661,7 @@ class TestTruncatedReplies(unittest.TestCase):
     def _llm(self, tmp):
         from triangulate.llm import LLM
         llm = object.__new__(LLM)
-        llm.model, llm.calls_path, llm._key = "fake", tmp, "x"
+        llm.model, llm.calls_path, llm._key = "deepseek-flash", tmp, "x"   # v2.10a：没有价格的模型不能计价
         return llm
 
     def test_truncated_json_is_reported_as_truncated(self):

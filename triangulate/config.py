@@ -77,9 +77,27 @@ MAX_TOKENS = {
     "search_direct": 4096,   # arm (3) 联网直接答的正式运行（预注册结果用的值；补充运行的 32000 在 probes/search_direct_supp.py）
 }
 
-# USD / 1M tokens：(cache hit, cache miss, output)。来源 https://api-docs.deepseek.com/quick_start/pricing（2026-10-15 查看）。
-# 峰时 = UTC 周一至周五 01:00-04:00、06:00-10:00；中国法定假日也算闲时，这里忽略（只会高估成本）。
-PRICES = {"deepseek-flash": {"offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20)}}
+# USD / 1M tokens：(cache hit, cache miss, output)，每个模型一项，带来源和查看日期。v2.10a：没有价格的模型拒跑（price() 抛
+# UnknownModel），不再静默按 deepseek-flash 计价。DeepSeek 峰时 = UTC 周一至周五 01:00-04:00、06:00-10:00，闲时半价；
+# 中国法定假日也算闲时，这里忽略（只会高估成本）。没有分时价的 provider，peak 和 offpeak 写同一组价。
+DEEPSEEK_PRICING = "https://api-docs.deepseek.com/quick_start/pricing"
+PRICES = {
+    "deepseek-flash": {"provider": "deepseek", "offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20),
+                       "source": DEEPSEEK_PRICING, "checked": "2026-10-21"},   # 2026-10-15 首次记录，10-21 复查未变
+    "deepseek-v4-pro": {"provider": "deepseek", "offpeak": (0.022, 0.66, 1.98), "peak": (0.044, 1.32, 3.96),
+                        "source": DEEPSEEK_PRICING, "checked": "2026-10-21"},
+}
+
+
+class UnknownModel(ValueError):
+    """config.PRICES 里没有这个模型：不能计价，就不跑。"""
+
+
+def price(model: str) -> dict:
+    p = PRICES.get(model)
+    if p is None:
+        raise UnknownModel(f"model {model!r} has no price entry in config.PRICES; add one (with source and date) first")
+    return p
 
 
 def read_key() -> str:
@@ -101,7 +119,7 @@ def is_peak(t: datetime) -> bool:
 
 
 def usd_cost(usage: dict, t: datetime, model: str = MODEL) -> float:
-    hit, miss, out = PRICES.get(model, PRICES["deepseek-flash"])["peak" if is_peak(t) else "offpeak"]
+    hit, miss, out = price(model)["peak" if is_peak(t) else "offpeak"]
     return (usage.get("prompt_cache_hit_tokens", 0) * hit + usage.get("prompt_cache_miss_tokens", 0) * miss
             + usage.get("completion_tokens", 0) * out) / 1e6
 

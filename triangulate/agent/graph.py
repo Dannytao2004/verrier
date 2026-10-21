@@ -820,7 +820,11 @@ def build(ctx: Context):
         return "jev" if D.is_discrete(state["plan"]["target"]) else "final"
 
     def jev(state: AgentState):
-        """离散目标的 Jev 对照臂（代码写简报、问一次；不并入 agent 的答案）。没配置 key 文件就记 not_configured。"""
+        """离散目标的 Jev 对照臂（代码写简报、问一次；不并入 agent 的答案）。没配置 key 文件就记 not_configured。
+        v2.10a：自带 key 的运行（ctx.spec）不跑：TYPESAFE_KEY_FILE 是服务器主人的 key。"""
+        if getattr(ctx, "spec", None) is not None:
+            return {"jev": {"arm": "jev", "status": "skipped",
+                            "note": "disabled in bring-your-own-key runs (the TypeSafe key belongs to the server owner)"}}
         if b.aborted:
             return {"jev": {"arm": "jev", "status": "skipped", "note": f"run aborted: {b.aborted}"}}
         kept = [p for p in state.get("points") or [] if p.get("keep") and p.get("judged_round")]

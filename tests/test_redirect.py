@@ -170,16 +170,16 @@ class TestKeyNotForwardedOnRedirect(unittest.TestCase):
         ok = self.url("ok")
         with tempfile.TemporaryDirectory() as tmp:
             client = object.__new__(llm.LLM)
-            client.model, client.calls_path, client._key = "fake", Path(tmp) / "calls.jsonl", KEY
+            client.model, client.calls_path, client._key = "deepseek-flash", Path(tmp) / "calls.jsonl", KEY
             with mock.patch.object(llm, "API_URL", ok):
                 out, _, err = client.json_call([{"role": "user", "content": "x"}], arm="judge:r1", qid="t", attempt=1)
         self.assertEqual((out, err), ({"ok": 1}, None))
         s = object.__new__(S.Searcher)
-        s.model, s._key, s._log = "fake", KEY, lambda rec: None
+        s.model, s._key, s._log = "deepseek-flash", KEY, lambda rec: None
         with mock.patch.object(S, "SEARCH_URL", ok):
             self.assertEqual(s.search("p", role="search:d1", qid="t")["urls"], ["https://example.org/a-page"])
         d = object.__new__(SD.DirectClient)
-        d.model, d._key, d._log = "fake", KEY, lambda rec: None
+        d.model, d._key, d._log = "deepseek-flash", KEY, lambda rec: None
         with mock.patch.object(SD, "SEARCH_URL", ok):
             self.assertEqual(d.call({"model": "fake"}, qid="t", attempt=1)["stop_reason"], "end_turn")
         with mock.patch.object(J, "API_URL", ok):

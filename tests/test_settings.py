@@ -195,7 +195,7 @@ class TestOtherCallers(unittest.TestCase):
             sent.append(json.loads(req.data))
             return Resp()
         s = object.__new__(S.Searcher)   # 不走 __init__：不读 key
-        s.model, s._key, s._log = "fake", "not-a-key", lambda rec: None
+        s.model, s._key, s._log = "deepseek-flash", "not-a-key", lambda rec: None
         with mock.patch.dict(config.MAX_TOKENS, DISTINCT), mock.patch("triangulate.llm.urlopen_no_redirect", urlopen):
             s.search("p", role="search:d1", qid="t")
         self.assertEqual([b["max_tokens"] for b in sent], [DISTINCT["search"]])

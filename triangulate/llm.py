@@ -1,7 +1,11 @@
-"""DeepSeek 调用：OpenAI 兼容 chat/completions，非思考模式 + JSON 输出。改编自 fanout-ledger/llm.py，换成标准库 urllib。
+"""模型的 JSON 调用。默认 DeepSeek：OpenAI 兼容 chat/completions，非思考模式 + JSON 输出。改编自 fanout-ledger/llm.py，换成标准库 urllib。
+
+v2.10a：建请求、解析回复、计价交给 provider adapter（triangulate/providers.py）；重试、先查截断、JSON 解析、日志留在这里。
+没有 ModelSpec（命令行、回测、基线）时用 DeepSeek adapter + key 文件 + 下面的 API_URL，请求体和 v2.9b 逐字节相同。
+有 ModelSpec（自带 key 的运行）时 provider / 模型 / key / 思考档位都按它。
 
 每次调用记一行到 results/calls.jsonl：arm、题 id、第几次尝试、token、延迟、finish_reason、估算 USD。
-日志里不记 prompt、不记回复内容、不记 key。
+日志里不记 prompt、不记 key。（v2.9b 起，回复不是合法 JSON 时记首尾各 200 字符的诊断。）
 """
 import json
 import threading
@@ -10,7 +14,8 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-from .config import API_URL, CALLS, MODEL, THINKING, THINKING_EXTRA_TOKENS, read_key, thinking_role, usd_cost
+from .config import API_URL, CALLS, MODEL, THINKING, THINKING_EXTRA_TOKENS, price, read_key, thinking_role
+from .providers import DEEPSEEK
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
 TOTAL_TIMEOUT_S = 1200
@@ -24,6 +29,11 @@ class KeyRejected(RuntimeError):
 class TransportError(RuntimeError):
     """服务端没给出可解析的回复（超时、5xx、空 body）。不算模型的输出问题，不占用「输出无效重试一次」的名额；
     runner 不保存这道题，之后再跑 run 会补上。"""
+
+
+class BalanceExhausted(TransportError):
+    """v2.10a：账户余额不足（DeepSeek 402）。不重试；agent 运行据此立刻停下（pipeline.AgentLLM / run_direction 把它变成
+    预算中止，之后的调用都不再发）。是 TransportError 的子类，所以基线（forecast / runner 只接 TransportError）照旧跳过这道题。"""
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -45,22 +55,52 @@ def urlopen_no_redirect(req, timeout: float):
     return _NO_REDIRECT_OPENER.open(req, timeout=timeout)
 
 
+def read_error_body(e: urllib.error.HTTPError, limit: int = 65536) -> bytes:
+    """出错时服务端的 body（只给 adapter 判断错误类型用，不写日志：有的 provider 会回显部分 key）。"""
+    try:
+        return e.read(limit) or b""
+    except Exception:  # noqa: BLE001
+        return b""
+
+
 class LLM:
-    def __init__(self, calls_path=CALLS, model: str = MODEL):
+    spec = None   # v2.10a：这次运行的 ModelSpec；None = 命令行 / 回测 / 基线。类级默认：测试会用 object.__new__ 绕过 __init__
+
+    def __init__(self, calls_path=CALLS, model: str = MODEL, spec=None):
+        if spec is not None:
+            # key 只留在 spec 里（每次发请求时才取），运行结束时 spec.drop_key() 一处清掉
+            self.spec, self.model, self.calls_path, self._key = spec, spec.model, calls_path, None
+            return
+        price(model)   # 没有价格的模型拒跑（config.UnknownModel），在读 key 之前
         self.model = model
         self.calls_path = calls_path
         self._key = read_key()
+
+    @property
+    def adapter(self):
+        return DEEPSEEK if self.spec is None else self.spec.adapter
+
+    def _auth_key(self) -> str:
+        return self._key if self.spec is None else self.spec.key
+
+    def effort_and_tokens(self, arm: str, max_tokens: int):
+        """(这次调用的思考档位或 None, 实际发出的 max_tokens)。开了思考的调用多给 THINKING_EXTRA_TOKENS（思考 token 计入
+        输出上限）；有 ModelSpec 时不超过模型的最大输出。没有 ModelSpec 时档位来自 TRIANGULATE_THINKING（v2.9a，默认全关）。"""
+        role = thinking_role(arm)
+        effort = THINKING.get(role) if self.spec is None else self.spec.effort(role)
+        tokens = max_tokens + (THINKING_EXTRA_TOKENS if effort else 0)
+        if self.spec is not None:
+            tokens = min(tokens, self.spec.max_output)
+        return effort, tokens
 
     def json_call(self, messages: list, *, arm: str, qid: str, attempt: int, max_tokens: int = 4000):
         """返回 (parsed_dict_or_None, raw_text, error_or_None)，error 只表示模型输出本身的问题。
         传输层失败（超时、5xx、空 body）内部重试最多 3 次，仍失败则抛 TransportError。
         3xx 跳转不跟随、不重试，直接抛 TransportError（D9）。"""
-        effort = THINKING.get(thinking_role(arm))
-        payload = {"model": self.model, "messages": messages,
-                   "thinking": {"type": "enabled" if effort else "disabled"}, "response_format": {"type": "json_object"},
-                   "temperature": 0, "max_tokens": max_tokens + (THINKING_EXTRA_TOKENS if effort else 0), "stream": False}
-        if effort:
-            payload["reasoning_effort"] = effort
+        ad = self.adapter
+        effort, out_tokens = self.effort_and_tokens(arm, max_tokens)
+        url = API_URL if self.spec is None else ad.chat_url(self.spec.region)
+        headers, payload = ad.chat_request(self.model, self._auth_key(), messages, max_tokens=out_tokens, effort=effort)
         body = json.dumps(payload).encode("utf-8")
         rec = {"arm": arm, "qid": qid, "attempt": attempt, "model": self.model}
         if effort:
@@ -68,12 +108,11 @@ class LLM:
         for http_try in range(1, 4):
             started = datetime.now(timezone.utc)
             t0 = time.time()
-            req = urllib.request.Request(API_URL, data=body, method="POST", headers={
-                "Content-Type": "application/json", "Authorization": f"Bearer {self._key}"})
+            req = urllib.request.Request(url, data=body, method="POST", headers=headers)
             try:
                 status, raw = self._post(req)
             except urllib.error.HTTPError as e:
-                status, raw = e.code, b""
+                status, raw = e.code, (read_error_body(e) if e.code in ad.error_body_statuses else b"")
             except (urllib.error.URLError, TimeoutError, OSError) as e:
                 rec.update(ok=False, error=type(e).__name__, http_try=http_try)
                 time.sleep(2 * http_try)
@@ -84,13 +123,20 @@ class LLM:
                 # key 被拒：不重试，直接停整轮；只记状态码
                 rec.update(ok=False, error=f"http_{status}")
                 self._log(rec)
-                raise KeyRejected(f"DeepSeek rejected the API key (HTTP {status})")
+                raise KeyRejected(f"{ad.label} rejected the API key (HTTP {status})")
             if 300 <= status < 400:
                 # 跳转没有跟随（urlopen_no_redirect）：跟过去的请求会带着 Authorization 头发到新地址
                 rec.update(ok=False, error=f"http_{status}")
                 self._log(rec)
                 raise TransportError(f"{arm} {qid} attempt {attempt}: http_{status} redirect not followed "
-                                     f"(the API key is only sent to {API_URL})")
+                                     f"(the API key is only sent to {url})")
+            why = ad.balance_exhausted(status, raw)
+            if why:
+                # 余额不足：不重试，整次运行停下（v2.10a）；日志行和 v2.9b 记 http_402 的那行相同
+                rec.update(ok=False, error=f"http_{status}")
+                self._log(rec)
+                raise BalanceExhausted(f"insufficient balance: {ad.label} {why} ({arm} {qid} attempt {attempt}); "
+                                       f"the run was stopped without retrying. Top up the {ad.label} account and run again.")
             if status in RETRY_STATUS and http_try < 3:
                 time.sleep(2 * http_try)
                 continue
@@ -99,8 +145,7 @@ class LLM:
                 break
             try:
                 data = json.loads(raw)
-                choice = data["choices"][0]
-                usage = data.get("usage") or {}
+                unpacked = ad.chat_unpack(data)
             except (ValueError, KeyError, IndexError, TypeError):
                 # 只记诊断信息：长度、顶层键、服务端 error.message（不含回复内容，也不含 key）
                 rec.update(ok=False, error="bad_response_body", body_bytes=len(raw), body_head_is_ws=raw[:1].isspace())
@@ -116,17 +161,10 @@ class LLM:
                     time.sleep(5 * http_try)
                     continue
                 break
-            rec.update(finish_reason=choice.get("finish_reason"),
-                       prompt_tokens=usage.get("prompt_tokens", 0),
-                       prompt_cache_hit_tokens=usage.get("prompt_cache_hit_tokens", 0),
-                       prompt_cache_miss_tokens=usage.get("prompt_cache_miss_tokens", 0),
-                       completion_tokens=usage.get("completion_tokens", 0),
-                       usd=round(usd_cost(usage, started, self.model), 6))
-            if effort:
-                rec["reasoning_tokens"] = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens", 0)
-            text = (choice.get("message") or {}).get("content") or ""
+            rec.update(ad.chat_meter(unpacked, started, self.model, effort))
+            text = ad.chat_text(unpacked)
             # 先查截断：被截断的 JSON 几乎总是解析失败，先解析的话截断会被误报成「不是合法 JSON」
-            if choice.get("finish_reason") == "length":
+            if ad.chat_truncated(unpacked):
                 rec.update(ok=False, error="truncated")
                 self._log(rec)
                 return None, text, "reply was truncated (finish_reason=length)"
@@ -165,6 +203,9 @@ class LLM:
             return r.status, b"".join(chunks)
 
     def _log(self, rec: dict):
+        line = json.dumps(rec, ensure_ascii=False)
+        if self.spec is not None:   # 兜底：记录里本来就没有 key
+            line = self.spec.redact(line)
         self.calls_path.parent.mkdir(parents=True, exist_ok=True)
         with _LOG_LOCK, self.calls_path.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            f.write(line + "\n")

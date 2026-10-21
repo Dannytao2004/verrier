@@ -1,0 +1,967 @@
+{
+ "model": "deepseek-flash",
+ "cases": [
+  {
+   "case": "json_off",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"ok\": true}"
+   ],
+   "result": [
+    {
+     "a": 1
+    },
+    "{\"a\": 1}",
+    null
+   ]
+  },
+  {
+   "case": "json_off_peak",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000645, \"ok\": true}"
+   ],
+   "result": [
+    {
+     "a": 1
+    },
+    "{\"a\": 1}",
+    null
+   ]
+  },
+  {
+   "case": "json_plan_low",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"enabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 30000, \"stream\": false, \"reasoning_effort\": \"low\"}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"plan\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"thinking\": \"low\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"reasoning_tokens\": 120, \"ok\": true}"
+   ],
+   "result": [
+    {
+     "a": 1
+    },
+    "{\"a\": 1}",
+    null
+   ]
+  },
+  {
+   "case": "json_repair_max",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"enabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 36000, \"stream\": false, \"reasoning_effort\": \"max\"}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r2:repair\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"thinking\": \"max\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"reasoning_tokens\": 120, \"ok\": true}"
+   ],
+   "result": [
+    {
+     "a": 1
+    },
+    "{\"a\": 1}",
+    null
+   ]
+  },
+  {
+   "case": "json_judge_high",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"enabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 36000, \"stream\": false, \"reasoning_effort\": \"high\"}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r3\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"thinking\": \"high\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"reasoning_tokens\": 120, \"ok\": true}"
+   ],
+   "result": [
+    {
+     "a": 1
+    },
+    "{\"a\": 1}",
+    null
+   ]
+  },
+  {
+   "case": "json_extract_off_while_thinking",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 16000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"extract:d3\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"ok\": true}"
+   ],
+   "result": [
+    {
+     "a": 1
+    },
+    "{\"a\": 1}",
+    null
+   ]
+  },
+  {
+   "case": "json_truncated",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 4000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"final\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"length\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"ok\": false, \"error\": \"truncated\"}"
+   ],
+   "result": [
+    null,
+    "{\"a\": [1, 2",
+    "reply was truncated (finish_reason=length)"
+   ]
+  },
+  {
+   "case": "json_invalid",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"ok\": false, \"error\": \"invalid_json\", \"text_len\": 26, \"json_error\": \"Illegal trailing comma before end of array at 14\", \"text_head\": \"{\\\"keep\\\": [1, 2,]} trailing\", \"text_tail\": \"{\\\"keep\\\": [1, 2,]} trailing\", \"text_at_error\": \"{\\\"keep\\\": [1, 2,]} trailing\"}"
+   ],
+   "result": [
+    null,
+    "{\"keep\": [1, 2,]} trailing",
+    "reply is not valid JSON"
+   ]
+  },
+  {
+   "case": "json_not_object",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"ok\": false, \"error\": \"not_an_object\"}"
+   ],
+   "result": [
+    null,
+    "[1, 2]",
+    "reply is not a JSON object"
+   ]
+  },
+  {
+   "case": "json_retry_500",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    },
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    },
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 3, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"ok\": true}"
+   ],
+   "result": [
+    {
+     "a": 1
+    },
+    "{\"a\": 1}",
+    null
+   ]
+  },
+  {
+   "case": "json_network_then_ok",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    },
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"ok\": true, \"error\": \"URLError\", \"http_try\": 2, \"http\": 200, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322}"
+   ],
+   "result": [
+    {
+     "a": 1
+    },
+    "{\"a\": 1}",
+    null
+   ]
+  },
+  {
+   "case": "json_bad_body",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    },
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    },
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"bad_response_body\", \"body_bytes\": 6, \"body_head_is_ws\": false, \"body_keys\": \"not_json\", \"will_retry\": true}",
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 2, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"bad_response_body\", \"body_bytes\": 36, \"body_head_is_ws\": false, \"body_keys\": [\"error\"], \"server_error\": \"overloaded\", \"will_retry\": true}",
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 3, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"bad_response_body\", \"body_bytes\": 2, \"body_head_is_ws\": true, \"body_keys\": \"not_json\", \"server_error\": \"overloaded\"}"
+   ],
+   "result": {
+    "raised": "TransportError",
+    "message": "judge:r1 t attempt 1: bad_response_body",
+    "is_transport_error": true
+   }
+  },
+  {
+   "case": "json_401",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 401, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"http_401\"}"
+   ],
+   "result": {
+    "raised": "KeyRejected",
+    "message": "DeepSeek rejected the API key (HTTP 401)",
+    "is_transport_error": false
+   }
+  },
+  {
+   "case": "json_402",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 402, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"http_402\"}"
+   ],
+   "result": {
+    "raised": "TransportError",
+    "message": "judge:r1 t attempt 1: http_402",
+    "is_transport_error": true
+   }
+  },
+  {
+   "case": "json_302",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 302, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"http_302\"}"
+   ],
+   "result": {
+    "raised": "TransportError",
+    "message": "judge:r1 t attempt 1: http_302 redirect not followed (the API key is only sent to https://api.deepseek.com/chat/completions)",
+    "is_transport_error": true
+   }
+  },
+  {
+   "case": "json_400",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 400, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"http_400\"}"
+   ],
+   "result": {
+    "raised": "TransportError",
+    "message": "judge:r1 t attempt 1: http_400",
+    "is_transport_error": true
+   }
+  },
+  {
+   "case": "search_ok",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 8192, \"tools\": [{\"type\": \"web_search_20250305\", \"name\": \"web_search\", \"max_uses\": 3}], \"messages\": [{\"role\": \"user\", \"content\": \"Find official widget data. \\u4e2d\\u6587\\u63d0\\u793a\\u3002\"}]}",
+     "timeout": 600
+    }
+   ],
+   "log": [
+    "{\"arm\": \"search:d2\", \"qid\": \"t\", \"model\": \"deepseek-flash\", \"kind\": \"search\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": true, \"stop\": \"end_turn\", \"input_tokens\": 15000, \"cache_read_input_tokens\": 12000, \"output_tokens\": 900, \"web_search_requests\": 2, \"n_result_urls\": 2, \"n_text_urls\": 2, \"n_search_errors\": 1, \"usd\": 0.002826, \"usd_search_fee_assumed\": 0.02}"
+   ],
+   "result": {
+    "queries": [
+     "widgets June 2025 official",
+     "widgets 2024"
+    ],
+    "urls": [
+     "https://stats.example.org/w",
+     "https://c.example.org/y",
+     "https://b.example.org/x"
+    ],
+    "n_text_urls": 2,
+    "n_result_urls": 2,
+    "web_search_requests": 2,
+    "usd": 0.002826,
+    "usd_search_fee_assumed": 0.02
+   }
+  },
+  {
+   "case": "search_ok_defaults",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 8192, \"tools\": [{\"type\": \"web_search_20250305\", \"name\": \"web_search\", \"max_uses\": 3}], \"messages\": [{\"role\": \"user\", \"content\": \"Find official widget data. \\u4e2d\\u6587\\u63d0\\u793a\\u3002\"}]}",
+     "timeout": 600
+    }
+   ],
+   "log": [
+    "{\"arm\": \"search:d2\", \"qid\": \"t\", \"model\": \"deepseek-flash\", \"kind\": \"search\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": true, \"stop\": \"end_turn\", \"input_tokens\": 15000, \"cache_read_input_tokens\": 12000, \"output_tokens\": 900, \"web_search_requests\": 2, \"n_result_urls\": 2, \"n_text_urls\": 2, \"n_search_errors\": 1, \"usd\": 0.002826, \"usd_search_fee_assumed\": 0.02}"
+   ],
+   "result": {
+    "queries": [
+     "widgets June 2025 official",
+     "widgets 2024"
+    ],
+    "urls": [
+     "https://stats.example.org/w",
+     "https://c.example.org/y",
+     "https://b.example.org/x"
+    ],
+    "n_text_urls": 2,
+    "n_result_urls": 2,
+    "web_search_requests": 2,
+    "usd": 0.002826,
+    "usd_search_fee_assumed": 0.02
+   }
+  },
+  {
+   "case": "search_retry_503",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 8192, \"tools\": [{\"type\": \"web_search_20250305\", \"name\": \"web_search\", \"max_uses\": 2}], \"messages\": [{\"role\": \"user\", \"content\": \"Find official widget data. \\u4e2d\\u6587\\u63d0\\u793a\\u3002\"}]}",
+     "timeout": 600
+    },
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 8192, \"tools\": [{\"type\": \"web_search_20250305\", \"name\": \"web_search\", \"max_uses\": 2}], \"messages\": [{\"role\": \"user\", \"content\": \"Find official widget data. \\u4e2d\\u6587\\u63d0\\u793a\\u3002\"}]}",
+     "timeout": 600
+    }
+   ],
+   "log": [
+    "{\"arm\": \"search:d2\", \"qid\": \"t\", \"model\": \"deepseek-flash\", \"kind\": \"search\", \"http\": 200, \"http_try\": 2, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": true, \"stop\": \"end_turn\", \"input_tokens\": 15000, \"cache_read_input_tokens\": 12000, \"output_tokens\": 900, \"web_search_requests\": 2, \"n_result_urls\": 2, \"n_text_urls\": 2, \"n_search_errors\": 1, \"usd\": 0.002826, \"usd_search_fee_assumed\": 0.02}"
+   ],
+   "result": {
+    "queries": [
+     "widgets June 2025 official",
+     "widgets 2024"
+    ],
+    "urls": [
+     "https://stats.example.org/w",
+     "https://c.example.org/y"
+    ],
+    "n_text_urls": 2,
+    "n_result_urls": 2,
+    "web_search_requests": 2,
+    "usd": 0.002826,
+    "usd_search_fee_assumed": 0.02
+   }
+  },
+  {
+   "case": "search_401",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 8192, \"tools\": [{\"type\": \"web_search_20250305\", \"name\": \"web_search\", \"max_uses\": 3}], \"messages\": [{\"role\": \"user\", \"content\": \"Find official widget data. \\u4e2d\\u6587\\u63d0\\u793a\\u3002\"}]}",
+     "timeout": 600
+    }
+   ],
+   "log": [
+    "{\"arm\": \"search:d2\", \"qid\": \"t\", \"model\": \"deepseek-flash\", \"kind\": \"search\", \"http\": 401, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"http_401\"}"
+   ],
+   "result": {
+    "queries": [],
+    "urls": [],
+    "error": "http_401",
+    "web_search_requests": 0,
+    "usd": 0.0,
+    "usd_search_fee_assumed": 0.0
+   }
+  },
+  {
+   "case": "search_402",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 8192, \"tools\": [{\"type\": \"web_search_20250305\", \"name\": \"web_search\", \"max_uses\": 3}], \"messages\": [{\"role\": \"user\", \"content\": \"Find official widget data. \\u4e2d\\u6587\\u63d0\\u793a\\u3002\"}]}",
+     "timeout": 600
+    }
+   ],
+   "log": [
+    "{\"arm\": \"search:d2\", \"qid\": \"t\", \"model\": \"deepseek-flash\", \"kind\": \"search\", \"http\": 402, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"http_402\"}"
+   ],
+   "result": {
+    "queries": [],
+    "urls": [],
+    "error": "http_402",
+    "web_search_requests": 0,
+    "usd": 0.0,
+    "usd_search_fee_assumed": 0.0
+   }
+  },
+  {
+   "case": "search_bad_body",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 8192, \"tools\": [{\"type\": \"web_search_20250305\", \"name\": \"web_search\", \"max_uses\": 3}], \"messages\": [{\"role\": \"user\", \"content\": \"Find official widget data. \\u4e2d\\u6587\\u63d0\\u793a\\u3002\"}]}",
+     "timeout": 600
+    }
+   ],
+   "log": [
+    "{\"arm\": \"search:d2\", \"qid\": \"t\", \"model\": \"deepseek-flash\", \"kind\": \"search\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": false, \"error\": \"bad_response_body\"}"
+   ],
+   "result": {
+    "queries": [],
+    "urls": [],
+    "error": "bad_response_body",
+    "web_search_requests": 0,
+    "usd": 0.0,
+    "usd_search_fee_assumed": 0.0
+   }
+  },
+  {
+   "case": "context_ask_and_search",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    },
+    {
+     "url": "https://api.deepseek.com/chat/completions",
+     "method": "POST",
+     "headers": [
+      [
+       "Authorization",
+       "Bearer sk-golden-0123456789abcdef"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a careful analyst. \\u53ea\\u56de JSON\\u3002\"}, {\"role\": \"user\", \"content\": \"Estimate widgets in June 2026 (\\u5355\\u4f4d\\uff1a\\u4e07\\u4ef6). Reply {\\\"a\\\": 1}.\"}, {\"role\": \"assistant\", \"content\": \"not json\"}, {\"role\": \"user\", \"content\": \"Your reply was rejected: reply is not valid JSON. Reply again with one valid JSON object.\"}], \"thinking\": {\"type\": \"disabled\"}, \"response_format\": {\"type\": \"json_object\"}, \"temperature\": 0, \"max_tokens\": 12000, \"stream\": false}",
+     "timeout": 180
+    },
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 8192, \"tools\": [{\"type\": \"web_search_20250305\", \"name\": \"web_search\", \"max_uses\": 3}], \"messages\": [{\"role\": \"user\", \"content\": \"p\"}]}",
+     "timeout": 600
+    }
+   ],
+   "log": [
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"ok\": false, \"error\": \"invalid_json\", \"text_len\": 8, \"json_error\": \"Expecting value at 0\", \"text_head\": \"not json\", \"text_tail\": \"not json\", \"text_at_error\": \"not json\"}",
+    "{\"arm\": \"judge:r1\", \"qid\": \"t\", \"attempt\": 2, \"model\": \"deepseek-flash\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"finish_reason\": \"stop\", \"prompt_tokens\": 1200, \"prompt_cache_hit_tokens\": 256, \"prompt_cache_miss_tokens\": 944, \"completion_tokens\": 300, \"usd\": 0.000322, \"ok\": true}",
+    "{\"arm\": \"search:d1\", \"qid\": \"t\", \"model\": \"deepseek-flash\", \"kind\": \"search\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": true, \"stop\": \"end_turn\", \"input_tokens\": 15000, \"cache_read_input_tokens\": 12000, \"output_tokens\": 900, \"web_search_requests\": 2, \"n_result_urls\": 2, \"n_text_urls\": 2, \"n_search_errors\": 1, \"usd\": 0.002826, \"usd_search_fee_assumed\": 0.02}"
+   ],
+   "result": [
+    [
+     {
+      "a": 1
+     },
+     null
+    ],
+    {
+     "queries": [
+      "widgets June 2025 official",
+      "widgets 2024"
+     ],
+     "urls": [
+      "https://stats.example.org/w",
+      "https://c.example.org/y",
+      "https://b.example.org/x"
+     ],
+     "n_text_urls": 2,
+     "n_result_urls": 2,
+     "web_search_requests": 2,
+     "usd": 0.002826,
+     "usd_search_fee_assumed": 0.02
+    }
+   ],
+   "budget": {
+    "usd_total_assumed": 0.0235,
+    "usd_tokens": 0.0035,
+    "usd_search_fee_assumed": 0.02,
+    "usd_cap": 1.0,
+    "pages_used": 0,
+    "pages_cap": 48,
+    "round1_pages": 40,
+    "max_directions": 10,
+    "urls_per_direction": 4,
+    "n_calls_logged": 3,
+    "aborted": ""
+   },
+   "directions": 10,
+   "llm_reserve": 0.01455,
+   "search_reserve": 0.0988304
+  },
+  {
+   "case": "direct_client",
+   "requests": [
+    {
+     "url": "https://api.deepseek.com/anthropic/v1/messages",
+     "method": "POST",
+     "headers": [
+      [
+       "Anthropic-version",
+       "2023-06-01"
+      ],
+      [
+       "Content-type",
+       "application/json"
+      ],
+      [
+       "X-api-key",
+       "sk-golden-0123456789abcdef"
+      ]
+     ],
+     "body": "{\"model\": \"deepseek-flash\", \"max_tokens\": 4096, \"messages\": [{\"role\": \"user\", \"content\": \"x\"}]}",
+     "timeout": 600
+    }
+   ],
+   "log": [
+    "{\"arm\": \"search_direct\", \"qid\": \"t\", \"attempt\": 1, \"model\": \"deepseek-flash\", \"kind\": \"search_direct\", \"http\": 200, \"http_try\": 1, \"latency_s\": \"<latency_s>\", \"at\": \"<at>\", \"ok\": true, \"stop\": \"end_turn\", \"input_tokens\": 15000, \"cache_read_input_tokens\": 12000, \"cache_creation_input_tokens\": 0, \"output_tokens\": 900, \"web_search_requests\": 2, \"usd\": 0.002826, \"usd_search_fee_assumed\": 0.02}"
+   ],
+   "result": {
+    "stop_reason": "end_turn",
+    "usage": {
+     "input_tokens": 15000,
+     "cache_read_input_tokens": 12000,
+     "output_tokens": 900,
+     "server_tool_use": {
+      "web_search_requests": 2
+     }
+    }
+   }
+  }
+ ]
+}

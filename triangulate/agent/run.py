@@ -121,9 +121,11 @@ def checks_published(q: dict, today=None) -> bool:
     return q.get("answer_value") is None and date.fromisoformat(q["as_of"]) >= (today or date.today())
 
 
-def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False) -> dict:
+def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False, spec=None) -> dict:
     """建结果目录、上下文和图（不调模型）。返回运行句柄：g、cfg、ctx、out_dir、stamp、tag、leak_values、t0。
-    命令行（run_question）和网页（triangulate/web）共用；图的第一个输入是 initial_input(q)。"""
+    命令行（run_question）和网页（triangulate/web）共用；图的第一个输入是 initial_input(q)。
+    v2.10a：spec（providers.ModelSpec）= 自带 key 的运行，只挂在 ctx 上（不进 q、不进句柄的其他字段、不进图的 state）；
+    save_run 写完结果后清掉 key（release）。None = 命令行 / 回测，和以前相同。"""
     if ablate_own_history:
         tag = ablation_tag(tag)
     out_dir = RES / q["id"] / tag if tag else RES / q["id"]
@@ -133,7 +135,8 @@ def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False) -> dic
     if calls.exists():  # 保留之前那次运行的调用日志（失败重跑也留痕）
         calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
     leak_values = q.get("leak_values") or ([q["answer_value"]] if q.get("answer_value") is not None else None)
-    ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values, ablate_own_history=ablate_own_history)
+    ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values, ablate_own_history=ablate_own_history,
+                  spec=spec)
     # 有真值的题（回测 / 留出测试，--auto-approve 没人把关）只在题目明确标了 outcome_type = discrete 时才接受离散目标
     ctx.allow_discrete = q.get("answer_value") is None or q.get("outcome_type") == "discrete"
     ctx.check_published = checks_published(q)
@@ -164,32 +167,57 @@ def run_question(q: dict, auto_approve: bool, tag: str = "", ablate_own_history:
     return save_run(h, approvals)
 
 
-def run_settings() -> dict:
+def run_settings(spec=None) -> dict:
     """v2.5.3：这次运行用的基础设置，save_run 记进 state.json 的 settings（只记录，不参与计算；值都从定义处读）：
-    各角色的 max_tokens、Budget 的默认参数、区间常数。"""
+    各角色的 max_tokens、Budget 的默认参数、区间常数。v2.10a：自带 key 的运行另记 provider / 模型 / 区域 / 思考档位 / 上限
+    （spec.public()，不含 key），thinking 记这次运行实际用的（不是 TRIANGULATE_THINKING）。"""
     budget = {k: p.default for k, p in inspect.signature(Budget.__init__).parameters.items()
               if p.default is not inspect.Parameter.empty}
     out = {"max_tokens": dict(MAX_TOKENS), "budget_defaults": budget,
            "interval": {"MIN_WIDTH": AS.MIN_WIDTH, "MIN_WIDTH_CHANGE": AS.MIN_WIDTH_CHANGE,
                         "FALLBACK_SIGMA": M.FALLBACK_SIGMA, "DEFAULT_REL_U": M.DEFAULT_REL_U, "EPS": M.EPS}}
-    if THINKING:  # v2.9a：只有开了思考的实验运行才记，默认运行的 settings 和以前一样
+    if spec is not None:
+        out["run_spec"] = spec.public()
+        if spec.thinking_by_role():
+            out["thinking"] = {"by_role": spec.thinking_by_role(), "extra_max_tokens": THINKING_EXTRA_TOKENS,
+                               "max_output": spec.max_output}
+    elif THINKING:  # v2.9a：只有开了思考的实验运行才记，默认运行的 settings 和以前一样
         out["thinking"] = {"by_role": dict(THINKING), "extra_max_tokens": THINKING_EXTRA_TOKENS}
     return out
 
 
+def release(h: dict):
+    """v2.10a：运行结束，把自带的 key 从内存里清掉（LLM / SEARCHER 都只经 ctx.spec 取 key，这一处清掉就都没了）。
+    save_run 最后会调；网页在运行失败时也要调。没有 spec 的运行什么都不做。"""
+    spec = getattr((h or {}).get("ctx"), "spec", None)
+    if spec is not None:
+        spec.drop_key()
+
+
 def save_run(h: dict, approvals: list) -> dict:
     """图跑完以后：取最终 state，补上计量、泄漏审计和 settings（run_settings），写 state.json、ledger.md、graph.html。"""
+    try:
+        return _save_run(h, approvals)
+    finally:
+        release(h)
+
+
+def _save_run(h: dict, approvals: list) -> dict:
     q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]
     stamp, tag, leak_values, ablate_own_history, t0 = h["stamp"], h["tag"], h["leak_values"], h["ablate"], h["t0"]
+    spec = getattr(ctx, "spec", None)
+    scrub = (lambda t: t) if spec is None else spec.redact   # 兜底：写盘的文字里不留 key（正常路径上本来就没有）
     state = dict(g.get_state(cfg).values)
     state.update(started_at=stamp, wall_s=round(time.time() - t0, 1), budget=ctx.budget.snapshot(), approvals=approvals,
                  leakage=leakage_audit(state, q["as_of"], leak_values), model=ctx.llm.model, tag=tag,
-                 settings=run_settings())
+                 settings=run_settings(spec))
+    if spec is not None:
+        state["provider"] = spec.provider
     if ablate_own_history:
         state["ablation"] = ablation_summary(state)
-    (out_dir / "state.json").write_text(json.dumps(state, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
+    (out_dir / "state.json").write_text(scrub(json.dumps(state, indent=1, ensure_ascii=False, default=str)), encoding="utf-8")
     score = score_one(q, state)
-    (out_dir / "ledger.md").write_text(ledger(state, score), encoding="utf-8")
+    (out_dir / "ledger.md").write_text(scrub(ledger(state, score)), encoding="utf-8")
     r = (state.get("compute") or {}).get("result") or {}
     if r.get("mode") == "discrete":   # 离散目标：页头放结果概率表（含 Jev 对照臂）
         meta = f"as_of <b>{q['as_of']}</b> &middot; " + outcome_table_html(state)
@@ -213,7 +241,7 @@ def save_run(h: dict, approvals: list) -> dict:
         est = f"estimate {_n(r.get('central'))}"
     if q.get("answer_value") is not None:
         meta += f" &middot; official value (scoring only) <b>{q['answer_value']:,}</b>"
-    (out_dir / "graph.html").write_text(render_graph(state, f"Agent: {q['id']}", meta), encoding="utf-8")
+    (out_dir / "graph.html").write_text(scrub(render_graph(state, f"Agent: {q['id']}", meta)), encoding="utf-8")
     print(f"[{q['id']}] done in {state['wall_s']}s; {est}; usd {state['budget']['usd_total_assumed']}", flush=True)
     return state
 
