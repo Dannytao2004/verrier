@@ -1,5 +1,8 @@
 // Verrier 控制台：把 agent 的主运行界面（提问 → 人工确认方向 → 进度 → 结果）放进 Verrier 页面（verrier_console.html）。
 // 只调用现有 API（/api/runs、/api/result、/api/saved、/api/file、/api/graph），后端逻辑不变；回测表在经典界面（/#/...）。
+// web-v0.9：提问页多了「模型 · key · 上限」：provider、区域（只有 Kimi / GLM）、模型（带每次运行的估计花费，/api/providers）、
+// 你自己的 API key（默认存在这个标签页的 sessionStorage；勾「在这台设备上记住」才放 localStorage，明文）、校验 key（/api/key/check）、
+// 思考档位、花费上限（默认 $2.00）。发起运行时 key 随 POST /api/runs 发给本机服务，只留在这次运行的内存里。
 // 路由：#console（提问）、#console/run/<运行 id>（进度）、#console/result/<题 id>/<tag>（保存的结果）、
 // #console/evidence/<题 id>/<tag>（证据、方法和假设；面板由 verrier_evidence.js 画）、#console/graph/<题 id>/<tag>（依赖图；
 // 图纸由 verrier_graph.js 画）。别的 hash 是页面锚点，控制台关掉。
@@ -148,10 +151,11 @@
         <div class="cx-row"><label class="lbl" for="cxAsof">AS OF</label><input type="date" id="cxAsof">
           <span class="fine">${T("Empty = today (live pages). An earlier date = backtest: only archived snapshots up to that day.",
             "留空 = 今天（真实使用，读实时网页）；更早的日期 = 回测，只读不晚于那天的存档快照。")}</span></div>
+        ${cfgForm()}
         <div class="cx-row"><button class="btn primary" type="button" id="cxGo">${T("Launch mission", "发射任务")}<span>→</span></button>
           <span id="cxMsg" class="fine"></span></div>
-        <p class="fine">${T("Needs the API key file (TRIANGULATE_KEY_FILE) and network. Spending cap per run: US$1.00, including the assumed search fee.",
-          "需要 key 文件（TRIANGULATE_KEY_FILE）和网络。每次运行的花费上限 $1.00（含按假设单价记的搜索费）。")}</p>
+        <p class="fine">${T("Bring your own key: web runs only use the key you enter here, never a key file on the server. The key stays in this browser and in the server's memory for this one run; it is cleared when the run ends and never written to disk. The spending cap includes the assumed search fee.",
+          "自带 key：网页运行只用你在这里填的 key，从不使用服务器上的 key 文件。key 只留在这个浏览器和这次运行的服务器内存里，运行结束就清掉，不写进任何文件。花费上限含按假设单价记的搜索费。")}</p>
       </div>
       <div>
         <h3 class="cx-h">${T("Signal scope", "信号扫描")}</h3>
@@ -166,12 +170,22 @@
     body.querySelectorAll("[data-ex]").forEach(b => { b.onclick = () => {
       $("cxQ").value = EXAMPLES[+b.dataset.ex]; $("cxQ").dispatchEvent(new Event("input")); $("cxQ").focus(); }; });
     $("cxGo").onclick = async () => {
-      const btn = $("cxGo");
+      const btn = $("cxGo"), key = ($("cxKey") || {}).value || "";
+      if (!cat) {   // 模型清单没取到：不发（否则会按服务端默认的 DeepSeek 发出去，而 key 可能是别家的）
+        $("cxMsg").innerHTML = `<span class="cx-bad">${T("The model list has not loaded yet.", "模型清单还没取到。")}</span>`;
+        return;
+      }
+      if (!key.trim()) {
+        $("cxMsg").innerHTML = `<span class="cx-bad">${T("Enter your own API key first (web runs never use a key file on the server).",
+          "先填你自己的 API key（网页运行从不使用服务器上的 key 文件）。")}</span>`;
+        if ($("cxKey")) $("cxKey").focus();
+        return;
+      }
       btn.disabled = true;
       btn.classList.add("ignite");
       $("cxScopeTxt").innerHTML = T("Ignition", "点火");
       try {
-        const [r] = await Promise.all([post("/api/runs", {question: $("cxQ").value, as_of: $("cxAsof").value || null}),
+        const [r] = await Promise.all([post("/api/runs", {question: $("cxQ").value, as_of: $("cxAsof").value || null, ...runCfg(), api_key: key}),
           new Promise(ok => setTimeout(ok, 900))]);   // 点火动画至少放完一段
         location.hash = "#console/run/" + encodeURIComponent(r.id);
       } catch (e) {
@@ -181,15 +195,171 @@
       }
     };
     scope(tok);
+    cfgInit(tok).catch(fail(tok));
     const [runs, saved] = await Promise.all([api("/api/runs"), api("/api/saved").catch(() => ({runs: []}))]);
     if (tok !== token) return;
     $("cxRuns").innerHTML = runs.runs.length ? `<div class="cx-list">${runs.runs.map(r => `<a class="cx-li" href="#console/run/${encodeURIComponent(r.id)}">
-      ${badge(r.status)}<span title="${esc(r.question)}">${esc(r.question)}</span><span class="lbl">${esc(r.as_of)}</span></a>`).join("")}</div>
+      ${badge(r.status)}<span title="${esc(r.question)}">${esc(r.question)}</span><span class="lbl">${r.run_spec ? esc(r.run_spec.model) + " · " : ""}${esc(r.as_of)}</span></a>`).join("")}</div>
       <p class="fine">${T(`At most ${esc(runs.max_active)} unfinished runs at a time.`, `同时最多 ${esc(runs.max_active)} 个没结束的运行。`)}</p>` : T("None yet.", "还没有。");
     const sv = (saved.runs || []).slice().sort((a, b) => String(b.started_at || "").localeCompare(String(a.started_at || ""))).slice(0, 8);
     $("cxSaved").innerHTML = sv.length ? `<div class="cx-list">${sv.map(r => `<a class="cx-li" href="#console/result/${encodeURIComponent(r.qid)}/${encodeURIComponent(r.tag || "")}">
       <span class="stencil">${esc(r.kind)}</span><span title="${esc(r.qid)} / ${esc(r.tag)}">${esc(r.qid)} <span class="lbl">${esc(r.tag || "")}</span></span>
       <span class="lbl">${r.mode === "discrete" ? esc(r.most_likely ?? "—") : fmt(r.estimate)}</span></a>`).join("")}</div>` : T("None.", "没有。");
+  }
+
+  // ---------- 模型 · key · 上限（web-v0.9：自带 key） ----------
+  // 非秘密的选择（provider、区域、模型、档位、上限）存 localStorage；key 按「provider + 区域」分开存：默认 sessionStorage
+  // （关掉标签页就没了），勾了「在这台设备上记住」才放 localStorage（明文）。key 只在发起运行和校验 key 时发给本机服务
+  const CFG_STORE = "verrier-run-cfg", keyName = (p, r) => `verrier-key:${p}:${r}`;
+  const LV = {off: ["off", "关"], low: ["low", "低"], medium: ["medium", "中"], high: ["high", "高"]};
+  const REG_ZH = {global: "国际站", cn: "国内站"};
+  const bi = n => n ? T(esc(n.en), esc(n.zh)) : "";
+  const money = x => x === null || x === undefined ? "—" : "$" + Number(x).toFixed(2);
+  const stor = kind => { try { return kind === "local" ? localStorage : sessionStorage; } catch (e) { return null; } };
+  const sget = (kind, k) => { try { const s = stor(kind); return s ? s.getItem(k) : null; } catch (e) { return null; } };
+  const sset = (kind, k, v) => { try { const s = stor(kind); if (s) { if (v === null) s.removeItem(k); else s.setItem(k, v); } } catch (e) { /* 存不了就不存 */ } };
+  let cat = null, capTimer = null;
+  const cfg = {provider: null, region: null, model: null, thinking: null, cap: 2};
+  try { Object.assign(cfg, JSON.parse(sget("local", CFG_STORE) || "{}")); } catch (e) { /* 坏的就用默认 */ }
+  const cfgSave = () => sset("local", CFG_STORE, JSON.stringify(cfg));
+  const provOf = () => cat.providers.find(p => p.id === cfg.provider);
+  const modelOf = () => provOf().models.find(m => m.id === cfg.model);
+  const regionOf = m => m.by_region[cfg.region] || Object.values(m.by_region)[0];
+  function normalize() {   // 让选择总是合法的：不认识的 provider / 区域 / 模型 / 档位换成默认值
+    if (!cat.providers.some(p => p.id === cfg.provider)) cfg.provider = cat.default_provider;
+    const p = provOf();
+    if (!p.regions.some(r => r.id === cfg.region)) cfg.region = p.default_region;
+    if (!p.models.some(m => m.id === cfg.model)) cfg.model = p.default_model;
+    const m = modelOf();
+    if (!m.thinking.levels.includes(cfg.thinking)) cfg.thinking = m.thinking.default;
+    if (!(Number(cfg.cap) > 0)) cfg.cap = cat.default_usd_cap;
+  }
+  function runCfg() {   // 上限取输入框里的值（不合法时由服务端回 400 说明，不悄悄用上一次的值）
+    const capIn = $("cxCap"), cap = capIn && capIn.value.trim() !== "" ? Number(capIn.value) : Number(cfg.cap);
+    return {provider: cfg.provider, model: cfg.model, region: cfg.region, thinking: cfg.thinking, usd_cap: isFinite(cap) ? cap : String(capIn.value)};
+  }
+  function cfgForm() {
+    return `<div class="cx-cfg" id="cxCfg">
+      <div class="cx-cfg-h"><span>${T("Model · key · limits", "模型 · key · 上限")}</span><i class="hz"></i><span class="sp"></span><span>BYOK</span></div>
+      <dl class="cx-cfg-g">
+        <dt><label for="cxProv">${T("Provider", "模型厂商")}</label></dt><dd><select id="cxProv"><option>…</option></select><div class="fine" id="cxProvNote"></div></dd>
+        <dt class="cx-reg"><label for="cxReg">${T("Region", "区域")}</label></dt><dd class="cx-reg"><select id="cxReg"></select>
+          <div class="fine">${T("The international and China platforms have separate keys and balances: pick the one where the key was created.",
+            "国际站和国内站的 key、余额互不通用：选建 key 的那一站。")}</div></dd>
+        <dt><label for="cxModel">${T("Model", "模型")}</label></dt><dd><select id="cxModel"></select><div class="fine" id="cxModelNote"></div></dd>
+        <dt><label for="cxKey">API key</label></dt><dd>
+          <div class="cx-keyrow"><input type="password" id="cxKey" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-…">
+            <button class="btn" type="button" id="cxCheck">${T("Check key", "校验 key")}</button></div>
+          <label class="cx-chk"><input type="checkbox" id="cxRemember"> ${T("Remember on this device", "在这台设备上记住")}</label>
+          <div class="fine" id="cxKeyMsg"></div>
+          <div class="fine" id="cxKeyNote"></div></dd>
+        <dt><label for="cxThink">${T("Thinking", "思考深度")}</label></dt><dd><select id="cxThink"></select><div class="fine" id="cxThinkNote"></div></dd>
+        <dt><label for="cxCap">${T("Spending cap", "花费上限")}</label></dt><dd><span class="cx-capin"><span class="lbl">US$</span>
+          <input type="number" id="cxCap" min="0.1" step="0.5" value="2.00" inputmode="decimal"></span>
+          <span class="fine">${T("per run, default $2.00", "每次运行，默认 $2.00")}</span></dd>
+      </dl>
+      <div class="cx-est" id="cxEst"></div></div>`;
+  }
+  function keyNote() {
+    $("cxKeyNote").innerHTML = $("cxRemember").checked
+      ? `<span class="cx-bad">${T("Stored in this browser's localStorage in plain text: anyone who can use this browser profile can read it. Untick to forget it.",
+          "以明文存在这个浏览器的 localStorage 里：能用这个浏览器配置的人都读得到。取消勾选就会删掉。")}</span>`
+      : T("Kept in this tab's sessionStorage only (gone when the tab is closed).", "只存在这个标签页的 sessionStorage 里（关掉标签页就没了）。");
+  }
+  function keyLoad() {   // 换 provider / 区域时填上这个组合存过的 key
+    const n = keyName(cfg.provider, cfg.region), loc = sget("local", n);
+    $("cxKey").value = loc ?? sget("session", n) ?? "";
+    $("cxRemember").checked = loc !== null;
+    $("cxKeyMsg").innerHTML = "";
+    keyNote();
+  }
+  function keyStore() {
+    const n = keyName(cfg.provider, cfg.region), v = $("cxKey").value.trim(), keep = $("cxRemember").checked;
+    sset("local", n, v && keep ? v : null);
+    sset("session", n, v && !keep ? v : null);
+    keyNote();
+  }
+  function fillSelects() {
+    const p = provOf(), m = modelOf();
+    $("cxProv").innerHTML = cat.providers.map(x => `<option value="${esc(x.id)}"${x.id === cfg.provider ? " selected" : ""}>${esc(x.label)}</option>`).join("");
+    $("cxReg").innerHTML = p.regions.map(r => `<option value="${esc(r.id)}"${r.id === cfg.region ? " selected" : ""}>${esc(r.label)}${REG_ZH[r.id] ? " · " + REG_ZH[r.id] : ""}</option>`).join("");
+    body.querySelectorAll(".cx-reg").forEach(el => { el.hidden = !p.region_choice; });
+    $("cxModel").innerHTML = p.models.map(x => {
+      const lv = x.thinking.levels.includes(cfg.thinking) ? cfg.thinking : x.thinking.default, e = regionOf(x).by_thinking[lv];
+      return `<option value="${esc(x.id)}"${x.id === cfg.model ? " selected" : ""}>${esc(x.label)} · ≈ ${money(e.est_usd)}/run${e.stops_early ? " ⚠" : ""}</option>`;
+    }).join("");
+    $("cxThink").innerHTML = cat.thinking_levels.map(lv => { const ok = m.thinking.levels.includes(lv);
+      return `<option value="${esc(lv)}"${lv === cfg.thinking ? " selected" : ""}${ok ? "" : " disabled"}>${LV[lv] ? LV[lv].join(" · ") : esc(lv)}${ok ? "" : " — n/a"}</option>`; }).join("");
+    if (document.activeElement !== $("cxCap")) $("cxCap").value = Number(cfg.cap).toFixed(2);
+  }
+  function priceLine(pr) {
+    const u = pr.usd_per_mtok, cny = pr.currency !== "USD" && pr.listed;
+    return `${T("Price, US$ per 1M tokens", "价格（美元 / 百万 token）")}: ${T("input", "输入")} ${esc(u.input.toFixed(3))} · ${T("output", "输出")} ${esc(u.output.toFixed(3))} · ${T("cache hit", "缓存命中")} ${esc(u.cache_hit.toFixed(3))}` +
+      (cny ? ` · ${T(`listed in ${esc(pr.currency)}`, `原价 ${esc(pr.currency)}`)} ${esc(pr.listed.miss)} / ${esc(pr.listed.out)}${pr.fx ? `, ${T("converted at", "按汇率")} ${esc(pr.fx.cny_per_usd)} (${esc(pr.fx.date)})` : ""}` : "") +
+      (pr.peak_offpeak ? ` · ${T("peak-hour price", "峰时价")}` : "") +
+      (pr.source ? ` · <a href="${esc(pr.source)}" target="_blank" rel="noopener noreferrer">${T("source", "来源")}</a> ${esc(pr.checked || "")}` : "");
+  }
+  function cfgNotes() {
+    const p = provOf(), m = modelOf(), r = regionOf(m), e = r.by_thinking[cfg.thinking], th = m.thinking, cap = Number(cfg.cap);
+    const page = p.key_pages && p.key_pages[cfg.region];
+    $("cxProvNote").innerHTML = (p.notes || []).map(bi).join("<br>") +
+      (page ? `<br>${T("Create the key at", "在这里建 key")}: <a href="${esc(page)}" target="_blank" rel="noopener noreferrer">${esc(page)}</a>` : "");
+    $("cxModelNote").innerHTML = priceLine(r.price) + ((m.notes || []).length ? "<br>" + m.notes.map(bi).join("<br>") : "");
+    $("cxThinkNote").innerHTML = `${T("Applies to plan, judge and repair; they send", "作用于 plan、judge、repair，发")} <code>${esc(JSON.stringify(th.sends[cfg.thinking] || {}))}</code>;
+      ${T("the other roles send", "其余角色发")} <code>${esc(JSON.stringify(th.sends_other_roles || {}))}</code>.
+      ${T("Thinking tokens are billed as output.", "思考 token 按输出计费。")}`;   // 关不掉思考的说明在模型说明里（catalog.NOTE_NO_OFF）
+    $("cxEst").innerHTML = `<div class="cx-est-n"><span class="lbl">${T("Estimated cost per run", "每次运行的估计花费")}</span><b>≈ ${money(e.est_usd)}</b></div>
+      <div class="cx-est-n"><span class="lbl">${T("Cap", "上限")}</span><b>${money(cap)}</b></div>
+      <div class="cx-est-n"><span class="lbl">${T("First-round routes", "第一轮方向数")}</span><b>${esc(e.directions)}</b></div>
+      <div class="cx-est-t">
+        ${e.over_cap ? `<p class="cx-bad">${T(`The estimate is above the cap: the run stops when it reaches ${money(cap)}.`, `估计超过上限：花到 ${money(cap)} 时运行就会停下。`)}</p>` : ""}
+        ${e.stops_early ? `<p class="cx-bad">${T(`At this cap the first round's worst-case holds (searches in flight ${money(e.round1_search_hold_usd)}, one page extraction ${money(e.extract_hold_usd)}) do not fit, so the run will likely stop in round 1.`,
+          `这个上限下，第一轮最坏情况的预扣（同时在途的搜索 ${money(e.round1_search_hold_usd)}、抽取一页 ${money(e.extract_hold_usd)}）放不下，运行很可能在第一轮就停下。`)}
+          ${e.min_cap_usd ? T(`Raise the cap to at least ${money(e.min_cap_usd)} or pick a cheaper model.`, `把上限调到至少 ${money(e.min_cap_usd)}，或者换便宜的模型。`) : T("Pick a cheaper model.", "换便宜的模型。")}</p>` : ""}
+        <p class="fine">${bi(cat.estimate_note)}</p></div>`;
+  }
+  function cfgRender() { normalize(); cfgSave(); fillSelects(); cfgNotes(); }
+  async function loadCatalog(tok) {
+    const c = await api("/api/providers?usd_cap=" + encodeURIComponent(Number(cfg.cap) > 0 ? Number(cfg.cap) : 2));
+    if (tok !== token || !$("cxCfg")) return false;
+    cat = c;
+    cfgRender();
+    return true;
+  }
+  async function cfgInit(tok) {
+    if (!(await loadCatalog(tok))) return;
+    keyLoad();
+    const changed = (k, keyToo) => ev => { cfg[k] = ev.target.value; cfgRender(); if (keyToo) keyLoad(); };
+    $("cxProv").onchange = changed("provider", true);
+    $("cxReg").onchange = changed("region", true);
+    $("cxModel").onchange = changed("model");
+    $("cxThink").onchange = changed("thinking");
+    $("cxCap").oninput = () => {   // 上限变了：方向数和估计跟着变，重新取一次目录（本机接口）
+      const v = Number($("cxCap").value);
+      if (!(v > 0)) return;
+      cfg.cap = v;
+      clearTimeout(capTimer);
+      capTimer = setTimeout(() => loadCatalog(tok).catch(fail(tok)), 350);
+    };
+    $("cxKey").oninput = keyStore;
+    $("cxRemember").onchange = keyStore;
+    $("cxCheck").onclick = async () => {
+      const btn = $("cxCheck"), key = $("cxKey").value;
+      if (!key.trim()) { $("cxKeyMsg").innerHTML = `<span class="cx-bad">${T("Enter a key first.", "先填 key。")}</span>`; return; }
+      btn.disabled = true;
+      $("cxKeyMsg").textContent = "…";
+      try {
+        const r = await post("/api/key/check", {provider: cfg.provider, region: cfg.region, model: cfg.model, api_key: key});
+        $("cxKeyMsg").innerHTML = r.ok ? `<span class="cx-ok">✓ ${esc(r.message)}</span>` : `<span class="cx-bad">✕ ${esc(r.message || r.error)}</span>`;
+      } catch (err) { $("cxKeyMsg").innerHTML = `<span class="cx-bad">✕ ${esc(err.message)}</span>`; }
+      btn.disabled = false;
+    };
+  }
+  function specLine(r) {   // 运行页：这次运行用的模型，和 key 还在不在服务器内存里
+    const s = r.run_spec;
+    if (!s) return "";
+    return ` · ${esc(s.provider)} / ${esc(s.model)}${s.region && s.region !== "global" ? " / " + esc(s.region) : ""} · ${T("thinking", "思考")} ${esc(s.thinking)} · ` +
+      (r.key_in_memory ? T("key held in server memory for this run", "key 在服务器内存里（只用于这次运行）") : T("key cleared from server memory", "key 已从服务器内存清掉"));
   }
 
   // ---------- 装饰动效：雷达扫描、按键声波、「思考中」打字机 ----------
@@ -408,7 +578,7 @@
     const keep = body.scrollTop, key = stageKey(r), cur = stations(r).find(s => s.status !== "done");
     $("cxRunTop").innerHTML = `<div id="cxStrip">${strip(r)}</div>
       ${r.error ? `<div class="cx-err">${esc(r.error)}</div>` : ""}
-      <p class="cx-q">${esc(r.question)}</p><p class="fine">${T("question id", "题 id")} ${esc(r.qid)} · tag ${esc(r.tag)}</p>`;
+      <p class="cx-q">${esc(r.question)}</p><p class="fine">${T("question id", "题 id")} ${esc(r.qid)} · tag ${esc(r.tag)}${specLine(r)}</p>`;
     thinkSet($("cxThink"), key, cur ? T(...cur.label) : "");
     $("cxRunMain").innerHTML = `${picking ? gate(r) : ""}
       <h3 class="cx-h">${T("Mission timeline", "任务流程")}</h3>${timeline(stations(r), active)}

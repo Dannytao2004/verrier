@@ -62,29 +62,19 @@ function route() {
 window.addEventListener("hashchange", route);
 window.addEventListener("load", route);
 
-// ---------- 首页：发起运行 ----------
+// ---------- 首页：只浏览（web-v0.9 起新运行只在 /verrier 控制台发起：要填你自己的 API key） ----------
 async function pageHome() {
   $app.innerHTML = `<h1>问一个拿不到的数</h1>
   <div class="card">
-    <p class="muted">agent 先钉死目标、列出取证方向，然后停下来等你确认；确认后并行取证、裁判、代码计算、给出估计。
-    需要 key 文件（环境变量 TRIANGULATE_KEY_FILE）和网络。每次运行的花费上限是 $1.00（含按假设单价记的搜索费）。</p>
-    <label>问题<br><textarea id="q" placeholder="How many ... in ...?"></textarea></label>
-    <p><label>as_of（站在哪一天）：<input type="date" id="asof"></label>
-    <span class="muted">留空 = 今天（真实使用，可以用今天的网页）；更早的日期 = 回测模式，只用不晚于 as_of 的存档快照。</span></p>
-    <button id="go">开始</button> <span id="msg" class="muted"></span>
+    <p>经典界面只用来浏览：这次服务启动后的网页运行（进度、确认方向、取消）、已保存的运行和回测。</p>
+    <p>发起新运行请到 <a href="/verrier#console">Verrier 控制台</a>：选 provider 和模型，填你自己的 API key（自带 key）。
+    网页运行从不使用服务器上的 key 文件；key 只留在你的浏览器和这次运行的服务器内存里，运行结束就清掉。</p>
   </div>
   <h2>这次服务启动后的网页运行</h2><div id="runs" class="muted">加载中…</div>`;
-  document.getElementById("go").onclick = async () => {
-    const btn = document.getElementById("go");
-    btn.disabled = true;
-    try {
-      const r = await post("/api/runs", {question: document.getElementById("q").value, as_of: document.getElementById("asof").value || null});
-      location.hash = "#/run/" + r.id;
-    } catch (e) { document.getElementById("msg").innerHTML = `<span class="bad">${esc(e.message)}</span>`; btn.disabled = false; }
-  };
   const d = await api("/api/runs");
-  document.getElementById("runs").innerHTML = d.runs.length ? `<table><tr><th>开始时间</th><th>问题</th><th>as_of</th><th>状态</th><th></th></tr>
-    ${d.runs.map(r => `<tr><td>${esc(r.created_at)}</td><td>${esc(r.question)}</td><td>${esc(r.as_of)}</td><td>${badge(r.status)}</td>
+  document.getElementById("runs").innerHTML = d.runs.length ? `<table><tr><th>开始时间</th><th>问题</th><th>as_of</th><th>模型</th><th>状态</th><th></th></tr>
+    ${d.runs.map(r => `<tr><td>${esc(r.created_at)}</td><td>${esc(r.question)}</td><td>${esc(r.as_of)}</td>
+    <td class="small">${r.run_spec ? esc(r.run_spec.provider + " / " + r.run_spec.model) : "—"}</td><td>${badge(r.status)}</td>
     <td><a href="#/run/${esc(r.id)}">进度</a>${r.result ? ` · <a href="${resultHref(r.result.qid, r.result.tag)}">结果</a>` : ""}</td></tr>`).join("")}</table>
     <p class="muted small">同时最多 ${d.max_active} 个没结束的运行。</p>` : "还没有。";
 }
@@ -163,7 +153,7 @@ function runHeader(r) {
   &nbsp; 已用时 <b>${fmt(r.elapsed_s)}</b> 秒 · 已花 <b>$${r.usd === null ? "—" : r.usd.toFixed(3)}</b>
   ${r.usd_cap ? ` / 上限 $${r.usd_cap.toFixed(2)}` : ""}（含按假设单价记的搜索费） · as_of ${esc(r.as_of)}
   ${active ? ' &nbsp; <button class="secondary" id="cancel">取消运行</button>' : ""}</div>
-  <p>${esc(r.question)}</p><p class="muted small">题 id ${esc(r.qid)} · tag ${esc(r.tag)}</p></div>`;
+  <p>${esc(r.question)}</p><p class="muted small">题 id ${esc(r.qid)} · tag ${esc(r.tag)}${r.run_spec ? ` · ${esc(r.run_spec.provider)} / ${esc(r.run_spec.model)} · 思考 ${esc(r.run_spec.thinking)}` : ""}</p></div>`;
 }
 function approvalBlock(r) {
   return `<h2>确认方向</h2><div class="card warn"><p>agent 停在这里等你确认。不勾的方向不会跑（走图里已有的「改方向列表」路径，保留的方向会重新编号 d1..dK）。</p>

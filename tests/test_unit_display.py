@@ -146,7 +146,7 @@ class TestGraphRuns(unittest.TestCase):
         try:
             with mock.patch.object(TW, "FakeLLM", LLM), mock.patch.object(P, "fetch_page", TW.fake_fetch), \
                     mock.patch.object(G, "search_markets", lambda k, a: {"keywords": k, "markets": [], "points": [], "note": "x"}):
-                rid = c.post("/api/runs", json={"question": "How many widgets in June 2026?", "as_of": "2026-06-20"}).json()["id"]
+                rid = c.post("/api/runs", json={**TW.BYOK, "question": "How many widgets in June 2026?", "as_of": "2026-06-20"}).json()["id"]
                 TW.wait_for(c, rid, ("awaiting_approval",))
                 c.post(f"/api/runs/{rid}/approve", json={})
                 run = TW.wait_for(c, rid, ("done", "failed"))

@@ -8,6 +8,10 @@
 - 裁判 / 输入核对 / 修正调用来自这次运行自己的 calls.jsonl；花费来自 ctx.budget。
 每个网页运行有自己的 tag（web_<UTC 时间>），结果写在 results/agent/<qid>/<tag>/，不会覆盖回测结果。
 服务进程退出后，内存里的登记就没了（已写盘的结果还在，可以在「已保存的运行」里看）。
+
+web-v0.9：网页运行一律自带 key（providers.ModelSpec，「BYOK」），没有 spec 就拒跑；永远不读服务器的 key 文件。
+spec 只在这个 WebRun 和 prepare 出来的 ctx 上（内存里），运行结束（完成 / 失败 / 取消）时 _release() 先把已存的文字过一遍
+redact_obj、再 drop_key()；运行中返回的状态视图也先过 redact_obj。spec.public()（provider、模型、区域、档位、上限）可以给网页看。
 """
 import hashlib
 import json
@@ -21,8 +25,14 @@ from langgraph.types import Command
 from ..agent import run as agent_run
 
 ACTIVE = ("planning", "awaiting_approval", "running")
+FINISHED = ("done", "failed", "cancelled")
 MAX_ACTIVE = 2
 CANCEL_REASON = "cancelled from the web UI"
+ERROR_MAX_CHARS = 500
+NEED_KEY = ("需要你自己的 API key：网页运行只用你填的 key，从不使用服务器上的 key 文件。"
+            "/ Your own API key is required: web runs only use the key you enter and never the server's key file.")
+# 运行结束清 key 之前要过一遍 redact_obj 的字段（状态视图里的文字都来自这些）
+_SCRUB_FIELDS = ("q", "error", "target", "proposed", "plan_notes", "dirs", "markets", "judge", "compute", "approvals", "result")
 
 
 class Busy(RuntimeError):
@@ -43,9 +53,10 @@ def _iso(t):
 
 
 class WebRun:
-    def __init__(self, run_id: str, q: dict, tag: str, prepare, save):
+    def __init__(self, run_id: str, q: dict, tag: str, prepare, save, spec=None):
         self.id, self.q, self.tag = run_id, q, tag
         self._prepare, self._save = prepare, save
+        self._spec = spec   # providers.ModelSpec（含 key，只在内存里）；Registry.start 保证网页运行一定有
         self.lock = threading.Lock()
         self.status, self.error = "planning", None
         self.created, self.finished = time.time(), None
@@ -76,10 +87,29 @@ class WebRun:
             fn(*args)
         except Exception as e:  # noqa: BLE001  任何异常都记成 failed，不让线程悄悄死掉
             with self.lock:
-                self.status, self.error, self.finished = "failed", f"{type(e).__name__}: {e}"[:500], time.time()
+                self.status, self.error, self.finished = "failed", self._clip(f"{type(e).__name__}: {e}"), time.time()
+        finally:
+            if self.status in FINISHED:   # 完成 / 失败 / 取消：清 key（停在人工确认时不清，批准后还要用）
+                self._release()
+
+    def _clip(self, text: str) -> str:
+        """存进状态的错误文字：先把 key 换成 ***，再截断（先截断的话，截在 key 中间的半截就认不出来了）。"""
+        sp = self._spec
+        return (text if sp is None else sp.redact(text))[:ERROR_MAX_CHARS]
+
+    def _release(self):
+        """运行结束：已存的文字先过一遍 redact_obj（key 已清掉以后就认不出来了），再把 key 从内存里清掉。
+        _after_stream 调 save 时带 keep_key=True（save_run 不清 key），由这里统一清：完成、失败、取消都走 _guard 的 finally。"""
+        sp = self._spec
+        if sp is None or not sp.has_key:
+            return
+        with self.lock:
+            for name in _SCRUB_FIELDS:
+                setattr(self, name, sp.redact_obj(getattr(self, name)))
+            sp.drop_key()
 
     def _plan_phase(self):
-        h = self._prepare(self.q, self.tag)
+        h = self._prepare(self.q, self.tag, spec=self._spec)
         h["ctx"].progress = self._on_event
         self.h = h
         if self.cancel_requested:
@@ -111,14 +141,14 @@ class WebRun:
             if cancelled:
                 self._resume(self.approvals[-1])
             return
-        state = self._save(self.h, self.approvals)
+        state = self._save(self.h, self.approvals, keep_key=True)   # key 留到 _release 统一清（先 redact 已存的文字）
         r = ((state or {}).get("compute") or {}).get("result") or {}
         with self.lock:
             self.result = {"qid": self.q["id"], "tag": self.h["tag"]}
             if self.cancel_requested:
                 self.status = "cancelled"
             elif (state or {}).get("aborted") and r.get("central") is None and r.get("most_likely") is None:
-                self.status, self.error = "failed", str(state["aborted"])[:500]
+                self.status, self.error = "failed", self._clip(str(state["aborted"]))
             else:
                 self.status = "done"
             self.finished = time.time()
@@ -299,12 +329,19 @@ class WebRun:
         add("final", "终稿", "done" if self.final_done else ("running" if c and st == "running" else "pending"))
         return S
 
+    def _public(self, view: dict) -> dict:
+        """返回给网页之前：spec 的公开部分（不含 key）加进去，所有文字过一遍 redact_obj（key 已清掉时原样返回）。"""
+        sp = self._spec
+        if sp is None:
+            return view
+        return sp.redact_obj({**view, "run_spec": sp.public(), "key_in_memory": sp.has_key})
+
     def status_view(self) -> dict:
         with self.lock:
             roles = self._roles()
             b = self.h["ctx"].budget if self.h else None
             end = self.finished or time.time()
-            return {"id": self.id, "qid": self.q["id"], "tag": self.tag, "question": self.q["question"], "as_of": self.q["as_of"],
+            view = {"id": self.id, "qid": self.q["id"], "tag": self.tag, "question": self.q["question"], "as_of": self.q["as_of"],
                     "status": self.status, "error": self.error, "cancel_requested": self.cancel_requested,
                     "created_at": _iso(self.created), "finished_at": _iso(self.finished),
                     "elapsed_s": round(end - self.created, 1),
@@ -316,11 +353,13 @@ class WebRun:
                     "markets": self.markets, "judge": {str(k): v for k, v in self.judge.items()},
                     "stages": self._stages(roles), "calls": roles, "compute": self.compute,
                     "approvals": list(self.approvals), "result": self.result}
+            return self._public(view)
 
     def brief(self) -> dict:
         with self.lock:
-            return {"id": self.id, "qid": self.q["id"], "tag": self.tag, "question": self.q["question"][:200],
-                    "as_of": self.q["as_of"], "status": self.status, "created_at": _iso(self.created), "result": self.result}
+            return self._public({"id": self.id, "qid": self.q["id"], "tag": self.tag, "question": self.q["question"][:200],
+                                 "as_of": self.q["as_of"], "status": self.status, "created_at": _iso(self.created),
+                                 "result": self.result})
 
 
 def _judge_summary(jr: dict) -> dict:
@@ -354,7 +393,18 @@ class Registry:
         self.runs = {}
         self.lock = threading.Lock()
 
-    def start(self, question: str, as_of=None) -> WebRun:
+    def start(self, question: str, as_of=None, spec=None) -> WebRun:
+        """spec（providers.ModelSpec）必须有：网页运行只用用户自己的 key。登记之前任何一步出错都先清掉 spec 里的 key。"""
+        try:
+            return self._start(question, as_of, spec)
+        except BaseException:
+            if spec is not None and not any(r._spec is spec for r in self.runs.values()):
+                spec.drop_key()
+            raise
+
+    def _start(self, question: str, as_of, spec) -> WebRun:
+        if spec is None or not getattr(spec, "has_key", False):
+            raise ValueError(NEED_KEY)
         if not isinstance(question, str) or not (as_of is None or isinstance(as_of, str)):
             raise ValueError("question 必须是字符串，as_of 必须是字符串或留空")   # 审查发现：非字符串原来会 500
         question = (question or "").strip()
@@ -380,7 +430,7 @@ class Registry:
             while any(r.qid_tag == (qid, tag) for r in self.runs.values()) or (agent_run.RES / qid / tag).exists():
                 tag, n = f"web_{stamp}_{n}", n + 1
             run = WebRun(uuid.uuid4().hex[:12], {"id": qid, "question": question, "as_of": d.isoformat()}, tag,
-                         self._prepare, self._save)
+                         self._prepare, self._save, spec=spec)
             self.runs[run.id] = run
         run.start()
         return run

@@ -199,12 +199,15 @@ def release(h: dict):
         spec.drop_key()
 
 
-def save_run(h: dict, approvals: list) -> dict:
-    """图跑完以后：取最终 state，补上计量、泄漏审计和 settings（run_settings），写 state.json、ledger.md、graph.html。"""
+def save_run(h: dict, approvals: list, keep_key: bool = False) -> dict:
+    """图跑完以后：取最终 state，补上计量、泄漏审计和 settings（run_settings），写 state.json、ledger.md、graph.html。
+    写完清掉自带的 key（release）；web-v0.9：keep_key=True 时不清，由调用方清（网页的 WebRun._release：先把内存里
+    已存的文字过一遍 redact_obj 再清）。"""
     try:
         return _save_run(h, approvals)
     finally:
-        release(h)
+        if not keep_key:
+            release(h)
 
 
 def _save_run(h: dict, approvals: list) -> dict:

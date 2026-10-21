@@ -286,16 +286,27 @@ def fake_fetch(url, as_of, qid, **kw):
             "text": "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets."}
 
 
+# web-v0.9：网页运行一定要自带 key。这把是假的（不发任何真实请求），测试检查它不出现在任何返回和写出的文件里
+FAKE_KEY = "sk-web-FAKE-0123456789abcdefXYZ"
+BYOK = {"provider": "deepseek", "api_key": FAKE_KEY}
+
+
+def byok_spec(**kw):
+    from triangulate import providers as PV
+    return PV.ModelSpec(kw.pop("provider", "deepseek"), kw.pop("model", "deepseek-flash"), kw.pop("key", FAKE_KEY), **kw)
+
+
 def make_prepare(tmp: Path, gate: threading.Event | None = None):
     from triangulate.agent import graph as G
     from triangulate.agent import pipeline as P
 
-    def prepare(q, tag=""):
+    def prepare(q, tag="", spec=None):
         if gate is not None:
             gate.wait(10)
         ctx = object.__new__(P.Context)
         ctx.qid, ctx.question, ctx.as_of_s, ctx.as_of = q["id"], q["question"], q["as_of"], date.fromisoformat(q["as_of"])
-        ctx.budget, ctx.leak_patterns, ctx.ablate_own_history, ctx.progress = P.Budget(), [], False, None
+        budget = P.Budget() if spec is None else P.Budget.for_model(spec.price_id, usd=spec.usd_cap)
+        ctx.budget, ctx.leak_patterns, ctx.ablate_own_history, ctx.progress, ctx.spec = budget, [], False, None, spec
         ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
         out_dir = tmp / q["id"] / tag
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -344,7 +355,7 @@ class TestApiRuns(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def test_start_stops_at_approval_then_resume_with_subset(self):
-        r = self.c.post("/api/runs", json={"question": "How many widgets in June 2026?", "as_of": "2026-06-20"})
+        r = self.c.post("/api/runs", json={**BYOK, "question": "How many widgets in June 2026?", "as_of": "2026-06-20"})
         self.assertEqual(r.status_code, 200, r.text)
         rid = r.json()["id"]
         self.assertTrue(r.json()["tag"].startswith("web_"))
@@ -381,7 +392,7 @@ class TestApiRuns(unittest.TestCase):
         self.assertEqual([x["id"] for x in self.c.get("/api/runs").json()["runs"]], [rid])
 
     def test_approve_all_sends_plain_approval(self):
-        rid = self.c.post("/api/runs", json={"question": "How many widgets in June 2026?", "as_of": "2026-06-20"}).json()["id"]
+        rid = self.c.post("/api/runs", json={**BYOK, "question": "How many widgets in June 2026?", "as_of": "2026-06-20"}).json()["id"]
         wait_for(self.c, rid, ("awaiting_approval",))
         self.c.post(f"/api/runs/{rid}/approve", json={})
         st = wait_for(self.c, rid, ("done", "failed"))
@@ -390,9 +401,9 @@ class TestApiRuns(unittest.TestCase):
 
     def test_concurrency_limit_and_cancel_at_approval(self):
         self.gate.clear()   # 第一个运行卡在 prepare 里（planning）
-        r1 = self.c.post("/api/runs", json={"question": "q1", "as_of": "2026-06-20"})
+        r1 = self.c.post("/api/runs", json={**BYOK, "question": "q1", "as_of": "2026-06-20"})
         self.assertEqual(r1.status_code, 200)
-        r2 = self.c.post("/api/runs", json={"question": "q2", "as_of": "2026-06-20"})
+        r2 = self.c.post("/api/runs", json={**BYOK, "question": "q2", "as_of": "2026-06-20"})
         self.assertEqual(r2.status_code, 429)
         self.assertIn("上限 1", r2.json()["detail"])
         self.gate.set()
@@ -404,23 +415,23 @@ class TestApiRuns(unittest.TestCase):
         self.assertEqual(st["approvals"][-1]["approved"], False)
         self.assertEqual(st["directions"], [])           # 没批准：一个方向都没跑
         self.assertEqual(self.c.post(f"/api/runs/{rid}/cancel").status_code, 409)
-        self.assertEqual(self.c.post("/api/runs", json={"question": "q2", "as_of": "2026-06-20"}).status_code, 200)
+        self.assertEqual(self.c.post("/api/runs", json={**BYOK, "question": "q2", "as_of": "2026-06-20"}).status_code, 200)
 
     def test_cancel_during_planning_ends_without_approval(self):
         # 审查发现：规划中点取消，原来会停进 awaiting_approval、占着名额，还能被批准
         self.gate.clear()
-        rid = self.c.post("/api/runs", json={"question": "q1", "as_of": "2026-06-20"}).json()["id"]
+        rid = self.c.post("/api/runs", json={**BYOK, "question": "q1", "as_of": "2026-06-20"}).json()["id"]
         self.assertEqual(self.c.post(f"/api/runs/{rid}/cancel").status_code, 200)
         self.gate.set()
         st = wait_for(self.c, rid, ("cancelled", "failed", "awaiting_approval"))
         self.assertEqual(st["status"], "cancelled", st)
         self.assertFalse(any(a.get("approved") for a in st["approvals"]), st["approvals"])
         self.assertEqual(self.c.post(f"/api/runs/{rid}/approve", json={}).status_code, 409)
-        self.assertEqual(self.c.post("/api/runs", json={"question": "q2", "as_of": "2026-06-20"}).status_code, 200)
+        self.assertEqual(self.c.post("/api/runs", json={**BYOK, "question": "q2", "as_of": "2026-06-20"}).status_code, 200)
 
     def test_non_string_fields_are_400(self):
-        self.assertEqual(self.c.post("/api/runs", json={"question": 123}).status_code, 400)
-        self.assertEqual(self.c.post("/api/runs", json={"question": "x", "as_of": 20260101}).status_code, 400)
+        self.assertEqual(self.c.post("/api/runs", json={**BYOK, "question": 123}).status_code, 400)
+        self.assertEqual(self.c.post("/api/runs", json={**BYOK, "question": "x", "as_of": 20260101}).status_code, 400)
 
     def test_cancel_while_running_uses_budget_abort(self):
         from triangulate.web.runs import CANCEL_REASON, Registry
@@ -432,12 +443,12 @@ class TestApiRuns(unittest.TestCase):
                 go.wait(10)
                 return super().search(*a, **k)
 
-        def prepare(q, tag=""):
-            h = base(q, tag)
+        def prepare(q, tag="", spec=None):
+            h = base(q, tag, spec=spec)
             h["ctx"].searcher = SlowSearcher()
             return h
         reg = Registry(prepare=prepare)
-        run = reg.start("How many widgets in June 2026?", "2026-06-20")
+        run = reg.start("How many widgets in June 2026?", "2026-06-20", spec=byok_spec())
         t = time.time()
         while run.status != "awaiting_approval" and time.time() - t < 10:
             time.sleep(0.02)
@@ -458,10 +469,10 @@ class TestApiRuns(unittest.TestCase):
     def test_failed_prepare_is_reported(self):
         from triangulate.web.runs import Registry
 
-        def boom(q, tag=""):
+        def boom(q, tag="", spec=None):
             raise RuntimeError("key file not found: X (set TRIANGULATE_KEY_FILE)")
         reg = Registry(prepare=boom)
-        run = reg.start("q", "2026-06-20")
+        run = reg.start("q", "2026-06-20", spec=byok_spec())
         t = time.time()
         while run.status == "planning" and time.time() - t < 5:
             time.sleep(0.02)
@@ -469,8 +480,8 @@ class TestApiRuns(unittest.TestCase):
         self.assertIn("key file not found", run.status_view()["error"])
 
     def test_input_validation_and_404(self):
-        self.assertEqual(self.c.post("/api/runs", json={"question": "  "}).status_code, 400)
-        self.assertEqual(self.c.post("/api/runs", json={"question": "q", "as_of": "2999-01-01"}).status_code, 400)
+        self.assertEqual(self.c.post("/api/runs", json={**BYOK, "question": "  "}).status_code, 400)
+        self.assertEqual(self.c.post("/api/runs", json={**BYOK, "question": "q", "as_of": "2999-01-01"}).status_code, 400)
         self.assertEqual(self.c.get("/api/runs/nope").status_code, 404)
         self.assertEqual(self.c.post("/api/runs/nope/approve", json={}).status_code, 404)
         self.assertEqual(self.c.get("/api/result", params={"qid": "..", "tag": ""}).status_code, 404)

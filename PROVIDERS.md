@@ -11,7 +11,7 @@
 | `v2.10c` | GPT adapter（OpenAI：JSON 调用走 Chat Completions，搜索走 Responses API 的 web_search）；按官方价计价（含 cache 写入价、272K 长上下文档）；429 余额 / 额度错误立刻停；GPT key 校验 | 第 10 节 |
 | `v2.10d` | Kimi adapter（国际站 / 国内站两个区域；JSON 调用走流式 Chat Completions；搜索 = 一次 JSON 调用生成查询词 + `POST /v1/tools/search`）；国内站按 CNY 官方价折算（`ModelSpec.price_id`）；429 余额不足立刻停；Kimi key 校验 | 第 11 节 |
 | `v2.10e` | GLM adapter（Z.ai 国际站 / 智谱开放平台国内站两个区域；JSON 调用走非流式 Chat Completions；搜索同 Kimi：生成查询词 + `POST /web_search`）；国内站按 CNY 官方价折算；429 余额不足（1113）和用量上限 / 套餐 key 的码立刻停；只收 Standard API Key（网页提示 `GLM_KEY_NOTE`）；GLM key 校验 | 第 12 节 |
-| 之后 | 网页（填 key、选模型、校验 key、每次运行的花费估计） | 未开始 |
+| `web-v0.9` | 网页接上 BYOK：`GET /api/providers`（provider、区域、模型、思考档位、每次运行的花费估计）、`POST /api/key/check`、`POST /api/runs` 必须带 key；key 只在这次运行的内存里，结束就清；经典界面只浏览；/verrier 控制台的「模型 · key · 上限」表单 | 第 13 节 |
 
 ## 1. Scope and binding decisions（用户 10-20 / 10-21 定的，摘要）
 
@@ -172,10 +172,9 @@ agent 里 `AgentLLM.ask` 和 `run_direction` 的搜索把它变成 `Budget.halt(
 - **DeepSeek 搜索角色的思考没关**：搜索请求不带 `thinking` 字段（v2.9b 原样），服务端默认；`search_direct.py` 的注释记过这个接口默认返回 thinking 块。
   用户决定 6 说「其余角色能关就关」，但关掉要往搜索请求体里加字段（改变冻结的请求体），而且 DeepSeek 的 Anthropic 兼容文档只写了 `thinking`
   「Supported」、没写 `type: disabled` 的效果（未核实）。本阶段没动，等用户定。
-- **网页还没接**：`web/runs.py` 的 `prepare(q, tag)` 还不传 spec；运行失败（`_guard`）时还没调 `run.release(h)` 和 `spec.redact`；
-  `app.py` 不收 provider / model / key；网页没有 key 输入框、模型选择、花费估计。留给网页阶段。
+- ~~**网页还没接**~~：web-v0.9 已接（第 13 节）。
 - 搜索遇到 401 / 403 仍然只记 `http_401` 返回空 URL（v2.9b 原样），不像 JSON 调用那样抛 `KeyRejected`。
-- ~~key 校验（models 列表接口）还没实现。~~ v2.10b：`llm.check_key`（DeepSeek `GET /models`、Claude `GET /v1/models`），网页还没接。
+- ~~key 校验（models 列表接口）还没实现。~~ v2.10b：`llm.check_key`（DeepSeek `GET /models`、Claude `GET /v1/models`）；web-v0.9 网页已接（`POST /api/key/check`）。
 - ~~其他四家（Claude、GPT、Kimi、GLM）的 adapter、价格、模型清单还没加~~：Claude 见第 9 节（v2.10b），GPT 见第 10 节（v2.10c），
   Kimi 见第 11 节（v2.10d），GLM 见第 12 节（v2.10e）。
 
@@ -937,6 +936,105 @@ then run again.`（不含服务端原文。）
 - 真实网络只发了不花钱的请求（`probes/glm_key_probe.py`，跑了两次，全部 401）。没有真 key，没有发过成功的 `/chat/completions`、`/web_search`。
 - 本阶段对其他代码的改动：`llm.server_error`（`parse_error` 钩子）、`llm.server_error_detail`（只有 code 的记录）、`llm.check_key`（列表全不全不知道时的文字）、
   `Searcher._search_by_queries`（传 region、按 adapter 计费）、`run.run_settings`（`search_settings`）、`KimiAdapter`（`region` 参数、`search_settings`）。
+
+## 13. Web layer（web-v0.9）
+
+网页（`triangulate/web/`）接上自带 key。只在本机单用户用（照旧只绑 127.0.0.1，`TrustedHostMiddleware` 只认本机 Host 头，POST 只收 JSON）。
+
+### 13.1 接口
+
+| 接口 | 做什么 |
+|---|---|
+| `GET /api/providers[?usd_cap=2]` | `web/catalog.py` 的 `providers_view(cap)`：五家的 id / 名字 / 默认模型 / 区域（Kimi、GLM 有国际站 / 国内站，`region_choice`）/ 说明（中英，`PROVIDER_NOTES`）/ GLM 建 key 的页面；每个模型的思考档位（`levels`、`can_turn_off`、`default`、`sends` = 各档位下 plan / judge / repair 的请求体里控制思考的字段、`sends_other_roles`、说明）和每个区域的价格（官方价、来源、查看日期，CNY 原价和汇率）、第一轮方向数、每个档位的花费估计（13.4）。全部取自 `providers.py` 和 `config.PRICES`，不另写一份清单；没有 key、没有任何秘密。`usd_cap` 不是有限正数回 400 |
+| `POST /api/key/check` `{provider, region, model?, api_key}` | 用这几项建一个 `ModelSpec`（没给模型用这家的默认模型），调 `llm.check_key`（这家免费的 models 列表接口，第 9.7 / 10.5 / 11.8 / 12.8 节），返回 `ok` / `error`（key_rejected、balance、network……）/ `message`；结果先过 `spec.redact_obj`，返回后马上 `drop_key()`。`create_app(key_checker=...)` 可以换校验函数（假演示服务用） |
+| `POST /api/runs` `{question, as_of, provider, model, region, thinking, usd_cap, api_key}` | `app.spec_from_body`：没有 `api_key`（缺、null、空白）就 400，消息是中英两句 `runs.NEED_KEY`（「需要你自己的 API key：网页运行只用你填的 key，从不使用服务器上的 key 文件。」）；其余字段没给就用默认值（DeepSeek、这家的默认模型、这个模型的默认档位：能关就 off，否则 low；上限 $2.00）；不合法的组合（模型不属于这家、这个模型没有这个档位、区域不对、上限不是正数、key 格式不对）都是 400，消息里不带 key。spec 交给 `Registry.start(question, as_of, spec=spec)` |
+| 422（请求体不是 JSON 对象） | FastAPI 默认的 422 会把收到的 body 原样放在 `input` 里（请求体里有 `api_key` 时就是回显 key）。`create_app` 换了 `RequestValidationError` 的处理：只回 `loc` / `type` / `msg` |
+
+### 13.2 key 在服务器上的一生
+
+1. `spec_from_body` -> `ModelSpec`（`clean_key`：去首尾空白，8–512 个可打印 ASCII）。
+2. `Registry.start` 必须有 spec（没有就 `ValueError(NEED_KEY)`，防别的调用方绕过 app）；登记之前任何一步出错（题目不合法、`Busy`）先 `spec.drop_key()` 再抛。
+3. `WebRun._spec` 和 `prepare_run(q, tag, spec=spec)` 的 `ctx.spec`：只在内存里。默认的 prepare 就是命令行同一个 `run.prepare_run`，所以 LLM / Searcher / Budget 走的都是 v2.10a–e 的 spec 路径，**不读 key 文件**（测试把 `config.read_key`、`llm.read_key`、`search.read_key` 换成直接报错来证明）；Jev 对照臂照 v2.10a 跳过。
+4. 停在人工确认时 key 留着（批准后还要用）。
+5. 运行结束（完成 / 失败 / 取消，都经过 `_guard` 的 `finally`）：`WebRun._release()` 先把内存里已存的文字（题目、错误、目标、方向、裁判摘要、计算结果、批准记录……）过一遍 `spec.redact_obj`，再 `drop_key()`。
+   `_after_stream` 调 `save_run(h, approvals, keep_key=True)`：`save_run` 新加的 `keep_key` 参数让它写完文件不清 key，由 `_release` 统一清（不然 save 先清了 key，之后就认不出文字里的 key 了）。命令行照旧 `keep_key=False`。
+6. 错误文字（`_guard` 的异常、`state.aborted`）经 `WebRun._clip`：先 redact 再截到 500 字（先截的话，截在 key 中间的半截就认不出来了）。
+7. 每个状态视图（`status_view`、`brief`）返回前加上 `run_spec`（`spec.public()`，不含 key）和 `key_in_memory`（布尔），整个 dict 过一遍 `redact_obj`。
+
+`providers.ModelSpec.redact_obj(obj)`（新）：`redact` 的深层版，dict（含键）/ list / tuple 里的每个字符串都换，返回新对象。
+`providers.effort_for(model, level, role)` / `tokens_for_model(...)`（新）：从 `ModelSpec.effort` / `tokens_for` 里提出来的同一段逻辑（行为不变），网页的估计在没有 key 时也能用。
+
+### 13.3 前端
+
+- **经典界面（`/`，`static/app.js` + `index.html`）只浏览**：首页的提问表单去掉了，换成「去 Verrier 控制台发起」的说明；还能看这次服务启动后的网页运行（进度、批准 / 取消已有的运行）、已保存的运行和回测。导航「新问题」改名「网页运行」。
+- **共享控制台（`static/verrier_console.js`，/verrier、/verrier/aero、/verrier/apple、/verrier/manuscript 都用）**：提问页加了「模型 · key · 上限」：
+  provider、区域（只有 Kimi / GLM 显示）、模型（选项里带每次运行的估计花费，第一轮会中止的标 ⚠）、API key（`type=password`）+「在这台设备上记住」+「校验 key」、思考深度（off / low / medium / high，这个模型没有的档位 disabled，下面写各档实际发什么和说明）、花费上限（默认 2.00，改了就重新取 `/api/providers?usd_cap=`）。下面三格读数：估计花费、上限、第一轮方向数，以及超上限 / 第一轮会中止的提示。中英两套文字照旧用 `T()` 的 span；`<option>` 里放不了 span，档位写成「off · 关」这种双语。
+  旧的「需要 key 文件、上限 $1.00」说明换成了「自带 key：只用你填的 key，从不用服务器的 key 文件；key 只在浏览器和这次运行的服务器内存里，结束就清，不写盘」。
+- **key 在浏览器里**：按「provider + 区域」分开存（`verrier-key:<provider>:<region>`），默认 `sessionStorage`（关掉标签页就没了）；勾了「记住」才放 `localStorage`，旁边写明是明文、能用这个浏览器配置的人都读得到；取消勾选就从 `localStorage` 删掉。换 provider / 区域时自动填上那个组合存过的 key。非秘密的选择（provider、区域、模型、档位、上限）存 `localStorage` 的 `verrier-run-cfg`。
+- 运行页题 id 那一行加了「provider / 模型 / 区域 · 思考档位 · key 在服务器内存里 / 已清掉」。
+- 样式：原版 /verrier（`verrier_console.html` 的内联 CSS）按工业规格表做了 `.cx-cfg`（黑铭牌条、左栏标签右栏控件、底部三格读数）；另外三个页面没加样式，能用但朴素。
+- **假演示服务**（`probes/web_demo_fake.py`，端口 8773）：「校验 key」换成不发请求、总是通过的 `fake_check_key`；prepare 收 spec（假模型不管选了哪家），key 照真实路径只在内存里、结束就清。10-21 在浏览器里走了一遍：选 GLM、填 key、记住 / 取消记住（存储位置对）、校验、发起、批准、完成，运行页显示「key 已从服务器内存清掉」，临时结果目录里 grep 不到 key。
+
+### 13.4 每次运行的花费估计
+
+只是给人看的粗估，不参与预算（上限照旧靠预扣守住）。`catalog.estimate(model, region, level, cap)`：
+
+- token 构成（`RUN_PROFILE`）：`results/agent/**/calls.jsonl` 里 2026-10-18 起 50 次 deepseek-flash 运行（不开思考）的平均：plan / judge / repair 合计 cache hit 19,400、miss 28,400、输出 14,900 token；其余角色合计 5,000 / 18,700 / 3,100、15 次调用；
+  实际方向数 = 第一轮上限 × 1.13（含第二轮 base-rate），每个方向 3.1 次调用，每个方向的 token 用 `Budget.DIRECTION_PROFILE`。思考：22 次 v2.9 思考实验运行里 plan / judge / repair 开 high 多出 47,300 个思考 token（所有非 off 档位都按它算，偏保守）；audit / unit_arbiter 开 low 每次调用 870 个，关不掉思考的模型其余角色按它乘调用次数。
+- 计价：`Budget.profile_usd(price_id, profile)`（新，从 `typical_direction_usd` 里提出来，算法不变）：峰时价，缓存的处理同方向数缩放（Claude 不写 cache_control 按 base input；GPT 输入按 30 分钟写入价；Kimi / GLM 按 miss 价），思考 token 按输出价。
+- 方向数：`Budget.for_model(price_id, usd=cap).directions`（和真正运行的预算同一个函数）。
+- 对照：deepseek-flash 估 $0.62，50 次实测平均 $0.52（峰时价 + 方向数按上限算，偏高约 20%）。
+- **第一轮会不会因为预扣放不下而中止**（`stops_early`）：第一轮同时在途的搜索预扣合计（min(方向数, 8) × `search_reserve`）或抽取一个 4 万字符页面的预扣（`llm_reserve`，含思考余量）超过上限就标出来，并从当前上限往上按 $0.5 一档找放得下的最小上限（`min_cap_usd`）。只往上找：上限低到只剩一个方向时也可能放得下，但那不是「调高上限」的建议。
+
+`$2` 上限下（默认档位；「估计（high）」是 plan / judge / repair 开 high）：
+
+| 计价 id（默认档位） | 第一轮方向数 | 估计 | 估计（high） | 第一轮搜索预扣合计 | 抽取一页预扣 | 第一轮会中止 | 放得下的最小上限 |
+|---|---|---|---|---|---|---|---|
+| deepseek-flash（off） | 10 | $0.62 | $0.68 | $0.79 | $0.03 | 否 | — |
+| deepseek-v4-pro（off） | 10 | $1.14 | $1.33 | $1.22 | $0.09 | 否 | — |
+| claude-haiku-5-5（off） | 10 | $0.53 | $0.56 | $0.70 | $0.01 | 否 | — |
+| claude-sonnet-5-5（off） | 6 | $1.37 | $1.84 | $1.33 | $0.20 | 否 | — |
+| claude-opus-5-5（low） | 3 | $2.95 | $2.95 | $2.53 | $0.88 | 是 | $7.00 |
+| claude-fable-5-1（low） | 1 | $5.48 | $5.48 | $1.99 | $2.20 | 是 | $16.00 |
+| gpt-6-luna（off） | 10 | $0.55 | $0.57 | $0.70 | $0.01 | 否 | — |
+| gpt-6.1-sol（low） | 5 | $2.10 | $2.10 | $2.38 | $0.45 | 是 | $4.00 |
+| gpt-6-astra（low） | 1 | $5.77 | $5.77 | $2.06 | $2.25 | 是 | $2.50 |
+| kimi-k2.6（off） | 10 | $0.81 | $1.00 | $0.42 | $0.08 | 否 | — |
+| kimi-k2.6@cn（off） | 10 | $0.80 | $0.99 | $0.39 | $0.08 | 否 | — |
+| kimi-k3（low） | 5 | $2.63 | $2.63 | $2.48 | $0.66 | 是 | $4.00 |
+| kimi-k3@cn（low） | 5 | $2.60 | $2.60 | $2.44 | $0.65 | 是 | $4.00 |
+| glm-4.7-flashx（off） | 10 | $0.51 | $0.53 | $0.66 | $0.01 | 否 | — |
+| glm-4.7-flashx@cn（off） | 10 | $0.13 | $0.15 | $0.12 | $0.01 | 否 | — |
+| glm-5.2（off） | 9 | $1.31 | $1.51 | $1.05 | $0.10 | 否 | — |
+| glm-5.2@cn（off） | 10 | $0.93 | $1.12 | $0.45 | $0.09 | 否 | — |
+| glm-5.3（low） | 9 | $1.69 | $1.69 | $1.89 | $0.20 | 否 | — |
+| glm-5.3@cn（low） | 10 | $1.30 | $1.30 | $1.25 | $0.19 | 否 | — |
+
+Astra 的 $2.50 是「只剩 1 个方向时放得下」的上限（往上找到的第一档）；Astra 在 $10 下有 7 个方向，又放不下，要 $17。这张表就是 v2.10b–e 一直说的「贵模型在 $2 下跑不起来」，网页现在把它直接显示出来；预算本身的做法没改（等你定）。
+
+### 13.5 已知限制、没做的
+
+- **贵模型在 $2 下第一轮就中止**（13.4、第 9.8 / 10.7 / 11.7 / 12.7 节）：网页只提示、给最小上限，预算逻辑没改，等你定。
+- 估计用的是 DeepSeek 的 token 数：别家的 tokenizer、思考长度、搜索带进来的内容 token 都没测；Kimi / GLM 的搜索不经过模型，按 DeepSeek 的搜索 token 算是高估。思考 token 不分档位（low 也按 high 的实测量算）。
+- 「第一轮会中止」只查了第一轮同时搜索和抽取一个 4 万字符页面两种预扣；更长的页面、第二轮、裁判的预扣没查。
+- 停在人工确认的运行一直占着 key（在内存里），直到你批准、取消或者服务退出；没有超时自动清。
+- 浏览器里的 key：sessionStorage / localStorage 对这个页面的任何脚本都可读。页面只加载本仓库的脚本和 Google Fonts 的 CSS，所有服务端文字都经过 `esc()`；没有做 CSP。勾「记住」时是明文。
+- key 从浏览器发到本机服务走的是 `http://127.0.0.1`（没有 TLS；只在本机回环上）。
+- 服务器内存里的 key 是 Python 字符串，`drop_key()` 只是去掉引用，不能保证内存里的那份立刻被覆盖（Python 做不到）。
+- 「校验 key」只说明这家接受这把 key：余额够不够、K3 是否解锁、GLM 的 key 是不是 Standard API Key，都要到第一次计费调用才知道（第 11.8 / 12.8 节）。
+- 经典界面的运行页还能批准 / 取消已有的运行（不发起新运行）。
+- aero / apple / manuscript 三个页面的表单没有专门的样式。
+- DeepSeek 搜索角色的思考没关（第 8 节），仍等你定。
+
+### 13.6 Verification（web-v0.9）
+
+- `tests/test_web_byok.py`（15 个）：目录和 providers.py 一致、各档位发的字段、估计跟着上限 / 预算走（含 Opus $7、Fable 抽取放不下）、上限校验；key 校验对着假服务（真走 urllib，请求头里是去了空白的 key，返回里没有 key）、校验完清 key、各种 400 不回显；没有 key 拒跑（4 种写法）、15 种不合法的组合都是 400 且不回显、4 种 422 不回显；设置一路传到运行（Kimi 国内站 K3、high、$3.5）、默认值；整次运行（假模型）后 key 已清、写出的每个文件和每个 API 返回都没有 key；模型回复里带 key 时状态视图和结束后的视图都是 `***`；取消、prepare 抛带 key 的异常（key 跨在 500 字截断处）、没有 spec、题目不合法、Busy 都会清 key；经典界面不能发起运行；控制台表单的静态检查。
+  **端到端（`TestRealPathEndToEnd`）**：默认的 `Registry()`（真实的 `prepare_run` / `AgentLLM` / `Searcher` / `save_run`），DeepSeek 的 URL 换成 127.0.0.1 上按 system prompt 回复的假服务；POST /api/runs（deepseek-flash、high、$1.5）-> 人工确认 -> 批准 -> 完成：每个请求都带着用户的 key（Bearer / x-api-key），plan 发 `thinking enabled` + `reasoning_effort high` + `max_tokens` 30000、抽取关思考；key 文件一次都没读；结果目录（state.json、calls.jsonl、ledger.md、graph.html）和 7 个 API 返回里都没有 key；key 已从内存清掉。
+- 旧测试：`tests/test_web.py`、`tests/test_unit_display.py` 的网页运行改成带假 key（`TW.BYOK` / `TW.byok_spec()`），`make_prepare` 收 spec；`tests/test_verrier_page.py` 的路由清单加上两个新接口。
+- 变异检查 19 处（`_release` 不清 key、先截断再 redact、状态视图不 redact、清 key 前不 scrub、save 自己清 key、没有 spec 也能跑、登记失败不清 key、422 回显 input、校验后不清 key、校验结果不 redact、没 key 时用服务器的 key、忽略上限、最小上限从 0 找、不查抽取预扣、思考不计价、方向数写死、经典界面又能发起、「记住」不放 localStorage、`redact_obj` 漏掉 dict 的值）：全部被测试抓到（「先截断再 redact」第一次没抓到：测试里截断只留下 key 的前 6 个字符，改成留 16 个后抓到）。
+- DeepSeek 默认路径的 24 组金样本仍逐字节相同（`tests/test_providers.py`）；G2（`probes/compare_continuous_prompts.py`）仍是 `365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4`。
+- 浏览器（假演示服务，10-21）：/verrier 上切 DeepSeek / Kimi / GLM / Claude、K3 的 off 是 disabled、上限 2 -> 4 -> 2 时估计和提示跟着变、GLM 两站分别存 key、记住 / 取消记住、校验、发起 -> 批准 -> 完成；/verrier/aero、/verrier/apple、/verrier/manuscript 表单能用、没有脚本错误；经典界面首页只剩浏览。
+- 没有真 key。真实网络只有一处意外：前两轮变异检查里，「没 key 时用服务器的 key」那处变异让 `test_classic_page_is_browse_only` 用默认的 `Registry()` 真的发起了运行，向 `api.deepseek.com/chat/completions` 发了 2 次带假 key（`sk-server-default-key`）的请求，都是 401、不花钱，在 `results/agent/` 下多出的目录已删。之后测试的 client 默认改成 prepare 直接报错的 Registry（保护失效时只会测试失败、不会连真 API），再跑变异检查没有再发真实请求。
 
 ## Official docs（Claude，2026-10-21 查看）
 

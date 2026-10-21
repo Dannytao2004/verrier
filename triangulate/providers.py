@@ -1246,6 +1246,34 @@ def thinking_levels(model: str) -> tuple:
     return (("off",) if m["thinking_off"] else ()) + tuple(x for x in THINKING_UI if x in m["efforts"])
 
 
+def effort_for(model: str, level: str, role: str):
+    """网页档位 level 下，这个角色发给 API 的思考档位；None = 关思考。档位只作用于 REASONING_ROLES；其余角色能关就关，
+    关不掉思考的模型用最低一档。ModelSpec.effort 和网页的花费估计（web/catalog.py，没有 key 时）都用它。"""
+    m = MODELS[model]
+    if role in REASONING_ROLES and level != "off":
+        return m["efforts"][level]
+    if m["thinking_off"]:
+        return None
+    return m["efforts"][next(x for x in THINKING_UI if x in m["efforts"])]   # 关不掉思考的模型：最低一档
+
+
+def tokens_for_model(model: str, level: str, role: str, max_tokens: int):
+    """(这个角色的思考档位或 None, 实际发出的 max_tokens)：开了思考的调用多给 THINKING_EXTRA_TOKENS（思考 token 计入输出上限），
+    不超过模型的最大输出。"""
+    effort = effort_for(model, level, role)
+    return effort, min(max_tokens + (THINKING_EXTRA_TOKENS if effort else 0), MODELS[model]["max_output"])
+
+
+def _redact_deep(obj, key: str):
+    if isinstance(obj, str):
+        return obj.replace(key, "***")
+    if isinstance(obj, dict):
+        return {_redact_deep(k, key): _redact_deep(v, key) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_redact_deep(x, key) for x in obj]
+    return obj
+
+
 def clean_key(api_key) -> str:
     """去掉首尾空白（粘贴时常带换行）；只收可打印 ASCII、中间不能有空白，长度 8–512。
     否则 urllib 拼请求头时会抛带着整把 key 的 ValueError / UnicodeEncodeError（research：已实测），这里先拦下。消息里不带 key。"""
@@ -1311,6 +1339,12 @@ class ModelSpec:
         k = self._key
         return text.replace(k, "***") if k and isinstance(text, str) else text
 
+    def redact_obj(self, obj):
+        """web-v0.9：redact 的深层版：dict / list / tuple 里所有字符串（含 dict 的键）里的 key 换成 ***，返回新的对象（不改原对象）。
+        key 已经清掉时原样返回。网页的运行状态在返回前、清 key 之前都过一遍。"""
+        k = self._key
+        return _redact_deep(obj, k) if k else obj
+
     def __repr__(self):
         return (f"ModelSpec(provider={self.provider!r}, model={self.model!r}, region={self.region!r}, "
                 f"thinking={self.thinking!r}, usd_cap={self.usd_cap!r}, key=***)")
@@ -1337,18 +1371,11 @@ class ModelSpec:
 
     def effort(self, role: str):
         """这个角色发给 API 的思考档位；None = 关思考。role 是 config.thinking_role(arm) 的结果。"""
-        m = MODELS[self.model]
-        if role in REASONING_ROLES and self.thinking != "off":
-            return m["efforts"][self.thinking]
-        if m["thinking_off"]:
-            return None
-        return m["efforts"][next(x for x in THINKING_UI if x in m["efforts"])]   # 关不掉思考的模型：最低一档
+        return effort_for(self.model, self.thinking, role)
 
     def tokens_for(self, role: str, max_tokens: int):
-        """(这个角色的思考档位或 None, 实际发出的 max_tokens)：开了思考的调用多给 THINKING_EXTRA_TOKENS（思考 token 计入输出上限），
-        不超过模型的最大输出。LLM.json_call 和 Searcher.search 都用它。"""
-        effort = self.effort(role)
-        return effort, min(max_tokens + (THINKING_EXTRA_TOKENS if effort else 0), self.max_output)
+        """(这个角色的思考档位或 None, 实际发出的 max_tokens)：见 tokens_for_model。LLM.json_call 和 Searcher.search 都用它。"""
+        return tokens_for_model(self.model, self.thinking, role, max_tokens)
 
     def thinking_by_role(self) -> dict:
         """开了思考的角色 -> API 档位（「*」= 其余角色，只有关不掉思考的模型才有）。记进 run settings。"""

@@ -46,9 +46,10 @@ class TestVerrierPage(unittest.TestCase):
         js = (STATIC / "verrier_console.js").read_text(encoding="utf-8")
         routes = {r.path for r in self.c.app.routes}
         for path in ("/api/runs", "/api/runs/{run_id}", "/api/runs/{run_id}/approve", "/api/runs/{run_id}/cancel",
-                     "/api/result", "/api/saved", "/api/file", "/api/graph"):
+                     "/api/result", "/api/saved", "/api/file", "/api/graph", "/api/providers", "/api/key/check"):
             self.assertIn(path, routes)
-        for used in ('"/api/runs"', "/api/runs/", "/approve", "/cancel", "/api/result?", '"/api/saved"', "/api/file?", "/api/graph?"):
+        for used in ('"/api/runs"', "/api/runs/", "/approve", "/cancel", "/api/result?", '"/api/saved"', "/api/file?", "/api/graph?",
+                     '"/api/providers?usd_cap="', '"/api/key/check"'):   # web-v0.9：模型目录、校验 key
             self.assertIn(used, js)
 
     def test_evidence_route_and_link(self):

@@ -75,19 +75,23 @@ class Budget:
         （含各家的搜索费），这样贵的模型第一轮方向少一些，上限照样守得住。"""
         if model == cls.REFERENCE_MODEL:
             return cls.TYPICAL_DIRECTION_USD
+        return (cls.TYPICAL_DIRECTION_USD * cls.profile_usd(model, cls.DIRECTION_PROFILE)
+                / cls.profile_usd(cls.REFERENCE_MODEL, cls.DIRECTION_PROFILE))
 
-        def cost(m):
-            p = price(m)
-            hit, miss, out = p["peak"]
-            if p.get("prompt_cache") == "explicit":   # v2.10b Claude：不写 cache_control 就没有缓存，DeepSeek 命中的那部分按 base input 算
-                hit = miss
-            elif p.get("prompt_cache") == "implicit_write":   # v2.10c GPT：默认在 user 消息末尾写缓存，输入都按 30 分钟写入价（保守）
-                hit = miss = p["cache_write_30m"]
-            elif p.get("prompt_cache") == "implicit":   # v2.10d Kimi：自动缓存，但这里的命中率没测过，输入都按 miss / 5 分钟写入价（保守）
-                hit = miss = max(miss, p.get("cache_write_5m", miss))
-            pr = cls.DIRECTION_PROFILE
-            return (pr["hit"] * hit + pr["miss"] * miss + pr["out"] * out) / 1e6 + pr["searches"] * search_fee_usd(m)
-        return cls.TYPICAL_DIRECTION_USD * cost(model) / cost(cls.REFERENCE_MODEL)
+    @staticmethod
+    def profile_usd(model: str, profile: dict) -> float:
+        """一组 token（profile：hit / miss / out，可选 searches 次搜索）按这个模型的峰时价算的 USD。缓存的处理偏保守（见下）。
+        typical_direction_usd 用它算价格比例；web-v0.9 网页的「每次运行的花费估计」（web/catalog.py）也用它。"""
+        p = price(model)
+        hit, miss, out = p["peak"]
+        if p.get("prompt_cache") == "explicit":   # v2.10b Claude：不写 cache_control 就没有缓存，DeepSeek 命中的那部分按 base input 算
+            hit = miss
+        elif p.get("prompt_cache") == "implicit_write":   # v2.10c GPT：默认在 user 消息末尾写缓存，输入都按 30 分钟写入价（保守）
+            hit = miss = p["cache_write_30m"]
+        elif p.get("prompt_cache") == "implicit":   # v2.10d Kimi：自动缓存，但这里的命中率没测过，输入都按 miss / 5 分钟写入价（保守）
+            hit = miss = max(miss, p.get("cache_write_5m", miss))
+        return ((profile["hit"] * hit + profile["miss"] * miss + profile["out"] * out) / 1e6
+                + profile.get("searches", 0) * search_fee_usd(model))
 
     def _max_directions(self) -> int:
         return max(1, min(self.max_directions_hard, self.round1_pages // self.urls_per_direction,

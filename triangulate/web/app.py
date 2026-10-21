@@ -1,32 +1,73 @@
 """本地网页：发起运行（停在人工确认方向）、看进度、看任何一次保存的运行、回测表。
 
 启动：.venv/Scripts/python.exe -m triangulate serve [--port 8770]，只绑定 127.0.0.1。
-浏览保存的运行完全离线；发起新运行需要 key 文件（TRIANGULATE_KEY_FILE）和网络。前端是 static/ 里的原生 HTML + JS，没有构建步骤。
+浏览保存的运行完全离线；前端是 static/ 里的原生 HTML + JS，没有构建步骤。
+web-v0.9：发起新运行要用户自己的 key（自带 key，BYOK）：POST /api/runs 带 provider / model / region / thinking / usd_cap / api_key，
+没有 api_key 就拒跑；网页运行永远不读服务器的 key 文件（TRIANGULATE_KEY_FILE / .env）。key 只进这次运行内存里的 ModelSpec，
+运行结束就清掉；任何返回（状态、校验结果、错误）都不含 key。只在 /verrier 系列页面上发起；经典界面（/）只浏览。
+GET /api/providers：可选的 provider、区域、模型、思考档位和每次运行的花费估计（web/catalog.py）。
+POST /api/key/check：用这把 key 调这家免费的 models 列表接口（llm.check_key），只回 ok / 被拒 / 出错。
 """
 from pathlib import Path
 
 from fastapi import Body, FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from .. import llm
+from .. import providers as PV
 from ..agent.outputs import dep_graph
 from ..agent.run import RES
+from . import catalog as CAT
 from . import results as R
-from .runs import BadState, Busy, Registry
+from .runs import NEED_KEY, BadState, Busy, Registry
 
 STATIC = Path(__file__).resolve().parent / "static"
 HOST = "127.0.0.1"
 DEFAULT_PORT = 8770
 FILES = {"graph.html": "text/html; charset=utf-8", "ledger.md": "text/plain; charset=utf-8"}
+SPEC_FIELDS = ("provider", "model", "region", "thinking")   # 字符串字段；usd_cap 是数，api_key 单独处理
 
 
-def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=("127.0.0.1", "localhost")) -> FastAPI:
+def spec_from_body(body: dict) -> PV.ModelSpec:
+    """网页请求里的 provider / model / region / thinking / usd_cap / api_key -> ModelSpec。没给的字段用默认值（provider 默认 DeepSeek，
+    模型用这家的默认模型，档位用这个模型的默认档，上限 $2.00）；api_key 没给就拒（NEED_KEY）。抛 ValueError，消息里不带 key。"""
+    key = body.get("api_key")
+    if key is None or (isinstance(key, str) and not key.strip()):
+        raise ValueError(NEED_KEY)
+    for f in SPEC_FIELDS:
+        if body.get(f) is not None and not isinstance(body[f], str):
+            raise ValueError(f"{f} must be a string")
+    provider = body.get("provider") or PV.DEFAULT_PROVIDER
+    if provider not in PV.PROVIDERS:
+        raise ValueError(f"unknown provider {provider!r}; choose one of {', '.join(PV.PROVIDERS)}")
+    model = body.get("model") or PV.PROVIDERS[provider]["default_model"]
+    if model not in PV.MODELS:
+        raise ValueError(f"model {model!r} is not offered for {PV.PROVIDERS[provider]['label']}; choose one of "
+                         f"{', '.join(PV.PROVIDERS[provider]['models'])}")
+    thinking = body.get("thinking") or CAT.default_thinking(model)
+    cap = CAT.parse_cap(body["usd_cap"]) if body.get("usd_cap") is not None else PV.DEFAULT_USD_CAP
+    # SpecError / config.UnknownModel 都是 ValueError
+    return PV.ModelSpec(provider, model, key, region=body.get("region") or None, thinking=thinking, usd_cap=cap)
+
+
+def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=("127.0.0.1", "localhost"),
+               key_checker=None) -> FastAPI:
+    """key_checker：POST /api/key/check 用的校验函数（默认 llm.check_key；假演示服务换成「什么 key 都接受」的）。"""
     app = FastAPI(title="triangulate-agent", docs_url=None, redoc_url=None, openapi_url=None)
     # 只认本机的 Host 头（挡 DNS rebinding）；POST 只收 application/json（FastAPI 默认），别的网页不能用表单替你开运行
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(allowed_hosts))
     reg = registry or Registry()
     app.state.registry = reg
+    check = key_checker or llm.check_key
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error(request, exc):
+        # FastAPI 默认的 422 会把收到的 body 原样放进 "input"：请求体里有 api_key 时就回显了 key。这里只回错误的位置和类型
+        return JSONResponse(status_code=422, content={"detail": [{"loc": list(e.get("loc", ())), "type": e.get("type"),
+                                                                  "msg": e.get("msg")} for e in exc.errors()]})
 
     def run_or_404(run_id: str):
         try:
@@ -58,11 +99,35 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
         # 第四版并列界面（欧洲古典天文学手稿风草稿）：同一套 API 和共享 JS；首屏账页实时读 /api/result，读不到用页面里的快照
         return FileResponse(STATIC / "verrier_manuscript.html", media_type="text/html; charset=utf-8")
 
+    # ---------- 模型、key ----------
+    @app.get("/api/providers")
+    def providers(usd_cap: float | None = Query(None)):
+        try:
+            cap = PV.DEFAULT_USD_CAP if usd_cap is None else CAT.parse_cap(usd_cap)
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+        return CAT.providers_view(cap)
+
+    @app.post("/api/key/check")
+    def key_check(body: dict = Body(...)):
+        try:
+            spec = spec_from_body({k: body.get(k) for k in ("provider", "model", "region", "api_key")})
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+        try:
+            return spec.redact_obj(check(spec))
+        finally:
+            spec.drop_key()
+
     # ---------- 网页运行 ----------
     @app.post("/api/runs")
     def start_run(body: dict = Body(...)):
         try:
-            run = reg.start(body.get("question", ""), body.get("as_of"))
+            spec = spec_from_body(body)
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+        try:
+            run = reg.start(body.get("question", ""), body.get("as_of"), spec=spec)   # 出错时 Registry.start 清 key
         except ValueError as e:
             raise HTTPException(400, str(e)) from None
         except Busy as e:
