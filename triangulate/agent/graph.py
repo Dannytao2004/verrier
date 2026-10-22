@@ -279,10 +279,10 @@ CONFLICT_RATIO = 3.0   # 能跑的方法之间差到这个倍数以上，就当�
 CONFLICT_TVD = 0.5     # 离散方法的对应规则：两个分布的 total variation distance 超过它（一半以上的概率换了结果）就交回裁判
 
 
-def _problems(jr: dict, out: dict, av: dict, failed: dict) -> tuple:
+def _problems(jr: dict, out: dict, av: dict, failed: dict, quiet_if_agree: bool = True) -> tuple:
     """(能跑的方法数, 交给裁判的问题清单)：失败的方法和原因、被拒的假设、能跑的方法之间差 CONFLICT_RATIO 倍以上
     （离散方法：分布的 total variation distance 超过 CONFLICT_TVD）。
-    已有两条以上能跑而且互相吻合的方法时返回空清单。"""
+    已有两条以上能跑而且互相吻合的方法时返回空清单（quiet_if_agree=False 时照样返回完整清单，v2.11e 的 check() 用）。"""
     ms = out.get("methods") or []
     ok = [(i, m) for i, m in enumerate(ms) if i not in failed and C.produced(m)]
     num = [(i, m) for i, m in ok if m.get("estimate")]   # 离散方法没有 estimate，不做倍数冲突检查（连续值时 num == ok）
@@ -310,7 +310,7 @@ def _problems(jr: dict, out: dict, av: dict, failed: dict) -> tuple:
     if not ms:
         probs = ["no methods were proposed"]
     # v2.7d：只覆盖一部分的方法（coverage part、缺部分的 sum）不进合并，总是交回裁判（让它和其余部分加成一个方法）
-    if len(ok) >= 2 and not any(x.startswith("methods disagree") for x in probs) and \
+    if quiet_if_agree and len(ok) >= 2 and not any(x.startswith("methods disagree") for x in probs) and \
             not any(m.get("coverage_excluded") for m in ms):
         return len(ok), []   # 已有两条以上互相吻合的路线：不交回裁判，免得把好结果改坏
     return len(ok), probs
@@ -688,6 +688,15 @@ def build(ctx: Context):
                 failed.update(aud)
                 last["audit_only"] = dict(audit)
                 n_ok, errs = _problems(jr, out_c, av_c, failed)
+                # v2.11e（D2）：两条以上路线吻合时 _problems 返回空，代码否掉的方法（failed 里不属于 aud 的，也包括 value_check 去掉点之后
+                # 报的「unknown or discarded」）就静默丢了。其中有一条文字在这一轮之前的修正里从没发给过裁判，就把完整清单交回（清单里
+                # 也带着输入核对和单位核对的异议）；按文字去重，仍受 MAX_REPAIRS 约束，不另加守卫（决定 10）
+                sent = {e for r in jr.get("repairs") or [] for e in r["errors"]}
+                last["resent"] = [] if errs else [x for x in (
+                    f"method {m.get('label') or m.get('id')} ({m.get('method')}): {failed[i]}"
+                    for i, m in enumerate(out_c.get("methods") or []) if i in failed and i not in aud) if x not in sent]
+                if last["resent"]:
+                    errs = _problems(jr, out_c, av_c, failed, quiet_if_agree=False)[1]
                 return aud, n_ok, (vfail + errs if errs else errs)
 
             target = D.with_outcomes(target0, orec_new) if disc else target0
@@ -700,6 +709,8 @@ def build(ctx: Context):
                 if not errs:
                     break
                 jr["repair"] = {"attempt": attempt + 1, "errors": errs}
+                if last.get("resent"):   # v2.11e：路线本来吻合，是因为这几条代码否决还没发过才交回的
+                    jr["repair"]["resent_failed_methods"] = last["resent"]
                 jr.setdefault("repairs", []).append(jr["repair"])
                 prev_reply = {"methods": jr["methods"], "assumptions": jr["assumptions"]}
                 note, repair_user = "", judge_user

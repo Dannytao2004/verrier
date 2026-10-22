@@ -481,6 +481,7 @@ class TestProblemsKeepsGoodRuns(unittest.TestCase):
     def test_two_agreeing_survivors_with_a_failure(self):
         from triangulate.agent import graph as G
         out = {"methods": [{"id": "m1", "estimate": 843000.0}, {"id": "m2", "estimate": 853000.0}, {"id": "m3", "estimate": None}]}
+        # _problems 本身照旧返回空；v2.11e 起 check() 会把没发过的代码否决交回裁判（tests/test_resend_failed_methods.py）
         self.assertEqual(G._problems({"methods": [{}, {}, {}]}, out, {"rejected": []}, {2: "x"}), (2, []))
 
     def test_single_survivor_with_a_failure_goes_back(self):
