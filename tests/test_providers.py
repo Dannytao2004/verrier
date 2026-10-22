@@ -1,7 +1,8 @@
 """v2.10a：provider adapter 层（目前只有 DeepSeek）和每次运行的 ModelSpec。全部离线：假 urlopen、假 key，不读 key 文件。
 
 - 没有 ModelSpec 的默认路径（命令行、回测、基线）：请求（URL、请求头、请求体字节）和 calls.jsonl 行与 HEAD ec3e929 逐字节相同
-  （tests/golden/deepseek_requests_head.json），唯一有意的差别是 402 现在抛 BalanceExhausted；
+  （tests/golden/deepseek_requests_head.json），有意的差别是 402 现在抛 BalanceExhausted，以及 v2.11c 起成功的搜索的返回值多一个
+  candidates（CANDIDATES 里的 4 个 case；请求、日志不变）；
 - 有 ModelSpec 的 DeepSeek 运行：请求体和默认路径相同，只是 key / 模型 / 思考档位按 spec；
 - 价格：没有价格的模型拒跑；方向数按模型价格缩放；
 - 余额不足：整次运行干净停下；key 不进任何写盘的文件和错误文字；Jev 对照臂在自带 key 的运行里不跑。
@@ -27,6 +28,21 @@ GOLDEN = Path(__file__).resolve().parent / "golden" / "deepseek_requests_head.js
 OK_CHAT = ("ok", 200, GD._chat('{"a": 1}'))
 OK_SEARCH = ("ok", 200, GD.SEARCH_BODY)
 INTENDED = {"json_402", "search_402"}   # 402：HEAD 是 TransportError / 返回 http_402，现在抛 BalanceExhausted（v2.10a 有意改的）
+# v2.11c（计划 D3，决定 17）：成功的搜索的返回值多一个 candidates（各查询词的全部结果 URL），只有这 4 个 case 的返回值里有搜索结果。
+# 请求、日志照旧逐字节比；返回值去掉 candidates 这一个键以后也逐字节比。context_ask_and_search 的返回值是 [ask 的结果, 搜索的结果]
+CANDIDATES = {"search_ok": None, "search_ok_defaults": None, "search_retry_503": None, "context_ask_and_search": 1}
+# 金样本 SEARCH_BODY 的 candidates：块里没有 id，按先进先出配查询词；第二块是 max_uses_exceeded 错误
+GOLDEN_CANDIDATES = {"provider": "deepseek", "by_query": [
+    {"query": "widgets June 2025 official", "urls": ["https://stats.example.org/w", "https://b.example.org/x"]},
+    {"query": "widgets 2024", "urls": [], "error": "max_uses_exceeded"}]}
+
+
+def _without_candidates(case: dict) -> tuple:
+    """(去掉 candidates 之后的 case, 去掉的 candidates)：只动 CANDIDATES 里写明的那一个返回值。"""
+    case = copy.deepcopy(case)
+    i = CANDIDATES[case["case"]]
+    res = case["result"] if i is None else case["result"][i]
+    return case, res.pop("candidates")
 
 
 def spec(model="deepseek-flash", thinking="off", key=KEY, **kw):
@@ -47,8 +63,13 @@ class TestGoldenDefaultPath(unittest.TestCase):
                     self.assertEqual(n["result"]["raised"], "BalanceExhausted")
                     self.assertTrue(n["result"]["is_transport_error"])   # 基线只接 TransportError：照旧跳过这道题
                     self.assertIn("insufficient balance", n["result"]["message"])
+                elif o["case"] in CANDIDATES:
+                    n2, cand = _without_candidates(n)
+                    self.assertEqual(cand, GOLDEN_CANDIDATES)
+                    self.assertEqual(GD.dumps(o), GD.dumps(n2))
                 else:
                     self.assertEqual(GD.dumps(o), GD.dumps(n))
+        self.assertNotIn("candidates", GD.dumps([c for c in new["cases"] if c["case"] not in CANDIDATES]))
         self.assertTrue(any(r["body"] for c in new["cases"] for r in c["requests"]))
 
 

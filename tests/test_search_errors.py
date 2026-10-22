@@ -8,8 +8,9 @@ from unittest import mock
 
 from triangulate.agent import search as S
 
-# 返回给调用方的键（v2.5.5 起没变过；S4 不往 state 加字段）
-RETURN_KEYS = {"queries", "urls", "n_text_urls", "n_result_urls", "web_search_requests", "usd", "usd_search_fee_assumed"}
+# 返回给调用方的键（v2.5.5 到 v2.11b 没变过；S4 不往 state 加字段；v2.11c 加 candidates，计划 D3）
+RETURN_KEYS = {"queries", "urls", "n_text_urls", "n_result_urls", "web_search_requests", "usd", "usd_search_fee_assumed",
+               "candidates"}
 
 
 def _result(*urls):

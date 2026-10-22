@@ -13,6 +13,12 @@ search_request / search_unpack / search_meter）；search_request 多收 region�
 v2.10i（审查修正）：自带 key 的运行里，回复没给 usage 时这次搜索按预扣的 token 部分记账（不按 0）；Responses 回复 status failed 时
 记 ok false、把 redact 过的 error 往外报；Kimi、GLM 的搜索读超时不重发、按预扣记账，单次读超时取 adapter 的 search_timeout_s；
 GLM 的回复里没有查询词，返回值带 queries_reported False。DeepSeek 命令行的请求、超时、日志、返回值都不变（24 组金样本）。
+v2.11c（计划 D3，决定 17、18）：返回值多一个 candidates = {provider, by_query}：每次搜索每个查询词的全部结果 URL（含没被选中的），
+URL 用和选中的 URL 同一个 parse_urls 规范化，不带标题（见 by_query）。run_direction 照旧把整个返回值存进 state.json 的
+results[*].search，只给人事后审计，不进任何 prompt（tests/test_search_candidates.py 的哨兵测试）。所以 v2.10i 那句「返回值都不变」
+从 v2.11c 起不再成立：DeepSeek 命令行的请求体、超时、日志仍和金样本逐字节相同，拿到过回复的搜索的返回值只多 candidates 这一个键
+（tests/test_providers.py 对 4 个 case 写明了豁免）。回复里没有搜索结果（只有文字、use 没有结果块、Responses status failed）也加，
+by_query 是空列表；一轮回复都没拿到（请求失败、读超时不重发）时返回值不变，没有这个键。
 
 只有这一个角色看得到搜索结果。它的输出由代码用正则只取 URL，其余文字（标题、摘要、模型的话）全部丢弃，
 分析角色（extractor / judge / final）永远看不到。每次调用记一行 calls.jsonl（不含内容、不含 key）。
@@ -49,6 +55,42 @@ def parse_urls(text: str, cap: int = 5) -> list:
     return out
 
 
+def by_query(parsed_rounds: list) -> list:
+    """v2.11c：各轮 search_unpack 的 groups 汇总成 candidates.by_query。每组 {query 或 queries, urls[, error]}；urls 用 parse_urls
+    规范化（同选中的 URL：去尾部标点、去 #fragment、组内去重保序），不截断，不带标题。
+    Anthropic 格式（DeepSeek / Claude，组里有 tool_use_id）：各轮拼起来，先按 tool_use_id 对 server_tool_use 的 id；id 对得上、但那个
+    查询词已被前面同 id 的组配走的（同一个 id 出现两次），仍记那个查询词；没有 id 或对不上任何查询词的组，按先进先出配给还没配上的
+    查询词；还配不上就记 query None。OpenAI / Kimi 的组带 queries 列表，GLM 的组 query 是 None，照原样。"""
+    uses = [(i, q) for p in parsed_rounds for i, q in zip(p.get("query_ids") or [], p["queries"])]
+    groups = [g for p in parsed_rounds for g in p.get("groups") or []]
+    free, pick = list(range(len(uses))), {}   # free：还没配上的查询词（按出现顺序）；pick：组号 -> 查询词号
+    for gi, g in enumerate(groups):
+        if g.get("tool_use_id") is not None:
+            ui = next((u for u in free if uses[u][0] == g["tool_use_id"]), None)
+            if ui is not None:
+                pick[gi] = ui
+                free.remove(ui)
+    out = []
+    for gi, g in enumerate(groups):
+        if "tool_use_id" in g:
+            tid = g["tool_use_id"]
+            same = None if tid is None else next((u for u, (i, _) in enumerate(uses) if i == tid), None)
+            if gi not in pick and same is not None:   # id 对得上，只是查询词已被同 id 的组配走：仍记它，不占先进先出
+                pick[gi] = same
+            elif gi not in pick and free:   # 没有 id 或对不上任何查询词：先进先出
+                pick[gi] = free.pop(0)
+            row = {"query": uses[pick[gi]][1] if gi in pick else None}
+        elif "queries" in g:
+            row = {"queries": list(g["queries"])}
+        else:
+            row = {"query": g.get("query")}
+        row["urls"] = parse_urls("\n".join(g["urls"]), cap=10 ** 6)   # cap 只是不截断
+        if "error" in g:
+            row["error"] = g["error"]
+        out.append(row)
+    return out
+
+
 class Searcher:
     spec = None   # v2.10a：这次运行的 ModelSpec；None = 命令行 / 回测（基线的 DirectClient 继承这个构造）
     # v2.10f：续接（Claude 的 pause_turn）之前重新预扣一次搜索的预扣；pipeline.Context 在自带 key 的运行里设成
@@ -69,7 +111,8 @@ class Searcher:
         其余 HTTP 错误照旧记在返回的 error 里，不抛。v2.10b：adapter 允许时（Claude），回复的 stop_reason 是 pause_turn 就把这次的
         content 原样回传续上（最多 adapter.max_search_continuations 次），每次请求各记一行日志，结果合并。
         v2.10h：五家都走这一条路（各家自带的搜索工具）；自带 key 的运行把区域交给 adapter（GLM 两站的搜索引擎不同）。
-        v2.10i：缺 usage 按预扣记账、status failed 报错、Kimi / GLM 读超时不重发（见模块说明和 _request）。"""
+        v2.10i：缺 usage 按预扣记账、status failed 报错、Kimi / GLM 读超时不重发（见模块说明和 _request）。
+        v2.11c：拿到过回复时多一个 candidates（各查询词的全部结果 URL，见 by_query）；一轮都没拿到时没有这个键。"""
         sp = self.spec
         ad = DEEPSEEK if sp is None else sp.adapter
         url = SEARCH_URL if sp is None else ad.search_url(sp.region)
@@ -135,7 +178,8 @@ class Searcher:
                 break
             if u not in urls:
                 urls.append(u)
-        # 返回给调用方的只有：查询词（只进 state.json 审计，不进任何分析 prompt）、URL、计量。搜索结果的标题不往外传
+        # 返回给调用方的只有：查询词（只进 state.json 审计，不进任何分析 prompt）、URL、计量、candidates（v2.11c，同查询词只进 state.json）。
+        # 搜索结果的标题不往外传
         out = {"queries": queries, "urls": urls, "n_text_urls": len(text_urls), "n_result_urls": len(result_urls),
                "web_search_requests": n_req, "usd": usd, "usd_search_fee_assumed": n_req * fee}
         if len(rounds) > 1:
@@ -146,6 +190,7 @@ class Searcher:
             out["error"] = failed if len(rounds) == 1 else f"continuation {len(rounds) - 1}: {failed}"
         elif error:
             out["error"] = f"continuation {len(rounds)}: {error}"
+        out["candidates"] = {"provider": ad.provider, "by_query": by_query([p for p, _ in rounds])}
         return out
 
     def _reserve_usd(self, price_model: str, out_tokens: int, max_uses: int, fee: float) -> tuple:

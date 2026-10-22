@@ -59,27 +59,37 @@ def anthropic_usage_to_cost(usage: dict, t, model: str = MODEL) -> float:
 
 def anthropic_search_unpack(d: dict) -> dict:
     """Anthropic Messages 形的回复（content 块数组）里取：查询词、搜索结果 URL（和标题）、文字块、搜索次数、搜索错误数。
-    标题只在这里解析出来（v2.10b），Searcher 不往外传：分析角色只拿得到 URL（设计同 v2.9b）。"""
+    标题只在这里解析出来（v2.10b），Searcher 不往外传：分析角色只拿得到 URL（设计同 v2.9b）。
+    v2.11c：每个结果块一组 groups（tool_use_id、原样的 URL、出错时的 error_code），query_ids 和 queries 一一对应（server_tool_use 的 id）；
+    查询词和结果的配对在 Searcher 里做（pause_turn 续接时 use 和 result 可能在不同轮）。"""
     usage = d.get("usage") or {}
     n_req = int(((usage.get("server_tool_use") or {}).get("web_search_requests")) or 0)
-    queries, result_urls, result_titles, texts, n_err = [], [], [], [], 0
+    queries, query_ids, result_urls, result_titles, texts, groups, n_err = [], [], [], [], [], [], 0
     for b in d.get("content") or []:
         if b.get("type") == "server_tool_use":
             queries.append(str((b.get("input") or {}).get("query", ""))[:200])
+            query_ids.append(b.get("id"))
         elif b.get("type") == "web_search_tool_result":
             c = b.get("content")
+            g = {"tool_use_id": b.get("tool_use_id"), "urls": []}
             if isinstance(c, list):
                 hits = [x for x in c if isinstance(x, dict) and x.get("url")]
                 result_urls += [x.get("url") for x in hits]
                 result_titles += [str(x.get("title") or "") for x in hits]
+                g["urls"] = [x.get("url") for x in hits]
                 # DeepSeek 把错误也放在 list 里：[{"type": "web_search_tool_result_error", "error_code": "max_uses_exceeded"}]
-                n_err += sum(1 for x in c if isinstance(x, dict) and x.get("type") == "web_search_tool_result_error")
+                errs = [x for x in c if isinstance(x, dict) and x.get("type") == "web_search_tool_result_error"]
+                n_err += len(errs)
             else:   # Claude 官方格式：出错时 content 是一个错误对象（HTTP 仍是 200）
                 n_err += 1
+                errs = [c]
+            if errs:
+                g["error"] = str((errs[0].get("error_code") if isinstance(errs[0], dict) else None) or "error")[:60]
+            groups.append(g)
         elif b.get("type") == "text":
             texts.append(b.get("text") or "")
     return {"usage": usage, "n_req": n_req, "queries": queries, "result_urls": result_urls, "result_titles": result_titles,
-            "texts": texts, "n_err": n_err, "stop": d.get("stop_reason")}
+            "texts": texts, "n_err": n_err, "stop": d.get("stop_reason"), "query_ids": query_ids, "groups": groups}
 
 
 class DeepSeekAdapter:
@@ -498,9 +508,11 @@ def openai_search_unpack(d: dict) -> dict:
     open_page（url）、find_in_page。只有 search 动作计次收费（web search 指南：Search actions incur a tool call cost）。
     message 项的 output_text：文字 + url_citation 注解（url、title）。URL 顺序：引用的 -> sources -> open_page；标题有引用的，
     v2.10h 起还有 sources 里带的（Kimi K3 的 Responses API：sources 是 {type, url, title}；OpenAI 的只有 url，标题照旧是空字符串），
-    只在这里解析（Searcher 不往外传）。v2.10i：status 是 failed 时多一个 error（{code, message}，原文；Searcher 先 redact 再记、再往外报）。"""
+    只在这里解析（Searcher 不往外传）。v2.10i：status 是 failed 时多一个 error（{code, message}，原文；Searcher 先 redact 再记、再往外报）。
+    v2.11c：每个 web_search_call 一组 groups：queries（这次调用的查询词列表）、urls（search 的 sources 原样；open_page 是打开的那个
+    url；find_in_page 没有）、调用 status failed 时 error "failed"。message 里引用的 URL 不属于哪一次调用，不进 groups。"""
     usage = d.get("usage") or {}
-    cited, cited_titles, sources, source_titles, opened, queries, texts = [], [], [], [], [], [], []
+    cited, cited_titles, sources, source_titles, opened, queries, texts, groups = [], [], [], [], [], [], [], []
     n_req = n_err = 0
     for item in d.get("output") or []:
         if not isinstance(item, dict):
@@ -508,8 +520,10 @@ def openai_search_unpack(d: dict) -> dict:
         t = item.get("type")
         if t == "web_search_call":
             a = item.get("action") or {}
+            g = {"queries": [], "urls": []}
             if item.get("status") == "failed":
                 n_err += 1
+                g["error"] = "failed"
             kind = a.get("type")
             if kind in ("search", None):   # 没有 action 的调用也按一次搜索计费（保守）
                 n_req += 1
@@ -518,8 +532,11 @@ def openai_search_unpack(d: dict) -> dict:
                 hits = [s for s in a.get("sources") or [] if isinstance(s, dict) and s.get("url")]
                 sources += [s["url"] for s in hits]
                 source_titles += [str(s.get("title") or "") for s in hits]
+                g.update(queries=[str(q)[:200] for q in qs], urls=[s["url"] for s in hits])
             elif kind == "open_page" and a.get("url"):
                 opened.append(a["url"])
+                g["urls"] = [a["url"]]
+            groups.append(g)
         elif t == "message":
             for c in item.get("content") or []:
                 if isinstance(c, dict) and c.get("type") == "output_text":
@@ -533,7 +550,7 @@ def openai_search_unpack(d: dict) -> dict:
     status = d.get("status")
     reason = (d.get("incomplete_details") or {}).get("reason")
     out = {"usage": usage, "n_req": n_req, "queries": queries, "result_urls": result_urls, "result_titles": result_titles,
-           "texts": texts, "n_err": n_err, "stop": f"{status}:{reason}" if reason else status}
+           "texts": texts, "n_err": n_err, "stop": f"{status}:{reason}" if reason else status, "groups": groups}
     if status == "failed":   # v2.10i：HTTP 200 但 status failed：error 是 {code, message}（Kimi Responses 页；OpenAI 同形状）
         err = d.get("error") if isinstance(d.get("error"), dict) else {}
         out["error"] = {"code": "" if err.get("code") is None else str(err["code"]),
@@ -1002,7 +1019,8 @@ def glm_search_unpack(d: dict) -> dict:
     """v2.10h：Chat Completions + 自带 web_search 工具的回复（两站 API 参考 ChatCompletionResponse）：choices[0].message.content 是模型的
     文字（模型挑的 URL 从这里取），顶层 web_search[] 是这次搜索的结果（search_result: true 才返回；每项 title、link、content、media、icon、
     refer、publish_date），取 link 和 title（标题不出 Searcher）。回复里没有查询词（由服务端定）。计次：文档按实际调用次数计费，回复里没有
-    搜索次数，也没写意图识别判定不搜时收不收：每个 HTTP 200 的回复按一次记（保守）。形状不对的部分按空的处理（不抛，Searcher 照常记一行）。"""
+    搜索次数，也没写意图识别判定不搜时收不收：每个 HTTP 200 的回复按一次记（保守）。形状不对的部分按空的处理（不抛，Searcher 照常记一行）。
+    v2.11c：groups 只有一组，query 是 None（回复里没有查询词）。"""
     usage = d.get("usage") if isinstance(d.get("usage"), dict) else {}
     choices = d.get("choices") if isinstance(d.get("choices"), list) else []
     ch = choices[0] if choices and isinstance(choices[0], dict) else {}
@@ -1012,7 +1030,7 @@ def glm_search_unpack(d: dict) -> dict:
     hits = [x for x in found if isinstance(x, dict) and x.get("link")]
     return {"usage": usage, "n_req": 1, "queries": [], "result_urls": [str(x["link"]) for x in hits],
             "result_titles": [str(x.get("title") or "") for x in hits], "texts": [text] if isinstance(text, str) else [],
-            "n_err": 0, "stop": ch.get("finish_reason")}
+            "n_err": 0, "stop": ch.get("finish_reason"), "groups": [{"query": None, "urls": [str(x["link"]) for x in hits]}]}
 
 
 class GLMAdapter:
