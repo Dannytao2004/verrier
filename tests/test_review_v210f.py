@@ -33,7 +33,7 @@ class TestCommandLineOnlyDeepSeek(unittest.TestCase):
         """审查发现：TRIANGULATE_MODEL 设成有价格的别家模型时，以前会带着 DeepSeek 的 key 把别家的模型 id 发到 api.deepseek.com。"""
         from triangulate.agent import search as S
         with mock.patch("triangulate.llm.read_key", no_key_file), mock.patch("triangulate.agent.search.read_key", no_key_file):
-            for m in ("claude-haiku-5-5", "gpt-6-luna", "kimi-k2.6", "glm-5.2", "kimi-k3@cn"):
+            for m in ("claude-haiku-5-5", "gpt-6-luna", "kimi-k3", "glm-5.2", "kimi-k3@cn"):
                 with self.subTest(model=m):
                     with self.assertRaises(config.UnsupportedModel) as cm:
                         llm.LLM(model=m)

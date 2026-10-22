@@ -6,7 +6,8 @@ v2.10a：建请求、解析回复、计价交给 provider adapter（triangulate/
 v2.10b：各家不同的解码（Claude 是流式 SSE）、可重试的状态码、超时、回复本身的问题（截断 / 拒答 / 暂停）也由 adapter 给；
 check_key() 用 models 列表接口校验 key。
 v2.10c：OpenAI（Chat Completions）；读过的错误 body 另记 error.code，像 key 的片段换成 sk-***。
-v2.10d：Kimi（流式 Chat Completions）；计量按 spec.price_id（国内站的价格）；retry_after() 另认 Kimi 搜索接口的 X-RateLimit-Reset。
+v2.10d：Kimi（流式 Chat Completions）；计量按 spec.price_id（国内站的价格）。（v2.10d 的 retry_after() 另认 Kimi 搜索接口
+X-RateLimit-Reset 的那一段在 v2.10h 删掉：那个搜索接口不再用。）
 v2.10e：GLM（非流式 Chat Completions）；adapter 有 parse_error 时错误 body 由它解析（GLM 只有 code / message）；check_key 认
 「列表全不全不知道」（GLM 的 models 接口没有文档）。
 
@@ -75,18 +76,10 @@ RETRY_AFTER_MAX_S = 60
 
 def retry_after(ad, headers):
     """v2.10d：出错的回复要求等多少秒（交给 retry_wait）：adapter 不看（honor_retry_after = False，DeepSeek）或没有响应头时 None；
-    先取 retry-after；没有时，adapter 指定了 reset_header（Kimi 搜索接口的 X-RateLimit-Reset，Unix 秒）就换成距现在的秒数。
-    v2.10b / c 的 Claude、OpenAI 只看 retry-after，行为不变。"""
+    否则取 retry-after。（v2.10h：Kimi 搜索接口的 X-RateLimit-Reset 那一段删掉，那个接口不再用。）"""
     if not ad.honor_retry_after or not headers:
         return None
-    ra = headers.get("retry-after")
-    name = getattr(ad, "reset_header", None)
-    if ra is None and name and headers.get(name) is not None:
-        try:
-            ra = float(headers.get(name)) - time.time()
-        except ValueError:
-            ra = None
-    return ra
+    return headers.get("retry-after")
 
 
 def retry_wait(default_s: float, retry_after) -> float:

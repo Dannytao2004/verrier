@@ -2,8 +2,9 @@
 （tests/fake_glm.py）跑：真实走 urllib + urlopen_no_redirect，请求头、请求体、HTTPError 的 body 都是真的；不联网、不需要真 key、
 不读 key 文件。
 
-JSON 调用：OpenAI 兼容的非流式 Chat Completions；搜索：一次 JSON 调用生成查询词 + 每个查询词 POST /web_search。
-每一项对照的官方文档写在各个测试的说明里（链接见 PROVIDERS.md 第 12 节）。
+JSON 调用：OpenAI 兼容的非流式 Chat Completions。v2.10h（用户 10-21：只用各家自带的联网搜索）：搜索 = 同一个 Chat Completions 接口
+带上自带的 web_search 工具，不再有「生成查询词 + POST /web_search」。
+每一项对照的官方文档写在各个测试的说明里（链接见 PROVIDERS.md 第 12、16 节）。
 """
 import http.client
 import json
@@ -16,7 +17,6 @@ from tests import fake_glm as FG
 from triangulate import config, llm
 from triangulate import providers as PV
 from triangulate.agent import pipeline as P
-from triangulate.agent import prompts as PR
 from triangulate.agent import search as S
 
 KEY = "0123456789abcdef0123456789abcdef.GLMuserSecret01"   # 形状同 GLM 的 key（id.secret）
@@ -25,6 +25,7 @@ MSGS = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": "Esti
 BRIEF = "Find official widget statistics for June 2026.\n\nAfter searching, reply with at most 4 URLs, most useful first."
 FX = config.CNY_PER_USD
 EXTRA = config.THINKING_EXTRA_TOKENS
+SEARCH_MAX = config.MAX_TOKENS["search"]
 
 
 def spec(model="glm-5.2", thinking="off", key=KEY, **kw):
@@ -35,12 +36,9 @@ def ok(content='{"a": 1}', **kw):
     return ("json", 200, FG.completion(content, **kw))
 
 
-def queries_reply(*qs, **kw):
-    return ok(json.dumps({"queries": list(qs)}), **kw)
-
-
-def results(*urls):
-    return ("json", 200, FG.search_results(*urls))
+def found(text, *urls, **kw):
+    """v2.10h：带 web_search 工具的搜索回复：模型的文字 + 顶层 web_search[]（urls）。"""
+    return ok(text, web=list(urls), **kw)
 
 
 def err(status, code, message, wrapped=True, headers=None):
@@ -374,7 +372,8 @@ class TestChatErrors(_FakeServerCase):
 
 class TestGLMCost(unittest.TestCase):
     """Pricing 页（国际站 USD：https://docs.z.ai/guides/overview/pricing；国内站 CNY：https://docs.bigmodel.cn/cn/guide/start/pricing，
-    2026-10-21）。搜索：国际站 Built-in Tools 的 Web Search $0.01 / use，国内站 Search-Std ¥0.01 / 次。"""
+    2026-10-21）。搜索（v2.10h 起就是 Chat Completions 自带的 web_search 工具）：国际站 Built-in Tools 的 Web Search $0.01 / use，
+    国内站 search_std ¥0.01 / 次。"""
 
     def test_prices_match_the_pricing_pages(self):
         want = {"glm-5.3": ("USD", (0.26, 1.4, 4.4)), "glm-5.2": ("USD", (0.26, 1.4, 4.4)),
@@ -418,19 +417,20 @@ class TestGLMCost(unittest.TestCase):
         self.assertEqual(P.Budget().directions, 10)   # DeepSeek 默认路径不变
 
     def test_reservations_and_the_context_budget(self):
-        """预扣：输入按 input 价（没有写入价）；国内站按折算后的价格。Context 按 spec.price_id 计价；搜索的预扣按「生成查询词」那次调用
-        发出的 max_tokens（5.3 永远在想：+24,000）加 (2 × max_uses + 2) 次搜索费。"""
+        """预扣：输入按 input 价（没有写入价）；国内站按折算后的价格。Context 按 spec.price_id 计价。v2.10h：搜索的预扣同其他自带搜索的
+        provider：输入按 p99 的 72,000 token（搜索结果进模型的输入）、输出按发出的 max_tokens（5.3 永远在想：+24,000）、
+        (2 × max_uses + 2) 次搜索费。"""
         # v2.10f：别家的 tokenizer 没测过，输入按 1 个字符 1 个 token 预扣（DeepSeek 照旧 2 个字符）
         self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "glm-5.3"), (100_000 * 1.4 + 1000 * 4.4) / 1e6)
         self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "glm-5.3@cn"), (100_000 * 8 + 1000 * 28) / 1e6 / FX)
         ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("glm-5.3", "high", region="cn"))
         self.assertEqual((ctx.budget.model, ctx.budget.usd_cap), ("glm-5.3@cn", 2.0))
-        self.assertEqual(ctx.budget.search_tokens, S.SEARCH_QUERIES_MAX_TOKENS + EXTRA)
+        self.assertEqual((ctx.budget.search_tokens, ctx.budget.search_input_tokens), (SEARCH_MAX + EXTRA, 72_000))
         self.assertAlmostEqual(ctx.budget.search_reserve(),
-                               (30_000 * 8 + ctx.budget.search_tokens * 28) / 1e6 / FX + 8 * 0.01 / FX)
+                               (72_000 * 8 + ctx.budget.search_tokens * 28) / 1e6 / FX + 8 * 0.01 / FX)
         ctx2 = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("glm-5.2", "high"))
-        self.assertEqual(ctx2.budget.search_tokens, S.SEARCH_QUERIES_MAX_TOKENS)   # 搜索不是 plan / judge / repair：5.2 关思考
-        self.assertAlmostEqual(ctx2.budget.search_reserve(), (30_000 * 1.4 + 2000 * 4.4) / 1e6 + 8 * 0.01)
+        self.assertEqual(ctx2.budget.search_tokens, SEARCH_MAX)   # 搜索不是 plan / judge / repair：5.2 关思考
+        self.assertAlmostEqual(ctx2.budget.search_reserve(), (72_000 * 1.4 + SEARCH_MAX * 4.4) / 1e6 + 8 * 0.01)
 
     def test_search_fee_by_region(self):
         self.assertAlmostEqual(PV.search_fee_usd("glm-5.2"), 0.01)
@@ -440,126 +440,104 @@ class TestGLMCost(unittest.TestCase):
 
 
 class TestGLMSearch(_FakeServerCase):
-    QS = ("widgets June 2026 national statistics office", "widget production 2025 annual report", "widget exports customs data")
+    """v2.10h：Chat Completions 自带的 web_search 工具（两站 API 参考的 WebSearchToolSchema / WebSearchObject；联网搜索指南「对话中的网络
+    搜索」/「Web Search in Chat」）：服务端先对输入做搜索意图识别、搜一次，把结果放进上下文再生成；search_result: true 时结果在回复顶层的
+    web_search[]（link、title ...）。"""
 
-    def test_queries_then_web_search(self):
-        """同 Kimi：一次 JSON 调用（SEARCH_QUERIES_* 包着同一段搜索 prompt）生成查询词，再逐个 POST {base}/web_search（Web Search API：
-        国际站 search_engine 必填、enum 只有 search-prime；search_query 必填；count 1–50，默认 10）。搜索不是 plan / judge / repair：
-        5.2 关思考。结果的 link（和 title）按名次交替合并。"""
-        a1, a2, b1, c1 = (f"https://{h}.example.org/w" for h in ("a1", "a2", "b1", "c1"))
-        out, seen, log = self.search(queries_reply(*self.QS), results(a1, a2), results(b1, a1), results(c1))
-        q = seen[0]
-        self.assertEqual((q["method"], q["path"]), ("POST", "/api/paas/v4/chat/completions"))
-        self.assertEqual(q["body"]["messages"], [{"role": "system", "content": PR.SEARCH_QUERIES_SYSTEM},
-                                                 {"role": "user", "content": PR.SEARCH_QUERIES_USER.format(n=3, brief=BRIEF)}])
-        self.assertEqual((q["body"]["thinking"], q["body"]["max_tokens"], q["body"]["response_format"]),
-                         ({"type": "disabled"}, S.SEARCH_QUERIES_MAX_TOKENS, {"type": "json_object"}))
-        self.assertEqual(len(seen), 4)
-        for r, text in zip(seen[1:], self.QS):
-            self.assertEqual((r["method"], r["path"]), ("POST", "/api/paas/v4/web_search"))
-            self.assertEqual(r["headers"]["authorization"], f"Bearer {KEY}")
-            self.assertEqual(r["body"], {"search_engine": "search-prime", "search_query": text, "count": 4})
-        self.assertEqual(out["urls"], [a1, b1, c1, a2])
-        self.assertEqual(out["queries"], list(self.QS))
-        self.assertEqual((out["web_search_requests"], out["n_result_urls"], out["n_text_urls"]), (3, 5, 0))
-        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.03)
-        self.assertAlmostEqual(out["usd"], (1000 * 1.4 + 300 * 4.4) / 1e6)
-        self.assertNotIn("Title of", json.dumps(out))   # 标题解析出来但不往外传
+    def test_chat_web_search_request_and_reply(self):
+        """请求：POST {base}/chat/completions；model、messages（一条 user：搜索 prompt 原样）、thinking（搜索不是 plan / judge / repair：
+        5.2 关思考）、tools（web_search：enable true、search_engine 必填（国际站 API 参考的 enum 只有 search_pro_jina）、search_result true）、
+        max_tokens、stream false。不发 search_query（那是「强制按这个查询词搜」）、search_intent / count 等（用默认）、response_format
+        （搜索角色回的是 URL 列表）、tool_choice。回复：模型文字里的 URL 优先，不够再按 web_search[].link 补；查询词回复里没有；每个 HTTP 200
+        按一次搜索记（$0.01 / use）。"""
+        a1, b1, c1 = (f"https://{h}.example.org/w" for h in ("a1", "b1", "c1"))
+        out, seen, log = self.search(found(f"Most useful first:\n{b1}", a1, b1, c1, use=FG.usage(6_000, 300, cached=1_000)))
+        r = seen[0]
+        self.assertEqual((r["method"], r["path"]), ("POST", "/api/paas/v4/chat/completions"))
+        self.assertEqual(r["headers"]["authorization"], f"Bearer {KEY}")
+        b = r["body"]
+        self.assertEqual(b, {"model": "glm-5.2", "messages": [{"role": "user", "content": BRIEF}], "thinking": {"type": "disabled"},
+                             "tools": [{"type": "web_search", "web_search": {"enable": True, "search_engine": "search_pro_jina",
+                                                                            "search_result": True}}],
+                             "max_tokens": SEARCH_MAX, "stream": False})
+        self.assertEqual(list(b), ["model", "messages", "thinking", "tools", "max_tokens", "stream"])
+        for banned in ("response_format", "temperature", "tool_choice", "reasoning_effort", "max_completion_tokens"):
+            self.assertNotIn(banned, b)
+        self.assertEqual(out["urls"], [b1, a1, c1])
+        self.assertEqual(out["queries"], [])
+        self.assertEqual((out["web_search_requests"], out["n_result_urls"], out["n_text_urls"]), (1, 3, 1))
+        want = (5_000 * 1.4 + 1_000 * 0.26 + 300 * 4.4) / 1e6
+        self.assertAlmostEqual(out["usd"], want)
+        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.01)
         self.assertNotIn("error", out)
-        self.assertEqual(log[0]["arm"], "search:d1:queries")
-        for i, rec in enumerate(log[1:], 1):
-            self.assertEqual((rec["arm"], rec["kind"], rec["query_n"], rec["ok"], rec["web_search_requests"], rec["usd"],
-                              rec["usd_search_fee_assumed"]), ("search:d1", "search", i, True, 1, 0.0, 0.01))
+        self.assertNotIn("Title of", json.dumps(out))   # 标题解析出来但不往外传
+        self.assertNotIn("think about the widgets", json.dumps(out) + json.dumps(log))   # 思考内容不进返回值和日志
+        rec = log[0]
+        self.assertEqual((rec["arm"], rec["kind"], rec["ok"], rec["stop"], rec["prompt_tokens"], rec["cached_tokens"],
+                          rec["completion_tokens"], rec["web_search_requests"], rec["n_result_urls"], rec["usd"],
+                          rec["usd_search_fee_assumed"]),
+                         ("search:d1", "search", True, "stop", 6_000, 1_000, 300, 1, 3, round(want, 6), 0.01))
+        parsed = PV.GLM.search_unpack(FG.completion("x", web=[a1, b1]))
+        self.assertEqual(parsed["result_titles"], ["Title of w", "Title of w"])
         self.assertNoKeyIn(out, log)
 
-    def test_china_endpoint_and_query_length(self):
-        """国内站 Web Search API：search_query（必填，maxLength 70，建议不超过 70 个字符）、search_engine（必填，search_std = 基础版
-        ¥0.01 / 次）、search_intent（必填；false = 跳过意图识别、直接搜）、count。超过 70 个字符的查询词截到 70 以内（按空格；中文直接截）。
-        5.3 的查询词调用用 low（永远在想，+24,000 余量）。"""
-        long_en = "official widget production statistics June 2026 national bureau monthly release table"   # 85 个字符
-        long_zh = "国家统计局" * 20
-        out, seen, log = self.search(queries_reply(long_en, long_zh, "widgets 2026"), *[results("https://a.example.org/w")] * 3,
+    def test_china_endpoint_engine_and_thinking(self):
+        """国内站：发到国内站的 chat/completions，search_engine 用 search_std（基础版 ¥0.01 / 次，按汇率折算）；token 按 CNY 价。
+        5.3 永远在想：搜索也是 thinking enabled + reasoning_effort low，max_tokens +24,000。"""
+        out, seen, log = self.search(found("https://a.example.org/w", "https://a.example.org/w", use=FG.usage(4_000, 200)),
                                      sp=spec("glm-5.3", "high", region="cn"))
-        self.assertEqual([r["path"] for r in seen], ["/cn/api/paas/v4/chat/completions"] + ["/cn/api/paas/v4/web_search"] * 3)
+        self.assertEqual(seen[0]["path"], "/cn/api/paas/v4/chat/completions")
         b = seen[0]["body"]
-        self.assertEqual((b["thinking"], b["reasoning_effort"], b["max_tokens"]),
-                         ({"type": "enabled"}, "low", S.SEARCH_QUERIES_MAX_TOKENS + EXTRA))
-        bodies = [r["body"] for r in seen[1:]]
-        # 前 70 个字符停在 "monthly" 中间（加上 "monthly" 是 71 个），截到它前面的空格
-        self.assertEqual(bodies[0], {"search_query": "official widget production statistics June 2026 national bureau",
-                                     "search_engine": "search_std", "search_intent": False, "count": 4})
-        self.assertEqual(bodies[1]["search_query"], long_zh[:70])
-        self.assertEqual(bodies[2]["search_query"], "widgets 2026")
-        self.assertTrue(all(len(x["search_query"]) <= 70 for x in bodies))
-        self.assertEqual(out["queries"], [long_en, long_zh, "widgets 2026"])   # 返回的是生成的查询词（进 state.json 审计）
-        self.assertAlmostEqual(out["usd_search_fee_assumed"], 3 * 0.01 / FX)
-        self.assertEqual(log[0]["thinking"], "low")
-        self.assertEqual(PV.GLM.tools_search_request(KEY, long_en, limit=4, region="global")[1]["search_query"], long_en)
-        self.assertEqual([PV.GLM.tools_search_request(KEY, "q", limit=n)[1]["count"] for n in (0, 4, 80)], [1, 4, 50])
+        self.assertEqual((b["thinking"], b["reasoning_effort"], b["max_tokens"]), ({"type": "enabled"}, "low", SEARCH_MAX + EXTRA))
+        self.assertEqual(list(b), ["model", "messages", "thinking", "reasoning_effort", "tools", "max_tokens", "stream"])
+        self.assertEqual(b["tools"][0]["web_search"], {"enable": True, "search_engine": "search_std", "search_result": True})
+        self.assertAlmostEqual(out["usd"], (4_000 * 8 + 200 * 28) / 1e6 / FX)
+        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.01 / FX)
+        self.assertEqual(out["urls"], ["https://a.example.org/w"])   # 去重
 
-    def test_billing_and_failures(self):
-        """国内站价格页：搜索工具按实际调用次数计费（国际站价格页按次）。文档没说空结果免费，所以每个 HTTP 200 都按一次记（含空结果、
-        形状不对的），失败的请求不记。一个查询词失败不影响其余的，失败原因合在 error 里（400 的业务码和 message 照原样）。"""
-        x = "https://x.example.org/w"
-        out, seen, log = self.search(queries_reply(*self.QS), ("json", 200, {"id": "s", "search_result": []}),
-                                     err(400, 1214, "Parameter count is invalid. Please check the documentation."), results(x))
-        self.assertEqual((out["urls"], out["web_search_requests"], len(seen)), ([x], 2, 4))
-        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.02)
-        self.assertEqual(out["error"], "query 2: http_400 (code 1214: Parameter count is invalid. Please check the documentation.)")
-        self.assertEqual((log[1]["web_search_requests"], log[1]["usd_search_fee_assumed"], log[1]["n_result_urls"]), (1, 0.01, 0))
-        self.assertEqual((log[2]["ok"], log[2]["error"], log[2]["server_error_code"]), (False, "http_400", "1214"))
-        self.assertNotIn("usd", log[2])
-        out, _, log = self.search(queries_reply("q1"), ("json", 200, {"id": "s"}), max_uses=1)
-        self.assertEqual((out["urls"], out["error"], out["web_search_requests"]), ([], "query 1: bad_response_body", 1))
-        self.assertEqual((log[1]["error"], log[1]["usd"], log[1]["usd_search_fee_assumed"]), ("bad_response_body", 0.0, 0.01))
+    def test_every_ok_reply_counts_as_one_search(self):
+        """文档按实际调用次数计费，回复里没有搜索次数，也没写意图识别判定不搜时收不收：每个 HTTP 200 都按一次记（保守）。没有 web_search[]
+        时 URL 只能来自模型的文字；回复形状不对（没有 choices）也照常记一行、不抛。"""
+        out, _, log = self.search(ok("https://memory.example.org/z"))
+        self.assertEqual((out["urls"], out["web_search_requests"], out["n_result_urls"]), (["https://memory.example.org/z"], 1, 0))
+        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.01)
+        out, _, log = self.search(("json", 200, {"id": "x"}))
+        self.assertEqual((out["urls"], out["web_search_requests"], log[0]["ok"], log[0]["stop"]), ([], 1, True, None))
+        out, _, log = self.search(found("", "https://a.example.org/w", finish_reason="sensitive"))
+        self.assertEqual((out["urls"], log[0]["stop"]), (["https://a.example.org/w"], "sensitive"))
 
-    def test_rejected_key_rate_limits_and_balance_on_the_search_endpoint(self):
-        """搜索接口的 401：不读 body、不抛，记 http_401（同其他 provider 的搜索）。429 1302 重试；429 1113：整次运行停下。"""
+    def test_errors_on_the_search_request(self):
+        """401：不读 body、不抛，记 http_401（同其他 provider 的搜索）。429 1302 重试；429 1113：整次运行停下；400 的业务码和 message
+        照原样记（例如国际站不收某个 search_engine 时）。"""
         with mock.patch.object(llm, "read_error_body", wraps=llm.read_error_body) as rb:
-            out, seen, _ = self.search(queries_reply("q1"), ("json", 401, FG.REAL_401_FAKE_KEY), max_uses=1)
+            out, seen, _ = self.search(("json", 401, FG.REAL_401_FAKE_KEY))
             rb.assert_not_called()
-        self.assertEqual((out["urls"], out["error"], len(seen)), ([], "query 1: http_401", 2))
-        out, seen, _ = self.search(queries_reply("q1"), err(429, 1302, "Rate limit reached for requests"),
-                                   results("https://a.example.org/w"), max_uses=1)
-        self.assertEqual((len(seen), out["urls"], self.sleeps), (3, ["https://a.example.org/w"], [3]))
+        self.assertEqual((out["urls"], out["error"], len(seen)), ([], "http_401", 1))
+        out, seen, _ = self.search(err(429, 1302, "Rate limit reached for requests"), found("https://a.example.org/w"))
+        self.assertEqual((len(seen), out["urls"], self.sleeps), (2, ["https://a.example.org/w"], [3]))
         self.sleeps.clear()
-        out, seen, log = self.search(queries_reply("q1", "q2"), err(429, 1113, "Insufficient balance or no resource package."))
+        out, seen, log = self.search(err(429, 1113, "Insufficient balance or no resource package."))
         self.assertIsInstance(out, llm.BalanceExhausted)
         self.assertTrue(str(out).startswith("insufficient balance: GLM HTTP 429 code 1113"), str(out))
         self.assertIn("(search:d1 t); the run was stopped without retrying.", str(out))
-        self.assertEqual((len(seen), self.sleeps), (2, []))
+        self.assertEqual((len(seen), self.sleeps), (1, []))
         self.assertNoKeyIn(str(out), log)
-        out, seen, _ = self.search(err(429, 1113, "Insufficient balance"))   # 生成查询词那一步就没钱了
-        self.assertIsInstance(out, llm.BalanceExhausted)
-        self.assertEqual(len(seen), 1)
-
-    def test_query_generation_failures_mean_no_search(self):
-        """生成查询词只调一次，失败就没有 URL（不修 JSON、不补查询词），error 以 "queries:" 开头，不发搜索请求。"""
-        cases = [(ok("not json"), "queries: reply is not valid JSON"),
-                 (ok('{"q": ["a"]}'), 'queries: the reply has no "queries" list'),
-                 (ok('{"queries": ["a"', finish_reason="length"), "queries: reply was truncated (finish_reason=length)"),
-                 (ok('{"queries": ["a"]}', finish_reason="sensitive"),
-                  "queries: reply was stopped by content moderation (finish_reason=sensitive)"),
-                 (err(400, 1210, "Invalid API parameter, please check the documentation."),
-                  "queries: search:d1:queries t attempt 1: http_400 (code 1210: Invalid API parameter, please check the documentation.)"),
-                 (("json", 401, FG.REAL_401_FAKE_KEY), "queries: GLM rejected the API key (HTTP 401)")]
-        for reply, msg in cases:
-            with self.subTest(err=msg[:40]):
-                out, seen, _ = self.search(reply)
-                self.assertEqual((out["urls"], out["queries"], out["error"], out["web_search_requests"], len(seen)),
-                                 ([], [], msg, 0, 1))
+        out, seen, log = self.search(err(400, 1214, "Parameter search_engine is invalid. Please check the documentation."))
+        self.assertEqual((out["urls"], len(seen)), ([], 1))
+        self.assertEqual(out["error"], "http_400 (code 1214: Parameter search_engine is invalid. Please check the documentation.)")
+        self.assertEqual((log[0]["ok"], log[0]["server_error_code"]), (False, "1214"))
 
 
 class TestGLMDirection(_FakeServerCase):
-    """run_direction（一个子 agent）对着假服务走完：查询词 -> 搜索接口 -> 取页（假的）-> 抽取 -> 代码核对；三次调用都记进 calls.jsonl
-    并计入预算（查询词调用的 token、搜索的按次费用、抽取的 token）。"""
+    """run_direction（一个子 agent）对着假服务走完：自带的 web_search（Chat Completions）-> 取页（假的）-> 抽取 -> 代码核对；两次调用都
+    记进 calls.jsonl 并计入预算（搜索的 token 和按次费用、抽取的 token）。"""
 
     def test_one_direction_end_to_end(self):
         ctx = P.Context("t", "q", "2026-06-20", self.tmp / "c.jsonl", spec=spec("glm-5.2", "high"))
         url = "https://stats.example.org/widgets"
         extract = {"points": [{"name": "widgets June 2025", "value_as_written": "1,210", "unit": "widgets",
                                "period_start": "2025-06-01", "period_end": "2025-06-30", "quote": "June 2025: 1,210 widgets"}]}
-        self.fake.reset(queries_reply("widgets June 2025"), results(url), ok(json.dumps(extract), use=FG.usage(5000, 400)))
+        self.fake.reset(found(url, url), ok(json.dumps(extract), use=FG.usage(5000, 400)))
         page = {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01",
                 "text": "Widget statistics. June 2025: 1,210 widgets."}
         d = {"id": "d1", "category": "own_history", "hypothesis": "h", "data_to_find": "f", "search_hints": ["widgets"]}
@@ -569,14 +547,16 @@ class TestGLMDirection(_FakeServerCase):
         self.assertNotIn("error", out)
         self.assertEqual(out["search"]["urls"], [url])
         self.assertEqual(len(out["points"]), 1)
-        self.assertEqual([r["path"] for r in self.fake.seen],
-                         ["/api/paas/v4/chat/completions", "/api/paas/v4/web_search", "/api/paas/v4/chat/completions"])
-        self.assertEqual(self.fake.seen[2]["body"]["thinking"], {"type": "disabled"})   # 抽取不是 plan / judge / repair
+        self.assertEqual([r["path"] for r in self.fake.seen], ["/api/paas/v4/chat/completions"] * 2)
+        self.assertIn("tools", self.fake.seen[0]["body"])
+        self.assertIn("widgets", self.fake.seen[0]["body"]["messages"][0]["content"])   # SEARCH_USER 填好的那段原样是 user 消息
+        self.assertNotIn("tools", self.fake.seen[1]["body"])   # 抽取不带搜索工具
+        self.assertEqual(self.fake.seen[1]["body"]["thinking"], {"type": "disabled"})   # 抽取不是 plan / judge / repair
         rows = [json.loads(x) for x in ctx.calls_path.read_text(encoding="utf-8").splitlines()]
-        self.assertEqual([r["arm"] for r in rows], ["search:d1:queries", "search:d1", "extract:d1"])
+        self.assertEqual([r["arm"] for r in rows], ["search:d1", "extract:d1"])
         want = (1000 * 1.4 + 300 * 4.4) / 1e6 + 0.01 + (5000 * 1.4 + 400 * 4.4) / 1e6
         self.assertAlmostEqual(ctx.budget.usd, want, places=6)
-        self.assertEqual((ctx.budget.n_calls, ctx.budget.reserved, ctx.budget.aborted), (3, 0.0, ""))
+        self.assertEqual((ctx.budget.n_calls, ctx.budget.reserved, ctx.budget.aborted), (2, 0.0, ""))
         self.assertNoKeyIn(ctx.calls_path.read_text(encoding="utf-8"), out)
 
 
@@ -628,11 +608,12 @@ class TestModelSpecGLM(unittest.TestCase):
     def test_official_endpoints_and_key_note(self):
         """API 主机（两站的 API 参考 servers / HTTP API 页）：国际站 https://api.z.ai/api/paas/v4，国内站 https://open.bigmodel.cn/api/paas/v4。
         只用通用端点，没有 Coding Plan 端点（/api/coding/paas/v4）。网页上的 key 说明：只收 Standard API Key，Coding Plan 的 key 不行。"""
-        self.assertEqual(PV.GLM.regions, {
-            "global": {"chat": "https://api.z.ai/api/paas/v4/chat/completions", "search": "https://api.z.ai/api/paas/v4/web_search",
+        self.assertEqual(PV.GLM.regions, {   # v2.10h：搜索也发到 chat/completions（带自带的 web_search 工具）
+            "global": {"chat": "https://api.z.ai/api/paas/v4/chat/completions",
+                       "search": "https://api.z.ai/api/paas/v4/chat/completions",
                        "models": "https://api.z.ai/api/paas/v4/models"},
             "cn": {"chat": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-                   "search": "https://open.bigmodel.cn/api/paas/v4/web_search",
+                   "search": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
                    "models": "https://open.bigmodel.cn/api/paas/v4/models"}})
         self.assertNotIn("coding", json.dumps(PV.GLM.regions))
         self.assertEqual(set(PV.GLM.region_labels), {"global", "cn"})
@@ -643,8 +624,9 @@ class TestModelSpecGLM(unittest.TestCase):
             self.assertIn(s, note)
         self.assertEqual(PV.GLM.key_check_request("cn", KEY),
                          ("https://open.bigmodel.cn/api/paas/v4/models", {"Authorization": f"Bearer {KEY}"}))
-        self.assertEqual(PV.GLM.search_settings("global"), {"search_engine": "search-prime"})
-        self.assertEqual(PV.GLM.search_settings("cn"), {"search_engine": "search_std", "search_intent": False, "query_max_chars": 70})
+        self.assertEqual(PV.GLM.search_engines, {"global": "search_pro_jina", "cn": "search_std"})
+        for gone in ("search_mode", "tools_search_request", "tools_search_unpack", "search_settings", "search_bills_every_ok_response"):
+            self.assertFalse(hasattr(PV.GLM, gone), gone)
 
     def test_choices_and_public_view(self):
         self.assertEqual(PV.PROVIDERS["glm"]["models"], ("glm-4.7-flashx", "glm-5.2", "glm-5.3"))
@@ -670,7 +652,7 @@ class TestModelSpecGLM(unittest.TestCase):
 
 class TestRunWithGLMSpec(_FakeServerCase):
     """prepare_run(spec=GLM 国内站 5.3) -> 图 -> save_run，全部对着假服务：规划一步收到 429 code 1113 就干净停下；state.json 记 provider、
-    price_id、汇率和搜索设置，不记 key；结果目录里没有 key；写完以后 key 从内存里清掉。"""
+    price_id 和汇率，不记 key（v2.10h 起也不再记 search_queries）；结果目录里没有 key；写完以后 key 从内存里清掉。"""
 
     def test_end_to_end_balance_stop(self):
         from triangulate.agent import run as R
@@ -689,10 +671,7 @@ class TestRunWithGLMSpec(_FakeServerCase):
         self.assertEqual((st["provider"], st["model"]), ("glm", "glm-5.3"))
         rs = st["settings"]["run_spec"]
         self.assertEqual((rs["price_id"], rs["region"], rs["fx"]["cny_per_usd"]), ("glm-5.3@cn", "cn", 6.7192))
-        self.assertEqual(st["settings"]["search_queries"], {"max_tokens": S.SEARCH_QUERIES_MAX_TOKENS,
-                                                            "endpoint": self.fake.url("/cn/api/paas/v4/web_search"),
-                                                            "search_engine": "search_std", "search_intent": False,
-                                                            "query_max_chars": 70})
+        self.assertNotIn("search_queries", st["settings"])
         self.assertEqual(st["budget"]["usd_cap"], 1.5)
         files = list((self.tmp / q["id"] / "web_t").iterdir())
         self.assertTrue({"state.json", "calls.jsonl"} <= {f.name for f in files})

@@ -24,7 +24,6 @@ from .evidence import parse_date
 from .graph import build
 from .outputs import basis_text, ledger, outcome_table_html, render_graph, unit_text
 from .pipeline import Budget, Context
-from .search import SEARCH_QUERIES_MAX_TOKENS
 
 RES = RESULTS / "agent"
 RESIDUAL_RISKS = [
@@ -179,10 +178,8 @@ def run_settings(spec=None) -> dict:
                         "FALLBACK_SIGMA": M.FALLBACK_SIGMA, "DEFAULT_REL_U": M.DEFAULT_REL_U, "EPS": M.EPS}}
     if spec is not None:
         out["run_spec"] = spec.public()
-        ad = spec.adapter
-        if getattr(ad, "search_mode", "model") == "queries":   # v2.10d Kimi / v2.10e GLM：搜索 = 生成查询词 + 搜索接口
-            out["search_queries"] = {"max_tokens": SEARCH_QUERIES_MAX_TOKENS, "endpoint": ad.search_url(spec.region),
-                                     **ad.search_settings(spec.region)}
+        # v2.10h：v2.10d / e 给 Kimi、GLM 记的 search_queries（生成查询词 + 搜索接口的设置）删掉：五家都用自带的搜索，同 DeepSeek /
+        # Claude / GPT 不另记
         if spec.thinking_by_role():
             out["thinking"] = {"by_role": spec.thinking_by_role(), "extra_max_tokens": THINKING_EXTRA_TOKENS,
                                "max_output": spec.max_output}

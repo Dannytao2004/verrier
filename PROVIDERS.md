@@ -12,6 +12,7 @@
 | `v2.10d` | Kimi adapter（国际站 / 国内站两个区域；JSON 调用走流式 Chat Completions；搜索 = 一次 JSON 调用生成查询词 + `POST /v1/tools/search`）；国内站按 CNY 官方价折算（`ModelSpec.price_id`）；429 余额不足立刻停；Kimi key 校验 | 第 11 节 |
 | `v2.10e` | GLM adapter（Z.ai 国际站 / 智谱开放平台国内站两个区域；JSON 调用走非流式 Chat Completions；搜索同 Kimi：生成查询词 + `POST /web_search`）；国内站按 CNY 官方价折算；429 余额不足（1113）和用量上限 / 套餐 key 的码立刻停；只收 Standard API Key（网页提示 `GLM_KEY_NOTE`）；GLM key 校验 | 第 12 节 |
 | `web-v0.9` | 网页接上 BYOK：`GET /api/providers`（provider、区域、模型、思考档位、每次运行的花费估计）、`POST /api/key/check`、`POST /api/runs` 必须带 key；key 只在这次运行的内存里，结束就清；经典界面只浏览；/verrier 控制台的「模型 · key · 上限」表单 | 第 13 节 |
+| `v2.10h` | 用户 10-21：每个模型只用自家自带的联网搜索，没有就删掉这个模型。删掉 Kimi K2.6；删掉「生成查询词 + 另调搜索接口」那条路；K3 改走 Responses API 自带的 web_search，GLM 三个模型改走 Chat Completions 自带的 web_search；DeepSeek / Claude / GPT 不变 | 第 16 节 |
 | `v2.10f` | 审查修正：自带 key 的运行里预扣放不下只是因为在途时等、上限放不下一次最小运行就在服务端拒跑、Claude 默认改 Sonnet 5.5；中途停下的运行标 failed 并写原因；预扣的估计（搜索输入 p99、别家 1 字符 1 token、续接另预扣、缺 usage 按预扣记）；先 redact 再截断、GLM 形状的 key、key 字符集；等人工确认 30 分钟超时；~~DeepSeek 自带 key 的搜索关思考~~（v2.10g 按用户决定撤回）；命令行只收 DeepSeek 模型；403 的说法；GLM 1313 重试；五家的端到端测试 | 第 14 节 |
 
 ## 1. Scope and binding decisions（用户 10-20 / 10-21 定的，摘要）
@@ -68,11 +69,12 @@ adapter 只管各家不同的部分：
 | v2.10c：`Budget.reserve_rates(model, prompt_tokens)` | 预扣用的单价：`peak_rates`，默认会写缓存的模型（`prompt_cache = "implicit_write"`，GPT）输入按 30 分钟写入价。DeepSeek / Claude 和 `peak_rates` 相同 |
 | v2.10d：`ModelSpec.price_id`、`providers.price_id(model, region, ad)` | 计价 id（`config.PRICES` 的键）：这家的默认区域就是模型名（DeepSeek / Claude / GPT 只有一个区域，不变），别的区域是 `模型@区域`（Kimi 国内站 `kimi-k3@cn`）。`LLM.price_model`、`Searcher` 的计量、`Budget.for_model`、`ModelSpec` 的价格校验都用它；请求里发的仍是模型名，calls.jsonl 的 `model` 也仍是模型名 |
 | v2.10d：`providers.search_fee_usd(price_id)` | 价格表里写了 `search_fee_usd` 的（Kimi，按区域）用它，否则用这家 adapter 的 `search_fee_usd`（其余三家不变） |
-| v2.10d：`search_mode`、`tools_search_request(key, query, limit=)`、`tools_search_unpack(d)` | `search_mode = "queries"`（Kimi）：`Searcher.search` 不走 `search_request` 那条路，改走 `_search_by_queries`（第 11.5 节）。没有这个属性的 adapter 照旧（`"model"`） |
-| v2.10d：`reset_header`、`llm.retry_after(ad, headers)` | 出错时要等多少秒：先看 `retry-after`；没有、且 adapter 指定了 `reset_header`（Kimi 搜索接口的 `X-RateLimit-Reset`，Unix 秒）时换成距现在的秒数。`honor_retry_after = False`（DeepSeek）时照旧不看；Claude / OpenAI 没有 `reset_header`，行为不变 |
+| v2.10h：`search_request(..., region=None)` | 五家的 `search_request` 都多收一个 `region`（只有 GLM 用：两站的搜索引擎不同；DeepSeek / Claude / GPT 不用，请求体不变）。`Searcher.search` 在自带 key 的运行里传 `spec.region`，命令行传 None。下面四行（`search_mode`、`reset_header`、`tools_search_request` / `search_settings`、`search_bills_every_ok_response`）v2.10h 删掉（第 16 节） |
+| ~~v2.10d：`search_mode`、`tools_search_request(key, query, limit=)`、`tools_search_unpack(d)`~~（v2.10h 删掉） | `search_mode = "queries"`（Kimi）：`Searcher.search` 不走 `search_request` 那条路，改走 `_search_by_queries`（第 11.5 节）。没有这个属性的 adapter 照旧（`"model"`） |
+| ~~v2.10d：`reset_header`~~（v2.10h 删掉）、`llm.retry_after(ad, headers)` | 出错时要等多少秒：先看 `retry-after`；没有、且 adapter 指定了 `reset_header`（Kimi 搜索接口的 `X-RateLimit-Reset`，Unix 秒）时换成距现在的秒数。`honor_retry_after = False`（DeepSeek）时照旧不看；Claude / OpenAI 没有 `reset_header`，行为不变 |
 | v2.10d：`region_labels`、`MODELS[m]["thinking_param"]` / `["thinking_depth"]` | 网页用：区域的说明；这个模型用哪个字段控制思考、有没有深度档位（K2.6 没有：low / medium / high 都是「开」） |
-| v2.10e：`tools_search_request(key, query, limit=, region=)`、`search_settings(region)` | 搜索请求按区域建（GLM 两站的引擎和必填字段不同；Kimi 不用 region）；`run_settings` 的 `search_queries` 里记哪些搜索设置（Kimi 仍是 `timeout_seconds`，GLM 是引擎等） |
-| v2.10e：`search_bills_every_ok_response` | 「查询词」模式的计费：没有这个属性（Kimi）= 只有结果非空才记一次；GLM 为 True = 每个 HTTP 200 都记一次（含空结果、形状不对的） |
+| ~~v2.10e：`tools_search_request(key, query, limit=, region=)`、`search_settings(region)`~~（v2.10h 删掉） | 搜索请求按区域建（GLM 两站的引擎和必填字段不同；Kimi 不用 region）；`run_settings` 的 `search_queries` 里记哪些搜索设置（Kimi 仍是 `timeout_seconds`，GLM 是引擎等） |
+| ~~v2.10e：`search_bills_every_ok_response`~~（v2.10h 删掉） | 「查询词」模式的计费：没有这个属性（Kimi）= 只有结果非空才记一次；GLM 为 True = 每个 HTTP 200 都记一次（含空结果、形状不对的） |
 | v2.10e：`parse_error(raw)` | adapter 有它时 `llm.server_error` 用它解析错误 body（GLM：只有 `code` / `message`，可能没有外层 `error`），日志记 `server_error_code` / `server_error`、不记 `server_error_type`；`llm.server_error_detail` 对这种记录写 `(code 1214: message)`。其余 provider 没有这个钩子，文字不变 |
 | v2.10e：`models_unpack` 第二项可以是 `None` | 「列表全不全不知道」（GLM 的 models 接口没有文档）：所选模型不在里面时 `check_key` 的 `model_listed` 是 None，message 写「没核对」而不是「不在列表里」 |
 | v2.10e：`key_note`、`key_pages`（GLM） | 网页上要显示的 key 说明（只收 Standard API Key、不收 Coding Plan key）和两站建 key 的页面；`PROVIDERS["glm"]["key_note"]` 是同一段 |
@@ -519,6 +521,9 @@ explicit 断点只缓存固定的提示词（要改请求体的消息格式）�
 
 ## 11. Kimi adapter（`KimiAdapter`，v2.10d）
 
+> **v2.10h（用户 10-21）**：K2.6 删掉，只剩 K3；搜索改走 Responses API 自带的 web_search（第 16 节）。本节里关于 K2.6、
+> 「生成查询词 + `POST /v1/tools/search`」（11.5）、按 $0.002 / ¥0.01 记的搜索费、`X-RateLimit-Reset` 等待的部分作废，留作记录。
+
 Moonshot AI 开放平台。同前两家：标准库 urllib，不装 SDK（官方示例用 OpenAI SDK 换 base_url；这里直接发 HTTP，和其余 provider 共用外层循环、
 不跟随跳转、假服务测试）。JSON 调用走 OpenAI 兼容的 Chat Completions；Responses / Anthropic Messages 兼容接口文档里只支持 `kimi-k3`，不用
 （K2.6 只能走 Chat Completions）。API 细节在 2026-10-21 对照官方 `.md` 原文（页面地址加 `.md`）逐条核过，价格表是 JS 渲染的，数字取自页面 HTML
@@ -599,7 +604,7 @@ an error, so do not pass it explicitly"；用户决定 5）；`prompt_cache_opti
 (...); the run was stopped without retrying. Top up the Kimi account on the platform where the key was created (platform.kimi.ai or platform.kimi.com), then run again.`（不含服务端原文。）
 Kimi 文档里没有 402；也没有像 OpenAI 那样分「用户自设的消费上限」的错误码（国际站项目可设每日预算，到额后拒绝请求，调研记录有约 10 分钟延迟；返回什么错误没查到，未核实）。
 
-### 11.5 搜索：生成查询词 + `POST /v1/tools/search`
+### 11.5 搜索：生成查询词 + `POST /v1/tools/search`（v2.10h 作废，见第 16 节）
 
 为什么不用模型自己搜：内置工具 `$web_search` 在 2026-10-20 下线（WebSearch Pricing 页：expected to be deprecated on October 20, 2026；For new integrations, please use the
 `/v1/tools/search` endpoint）；Anthropic 兼容接口文档里没有 web_search 服务端工具（调研记录）；Responses API 的 web_search 只支持 K3、计费页没列价格（调研记录）；官方工具 `web-search`
@@ -740,6 +745,9 @@ CNY 原价存在 `PRICES[...]["listed"]`，`peak` / `search_fee_usd` 是除以 6
 
 ## 12. GLM adapter（`GLMAdapter`，v2.10e）
 
+> **v2.10h（用户 10-21）**：搜索改走 Chat Completions 自带的 web_search 工具（第 16 节）。本节 12.5「生成查询词 + `POST /web_search`」作废，
+> 留作记录；JSON 调用（12.2–12.4）、价格（12.6）、key 校验（12.8）不变。
+
 Z.ai 国际站和智谱开放平台国内站。同前几家：标准库 urllib，不装官方 SDK（`zai-sdk`）：和其余 provider 共用外层循环、不跟随跳转、假服务测试。
 JSON 调用走 OpenAI 兼容的 Chat Completions（两站的 API 参考都写明）；Anthropic Messages 兼容端点和 Responses 兼容端点支持哪些参数没写全（调研记录），不用。
 API 细节在 2026-10-21 对照两站官方 `.md` 原文（页面地址加 `.md`）逐条核过；国际站和国内站的同名页面有出入时分开写。
@@ -831,7 +839,7 @@ API 细节在 2026-10-21 对照两站官方 `.md` 原文（页面地址加 `.md`
 Top up the GLM account (or check its limits) on the platform where the key was created (z.ai/manage-apikey/billing or bigmodel.cn), make sure it is a Standard API Key,
 then run again.`（不含服务端原文。）
 
-### 12.5 搜索：生成查询词 + `POST {base}/web_search`
+### 12.5 搜索：生成查询词 + `POST {base}/web_search`（v2.10h 作废，见第 16 节）
 
 为什么不用模型自己搜：Chat Completions 的内置 `web_search` 工具是「检索结果喂给模型再生成」，不像 Anthropic 的服务端工具那样多轮自主搜，而且 API 参考写的引擎
 `search_pro_jina` 和指南示例的 `search-prime` 对不上（调研记录）；独立的 Web Search API 直接给结构化结果（title / link / content），正好只要 URL。
@@ -1015,6 +1023,8 @@ then run again.`（不含服务端原文。）
 | glm-5.3（low） | 9 | $1.69 | $1.69 | $1.89 | $0.20 | 否 | — |
 | glm-5.3@cn（low） | 10 | $1.30 | $1.30 | $1.25 | $0.19 | 否 | — |
 
+（v2.10h：K2.6 删掉；K3 和 GLM 的数字按自带搜索的预扣重算，见第 16.6 节。）
+
 Astra 的 $2.50 是「只剩 1 个方向时放得下」的上限（往上找到的第一档）；Astra 在 $10 下有 7 个方向，又放不下，要 $17。这张表就是 v2.10b–e 一直说的「贵模型在 $2 下跑不起来」，网页现在把它直接显示出来；预算本身的做法没改（等你定）。
 
 ### 13.5 已知限制、没做的
@@ -1088,6 +1098,8 @@ Claude 的默认组合（Opus 5.5 + $2）第一轮就中止（规划和两次搜
 | glm-4.7-flashx / @cn（off） | 10 | $0.51 / $0.13 | $0.11 / $0.04 | 否 | — | 否 |
 | glm-5.2 / glm-5.2@cn（off） | 9 / 10 | $1.31 / $0.93 | $0.50 / $0.39 | 否 | — | 否 |
 | glm-5.3 / glm-5.3@cn（low） | 9 / 10 | $1.69 / $1.30 | $0.93 / $0.79 | 否 | — | 否 |
+
+（v2.10h：K2.6 那一行作废；K3、GLM 的最坏情况预扣按自带搜索重算，见第 16.6 节。）
 
 ### 14.2 中途停下的运行：网页状态和终稿（medium）
 
@@ -1273,3 +1285,211 @@ OpenAI / Anthropic 两种格式（colspan=2），Anthropic 格式的深度是 `o
 ## 15. v2.10g：DeepSeek 搜索请求保持原样（用户 10-21 决定）
 
 用户 10-21：「保持原本一样即可，我觉得无所谓」。v2.10f 在自带 key 的 DeepSeek 搜索请求末尾加的 `thinking: disabled`（及 `output_config`）撤回，`DeepSeekAdapter.search_request_spec` 删除；命令行和自带 key 的运行发出的搜索请求体都和 v2.9b 逐字相同（不带 thinking 字段，服务端默认）。第 14.6 节的这一条作废。
+
+
+## 16. v2.10h：每个模型只用自家自带的联网搜索（用户 10-21 决定）
+
+### 16.1 用户的规则
+
+用户 10-21 原话：「把K2.6直接删了，K3只用它自带的，别的也是，都尽量只用自带的，如果没有可以直接把那款模型删了」。
+
+做法：每个模型的搜索只走这家 API 自带的联网搜索工具（服务端执行、结果和模型的回答在同一次调用里回来）；v2.10d / e 给 Kimi、GLM
+做的「我们先用一次 JSON 调用生成查询词、再由代码去调一个独立的 REST 搜索接口」那条路不再允许，整条删掉。找不到自带搜索的模型从
+目录、网页、测试里删掉。DeepSeek 的请求体（命令行、回测、自带 key 的运行）逐字节不变，已有角色的提示词不变（G2 sha 不变）。
+
+**口径（要你确认的一点）**：DeepSeek、Claude、GPT 的自带搜索是「模型驱动」的：模型在推理中自己决定搜什么、搜几次。K3 和 GLM 的
+自带搜索不是：K3 是服务端先按输入判断要不要搜、在模型回答之前搜（Responses 页：the server first decides from the input whether a
+search is needed）；GLM 是服务端先做搜索意图识别、一次请求搜一次、结果按模板交给模型（官方叫 retrieval-augmented generation /
+「对话中的网络搜索」）。这里按你的原话「只用它自带的」处理：自带的就用，K3、GLM 都保留。如果你要的是严格的「模型驱动」，K3 和 GLM
+三个模型都要删（这和「K3 只用它自带的」矛盾，所以没按这个口径做）。
+
+### 16.2 每个模型的结论（2026-10-21 按官方文档逐个核对；只读文档，没有付费调用）
+
+| provider | 模型 | 自带的联网搜索 | 结论 | 依据（官方页） |
+|---|---|---|---|---|
+| DeepSeek | `deepseek-flash` | Anthropic 兼容接口 `POST /anthropic/v1/messages` 的服务端 `web_search_20250305`，模型驱动 | 保留，不改（请求体同 v2.9b） | Anthropic API 兼容页、Claude Code 集成页（The DeepSeek API natively supports the Web Search feature）；项目存档 1,191 次实跑都有 `web_search_requests` |
+| DeepSeek | `deepseek-v4-pro` | 同上 | 保留，不改 | 官方写 v4-pro 支持原生搜索（Responses API / Codex 页）；**但「v4-pro 在 Anthropic 端点上用 web_search」只能从 Claude Code 页推断，存档里 0 次实跑（未核实）** |
+| Claude | Haiku 5.5 / Sonnet 5.5 / Opus 5.5 / Fable 5.1 | Messages API 的 `web_search_20250305`，模型驱动 | 保留，不改 | Web search tool 页；按模型的 capability 标志（Models API）要有效 key 才能查，没查（未核实） |
+| GPT | 6 Luna / 6.1 Sol / 6 Astra | Responses API 的 `web_search`，模型驱动 | 保留，不改 | 三个模型页的 Supported tools（Responses API）都有 web_search；web search 指南 |
+| Kimi | `kimi-k2.6` | 没有可用的：Responses API 只支持 `kimi-k3`；Chat Completions 的 `$web_search` 2026-10-20 下线；官方工具 `web-search` 在 K3 快速开始页写着「being updated and is not recommended」；`/v1/tools/search` 是代码驱动的 REST 接口（新规则不允许） | **删除** | Responses 页（This endpoint currently supports kimi-k3）、Use Web Search 指南（Retires on October 20, 2026）、WebSearch Pricing 页 |
+| Kimi | `kimi-k3` | Responses API（`POST /v1/responses`）的 `web_search`；服务端先判断要不要搜（不是模型驱动） | **改走自带** | 两站的 Responses 页（内容相同，两站都支持） |
+| GLM | `glm-5.3` / `glm-5.2` / `glm-4.7-flashx` | Chat Completions 的 `web_search` 工具（`search_result: true` 时返回结果的 link）；服务端意图识别 + 一次搜索（不是模型驱动） | **改走自带** | 两站 Chat Completion API 参考（WebSearchToolSchema / WebSearchObject）、联网搜索指南（对话中的网络搜索 / Web Search in Chat） |
+
+区域：K3 的 Responses web_search 两站都有，所以两站都保留；GLM 的 Chat web_search 两站都有，两站都保留。
+
+### 16.3 Kimi K3：请求和回复
+
+改前（v2.10g，一个方向的一次搜索 = 1 次 JSON 调用 + 最多 3 次搜索接口）：
+
+```text
+POST https://api.moonshot.ai/v1/chat/completions
+{"model": "kimi-k3", "messages": [{"role": "system", "content": SEARCH_QUERIES_SYSTEM}, {"role": "user", "content": SEARCH_QUERIES_USER(brief)}],
+ "reasoning_effort": "low", "response_format": {"type": "json_object"}, "max_completion_tokens": 26000, "stream": true,
+ "stream_options": {"include_usage": true}}
+-> {"queries": ["widgets June 2026 national statistics office", ...]}
+POST https://api.moonshot.ai/v1/tools/search   {"text_query": "widgets June 2026 national statistics office", "limit": 4, "timeout_seconds": 30}   （每个查询词一次）
+```
+
+改后（v2.10h，一次请求）：
+
+```text
+POST https://api.moonshot.ai/v1/responses        （国内站 https://api.moonshot.cn/v1/responses）
+Authorization: Bearer <用户的 key>
+{"model": "kimi-k3", "input": "<SEARCH_USER 填好的那段，原样>", "tools": [{"type": "web_search"}],
+ "include": ["web_search_call.action.sources"], "reasoning": {"effort": "low"}, "max_output_tokens": 32192}
+```
+
+| 字段 | 为什么 |
+|---|---|
+| `input`（字符串） | Responses 页：字符串 = 一条 user 消息。搜索 prompt 原样（同 GPT 的搜索），不加 `instructions`，提示词不变 |
+| `tools: [{"type": "web_search"}]` | 每个请求最多一个 web_search；`search_context_size`、`blocked_domains` 会报 invalid_request_error，不发；`user_location` 被忽略，不发 |
+| `include: ["web_search_call.action.sources"]` | 不写就不返回搜索命中的网页（url、title） |
+| `reasoning.effort` | 只有 low / high / max，**省略时默认 max**（最贵），所以显式写；搜索不是 plan / judge / repair，用 low |
+| `max_output_tokens` | 默认 131,072；这里 8,192 + 思考余量 24,000（K3 永远在想，同 JSON 调用的规则） |
+| 不发 `tool_choice` | 只有 `auto`（就是默认），**没法强制它搜** |
+| 不发 `max_tool_calls` | Responses 页的请求字段里没有（`max_uses` 不用） |
+| 不发 `stream` | 默认 false，回复是文档写明的 `ResponsesResponse` 形状（流式事件 `response.completed` 的 body 文档没写，没用）。风险见 16.8 |
+| 不发 `store`、`prompt_cache_options` | 回复里 `store` Always false；缓存写入省略 = 默认 5 分钟档（同 JSON 调用） |
+
+回复（`openai_search_unpack`，和 GPT 共用；v2.10h 起也取 sources 的 title）：`output[]` 的顺序是 web_search_call（服务端决定要搜时才有）、
+reasoning、message。`web_search_call.action.query` -> 查询词（服务端实际用的）；`action.sources[]` 的 `url` / `title` -> 结果（标题不出 Searcher）；
+message 的 `output_text` -> 模型挑的 URL（Searcher 照旧先用文字里的 URL，不够再按 sources 补）。`status = incomplete`（`incomplete_details.reason`）
+照样用已有的结果，日志 `stop` 记 `incomplete:max_output_tokens`。reasoning 的内容不进返回值和日志。
+
+计价：`kimi_responses_cost`：`usage.input_tokens`（含服务端放进上下文的搜索结果）、`input_tokens_details.cached_tokens` / `cache_write_tokens`
+（和未缓存的部分互斥）、`output_tokens`（含思考），按 K3 的价（11.6，算法同 `kimi_usage_cost`）。usage 是 null（文档允许）时按 0 记。
+搜索费：**两站的 WebSearch Pricing 页都没列 Responses 里 web_search 的单价**（只列了 REST 接口 Basic $0.002 / Pro $0.003 / Fetch $0.002 和已下线的
+`$web_search` $0.005 / ¥0.03），usage 里也没有搜索次数：按 `web_search_call` 的个数 × `config.KIMI_WEB_SEARCH_FEE_ASSUMED_USD` = **$0.01（假设，
+未核实）** 记账，两站都按这个美元数（`PRICES[...]["search_fee_assumed"] = True`；比两站列出的所有搜索单价都高）。
+
+错误：同 11.4（Responses 页的错误形状同 Chat：`{"error": {message, type, code}}`；429 `exceeded_current_quota_error` 停下整次运行，429 限流 /
+503 按 Retry-After 重试，401 / 403 不读 body）。Responses 页只写了 429「Rate limited or out of quota」，余额不足是不是同一个 type 没单列（未核实，按同一规则认）。
+
+### 16.4 GLM：请求和回复
+
+改前（v2.10g，1 次 JSON 调用生成查询词 + 每个查询词一次独立搜索接口）：
+
+```text
+POST https://api.z.ai/api/paas/v4/web_search      {"search_engine": "search-prime", "search_query": "<查询词>", "count": 4}
+POST https://open.bigmodel.cn/api/paas/v4/web_search  {"search_query": "<查询词，最多 70 字符>", "search_engine": "search_std", "search_intent": false, "count": 4}
+```
+
+改后（v2.10h，一次请求，同一个 chat/completions 接口）：
+
+```text
+POST https://api.z.ai/api/paas/v4/chat/completions     （国内站 https://open.bigmodel.cn/api/paas/v4/chat/completions）
+Authorization: Bearer <用户的 key>
+{"model": "glm-5.2", "messages": [{"role": "user", "content": "<SEARCH_USER 填好的那段，原样>"}], "thinking": {"type": "disabled"},
+ "tools": [{"type": "web_search", "web_search": {"enable": true, "search_engine": "search_pro_jina", "search_result": true}}],
+ "max_tokens": 8192, "stream": false}
+```
+
+GLM-5.3（关不掉思考）：`"thinking": {"type": "enabled"}, "reasoning_effort": "low"`，`max_tokens` 32,192；GLM-4.7-FlashX：同 5.2（thinking disabled）。
+国内站 `search_engine` 是 `search_std`。
+
+| 字段 | 为什么 |
+|---|---|
+| `enable: true` | 默认 false |
+| `search_engine` | 必填。**国际站 API 参考的 enum 只有 `search_pro_jina`**（Web Search 指南「Web Search in Chat」的示例写的是 `search-prime`，两处矛盾，按 API 参考，未核实）；国内站可选 search_std / search_pro / search_pro_sogou / search_pro_quark，用最便宜的 `search_std`（¥0.01 / 次，同 v2.10e） |
+| `search_result: true` | 默认 false：不写就不返回结果的 link / title |
+| 不写 `search_query` | 那是「强制按这个查询词搜」，等于由我们写查询词 |
+| 不写 `search_intent`、`require_search` | 用默认：服务端先做搜索意图识别（国内站），不强制按搜索结果回答 |
+| 不写 `count`、`search_domain_filter`、`search_recency_filter`、`content_size`、`search_prompt` | 用默认（count 默认 10；search_prompt 用默认模板，不加新提示词） |
+| 不发 `response_format` | 搜索角色回的是 URL 列表，不是 JSON |
+| 不发 `tool_choice` | 只有 `auto`，而且只对 function 有效 |
+| thinking / reasoning_effort | 同 JSON 调用的规则（12.3）：搜索不是 plan / judge / repair |
+
+回复（`glm_search_unpack`）：`choices[0].message.content` -> 模型的文字（模型挑的 URL）；顶层 `web_search[]` 的 `link` / `title` -> 结果
+（标题不出 Searcher）；回复里没有查询词（服务端自己定，`queries` 是空列表）；`reasoning_content` 不拼、不记。形状不对的部分按空的处理、不抛。
+注意：默认 search_prompt 要求「直接陈述答案，无需说明数据来源」，模型的文字里可能没有 URL，这时 URL 全部来自 `web_search[]`。
+
+计价：token 同 JSON 调用（`glm_usage_cost`；`prompt_tokens` 含放进上下文的搜索结果）。搜索费：国际站价格页 Built-in Tools「Web Search $0.01 / use」
+（现在正好就是这个工具的价）；国内站「搜索工具按照实际调用次数计费」，search_std ¥0.01 / 次（联网搜索指南的搜索引擎说明表同价）。回复里没有
+搜索次数，文档也没写意图识别判定不搜时收不收：**每个 HTTP 200 的回复按一次记**（保守，同 v2.10e 的做法）。错误同 12.4（1113 停下、1302 / 1305 / 1313 重试、
+401 不读 body、400 的业务码和 message 照原样记）。
+
+### 16.5 DeepSeek、Claude、GPT
+
+不改。DeepSeek 的搜索请求体在命令行、回测、自带 key 的运行里都和 v2.9b 逐字节相同（`search_request` 多收的 `region` 不进请求体；
+24 组金样本照旧逐字节相同）。DeepSeek 价格页写 Search API 每 1,000 次成功请求 $0.75、北京时间 2026-11-01 起按次计费；它是否适用于本应用这种直接调
+API 用 web_search 工具的情况，原文没写（未核实）；预算照旧按每次 $0.01 记（偏高），没改。
+
+### 16.6 预算、方向数、网页
+
+- 预扣（`pipeline.configure_byok`）：「生成查询词」那一支删掉，五家同一个规则：搜索输入按 p99 的 72,000 token（K3 / GLM 的搜索结果也进模型的输入），
+  输出按发出的 max tokens（K3、GLM-5.3 关不掉思考：8,192 + 24,000），加 (2 × max_uses + 2) 次搜索费。`configure_byok` 不再收 adapter 参数。
+- 方向数：K3 的搜索费从 $0.002 变成假设的 $0.01，`$2` 下的方向数从 5 变成 4。
+- `state.json` 的 `settings.search_queries`（v2.10d / e 给 Kimi、GLM 记的生成查询词设置）不再记，同 DeepSeek / Claude / GPT。
+- 网页（`/api/providers`，数据驱动，前端没改）：Kimi 只剩 K3，默认模型改成 K3；Kimi、GLM 各加一条「联网搜索用自带工具」的说明（中英）。
+- **Kimi 在默认 `$2` 上限下会被拒跑**：K2.6 删掉以后 Kimi 只剩 K3，K3 一次最小运行的最坏情况预扣 $2.85（国内站 $2.83）> $2，网页拒跑并给出最小上限 $3.00
+  （K3 本来就是这样，只是以前 Kimi 的默认模型是 K2.6）。要不要给 Kimi 改默认上限，没改，等你定。
+
+`$2` 上限、默认档位（`catalog.estimate`；左边是 v2.10f / g，右边是 v2.10h）：
+
+| 计价 id（档位） | 第一轮方向数 | 估计 | 一次最小运行的最坏情况预扣 | 一次搜索预扣 | 拒跑 / 最小上限 |
+|---|---|---|---|---|---|
+| kimi-k2.6 / @cn（off） | 10 / 10 | $0.81 / $0.80 | $0.34 / $0.34 | — | 删除 |
+| kimi-k3（low） | 5 -> 4 | $2.63 -> $2.53 | $2.57 -> $2.85 | -> $0.78 | 拒跑，$3.00 -> $3.00 |
+| kimi-k3@cn（low） | 5 -> 4 | $2.60 -> $2.51 | $2.54 -> $2.83 | -> $0.77 | 拒跑，$3.00 -> $3.00 |
+| glm-4.7-flashx / @cn（off） | 10 / 10 | $0.51 / $0.13（不变） | $0.11 / $0.04 -> $0.11 / $0.05 | -> $0.088 / $0.021 | 否 |
+| glm-5.2 / @cn（off） | 9 / 10 | $1.31 / $0.93（不变） | $0.50 / $0.39 -> $0.59 / $0.46 | -> $0.217 / $0.132 | 否 |
+| glm-5.3 / @cn（low） | 9 / 10 | $1.69 / $1.30（不变） | $0.93 / $0.79 -> $1.01 / $0.86 | -> $0.322 / $0.232 | 否 |
+| DeepSeek / Claude / GPT 各模型 | 不变 | 不变 | 不变 | 不变 | 不变 |
+
+第 13.5 节那句「Kimi / GLM 的搜索不经过模型，按 DeepSeek 的搜索 token 算是高估」不再成立：现在两家的搜索都经过模型，估计的口径和另外三家相同。
+
+### 16.7 删掉的代码
+
+`providers.py`：`kimi-k2.6`（`MODELS`、`PROVIDERS["kimi"]`）、Kimi 的 `search_mode` / `search_limit_max` / `search_timeout_seconds` / `reset_header` /
+`tools_search_request` / `search_settings` / `tools_search_unpack`、K2.6 的 thinking 开关那一支；GLM 的 `search_mode` / `search_bills_every_ok_response` /
+`search_count_max` / `search_query_max_chars` / `tools_search_request` / `tools_search_unpack` / `search_settings`、`_cut_query`。
+`config.py`：`kimi-k2.6`、`kimi-k2.6@cn` 的价格。`agent/search.py`：`_QueryLLM`、`_search_by_queries`、`_write_queries`、`SEARCH_QUERIES_MAX_TOKENS`。
+`agent/prompts.py`：`SEARCH_QUERIES_SYSTEM` / `SEARCH_QUERIES_USER`（只有那条路用；已有角色的提示词没动）。`agent/run.py`：`search_queries` 设置。
+`llm.retry_after`：按 `X-RateLimit-Reset` 等的那一段（只给 `/v1/tools/search` 用）。测试里对应的用例删掉或改写。
+
+### 16.8 已知限制、没核实的
+
+- **K3 的搜索不能强制**：`tool_choice` 只有 auto，服务端判定不搜时没有 web_search_call，URL 只能来自模型的文字（可能来自模型自己的记忆），也可能一个都没有。
+  一次请求里是不是最多搜一次，文档只说「appears at the front of output」，没写上限（未核实）。
+- **K3 快速开始页（两站）写着「Web search is being updated and is not recommended for production workflows in the near term」**（国内站：联网搜索正在更新，
+  近期不建议用于生产流程）。这句在 Important limits 里，没说是不是专指 Formula 官方工具；网页上照写给用户。
+- K3 的 web_search 单价没公布、usage 里没有搜索次数：按每个 web_search_call $0.01 的假设记（未核实）。
+- K3 的搜索是非流式请求：Common Error Codes 页写着服务端 900 秒没回会 504（长的非流式请求常见）；Searcher 的单次读超时 600 秒。搜索用 low、max_output_tokens
+  32,192，没实测要多久。
+- **GLM 国际站的 `search_engine`**：API 参考的 enum 只有 `search_pro_jina`，指南示例是 `search-prime`，按 API 参考（未核实）；不对的话每次搜索都会 400，错误照原样记。
+- GLM 的搜索不是模型驱动：服务端用我们很长的搜索说明自己做意图识别、自己定查询词，效果没测；默认 search_prompt 让模型不写来源，URL 主要靠 `web_search[]`。
+  GLM-5.3 一直开着思考，和 web_search 一起用的效果文档没写。意图识别判定不搜时收不收费没写（按一次记）。GLM-4.7-FlashX 的国际站 id 照旧没核实（12.9）。
+- DeepSeek v4-pro 在 Anthropic 端点上用 web_search 没有实跑过（16.2）；Claude 各模型的 capability 标志没用 key 查过。
+- 这一阶段的真实网络只有不花钱的请求：`probes/native_search_probe.py`（2026-10-22 00:56 UTC）用正式代码建的搜索请求带假 key 发到 K3 两站的
+  `/v1/responses`、GLM 两站的 `/chat/completions`（5.2、5.3）：6 个请求都是 401（Kimi `invalid_authentication_error`，GLM `code 1000`），接口存在、没有跳转、
+  没有回显 key。鉴权在前，这不能说明请求体被接受；有效 key 下的回复形状只按文档写，没有真 key 实测。
+
+### 16.9 Verification（v2.10h）
+
+- 全套测试 671 个通过（v2.10g 是 674 个：Kimi 的查询词 / tools/search / X-RateLimit-Reset / K2.6 用例删掉，新的 Responses 搜索用例加上，Kimi 33 -> 31 个；
+  GLM 的查询词 / web_search 接口用例换成 Chat web_search 用例，31 -> 30 个）。
+- 新的假服务回复：`tests/fake_kimi.py` 的 `search_response`（ResponsesResponse：web_search_call + reasoning + message，sources 带 url / title）和
+  `responses_usage`；`tests/fake_glm.py` 的 `completion(web=...)`（顶层 web_search[]，每项 title / link / content / media / icon / refer / publish_date）。
+  测试对着 127.0.0.1 的假服务真实走 urllib：两家的请求体（逐字段、键顺序、禁发的字段）、两站路由、URL 顺序、标题不外传、计价（含 cache 写入）、
+  搜索费（K3 假设 $0.01 不折算；GLM 两站）、服务端不搜 / incomplete / usage null / 形状不对、余额 429 停下、限流重试、400 照原样、401 不读 body、3xx 不跟随、
+  一个方向的端到端、整次运行端到端（settings 不再有 search_queries）。
+- `tests/test_providers_e2e.py`：K3 两站（low $5、high $20）、GLM 三个模型都跑完（估计 1210）；每个请求都带用户的 key；没有任何请求发到 `/tools/search`、`/web_search`；
+  Kimi 的搜索请求是 `/v1/responses` + `[{"type": "web_search"}]`，GLM 的搜索请求带 web_search 工具、不带 search_query；搜索阶段余额不足五家都干净停下；K3 在 $2 下拒跑。
+- 变异检查 21 处（K3 不 include sources、不写 effort、发 tool_choice、发 max_tool_calls、URL 改回 tools/search、计价不算 cache 写入、国内站搜索费按 CNY 折算、
+  搜索费改回 $0.002、sources 不取标题、URL 顺序；GLM search_result false、国际站引擎写成 search-prime、自己写 search_query、搜索也发 response_format、
+  没结果就不计次、取 url 不取 link、URL 改回 /web_search；Searcher 不传 region；预扣输入改回 30,000、搜索不加思考余量；DeepSeek 请求体里多一个 region）：
+  全部被测试抓到。「计价不算 cache 写入」第一次没抓到：K3 的 5 分钟写入价正好等于 miss 价，结果一样；补了一个写入价不同的假价格的用例后抓到。
+- DeepSeek 默认路径：`tests/test_providers.py` 的 24 组金样本逐字节相同；G2（`probes/compare_continuous_prompts.py`）：
+  `365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4`（和 v2.10g 相同）。
+
+### 16.10 Official docs（v2.10h，2026-10-21 查看）
+
+- Kimi Responses API（国际站 / 国内站）：https://platform.kimi.ai/docs/api/responses 、https://platform.kimi.com/docs/api/responses
+- Kimi K3 快速开始（Important limits：web search 正在更新）：https://platform.kimi.ai/docs/guide/kimi-k3-quickstart 、https://platform.kimi.com/docs/guide/kimi-k3-quickstart
+- Kimi `$web_search`（2026-10-20 下线）：https://platform.kimi.ai/docs/guide/use-web-search ；WebSearch Pricing：https://platform.kimi.ai/docs/pricing/websearch 、https://platform.kimi.com/docs/pricing/websearch
+- GLM Chat Completion（WebSearchToolSchema / WebSearchObject，国际站）：https://docs.z.ai/api-reference/llm/chat-completion ；国内站对话补全：https://docs.bigmodel.cn/api-reference/模型-api/对话补全
+- GLM 联网搜索指南（Web Search in Chat / 对话中的网络搜索、搜索引擎说明）：https://docs.z.ai/guides/tools/web-search 、https://docs.bigmodel.cn/cn/guide/tools/web-search
+- GLM 价格（国际站 Built-in Tools Web Search $0.01 / use；国内站搜索工具按次）：https://docs.z.ai/guides/overview/pricing 、https://docs.bigmodel.cn/cn/guide/start/pricing
+- DeepSeek：Anthropic API 兼容 https://api-docs.deepseek.com/guides/anthropic_api 、Claude Code 集成 https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code 、
+  Responses API https://api-docs.deepseek.com/guides/responses_api 、价格 https://api-docs.deepseek.com/quick_start/pricing
+- Claude web search tool：https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool ；OpenAI web search：https://developers.openai.com/api/docs/guides/tools-web-search

@@ -1,7 +1,8 @@
 """v2.10d 探针（不花钱）：对真实的 Kimi 接口发不带 key / 带明显是假的 key 的请求，看 401 的形状，并确认 llm.check_key 的处理。
   1. 国际站 GET https://api.moonshot.ai/v1/models：不带 key、带假 key；
   2. 国内站 GET https://api.moonshot.cn/v1/models：带假 key（两站的 key 互不通用，看返回是否相同）；
-  3. 国际站 POST /v1/tools/search、POST /v1/chat/completions：带假 key（鉴权就被拒，不会执行搜索或生成）；
+  3. 国际站 POST /v1/chat/completions：带假 key（鉴权就被拒，不会生成）；（v2.10d 时还发过 POST /v1/tools/search，v2.10h 起那个
+     接口不用、K2.6 删掉，这里改成 K3；搜索接口 /v1/responses 的假 key 探针在 probes/native_search_probe.py）
   4. llm.check_key：国际站、国内站各一次（假 key，Authorization: Bearer，和正式代码同一条路）。
 不读 .env、不读任何 key 文件；结果写到 probes/out/kimi_key_probe.json（gitignore）。
 用法：.venv/Scripts/python.exe probes/kimi_key_probe.py
@@ -43,10 +44,9 @@ def main():
            "global_models_no_key": send(g["models"], {}),
            "global_models_fake_key": send(g["models"], fake),
            "cn_models_fake_key": send(cn["models"], fake),
-           "global_tools_search_fake_key": send(g["search"], fake, {"text_query": "test", "limit": 1, "timeout_seconds": 5}),
-           "global_chat_fake_key": send(g["chat"], fake, {"model": "kimi-k2.6", "messages": [{"role": "user", "content": "hi"}],
-                                                         "thinking": {"type": "disabled"}, "max_completion_tokens": 1}),
-           "check_key_global": llm.check_key(PV.ModelSpec("kimi", "kimi-k2.6", FAKE_KEY)),
+           "global_chat_fake_key": send(g["chat"], fake, {"model": "kimi-k3", "messages": [{"role": "user", "content": "hi"}],
+                                                         "reasoning_effort": "low", "max_completion_tokens": 1}),
+           "check_key_global": llm.check_key(PV.ModelSpec("kimi", "kimi-k3", FAKE_KEY, thinking="low")),
            "check_key_cn": llm.check_key(PV.ModelSpec("kimi", "kimi-k3", FAKE_KEY, region="cn", thinking="low"))}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")

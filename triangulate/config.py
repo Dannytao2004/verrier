@@ -140,47 +140,50 @@ PRICES.update({   # input, cached input, 30m write, 12h write, output；long con
 # 两站的 key、余额、价格各自独立，所以价格按「模型@区域」记：国际站用模型名本身，国内站是 "kimi-k3@cn"（ModelSpec.price_id）。
 # 价格表在页面里由 JS 渲染（.md 导出是空表），数字取自页面 HTML 里编译后的表格（列名见 PROVIDERS.md 第 11.6 节）。
 # 没有分时价：peak = offpeak = (cache hit, cache miss, output)。K3 另列缓存写入（5 分钟 / 1 小时）；本项目不写 prompt_cache_options，
-# 按官方默认是 5 分钟档（K3 的 5 分钟写入价 = cache miss 价）。K2 系列没有单列写入价（写入按 cache miss 计）。
+# 按官方默认是 5 分钟档（K3 的 5 分钟写入价 = cache miss 价）。
 # prompt_cache = "implicit"：服务端自动缓存重复前缀，但这个 agent 在 Kimi 上的命中率没测过，「一个方向」的估价把输入全按 miss 价算。
-# search_fee_usd：POST /v1/tools/search（Web Search Basic）每次的价格，只有 HTTP 200 且 search_results 非空才收费。
+# v2.10h：K2.6 删掉（用户 10-21：只用各家自带的搜索，K2.6 没有）。K3 的搜索改走 Responses API 自带的 web_search 工具；两站的 WebSearch
+# Pricing 页都没列它的单价（只列了 REST 接口 Basic / Pro / Fetch 和已下线的 $web_search），usage 里也没有搜索次数，所以按 web_search_call
+# 的个数、每次 KIMI_WEB_SEARCH_FEE_ASSUMED_USD 的保守假设记账（同 DeepSeek 的做法；高于两站列出的所有搜索单价：旧 $web_search
+# $0.005 / ¥0.03、Pro $0.003 / ¥0.015），两站都按这个美元数（search_fee_assumed = True，不是官方价）。
 # 国内站的 CNY 价按下面的汇率折成 USD（这次运行的上限是美元）：中国人民银行授权中国外汇交易中心公布的 2026-10-21 人民币汇率中间价
 KIMI_PRICING = "https://platform.kimi.ai/docs/pricing/chat"
 KIMI_PRICING_CN = "https://platform.kimi.com/docs/pricing/chat"
 KIMI_SEARCH_PRICING = "https://platform.kimi.ai/docs/pricing/websearch"
 KIMI_SEARCH_PRICING_CN = "https://platform.kimi.com/docs/pricing/websearch"
+KIMI_WEB_SEARCH_FEE_ASSUMED_USD = 0.01
 CNY_PER_USD = 6.7192
 CNY_PER_USD_SOURCE = "https://www.pbc.gov.cn/zhengcehuobisi/125207/125217/125925/2026102108513972558/index.html"
 CNY_PER_USD_DATE = "2026-10-21"
 
 
-def _kimi_price(currency, hit, miss, out, search_fee, write_5m=None, write_1h=None) -> dict:
-    """Kimi 一个模型在一个区域的价格。currency 是 "USD" 或 "CNY"（CNY 按 CNY_PER_USD 折成 USD，原价另存在 "listed" 里）。"""
+def _kimi_price(currency, hit, miss, out, write_5m, write_1h) -> dict:
+    """Kimi 一个模型在一个区域的价格。currency 是 "USD" 或 "CNY"（CNY 按 CNY_PER_USD 折成 USD，原价另存在 "listed" 里）。
+    搜索费是假设的美元数（见上面的说明），不按区域折算。"""
     r = 1.0 if currency == "USD" else 1.0 / CNY_PER_USD
     p = {"provider": "kimi", "offpeak": (hit * r, miss * r, out * r), "peak": (hit * r, miss * r, out * r),
-         "prompt_cache": "implicit", "search_fee_usd": search_fee * r, "currency": currency,
-         "listed": {"hit": hit, "miss": miss, "out": out, "search_fee": search_fee, "write_5m": write_5m, "write_1h": write_1h},
+         "prompt_cache": "implicit", "search_fee_usd": KIMI_WEB_SEARCH_FEE_ASSUMED_USD, "search_fee_assumed": True,
+         "currency": currency, "listed": {"hit": hit, "miss": miss, "out": out, "write_5m": write_5m, "write_1h": write_1h},
          "source": KIMI_PRICING if currency == "USD" else KIMI_PRICING_CN,
-         "search_source": KIMI_SEARCH_PRICING if currency == "USD" else KIMI_SEARCH_PRICING_CN, "checked": "2026-10-21"}
-    if write_5m is not None:
-        p["cache_write_5m"], p["cache_write_1h"] = write_5m * r, write_1h * r
+         "search_source": KIMI_SEARCH_PRICING if currency == "USD" else KIMI_SEARCH_PRICING_CN, "checked": "2026-10-21",
+         "cache_write_5m": write_5m * r, "cache_write_1h": write_1h * r}
     if currency != "USD":
         p["fx"] = {"cny_per_usd": CNY_PER_USD, "source": CNY_PER_USD_SOURCE, "date": CNY_PER_USD_DATE}
     return p
 
 
-PRICES.update({   # cache hit, cache miss, output, 每次搜索；K3 另有 5 分钟 / 1 小时缓存写入
-    "kimi-k3": _kimi_price("USD", 0.30, 3.00, 15.00, 0.002, write_5m=3.00, write_1h=6.00),
-    "kimi-k2.6": _kimi_price("USD", 0.16, 0.95, 4.00, 0.002),
-    "kimi-k3@cn": _kimi_price("CNY", 2.00, 20.00, 100.00, 0.01, write_5m=20.00, write_1h=40.00),
-    "kimi-k2.6@cn": _kimi_price("CNY", 1.10, 6.50, 27.00, 0.01),
+PRICES.update({   # cache hit, cache miss, output, 5 分钟 / 1 小时缓存写入
+    "kimi-k3": _kimi_price("USD", 0.30, 3.00, 15.00, write_5m=3.00, write_1h=6.00),
+    "kimi-k3@cn": _kimi_price("CNY", 2.00, 20.00, 100.00, write_5m=20.00, write_1h=40.00),
 })
 
 # v2.10e：GLM（Z.ai 国际站 api.z.ai 按 USD；智谱开放平台国内站 open.bigmodel.cn 按 CNY，2026-10-21 查看）。同 Kimi：两站的 key、余额、
 # 价格各自独立，价格按「模型@区域」记（国际站是模型名本身，国内站 "glm-5.3@cn"），CNY 按上面同一个汇率中间价折成 USD。
 # 没有分时价：peak = offpeak = (cached input, input, output)。缓存是隐式自动的（Context Caching 指南），没有写入费；缓存存储
 # 「限时免费」（两站价格页），这里不计。prompt_cache = "implicit"：这个 agent 在 GLM 上的命中率没测过，「一个方向」的估价和预扣把输入
-# 全按 input 价算（同 Kimi）。search_fee_usd：POST /web_search 每次的价格。国际站价格页只列了 Built-in Tools 的「Web Search
-# $0.01 / use」，没说是否就是独立接口 search-prime 的价格（未核实，按它记）；国内站 Search-Std ¥0.01 / 次（按实际调用次数计费）
+# 全按 input 价算（同 Kimi）。search_fee_usd：v2.10h 起是 Chat Completions 自带的 web_search 工具每次的价格（用户 10-21：只用自带的
+# 搜索）：国际站价格页 Built-in Tools「Web Search $0.01 / use」；国内站「搜索工具按照实际调用次数计费」，本项目用的引擎 search_std
+# ¥0.01 / 次（联网搜索指南的搜索引擎说明表同价）
 GLM_PRICING = "https://docs.z.ai/guides/overview/pricing"
 GLM_PRICING_CN = "https://docs.bigmodel.cn/cn/guide/start/pricing"
 

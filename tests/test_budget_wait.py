@@ -284,12 +284,14 @@ class TestSearchContinuationReserves(unittest.TestCase):
         self.assertAlmostEqual(b.reserved, 0.0)
 
     def test_reserve_inputs(self):
-        """模型自己搜的 provider（Claude、GPT、DeepSeek）搜索输入按 72,000 token；生成查询词的（Kimi、GLM）照旧 30,000。"""
+        """模型自己搜的 provider（Claude、GPT、DeepSeek）搜索输入按 72,000 token。v2.10h：Kimi、GLM 也改成自带的搜索（搜索结果进模型的
+        输入），同样 72,000（以前「生成查询词」那条路按 30,000）。"""
         ctx = self.ctx(10.0)
         self.assertEqual(ctx.budget.search_input_tokens, 72_000)
-        for provider, model, want in (("kimi", "kimi-k2.6", 30_000), ("glm", "glm-5.2", 30_000), ("gpt", "gpt-6-luna", 72_000),
-                                      ("deepseek", "deepseek-flash", 72_000)):
-            sp = PV.ModelSpec(provider, model, KEY)
+        for provider, model, level in (("kimi", "kimi-k3", "low"), ("glm", "glm-5.2", "off"), ("gpt", "gpt-6-luna", "off"),
+                                       ("deepseek", "deepseek-flash", "off")):
+            want = 72_000
+            sp = PV.ModelSpec(provider, model, KEY, thinking=level)
             c = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=sp)
             self.assertEqual((c.budget.search_input_tokens, c.budget.wait_for_room), (want, True), model)
         self.assertEqual(PV.reserve_chars_per_token("deepseek-v4-pro"), 2)

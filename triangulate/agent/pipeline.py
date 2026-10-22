@@ -14,7 +14,7 @@ from ..providers import reserve_chars_per_token, search_fee_usd, tokens_for_mode
 from . import evidence as ev
 from .fetch import fetch_live, fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
-from .search import SEARCH_QUERIES_MAX_TOKENS, Searcher
+from .search import Searcher
 
 MAX_CHARS_TO_EXTRACTOR = 400_000   # v2.8b 从 24_000 放宽（HTML 和 PDF 都适用）：长的统计页不再只发开头
 QUOTE_STORE_CHARS = 200
@@ -55,7 +55,7 @@ class Budget:
     search_tokens = None   # v2.10b：一次搜索发出的 max_tokens；None = MAX_TOKENS["search"]（有 ModelSpec 时 Context 设成实际发出的值）
     # 一次搜索请求预扣的输入 token。命令行（没有 spec）照旧 30,000；v2.10f 自带 key 的运行（模型自己搜的 provider）按已存 1,262 次
     # DeepSeek 搜索 input + cache read 的 p99（71,669；中位 27,719，p90 44,283，最大 265,681，42% 超过 30,000）取 72,000。
-    # 「生成查询词 + 搜索接口」的 provider（Kimi、GLM）的模型调用只有生成查询词（输入是几千字符的 brief），照旧 30,000
+    # v2.10h：Kimi、GLM 也改成各家自带的搜索（搜索结果进模型的输入），五家都按 72,000
     SEARCH_INPUT_TOKENS = 30_000
     SEARCH_INPUT_TOKENS_BYOK = 72_000
     search_input_tokens = None   # None = SEARCH_INPUT_TOKENS；configure_byok 设
@@ -278,13 +278,12 @@ class Budget:
         return out
 
 
-def configure_byok(b: Budget, model: str, level: str, adapter) -> Budget:
+def configure_byok(b: Budget, model: str, level: str) -> Budget:
     """v2.10f：自带 key 的运行的预扣设置（pipeline.Context 和网页的花费估计 web/catalog.py 共用，两边一致）：
-    搜索预扣按实际发出的 max_tokens（含思考余量；「生成查询词」的 provider 按那次调用的 max_tokens）、模型自己搜的 provider 输入按 p99；
-    预扣放不下只是因为在途的预扣时等（wait_for_room）。"""
-    queries = getattr(adapter, "search_mode", "model") == "queries"
-    b.search_tokens = tokens_for_model(model, level, "search", SEARCH_QUERIES_MAX_TOKENS if queries else MAX_TOKENS["search"])[1]
-    b.search_input_tokens = Budget.SEARCH_INPUT_TOKENS if queries else Budget.SEARCH_INPUT_TOKENS_BYOK
+    搜索预扣按实际发出的 max_tokens（含思考余量）、输入按 p99（SEARCH_INPUT_TOKENS_BYOK）；预扣放不下只是因为在途的预扣时等
+    （wait_for_room）。v2.10h：「生成查询词」的 provider 没有了，五家同一个规则（以前那一支的参数 adapter 也删掉）。"""
+    b.search_tokens = tokens_for_model(model, level, "search", MAX_TOKENS["search"])[1]
+    b.search_input_tokens = Budget.SEARCH_INPUT_TOKENS_BYOK
     b.wait_for_room = True
     return b
 
@@ -344,10 +343,9 @@ class Context:
         # v2.10d：按 spec.price_id 计价（Kimi 国内站是 "kimi-k3@cn"，其余就是模型名）
         self.budget = budget or (Budget() if spec is None else Budget.for_model(spec.price_id, usd=spec.usd_cap))
         self.calls_path = calls_path
-        if spec is not None:   # v2.10b：搜索也开思考的模型（Opus 5.5 / Fable 5.1）预扣按带余量的 max_tokens
-            # v2.10d：「生成查询词 + 搜索接口」的 provider（Kimi），搜索里唯一的模型调用是生成查询词，预扣按它发出的 max_tokens
+        if spec is not None:   # v2.10b：搜索也开思考的模型（Opus 5.5 / Fable 5.1、K3、GLM-5.3）预扣按带余量的 max_tokens
             # v2.10f：搜索输入按 p99、放不下只因为在途时等（configure_byok）
-            configure_byok(self.budget, spec.model, spec.thinking, spec.adapter)
+            configure_byok(self.budget, spec.model, spec.thinking)
         self.llm = AgentLLM(calls_path, self.budget, spec=spec)
         self.searcher = Searcher(log=self.llm._log, spec=spec)
         if spec is not None:   # v2.10f：Claude 搜索的 pause_turn 续接之前再预扣一份（放不下就不续）

@@ -117,9 +117,10 @@ class TestProvidersApi(_Client):
         self.assertEqual(m["claude-sonnet-5-5"]["thinking"]["sends"]["off"]["thinking"], {"type": "between_tools"})
         self.assertEqual(m["gpt-6-luna"]["thinking"]["sends"]["off"], {"reasoning_effort": "none"})
         self.assertEqual(m["kimi-k3"]["thinking"]["sends"]["high"], {"reasoning_effort": "max"})
-        self.assertEqual(m["kimi-k2.6"]["thinking"]["sends"]["high"], {"thinking": {"type": "enabled"}})
+        self.assertNotIn("kimi-k2.6", m)   # v2.10h：删掉（没有自带的搜索）
         self.assertEqual(m["glm-5.2"]["thinking"]["sends"]["low"]["reasoning_effort"], "high")
-        self.assertEqual(m["kimi-k2.6"]["notes"][0]["en"], "No depth levels: low, medium and high all mean thinking on.")
+        self.assertEqual(m["glm-4.7-flashx"]["thinking"]["sends"]["high"], {"thinking": {"type": "enabled"}})
+        self.assertEqual(m["glm-4.7-flashx"]["notes"][0]["en"], "No depth levels: low, medium and high all mean thinking on.")
         self.assertIn("cannot be turned off", m["gpt-6-astra"]["notes"][0]["en"])
 
     def test_estimates_follow_the_cap_and_the_budget(self):
@@ -167,12 +168,16 @@ class TestProvidersApi(_Client):
         self.assertNotIn("min_cap_usd", sonnet)
         cn = est(2, "kimi-k3", "cn")
         self.assertEqual(cn["price_id"], "kimi-k3@cn")
-        # 每家的默认模型 + 默认档位在 $2 下都放得下（网页的默认组合不会被拒）
+        # 每家的默认模型 + 默认档位在 $2 下都放得下（网页的默认组合不会被拒）。v2.10h 例外：Kimi 只剩 K3（K2.6 删掉：没有自带的搜索），
+        # K3 关不掉思考，$2 放不下一次最小运行：网页照样拒跑并给出最小上限 $3.00
         v = self.c.get("/api/providers").json()
         for p in v["providers"]:
             m = next(x for x in p["models"] if x["id"] == p["default_model"])
             e = m["by_region"][p["default_region"]]["by_thinking"][m["thinking"]["default"]]
-            self.assertFalse(e["stops_early"], (p["id"], e))
+            if p["id"] == "kimi":
+                self.assertEqual((m["id"], e["stops_early"], e["min_cap_usd"]), ("kimi-k3", True, 3.0))
+            else:
+                self.assertFalse(e["stops_early"], (p["id"], e))
 
     def test_bad_cap(self):
         for bad in ("0", "-1", "nan", "inf"):

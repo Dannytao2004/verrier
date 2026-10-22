@@ -2,13 +2,12 @@
 假服务（tests/fake_kimi.py）跑：真实走 urllib + urlopen_no_redirect，请求头、请求体、HTTPError 的 body 都是真的；不联网、
 不需要真 key、不读 key 文件。
 
-JSON 调用：OpenAI 兼容的流式 Chat Completions；搜索：一次 JSON 调用生成查询词 + 每个查询词 POST /v1/tools/search。
-每一项对照的官方文档写在各个测试的说明里（链接见 PROVIDERS.md 第 11 节）。
+JSON 调用：OpenAI 兼容的流式 Chat Completions。v2.10h（用户 10-21：只用各家自带的联网搜索）：只剩 K3（K2.6 删掉）；搜索 =
+Responses API（POST /v1/responses）自带的 web_search 工具，不再有「生成查询词 + /v1/tools/search」。
+每一项对照的官方文档写在各个测试的说明里（链接见 PROVIDERS.md 第 11、16 节）。
 """
-import http.client
 import json
 import tempfile
-import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -26,9 +25,10 @@ MSGS = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": "Esti
 BRIEF = "Find official widget statistics for June 2026.\n\nAfter searching, reply with at most 4 URLs, most useful first."
 FX = config.CNY_PER_USD
 EXTRA = config.THINKING_EXTRA_TOKENS
+SEARCH_OUT = config.MAX_TOKENS["search"] + EXTRA   # K3 永远在想：搜索也带思考余量
 
 
-def spec(model="kimi-k2.6", thinking="off", key=KEY, **kw):
+def spec(model="kimi-k3", thinking="low", key=KEY, **kw):
     return PV.ModelSpec("kimi", model, key, thinking=thinking, **kw)
 
 
@@ -36,12 +36,8 @@ def ok(content='{"a": 1}', **kw):
     return ("raw", 200, FK.sse(content, **kw))
 
 
-def queries_reply(*qs, **kw):
-    return ok(json.dumps({"queries": list(qs)}), **kw)
-
-
-def results(*urls):
-    return ("json", 200, FK.search_results(*urls))
+def found(text="https://a.example.org/w", **kw):
+    return ("json", 200, FK.search_response(text, **kw))
 
 
 class _FakeServerCase(unittest.TestCase):
@@ -96,7 +92,7 @@ class TestChatRequest(_FakeServerCase):
         """Chat API：POST /v1/chat/completions，Authorization: Bearer；response_format json_object；max_completion_tokens
         （max_tokens 已 Deprecated）；stream: true + stream_options.include_usage（错误码页：非流式 900 秒没回就 504，要用流式）。
         Model Parameter Reference：temperature / top_p / n / presence_penalty / frequency_penalty 是固定值，传了报错，不发。
-        K2.6 关思考：thinking {"type": "disabled"}（默认是 enabled，要关必须写）；不支持 reasoning_effort。"""
+        K3：顶层 reasoning_effort（永远在想；省略时 max），不发 thinking。"""
         out, seen, log = self.chat(ok())
         self.assertEqual(out, ({"a": 1}, '{"a": 1}', None))
         r = seen[0]
@@ -106,57 +102,39 @@ class TestChatRequest(_FakeServerCase):
         for h in ("x-api-key", "anthropic-version"):
             self.assertNotIn(h, r["headers"])
         b = r["body"]
-        self.assertEqual(list(b), ["model", "messages", "thinking", "response_format", "max_completion_tokens", "stream",
+        self.assertEqual(list(b), ["model", "messages", "reasoning_effort", "response_format", "max_completion_tokens", "stream",
                                    "stream_options"])
-        self.assertEqual((b["model"], b["messages"]), ("kimi-k2.6", MSGS))   # Kimi 收 system 角色，原样
-        self.assertEqual((b["thinking"], b["response_format"], b["max_completion_tokens"], b["stream"], b["stream_options"]),
-                         ({"type": "disabled"}, {"type": "json_object"}, 12000, True, {"include_usage": True}))
-        for banned in ("temperature", "top_p", "n", "presence_penalty", "frequency_penalty", "max_tokens", "reasoning_effort",
+        self.assertEqual((b["model"], b["messages"]), ("kimi-k3", MSGS))   # Kimi 收 system 角色，原样
+        self.assertEqual((b["reasoning_effort"], b["response_format"], b["max_completion_tokens"], b["stream"], b["stream_options"]),
+                         ("low", {"type": "json_object"}, 12000 + EXTRA, True, {"include_usage": True}))
+        for banned in ("temperature", "top_p", "n", "presence_penalty", "frequency_penalty", "max_tokens", "thinking",
                        "tools", "tool_choice", "prompt_cache_options", "store"):
             self.assertNotIn(banned, b)
-        self.assertNotIn("thinking", log[0])
-        self.assertEqual((log[0]["model"], log[0]["ok"]), ("kimi-k2.6", True))
+        self.assertEqual((log[0]["model"], log[0]["ok"], log[0]["thinking"]), ("kimi-k3", True, "low"))
 
-    def test_thinking_per_model_and_role(self):
+    def test_thinking_per_role(self):
         """K3（Reasoning Effort 页）：永远在想，顶层 reasoning_effort 只有 low / high / max（省略时 max），不发 thinking；网页档位
-        low -> low、medium -> high、high -> max（调研的映射），plan / judge / repair 以外用 low。K2.6：thinking enabled / disabled，
-        没有深度。思考 token 和正文共用 max_completion_tokens（Thinking 指南）：开思考的调用 +24,000。"""
-        dis, en = {"thinking": {"type": "disabled"}}, {"thinking": {"type": "enabled"}}
-        cases = [  # (模型, 网页档位, arm, 期望的思考字段, 有没有思考余量)
-            ("kimi-k2.6", "off", "plan", dis, False),
-            ("kimi-k2.6", "low", "judge:r1", en, True),
-            ("kimi-k2.6", "medium", "judge:r2:repair", en, True),
-            ("kimi-k2.6", "high", "plan", en, True),
-            ("kimi-k2.6", "high", "extract:d1", dis, False),
-            ("kimi-k3", "low", "plan", {"reasoning_effort": "low"}, True),
-            ("kimi-k3", "medium", "judge:r1", {"reasoning_effort": "high"}, True),
-            ("kimi-k3", "high", "judge:r2:repair", {"reasoning_effort": "max"}, True),
-            ("kimi-k3", "high", "audit", {"reasoning_effort": "low"}, True),
-            ("kimi-k3", "medium", "final", {"reasoning_effort": "low"}, True),
-        ]
-        for model, level, arm, want, extra in cases:
-            with self.subTest(model=model, level=level, arm=arm):
-                out, seen, log = self.chat(ok(), sp=spec(model, level), arm=arm, max_tokens=4000)
+        low -> low、medium -> high、high -> max（调研的映射），plan / judge / repair 以外用 low。思考 token 和正文共用
+        max_completion_tokens（Thinking 指南）：每个调用都 +24,000。"""
+        cases = [("low", "plan", "low"), ("medium", "judge:r1", "high"), ("high", "judge:r2:repair", "max"),
+                 ("high", "audit", "low"), ("medium", "final", "low")]
+        for level, arm, want in cases:
+            with self.subTest(level=level, arm=arm):
+                out, seen, log = self.chat(ok(), sp=spec(thinking=level), arm=arm, max_tokens=4000)
                 b = seen[0]["body"]
-                key = next(iter(want))
-                self.assertEqual(b[key], want[key])
-                self.assertNotIn("reasoning_effort" if key == "thinking" else "thinking", b)
-                self.assertEqual(b["max_completion_tokens"], 4000 + (EXTRA if extra else 0))
-                self.assertEqual(log[0].get("thinking"), (b.get("reasoning_effort") or "enabled") if extra else None)
+                self.assertEqual(b["reasoning_effort"], want)
+                self.assertNotIn("thinking", b)
+                self.assertEqual(b["max_completion_tokens"], 4000 + EXTRA)
+                self.assertEqual(log[0]["thinking"], want)
         self.assertEqual(PV.thinking_levels("kimi-k3"), ("low", "medium", "high"))
-        self.assertEqual(PV.thinking_levels("kimi-k2.6"), ("off", "low", "medium", "high"))
-        self.assertFalse(PV.MODELS["kimi-k2.6"]["thinking_depth"])   # 网页把 low / medium / high 合并成「开」
         with self.assertRaises(PV.SpecError):
-            spec("kimi-k3", "off")
+            spec(thinking="off")
         with self.assertRaises(ValueError):   # 防御：K3 不会不带 reasoning_effort
             PV.KIMI.chat_request("kimi-k3", KEY, MSGS, max_tokens=10, effort=None)
-        self.assertEqual(spec("kimi-k3", "high").thinking_by_role(), {"plan": "max", "judge": "max", "repair": "max", "*": "low"})
-        self.assertEqual(spec("kimi-k2.6", "medium").thinking_by_role(), {"plan": "enabled", "judge": "enabled", "repair": "enabled"})
+        self.assertEqual(spec(thinking="high").thinking_by_role(), {"plan": "max", "judge": "max", "repair": "max", "*": "low"})
 
     def test_headroom_is_capped_at_the_models_max_output(self):
-        _, seen, _ = self.chat(ok(), sp=spec("kimi-k2.6", "high"), arm="plan", max_tokens=250_000)
-        self.assertEqual(seen[0]["body"]["max_completion_tokens"], 262_144)
-        _, seen, _ = self.chat(ok(), sp=spec("kimi-k3", "low"), max_tokens=1_040_000)
+        _, seen, _ = self.chat(ok(), max_tokens=1_040_000)
         self.assertEqual(seen[0]["body"]["max_completion_tokens"], 1_048_576)
 
     def test_region_and_retry_turns(self):
@@ -186,15 +164,12 @@ class TestChatReply(_FakeServerCase):
 
     def test_usage_is_metered_with_cache_reads_and_writes(self):
         """Chat API usage：prompt_tokens 是全部输入，prompt_tokens_details 的 cached_tokens / cache_write_tokens 和未缓存的部分互斥。
-        K3 价格（国际站）：miss $3、5 分钟写入 $3、命中 $0.30、输出 $15；K2.6：命中 $0.16、miss $0.95、输出 $4（K2 没有单列写入价，
-        写入按 miss）。国内站：CNY 价按 2026-10-21 中间价 6.7192 折成 USD。"""
+        K3 价格（国际站）：miss $3、5 分钟写入 $3、命中 $0.30、输出 $15。国内站：CNY 价按 2026-10-21 中间价 6.7192 折成 USD。"""
         u = FK.usage(prompt=12_000, completion=900, cached=4_000, write=7_000)
-        cases = [(spec("kimi-k3", "low"), (1_000 * 3.00 + 4_000 * 0.30 + 7_000 * 3.00 + 900 * 15.00) / 1e6),
-                 (spec("kimi-k2.6"), (8_000 * 0.95 + 4_000 * 0.16 + 900 * 4.00) / 1e6),
-                 (spec("kimi-k2.6", region="cn"), (8_000 * 6.50 + 4_000 * 1.10 + 900 * 27.00) / 1e6 / FX),
-                 (spec("kimi-k3", "low", region="cn"), (1_000 * 20 + 4_000 * 2 + 7_000 * 20 + 900 * 100) / 1e6 / FX)]
+        cases = [(spec(), (1_000 * 3.00 + 4_000 * 0.30 + 7_000 * 3.00 + 900 * 15.00) / 1e6),
+                 (spec(region="cn"), (1_000 * 20 + 4_000 * 2 + 7_000 * 20 + 900 * 100) / 1e6 / FX)]
         for sp, want in cases:
-            with self.subTest(model=sp.model, region=sp.region):
+            with self.subTest(region=sp.region):
                 _, _, log = self.chat(ok(use=u), sp=sp)
                 rec = log[0]
                 self.assertAlmostEqual(rec["usd"], round(want, 6))
@@ -203,8 +178,8 @@ class TestChatReply(_FakeServerCase):
                 self.assertNotIn("reasoning_tokens", rec)   # Chat API 的 usage 没有这个字段：没有就不记
                 self.assertEqual(rec["model"], sp.model)    # 日志里是模型名；计价 id 只用来查价格
         # 没有 prompt_tokens_details 时用顶层 cached_tokens；有 completion_tokens_details.reasoning_tokens 时记下
-        self.assertAlmostEqual(PV.kimi_usage_cost({"prompt_tokens": 1000, "cached_tokens": 400, "completion_tokens": 10}, "kimi-k2.6"),
-                               (600 * 0.95 + 400 * 0.16 + 10 * 4) / 1e6)
+        self.assertAlmostEqual(PV.kimi_usage_cost({"prompt_tokens": 1000, "cached_tokens": 400, "completion_tokens": 10}, "kimi-k3"),
+                               (600 * 3.00 + 400 * 0.30 + 10 * 15.00) / 1e6)
         u2 = {**FK.usage(), "completion_tokens_details": {"reasoning_tokens": 120}}
         _, _, log = self.chat(ok(use=u2))
         self.assertEqual(log[0]["reasoning_tokens"], 120)
@@ -239,7 +214,7 @@ class TestChatReply(_FakeServerCase):
         out, seen, log = self.chat(ok(include_usage=False))
         self.assertEqual((out[0], len(seen)), ({"a": 1}, 1))
         sent = seen[0]["body"]
-        want = P.Budget.llm_reserve(sum(len(m["content"]) for m in MSGS), sent["max_completion_tokens"], "kimi-k2.6")
+        want = P.Budget.llm_reserve(sum(len(m["content"]) for m in MSGS), sent["max_completion_tokens"], "kimi-k3")
         self.assertGreater(want, 0)
         self.assertEqual((log[0]["usage_missing"], log[0]["usd"], log[0]["usd_basis"]), (True, round(want, 6), "reserve (usage missing)"))
         self.assertNotIn("usd_basis", self.chat(ok())[2][0])   # 有 usage 的回复照旧按 usage 计价
@@ -318,27 +293,25 @@ class TestChatErrors(_FakeServerCase):
 
 
 class TestKimiCost(unittest.TestCase):
-    """Pricing 页（国际站 USD、国内站 CNY，2026-10-21）和 WebSearch Pricing 页（Basic：$0.002 / ¥0.01 一次）。"""
+    """Pricing 页（国际站 USD、国内站 CNY，2026-10-21）。v2.10h：Responses 里 web_search 的单价两站的 WebSearch Pricing 页都没列：
+    按每次 $0.01 的假设记（config.KIMI_WEB_SEARCH_FEE_ASSUMED_USD，两站相同、不折算）。"""
 
     def test_prices_match_the_pricing_pages(self):
-        want = {"kimi-k3": ("USD", (0.30, 3.00, 15.00), 3.00, 6.00, 0.002),
-                "kimi-k2.6": ("USD", (0.16, 0.95, 4.00), None, None, 0.002),
-                "kimi-k3@cn": ("CNY", (2.00, 20.00, 100.00), 20.00, 40.00, 0.01),
-                "kimi-k2.6@cn": ("CNY", (1.10, 6.50, 27.00), None, None, 0.01)}
-        for pid, (cur, listed, w5, w1, fee) in want.items():
+        want = {"kimi-k3": ("USD", (0.30, 3.00, 15.00), 3.00, 6.00), "kimi-k3@cn": ("CNY", (2.00, 20.00, 100.00), 20.00, 40.00)}
+        self.assertEqual(sorted(p for p in config.PRICES if p.startswith("kimi")), sorted(want))   # K2.6 已删
+        for pid, (cur, listed, w5, w1) in want.items():
             with self.subTest(price_id=pid):
                 p = config.price(pid)
                 r = 1.0 if cur == "USD" else 1 / FX
                 self.assertEqual((p["provider"], p["currency"], p["prompt_cache"], p["checked"]), ("kimi", cur, "implicit", "2026-10-21"))
-                self.assertEqual((p["listed"]["hit"], p["listed"]["miss"], p["listed"]["out"], p["listed"]["search_fee"]), (*listed, fee))
+                self.assertEqual((p["listed"]["hit"], p["listed"]["miss"], p["listed"]["out"]), listed)
+                self.assertNotIn("search_fee", p["listed"])   # 没有官方价，不写成「原价」
                 for got, base in zip(p["peak"], listed):
                     self.assertAlmostEqual(got, base * r)
                 self.assertEqual(p["peak"], p["offpeak"])
-                self.assertAlmostEqual(p["search_fee_usd"], fee * r)
-                self.assertEqual(p.get("cache_write_5m") is None, w5 is None)
-                if w5 is not None:
-                    self.assertAlmostEqual(p["cache_write_5m"], w5 * r)
-                    self.assertAlmostEqual(p["cache_write_1h"], w1 * r)
+                self.assertEqual((p["search_fee_usd"], p["search_fee_assumed"]), (0.01, True))
+                self.assertAlmostEqual(p["cache_write_5m"], w5 * r)
+                self.assertAlmostEqual(p["cache_write_1h"], w1 * r)
                 self.assertTrue(p["source"].startswith("https://platform.kimi." + ("ai" if cur == "USD" else "com")))
                 self.assertEqual("fx" in p, cur == "CNY")
         self.assertEqual(config.price("kimi-k3@cn")["fx"], {"cny_per_usd": 6.7192, "source": config.CNY_PER_USD_SOURCE,
@@ -346,7 +319,7 @@ class TestKimiCost(unittest.TestCase):
 
     def test_directions_scale_with_kimi_prices(self):
         """「一个方向」的估价：Kimi 自动缓存，但这个 agent 的命中率没测过，输入全按 miss（K3 的 5 分钟写入价同 miss）算，
-        加 4 次 × 每次搜索费。$2 上限：K2.6 10 个方向、K3 5 个。"""
+        加 4 次 × 每次搜索费（假设的 $0.01）。$2 上限：两站都是 4 个方向。"""
         pr = P.Budget.DIRECTION_PROFILE
 
         def cost(m):
@@ -357,174 +330,151 @@ class TestKimiCost(unittest.TestCase):
             fee = p.get("search_fee_usd", 0.01)
             return (pr["hit"] * hit + pr["miss"] * miss + pr["out"] * out) / 1e6 + pr["searches"] * fee
         flash = cost("deepseek-flash")
-        ids = ("kimi-k2.6", "kimi-k3", "kimi-k2.6@cn", "kimi-k3@cn")
+        ids = ("kimi-k3", "kimi-k3@cn")
         for m in ids:
             with self.subTest(price_id=m):
                 self.assertAlmostEqual(P.Budget.typical_direction_usd(m), 0.06 * cost(m) / flash)
-        self.assertEqual({m: P.Budget.for_model(m, usd=2.0).directions for m in ids},
-                         {"kimi-k2.6": 10, "kimi-k3": 5, "kimi-k2.6@cn": 10, "kimi-k3@cn": 5})
+        self.assertEqual({m: P.Budget.for_model(m, usd=2.0).directions for m in ids}, {"kimi-k3": 4, "kimi-k3@cn": 4})
         self.assertEqual(P.Budget().directions, 10)   # DeepSeek 默认路径不变
 
     def test_reservations_and_the_context_budget(self):
-        """预扣：输入按 miss 和 5 分钟写入价中较高的；国内站按折算后的价格。Context 按 spec.price_id 计价；搜索的预扣按「生成查询词」
-        那次调用发出的 max_completion_tokens（K3 永远在想：+24,000）加 (2 × max_uses + 2) 次搜索费。"""
+        """预扣：输入按 miss 和 5 分钟写入价中较高的；国内站按折算后的价格。Context 按 spec.price_id 计价。v2.10h：搜索的预扣同其他
+        自带搜索的 provider：输入按 p99 的 72,000 token、输出按发出的 max_output_tokens（K3 永远在想：+24,000）、(2 × max_uses + 2) 次搜索费。"""
         # v2.10f：别家的 tokenizer 没测过，输入按 1 个字符 1 个 token 预扣（DeepSeek 照旧 2 个字符）
         self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "kimi-k3"), (100_000 * 3 + 1000 * 15) / 1e6)
         self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "kimi-k3@cn"), (100_000 * 20 + 1000 * 100) / 1e6 / FX)
-        ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("kimi-k3", "high", region="cn"))
+        ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec(thinking="high", region="cn"))
         self.assertEqual((ctx.budget.model, ctx.budget.usd_cap), ("kimi-k3@cn", 2.0))
-        self.assertEqual(ctx.budget.search_tokens, S.SEARCH_QUERIES_MAX_TOKENS + EXTRA)
-        self.assertAlmostEqual(ctx.budget.search_reserve(),
-                               (30_000 * 20 + ctx.budget.search_tokens * 100) / 1e6 / FX + 8 * 0.01 / FX)
-        ctx2 = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("kimi-k2.6", "high"))
-        self.assertEqual(ctx2.budget.search_tokens, S.SEARCH_QUERIES_MAX_TOKENS)   # 搜索不是 plan / judge / repair：K2.6 关思考
-        self.assertAlmostEqual(ctx2.budget.search_reserve(), (30_000 * 0.95 + 2000 * 4) / 1e6 + 8 * 0.002)
+        self.assertEqual((ctx.budget.search_tokens, ctx.budget.search_input_tokens), (SEARCH_OUT, 72_000))
+        self.assertAlmostEqual(ctx.budget.search_reserve(), (72_000 * 20 + SEARCH_OUT * 100) / 1e6 / FX + 8 * 0.01)
+        ctx2 = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec())
+        self.assertAlmostEqual(ctx2.budget.search_reserve(), (72_000 * 3 + SEARCH_OUT * 15) / 1e6 + 8 * 0.01)
 
-    def test_search_fee_by_region_and_other_providers_unchanged(self):
-        self.assertAlmostEqual(PV.search_fee_usd("kimi-k2.6"), 0.002)
-        self.assertAlmostEqual(PV.search_fee_usd("kimi-k3@cn"), 0.01 / FX)
+    def test_responses_usage_is_split_like_chat_usage(self):
+        """Responses 页 Usage fields：cached_tokens、cache_write_tokens 和未缓存的部分互斥、相加等于 input_tokens（同 Chat API）。K3 的
+        5 分钟写入价恰好等于 miss 价，这里用一个写入价不同的假价格确认写入那部分确实按写入价算。"""
+        fake = dict(config.price("kimi-k3"), peak=(0.5, 2.0, 10.0), cache_write_5m=7.0)
+        with mock.patch.dict(config.PRICES, {"kimi-fake": fake}):
+            u = {"input_tokens": 1_000, "input_tokens_details": {"cached_tokens": 100, "cache_write_tokens": 300}, "output_tokens": 50}
+            self.assertAlmostEqual(PV.kimi_responses_cost(u, "kimi-fake"), (600 * 2.0 + 100 * 0.5 + 300 * 7.0 + 50 * 10.0) / 1e6)
+            self.assertEqual(PV.kimi_responses_cost({}, "kimi-fake"), 0.0)   # usage 是 null 时按 0
+
+    def test_search_fee_and_other_providers_unchanged(self):
+        self.assertEqual((PV.search_fee_usd("kimi-k3"), PV.search_fee_usd("kimi-k3@cn")), (0.01, 0.01))
+        self.assertEqual(PV.KIMI.search_fee_usd, config.KIMI_WEB_SEARCH_FEE_ASSUMED_USD)
         for m, fee in (("deepseek-flash", 0.01), ("claude-opus-5-5", 0.01), ("gpt-6-luna", 0.01)):
             self.assertEqual(PV.search_fee_usd(m), fee)
-        self.assertEqual(spec("kimi-k3", "low").price_id, "kimi-k3")
-        self.assertEqual(spec("kimi-k3", "low", region="cn").price_id, "kimi-k3@cn")
+        self.assertEqual(spec().price_id, "kimi-k3")
+        self.assertEqual(spec(region="cn").price_id, "kimi-k3@cn")
         self.assertEqual(PV.ModelSpec("deepseek", "deepseek-flash", KEY).price_id, "deepseek-flash")
 
 
 class TestKimiSearch(_FakeServerCase):
-    QS = ("widgets June 2026 national statistics office", "widget production 2025 annual report", "widget exports customs data")
+    """v2.10h：K3 自带的 web_search（Responses 页：POST /v1/responses，tools [{"type": "web_search"}]，服务端先按输入决定要不要搜，
+    搜了把结果放进模型的上下文；output 最前面是 web_search_call，include web_search_call.action.sources 才带结果的 url / title）。"""
 
-    def test_queries_then_tools_search(self):
-        """模型侧的 $web_search 已在 2026-10-20 下线（WebSearch Pricing 页）。改为：一次 JSON 调用（SEARCH_QUERIES_* 包着同一段
-        搜索 prompt）生成查询词，再逐个 POST /v1/tools/search（Web Search Basic 页：text_query 必填、limit 1–20、timeout_seconds 1–60、
-        include_content 默认 false）。搜索不是 plan / judge / repair：K2.6 关思考。"""
-        a1, a2, b1, c1 = (f"https://{h}.example.org/w" for h in ("a1", "a2", "b1", "c1"))
-        out, seen, log = self.search(queries_reply(*self.QS), results(a1, a2), results(b1, a1), results(c1))
-        q = seen[0]
-        self.assertEqual((q["method"], q["path"]), ("POST", "/v1/chat/completions"))
-        self.assertEqual(q["body"]["messages"], [{"role": "system", "content": PR.SEARCH_QUERIES_SYSTEM},
-                                                 {"role": "user", "content": PR.SEARCH_QUERIES_USER.format(n=3, brief=BRIEF)}])
-        self.assertIn(BRIEF, q["body"]["messages"][1]["content"])
-        self.assertEqual((q["body"]["thinking"], q["body"]["max_completion_tokens"], q["body"]["response_format"]),
-                         ({"type": "disabled"}, S.SEARCH_QUERIES_MAX_TOKENS, {"type": "json_object"}))
-        self.assertEqual(len(seen), 4)
-        for r, text in zip(seen[1:], self.QS):
-            self.assertEqual((r["method"], r["path"]), ("POST", "/v1/tools/search"))
-            self.assertEqual(r["headers"]["authorization"], f"Bearer {KEY}")
-            self.assertEqual(r["body"], {"text_query": text, "limit": 4, "timeout_seconds": 30})
-        # 按名次交替合并：每个查询词的第 1 名，再第 2 名……；重复的去掉，最多 cap 个
-        self.assertEqual(out["urls"], [a1, b1, c1, a2])
-        self.assertEqual(out["queries"], list(self.QS))
-        self.assertEqual((out["web_search_requests"], out["n_result_urls"], out["n_text_urls"]), (3, 5, 0))
-        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.006)
-        self.assertAlmostEqual(out["usd"], (1000 * 0.95 + 300 * 4) / 1e6)
-        self.assertNotIn("Title of", json.dumps(out))   # 标题解析出来但不往外传
+    def test_responses_web_search_request_and_reply(self):
+        """请求：model、input（搜索 prompt 原样，字符串 = 一条 user 消息）、tools 只有 web_search、include sources、reasoning.effort
+        （省略时默认 max，所以显式写；搜索不是 plan / judge / repair：low）、max_output_tokens（8192 + 24,000 思考余量）。不发
+        tool_choice（只有 auto）、max_tool_calls（没有这个参数）、stream / store / instructions / prompt_cache_options。
+        回复：模型文字里的 URL 优先，不够再按 sources 补；查询词是 action.query（服务端实际用的）；计次 = web_search_call 的个数。"""
+        src = ("https://b.example.org/x", "https://a.example.org/w", "https://c.example.org/y")
+        use = FK.responses_usage(inp=20_000, out=700, cached=5_000, write=10_000, reasoning=300)
+        out, seen, log = self.search(found("Best first:\nhttps://a.example.org/w", sources=src, use=use))
+        r = seen[0]
+        self.assertEqual((r["method"], r["path"]), ("POST", "/v1/responses"))
+        self.assertEqual(r["headers"]["authorization"], f"Bearer {KEY}")
+        self.assertEqual(r["headers"]["content-type"], "application/json")
+        b = r["body"]
+        self.assertEqual(b, {"model": "kimi-k3", "input": BRIEF, "tools": [{"type": "web_search"}],
+                             "include": ["web_search_call.action.sources"], "reasoning": {"effort": "low"},
+                             "max_output_tokens": SEARCH_OUT})
+        self.assertEqual(list(b), ["model", "input", "tools", "include", "reasoning", "max_output_tokens"])
+        self.assertEqual(out["urls"], ["https://a.example.org/w", "https://b.example.org/x", "https://c.example.org/y"])
+        self.assertEqual(out["queries"], ["widgets June 2026 official statistics"])
+        self.assertEqual((out["web_search_requests"], out["n_result_urls"], out["n_text_urls"]), (1, 3, 1))
+        want = (5_000 * 3.00 + 5_000 * 0.30 + 10_000 * 3.00 + 700 * 15.00) / 1e6   # 未缓存 = 20,000 - 5,000 - 10,000
+        self.assertAlmostEqual(out["usd"], want)
+        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.01)
         self.assertNotIn("error", out)
-        self.assertEqual(log[0]["arm"], "search:d1:queries")
-        self.assertNotIn("kind", log[0])
-        self.assertAlmostEqual(log[0]["usd"], out["usd"])
-        for i, rec in enumerate(log[1:], 1):
-            self.assertEqual((rec["arm"], rec["kind"], rec["query_n"], rec["ok"], rec["web_search_requests"], rec["usd"],
-                              rec["usd_search_fee_assumed"]), ("search:d1", "search", i, True, 1, 0.0, 0.002))
-        self.assertEqual([r["n_result_urls"] for r in log[1:]], [2, 2, 1])
+        self.assertNotIn("Title of", json.dumps(out))      # 标题解析出来但不往外传
+        self.assertNotIn("SECRET-REASONING", json.dumps(out) + json.dumps(log))
+        rec = log[0]
+        self.assertEqual((rec["arm"], rec["kind"], rec["ok"], rec["stop"], rec["input_tokens"], rec["cached_tokens"],
+                          rec["cache_write_tokens"], rec["output_tokens"], rec["reasoning_tokens"], rec["web_search_requests"],
+                          rec["n_result_urls"], rec["usd"], rec["usd_search_fee_assumed"]),
+                         ("search:d1", "search", True, "completed", 20_000, 5_000, 10_000, 700, 300, 1, 3, round(want, 6), 0.01))
+        parsed = PV.KIMI.search_unpack(FK.search_response(sources=src))
+        self.assertEqual(parsed["result_titles"], ["Title of x", "Title of w", "Title of y"])   # sources 的 title 解析出来
         self.assertNoKeyIn(out, log)
 
-    def test_k3_and_the_china_endpoint(self):
-        """K3 的查询词调用用 low（永远在想，+24,000 余量）；国内站发到国内站的两个地址，搜索费按 ¥0.01 折算。"""
-        out, seen, log = self.search(queries_reply("widgets 2026"), results("https://a.example.org/w"),
-                                     sp=spec("kimi-k3", "high", region="cn"))
-        self.assertEqual([r["path"] for r in seen], ["/cn/v1/chat/completions", "/cn/v1/tools/search"])
-        b = seen[0]["body"]
-        self.assertEqual((b["reasoning_effort"], b["max_completion_tokens"]), ("low", S.SEARCH_QUERIES_MAX_TOKENS + EXTRA))
-        self.assertNotIn("thinking", b)
-        self.assertEqual(log[0]["thinking"], "low")
-        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.01 / FX)
-        self.assertAlmostEqual(log[1]["usd_search_fee_assumed"], round(0.01 / FX, 6))
+    def test_effort_is_low_whatever_the_level_and_the_china_endpoint(self):
+        """国内站发到国内站的 /v1/responses；token 按 CNY 价折算，搜索费按假设的 $0.01（不折算）。网页档位只作用于 plan / judge / repair。"""
+        use = FK.responses_usage(inp=10_000, out=500, reasoning=100)
+        out, seen, log = self.search(found(sources=("https://a.example.org/w",), use=use), sp=spec(thinking="high", region="cn"))
+        self.assertEqual(seen[0]["path"], "/cn/v1/responses")
+        self.assertEqual((seen[0]["body"]["reasoning"], seen[0]["body"]["max_output_tokens"]), ({"effort": "low"}, SEARCH_OUT))
+        self.assertAlmostEqual(out["usd"], (10_000 * 20 + 500 * 100) / 1e6 / FX)
+        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.01)
+        with self.assertRaises(ValueError):   # 防御：K3 的搜索不会不带 reasoning effort
+            PV.KIMI.search_request("kimi-k3", KEY, BRIEF, max_tokens=10, max_uses=3, effort=None)
 
-    def test_empty_and_failed_queries(self):
-        """Web Search Basic 计费：只有 HTTP 200 且 search_results 非空才收费（空结果、失败都不收）。一个查询词失败不影响其余的，
-        失败原因合在 error 里（400 的 error.type / message 照原样）。"""
-        x = "https://x.example.org/w"
-        bad = FK.error_body("invalid_request", "limit must be between 1 and 20")
-        out, seen, log = self.search(queries_reply(*self.QS), ("json", 200, {"search_results": []}), ("json", 400, bad), results(x))
-        self.assertEqual((out["urls"], out["web_search_requests"], len(seen)), ([x], 1, 4))
-        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.002)
-        self.assertEqual(out["error"], "query 2: http_400 (invalid_request: limit must be between 1 and 20)")
-        self.assertEqual((log[1]["web_search_requests"], log[1]["usd_search_fee_assumed"], log[1]["n_result_urls"]), (0, 0.0, 0))
-        self.assertEqual((log[2]["ok"], log[2]["error"], log[2]["server_error_type"]), (False, "http_400", "invalid_request"))
-        self.assertNotIn("usd", log[2])
+    def test_the_server_may_not_search(self):
+        """Responses 页：web_search_call 只有服务端决定要搜时才有（tool_choice 只有 auto，没法强制）。没搜：不计搜索费，URL 只能来自
+        模型的文字；照常记一行（stop completed、web_search_requests 0）。"""
+        out, _, log = self.search(found("https://memory.example.org/z", searched=False))
+        self.assertEqual((out["urls"], out["queries"], out["web_search_requests"], out["usd_search_fee_assumed"]),
+                         (["https://memory.example.org/z"], [], 0, 0.0))
+        self.assertEqual((log[0]["web_search_requests"], log[0]["n_result_urls"], log[0]["usd_search_fee_assumed"]), (0, 0, 0.0))
+        out, _, _ = self.search(found("no links here", searched=False))
+        self.assertEqual(out["urls"], [])
 
-    def test_rate_limits_wait_for_the_reset_time(self):
-        """429 rate_limited 带 X-RateLimit-Limit / Remaining，按秒限速时还有 X-RateLimit-Reset（Unix 秒）：没有 Retry-After 时
-        等到 reset（不少于默认的 3 秒，最多 60 秒）再重试；rate_limit_unavailable 没有这些头：照常退避。"""
-        hdr = {"X-RateLimit-Limit": "1", "X-RateLimit-Remaining": "0", "X-RateLimit-Reset": str(int(time.time()) + 9)}
-        out, seen, _ = self.search(queries_reply("q1"), ("json", 429, FK.error_body("rate_limited", "project qps limit exceeded"), hdr),
-                                   results("https://a.example.org/w"), max_uses=1)
-        self.assertEqual((len(seen), out["urls"]), (3, ["https://a.example.org/w"]))
-        self.assertEqual(len(self.sleeps), 1)
-        self.assertTrue(7 <= self.sleeps[0] <= 9.5, self.sleeps)
-        self.sleeps.clear()
-        out, seen, _ = self.search(queries_reply("q1"), ("json", 429, FK.error_body("rate_limit_unavailable", "rate limit store unavailable")),
-                                   results("https://a.example.org/w"), max_uses=1)
-        self.assertEqual((len(seen), self.sleeps), (3, [3]))
-        h = http.client.HTTPMessage()   # 和 HTTPError.headers 同类（不分大小写）
-        h["Retry-After"], h["X-RateLimit-Reset"] = "4", "1"
-        self.assertEqual(llm.retry_after(PV.KIMI, h), "4")   # Retry-After 优先
-        self.assertIsNone(llm.retry_after(PV.DEEPSEEK, h))   # DeepSeek 不看（同 v2.9b）
-        self.assertIsNone(llm.retry_after(PV.KIMI, http.client.HTTPMessage()))
+    def test_incomplete_and_null_usage(self):
+        """status incomplete（incomplete_details.reason = max_output_tokens）：照样用已有的文字和 sources，stop 记原因。usage 可以是 null
+        （ResponsesResponse 的 usage oneOf null）：token 成本按 0 记，搜索照样计次。"""
+        reply = FK.search_response("", sources=("https://a.example.org/w",), status="incomplete",
+                                   incomplete={"reason": "max_output_tokens"})
+        reply["usage"] = None
+        out, _, log = self.search(("json", 200, reply))
+        self.assertEqual((out["urls"], out["usd"], out["web_search_requests"]), (["https://a.example.org/w"], 0.0, 1))
+        self.assertEqual(log[0]["stop"], "incomplete:max_output_tokens")
 
-    def test_rejected_key_and_bad_bodies_on_the_search_endpoint(self):
-        """搜索接口的 401 / 403 没有 body（Web Search Basic 页；10-21 实测 401 的 Content-Length 是 0）：不读、不抛，记 http_401。
-        200 却没有 search_results 列表：形状不对。"""
-        with mock.patch.object(llm, "read_error_body", wraps=llm.read_error_body) as rb:
-            out, seen, log = self.search(queries_reply("q1"), ("raw", 401, b""), max_uses=1)
-            rb.assert_not_called()
-        self.assertEqual((out["urls"], out["error"], len(seen)), ([], "query 1: http_401", 2))
-        out, _, log = self.search(queries_reply("q1"), ("json", 200, {"results": []}), max_uses=1)
-        self.assertEqual((out["error"], log[1]["error"]), ("query 1: bad_response_body", "bad_response_body"))
-
-    def test_query_generation_failures_mean_no_search(self):
-        """生成查询词只调一次，失败就没有 URL（不修 JSON、不补查询词），error 以 "queries:" 开头，不发搜索请求。"""
-        cases = [(ok("not json"), "queries: reply is not valid JSON"),
-                 (ok('{"q": ["a"]}'), 'queries: the reply has no "queries" list'),
-                 (ok('{"queries": ["", "  ", 3]}'), "queries: the reply listed no search queries"),
-                 (ok('{"queries": ["a"', finish_reason="length"), "queries: reply was truncated (finish_reason=length)"),
-                 (("json", 400, FK.error_body("invalid_request_error", "Invalid request")),
-                  "queries: search:d1:queries t attempt 1: http_400 (invalid_request_error: Invalid request)"),
-                 (("json", 401, FK.REAL_401_FAKE_KEY), "queries: Kimi rejected the API key (HTTP 401)")]
-        for reply, err in cases:
-            with self.subTest(err=err[:40]):
-                out, seen, _ = self.search(reply)
-                self.assertEqual((out["urls"], out["queries"], out["error"], out["web_search_requests"], len(seen)),
-                                 ([], [], err, 0, 1))
-
-    def test_queries_are_trimmed_deduplicated_and_capped(self):
-        out, seen, _ = self.search(queries_reply(" a widgets ", "a widgets", "b", "c", "d"), *[results("https://a.example.org/w")] * 3)
-        self.assertEqual(out["queries"], ["a widgets", "b", "c"])
-        self.assertEqual([r["body"]["text_query"] for r in seen[1:]], ["a widgets", "b", "c"])
-
-    def test_balance_stops_on_the_query_call_and_on_the_search_endpoint(self):
+    def test_errors_on_the_search_endpoint(self):
+        """Responses 接口的错误形状 {"error": {message, type, code}}：429 exceeded_current_quota_error -> 整次运行停下（不重试）；
+        429 engine_overloaded_error 按 Retry-After 重试；400 照原样记（不重试）；401 不读 body、不抛，记 http_401（同其他 provider 的搜索）；
+        3xx 不跟随。"""
         body = FK.error_body("exceeded_current_quota_error", "Account balance is insufficient or the account has been disabled")
-        out, seen, _ = self.search(("json", 429, body))
-        self.assertIsInstance(out, llm.BalanceExhausted)
-        self.assertEqual(len(seen), 1)
-        out, seen, log = self.search(queries_reply("q1", "q2"), ("json", 429, body))
+        out, seen, log = self.search(("json", 429, body))
         self.assertIsInstance(out, llm.BalanceExhausted)
         self.assertTrue(str(out).startswith("insufficient balance: Kimi HTTP 429 exceeded_current_quota_error (balance insufficient"))
         self.assertIn("(search:d1 t); the run was stopped without retrying.", str(out))
-        self.assertEqual((len(seen), self.sleeps), (2, []))
+        self.assertEqual((len(seen), self.sleeps), (1, []))
         self.assertNoKeyIn(str(out), log)
+        over = FK.error_body("engine_overloaded_error", "The engine is currently overloaded, please try again later")
+        out, seen, _ = self.search(("json", 429, over, {"retry-after": "8"}), found())
+        self.assertEqual((len(seen), out["urls"], self.sleeps), (2, ["https://a.example.org/w"], [8.0]))
+        bad = FK.error_body("invalid_request_error", "search_context_size is not supported")
+        out, seen, log = self.search(("json", 400, bad))
+        self.assertEqual((out["urls"], out["error"], len(seen)),
+                         ([], "http_400 (invalid_request_error: search_context_size is not supported)", 1))
+        with mock.patch.object(llm, "read_error_body", wraps=llm.read_error_body) as rb:
+            out, seen, _ = self.search(("json", 401, FK.REAL_401_FAKE_KEY))
+            rb.assert_not_called()
+        self.assertEqual((out["urls"], out["error"], len(seen)), ([], "http_401", 1))
+        out, seen, _ = self.search(("redirect", 302, self.fake.url("/elsewhere")))
+        self.assertEqual((out["error"], [r["path"] for r in seen]), ("http_302", ["/v1/responses"]))
 
 
 class TestKimiDirection(_FakeServerCase):
-    """run_direction（一个子 agent）对着假服务走完：查询词 -> 搜索接口 -> 取页（假的）-> 抽取 -> 代码核对；三次调用都记进
-    calls.jsonl 并计入预算（查询词调用的 token、搜索的按次费用、抽取的 token）。"""
+    """run_direction（一个子 agent）对着假服务走完：自带的 web_search（Responses）-> 取页（假的）-> 抽取 -> 代码核对；两次调用都记进
+    calls.jsonl 并计入预算（搜索的 token 和假设的按次费用、抽取的 token）。"""
 
     def test_one_direction_end_to_end(self):
-        ctx = P.Context("t", "q", "2026-06-20", self.tmp / "c.jsonl", spec=spec("kimi-k2.6", "high"))
+        ctx = P.Context("t", "q", "2026-06-20", self.tmp / "c.jsonl", spec=spec(thinking="high"))
         url = "https://stats.example.org/widgets"
         extract = {"points": [{"name": "widgets June 2025", "value_as_written": "1,210", "unit": "widgets",
                                "period_start": "2025-06-01", "period_end": "2025-06-30", "quote": "June 2025: 1,210 widgets"}]}
-        self.fake.reset(queries_reply("widgets June 2025"), results(url), ok(json.dumps(extract), use=FK.usage(5000, 400)))
+        self.fake.reset(found(url, query="widgets June 2025", sources=(url,)), ok(json.dumps(extract), use=FK.usage(5000, 400)))
         page = {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01",
                 "text": "Widget statistics. June 2025: 1,210 widgets."}
         d = {"id": "d1", "category": "own_history", "hypothesis": "h", "data_to_find": "f", "search_hints": ["widgets"]}
@@ -535,14 +485,15 @@ class TestKimiDirection(_FakeServerCase):
         self.assertEqual(out["search"]["urls"], [url])
         self.assertEqual(out["search"]["queries"], ["widgets June 2025"])
         self.assertEqual(len(out["points"]), 1)
-        self.assertEqual([r["path"] for r in self.fake.seen], ["/v1/chat/completions", "/v1/tools/search", "/v1/chat/completions"])
-        self.assertIn("widgets", self.fake.seen[0]["body"]["messages"][1]["content"])   # SEARCH_USER 填好的那段在 brief 里
-        self.assertEqual(self.fake.seen[2]["body"]["thinking"], {"type": "disabled"})   # 抽取不是 plan / judge / repair
+        self.assertEqual([r["path"] for r in self.fake.seen], ["/v1/responses", "/v1/chat/completions"])
+        self.assertIn("widgets", self.fake.seen[0]["body"]["input"])   # SEARCH_USER 填好的那段原样是 input
+        self.assertNotIn(PR.SEARCH_USER[:40], json.dumps(self.fake.seen[1]["body"]))   # 抽取不经过搜索 prompt
+        self.assertEqual(self.fake.seen[1]["body"]["reasoning_effort"], "low")   # 抽取不是 plan / judge / repair
         rows = [json.loads(x) for x in ctx.calls_path.read_text(encoding="utf-8").splitlines()]
-        self.assertEqual([r["arm"] for r in rows], ["search:d1:queries", "search:d1", "extract:d1"])
-        want = (1000 * 0.95 + 300 * 4) / 1e6 + 0.002 + (5000 * 0.95 + 400 * 4) / 1e6
+        self.assertEqual([r["arm"] for r in rows], ["search:d1", "extract:d1"])
+        want = (9000 * 3.00 + 600 * 15.00) / 1e6 + 0.01 + (5000 * 3.00 + 400 * 15.00) / 1e6
         self.assertAlmostEqual(ctx.budget.usd, want, places=6)
-        self.assertEqual((ctx.budget.n_calls, ctx.budget.reserved, ctx.budget.aborted), (3, 0.0, ""))
+        self.assertEqual((ctx.budget.n_calls, ctx.budget.reserved, ctx.budget.aborted), (2, 0.0, ""))
         self.assertNoKeyIn(ctx.calls_path.read_text(encoding="utf-8"), out)
 
 
@@ -554,19 +505,19 @@ class TestKeyCheck(_FakeServerCase):
         return out, list(self.fake.seen)
 
     PAGE = {"object": "list", "data": [
-        {"id": "kimi-k3", "object": "model", "created": 1, "owned_by": "moonshot", "context_length": 1_048_576,
-         "supports_image_in": True, "supports_video_in": True, "supports_reasoning": True},
         {"id": "kimi-k2.6", "object": "model", "created": 1, "owned_by": "moonshot", "context_length": 262_144,
+         "supports_image_in": True, "supports_video_in": True, "supports_reasoning": True},
+        {"id": "kimi-k3", "object": "model", "created": 1, "owned_by": "moonshot", "context_length": 1_048_576,
          "supports_image_in": True, "supports_video_in": True, "supports_reasoning": True}]}
 
     def test_models_list(self):
         """List Models：GET /v1/models，Authorization: Bearer，回复 {"object": "list", "data": [{"id", "context_length", ...}]}
-        （没有分页）。两站的 key 互不通用：国内站的 key 要发到国内站。"""
+        （没有分页）。两站的 key 互不通用：国内站的 key 要发到国内站。（列表里别的模型照样有，网页只提供 K3。）"""
         out, seen = self.check(("json", 200, self.PAGE))
         self.assertEqual((seen[0]["method"], seen[0]["path"], seen[0]["body"]), ("GET", "/v1/models", None))
         self.assertEqual(seen[0]["headers"]["authorization"], f"Bearer {KEY}")
         self.assertEqual((out["ok"], out["model_listed"], out["n_models"], out["status"]), (True, True, 2, 200))
-        out, seen = self.check(("json", 200, {"object": "list", "data": self.PAGE["data"][1:]}), sp=spec("kimi-k3", "low", region="cn"))
+        out, seen = self.check(("json", 200, {"object": "list", "data": self.PAGE["data"][:1]}), sp=spec(region="cn"))
         self.assertEqual(seen[0]["path"], "/cn/v1/models")
         self.assertEqual((out["ok"], out["model_listed"]), (True, False))
         self.assertIn("not in the models list", out["message"])
@@ -576,7 +527,7 @@ class TestKeyCheck(_FakeServerCase):
         for body in (FK.REAL_401_NO_KEY, FK.REAL_401_FAKE_KEY):
             with self.subTest(type=body["error"]["type"]):
                 out, _ = self.check(("json", 401, body))
-                self.assertEqual(out, {"provider": "kimi", "model": "kimi-k2.6", "ok": False, "status": 401,
+                self.assertEqual(out, {"provider": "kimi", "model": "kimi-k3", "ok": False, "status": 401,
                                        "error": "key_rejected", "message": "Kimi rejected the API key (HTTP 401)"})
 
     def test_other_outcomes(self):
@@ -594,46 +545,50 @@ class TestKeyCheck(_FakeServerCase):
 
 class TestModelSpecKimi(unittest.TestCase):
     def test_official_endpoints(self):
-        """API 主机：国际站 api.moonshot.ai、国内站 api.moonshot.cn（Chat API / Web Search Basic / List Models 页的 servers）。"""
+        """API 主机：国际站 api.moonshot.ai、国内站 api.moonshot.cn（Chat API / Responses / List Models 页的 servers）。
+        v2.10h：搜索发到 /v1/responses（不再有 /v1/tools/search）。"""
         self.assertEqual(PV.KIMI.regions, {
-            "global": {"chat": "https://api.moonshot.ai/v1/chat/completions", "search": "https://api.moonshot.ai/v1/tools/search",
+            "global": {"chat": "https://api.moonshot.ai/v1/chat/completions", "search": "https://api.moonshot.ai/v1/responses",
                        "models": "https://api.moonshot.ai/v1/models"},
-            "cn": {"chat": "https://api.moonshot.cn/v1/chat/completions", "search": "https://api.moonshot.cn/v1/tools/search",
+            "cn": {"chat": "https://api.moonshot.cn/v1/chat/completions", "search": "https://api.moonshot.cn/v1/responses",
                    "models": "https://api.moonshot.cn/v1/models"}})
         self.assertEqual(set(PV.KIMI.region_labels), {"global", "cn"})
         self.assertEqual(PV.KIMI.key_check_request("cn", KEY), ("https://api.moonshot.cn/v1/models", {"Authorization": f"Bearer {KEY}"}))
-        self.assertEqual([PV.KIMI.tools_search_request(KEY, "q", limit=n)[1]["limit"] for n in (0, 4, 50)], [1, 4, 20])
+        for gone in ("search_mode", "tools_search_request", "tools_search_unpack", "search_settings", "reset_header"):
+            self.assertFalse(hasattr(PV.KIMI, gone), gone)
 
     def test_choices_and_public_view(self):
-        self.assertEqual(PV.PROVIDERS["kimi"]["models"], ("kimi-k2.6", "kimi-k3"))
-        self.assertEqual(PV.PROVIDERS["kimi"]["default_model"], "kimi-k2.6")
-        self.assertEqual((PV.MODELS["kimi-k2.6"]["max_output"], PV.MODELS["kimi-k3"]["max_output"]), (262_144, 1_048_576))
-        sp = spec("kimi-k3", "medium", region="cn", usd_cap=5)
+        """v2.10h：K2.6 删掉（用户 10-21：没有自带的搜索），只剩 K3，默认也是 K3。"""
+        self.assertEqual(PV.PROVIDERS["kimi"]["models"], ("kimi-k3",))
+        self.assertEqual(PV.PROVIDERS["kimi"]["default_model"], "kimi-k3")
+        self.assertNotIn("kimi-k2.6", PV.MODELS)
+        self.assertEqual(PV.MODELS["kimi-k3"]["max_output"], 1_048_576)
+        sp = spec(thinking="medium", region="cn", usd_cap=5)
         self.assertEqual(sp.public(), {"provider": "kimi", "model": "kimi-k3", "region": "cn", "thinking": "medium",
                                        "thinking_by_role": {"plan": "high", "judge": "high", "repair": "high", "*": "low"},
                                        "usd_cap": 5.0, "byok": True, "price_id": "kimi-k3@cn",
                                        "fx": {"cny_per_usd": 6.7192, "source": config.CNY_PER_USD_SOURCE, "date": "2026-10-21"}})
-        self.assertEqual(spec().public(), {"provider": "kimi", "model": "kimi-k2.6", "region": "global", "thinking": "off",
-                                           "thinking_by_role": {}, "usd_cap": 2.0, "byok": True})
+        self.assertEqual(spec().public(), {"provider": "kimi", "model": "kimi-k3", "region": "global", "thinking": "low",
+                                           "thinking_by_role": {"plan": "low", "judge": "low", "repair": "low", "*": "low"},
+                                           "usd_cap": 2.0, "byok": True})
         self.assertNotIn(KEY, repr(sp))
-        with self.assertRaises(PV.SpecError):
-            spec(region="us")
-        with self.assertRaises(PV.SpecError):
-            PV.ModelSpec("kimi", "gpt-6-luna", KEY)
-        with self.assertRaises(PV.SpecError):
-            PV.ModelSpec("moonshot", "kimi-k2.6", KEY)
+        for bad in (lambda: spec(region="us"), lambda: PV.ModelSpec("kimi", "gpt-6-luna", KEY),
+                    lambda: PV.ModelSpec("moonshot", "kimi-k3", KEY, thinking="low"),
+                    lambda: PV.ModelSpec("kimi", "kimi-k2.6", KEY)):
+            with self.assertRaises(PV.SpecError):
+                bad()
         with mock.patch.dict(config.PRICES), self.assertRaises(config.UnknownModel):   # 某个区域没有价格就拒跑
-            del config.PRICES["kimi-k2.6@cn"]
+            del config.PRICES["kimi-k3@cn"]
             spec(region="cn")
 
 
 class TestRunWithKimiSpec(_FakeServerCase):
     """prepare_run(spec=Kimi 国内站 K3) -> 图 -> save_run，全部对着假服务：规划一步收到 429 exceeded_current_quota_error 就干净停下；
-    state.json 记 provider、price_id、汇率和搜索设置，不记 key；结果目录里没有 key；写完以后 key 从内存里清掉。"""
+    state.json 记 provider、price_id 和汇率，不记 key（v2.10h 起也不再记 search_queries）；结果目录里没有 key；写完以后 key 从内存里清掉。"""
 
     def test_end_to_end_balance_stop(self):
         from triangulate.agent import run as R
-        sp = spec("kimi-k3", "high", region="cn", usd_cap=1.5)
+        sp = spec(thinking="high", region="cn", usd_cap=1.5)
         q = {"id": "ask_kimi1", "question": "How many widgets were sold in June 2026?", "as_of": "2026-06-20"}
         body = FK.error_body("exceeded_current_quota_error", "Account balance is insufficient or the account has been disabled")
         self.fake.reset(*[("json", 429, body)] * 3)
@@ -649,8 +604,7 @@ class TestRunWithKimiSpec(_FakeServerCase):
         self.assertEqual((st["provider"], st["model"]), ("kimi", "kimi-k3"))
         rs = st["settings"]["run_spec"]
         self.assertEqual((rs["price_id"], rs["region"], rs["fx"]["cny_per_usd"]), ("kimi-k3@cn", "cn", 6.7192))
-        self.assertEqual(st["settings"]["search_queries"], {"max_tokens": S.SEARCH_QUERIES_MAX_TOKENS,
-                                                            "endpoint": self.fake.url("/cn/v1/tools/search"), "timeout_seconds": 30})
+        self.assertNotIn("search_queries", st["settings"])
         self.assertEqual(st["budget"]["usd_cap"], 1.5)
         files = list((self.tmp / q["id"] / "web_t").iterdir())
         self.assertTrue({"state.json", "calls.jsonl"} <= {f.name for f in files})

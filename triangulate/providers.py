@@ -4,6 +4,10 @@ v2.10d 加 Kimi（国际站 / 国内站两个区域；JSON 调用走 OpenAI 兼�
 国内站按 CNY 价折算，计价用 ModelSpec.price_id（"kimi-k3@cn"）。
 v2.10e 加 GLM（Z.ai 国际站 / 智谱开放平台国内站；JSON 调用走 OpenAI 兼容的非流式 Chat Completions，搜索同 Kimi：生成查询词 +
 POST /web_search）；只收 Standard API Key（GLM_KEY_NOTE）。
+v2.10h（用户 10-21：每个模型只用自家自带的联网搜索，没有就删掉这个模型）：删掉 Kimi K2.6；「生成查询词 + 另调搜索接口」那条路删掉。
+K3 的搜索走 Responses API 的 web_search 工具（KimiAdapter.search_request），GLM 的搜索走 Chat Completions 的 web_search 工具
+（GLMAdapter.search_request）；DeepSeek / Claude / GPT 的搜索不变。所有 adapter 的 search_request 多收一个 region（只有 GLM 用：两站的
+搜索引擎不同）。PROVIDERS.md 第 16 节。
 
 ModelSpec = provider、model、region、思考档位、这次运行的花费上限，加上用户自己的 key（只在内存里，见 ModelSpec 的说明）。
 有 ModelSpec 的运行就是「自带 key」（BYOK）的运行：pipeline.Context(spec=...) 把它交给 AgentLLM、Searcher 和 Budget。
@@ -16,7 +20,8 @@ JSON 解析、日志、预算这些外层循环留在 llm.LLM.json_call 和 agen
 import json
 import math
 
-from .config import CLAUDE_US_GEO_MULTIPLIER, MODEL, PRICES, THINKING_EXTRA_TOKENS, UnknownModel, price, usd_cost
+from .config import (CLAUDE_US_GEO_MULTIPLIER, KIMI_WEB_SEARCH_FEE_ASSUMED_USD, MODEL, PRICES, THINKING_EXTRA_TOKENS, UnknownModel,
+                     price, usd_cost)
 
 THINKING_UI = ("off", "low", "medium", "high")   # 网页上的一个总档位
 REASONING_ROLES = ("plan", "judge", "repair")    # 档位只作用于这三个角色（config.thinking_role 的取值）；其余角色能关就关
@@ -152,8 +157,8 @@ class DeepSeekAdapter:
             return "truncated", "reply was truncated (finish_reason=length)"
         return None
 
-    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None):
-        """effort 不用：DeepSeek 搜索请求体保持 v2.9b 原样（不带 thinking 字段）。命令行和自带 key 的运行都走这里：
+    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None, region=None):
+        """effort、region 不用：DeepSeek 搜索请求体保持 v2.9b 原样（不带 thinking 字段）。命令行和自带 key 的运行都走这里：
         用户 10-21 定「保持原本一样即可」，v2.10g 撤回了 v2.10f 给自带 key 的运行加的 thinking disabled（PROVIDERS.md 第 8、14.6 节）。"""
         payload = {"model": model, "max_tokens": max_tokens,
                    "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": max_uses}],
@@ -383,8 +388,8 @@ class ClaudeAdapter:
             return "paused", "reply was paused before it finished (stop_reason=pause_turn)"
         return None
 
-    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None):
-        """web_search_20250305（基础版）：所有当前模型都能用、结果块直接在顶层 content 里、ZDR-eligible；带 dynamic filtering 的
+    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None, region=None):
+        """region 不用（只有一个区域）。web_search_20250305（基础版）：所有当前模型都能用、结果块直接在顶层 content 里、ZDR-eligible；带 dynamic filtering 的
         20260209 / 20260318 会在内部跑 code execution、嵌套块带 caller 字段，这里只要 URL，用不上（见 PROVIDERS.md）。"""
         payload = {"model": model, "max_tokens": max_tokens,
                    "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": max_uses}],
@@ -489,10 +494,11 @@ def openai_search_unpack(d: dict) -> dict:
     """Responses API 的回复（output 项数组）里取：查询词、URL（和标题）、文字、搜索次数、出错的搜索数。
     web_search_call.action：search（queries / query；include 了 web_search_call.action.sources 时带 sources[]，只有 url）、
     open_page（url）、find_in_page。只有 search 动作计次收费（web search 指南：Search actions incur a tool call cost）。
-    message 项的 output_text：文字 + url_citation 注解（url、title）。URL 顺序：引用的 -> sources -> open_page；标题只有引用有，
+    message 项的 output_text：文字 + url_citation 注解（url、title）。URL 顺序：引用的 -> sources -> open_page；标题有引用的，
+    v2.10h 起还有 sources 里带的（Kimi K3 的 Responses API：sources 是 {type, url, title}；OpenAI 的只有 url，标题照旧是空字符串），
     只在这里解析（Searcher 不往外传）。"""
     usage = d.get("usage") or {}
-    cited, cited_titles, sources, opened, queries, texts = [], [], [], [], [], []
+    cited, cited_titles, sources, source_titles, opened, queries, texts = [], [], [], [], [], [], []
     n_req = n_err = 0
     for item in d.get("output") or []:
         if not isinstance(item, dict):
@@ -507,7 +513,9 @@ def openai_search_unpack(d: dict) -> dict:
                 n_req += 1
                 qs = a.get("queries") or ([a["query"]] if a.get("query") else [])
                 queries += [str(q)[:200] for q in qs]
-                sources += [s["url"] for s in a.get("sources") or [] if isinstance(s, dict) and s.get("url")]
+                hits = [s for s in a.get("sources") or [] if isinstance(s, dict) and s.get("url")]
+                sources += [s["url"] for s in hits]
+                source_titles += [str(s.get("title") or "") for s in hits]
             elif kind == "open_page" and a.get("url"):
                 opened.append(a["url"])
         elif t == "message":
@@ -519,7 +527,7 @@ def openai_search_unpack(d: dict) -> dict:
                             cited.append(ann["url"])
                             cited_titles.append(str(ann.get("title") or ""))
     result_urls = cited + sources + opened
-    result_titles = cited_titles + [""] * (len(sources) + len(opened))
+    result_titles = cited_titles + source_titles + [""] * len(opened)
     status = d.get("status")
     reason = (d.get("incomplete_details") or {}).get("reason")
     return {"usage": usage, "n_req": n_req, "queries": queries, "result_urls": result_urls, "result_titles": result_titles,
@@ -624,8 +632,8 @@ class OpenAIAdapter:
             return "content_filter", "reply was stopped by the content filter (finish_reason=content_filter)"
         return None
 
-    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None):
-        """Responses API + hosted web_search（新集成用 {"type": "web_search"}）。tool_choice required：web search 指南
+    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None, region=None):
+        """region 不用（只有 global）。Responses API + hosted web_search（新集成用 {"type": "web_search"}）。tool_choice required：web search 指南
         Limitations「With tool_choice: "auto", search is optional. Use tool_choice: "required" ... when search must run」。
         max_tool_calls = max_uses（所有内置工具调用合计，含 open_page / find_in_page）。sources 要 include 才返回。
         store: false（默认 true，保存至少 30 天）。"""
@@ -719,7 +727,7 @@ def parse_chat_sse(raw: bytes) -> dict:
 def kimi_usage_cost(usage: dict, price_id: str) -> float:
     """Kimi 的 usage 按 config.PRICES[price_id]（国内站已折成 USD）计价。Chat API 页：prompt_tokens 是全部输入；
     prompt_tokens_details 里 cached_tokens（命中）、cache_write_tokens（写入）和未缓存的部分互斥、相加等于 prompt_tokens。
-    命中按 cache hit 价；写入按 5 分钟写入价（本项目不写 prompt_cache_options，官方默认 5 分钟档；K2 系列没有单列写入价，按 miss 价）；
+    命中按 cache hit 价；写入按 5 分钟写入价（本项目不写 prompt_cache_options，官方默认 5 分钟档；没有单列写入价的模型按 miss 价）；
     其余按 miss 价；completion_tokens（含思考）按 output 价。没有 prompt_tokens_details 时用顶层的 cached_tokens。"""
     p = price(price_id)
     hit, miss, outp = p["peak"]
@@ -730,6 +738,17 @@ def kimi_usage_cost(usage: dict, price_id: str) -> float:
     plain = max(0, inp - read - write)
     out = usage.get("completion_tokens", 0) or 0
     return (plain * miss + read * hit + write * p.get("cache_write_5m", miss) + out * outp) / 1e6
+
+
+def kimi_responses_cost(usage: dict, price_id: str) -> float:
+    """v2.10h：K3 搜索（Responses API）的 usage 计价，算法同 kimi_usage_cost。Responses 页 Usage fields：input_tokens 是全部输入
+    （含服务端放进上下文的搜索结果），input_tokens_details 的 cached_tokens（命中）、cache_write_tokens（写入）和未缓存的部分互斥、
+    相加等于 input_tokens；output_tokens 含思考 token。"""
+    det = usage.get("input_tokens_details") if isinstance(usage.get("input_tokens_details"), dict) else {}
+    return kimi_usage_cost({"prompt_tokens": usage.get("input_tokens", 0) or 0,
+                            "prompt_tokens_details": {"cached_tokens": det.get("cached_tokens", 0) or 0,
+                                                      "cache_write_tokens": det.get("cache_write_tokens", 0) or 0},
+                            "completion_tokens": usage.get("output_tokens", 0) or 0}, price_id)
 
 
 def _kimi_turns(messages: list) -> list:
@@ -747,38 +766,37 @@ KIMI_BALANCE_TYPES = {   # Common Error Codes 页：429 + 这个 error.type = �
 
 class KimiAdapter:
     """Kimi（Moonshot AI 开放平台）。国际站 api.moonshot.ai（USD）和国内站 api.moonshot.cn（CNY）两个区域，key 不能混用（混用 401）。
+    v2.10h 起只有 K3（K2.6 删掉：没有可用的自带搜索，用户 10-21）。
     JSON 调用走 OpenAI 兼容的 Chat Completions（POST /v1/chat/completions）：response_format json_object（用户决定：不用 JSON
-    schema）、max_completion_tokens（max_tokens 已 deprecated；思考 token 计入）、思考按模型（K3 顶层 reasoning_effort，永远在想，
-    不发 thinking；K2.6 thinking enabled / disabled，没有深度）；temperature / top_p / n / 两个 penalty 都是固定值，不发；
-    stream: true + stream_options.include_usage（错误码页：非流式请求 900 秒没回就 504，要用流式）。
-    搜索：模型侧的 $web_search 已在 2026-10-20 下线，改成「一次小的 JSON 调用生成查询词 + 每个查询词 POST /v1/tools/search」
-    （search_mode = "queries"，流程在 agent/search.Searcher._search_by_queries）。设计说明和官方文档链接见 PROVIDERS.md 第 11 节。"""
+    schema）、max_completion_tokens（max_tokens 已 deprecated；思考 token 计入）、顶层 reasoning_effort（K3 永远在想，不发 thinking）；
+    temperature / top_p / n / 两个 penalty 都是固定值，不发；stream: true + stream_options.include_usage（错误码页：非流式请求 900 秒
+    没回就 504，要用流式）。
+    搜索（v2.10h）：Responses API（POST /v1/responses）自带的 web_search 工具（search_request）：服务端先按输入决定要不要搜，搜了就把
+    结果放进模型的上下文，output 最前面是 web_search_call（include web_search_call.action.sources 才带结果的 url / title），模型再按
+    结果回答。设计说明和官方文档链接见 PROVIDERS.md 第 11、16 节。"""
 
     provider, label = "kimi", "Kimi"
     regions = {"global": {"chat": "https://api.moonshot.ai/v1/chat/completions",
-                          "search": "https://api.moonshot.ai/v1/tools/search",
+                          "search": "https://api.moonshot.ai/v1/responses",
                           "models": "https://api.moonshot.ai/v1/models"},
                "cn": {"chat": "https://api.moonshot.cn/v1/chat/completions",
-                      "search": "https://api.moonshot.cn/v1/tools/search",
+                      "search": "https://api.moonshot.cn/v1/responses",
                       "models": "https://api.moonshot.cn/v1/models"}}
     region_labels = {"global": "International (platform.kimi.ai, billed in USD)",
                      "cn": "China (platform.kimi.com, billed in CNY)"}
     default_region = "global"
-    search_fee_usd = 0.002            # 国际站 Web Search Basic；按区域的价格在 config.PRICES 的 search_fee_usd（providers.search_fee_usd）
-    search_mode = "queries"           # Searcher：先生成查询词，再逐个调搜索接口（不是模型自己搜）
-    search_limit_max = 20             # /v1/tools/search 的 limit 取值 1–20
-    search_timeout_seconds = 30       # /v1/tools/search 的 timeout_seconds（1–60，省略 = 不限时）
-    # 除 401 / 403（key 被拒；搜索接口文档写明这两种没有 body）以外的错误都读 body：429 判断余额（error.type），
-    # 其余只把 error.type / message 记进日志
+    # Responses 里 web_search 的单价两站都没列：按 web_search_call 的个数、每次这个假设的美元数记（config.KIMI_WEB_SEARCH_FEE_ASSUMED_USD；
+    # 价格表里两站的 search_fee_usd 也是它）
+    search_fee_usd = KIMI_WEB_SEARCH_FEE_ASSUMED_USD
+    # 除 401 / 403（key 被拒，不读）以外的错误都读 body：429 判断余额（error.type），其余只把 error.type / message 记进日志
     error_body_statuses = frozenset({400, 404, 408, 413, 422, 429, 500, 502, 503, 504})
     balance_statuses = frozenset({429})
-    # 429 engine_overloaded_error / rate_limit_reached_error（搜索：rate_limited / rate_limit_unavailable）、500、502、503、504 重试
+    # 429 engine_overloaded_error / rate_limit_reached_error、500、502、503、504 重试
     retry_statuses = frozenset({429, 500, 502, 503, 504})
     honor_retry_after = True          # 错误码页：engine_overloaded_error 按 Retry-After 等
-    reset_header = "x-ratelimit-reset"   # 搜索接口的 429 带 X-RateLimit-Reset（Unix 秒），没有 Retry-After 时按它等（llm.retry_after）
     log_server_error = True
     chat_timeouts = {"sock_timeout": 600, "total_timeout": 3600}   # 流式：单次读最多 600 秒，整次 3600 秒（没实测）
-    max_search_continuations = 0
+    max_search_continuations = 0      # Responses 没有 pause_turn；status = incomplete 就照原样用已有的结果
     balance_hint = ("Top up the Kimi account on the platform where the key was created (platform.kimi.ai or platform.kimi.com), "
                     "then run again.")
 
@@ -794,13 +812,10 @@ class KimiAdapter:
 
     @staticmethod
     def thinking_fields(model: str, effort) -> dict:
-        """K3：只有顶层 reasoning_effort（low / high / max，省略时 max；不发 thinking：文档 should not）。
-        K2.6：thinking.type enabled / disabled（没有深度；不支持 reasoning_effort）。"""
-        if MODELS[model]["thinking_param"] == "reasoning_effort":
-            if not effort:
-                raise ValueError(f"{model} always thinks; it needs a reasoning_effort")
-            return {"reasoning_effort": effort}
-        return {"thinking": {"type": "enabled" if effort else "disabled"}}
+        """K3（v2.10h 起唯一的模型）：只有顶层 reasoning_effort（low / high / max，省略时 max；不发 thinking：文档 should not）。"""
+        if not effort:
+            raise ValueError(f"{model} always thinks; it needs a reasoning_effort")
+        return {"reasoning_effort": effort}
 
     def chat_request(self, model: str, key: str, messages: list, *, max_tokens: int, effort):
         payload = {"model": model, "messages": _kimi_turns(messages)}
@@ -848,28 +863,45 @@ class KimiAdapter:
             return "unexpected_finish", f"reply ended with finish_reason={fr}"
         return None
 
-    def tools_search_request(self, key: str, query: str, *, limit: int, region: str | None = None):
-        """Web Search Basic：POST /v1/tools/search，body text_query（必填）、limit（1–20，默认 5）、timeout_seconds（1–60）；
-        include_content 用默认 false（页面由 fetch 自己取）。两站的 body 相同，region 不用（v2.10e 起 Searcher 传进来，GLM 要用）。"""
-        return self._headers(key), {"text_query": query, "limit": max(1, min(self.search_limit_max, int(limit))),
-                                    "timeout_seconds": self.search_timeout_seconds}
+    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None, region=None):
+        """v2.10h：Responses API（POST /v1/responses，两站的 Responses 页）自带的 web_search 工具。body：model；input（字符串 = 一条
+        user 消息：搜索 prompt 原样）；tools 只有一个 {"type": "web_search"}（每个请求最多一个；search_context_size / blocked_domains 会报
+        invalid_request_error，不发）；include web_search_call.action.sources（不写就不返回结果的 url / title）；reasoning.effort（省略时
+        默认 max，最贵，所以显式写；搜索不是 plan / judge / repair：low）；max_output_tokens（默认 131072）。
+        不发：tool_choice（只有 auto，就是默认；没法强制搜）、max_tool_calls（没有这个参数）、stream（默认 false：回复是文档写明的
+        ResponsesResponse 形状）、store（回复里 Always false）、prompt_cache_options（省略 = 默认 5 分钟档）、instructions。
+        max_uses、region 不用：搜不搜由服务端按输入定（Responses 页：the server first decides from the input whether a search is needed）。"""
+        if not effort:
+            raise ValueError(f"{model} always thinks; it needs a reasoning effort")
+        payload = {"model": model, "input": prompt, "tools": [{"type": "web_search"}],
+                   "include": ["web_search_call.action.sources"], "reasoning": {"effort": effort}, "max_output_tokens": max_tokens}
+        return self._headers(key), payload
 
-    def search_settings(self, region: str) -> dict:
-        """记进 run settings 的搜索设置（run.run_settings 的 search_queries）。"""
-        return {"timeout_seconds": self.search_timeout_seconds}
+    # output[]：web_search_call（只有服务端决定要搜时才有，在最前面）的 action：type search、query（实际用的查询词）、sources
+    # [{type: url, url, title}]；reasoning；message 的 output_text。形状同 OpenAI Responses（openai_search_unpack 也取 sources 的 title）。
+    # 计次 = web_search_call 的个数（usage 里没有搜索次数）
+    search_unpack = staticmethod(openai_search_unpack)
 
     @staticmethod
-    def tools_search_unpack(d: dict) -> list:
-        """search_results[] -> [(url, title)]（只要有 url 的）。没有 search_results 列表时抛 KeyError / TypeError（形状不对）。"""
-        res = d["search_results"]
-        if not isinstance(res, list):
-            raise TypeError("search_results is not a list")
-        return [(str(x["url"]), str(x.get("title") or "")) for x in res if isinstance(x, dict) and x.get("url")]
+    def search_continue(payload: dict, d: dict):
+        return None
+
+    @staticmethod
+    def search_meter(unpacked: dict, started, model: str):
+        """(写进 calls.jsonl 的 token 字段, token 成本 USD)。model 是计价 id（国内站 "kimi-k3@cn"）。usage 是 null（文档允许）时按 0 记。"""
+        u = unpacked["usage"]
+        det = u.get("input_tokens_details") if isinstance(u.get("input_tokens_details"), dict) else {}
+        odet = u.get("output_tokens_details") if isinstance(u.get("output_tokens_details"), dict) else {}
+        return ({"input_tokens": u.get("input_tokens", 0), "cached_tokens": det.get("cached_tokens", 0) or 0,
+                 "cache_write_tokens": det.get("cache_write_tokens", 0) or 0, "output_tokens": u.get("output_tokens", 0),
+                 "reasoning_tokens": odet.get("reasoning_tokens", 0) or 0},
+                kimi_responses_cost(u, model))
 
     def balance_exhausted(self, status: int, body: bytes):
         """余额不足就返回一句说明（不含服务端原文），否则 None。错误码页：429 + error.type = exceeded_current_quota_error
         （余额不足或账户停用 / token 额度不足）；同为 429 的 engine_overloaded_error、rate_limit_reached_error 是限流，重试。
-        搜索接口的错误码表没列余额不足（未核实它用不用同一个 type）；按同一规则认。"""
+        v2.10h：搜索走的 Responses 接口只写了 429「Rate limited or out of quota」、错误形状 {"error": {message, type, code}}，没单列
+        type（未核实它用不用同一个 type）；按同一规则认。"""
         if status not in self.balance_statuses:
             return None
         try:
@@ -953,13 +985,21 @@ GLM_KEY_NOTE = ("Use a Standard API Key: on Z.ai, API Keys -> Standard API Key (
                 "This app only calls the general endpoint /api/paas/v4, never the Coding Plan endpoint /api/coding/paas/v4.")
 
 
-def _cut_query(q: str, n: int) -> str:
-    """查询词最多 n 个字符：超了就截到 n 以内最后一个空格（没有合适的空格时直接截断，例如中文）。"""
-    if len(q) <= n:
-        return q
-    cut = q[:n]
-    sp = cut.rfind(" ")
-    return (cut[:sp] if sp >= n // 2 else cut).rstrip()
+def glm_search_unpack(d: dict) -> dict:
+    """v2.10h：Chat Completions + 自带 web_search 工具的回复（两站 API 参考 ChatCompletionResponse）：choices[0].message.content 是模型的
+    文字（模型挑的 URL 从这里取），顶层 web_search[] 是这次搜索的结果（search_result: true 才返回；每项 title、link、content、media、icon、
+    refer、publish_date），取 link 和 title（标题不出 Searcher）。回复里没有查询词（由服务端定）。计次：文档按实际调用次数计费，回复里没有
+    搜索次数，也没写意图识别判定不搜时收不收：每个 HTTP 200 的回复按一次记（保守）。形状不对的部分按空的处理（不抛，Searcher 照常记一行）。"""
+    usage = d.get("usage") if isinstance(d.get("usage"), dict) else {}
+    choices = d.get("choices") if isinstance(d.get("choices"), list) else []
+    ch = choices[0] if choices and isinstance(choices[0], dict) else {}
+    msg = ch.get("message") if isinstance(ch.get("message"), dict) else {}
+    text = msg.get("content")
+    found = d.get("web_search") if isinstance(d.get("web_search"), list) else []
+    hits = [x for x in found if isinstance(x, dict) and x.get("link")]
+    return {"usage": usage, "n_req": 1, "queries": [], "result_urls": [str(x["link"]) for x in hits],
+            "result_titles": [str(x.get("title") or "") for x in hits], "texts": [text] if isinstance(text, str) else [],
+            "n_err": 0, "stop": ch.get("finish_reason")}
 
 
 class GLMAdapter:
@@ -970,15 +1010,17 @@ class GLMAdapter:
     5.2：disabled，或 enabled + reasoning_effort；4.7 系列：enabled / disabled，没有 reasoning_effort）；temperature / top_p / do_sample
     不发（官方默认 temperature 1.0、top_p 0.95 就是推荐值）。回复按 finish_reason 分：stop 解析，length / model_context_window_exceeded
     报截断，sensitive 报内容审核，其余照原样报。错误 body 的 code 可能是字符串或整数、可能没有外层 error（glm_error）。
-    搜索：同 Kimi，先用一次 JSON 调用生成查询词，再逐个 POST {base}/web_search（国际站 search-prime，国内站 search_std）。
-    设计说明和官方文档链接见 PROVIDERS.md 第 12 节。"""
+    搜索（v2.10h，用户 10-21：只用自带的搜索）：同一个 Chat Completions 接口带上自带的 web_search 工具（search_request；国际站引擎
+    search_pro_jina，国内站 search_std），服务端先对输入做搜索意图识别、搜一次，把结果放进上下文再生成；结果的 link 在回复顶层的
+    web_search[] 里。设计说明和官方文档链接见 PROVIDERS.md 第 12、16 节。"""
 
     provider, label = "glm", "GLM"
+    # v2.10h：搜索也发到 chat/completions（带 web_search 工具），不再用独立的 /web_search 接口
     regions = {"global": {"chat": "https://api.z.ai/api/paas/v4/chat/completions",
-                          "search": "https://api.z.ai/api/paas/v4/web_search",
+                          "search": "https://api.z.ai/api/paas/v4/chat/completions",
                           "models": "https://api.z.ai/api/paas/v4/models"},
                "cn": {"chat": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-                      "search": "https://open.bigmodel.cn/api/paas/v4/web_search",
+                      "search": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
                       "models": "https://open.bigmodel.cn/api/paas/v4/models"}}
     region_labels = {"global": "International (Z.ai, z.ai, billed in USD)",
                      "cn": "China (Zhipu BigModel open platform, bigmodel.cn, billed in CNY)"}
@@ -986,12 +1028,9 @@ class GLMAdapter:
     key_pages = {"global": "https://z.ai/manage-apikey/apikey-list", "cn": "https://bigmodel.cn/usercenter/proj-mgmt/apikeys"}
     default_region = "global"
     search_fee_usd = 0.01             # 国际站；按区域的价格在 config.PRICES 的 search_fee_usd（providers.search_fee_usd）
-    search_mode = "queries"           # Searcher：先生成查询词，再逐个调搜索接口（同 Kimi）
-    search_bills_every_ok_response = True   # 文档：按实际调用次数计费（没说空结果免费）-> 每个 HTTP 200 都按一次记（保守）
-    # 搜索引擎：国际站 Web Search API 的 enum 只有 search-prime；国内站用 search_std（基础版，¥0.01 / 次）
-    search_engines = {"global": "search-prime", "cn": "search_std"}
-    search_count_max = 50             # count：1–50（默认 10）
-    search_query_max_chars = {"cn": 70}   # 国内站 search_query 的 maxLength 是 70（建议不超过 70 个字符）；国际站没写上限
+    # v2.10h：web_search 工具的 search_engine（必填）。国际站 Chat Completion API 参考的 enum 只有 search_pro_jina（Web Search 指南的
+    # 「Web Search in Chat」示例写的是 search-prime，和参考页矛盾，按参考页）；国内站用 search_std（基础版，¥0.01 / 次）
+    search_engines = {"global": "search_pro_jina", "cn": "search_std"}
     # 除 401 / 403（key 被拒，不读）以外的错误都读 body：429 判断余额 / 用量上限（code），其余只把 code / message 记进日志
     error_body_statuses = frozenset({400, 404, 413, 429, 500, 502, 503, 504})
     balance_statuses = frozenset({429})
@@ -1077,33 +1116,37 @@ class GLMAdapter:
             return "unexpected_finish", f"reply ended with finish_reason={fr}"
         return None
 
-    def tools_search_request(self, key: str, query: str, *, limit: int, region: str | None = None):
-        """Web Search API：POST {base}/web_search。国际站 body：search_engine（必填，只有 search-prime）、search_query（必填）、count
-        （1–50，默认 10）。国内站：search_query（必填，maxLength 70）、search_engine（必填，search_std）、search_intent（必填；false =
-        跳过意图识别、直接搜：查询词已经是写好的搜索词）、count。search_domain_filter / search_recency_filter / content_size 用默认。"""
+    def search_request(self, model: str, key: str, prompt: str, *, max_tokens: int, max_uses: int, effort=None, region=None):
+        """v2.10h：Chat Completions（POST {base}/chat/completions）自带的 web_search 工具（两站 API 参考的 WebSearchToolSchema；联网搜索
+        指南「对话中的网络搜索」/「Web Search in Chat」）。body 依次是 model、messages（一条 user：搜索 prompt 原样）、thinking（和
+        reasoning_effort；规则同 JSON 调用：搜索不是 plan / judge / repair，5.2 / 4.7-FlashX 关思考，5.3 用 low）、tools、max_tokens、stream。
+        web_search 里只写：enable true（默认 false）、search_engine（必填，按区域）、search_result true（默认 false：不写就不返回结果的
+        link / title）。不写 search_query（那是「强制按这个查询词搜」，等于由我们写查询词）、search_intent / require_search（用默认：服务端
+        先做搜索意图识别）、count / search_domain_filter / search_recency_filter / content_size / search_prompt（用默认）。不发
+        response_format（搜索角色回的是 URL 列表，不是 JSON）、tool_choice（只有 auto，而且只对 function 有效）。max_uses 不用：一次请求
+        搜一次，由服务端定。"""
         region = region or self.default_region
-        n = self.search_query_max_chars.get(region)
-        q = _cut_query(query, n) if n else query
-        count = max(1, min(self.search_count_max, int(limit)))
-        if region == "cn":
-            body = {"search_query": q, "search_engine": self.search_engines[region], "search_intent": False, "count": count}
-        else:
-            body = {"search_engine": self.search_engines[region], "search_query": q, "count": count}
-        return self._headers(key), body
+        payload = {"model": model, "messages": [{"role": "user", "content": prompt}]}
+        payload.update(self.thinking_fields(model, effort))
+        payload.update({"tools": [{"type": "web_search", "web_search": {"enable": True, "search_engine": self.search_engines[region],
+                                                                       "search_result": True}}],
+                        "max_tokens": max_tokens, "stream": False})
+        return self._headers(key), payload
+
+    search_unpack = staticmethod(glm_search_unpack)
 
     @staticmethod
-    def tools_search_unpack(d: dict) -> list:
-        """search_result[] -> [(link, title)]（只要有 link 的）。没有 search_result 列表时抛 KeyError / TypeError（形状不对）。"""
-        res = d["search_result"]
-        if not isinstance(res, list):
-            raise TypeError("search_result is not a list")
-        return [(str(x["link"]), str(x.get("title") or "")) for x in res if isinstance(x, dict) and x.get("link")]
+    def search_continue(payload: dict, d: dict):
+        return None
 
-    def search_settings(self, region: str) -> dict:
-        out = {"search_engine": self.search_engines[region]}
-        if region == "cn":
-            out.update(search_intent=False, query_max_chars=self.search_query_max_chars["cn"])
-        return out
+    @staticmethod
+    def search_meter(unpacked: dict, started, model: str):
+        """(写进 calls.jsonl 的 token 字段, token 成本 USD)：usage 同 JSON 调用（prompt_tokens 含服务端放进上下文的搜索结果）。
+        model 是计价 id（国内站 "glm-5.3@cn"）。"""
+        u = unpacked["usage"]
+        det = u.get("prompt_tokens_details") if isinstance(u.get("prompt_tokens_details"), dict) else {}
+        return ({"prompt_tokens": u.get("prompt_tokens", 0), "cached_tokens": det.get("cached_tokens", 0) or 0,
+                 "completion_tokens": u.get("completion_tokens", 0)}, glm_usage_cost(u, model))
 
     @staticmethod
     def parse_error(raw: bytes) -> dict:
@@ -1200,14 +1243,9 @@ MODELS = {
     # v2.10d Kimi（官方 Model Parameter Reference / Reasoning Effort / Chat API，2026-10-21）。
     # K3：1M 上下文，max_completion_tokens 最大 1,048,576（输入 + 输出不能超过上下文）；永远在想，顶层 reasoning_effort 只有
     # low / high / max（默认 max）。网页档位按调研的映射：low -> low、medium -> high、high -> max；不给 off，其余角色 low。
-    # K2.6：262,144 上下文（输入 + max_completion_tokens 不能超过）；thinking enabled / disabled，没有深度档位，所以 low / medium /
-    # high 都是「开」（thinking_depth = False，网页上合并显示）。thinking_param = 这个模型用哪个字段控制思考
-    "kimi-k2.6": {"provider": "kimi", "label": "Kimi K2.6", "max_output": 262_144, "context": 262_144, "thinking_off": True,
-                  "thinking_param": "thinking", "thinking_depth": False,
-                  "efforts": {"low": "enabled", "medium": "enabled", "high": "enabled"}},
+    # v2.10h：K2.6 删掉（用户 10-21：只用自带的搜索；Responses API 只支持 K3，Chat Completions 的 $web_search 已在 10-20 下线）
     "kimi-k3": {"provider": "kimi", "label": "Kimi K3", "max_output": 1_048_576, "context": 1_048_576, "thinking_off": False,
-                "thinking_param": "reasoning_effort", "thinking_depth": True,
-                "efforts": {"low": "low", "medium": "high", "high": "max"}},
+                "thinking_depth": True, "efforts": {"low": "low", "medium": "high", "high": "max"}},
     # v2.10e GLM（Z.ai / 智谱官方 Chat Completion API、Deep Thinking、Core Parameters、模型页，2026-10-21）：max_tokens 最大 131,072。
     # GLM-5.3：1M 上下文；永远在想（thinking 只能 enabled），reasoning_effort 只有 low / high / max（默认 max）。网页档位同 Kimi K3：
     # low -> low、medium -> high、high -> max；不给 off，其余角色 low。
@@ -1237,9 +1275,9 @@ PROVIDERS = {"deepseek": {"label": "DeepSeek", "models": ("deepseek-flash", "dee
              # 唯一能关思考的（ModelSpec 的默认档位是 off）。官方「新项目从 Astra 开始」，要改随时说
              "gpt": {"label": "GPT (OpenAI)", "models": ("gpt-6-luna", "gpt-6.1-sol", "gpt-6-astra"),
                      "default_model": "gpt-6-luna"},
-             # 默认 K2.6：$2 上限下能跑满 10 个方向、能关思考（同 GPT 选 Luna 的理由）；调研记录官方 FAQ 讲成本时也推荐它。
-             # K3 要先充值才解锁，$2 下第一轮会因预扣放不下而中止（PROVIDERS.md 第 11.7 节）
-             "kimi": {"label": "Kimi (Moonshot AI)", "models": ("kimi-k2.6", "kimi-k3"), "default_model": "kimi-k2.6"},
+             # v2.10h：只有 K3（K2.6 删掉：没有自带的搜索，用户 10-21）。K3 要先充值才解锁；默认 $2 上限放不下一次最小运行，
+             # 网页会拒跑并给出最小上限（PROVIDERS.md 第 16 节）
+             "kimi": {"label": "Kimi (Moonshot AI)", "models": ("kimi-k3",), "default_model": "kimi-k3"},
              # 默认 GLM-5.2：国际站 API 参考里有这个 id、能关思考（ModelSpec 的默认档位是 off），$2 上限下 9 个方向。最便宜的 4.7-FlashX
              # （10 个方向）国际站 id 没核实；5.3（官方默认的旗舰）关不掉思考。PROVIDERS.md 第 12 节。key_note：网页上要显示的 key 说明
              "glm": {"label": "GLM (Z.ai / Zhipu)", "models": ("glm-4.7-flashx", "glm-5.2", "glm-5.3"), "default_model": "glm-5.2",
@@ -1269,7 +1307,7 @@ def reserve_chars_per_token(model: str) -> float:
 
 
 def search_fee_usd(model: str) -> float:
-    """每次搜索的费用（USD）。model 是计价 id；v2.10d：价格表里按区域写了 search_fee_usd 的（Kimi）用它，否则用这家 adapter 的。"""
+    """每次搜索的费用（USD）。model 是计价 id；v2.10d：价格表里按区域写了 search_fee_usd 的（Kimi、GLM）用它，否则用这家 adapter 的。"""
     p = PRICES.get(model) or {}
     return p["search_fee_usd"] if "search_fee_usd" in p else adapter_for_model(model).search_fee_usd
 

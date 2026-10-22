@@ -7,6 +7,8 @@ tests/test_web.py 的 FakeLLM）。key 都是假的；不读 key 文件、不联
 中途花费超过上限时同样 failed；上限放不下一次最小运行的组合在服务端拒跑、一个请求都不发；贵模型第一轮同时在途的搜索放不下时排队跑完
 （不再中止）；服务端的错误说明里带着 key（截断位置落在 key 中间）时也不留半截；停在人工确认超时自动结束并清 key。
 （审查脚本 e2e_all.py 整理而来。）
+v2.10h：Kimi 只剩 K3，搜索走 Responses API 自带的 web_search；GLM 的搜索走 Chat Completions 自带的 web_search；没有「生成查询词」
+那一步，也不再有任何请求发到 /v1/tools/search、/web_search。
 """
 import json
 import shutil
@@ -48,13 +50,11 @@ class _State:
 def _role_of(system):
     from triangulate.agent import prompts as PR
     return {PR.PLAN_SYSTEM: "plan", PR.EXTRACT_SYSTEM: "extract", PR.JUDGE_SYSTEM: "judge:r1", PR.AUDIT_SYSTEM: "audit",
-            PR.FINAL_SYSTEM: "final", PR.SEARCH_QUERIES_SYSTEM: "queries"}.get(system)
+            PR.FINAL_SYSTEM: "final"}.get(system)
 
 
 def _answer(role):
     from tests.test_web import FakeLLM
-    if role == "queries":
-        return {"queries": ["widgets June 2026 official", "widgets 2025 statistics"]}
     out, _ = FakeLLM().ask("", "", role=role, qid="fake")
     if role == "plan":
         cats = ("own_history", "physical_flow", "attention", "related_series", "administrative", "capacity_consumption")
@@ -84,7 +84,7 @@ class _Handler(BaseHTTPRequestHandler):
         self._json(200, {"object": "list", "data": [{"id": "x"}]})
 
     def _search(self, path, body):
-        """搜索接口（模型自己搜的四种 + 两种搜索接口）。broke_search 模式：按各家文档的余额不足回复。"""
+        """五家自带的搜索（v2.10h）。broke_search 模式：按各家文档的余额不足回复。"""
         broke = _State.mode == "broke_search"
         big = _State.mode == "huge_usage"
         usage_in = 3_000_000 if big else 9000
@@ -106,6 +106,17 @@ class _Handler(BaseHTTPRequestHandler):
                 {"type": "web_search_tool_result", "content": [{"type": "web_search_result", "url": "https://a.org/1"}]},
                 {"type": "text", "text": "https://a.org/1"}],
                 "usage": {"input_tokens": usage_in, "output_tokens": 400, "server_tool_use": {"web_search_requests": 2}}})
+        if path.startswith("/kimi/"):   # K3：Responses API + web_search（output：web_search_call、reasoning、message）
+            if broke:
+                return self._json(429, {"error": {"message": "Account balance is insufficient", "type": "exceeded_current_quota_error"}})
+            return self._json(200, {"id": "resp", "object": "response", "status": "completed", "model": "kimi-k3", "output": [
+                {"type": "web_search_call", "status": "completed", "action": {"type": "search", "query": "widgets", "sources": [
+                    {"type": "url", "url": "https://a.org/1", "title": "A"}, {"type": "url", "url": "https://b.org/2", "title": "B"}]}},
+                {"type": "reasoning", "summary": [{"type": "summary_text", "text": "hmm"}], "status": "completed"},
+                {"type": "message", "role": "assistant", "status": "completed",
+                 "content": [{"type": "output_text", "text": "https://a.org/1", "annotations": []}]}],
+                "usage": {"input_tokens": usage_in, "input_tokens_details": {"cached_tokens": 0, "cache_write_tokens": 0},
+                          "output_tokens": 400, "output_tokens_details": {"reasoning_tokens": 100}}})
         if path.endswith("/v1/responses"):
             if broke:
                 return self._json(429, {"error": {"message": "You exceeded your current quota", "type": "insufficient_quota",
@@ -117,13 +128,14 @@ class _Handler(BaseHTTPRequestHandler):
                                                  "annotations": [{"type": "url_citation", "url": "https://b.org/2", "title": "B"}]}]}],
                 "usage": {"input_tokens": usage_in, "input_tokens_details": {"cached_tokens": 0}, "output_tokens": 400,
                           "output_tokens_details": {"reasoning_tokens": 100}}})
-        if path.endswith("/tools/search"):
-            if broke:
-                return self._json(429, {"error": {"message": "Account balance is insufficient", "type": "exceeded_current_quota_error"}})
-            return self._json(200, {"search_results": [{"url": "https://a.org/1", "title": "A"}, {"url": "https://b.org/2", "title": "B"}]})
-        if broke:   # GLM /web_search
+        if broke:   # GLM：chat/completions + web_search 工具
             return self._json(429, {"error": {"code": "1113", "message": "Insufficient balance or no resource package. Please recharge."}})
-        return self._json(200, {"id": "w", "search_result": [{"link": "https://a.org/1", "title": "A"}, {"link": "https://b.org/2", "title": "B"}]})
+        return self._json(200, {"id": "w", "model": body["model"],
+                                "choices": [{"index": 0, "message": {"role": "assistant", "content": "https://a.org/1"},
+                                             "finish_reason": "stop"}],
+                                "usage": {"prompt_tokens": usage_in, "completion_tokens": 400, "prompt_tokens_details": {"cached_tokens": 0}},
+                                "web_search": [{"link": "https://a.org/1", "title": "A", "refer": "ref_1"},
+                                               {"link": "https://b.org/2", "title": "B", "refer": "ref_2"}]})
 
     def do_POST(self):
         srv = self.server
@@ -134,7 +146,7 @@ class _Handler(BaseHTTPRequestHandler):
         with srv.lock:
             srv.seen.append(rec)
         is_search = ((path.startswith("/claude/") and "tools" in body) or path.endswith("/anthropic/v1/messages")
-                     or path.endswith("/v1/responses") or path.endswith("/tools/search") or path.endswith("/web_search"))
+                     or path.endswith("/v1/responses") or (path.startswith("/glm/") and "tools" in body))
         if is_search:
             rec["role"] = "search"
             if _State.search_delay:
@@ -221,9 +233,9 @@ class _E2E(unittest.TestCase):
                                           "models": base + "/claude/v1/models"}},
             PV.OpenAIAdapter: {"global": {"chat": base + "/gpt/v1/chat/completions", "search": base + "/gpt/v1/responses",
                                           "models": base + "/gpt/v1/models"}},
-            PV.KimiAdapter: {r: {"chat": base + f"/kimi/{r}/v1/chat/completions", "search": base + f"/kimi/{r}/v1/tools/search",
+            PV.KimiAdapter: {r: {"chat": base + f"/kimi/{r}/v1/chat/completions", "search": base + f"/kimi/{r}/v1/responses",
                                  "models": base + f"/kimi/{r}/v1/models"} for r in ("global", "cn")},
-            PV.GLMAdapter: {r: {"chat": base + f"/glm/{r}/chat/completions", "search": base + f"/glm/{r}/web_search",
+            PV.GLMAdapter: {r: {"chat": base + f"/glm/{r}/chat/completions", "search": base + f"/glm/{r}/chat/completions",
                                 "models": base + f"/glm/{r}/models"} for r in ("global", "cn")},
         }
         self.tmp = Path(tempfile.mkdtemp())
@@ -301,7 +313,7 @@ class TestEveryProviderRunsToTheEnd(_E2E):
              ("claude", "claude-opus-5-5", "global", "high", 20.0),
              ("gpt", "gpt-6-luna", "global", "off", 2.0),
              ("gpt", "gpt-6.1-sol", "global", "medium", 20.0),
-             ("kimi", "kimi-k2.6", "global", "off", 2.0),
+             ("kimi", "kimi-k3", "global", "low", 5.0),
              ("kimi", "kimi-k3", "cn", "high", 20.0),
              ("glm", "glm-5.2", "global", "off", 2.0),
              ("glm", "glm-5.3", "cn", "low", 5.0),
@@ -322,8 +334,15 @@ class TestEveryProviderRunsToTheEnd(_E2E):
                 for x in seen:   # 每个请求都带着用户的 key
                     self.assertIn(key, x["headers"].get("authorization", "") + x["headers"].get("x-api-key", ""), x["path"])
                 roles = {x["role"] for x in seen}
-                want = {"plan", "search", "extract", "judge:r1", "final"} | ({"queries"} if prov in ("kimi", "glm") else set())
-                self.assertTrue(want <= roles, roles)
+                self.assertTrue({"plan", "search", "extract", "judge:r1", "final"} <= roles, roles)
+                # v2.10h：只用各家自带的搜索：没有发到独立搜索接口的请求；Kimi / GLM 的搜索请求带着自带的 web_search 工具
+                self.assertFalse([x["path"] for x in seen if x["path"].endswith(("/tools/search", "/web_search"))])
+                for x in seen:
+                    if x["role"] == "search" and prov == "kimi":
+                        self.assertEqual((x["path"].endswith("/v1/responses"), x["body"]["tools"]), (True, [{"type": "web_search"}]))
+                    if x["role"] == "search" and prov == "glm":
+                        self.assertEqual(x["body"]["tools"][0]["type"], "web_search")
+                        self.assertNotIn("search_query", x["body"]["tools"][0]["web_search"])
                 max_out = PV.MODELS[model]["max_output"]
                 for x in seen:
                     b = x["body"]
@@ -353,11 +372,11 @@ class TestStopsAreVisible(_E2E):
                  ("claude", "claude-haiku-5-5", "global", "off", "insufficient balance: Claude HTTP 402 billing_error"),
                  ("gpt", "gpt-6-luna", "global", "off",
                   "insufficient balance: OpenAI HTTP 429 credit_balance_exhausted (no prepaid credits left)"),
-                 ("kimi", "kimi-k2.6", "global", "off", "insufficient balance: Kimi HTTP 429 exceeded_current_quota_error"),
+                 ("kimi", "kimi-k3", "global", "low", "insufficient balance: Kimi HTTP 429 exceeded_current_quota_error"),
                  ("glm", "glm-5.2", "cn", "off", "insufficient balance: GLM HTTP 429 code 1113")]
         for i, (prov, model, region, think, want) in enumerate(cases):
-            with self.subTest(provider=prov):
-                key, r, st = self.start(20 + i, prov, model, region, think, 2.0)
+            with self.subTest(provider=prov):   # K3 在 $2 下会被拒跑（放不下一次最小运行），给 $5
+                key, r, st = self.start(20 + i, prov, model, region, think, 5.0 if prov == "kimi" else 2.0)
                 self.assertEqual(st["status"], "failed", st)
                 self.assertTrue(st["error"].startswith(want), st["error"])
                 self.assertIn("the run was stopped without retrying", st["error"])
@@ -418,10 +437,11 @@ class TestStopsAreVisible(_E2E):
         """兜底（审查发现）：服务端在 400 的 message 里回显了 key，200 字的截断落在 key 中间。先 redact 再截断：哪里都没有半截 key
         （GLM 的 key 不以 sk- 开头，以前会留下前 10 个字符）。"""
         _State.mode = "leaky"
-        for i, (prov, model, region) in enumerate((("glm", "glm-5.2", "global"), ("claude", "claude-haiku-5-5", "global"),
-                                                   ("kimi", "kimi-k2.6", "global"))):
+        for i, (prov, model, region, think, cap) in enumerate((("glm", "glm-5.2", "global", "off", 2.0),
+                                                               ("claude", "claude-haiku-5-5", "global", "off", 2.0),
+                                                               ("kimi", "kimi-k3", "global", "low", 5.0))):
             with self.subTest(provider=prov):
-                key, r, st = self.start(40 + i, prov, model, region, "off", 2.0)
+                key, r, st = self.start(40 + i, prov, model, region, think, cap)
                 self.assertIn(st["status"], ("done", "failed"))
                 calls = (self.tmp / st["qid"] / st["tag"] / "calls.jsonl").read_text(encoding="utf-8")
                 self.assertIn('"arm": "audit"', calls)

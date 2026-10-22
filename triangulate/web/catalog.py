@@ -72,6 +72,13 @@ PROVIDER_NOTES = {
         {"en": "New accounts (Tier0, US$1 topped up) are limited to 1 concurrent request and 3 requests per minute; runs will hit "
                "429 rate limits. Tier1 (US$10 cumulative) or above is recommended. K3 must be unlocked by topping up first.",
          "zh": "新账户（Tier0，累计充值 $1）只有并发 1、每分钟 3 次，运行会连续撞 429 限流；建议 Tier1（累计 $10）以上。K3 要先充值解锁。"},
+        # v2.10h：搜索改走 K3 自带的 web_search（用户 10-21：只用自带的搜索）
+        {"en": "Web search uses K3's built-in web_search tool (Responses API): Kimi's server decides from the search brief whether "
+               "to search, runs the search before the model answers, and cannot be forced to search. Kimi does not list a price "
+               "for it; the budget assumes US$0.01 per search. Kimi's K3 quickstart says web search is being updated and is not "
+               "recommended for production workflows in the near term.",
+         "zh": "联网搜索用 K3 自带的 web_search 工具（Responses API）：由 Kimi 服务端按搜索说明决定搜不搜、在模型回答之前搜，没法强制它搜。"
+               "Kimi 没公布这个工具的单价，预算按每次 $0.01 的假设记账。Kimi 的 K3 快速开始页写着联网搜索正在更新、近期不建议用于生产流程。"},
     ],
     "glm": [
         {"en": PV.GLM_KEY_NOTE,
@@ -80,6 +87,14 @@ PROVIDER_NOTES = {
                "不能用在这里。"},
         {"en": "Z.ai shows billing one day late (n-1), and its top-up does not support 3-D Secure cards.",
          "zh": "Z.ai 的账单晚一天显示（n-1），充值不支持 3DS 信用卡。"},
+        # v2.10h：搜索改走 GLM 自带的 web_search（用户 10-21：只用自带的搜索）
+        {"en": "Web search uses GLM's built-in web_search tool in Chat Completions (engine search_pro_jina on Z.ai, search_std on "
+               "bigmodel.cn): the service first checks the search brief for search intent, searches once per request and feeds the "
+               "results to the model; links come from the reply's web_search list. Each request is counted as one search "
+               "(US$0.01 on Z.ai, CNY 0.01 on bigmodel.cn).",
+         "zh": "联网搜索用 GLM 在 Chat Completions 里自带的 web_search 工具（Z.ai 用 search_pro_jina 引擎，智谱开放平台用 search_std）："
+               "服务端先对搜索说明做意图识别，一次请求搜一次，把结果交给模型；链接取自回复里的 web_search 列表。每个请求按一次搜索记账"
+               "（Z.ai $0.01，智谱 ¥0.01）。"},
     ],
 }
 
@@ -134,7 +149,7 @@ def sends(model: str, effort) -> dict:
 
 def _budget(pid: str, model: str, level: str, cap: float) -> Budget:
     """和真正运行的预算同样设置（pipeline.Context -> configure_byok：搜索按实际发出的 max_tokens 和 p99 的输入预扣）。"""
-    return configure_byok(Budget.for_model(pid, usd=cap), model, level, PV.ADAPTERS[PV.MODELS[model]["provider"]])
+    return configure_byok(Budget.for_model(pid, usd=cap), model, level)
 
 
 def _round1_hold(b: Budget) -> float:
