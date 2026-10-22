@@ -110,7 +110,7 @@ class TestRestatedPoint(unittest.TestCase):
         self.assertEqual(C.restated_point(A(unit="%"), {"p73": _pt("p73", 8.4, "%")}), "p73")
 
     def test_point_side_rule_unchanged(self):
-        # 点一侧仍是 unit == "%"；不是 "%" 的点照旧比单位词干（和以前相同）
+        # 点一侧的 % 分支仍是 unit == "%"；不是 "%" 的点走词干分支（v2.11b 起还要求两边 is_pct 相同、先去通用词）
         self.assertEqual(C.restated_point(A(), {"p73": _pt("p73", 8.4, "percent of annual live births")}), "p73")
         self.assertEqual(C.restated_point(A(), {"p1": _pt("p1", 8.4, "percentage points")}), "")
         self.assertEqual(C.restated_point(A(unit="percentage points"), {"p1": _pt("p1", 8.4, "%")}), "")
@@ -121,8 +121,31 @@ class TestRestatedPoint(unittest.TestCase):
     def test_non_percent_rules_unchanged(self):
         r = A(name="August-to-July ratio", unit="ratio", value=1.0, low=0.9, high=1.1)
         self.assertEqual(C.restated_point(r, {"p1": _pt("p1", 1.0, "day of month")}), "")
-        self.assertEqual(C.restated_point(r, {"p1": _pt("p1", 1.0, "ratio")}), "p1")
+        # v2.11b（R14）：两边都只剩通用词（ratio）时不再算复述（已知漏检，记在 BUGS）
+        self.assertEqual(C.restated_point(r, {"p1": _pt("p1", 1.0, "ratio")}), "")
         self.assertEqual(C.restated_point(r, {"p1": _pt("p1", 1.0, "ratio", keep=False)}), "")
+
+    def test_r14_generic_words_and_pct_parity(self):
+        # token 题 v1（ask_02c360ec/web_20261021T224831Z）第 2 轮：a11 = 7 和 p151 = 7 只有 ratio 相同，以前误判，m4 被拒
+        a11 = A(id="a11", name="Microsoft 2025 full-year tokens divided by its FY25 Q3 (Jan-Mar 2025) quarterly tokens",
+                unit="ratio (annual / Q1-2025 quarter)", value=7, low=5, high=9)
+        self.assertEqual(C.restated_point(a11, {"p151": _pt("p151", 7.0, "ratio")}), "")
+        # S2.md 第 6.3 节：百分数的假设和不是百分数的点（is_pct 不同）不再比词干
+        self.assertEqual(C.restated_point(A(), {"p1": _pt("p1", 8.4, "live births (persons)")}), "")
+        # 按整词去通用词：factories（词干 facto 同 factor）照旧比；index 不去
+        f = A(name="factories in the region", unit="factories", value=120, low=100, high=140)
+        self.assertEqual(C.restated_point(f, {"p1": _pt("p1", 120, "factories")}), "p1")
+        # 两边都要先去通用词：factor（通用词）和 factory（实词）的 5 字母词干都是 facto，只去一边就会误判
+        fo = A(name="regional factory output", unit="factory output", value=2.0, low=1.5, high=2.5)
+        self.assertEqual(C.restated_point(fo, {"p1": _pt("p1", 2.0, "factor")}), "")
+        fa = A(name="growth factor", unit="factor", value=2.0, low=1.5, high=2.5)
+        self.assertEqual(C.restated_point(fa, {"p1": _pt("p1", 2.0, "factory output")}), "")
+        ix = A(name="price index", unit="index (2020=100)", value=105.2, low=100, high=110)
+        self.assertEqual(C.restated_point(ix, {"p1": _pt("p1", 105.2, "index (2020=100)")}), "p1")
+        # 两边都是 % 的分支不变（决定 16）：FedWatch（ask_0e2d5021/discrete5 第 1 轮）a1 43.7 % 对 p78 43.7 %
+        hike = A(id="a1", name="Probability of a 25bp hike at the October 2026 FOMC meeting", unit="%", value=43.7,
+                 low=35, high=50)
+        self.assertEqual(C.restated_point(hike, {"p78": _pt("p78", 43.7, "%")}), "p78")
 
 
 @unittest.skipUnless(HAVE_LG, "langgraph not installed (use .venv)")
