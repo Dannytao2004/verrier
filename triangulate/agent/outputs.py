@@ -198,7 +198,9 @@ def ledger(state: dict, score: dict | None = None) -> str:
         for res in by_dir.get(d["id"], []):
             s = res.get("search") or {}
             if s:
-                L.append(f"Queries issued by the searcher: {'; '.join(_md(q) for q in s.get('queries', [])) or '(none)'}")
+                # v2.10i：provider 的回复里本来就没有查询词（GLM，queries_reported False）时不写「(none)」：看起来像根本没搜
+                none = "(not reported by the provider)" if s.get("queries_reported") is False else "(none)"
+                L.append(f"Queries issued by the searcher: {'; '.join(_md(q) for q in s.get('queries', [])) or none}")
                 L.append("")
             if s.get("voided"):   # v2.6c 回测泄漏护栏（pipeline.run_direction）
                 L += [f"**DIRECTION VOIDED: a searcher query contains a registered value {s['voided']}; no pages fetched**", ""]

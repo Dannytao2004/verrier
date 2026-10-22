@@ -247,12 +247,19 @@ class Budget:
 
     def search_reserve(self) -> float:
         """一次搜索请求的预扣：search_input_tokens 个输入 token + 发出的 max_tokens 个输出 token + (2 x max_uses + 2) 次搜索费。
-        v2.10f：Claude 的 pause_turn 续接每次另预扣同样一份（Searcher.renew -> renew_current）。"""
+        v2.10f：Claude 的 pause_turn 续接每次另预扣同样一份（Searcher.renew -> renew_current）。v2.10i：token 部分提到
+        search_tokens_reserve（算法、浮点结果不变）。"""
         m = self.model or MODEL
         n_in = self.SEARCH_INPUT_TOKENS if self.search_input_tokens is None else self.search_input_tokens
-        hit, miss, out = self.reserve_rates(m, n_in)
         tokens = MAX_TOKENS["search"] if self.search_tokens is None else self.search_tokens
-        return (n_in * miss + tokens * out) / 1e6 + (2 * self.search_max_uses + 2) * search_fee_usd(m)
+        return self.search_tokens_reserve(m, n_in, tokens) + (2 * self.search_max_uses + 2) * search_fee_usd(m)
+
+    @staticmethod
+    def search_tokens_reserve(model: str, n_in: float, out_tokens: int) -> float:
+        """v2.10i：一次搜索预扣里 token 的那一部分（不含搜索费）：n_in 个输入 token + out_tokens 个输出 token，按 reserve_rates。
+        search_reserve 用它；Searcher 在自带 key 的运行里，回复没给 usage、或读超时后不重发时，这次请求按它记账（不按 0）。"""
+        hit, miss, out = Budget.reserve_rates(model, n_in)
+        return (n_in * miss + out_tokens * out) / 1e6
 
     def reserve_page(self, round_no: int) -> bool:
         cap = self.round1_pages if round_no == 1 else self.pages_cap

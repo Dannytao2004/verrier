@@ -87,7 +87,7 @@ PROVIDER_NOTES = {
                "不能用在这里。"},
         {"en": "Z.ai shows billing one day late (n-1), and its top-up does not support 3-D Secure cards.",
          "zh": "Z.ai 的账单晚一天显示（n-1），充值不支持 3DS 信用卡。"},
-        # v2.10h：搜索改走 GLM 自带的 web_search（用户 10-21：只用自带的搜索）
+        # v2.10h：搜索改走 GLM 自带的 web_search（用户 10-21：只用自带的搜索）。v2.10i：国际站引擎名、链接来源没用真 key 测过，照实写
         {"en": "Web search uses GLM's built-in web_search tool in Chat Completions (engine search_pro_jina on Z.ai, search_std on "
                "bigmodel.cn): the service first checks the search brief for search intent, searches once per request and feeds the "
                "results to the model; links come from the reply's web_search list. Each request is counted as one search "
@@ -95,6 +95,13 @@ PROVIDER_NOTES = {
          "zh": "联网搜索用 GLM 在 Chat Completions 里自带的 web_search 工具（Z.ai 用 search_pro_jina 引擎，智谱开放平台用 search_std）："
                "服务端先对搜索说明做意图识别，一次请求搜一次，把结果交给模型；链接取自回复里的 web_search 列表。每个请求按一次搜索记账"
                "（Z.ai $0.01，智谱 ¥0.01）。"},
+        {"en": "Not tested with a real key: the Z.ai engine name search_pro_jina follows Z.ai's API reference (its Web Search guide "
+               "shows search-prime instead). If Z.ai rejects it, every search fails with HTTP 400 and the run gets no web pages, "
+               "while planning and judging are still billed. That links come back in the reply's web_search list is also taken "
+               "from the API reference only (the bigmodel.cn guide's example reply has no such list).",
+         "zh": "没用真 key 测过：Z.ai 的引擎名 search_pro_jina 按 Z.ai 的 API 参考写（它的联网搜索指南示例写的是 search-prime）。"
+               "如果 Z.ai 不收这个名字，每次搜索都会 HTTP 400、整次运行取不到网页，规划和裁判照样计费。链接从回复的 web_search 列表里取，"
+               "这一点也只有 API 参考可依（智谱开放平台指南的回复示例里没有这个列表）。"},
     ],
 }
 

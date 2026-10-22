@@ -431,13 +431,29 @@ class TestKimiSearch(_FakeServerCase):
 
     def test_incomplete_and_null_usage(self):
         """status incomplete（incomplete_details.reason = max_output_tokens）：照样用已有的文字和 sources，stop 记原因。usage 可以是 null
-        （ResponsesResponse 的 usage oneOf null）：token 成本按 0 记，搜索照样计次。"""
+        （ResponsesResponse 的 usage oneOf null）：v2.10i 起 token 成本按这次搜索预扣的 token 部分记（72,000 输入 + 32,192 输出，按 K3 的
+        预扣单价，约 $0.70；以前记 0，预算会漏掉这次），日志写 usd_basis；搜索照样按 web_search_call 计次。"""
         reply = FK.search_response("", sources=("https://a.example.org/w",), status="incomplete",
                                    incomplete={"reason": "max_output_tokens"})
         reply["usage"] = None
         out, _, log = self.search(("json", 200, reply))
-        self.assertEqual((out["urls"], out["usd"], out["web_search_requests"]), (["https://a.example.org/w"], 0.0, 1))
-        self.assertEqual(log[0]["stop"], "incomplete:max_output_tokens")
+        want = (72_000 * 3.00 + SEARCH_OUT * 15.00) / 1e6
+        self.assertAlmostEqual(want, P.Budget.search_tokens_reserve("kimi-k3", P.Budget.SEARCH_INPUT_TOKENS_BYOK, SEARCH_OUT))
+        self.assertEqual((out["urls"], out["web_search_requests"]), (["https://a.example.org/w"], 1))
+        self.assertAlmostEqual(out["usd"], want)
+        self.assertAlmostEqual(out["usd_search_fee_assumed"], 0.01)
+        self.assertEqual((log[0]["stop"], log[0]["ok"], log[0]["usage_missing"], log[0]["usd_basis"], log[0]["usd"]),
+                         ("incomplete:max_output_tokens", True, True, "reserve (usage missing)", round(want, 6)))
+        for missing in ("absent", {}):   # 整个字段都没有、或是空对象：同样按预扣
+            if missing == "absent":
+                reply.pop("usage")
+            else:
+                reply["usage"] = missing
+            out, _, log = self.search(("json", 200, reply))
+            self.assertAlmostEqual(out["usd"], want)
+            self.assertTrue(log[0]["usage_missing"])
+        out, _, log = self.search(found())   # 有 usage 的回复照旧按 usage 计价，不带 usage_missing / usd_basis
+        self.assertFalse({"usage_missing", "usd_basis"} & set(log[0]))
 
     def test_errors_on_the_search_endpoint(self):
         """Responses 接口的错误形状 {"error": {message, type, code}}：429 exceeded_current_quota_error -> 整次运行停下（不重试）；

@@ -1,7 +1,8 @@
 """v2.10e 探针（不花钱）：对真实的 GLM 接口（Z.ai 国际站 / 智谱开放平台国内站）发不带 key / 带明显是假的 key 的请求，
 看 401 的形状，并确认 llm.check_key 的处理。鉴权就被拒，不会生成、不会搜索、不计费。
   1. 国际站 GET https://api.z.ai/api/paas/v4/models：不带 key、带假 key；国内站 GET https://open.bigmodel.cn/api/paas/v4/models：带假 key；
-  2. 两站 POST /chat/completions、POST /web_search：带假 key；
+  2. 两站 POST /chat/completions：带假 key；（v2.10e 时还发过 POST /web_search，v2.10h 起那个独立搜索接口不用，v2.10i 从这里删掉；
+     搜索现在是 chat/completions 带自带的 web_search 工具，假 key 探针在 probes/native_search_probe.py）
   3. llm.check_key：两站各一次（假 key，Authorization: Bearer，和正式代码同一条路；adapter 还没加时跳过）。
 不读 .env、不读任何 key 文件；结果写到 probes/out/glm_key_probe.json（gitignore）。
 用法：.venv/Scripts/python.exe probes/glm_key_probe.py
@@ -46,12 +47,7 @@ def main():
            "global_models_fake_key": send(BASES["global"] + "/models", fake),
            "cn_models_fake_key": send(BASES["cn"] + "/models", fake),
            "global_chat_fake_key": send(BASES["global"] + "/chat/completions", fake, chat),
-           "cn_chat_fake_key": send(BASES["cn"] + "/chat/completions", fake, chat),
-           "global_web_search_fake_key": send(BASES["global"] + "/web_search", fake,
-                                              {"search_engine": "search-prime", "search_query": "test", "count": 1}),
-           "cn_web_search_fake_key": send(BASES["cn"] + "/web_search", fake,
-                                          {"search_query": "test", "search_engine": "search_std", "search_intent": False,
-                                           "count": 1})}
+           "cn_chat_fake_key": send(BASES["cn"] + "/chat/completions", fake, chat)}
     if "glm" in PV.ADAPTERS:
         out["check_key_global"] = llm.check_key(PV.ModelSpec("glm", "glm-4.7-flashx", FAKE_KEY))
         out["check_key_cn"] = llm.check_key(PV.ModelSpec("glm", "glm-5.3", FAKE_KEY, region="cn", thinking="low"))

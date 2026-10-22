@@ -179,7 +179,10 @@ def run_settings(spec=None) -> dict:
     if spec is not None:
         out["run_spec"] = spec.public()
         # v2.10h：v2.10d / e 给 Kimi、GLM 记的 search_queries（生成查询词 + 搜索接口的设置）删掉：五家都用自带的搜索，同 DeepSeek /
-        # Claude / GPT 不另记
+        # Claude / GPT 不另记。v2.10i：adapter 有 search_tool_settings 时（GLM：搜索端点和引擎，国际站的引擎名没实测）记进 search_tool
+        tool = getattr(spec.adapter, "search_tool_settings", None)
+        if tool is not None:
+            out["search_tool"] = tool(spec.region)
         if spec.thinking_by_role():
             out["thinking"] = {"by_role": spec.thinking_by_role(), "extra_max_tokens": THINKING_EXTRA_TOKENS,
                                "max_output": spec.max_output}

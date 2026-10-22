@@ -13,6 +13,7 @@
 | `v2.10e` | GLM adapter（Z.ai 国际站 / 智谱开放平台国内站两个区域；JSON 调用走非流式 Chat Completions；搜索同 Kimi：生成查询词 + `POST /web_search`）；国内站按 CNY 官方价折算；429 余额不足（1113）和用量上限 / 套餐 key 的码立刻停；只收 Standard API Key（网页提示 `GLM_KEY_NOTE`）；GLM key 校验 | 第 12 节 |
 | `web-v0.9` | 网页接上 BYOK：`GET /api/providers`（provider、区域、模型、思考档位、每次运行的花费估计）、`POST /api/key/check`、`POST /api/runs` 必须带 key；key 只在这次运行的内存里，结束就清；经典界面只浏览；/verrier 控制台的「模型 · key · 上限」表单 | 第 13 节 |
 | `v2.10h` | 用户 10-21：每个模型只用自家自带的联网搜索，没有就删掉这个模型。删掉 Kimi K2.6；删掉「生成查询词 + 另调搜索接口」那条路；K3 改走 Responses API 自带的 web_search，GLM 三个模型改走 Chat Completions 自带的 web_search；DeepSeek / Claude / GPT 不变 | 第 16 节 |
+| `v2.10i` | v2.10h 审查修正：自带 key 的运行里搜索回复缺 usage 按预扣记账（不按 0）；Responses 回复 status failed 记成失败、redact 后往外报；Kimi / GLM 搜索读超时不重发、按预扣记账，单次读 1200 秒；GLM 账本不再把没返回的查询词写成「(none)」、settings 记搜索端点和引擎；网页 GLM 说明标注国际站引擎名没实测；GLM 探针删掉已废弃的 /web_search。口径（模型驱动）、Kimi 默认上限、预测市场工具三处等你定 | 第 17 节 |
 | `v2.10f` | 审查修正：自带 key 的运行里预扣放不下只是因为在途时等、上限放不下一次最小运行就在服务端拒跑、Claude 默认改 Sonnet 5.5；中途停下的运行标 failed 并写原因；预扣的估计（搜索输入 p99、别家 1 字符 1 token、续接另预扣、缺 usage 按预扣记）；先 redact 再截断、GLM 形状的 key、key 字符集；等人工确认 30 分钟超时；~~DeepSeek 自带 key 的搜索关思考~~（v2.10g 按用户决定撤回）；命令行只收 DeepSeek 模型；403 的说法；GLM 1313 重试；五家的端到端测试 | 第 14 节 |
 
 ## 1. Scope and binding decisions（用户 10-20 / 10-21 定的，摘要）
@@ -75,6 +76,9 @@ adapter 只管各家不同的部分：
 | v2.10d：`region_labels`、`MODELS[m]["thinking_param"]` / `["thinking_depth"]` | 网页用：区域的说明；这个模型用哪个字段控制思考、有没有深度档位（K2.6 没有：low / medium / high 都是「开」） |
 | ~~v2.10e：`tools_search_request(key, query, limit=, region=)`、`search_settings(region)`~~（v2.10h 删掉） | 搜索请求按区域建（GLM 两站的引擎和必填字段不同；Kimi 不用 region）；`run_settings` 的 `search_queries` 里记哪些搜索设置（Kimi 仍是 `timeout_seconds`，GLM 是引擎等） |
 | ~~v2.10e：`search_bills_every_ok_response`~~（v2.10h 删掉） | 「查询词」模式的计费：没有这个属性（Kimi）= 只有结果非空才记一次；GLM 为 True = 每个 HTTP 200 都记一次（含空结果、形状不对的） |
+| v2.10i：`search_timeout_s`、`search_resend_after_timeout` | 搜索请求的单次读超时（没有这个属性 = 600 秒，DeepSeek / Claude / GPT 不变）和读超时以后要不要重发（没有 = 重发，同以前）。Kimi 1200 秒、GLM 1200 秒（= 它的 `chat_timeouts` 单次读），两家都不重发：读超时的那次按预扣记账（第 17.3 节） |
+| v2.10i：`search_reports_queries`、`search_tool_settings(region)`（GLM） | 回复里有没有查询词（没有这个属性 = 有）：GLM 为 False，`Searcher` 返回 `queries_reported: False`，账本写「(not reported by the provider)」；`run_settings` 把 `search_tool_settings` 的结果记进 `settings.search_tool`（端点、工具、引擎、`search_engine_tested: false`） |
+| v2.10i：`Budget.search_tokens_reserve(model, n_in, out_tokens)` | 一次搜索预扣里 token 的那一部分（`search_reserve` = 它 + (2 × max_uses + 2) 次搜索费，浮点结果不变）；`Searcher._reserve_usd` 在自带 key 的运行里按 `SEARCH_INPUT_TOKENS_BYOK` 调它 |
 | v2.10e：`parse_error(raw)` | adapter 有它时 `llm.server_error` 用它解析错误 body（GLM：只有 `code` / `message`，可能没有外层 `error`），日志记 `server_error_code` / `server_error`、不记 `server_error_type`；`llm.server_error_detail` 对这种记录写 `(code 1214: message)`。其余 provider 没有这个钩子，文字不变 |
 | v2.10e：`models_unpack` 第二项可以是 `None` | 「列表全不全不知道」（GLM 的 models 接口没有文档）：所选模型不在里面时 `check_key` 的 `model_listed` 是 None，message 写「没核对」而不是「不在列表里」 |
 | v2.10e：`key_note`、`key_pages`（GLM） | 网页上要显示的 key 说明（只收 Standard API Key、不收 Coding Plan key）和两站建 key 的页面；`PROVIDERS["glm"]["key_note"]` 是同一段 |
@@ -1039,6 +1043,7 @@ Astra 的 $2.50 是「只剩 1 个方向时放得下」的上限（往上找到�
 - 「校验 key」只说明这家接受这把 key：余额够不够、K3 是否解锁、GLM 的 key 是不是 Standard API Key，都要到第一次计费调用才知道（第 11.8 / 12.8 节）。
 - 经典界面的运行页还能批准 / 取消已有的运行（不发起新运行）。
 - aero / apple / manuscript 三个页面的表单没有专门的样式。
+- **「每家的默认组合在默认 $2 下不被拒」这条不变式，v2.10h 起对 Kimi 不成立（等你定）**：v2.10f 定的口径是每家的默认模型 + 默认档位在默认上限下放得下（`tests/test_web_byok.py` 的 `test_estimates_follow_the_cap_and_the_budget`）。K2.6 删掉以后 Kimi 只剩 K3，默认组合（K3、low、$2）一选就被服务端拒跑（假演示服务实测：`POST /api/runs {provider: kimi}` -> 400「The spending cap $2.00 cannot cover ... $2.85 ... Raise the cap to at least $3.00」），测试改成了只对 Kimi 接受 `stops_early`。两个做法：(a) 给 Kimi 单独的默认上限（例如 $3，网页切到 Kimi 时带出来）；(b) 接受「选 Kimi 要手动调上限」，这里就当作不变式已改。v2.10i 没改代码，等你选（第 17.5 节）。
 - ~~DeepSeek 搜索角色的思考没关（第 8 节），仍等你定。~~（v2.10f 已改，第 14.6 节）
 
 ### 13.6 Verification（web-v0.9）
@@ -1301,7 +1306,9 @@ OpenAI / Anthropic 两种格式（colspan=2），Anthropic 格式的深度是 `o
 自带搜索不是：K3 是服务端先按输入判断要不要搜、在模型回答之前搜（Responses 页：the server first decides from the input whether a
 search is needed）；GLM 是服务端先做搜索意图识别、一次请求搜一次、结果按模板交给模型（官方叫 retrieval-augmented generation /
 「对话中的网络搜索」）。这里按你的原话「只用它自带的」处理：自带的就用，K3、GLM 都保留。如果你要的是严格的「模型驱动」，K3 和 GLM
-三个模型都要删（这和「K3 只用它自带的」矛盾，所以没按这个口径做）。
+三个模型都要删（这和「K3 只用它自带的」矛盾，所以没按这个口径做）。v2.10i 审查又提了一次，代码照旧没改：按原话就维持现状；按严格的「模型驱动」就删 GLM 三个模型，K3 删不删要你本人确认（第 17.5 节）。
+
+**预测市场工具不算联网搜索（要你确认）**：plan 的 `market_keywords` -> `agent/markets.py` 调 Polymarket 的 `gamma-api.polymarket.com/public-search`，形式上也是「模型写关键词 + 代码调一个独立的 REST 搜索接口」，但它查的是预测市场的盘口，不是网页，而且是冻结的 DeepSeek 流水线的一部分（删掉要改 plan 提示词，G2 会变）。这里按「不是联网搜索、保持不变」处理，五家都照旧走它；你要把它也算进这条规则就说。
 
 ### 16.2 每个模型的结论（2026-10-21 按官方文档逐个核对；只读文档，没有付费调用）
 
@@ -1357,7 +1364,7 @@ message 的 `output_text` -> 模型挑的 URL（Searcher 照旧先用文字里�
 照样用已有的结果，日志 `stop` 记 `incomplete:max_output_tokens`。reasoning 的内容不进返回值和日志。
 
 计价：`kimi_responses_cost`：`usage.input_tokens`（含服务端放进上下文的搜索结果）、`input_tokens_details.cached_tokens` / `cache_write_tokens`
-（和未缓存的部分互斥）、`output_tokens`（含思考），按 K3 的价（11.6，算法同 `kimi_usage_cost`）。usage 是 null（文档允许）时按 0 记。
+（和未缓存的部分互斥）、`output_tokens`（含思考），按 K3 的价（11.6，算法同 `kimi_usage_cost`）。~~usage 是 null（文档允许）时按 0 记。~~（v2.10i 改成按这次搜索预扣的 token 部分记，第 17.1 节）
 搜索费：**两站的 WebSearch Pricing 页都没列 Responses 里 web_search 的单价**（只列了 REST 接口 Basic $0.002 / Pro $0.003 / Fetch $0.002 和已下线的
 `$web_search` $0.005 / ¥0.03），usage 里也没有搜索次数：按 `web_search_call` 的个数 × `config.KIMI_WEB_SEARCH_FEE_ASSUMED_USD` = **$0.01（假设，
 未核实）** 记账，两站都按这个美元数（`PRICES[...]["search_fee_assumed"] = True`；比两站列出的所有搜索单价都高）。
@@ -1454,7 +1461,7 @@ API 用 web_search 工具的情况，原文没写（未核实）；预算照旧�
 - **K3 快速开始页（两站）写着「Web search is being updated and is not recommended for production workflows in the near term」**（国内站：联网搜索正在更新，
   近期不建议用于生产流程）。这句在 Important limits 里，没说是不是专指 Formula 官方工具；网页上照写给用户。
 - K3 的 web_search 单价没公布、usage 里没有搜索次数：按每个 web_search_call $0.01 的假设记（未核实）。
-- K3 的搜索是非流式请求：Common Error Codes 页写着服务端 900 秒没回会 504（长的非流式请求常见）；Searcher 的单次读超时 600 秒。搜索用 low、max_output_tokens
+- K3 的搜索是非流式请求：Common Error Codes 页写着服务端 900 秒没回会 504（长的非流式请求常见）；~~Searcher 的单次读超时 600 秒~~（v2.10i：1200 秒、读超时不重发、按预扣记账，第 17.3 节）。搜索用 low、max_output_tokens
   32,192，没实测要多久。
 - **GLM 国际站的 `search_engine`**：API 参考的 enum 只有 `search_pro_jina`，指南示例是 `search-prime`，按 API 参考（未核实）；不对的话每次搜索都会 400，错误照原样记。
 - GLM 的搜索不是模型驱动：服务端用我们很长的搜索说明自己做意图识别、自己定查询词，效果没测；默认 search_prompt 让模型不写来源，URL 主要靠 `web_search[]`。
@@ -1493,3 +1500,122 @@ API 用 web_search 工具的情况，原文没写（未核实）；预算照旧�
 - DeepSeek：Anthropic API 兼容 https://api-docs.deepseek.com/guides/anthropic_api 、Claude Code 集成 https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code 、
   Responses API https://api-docs.deepseek.com/guides/responses_api 、价格 https://api-docs.deepseek.com/quick_start/pricing
 - Claude web search tool：https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool ；OpenAI web search：https://developers.openai.com/api/docs/guides/tools-web-search
+
+
+## 17. v2.10i：v2.10h 审查修正
+
+v2.10h 审查提了 8 条（3 条 medium、5 条 low）。能改代码的都改了；要你拍板的 4 处只写进文档和网页说明，没替你定（17.5）。DeepSeek 命令行 / 回测 /
+自带 key 的请求体不变（24 组金样本逐字节相同），已有角色的提示词不变（G2 sha 不变），没有任何真实网络请求。
+
+### 17.1 搜索回复缺 usage：按预扣记账，不按 0（medium）
+
+v2.10f 给 JSON 调用修过同一个漏洞（`llm.py`：缺 usage 按这次调用的预扣记），v2.10h 的 K3 搜索又把它带回来了：Responses 的 `usage` 可以是 null，
+`kimi_responses_cost` 算出 0，测试还把 0 固定成了预期；GLM 回复缺 `usage` 同样记 0。一次 K3 搜索最坏约 $0.70，记 0 会让「已花」偏低、上限守不住。
+
+做法（`Searcher.search`，只在自带 key 的运行里；五家共用这一条，命令行不变）：解析出来的 usage 是空的或 null，token 成本改成这次搜索预扣的 token 部分
+`Budget.search_tokens_reserve(price_id, 72_000, 发出的 max tokens)`，日志另记 `usage_missing: true`、`usd_basis: "reserve (usage missing)"`（同 llm.py 的写法）。
+搜索费照旧按回复里的搜索次数（K3 的 `web_search_call` 个数、GLM 每个 HTTP 200 一次）。
+
+改前 / 改后（K3 国际站，回复 `{"status": "incomplete", "usage": null, ...}`，calls.jsonl 的那一行，只列相关字段）：
+
+```text
+改前  {"kind": "search", "ok": true, "stop": "incomplete:max_output_tokens", "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "usd_search_fee_assumed": 0.01}
+改后  {"kind": "search", "ok": true, "stop": "incomplete:max_output_tokens", "input_tokens": 0, "output_tokens": 0, "usd": 0.69888,
+       "usage_missing": true, "usd_basis": "reserve (usage missing)", "usd_search_fee_assumed": 0.01}
+```
+
+各模型缺 usage 时记的 token 成本（= 一次搜索预扣的 token 部分，默认档位）：kimi-k3 $0.6989、kimi-k3@cn $0.6934、glm-5.3 $0.2424、glm-5.3@cn $0.2199、
+glm-5.2 $0.1368、glm-5.2@cn $0.1199、glm-4.7-flashx $0.0083、glm-4.7-flashx@cn $0.0090。规则对五家的自带 key 运行都生效（DeepSeek / Claude / GPT
+缺 usage 的回复这里没见过，只是兜底）；命令行的 DeepSeek 搜索照旧（缺 usage 记 0，金样本不变）。
+
+### 17.2 Responses 回复 HTTP 200 但 status failed（medium）
+
+Responses 页：`status` 有 `failed`，这时 `error` 是 `{code, message}`。v2.10h 把它当成 ok=True，`error` 不往外报。`openai_search_unpack`（K3 和 GPT 共用）
+现在在 status failed 时多返回一个 `error`；`Searcher` 记 `ok: false`、`error: "response_failed"`、`server_error_code`、`server_error`（message 先 redact 这次运行的
+key、去掉像 key 的片段，再截到 200 字，同 `llm.scrub_server_text`），返回值的 `error` 是 `response_failed (code <code>: <message>)`；不重试（服务端已经给了结论），
+token 照常计价（usage 也缺时按 17.1 记）。
+
+```text
+回复    {"status": "failed", "output": [], "usage": null, "error": {"code": "server_error", "message": "upstream failed"}}
+改前    日志 {"ok": true, "stop": "failed", "usd": 0.0}；返回 {"urls": [], ...}（没有 error）
+改后    日志 {"ok": false, "stop": "failed", "error": "response_failed", "server_error_code": "server_error", "server_error": "upstream failed",
+              "usd": 0.69888, "usage_missing": true, ...}；返回 {"urls": [], "error": "response_failed (code server_error: upstream failed)", ...}
+```
+
+GPT 的搜索也走这个解析，所以 GPT 的 failed 回复同样报出来（GPT 的请求体不变）。
+
+### 17.3 Kimi / GLM 搜索的读超时：1200 秒，超时不重发，按预扣记账（low）
+
+v2.10h 起 K3（永远在想、非流式 Responses）和 GLM（非流式 Chat Completions，5.3 开着思考）的搜索都是整段思考生成，却还是固定 600 秒单次读、读超时后盲目重发
+最多 3 次；被放弃的那次服务端可能照样计费，却不进预算。
+
+做法：adapter 新增 `search_timeout_s`、`search_resend_after_timeout`（第 3 节）。Kimi 1200 秒（Common Error Codes 页：非流式请求 900 秒没回服务端给 504；
+等得比它长，先等到服务端的 504，而不是我们先放弃）；GLM 1200 秒（= 它 JSON 调用的单次读）。两家读超时（请求已经发出、在等回复头或读 body）以后不重发，
+这次请求按预扣记账：token 部分 + (2 × max_uses + 2) 次搜索费（同 `Budget.search_reserve`）。连接阶段的失败（urllib 包成 `URLError`，请求没发出去）照旧最多试 3 次、
+不记账。
+
+```text
+改前  K3：timeout=600 -> TimeoutError -> 等 3 秒重发 -> 等 6 秒再发（最多 3 次）；日志一行 {"ok": false, "error": "TimeoutError", "http_try": 3}，不记 usd
+改后  K3：timeout=1200 -> TimeoutError -> 不重发；日志一行 {"ok": false, "error": "TimeoutError", "http_try": 1, "timeout_s": 1200, "resent": false,
+      "usd": 0.69888, "usd_search_fee_assumed": 0.08, "usd_basis": "reserve (read timeout, not resent)"}；返回 {"urls": [], "error": "TimeoutError", "usd": 0.69888, ...}
+```
+
+DeepSeek（命令行和自带 key）、Claude、GPT 不变：600 秒、读超时照旧重发（金样本里 DeepSeek 搜索的 timeout 仍是 600）。Claude / GPT 的搜索也是非流式、带思考的
+生成，同样的「放弃的请求可能被计费」的风险以前就有，这次没被点名、没改（记在这里）。K3 改走流式 Responses 没做：`response.completed` 事件的 body 形状文档没写，
+要先核实。1200 秒是否合适没实测。
+
+### 17.4 GLM 的可查性：账本的查询词、settings 里的搜索端点和引擎（low）
+
+GLM 的回复里没有查询词，v2.10h 的账本对每次 GLM 搜索都写「Queries issued by the searcher: (none)」，看起来像根本没搜。GLM adapter 新增
+`search_reports_queries = False`，`Searcher` 的返回值带 `queries_reported: false`，账本改写成：
+
+```text
+改前  Queries issued by the searcher: (none)
+改后  Queries issued by the searcher: (not reported by the provider)
+```
+
+K3 服务端没搜、别家没有查询词时照旧是「(none)」。`state.json` 的 settings 新增 `search_tool`（只有 GLM 有，`GLMAdapter.search_tool_settings`；不含 key）：
+
+```json
+"search_tool": {"endpoint": "https://api.z.ai/api/paas/v4/chat/completions", "tool": "web_search", "search_engine": "search_pro_jina", "search_engine_tested": false}
+```
+
+国内站是 `open.bigmodel.cn/.../chat/completions` + `search_std`。DeepSeek / Claude / GPT / Kimi 的 settings 不变。`web_search_requests` 照旧对 GLM 的每个 HTTP 200 记 1
+（文档没写意图识别判定不搜时收不收，保守），没改。
+
+### 17.5 没改、等你定的
+
+1. **口径：「自带」还是「模型驱动」**（审查 medium，第 16.1 节）。保留下来的 K3、GLM 三个模型的自带搜索都不是模型驱动的（K3 服务端先按输入判断要不要搜；GLM 意图识别 +
+   一次搜索）。按你的原话「K3只用它自带的，别的也是」就维持现状（网页上已有中英说明）；按严格的「模型驱动」就删 GLM 三个模型，K3 删不删要你本人确认（Kimi 唯一模型驱动的
+   自带工具是 Formula 的 web-search，K3 快速开始页写着 being updated and is not recommended）。代码没动。
+2. **GLM 国际站的引擎名和链接来源**（审查 medium）。国际站 API 参考的 enum 只有 `search_pro_jina`，Web Search 指南的示例写 `search-prime`；国内站指南的回复示例里没有顶层
+   `web_search[]`，链接提取只靠 API 参考的 schema。假 key 在鉴权就 401，证明不了。没按猜的改值；网页的 GLM 说明加了一条「没用真 key 测过；不收的话每次搜索都 HTTP 400、
+   取不到网页，规划和裁判照样计费」（中英）。要确认的话，用你自己的 key 在两站各发一次（每次约 $0.01 搜索费 + 搜索结果带进来的几千个输入 token，GLM-5.2 国际站
+   $1.4 / 百万，估计合计每站几美分，没实测），看两点：HTTP 200（引擎名被接受）、回复顶层有 `web_search[].link`。下面是正式代码建的请求体（`GLMAdapter.search_request`，只换了一段短的 prompt）：
+
+   ```text
+   POST https://api.z.ai/api/paas/v4/chat/completions        Authorization: Bearer <你的 Z.ai Standard API Key>
+   {"model": "glm-5.2", "messages": [{"role": "user", "content": "Find official retail sales statistics for China, June 2026. Reply with up to 4 URLs."}],
+    "thinking": {"type": "disabled"}, "tools": [{"type": "web_search", "web_search": {"enable": true, "search_engine": "search_pro_jina", "search_result": true}}],
+    "max_tokens": 8192, "stream": false}
+   POST https://open.bigmodel.cn/api/paas/v4/chat/completions  （同上，search_engine 换成 search_std）
+   ```
+3. **Kimi 的默认上限**（审查 low，第 13.5 节）：选 Kimi 时默认组合（K3、low、$2）会被拒跑、要求至少 $3.00。给 Kimi 单独的默认上限，还是接受「要手动调」并把不变式改掉，等你定。
+4. **预测市场工具**（审查 low，第 16.1 节）：按「不是联网搜索、保持不变」处理，等你确认。
+
+### 17.6 探针
+
+`probes/glm_key_probe.py` 删掉两站 `POST {base}/web_search` 的两项（v2.10h 起那个独立搜索接口整条不用；文件头注明，搜索的假 key 探针在 `probes/native_search_probe.py`）。
+这一版没有重跑任何探针。
+
+### 17.7 Verification（v2.10i）
+
+- 全套测试 683 个通过（v2.10h 是 671 个：新文件 `tests/test_review_v210i.py` 12 个；`tests/test_kimi.py` 的 `test_incomplete_and_null_usage` 改成断言按预扣记账，个数不变）。
+  新测试用假的 `llm.urlopen_no_redirect`（不联网）：GLM / K3 缺 usage 按预扣（两站、5.3 带思考余量）、日志经预算记进「已花」；DeepSeek 命令行缺 usage 照旧记 0、600 秒；
+  K3 / GPT 的 status failed 报错并 redact；Kimi / GLM 读超时 1200 秒、不重发、按预扣记账；连接失败照旧重试 3 次；DeepSeek（命令行 / 自带 key）、Claude、GPT 读超时照旧
+  600 秒重发 3 次；GLM 账本写「not reported」、K3 照旧「(none)」；settings.search_tool 只有 GLM 有、不含 key；网页 GLM 说明；GLM 探针不再发 /web_search。
+- 变异检查 16 处（不按预扣记、命令行也按预扣、failed 不报、failed 的 message 不 redact、unpack 不取 error、Kimi / GLM 照旧重发、Kimi 超时改回 600、超时不记账、
+  超时只记一次搜索费、连接失败也不重发、预扣按命令行的 30,000 输入、GLM 查询词标记关掉、账本总写 (none)、settings 不记 search_tool、网页说明删掉）：全部被测试抓到。
+- DeepSeek 默认路径：`tests/test_providers.py` 的 24 组金样本逐字节相同（含 `search_reserve` 的值、搜索的 timeout 600）；G2（`probes/compare_continuous_prompts.py .`）：
+  `365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4`（和 v2.10h 相同）。
+- 没有真 key、没有付费调用；这一版没有任何真实网络请求。

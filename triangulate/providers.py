@@ -8,6 +8,8 @@ v2.10h（用户 10-21：每个模型只用自家自带的联网搜索，没有�
 K3 的搜索走 Responses API 的 web_search 工具（KimiAdapter.search_request），GLM 的搜索走 Chat Completions 的 web_search 工具
 （GLMAdapter.search_request）；DeepSeek / Claude / GPT 的搜索不变。所有 adapter 的 search_request 多收一个 region（只有 GLM 用：两站的
 搜索引擎不同）。PROVIDERS.md 第 16 节。
+v2.10i（v2.10h 审查修正）：openai_search_unpack 在 status failed 时带出 error；Kimi / GLM 的搜索读超时 1200 秒、不重发
+（search_timeout_s / search_resend_after_timeout）；GLM 的 search_reports_queries / search_tool_settings。PROVIDERS.md 第 17 节。
 
 ModelSpec = provider、model、region、思考档位、这次运行的花费上限，加上用户自己的 key（只在内存里，见 ModelSpec 的说明）。
 有 ModelSpec 的运行就是「自带 key」（BYOK）的运行：pipeline.Context(spec=...) 把它交给 AgentLLM、Searcher 和 Budget。
@@ -496,7 +498,7 @@ def openai_search_unpack(d: dict) -> dict:
     open_page（url）、find_in_page。只有 search 动作计次收费（web search 指南：Search actions incur a tool call cost）。
     message 项的 output_text：文字 + url_citation 注解（url、title）。URL 顺序：引用的 -> sources -> open_page；标题有引用的，
     v2.10h 起还有 sources 里带的（Kimi K3 的 Responses API：sources 是 {type, url, title}；OpenAI 的只有 url，标题照旧是空字符串），
-    只在这里解析（Searcher 不往外传）。"""
+    只在这里解析（Searcher 不往外传）。v2.10i：status 是 failed 时多一个 error（{code, message}，原文；Searcher 先 redact 再记、再往外报）。"""
     usage = d.get("usage") or {}
     cited, cited_titles, sources, source_titles, opened, queries, texts = [], [], [], [], [], [], []
     n_req = n_err = 0
@@ -530,8 +532,13 @@ def openai_search_unpack(d: dict) -> dict:
     result_titles = cited_titles + source_titles + [""] * len(opened)
     status = d.get("status")
     reason = (d.get("incomplete_details") or {}).get("reason")
-    return {"usage": usage, "n_req": n_req, "queries": queries, "result_urls": result_urls, "result_titles": result_titles,
-            "texts": texts, "n_err": n_err, "stop": f"{status}:{reason}" if reason else status}
+    out = {"usage": usage, "n_req": n_req, "queries": queries, "result_urls": result_urls, "result_titles": result_titles,
+           "texts": texts, "n_err": n_err, "stop": f"{status}:{reason}" if reason else status}
+    if status == "failed":   # v2.10i：HTTP 200 但 status failed：error 是 {code, message}（Kimi Responses 页；OpenAI 同形状）
+        err = d.get("error") if isinstance(d.get("error"), dict) else {}
+        out["error"] = {"code": "" if err.get("code") is None else str(err["code"]),
+                        "message": "" if err.get("message") is None else str(err["message"])}
+    return out
 
 
 class OpenAIAdapter:
@@ -796,6 +803,11 @@ class KimiAdapter:
     honor_retry_after = True          # 错误码页：engine_overloaded_error 按 Retry-After 等
     log_server_error = True
     chat_timeouts = {"sock_timeout": 600, "total_timeout": 3600}   # 流式：单次读最多 600 秒，整次 3600 秒（没实测）
+    # v2.10i：搜索是非流式的 Responses 请求（整段思考生成完才回 body）。Common Error Codes 页：非流式请求 900 秒没回服务端给 504；
+    # 单次读等 1200 秒（比 900 秒长：先等到服务端的 504，而不是我们先放弃一个服务端可能照样计费的请求）。读超时以后不重发，
+    # 这次请求按预扣记账（Searcher._request）。时长没实测
+    search_timeout_s = 1200
+    search_resend_after_timeout = False
     max_search_continuations = 0      # Responses 没有 pause_turn；status = incomplete 就照原样用已有的结果
     balance_hint = ("Top up the Kimi account on the platform where the key was created (platform.kimi.ai or platform.kimi.com), "
                     "then run again.")
@@ -888,7 +900,8 @@ class KimiAdapter:
 
     @staticmethod
     def search_meter(unpacked: dict, started, model: str):
-        """(写进 calls.jsonl 的 token 字段, token 成本 USD)。model 是计价 id（国内站 "kimi-k3@cn"）。usage 是 null（文档允许）时按 0 记。"""
+        """(写进 calls.jsonl 的 token 字段, token 成本 USD)。model 是计价 id（国内站 "kimi-k3@cn"）。usage 是 null（文档允许）时这里算出 0，
+        v2.10i 起 Searcher 在自带 key 的运行里改按这次搜索预扣的 token 部分记账（usd_basis "reserve (usage missing)"，同 llm.py）。"""
         u = unpacked["usage"]
         det = u.get("input_tokens_details") if isinstance(u.get("input_tokens_details"), dict) else {}
         odet = u.get("output_tokens_details") if isinstance(u.get("output_tokens_details"), dict) else {}
@@ -1039,6 +1052,12 @@ class GLMAdapter:
     log_server_error = True
     # 非流式：生成完才回 body（文档没写服务端的超时）。单次读最多等 1200 秒，整次 1800 秒（同 OpenAI，没实测）
     chat_timeouts = {"sock_timeout": 1200, "total_timeout": 1800}
+    # v2.10i：搜索也是非流式的 Chat Completions（GLM-5.3 开着思考），单次读同 JSON 调用（1200 秒）；读超时以后不重发，这次请求按预扣
+    # 记账（Searcher._request）
+    search_timeout_s = chat_timeouts["sock_timeout"]
+    search_resend_after_timeout = False
+    # v2.10i：回复里没有查询词（服务端自己定）：账本写「not reported by the provider」，不写「(none)」（Searcher 返回 queries_reported False）
+    search_reports_queries = False
     max_search_continuations = 0
     balance_hint = ("Top up the GLM account (or check its limits) on the platform where the key was created "
                     "(z.ai/manage-apikey/billing or bigmodel.cn), make sure it is a Standard API Key, then run again.")
@@ -1133,6 +1152,12 @@ class GLMAdapter:
                         "max_tokens": max_tokens, "stream": False})
         return self._headers(key), payload
 
+    def search_tool_settings(self, region: str) -> dict:
+        """v2.10i：state.json 的 settings.search_tool（run.run_settings 记，事后查得出这次运行用的搜索端点和引擎）。国际站的
+        search_pro_jina 按 API 参考写，没用真 key 测过（PROVIDERS.md 第 17 节），所以另记 search_engine_tested False。不含 key。"""
+        return {"endpoint": self.search_url(region), "tool": "web_search", "search_engine": self.search_engines[region],
+                "search_engine_tested": False}
+
     search_unpack = staticmethod(glm_search_unpack)
 
     @staticmethod
@@ -1142,7 +1167,7 @@ class GLMAdapter:
     @staticmethod
     def search_meter(unpacked: dict, started, model: str):
         """(写进 calls.jsonl 的 token 字段, token 成本 USD)：usage 同 JSON 调用（prompt_tokens 含服务端放进上下文的搜索结果）。
-        model 是计价 id（国内站 "glm-5.3@cn"）。"""
+        model 是计价 id（国内站 "glm-5.3@cn"）。没有 usage 时这里算出 0，v2.10i 起 Searcher 在自带 key 的运行里改按预扣记账。"""
         u = unpacked["usage"]
         det = u.get("prompt_tokens_details") if isinstance(u.get("prompt_tokens_details"), dict) else {}
         return ({"prompt_tokens": u.get("prompt_tokens", 0), "cached_tokens": det.get("cached_tokens", 0) or 0,
