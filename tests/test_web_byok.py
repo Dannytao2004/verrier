@@ -147,17 +147,17 @@ class TestProvidersApi(_Client):
         opus = est(2, "claude-opus-5-5")
         # Opus 5.5（low，关不掉思考：每次调用 +24,000 输出 token）：输入按 1 字符 1 token、$4 / $20
         want = {"plan": (20_000 * 4 + (6000 + 24_000) * 20) / 1e6, "extract": (40_000 * 4 + (16_000 + 24_000) * 20) / 1e6,
-                "judge": (100_000 * 4 + (12_000 + 24_000) * 20) / 1e6,
+                "judge": (100_000 * 4 + (24_000 + 24_000) * 20) / 1e6,   # v2.11d：judge 12000 -> 24000
                 "search": (72_000 * 4 + (8192 + 24_000) * 20) / 1e6 + 8 * 0.01}
         for k, v in want.items():
             self.assertAlmostEqual(opus["run_floor"][k], round(v, 4), places=4)
         self.assertEqual((opus["directions"], opus["stops_early"], opus["run_floor_usd"], opus["min_cap_usd"]),
-                         (3, True, round(sum(want.values()), 2), 4.0))
+                         (3, True, round(sum(want.values()), 2), 4.5))   # v2.11d：judge 上限 24000，最小上限 4.0 -> 4.5
         self.assertAlmostEqual(opus["round1_search_hold_usd"], round(3 * want["search"], 2))
         self.assertTrue(opus["round1_queues"])   # 3 个搜索同时在途放不下：排队，不中止
         self.assertTrue(opus["over_cap"])
-        self.assertFalse(est(4, "claude-opus-5-5")["stops_early"])
-        self.assertTrue(est(3.5, "claude-opus-5-5")["stops_early"])   # 3.77 > 3.5
+        self.assertFalse(est(4.5, "claude-opus-5-5")["stops_early"])   # v2.11d：最坏预扣 3.77 -> 4.01
+        self.assertTrue(est(4, "claude-opus-5-5")["stops_early"])     # 4.01 > 4
         fable = est(2, "claude-fable-5-1")
         self.assertEqual(fable["directions"], 1)
         self.assertTrue(fable["stops_early"])
@@ -169,13 +169,13 @@ class TestProvidersApi(_Client):
         cn = est(2, "kimi-k3", "cn")
         self.assertEqual(cn["price_id"], "kimi-k3@cn")
         # 每家的默认模型 + 默认档位在 $2 下都放得下（网页的默认组合不会被拒）。v2.10h 例外：Kimi 只剩 K3（K2.6 删掉：没有自带的搜索），
-        # K3 关不掉思考，$2 放不下一次最小运行：网页照样拒跑并给出最小上限 $3.00
+        # K3 关不掉思考，$2 放不下一次最小运行：网页照样拒跑并给出最小上限 $3.50（v2.11d 前是 $3.00）
         v = self.c.get("/api/providers").json()
         for p in v["providers"]:
             m = next(x for x in p["models"] if x["id"] == p["default_model"])
             e = m["by_region"][p["default_region"]]["by_thinking"][m["thinking"]["default"]]
             if p["id"] == "kimi":
-                self.assertEqual((m["id"], e["stops_early"], e["min_cap_usd"]), ("kimi-k3", True, 3.0))
+                self.assertEqual((m["id"], e["stops_early"], e["min_cap_usd"]), ("kimi-k3", True, 3.5))   # v2.11d：judge 上限 24000，3.00 -> 3.50
             else:
                 self.assertFalse(e["stops_early"], (p["id"], e))
 

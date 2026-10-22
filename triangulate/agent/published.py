@@ -169,6 +169,8 @@ def candidates(points: list, target: dict, as_of, judged_only: bool = True) -> t
             continue
         if p.get("value_low") is not None or p.get("value_check") == "failed":   # v2.8o：区间不是公布值；数核对没过的点不用
             continue
+        if p.get("period_source") == "page_date":   # v2.11d（S43）：期间是页面日期补的，不能拿来确认「这个期间已公布」
+            continue
         v, name, unit = p.get("value"), str(p.get("name") or ""), str(p.get("unit") or "")
         if not isinstance(v, (int, float)) or isinstance(v, bool) or not math.isfinite(v):
             continue

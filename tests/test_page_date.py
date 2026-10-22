@@ -343,3 +343,19 @@ class TestPinnedJudgePrompt(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPublishedSkipsPageDated(unittest.TestCase):
+    """S43：时点目标下，期间是页面日期补的点不进「已公布」候选；同一个点写明期间照旧是候选。"""
+
+    def test_point_in_time_target(self):
+        from triangulate.agent import published as PB
+        t = {"what": "number of AI accelerators installed worldwide", "unit": "accelerators",
+             "period_start": "2026-10-21", "period_end": "2026-10-21"}
+        base = {"id": "p1", "value": 3.5e7, "name": "AI accelerators installed worldwide", "unit": "accelerators",
+                "quote": "about 35 million AI accelerators are installed worldwide", "keep": True, "judged_round": 1,
+                "page_date": "2026-10-21"}
+        stated = dict(base, period_start="2026-10-19", period_end="2026-10-19")
+        page_dated = dict(base, period_start="", period_end="2026-10-19", period_source="page_date")
+        self.assertEqual(len(PB.candidates([stated], t, date(2026, 10, 21))[0]), 1)
+        self.assertEqual(PB.candidates([page_dated], t, date(2026, 10, 21))[0], [])

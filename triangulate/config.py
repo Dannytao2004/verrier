@@ -61,8 +61,8 @@ THINKING_EXTRA_TOKENS = int(os.environ.get("TRIANGULATE_THINKING_EXTRA", "24000"
 MAX_TOKENS = {
     "plan": 6000,
     "extract": 16000,        # 抽取员，每页一次。v2.8b 从 4000 调到 16000：页面最多发 40 万字符，长页的 JSON 不被截断
-    "judge": 12000,          # v2 的 6000 在 167 个数据点时被截断过
-    "repair": 12000,         # 裁判修正轮：同 judge
+    "judge": 24000,          # v2 的 6000 在 167 个数据点时被截断过；v2.11d 冒烟（347 个点）第 2 轮在 12000 处被截断两次
+    "repair": 24000,         # 裁判修正轮：同 judge
     "audit": 4000,           # 输入核对
     "unit_check": 4000,      # v2.8e：单位核对（三个核对模型，每个方法各一次）
     "unit_arbiter": 4000,    # v2.8e：单位裁定（第四个模型）
