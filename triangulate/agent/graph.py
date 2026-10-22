@@ -29,6 +29,7 @@ from . import published as PB
 from . import qty as Q
 from . import unit_review as UR
 from . import value_check as VC
+from .evidence import period_text
 from .markets import search_markets
 from .outputs import basis_text, unit_text
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
@@ -142,7 +143,7 @@ def _table(points: list) -> str:
         dom = urllib.parse.urlsplit(p.get("source_url", "")).netloc
         via = f"snapshot {p['page_date']}" if p.get("via") == "snapshot" else f"{p.get('via')} {p.get('page_date') or ''}"
         rows.append(" | ".join([p["id"], p["direction_id"], p["name"][:90], _fmt_point(p), p.get("unit", "")[:25],
-                                f"{p.get('period_start') or '?'}..{p.get('period_end') or '?'}",
+                                period_text(p),
                                 p.get("published_at_if_visible") or "", dom, via.strip(), p.get("quote", "")[:150]]))
     return "\n".join(rows)
 
@@ -191,7 +192,7 @@ def point_placeholders(points: list, methods: list) -> tuple:
         key = f"{re.sub(r'[^a-z0-9]', '', str(i).lower()) or 'p'}_value"
         ph[key] = _fmt_num(p.get("value")) + ("%" if unit == "%" else f" {unit}" if unit else "")
         lines.append(f"- observed point {i} (input of {', '.join(ms)}): {p.get('name', '')}, value {ph[key]}, "
-                     f"period {p.get('period_start') or '?'}..{p.get('period_end') or '?'}")
+                     f"period {period_text(p)}")
     return ph, lines
 
 
@@ -342,7 +343,7 @@ def _evidence(iid: str, by_id: dict, kept_a: dict) -> str:
         return f"{iid}: unknown id"
     dom = urllib.parse.urlsplit(p.get("source_url", "")).netloc
     return (f'data point {iid}: "{p["name"]}" = {_fmt_point(p)} {p.get("unit", "")}, period '
-            f'{p.get("period_start") or "?"}..{p.get("period_end") or "?"}, source {dom}')
+            f'{period_text(p)}, source {dom}')
 
 
 def _outcome_role(label: str, target: dict) -> str:

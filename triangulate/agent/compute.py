@@ -11,7 +11,7 @@ from . import assumptions as A
 from . import methods as M
 from . import qty as Q
 from ..mc import sample_lognormal
-from .evidence import parse_date
+from .evidence import PAGE_DATE, parse_date
 
 TOL_DAYS = 3
 
@@ -169,6 +169,11 @@ def build_series(ids, pts: dict, ref=None) -> tuple:
             continue
         if not p.get("keep", True):
             notes.append(f"{i}: discarded by judge, not used")
+            continue
+        # v2.11d：页面日期兜底的点不进序列（target 和 signal 都不进）：期初 = 期末，会成为 signal 的参照期间、挤掉年度点；
+        # 两个相隔一年的页面日期点还能拼出假的年度序列
+        if p.get("period_source") == PAGE_DATE:
+            notes.append(f"{i}: period not stated in the source (page dated {p.get('period_end')}), not used in a series")
             continue
         ps, pe = _span(p)
         if pe is None:

@@ -24,6 +24,7 @@ from pathlib import Path
 
 from .. import llm
 from . import discrete as D
+from .evidence import period_text
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-latest"
@@ -89,7 +90,7 @@ def evidence_brief(target: dict, points: list, as_of: str) -> str:
         dom = urllib.parse.urlsplit(p.get("source_url") or "").netloc or "unknown source"
         avail = p.get("page_date") or p.get("published_at_if_visible") or "date unknown"
         lines.append(f"- {p.get('name', '')} = {_fmt(p.get('value'))} {p.get('unit', '')}, period "
-                     f"{p.get('period_start') or '?'}..{p.get('period_end') or '?'}, source {dom}, {avail}")
+                     f"{period_text(p)}, source {dom}, {avail}")
     if len(points) > MAX_POINTS:
         lines.append(f"({len(points) - MAX_POINTS} further evidence lines omitted.)")
     return "\n".join(lines)

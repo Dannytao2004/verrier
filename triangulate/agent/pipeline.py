@@ -379,8 +379,10 @@ def _emit(ctx, **event):
             pass
 
 
-def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period: bool, url: str = "") -> tuple:
-    """返回 (point|None, reason)。quote 逐字在页面里、value_as_written 在 quote 里、数字和倍数由代码解析、日期 <= as_of。"""
+def verify_point(raw: dict, text_n: str, as_of: date, page_date, page_published, url: str = "") -> tuple:
+    """返回 (point|None, reason)。quote 逐字在页面里、value_as_written 在 quote 里、数字和倍数由代码解析、日期 <= as_of。
+    v2.11d：page_published = 页面自己声明的发布日期（fetch.page_published，没有就是 None）。期初、期末都空的点用它当
+    period_end（period_start 留空），标 period_source = page_date，不做期间年份检查；页面也没有日期就照旧丢。"""
     if not isinstance(raw, dict):
         return None, "not an object"
     q, vw = ev.norm(str(raw.get("quote") or "")), ev.norm(str(raw.get("value_as_written") or ""))
@@ -414,14 +416,19 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
     basis = ev.scale_supported(sw, q, header, vw)
     if not basis:
         return None, f"scale word {sw!r} not supported by quote or table header"
-    why = ev.date_check(raw, as_of, page_date, allow_no_period=allow_no_period)
+    # v2.11d：引文没写期间（期初、期末去掉空白后都为空）时用页面日期兜底，只这一层；写了但解析不了的（2025-Q3）照旧丢
+    page_dated = not str(raw.get("period_start") or "").strip() and not str(raw.get("period_end") or "").strip()
+    if page_dated and page_published is not None:
+        raw = {**raw, "period_start": "", "period_end": page_published.isoformat()}
+    why = ev.date_check(raw, as_of, page_date)
     if why:
         return None, why
     # 抽取员给的期间年份必须在页面正文或网址里出现过（v2.1b 韩国题：旧页面上「7 月（报告当年）」被标成了 2026 年 7 月）
     # v2.6e：页面只写纪年（令和8年、民國115年、台湾的「115年」）时也算出现过（evidence.era_years）；period_end 本身写成纪年
     # （parse_date 现在认「令和8年3月」）时换成公历年再查，不让这种写法绕过检查
+    # v2.11d：页面日期兜底的点不查（y 为空）：年份来自页面元数据，正文里多半没有
     pe_s = str(raw.get("period_end") or "")
-    y = pe_s[:4]
+    y = "" if page_dated else pe_s[:4]
     if not y.isdigit() and not pe_s[:1].isascii() and (pe := ev.parse_date(pe_s, end=True)):
         y = str(pe.year)
     if y.isdigit() and y not in text_n and y not in url and not (y.isdecimal() and int(y) in ev.era_years(text_n)):
@@ -440,7 +447,7 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, allow_no_period
     lo = max(0, min(i - 80, len(q) - QUOTE_STORE_CHARS))
     point = {"name": str(raw.get("name") or "")[:160], "value": value, "value_as_written": vw, "scale_word": sw,
              "scale_basis": basis, "unit": unit, "period_start": str(raw.get("period_start") or ""),
-             "period_end": str(raw.get("period_end") or ""),
+             "period_end": str(raw.get("period_end") or ""), **({"period_source": ev.PAGE_DATE} if page_dated else {}),
              "published_at_if_visible": str(raw.get("published_at_if_visible") or ""),
              "quote": q[lo:lo + QUOTE_STORE_CHARS]}
     if unit_as_written is not None:
@@ -477,8 +484,7 @@ def _pair_unit(unit: str, vw: str, sw: str, q: str, header: str):
     return new, ev.SCALES[ev._cjk_scale_word(word)], word, b
 
 
-def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict, text, out: dict,
-                  allow_no_period: bool) -> list:
+def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict, text, out: dict) -> list:
     """取到的一页：哨兵 -> 抽取 -> 代码核对，记进 out。返回这一页核对通过的点（v2.5 提前停检查用）。"""
     _emit(ctx, kind="page", direction_id=d["id"], status=page.get("status"))
     if page["status"] == "dropped":
@@ -505,7 +511,8 @@ def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict
     new = []
     for j, r in enumerate(raws if isinstance(raws, list) else []):
         pd = date.fromisoformat(page["page_date"]) if page.get("page_date") else None
-        p, why = verify_point(r, text_n, ctx.as_of, pd, allow_no_period, url=page["url"])
+        pp = date.fromisoformat(page["page_published"]) if page.get("page_published") else None
+        p, why = verify_point(r, text_n, ctx.as_of, pd, pp, url=page["url"])
         base = {"direction_id": d["id"], "round": round_no, "source_url": page["url"], "via": page["status"],
                 "page_date": page.get("page_date"), "snapshot_ts": page.get("snapshot_ts"), "order": (len(out["pages"]), j)}
         if p is None:
@@ -538,7 +545,7 @@ def _timed_live(url: str, as_of: date, qid: str) -> dict:
     return page
 
 
-def _live_pages(ctx: Context, target: dict, d: dict, round_no: int, urls: list, out: dict, allow_no_period: bool):
+def _live_pages(ctx: Context, target: dict, d: dict, round_no: int, urls: list, out: dict):
     """v2.5 真实使用：这个方向的 URL 同时开抓（fetch_live；同一 host 的请求由 net 的限速排队，robots 照旧），按 URL 顺序
     抽取（点的编号因此可复现）。每页核对完的点交给 ctx.early；确认了已公布的值就不再抽取，没开始的抓取取消。"""
     b, w = ctx.budget, getattr(ctx, "early", None)
@@ -563,7 +570,7 @@ def _live_pages(ctx: Context, target: dict, d: dict, round_no: int, urls: list, 
             page = fut.result()
             if stopped(i):   # v2.5.1：等这一页的时候别的子 agent 已经确认了（published2 的 d5 多抽了一页）
                 break
-            new = _process_page(ctx, target, d, round_no, page, page.pop("text", None), out, allow_no_period)
+            new = _process_page(ctx, target, d, round_no, page, page.pop("text", None), out)
             if w is not None and new:
                 w.offer(ctx.llm, ctx.qid, target, ctx.as_of_s, ctx.as_of, new)
     finally:
@@ -598,7 +605,6 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
                 raise BudgetExceeded(b.halt(str(e))) from None
         out["search"] = s
         _emit(ctx, kind="searched", direction_id=d["id"], n_urls=len(s.get("urls", [])[: b.urls_per_direction]))
-        allow_no_period = d.get("category") == "base_rates"
         urls = s.get("urls", [])[: b.urls_per_direction]
         # v2.6c 回测泄漏护栏（D3）：查询词里出现登记值（哨兵的写法），这个方向作废：不取页、不重搜，命中的写法记进
         # search.voided。真实使用没有登记值（ctx.leak_patterns 为空），不受影响
@@ -608,14 +614,14 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
         elif w is not None and w.stop.is_set():
             out["stopped"] = w.stop_reason
         elif getattr(ctx, "live_fetch", False):
-            _live_pages(ctx, target, d, round_no, urls, out, allow_no_period)
+            _live_pages(ctx, target, d, round_no, urls, out)
         else:
             for url in urls:
                 if not b.reserve_page(round_no):
                     out["pages"].append({"url": url, "status": "dropped", "reason": "page cap reached"})
                     continue
                 page = fetch_page(url, ctx.as_of, ctx.qid)
-                _process_page(ctx, target, d, round_no, page, page.pop("text", None), out, allow_no_period)
+                _process_page(ctx, target, d, round_no, page, page.pop("text", None), out)
     except _Stopped:
         pass
     except BudgetExceeded as e:

@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from triangulate.agent import evidence as ev  # noqa: E402
+from triangulate.agent import fetch as F  # noqa: E402
 from triangulate.agent import prompts as NEW  # noqa: E402
 from triangulate.agent.pipeline import AgentLLM, Budget, verify_point  # noqa: E402
 from triangulate.config import MAX_TOKENS  # noqa: E402
@@ -39,7 +40,10 @@ def pages_for(run, k):
     for url, c in n.most_common():
         if url in meta and len(out) < k:
             did, pg = meta[url]
+            # v2.11d：v2.11d 之前存的页面记录没有 page_published，从 data/raw 原件重算（没存 HTTP 头和跳转后的 URL，用请求 URL）
+            pub = F.page_published(url, (ROOT / pg["raw_path"]).read_bytes(), {}, date.fromisoformat(s["as_of"]))
             out.append({"run": run, "url": url, "n_period_drops_saved": c, "dir": dirs.get(did, {}), "page_date": pg.get("page_date"),
+                        "page_published": pub.isoformat() if pub else None,
                         "txt": ROOT / pg["raw_path"].replace(".raw", ".txt"), "target": s["plan"]["target"], "as_of": s["as_of"]})
     return out
 
@@ -52,9 +56,10 @@ def extract(llm, P, page, tag):
                        role=f"extract_ab:{tag}", qid=page["run"].replace("/", "_"), max_tokens=MAX_TOKENS["extract"])
     text_n = ev.norm(text)
     pd = date.fromisoformat(page["page_date"]) if page.get("page_date") else None
+    pp = date.fromisoformat(page["page_published"]) if page.get("page_published") else None   # v2.11d：取代 base_rates 豁免
     kept, drops = [], collections.Counter()
     for r in (res or {}).get("points") or []:
-        p, why = verify_point(r, text_n, date.fromisoformat(page["as_of"]), pd, d.get("category") == "base_rates", url=page["url"])
+        p, why = verify_point(r, text_n, date.fromisoformat(page["as_of"]), pd, pp, url=page["url"])
         if p:
             kept.append({k: r.get(k) for k in ("name", "value_as_written", "period_start", "period_end")})
         else:

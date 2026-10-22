@@ -20,7 +20,7 @@ MEGA = "number: ambiguous '兆' before an SI unit: 10^12 or mega-"
 
 def _vp(text, url="https://example.org/x", **kw):
     raw = {"name": "x", "scale_word": "", "unit": "people", "period_start": "2025-01-01", "period_end": "2025-12-31", **kw}
-    return verify_point(raw, ev.norm(text), date(2026, 8, 29), None, False, url=url)
+    return verify_point(raw, ev.norm(text), date(2026, 8, 29), None, None, url=url)
 
 
 class TestParseValueCjk(unittest.TestCase):

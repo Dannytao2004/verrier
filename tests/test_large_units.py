@@ -27,7 +27,7 @@ KR = "지난해 인천시 출생아 수는 1만5천242명으로, 1년 전인 202
 def vp(quote, vw, sw="", unit="tokens", page=None, **kw):
     raw = {"name": "x", "value_as_written": vw, "scale_word": sw, "unit": unit, "period_start": "2025-01-01",
            "period_end": "2025-12-31", "quote": quote, **kw}
-    return verify_point(raw, ev.norm("2025 " + (page or quote)), date(2026, 10, 22), None, False)
+    return verify_point(raw, ev.norm("2025 " + (page or quote)), date(2026, 10, 22), None, None)
 
 
 def err(vw, sw=""):
@@ -466,7 +466,7 @@ class TestLeakGuardForCjkParsedNumbers(unittest.TestCase):
                               llm=LLM(), budget=None)
         page = {"url": "https://example.kr/news/2026-09-23", "status": "live_dated", "page_date": "2026-09-23"}
         out = {"pages": [], "points": [], "dropped_points": []}
-        P._process_page(ctx, {"what": "x"}, {"id": "d1"}, 1, page, text, out, False)
+        P._process_page(ctx, {"what": "x"}, {"id": "d1"}, 1, page, text, out)
         return page, out
 
     def test_korean_form_of_a_registered_value_voids_the_page(self):

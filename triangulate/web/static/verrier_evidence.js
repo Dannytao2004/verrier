@@ -17,7 +17,7 @@
   const T = (en, zh) => `<span class="en">${en}</span><span class="zh">${zh}</span>`;   // 只传常量或已转义的文字
   const factor = x => typeof x === "number" && isFinite(x) ? String(Number(x.toPrecision(4))) : "—";   // 单位换算系数（1e-6 这类小数）
   const link = (url, text) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text || url)}</a>` : "—";
-  const period = x => `${esc(x.period_start || "?")}..${esc(x.period_end || "?")}`;
+  const period = x => esc(x.period_text);   // v2.11d：期间文字由 web/results.py 的 period_text 给（页面日期兜底的点另有写法）
   const seen = p => p.snapshot_url ? link(p.snapshot_url, "snapshot " + p.snapshot_date) : esc([p.via, p.page_date].filter(Boolean).join(" ")) || "—";
   const bigUnit = u => u ? ` <span style="font-size:.4em;font-stretch:100%;letter-spacing:0">${esc(u)}</span>` : "";
   const panel = (code, title, right, inner) => `<section class="card cx-ev"><div class="bh"><span>${code} · ${title}</span><i class="hz"></i>

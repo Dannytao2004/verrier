@@ -23,7 +23,7 @@ def raw(vw, quote, **kw):
 
 
 def vp(r):
-    return verify_point(r, PAGE, date(2026, 10, 18), None, False)
+    return verify_point(r, PAGE, date(2026, 10, 18), None, None)
 
 
 class TestFindValueWords(unittest.TestCase):
@@ -248,12 +248,12 @@ class TestLeakNumbers(unittest.TestCase):
         out = {"pages": [], "points": [], "dropped_points": []}
         page = {"url": "https://example.org/x", "status": "live_dated", "page_date": "2026-08-01"}
         text = "July 2026 saw two million births. 35 clinics opened in July 2026."
-        new = P._process_page(ctx, {"what": "w"}, {"id": "d1"}, 1, page, text, out, False)
+        new = P._process_page(ctx, {"what": "w"}, {"id": "d1"}, 1, page, text, out)
         self.assertEqual((new, out["points"]), ([], []))
         self.assertEqual(out["pages"][0]["leak_hits"], ["two million (read as 2e+06)"])
         ctx.leak_values = 3_000_000   # 不是登记值：照常
         out = {"pages": [], "points": [], "dropped_points": []}
-        self.assertEqual(len(P._process_page(ctx, {"what": "w"}, {"id": "d1"}, 1, dict(page), text, out, False)), 2)
+        self.assertEqual(len(P._process_page(ctx, {"what": "w"}, {"id": "d1"}, 1, dict(page), text, out)), 2)
 
 
 class TestPreviousRound(unittest.TestCase):

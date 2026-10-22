@@ -195,7 +195,7 @@ function evidenceText(e) {
   if (e.kind === "assumption") return `<span class="k-assumption">假设 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)}${e.unit === "%" ? "%" : " " + esc(e.unit)}`;
   if (e.kind === "constant") return `<span class="k-constant">常数 ${esc(e.id)}（代码给）</span>`;
   if (e.kind === "unknown") return `<span class="bad">${esc(e.id)}：未知 id</span>`;
-  return `<span class="k-point">数据点 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)} ${esc(e.unit)}，期间 ${esc(e.period_start || "?")}..${esc(e.period_end || "?")}，
+  return `<span class="k-point">数据点 ${esc(e.id)}</span>：${esc(e.name)} = ${fmt(e.value)} ${esc(e.unit)}，期间 ${esc(e.period_text)}，
     来源 ${link(e.source_url, e.domain)}${e.snapshot_url ? `（${link(e.snapshot_url, "快照 " + e.snapshot_date)}）` : e.page_date ? `（${esc(e.via)} ${esc(e.page_date)}）` : ""}`;
 }
 function coverageText(c) {   // v2.7d：方法声明的覆盖范围（compute 规范化过的）
@@ -228,7 +228,7 @@ function pointTable(ps, withReason) {
   return `<table><tr><th>id</th><th>方向</th><th>名称</th><th class="num">值</th><th>单位</th><th>期间</th><th>来源</th><th>快照 / 页面日期</th>
   ${withReason ? "<th>裁判的理由</th>" : "<th>被哪些方法用</th>"}<th>原文</th></tr>
   ${ps.map(p => `<tr><td>${esc(p.id)}</td><td>${esc(p.direction_id)}</td><td>${esc(p.name)}</td><td class="num">${fmt(p.value)}</td><td>${esc(p.unit)}</td>
-  <td class="small">${esc(p.period_start || "?")}..${esc(p.period_end || "?")}</td><td>${link(p.source_url, p.domain)}</td>
+  <td class="small">${esc(p.period_text)}</td><td>${link(p.source_url, p.domain)}</td>
   <td class="small">${p.snapshot_url ? link(p.snapshot_url, p.snapshot_date) : esc((p.via || "") + " " + (p.page_date || ""))}</td>
   <td class="small">${withReason ? esc(p.judge_reason || p.ablation_excluded || "") : esc((p.used_by || []).join(", "))}</td>
   <td class="quote" title="${esc(p.quote)}">${esc((p.quote || "").slice(0, 160))}</td></tr>`).join("")}</table>`;

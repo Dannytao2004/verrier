@@ -8,6 +8,7 @@ import re
 import urllib.parse
 from pathlib import Path
 
+from ..agent.evidence import period_text
 from ..agent.graph import TARGET_HISTORY_ROLE
 from ..agent.outputs import basis_text, unit_text
 from ..agent.run import RES, score_one
@@ -166,7 +167,7 @@ def _snap_date(ts):
 def _point_view(p: dict, used_by=None) -> dict:
     return {"id": p.get("id"), "direction_id": p.get("direction_id"), "name": p.get("name"), "value": p.get("value"),
             "value_as_written": p.get("value_as_written"), "unit": p.get("unit"), "period_start": p.get("period_start"),
-            "period_end": p.get("period_end"), "source_url": p.get("source_url"),
+            "period_end": p.get("period_end"), "period_text": period_text(p), "source_url": p.get("source_url"),
             "domain": urllib.parse.urlsplit(p.get("source_url") or "").netloc, "via": p.get("via"),
             "snapshot_url": snapshot_url(p), "snapshot_date": _snap_date(p.get("snapshot_ts")),
             "page_date": p.get("page_date"), "quote": p.get("quote"), "keep": bool(p.get("keep")),

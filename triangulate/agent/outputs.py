@@ -4,6 +4,7 @@ import json
 import urllib.parse
 
 from ..viewer import VIS
+from .evidence import PAGE_DATE, period_text
 
 COL = {"snapshot": "#1b7a3a", "live_dated": "#8fd19e", "discarded": "#bdbdbd", "leak": "#d93b3b",
        "base_rate": "#4a7fd6", "method": "#4a7fd6", "method_failed": "#9e9e9e", "target": "#1f2d4d", "api": "#1b7a3a",
@@ -221,7 +222,7 @@ def ledger(state: dict, score: dict | None = None) -> str:
                     rd = (f" (range {_num(p['value_low'])}..{_num(p['value_high'])})" if p.get("value_low") is not None else "") + \
                          (f" as written \"{_md(p.get('value_as_written'))}\", value check {p.get('value_check')}" if p.get("reading") else "")
                     L.append(f"  - {p['id']} {_md(p['name'])[:80]} = **{_num(p['value'])}**{rd} {_md(p.get('unit'))} "
-                             f"({p.get('period_start')}..{p.get('period_end')}) [{k}: {_md(p.get('judge_reason'))[:120]}] "
+                             f"({period_text(p, blank='')}) [{k}: {_md(p.get('judge_reason'))[:120]}] "
                              f"quote: \"{_md(p.get('quote'))[:200]}\"")
             n_drop = len(res.get("dropped_points") or [])
             if n_drop:
@@ -309,7 +310,7 @@ def published_md(state: dict) -> list:
         L += ["", "| id | name | value | unit | period | source | verdict | reason |", "|---|---|---|---|---|---|---|---|"]
         for c in pub["candidates"]:
             L.append(f"| {c.get('id')} | {_md(c.get('name'))[:90]} | {_num(c.get('value'))} | {_md(c.get('unit'))[:30]} | "
-                     f"{c.get('period_start')}..{c.get('period_end')} | {_md(c.get('domain'))} | {_md(c.get('verdict', ''))} | "
+                     f"{period_text(c, blank='')} | {_md(c.get('domain'))} | {_md(c.get('verdict', ''))} | "
                      f"{_md(c.get('reason', ''))[:160]} |")
     return L + [""]
 
@@ -426,5 +427,6 @@ def ablation_md(state: dict) -> list:
          f"- points excluded before the judge: {ab.get('n_points_excluded')} of {ab.get('n_points_total')}",
          f"- methods allowed: {ab.get('methods_allowed')}", ""]
     for x in ab.get("excluded_points") or []:
-        L.append(f"  - {x['id']} {_md(x['name'])[:90]} = {_num(x['value'])} ({x.get('period_end')}): {_md(x['reason'])}")
+        per = period_text(x) if x.get("period_source") == PAGE_DATE else x.get("period_end")
+        L.append(f"  - {x['id']} {_md(x['name'])[:90]} = {_num(x['value'])} ({per}): {_md(x['reason'])}")
     return L + [""]

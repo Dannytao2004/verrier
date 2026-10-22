@@ -163,7 +163,7 @@ class TestExtractorGetsLongPages(unittest.TestCase):
         pages = []
         for n in (30_000, 450_000):
             out = {"pages": [], "points": [], "dropped_points": []}
-            P._process_page(ctx, target, {"id": "d1"}, 1, {"url": "https://x.org/a", "status": "snapshot"}, "y" * n, out, False)
+            P._process_page(ctx, target, {"id": "d1"}, 1, {"url": "https://x.org/a", "status": "snapshot"}, "y" * n, out)
             pages.append({k: out["pages"][0][k] for k in ("chars_sent", "truncated")})
         self.assertEqual(pages, [{"chars_sent": 30_000, "truncated": False}, {"chars_sent": 400_000, "truncated": True}])
         self.assertEqual([m for _, m in asked], [config.MAX_TOKENS["extract"]] * 2)

@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ..config import MAX_TOKENS
 from . import qty as Q
-from .evidence import PERCENT, norm, parse_date, split_multiplier
+from .evidence import PERCENT, norm, parse_date, period_text, split_multiplier
 from .pipeline import BudgetExceeded, dumps
 from .prompts import (UNIT_ARBITER_RETRY, UNIT_ARBITER_SYSTEM, UNIT_ARBITER_USER, UNIT_CHECK_SYSTEM, UNIT_CHECK_USER,
                       UNIT_RULES)
@@ -81,7 +81,7 @@ def input_lines(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
             # 观测点按 v / 1.2 .. v * 1.2 采样，v 就是代码用的值（百分数已除以 100）；v2.8o 区间点的 v 是区间中点（detail 里记着）
             v = d["value"] if "value" in d else math.sqrt(d["p10"] * d["p90"])
             x.update(kind="data point", value_used=_sig(v), unit_as_recorded=p.get("unit", ""), description=p.get("name", ""),
-                     period=f"{p.get('period_start') or '?'}..{p.get('period_end') or '?'}", quote=str(p.get("quote", ""))[:300])
+                     period=period_text(p), quote=str(p.get("quote", ""))[:300])
             if "low" in d:
                 x["range_used"] = f"{_sig(d['low'])}..{_sig(d['high'])}"
             if p.get("value") and abs(v * 100 / p["value"] - 1) < 1e-6:

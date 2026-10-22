@@ -16,7 +16,7 @@ PLAIN = ev.norm("2024 exports were 36 in the table.")   # 没有表头
 def vp(vw, quote, unit, sw="", page=PAGE, **kw):
     raw = {"name": "x", "value_as_written": vw, "scale_word": sw, "unit": unit, "period_start": "2024-01-01",
            "period_end": "2024-12-31", "quote": quote, **kw}
-    return verify_point(raw, page, date(2026, 10, 18), None, False)
+    return verify_point(raw, page, date(2026, 10, 18), None, None)
 
 
 class TestStripUnitMultiplier(unittest.TestCase):

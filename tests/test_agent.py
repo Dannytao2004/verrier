@@ -86,7 +86,7 @@ class TestQuoteAndNumbers(unittest.TestCase):
     def _pt(self, **kw):
         base = {"name": "x", "scale_word": "", "unit": "visitors", "period_start": "2025-08-01", "period_end": "2025-08-31"}
         from triangulate.agent.pipeline import verify_point
-        return verify_point({**base, **kw}, ev.norm(self.BAD), date(2026, 8, 15), None, False)
+        return verify_point({**base, **kw}, ev.norm(self.BAD), date(2026, 8, 15), None, None)
 
     def test_scale_counterexamples_rejected(self):
         q = "In August 2025 the site counted 3,412 visitors."
@@ -143,7 +143,6 @@ class TestDateFilter(unittest.TestCase):
         self.assertIn("published", ev.date_check({**ok, "published_at_if_visible": "2026-09-15"}, self.A, None))
         self.assertIn("page date", ev.date_check(ok, self.A, date(2026, 8, 16)))
         self.assertIn("missing", ev.date_check({"period_end": ""}, self.A, None))
-        self.assertEqual(ev.date_check({"period_end": ""}, self.A, None, allow_no_period=True), "")
 
 
 class TestMethods(unittest.TestCase):
@@ -703,10 +702,10 @@ class TestPeriodYearCheck(unittest.TestCase):
         text = "Births in July rose to 21,803 compared with the same month a year earlier."
         raw = {"name": "births July", "value_as_written": "21,803", "unit": "births", "period_start": "2026-07-01",
                "period_end": "2026-07-31", "quote": "Births in July rose to 21,803"}
-        p, why = verify_point(raw, ev.norm(text), date(2026, 8, 23), None, False)
+        p, why = verify_point(raw, ev.norm(text), date(2026, 8, 23), None, None)
         self.assertIsNone(p)
         self.assertIn("does not appear", why)
-        p, why = verify_point(raw, ev.norm(text), date(2026, 8, 23), None, False, url="https://x.example/news/2026-08-01/births")
+        p, why = verify_point(raw, ev.norm(text), date(2026, 8, 23), None, None, url="https://x.example/news/2026-08-01/births")
         self.assertIsNotNone(p, why)
 
 

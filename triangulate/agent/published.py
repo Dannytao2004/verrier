@@ -38,7 +38,7 @@ from ..config import MAX_TOKENS
 from . import ablation as AB
 from . import compute as C
 from . import discrete as D
-from .evidence import find_value, parse_date
+from .evidence import find_value, parse_date, period_text
 from .prompts import PUBLISHED_SYSTEM, PUBLISHED_USER
 
 MAX_CANDIDATES = 20
@@ -53,8 +53,8 @@ _CLAUSE = re.compile(r",\s|;|:|\(|\)|[.!?](?:\s|$)|\s[-–—]\s")   # 千分位
 PREPS = {"of", "in", "for", "at", "on"}
 NOT_CHECKED = ("not checked: backtest or scored question (as_of before today, or an official value is registered), so the "
                "target cannot have been published by as_of")
-POINT_KEYS = ("id", "name", "value", "value_as_written", "unit", "period_start", "period_end", "source_url", "via",
-              "page_date", "published_at_if_visible", "quote")
+POINT_KEYS = ("id", "name", "value", "value_as_written", "unit", "period_start", "period_end", "period_source", "source_url",
+              "via", "page_date", "published_at_if_visible", "quote")
 
 
 def _fmt(v) -> str:
@@ -212,7 +212,7 @@ def _via(p: dict) -> str:
 def candidate_line(p: dict) -> str:
     dom = urllib.parse.urlsplit(p.get("source_url", "")).netloc
     return (f'- {p["id"]}: "{p.get("name")}" = {_fmt(p.get("value"))} {p.get("unit", "")}, period '
-            f'{p.get("period_start") or "?"}..{p.get("period_end") or "?"}, source {dom} ({_via(p)}), publication date '
+            f'{period_text(p)}, source {dom} ({_via(p)}), publication date '
             f'{p.get("published_at_if_visible") or "not stated"}; quote: "{p.get("quote", "")}"')
 
 
@@ -276,7 +276,7 @@ def _evidence_lines(rec: dict) -> list:
     p = rec.get("point") or {}
     others = [i for i in rec.get("confirmed_ids") or [] if i != rec.get("id")]
     pub = f", publication date {p['published_at_if_visible']}" if p.get("published_at_if_visible") else ""
-    return [f"Source: data point {p.get('id')} \"{p.get('name')}\" (period {p.get('period_start')}..{p.get('period_end')}), "
+    return [f"Source: data point {p.get('id')} \"{p.get('name')}\" (period {period_text(p, blank='')}), "
             f"from {p.get('domain')} ({_via(p)}{pub}), quoting: \"{p.get('quote')}\"",
             "A separate model check confirmed that this data point has the pinned target's entity, measure and period and "
             "is a reported value, not a forecast; the number is taken from the data point by code."

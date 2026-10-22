@@ -14,6 +14,8 @@ v2.5：真实使用（as_of = 今天、题目没有登记真值）走 fetch_live
 v2.8b：PDF（Content-Type application/pdf，或正文以 %PDF 开头）用 pypdfium2 取出所有页的文字，页与页之间空一行，不选页、
 不限页数；要密码、损坏（包括下载被截断）、没有文字层（扫描件，不做 OCR）的 PDF 丢弃并写明原因。live PDF 的日期先用 URL 里的，
 URL 里没有再用 PDF 元数据的 CreationDate / ModDate。
+v2.11d：收下的页另存 page_published（页面自己声明的发布日期，page_published()），只给引文没写期间的点兜底；
+page_date、live_dates 和收不收页面都不变。
 """
 import hashlib
 import json
@@ -181,6 +183,34 @@ def pdf_dates(url: str, body: bytes) -> list:
     return out
 
 
+def page_published(url: str, body: bytes, headers: dict, cap: date):
+    """v2.11d：页面自己声明的发布日期（pipeline.verify_point 给引文没写期间的点兜底用），只取一层、返回 date 或 None：
+    URL 路径里的日期（有几个取最晚的）；否则 HTML 用 htmldate 的结构化原始日期（original_date=True、extensive_search=False，
+    不认晚于 cap 的日期），PDF 用元数据的 CreationDate。cap：live 页是 as_of，快照页是快照日期；快照页传原始 URL
+    （snap["original"]）和快照正文，不传 web.archive.org 的地址。page_date、live_dates 和收不收页面照旧，这里不参与。"""
+    ds = _url_dates(url)
+    if ds:
+        return max(ds)
+    try:   # 取不到就是 None；这一步出意外也不影响取页本身
+        if _is_pdf(body, headers):
+            import pypdfium2 as pdfium
+            with _PDFIUM_LOCK:
+                pdf = pdfium.PdfDocument(body)
+                try:
+                    meta = pdf.get_metadata_dict()
+                finally:
+                    pdf.close()
+            m = PDF_DATE.match((meta.get("CreationDate") or "").strip())
+            return date(int(m.group(1)), int(m.group(2)), int(m.group(3))) if m else None
+        from htmldate import find_date
+        # max_date 要给 datetime（给 date 对象 htmldate 会静默换成今天）；取 cap 当天的最后一刻，cap 当天的日期也认
+        d = find_date(_decode(body, headers), original_date=True, extensive_search=False, outputformat="%Y-%m-%d",
+                      max_date=datetime(cap.year, cap.month, cap.day, 23, 59, 59))
+        return date.fromisoformat(d) if d else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def _clean(s: str) -> bool:
     return s.count("\ufffd") <= FFFD_MAX * max(len(s), 1)
 
@@ -278,7 +308,9 @@ def fetch_page(url: str, as_of: date, qid: str, allow_live=None, today=None) -> 
             if text is None:
                 rec["reason"] = why
                 return rec
-            rec.update(status="snapshot", snapshot_ts=real_ts, page_date=ts_date(real_ts).isoformat())
+            pub = page_published(orig, body, headers, ts_date(real_ts))   # v2.11d：原始 URL + 快照正文，上限 = 快照日期
+            rec.update(status="snapshot", snapshot_ts=real_ts, page_date=ts_date(real_ts).isoformat(),
+                       page_published=pub.isoformat() if pub else None)
             return _store(rec, out_dir, body, text)
         rec["reason"] = f"snapshot fetch failed (http {status})" if status != 200 else f"snapshot redirected to {real_ts} > as_of"
     # 没有快照：回测不用 live 版本；真实使用时 live 版本只在能读出日期且 <= as_of、正文没有更晚日期时允许
@@ -346,8 +378,9 @@ def _live(rec: dict, out_dir, url: str, as_of: date, today: date, pre: str, get)
     if late:
         rec["reason"] = why(f"live page text mentions {late[-1]} > as_of")
         return rec
+    pub = page_published(final, body, headers, as_of)   # v2.11d：上限 = as_of
     rec.update(status="live_dated", page_date=latest.isoformat(), live_dates=sorted({d.isoformat() for d in dates}),
-               reason="")
+               page_published=pub.isoformat() if pub else None, reason="")
     return _store(rec, out_dir, body, text)
 
 

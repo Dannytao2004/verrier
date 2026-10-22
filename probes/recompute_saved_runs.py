@@ -50,7 +50,11 @@ def main():
             pd = date.fromisoformat(p["page_date"]) if p.get("page_date") else None
             raw = {k: p.get(k) for k in ("name", "value_as_written", "scale_word", "unit", "period_start", "period_end",
                                          "published_at_if_visible", "quote")}
-            ok, why = verify_point(raw, ev.norm(text[:MAX_CHARS_TO_EXTRACTOR]), date.fromisoformat(st["as_of"]), pd, False)
+            pp = None   # v2.11d：页面日期兜底的点按抽取员原样（期间为空）重查，页面日期就是它的 period_end
+            if p.get("period_source") == ev.PAGE_DATE:
+                raw.update(period_start="", period_end="")
+                pp = date.fromisoformat(p["period_end"])
+            ok, why = verify_point(raw, ev.norm(text[:MAX_CHARS_TO_EXTRACTOR]), date.fromisoformat(st["as_of"]), pd, pp)
             recheck[i] = "passes" if ok and ok["value"] == p["value"] else f"rejected: {why or 'value differs'}"
         ans = q["answer_value"]
         row = {"run": label, "qid": qid, "dir": f"results/agent/{qid}/{sub}".rstrip("/"), "answer": ans,

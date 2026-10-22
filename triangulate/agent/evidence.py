@@ -837,15 +837,17 @@ def late_dates(text: str, as_of: date, until: date) -> list:
     return sorted({d for d in text_dates(text) if as_of < d <= until})
 
 
-def date_check(point: dict, as_of: date, page_date, allow_no_period: bool = False) -> str:
-    """返回丢弃原因；空串 = 通过。period_end、文中可见的发布日期、页面日期都必须 <= as_of。"""
+def date_check(point: dict, as_of: date, page_date) -> str:
+    """返回丢弃原因；空串 = 通过。period_end、文中可见的发布日期、页面日期都必须 <= as_of。
+    v2.11d：不再给 base_rates 方向豁免期间（用户：完全没有日期不太可以）；引文没写期间的点由 pipeline.verify_point
+    先用页面日期补上 period_end，补不上照旧在这里丢，原因串不变。"""
     pe = parse_date(point.get("period_end"), end=True)
-    if pe is None and not allow_no_period:
+    if pe is None:
         return "period_end missing or unparseable"
-    if pe is not None and pe > as_of:
+    if pe > as_of:
         return f"period_end {pe} after as_of"
     ps = parse_date(point.get("period_start"))
-    if ps is not None and pe is not None and ps > pe:
+    if ps is not None and ps > pe:
         return "period_start after period_end"
     pub = parse_date(point.get("published_at_if_visible"))
     if pub is not None and pub > as_of:
@@ -853,6 +855,17 @@ def date_check(point: dict, as_of: date, page_date, allow_no_period: bool = Fals
     if page_date is not None and page_date > as_of:
         return f"page date {page_date} after as_of"
     return ""
+
+
+PAGE_DATE = "page_date"   # v2.11d：点的 period_source 取这个值 = 引文没写期间，period_end 是页面自己声明的发布日期
+
+
+def period_text(p: dict, blank: str = "?") -> str:
+    """点的期间怎么写给模型和人看。v2.11d 用页面日期兜底的点写成「not stated (page dated YYYY-MM-DD)」；
+    其余的点和以前逐字相同：「期初..期末」，空的写 blank（以前不补 ? 的几处传 blank=""）。"""
+    if p.get("period_source") == PAGE_DATE:
+        return f"not stated (page dated {p.get('period_end')})"
+    return f"{p.get('period_start') or blank}..{p.get('period_end') or blank}"
 
 
 # ---------- 泄漏哨兵 ----------

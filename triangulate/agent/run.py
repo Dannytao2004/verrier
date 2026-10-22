@@ -100,7 +100,9 @@ def ablation_summary(state: dict) -> dict:
     """消融记录（写进 state.json 和账本）：去掉了哪些方向、按什么规则排除了哪些点、残余风险。"""
     target = (state.get("plan") or {}).get("target") or {}
     pts = state.get("points") or []
-    ex = [{k: p.get(k) for k in ("id", "name", "value", "unit", "period_end", "direction_id")} | {"reason": p["ablation_excluded"]}
+    # v2.11d：页面日期兜底的点多记 period_source（账本据此标出来）；其余的点这条记录和以前一样
+    ex = [{k: p.get(k) for k in ("id", "name", "value", "unit", "period_end", "direction_id")}
+          | ({"period_source": p["period_source"]} if "period_source" in p else {}) | {"reason": p["ablation_excluded"]}
           for p in pts if p.get("ablation_excluded")]
     return {"own_history": True,
             "dropped_candidate_directions": [c["id"] for c in (state.get("plan") or {}).get("candidates") or []
