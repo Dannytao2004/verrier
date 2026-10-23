@@ -266,6 +266,7 @@ agent 用命令行 `--ask --auto-approve`，两个基线用 `probes/smoke_run.py
 | S57 | 低 | `verrier_apple.js` 的 `fit` 最小 32px：375px 宽时 13 位的大数字（现成数据和估计一样）宽 302.5px，列宽 263px，超出 R-01 卡片约 20px；aero 375px 缩到 36px、放得下 | 10-22 浏览器（假演示服务，apple 375x812，`#cxBody .cx-big` 数字文本 Range 宽 302.5、right 358.5，`.cx-deliv` right 339） | 记（原有；UI 别的不动） |
 | S58 | 低 | `run.py` 的 published 分支（graph.html 页头、最后打印的一行）用 `_n`（`{v:,.0f}`）：非整数的已公布值（4.3%）显示成 4，终稿是对的。v2.11f 的现成数据分支已改用 `PB._with_unit` | 读码 run.py:246-253 | 记（原有） |
 | S59 | 低 | v2.11f 区间读数（`value_low` 非空，例如「analysts expect 340,000 to 350,000」）不当现成数据候选：不送判定、不展示。规格只排除页面日期的点；放开就要在候选卡和交付页显示区间，否则大数字显示的是代码算的中点 | tests/test_existing.py `test_page_dated_points_and_ranges_are_not_candidates`；10-22 审查 range_basis.py | 记（用户定） |
+| S60 | 高 | 「全年总量 × 该年某月份额」被换算两次：单位核对把带全年期间的总量读成 person/year、把份额读成 1，`unit_review.to_target` 的期间长度兜底（v2.8j）再乘 1 month，年 -> 月做了两次（×1/12）。v2.11 回归里希思罗 m3 = 609,608（去掉这一步合并后 +0.79%，现存 -56.0%），日本迁居 m2 = 38,136（去掉后 +22.0%，现存 -64.8%）。frozen-v2.8r 同样有：`to_target('person/year','person',2026-09)` 新旧代码都得 ('(person/year) * 1 month', 0.0833)；think 臂 fc_yell_2026_09 的 m2 也三次被定成 '(visit/year) * 1 month'。和 S9(4) 同源（那时是判失败，v2.8j 之后变成算错）。repair 报错只写 methods disagree，不写代码乘了 1/12，三次修正都没修好 | `results/agent/fc_lhr_pax_2026_09/v211_reg`、`results/agent/fc_jp_movers_2026_08/v211_reg` 的 judge_rounds[1].unit_reviews；10-22 诊断（只读，各有一个反驳 agent 复核） | 没改：要用户定修法（UNIT_RULES 加一句会改 G2；或只在报错里写出代码乘的倍数） |
 
 ## H. 我的做事方式（这些低级错误的来源）
 
