@@ -1,0 +1,761 @@
+[
+ {
+  "id": "fc_kr_births_2026_07",
+  "as_of": "2026-08-23",
+  "answer_value": 24275,
+  "source": "https://www.koreatimes.co.kr/southkorea/society/20260923/births-up-11-in-july-extending-gains-to-25th-consecutive-month",
+  "estimate": 23379.326184705387,
+  "p10": 13834.141782410179,
+  "p90": 39510.430169642495,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.03689696458474201,
+  "abs_log10_err": 0.01632724837018507,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 23379.326184705387,
+    "pct_err": -0.03689696458474201,
+    "abs_log10_err": 0.01632724837018507
+   },
+   "naive": {
+    "estimate": 19000.0,
+    "pct_err": -0.21730175077239955,
+    "abs_log10_err": 0.10640563762721349
+   },
+   "structured_no_retrieval": {
+    "estimate": 20209.9130731277,
+    "pct_err": -0.16745981161162926,
+    "abs_log10_err": 0.07959479304802192
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.462,
+  "usd_tokens": 0.062,
+  "wall_s": 178.2
+ },
+ {
+  "id": "fc_tw_births_2026_09",
+  "as_of": "2026-09-08",
+  "answer_value": 7704,
+  "source": "https://www.taipeitimes.com/News/taiwan/archives/2026/10/08/2003865628",
+  "estimate": 7961.990974128987,
+  "p10": 5779.349884179635,
+  "p90": 10968.932759313284,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a2"
+  ],
+  "assumption_weight_share": 0.5,
+  "ablation": false,
+  "pct_err": 0.033487924990782236,
+  "abs_log10_err": 0.014305406807034675,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 7961.990974128987,
+    "pct_err": 0.033487924990782236,
+    "abs_log10_err": 0.014305406807034675
+   },
+   "naive": {
+    "estimate": 11000.0,
+    "pct_err": 0.42782969885773614,
+    "abs_log10_err": 0.1546764110417469
+   },
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5215,
+  "usd_tokens": 0.1315,
+  "wall_s": 223.5
+ },
+ {
+  "id": "fc_lhr_pax_2026_09",
+  "as_of": "2026-09-12",
+  "answer_value": 7180000,
+  "source": "https://www.sharecast.com/news/other-company-news/heathrow-airport-travel-tourism-london-passenger-traffic-uk--23819142.html",
+  "estimate": 7370981.732566588,
+  "p10": 4369056.359341616,
+  "p90": 12435493.441429915,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.026599127098410502,
+  "abs_log10_err": 0.011400890650922818,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 7370981.732566588,
+    "pct_err": 0.026599127098410502,
+    "abs_log10_err": 0.011400890650922818
+   },
+   "naive": {
+    "estimate": 7200000.0,
+    "pct_err": 0.0027855153203342198,
+    "abs_log10_err": 0.001208052188968099
+   },
+   "structured_no_retrieval": {
+    "estimate": 7000149.765439544,
+    "pct_err": -0.025048779186693015,
+    "abs_log10_err": 0.011017112569730416
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.4712,
+  "usd_tokens": 0.0712,
+  "wall_s": 204.9
+ },
+ {
+  "id": "fc_jp_births_2026_07",
+  "as_of": "2026-08-25",
+  "answer_value": 62479,
+  "source": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/07.html",
+  "estimate": 59048.59310549822,
+  "p10": 39331.08337328993,
+  "p90": 88650.91039181912,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 4,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3",
+   "a4"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.054904958378043434,
+  "abs_log10_err": 0.024524515325155198,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 59048.59310549822,
+    "pct_err": -0.054904958378043434,
+    "abs_log10_err": 0.024524515325155198
+   },
+   "naive": {
+    "estimate": 65000.0,
+    "pct_err": 0.04034955745130353,
+    "abs_log10_err": 0.017179286765247475
+   },
+   "structured_no_retrieval": {
+    "estimate": 60995.88860668152,
+    "pct_err": -0.023737758179844137,
+    "abs_log10_err": 0.010433507253840606
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.5127,
+  "usd_tokens": 0.0827,
+  "wall_s": 305.9
+ },
+ {
+  "id": "fc_nhs_ae_2026_09",
+  "as_of": "2026-09-08",
+  "answer_value": 2440000,
+  "source": "https://www.gov.uk/government/statistics/ae-attendances-and-emergency-admissions-for-september-2026-and-quarterly-report-q2",
+  "estimate": 2356998.536710199,
+  "p10": 1710868.4579534892,
+  "p90": 3247147.421666386,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 0.6666666666666666,
+  "ablation": false,
+  "pct_err": -0.03401699315155782,
+  "abs_log10_err": 0.015030513436333237,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 2356998.536710199,
+    "pct_err": -0.03401699315155782,
+    "abs_log10_err": 0.015030513436333237
+   },
+   "naive": {
+    "estimate": 2100000.0,
+    "pct_err": -0.139344262295082,
+    "abs_log10_err": 0.06517053160481018
+   },
+   "structured_no_retrieval": {
+    "estimate": 2423248.5696216593,
+    "pct_err": -0.006865340318992108,
+    "abs_log10_err": 0.0029918612816411103
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.5394,
+  "usd_tokens": 0.0594,
+  "wall_s": 129.5
+ },
+ {
+  "id": "fc_jp_movers_2026_08",
+  "as_of": "2026-08-29",
+  "answer_value": 356920,
+  "source": "https://www.stat.go.jp/data/idou/sokuhou/tsuki/index.html",
+  "estimate": 395968.90168797475,
+  "p10": 262501.8435535026,
+  "p90": 597296.266500407,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 6,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "a5",
+   "a6"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.1094051935671152,
+  "abs_log10_err": 0.04509019465284011,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 395968.90168797475,
+    "pct_err": 0.1094051935671152,
+    "abs_log10_err": 0.04509019465284011
+   },
+   "naive": {
+    "estimate": 400000.0,
+    "pct_err": 0.12069931637341691,
+    "abs_log10_err": 0.049489107014003365
+   },
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4795,
+  "usd_tokens": 0.1095,
+  "wall_s": 209.2
+ },
+ {
+  "id": "fc_pola_teu_2026_09",
+  "as_of": "2026-09-10",
+  "answer_value": 1042652,
+  "source": "https://portoflosangeles.org/references/2026-news-releases/news_100926_sept_cargo",
+  "estimate": 885785.3676744199,
+  "p10": 642962.7437045925,
+  "p90": 1220312.880129485,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a1"
+  ],
+  "assumption_weight_share": 0.5,
+  "ablation": false,
+  "pct_err": -0.1504496536961326,
+  "abs_log10_err": 0.07081087874425593,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 885785.3676744199,
+    "pct_err": -0.1504496536961326,
+    "abs_log10_err": 0.07081087874425593
+   },
+   "naive": {
+    "estimate": 780000.0,
+    "pct_err": -0.2519076355294,
+    "abs_log10_err": 0.1260447779330374
+   },
+   "structured_no_retrieval": {
+    "estimate": 779969.603847736,
+    "pct_err": -0.251936788259423,
+    "abs_log10_err": 0.1260617024694751
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4345,
+  "usd_tokens": 0.0545,
+  "wall_s": 163.8
+ },
+ {
+  "id": "fc_es_transit_2026_08",
+  "as_of": "2026-09-11",
+  "answer_value": 371623271,
+  "source": "https://www.ine.es/dyngs/Prensa/TV0826.htm",
+  "estimate": null,
+  "p10": null,
+  "p90": null,
+  "basis": "no_method",
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": 0,
+  "ablation": false,
+  "pct_err": null,
+  "abs_log10_err": null,
+  "covered_80": null,
+  "arms": {
+   "agent": null,
+   "naive": {
+    "estimate": 480000000.0,
+    "pct_err": 0.2916306309569079,
+    "abs_log10_err": 0.11113833573953483
+   },
+   "structured_no_retrieval": {
+    "estimate": 431746670.0495819,
+    "pct_err": 0.16178588302017793,
+    "abs_log10_err": 0.06512609501532916
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5284,
+  "usd_tokens": 0.0884,
+  "wall_s": 274.6
+ },
+ {
+  "id": "fc_ca_rail_2026_07",
+  "as_of": "2026-08-29",
+  "answer_value": 31686803,
+  "source": "https://www150.statcan.gc.ca/n1/daily-quotidien/260928/dq260928a-eng.htm",
+  "estimate": 30939192.204676725,
+  "p10": 22457751.769088246,
+  "p90": 42623750.770791925,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 0.6666666666666667,
+  "ablation": false,
+  "pct_err": -0.02359375905872474,
+  "abs_log10_err": 0.01036945334569743,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 30939192.204676725,
+    "pct_err": -0.02359375905872474,
+    "abs_log10_err": 0.01036945334569743
+   },
+   "naive": null,
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4343,
+  "usd_tokens": 0.0543,
+  "wall_s": 179.5
+ },
+ {
+  "id": "fc_de_cars_2026_09",
+  "as_of": "2026-09-05",
+  "answer_value": 256774,
+  "source": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+  "estimate": 78938.18376150455,
+  "p10": 53413.457316158696,
+  "p90": 116660.42920011433,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a2"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.6925771933236833,
+  "abs_log10_err": 0.5122639167768618,
+  "covered_80": false,
+  "arms": {
+   "agent": {
+    "estimate": 78938.18376150455,
+    "pct_err": -0.6925771933236833,
+    "abs_log10_err": 0.5122639167768618
+   },
+   "naive": {
+    "estimate": 210000.0,
+    "pct_err": -0.1821601875579303,
+    "abs_log10_err": 0.08733175181170402
+   },
+   "structured_no_retrieval": {
+    "estimate": 2337.3841124546584,
+    "pct_err": -0.9908971153136429,
+    "abs_log10_err": 2.0408209587953383
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5036,
+  "usd_tokens": 0.0936,
+  "wall_s": 306.4
+ },
+ {
+  "id": "fc_hk_visitors_2026_09",
+  "as_of": "2026-09-14",
+  "answer_value": 4031090,
+  "source": "https://www.discoverhongkong.com/content/dam/dhk/intl/corporate/newsroom/press-release/hktb/2026/10-Sep-Visitor-Arrivals-E.pdf",
+  "estimate": 4686124.464435655,
+  "p10": 2775365.169881013,
+  "p90": 7912386.7138261385,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.16249561891092856,
+  "abs_log10_err": 0.06539132484251303,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 4686124.464435655,
+    "pct_err": 0.16249561891092856,
+    "abs_log10_err": 0.06539132484251303
+   },
+   "naive": {
+    "estimate": 3200000.0,
+    "pct_err": -0.20617004333815425,
+    "abs_log10_err": 0.10027251620303762
+   },
+   "structured_no_retrieval": {
+    "estimate": 3614797.1514228885,
+    "pct_err": -0.10327054185768902,
+    "abs_log10_err": 0.04733856315227248
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4387,
+  "usd_tokens": 0.0387,
+  "wall_s": 135.5
+ },
+ {
+  "id": "fc_us_starts_2026_08",
+  "as_of": "2026-08-17",
+  "answer_value": 1275000,
+  "source": "https://www.census.gov/construction/nrc/pdf/newresconst.pdf",
+  "estimate": 1271700.4607989273,
+  "p10": 860831.2000196424,
+  "p90": 1878675.0084793658,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.0025878738831942583,
+  "abs_log10_err": 0.001125356116048856,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 1271700.4607989273,
+    "pct_err": -0.0025878738831942583,
+    "abs_log10_err": 0.001125356116048856
+   },
+   "naive": {
+    "estimate": 1350000.0,
+    "pct_err": 0.05882352941176472,
+    "abs_log10_err": 0.024823583725032145
+   },
+   "structured_no_retrieval": {
+    "estimate": 1335707.7804621987,
+    "pct_err": 0.04761394546054798,
+    "abs_log10_err": 0.02020127096382156
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.5411,
+  "usd_tokens": 0.0811,
+  "wall_s": 168.4
+ },
+ {
+  "id": "fc_us_gen_2026_07",
+  "as_of": "2026-08-25",
+  "answer_value": 453744,
+  "source": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_1_01",
+  "estimate": 418471.161340424,
+  "p10": 278476.8594178143,
+  "p90": 628842.6020018551,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.07773731147866647,
+  "abs_log10_err": 0.03514536102185151,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 418471.161340424,
+    "pct_err": -0.07773731147866647,
+    "abs_log10_err": 0.03514536102185151
+   },
+   "naive": null,
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.6056,
+  "usd_tokens": 0.1456,
+  "wall_s": 402.5
+ },
+ {
+  "id": "fc_kr_online_2026_08",
+  "as_of": "2026-09-01",
+  "answer_value": 24211800000000,
+  "source": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=447300",
+  "estimate": 24473747015245.812,
+  "p10": 17764695719650.18,
+  "p90": 33716552336087.406,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a1"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.010818981457215493,
+  "abs_log10_err": 0.0046733886344292345,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 24473747015245.812,
+    "pct_err": 0.010818981457215493,
+    "abs_log10_err": 0.0046733886344292345
+   },
+   "naive": {
+    "estimate": 21500000000000.0,
+    "pct_err": -0.11200323809051782,
+    "abs_log10_err": 0.05158861787838975
+   },
+   "structured_no_retrieval": {
+    "estimate": 19062840058445.188,
+    "pct_err": -0.2126632444326656,
+    "abs_log10_err": 0.10383947373584253
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4514,
+  "usd_tokens": 0.0714,
+  "wall_s": 173.7
+ }
+]

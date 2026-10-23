@@ -1,0 +1,63 @@
+[fc_lhr_pax_2026_09] plan: 6 directions -> approved=True
+[fc_lhr_pax_2026_09] done in 199.5s; estimate 7,262,176; usd 0.4686
+[
+ {
+  "id": "fc_lhr_pax_2026_09",
+  "as_of": "2026-09-12",
+  "answer_value": 7180000,
+  "source": "https://www.sharecast.com/news/other-company-news/heathrow-airport-travel-tourism-london-passenger-traffic-uk--23819142.html",
+  "estimate": 7262176.428875844,
+  "p10": 4699818.884566357,
+  "p90": 11221540.186858935,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 5,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "a5"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.011445185080201092,
+  "abs_log10_err": 0.004942351306272854,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 7262176.428875844,
+    "pct_err": 0.011445185080201092,
+    "abs_log10_err": 0.004942351306272854
+   },
+   "naive": {
+    "estimate": 7200000.0,
+    "pct_err": 0.0027855153203342198,
+    "abs_log10_err": 0.001208052188968099
+   },
+   "structured_no_retrieval": {
+    "estimate": 7000149.765439544,
+    "pct_err": -0.025048779186693015,
+    "abs_log10_err": 0.011017112569730416
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.4686,
+  "usd_tokens": 0.1286,
+  "wall_s": 199.5
+ }
+]

@@ -1,0 +1,61 @@
+[fc_kr_online_2026_08] plan: 7 directions -> approved=True
+[fc_kr_online_2026_08] done in 197.4s; estimate 23,399,920,038,686; usd 0.5627
+[
+ {
+  "id": "fc_kr_online_2026_08",
+  "as_of": "2026-09-01",
+  "answer_value": 24211800000000,
+  "source": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=447300",
+  "estimate": 23399920038685.805,
+  "p10": 15548354590013.865,
+  "p90": 35216347469240.55,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.03353240821889303,
+  "abs_log10_err": 0.014812704435854553,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 23399920038685.805,
+    "pct_err": -0.03353240821889303,
+    "abs_log10_err": 0.014812704435854553
+   },
+   "naive": {
+    "estimate": 21500000000000.0,
+    "pct_err": -0.11200323809051782,
+    "abs_log10_err": 0.05158861787838975
+   },
+   "structured_no_retrieval": {
+    "estimate": 19062840058445.188,
+    "pct_err": -0.2126632444326656,
+    "abs_log10_err": 0.10383947373584253
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5627,
+  "usd_tokens": 0.1227,
+  "wall_s": 197.4
+ }
+]

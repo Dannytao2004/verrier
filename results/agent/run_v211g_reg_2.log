@@ -1,0 +1,280 @@
+[fc_tw_births_2026_09] plan: 6 directions -> approved=True
+[fc_tw_births_2026_09] done in 223.5s; estimate 7,962; usd 0.5215
+[fc_lhr_pax_2026_09] plan: 7 directions -> approved=True
+[fc_lhr_pax_2026_09] done in 204.9s; estimate 7,370,982; usd 0.4712
+[fc_us_starts_2026_08] plan: 8 directions -> approved=True
+[fc_us_starts_2026_08] done in 168.4s; estimate 1,271,700; usd 0.5411
+[fc_us_gen_2026_07] plan: 8 directions -> approved=True
+[fc_us_gen_2026_07] done in 402.5s; estimate 418,471; usd 0.6056
+[fc_kr_online_2026_08] plan: 6 directions -> approved=True
+[fc_kr_online_2026_08] done in 173.7s; estimate 24,473,747,015,246; usd 0.4514
+[
+ {
+  "id": "fc_tw_births_2026_09",
+  "as_of": "2026-09-08",
+  "answer_value": 7704,
+  "source": "https://www.taipeitimes.com/News/taiwan/archives/2026/10/08/2003865628",
+  "estimate": 7961.990974128987,
+  "p10": 5779.349884179635,
+  "p90": 10968.932759313284,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a2"
+  ],
+  "assumption_weight_share": 0.5,
+  "ablation": false,
+  "pct_err": 0.033487924990782236,
+  "abs_log10_err": 0.014305406807034675,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 7961.990974128987,
+    "pct_err": 0.033487924990782236,
+    "abs_log10_err": 0.014305406807034675
+   },
+   "naive": {
+    "estimate": 11000.0,
+    "pct_err": 0.42782969885773614,
+    "abs_log10_err": 0.1546764110417469
+   },
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5215,
+  "usd_tokens": 0.1315,
+  "wall_s": 223.5
+ },
+ {
+  "id": "fc_lhr_pax_2026_09",
+  "as_of": "2026-09-12",
+  "answer_value": 7180000,
+  "source": "https://www.sharecast.com/news/other-company-news/heathrow-airport-travel-tourism-london-passenger-traffic-uk--23819142.html",
+  "estimate": 7370981.732566588,
+  "p10": 4369056.359341616,
+  "p90": 12435493.441429915,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.026599127098410502,
+  "abs_log10_err": 0.011400890650922818,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 7370981.732566588,
+    "pct_err": 0.026599127098410502,
+    "abs_log10_err": 0.011400890650922818
+   },
+   "naive": {
+    "estimate": 7200000.0,
+    "pct_err": 0.0027855153203342198,
+    "abs_log10_err": 0.001208052188968099
+   },
+   "structured_no_retrieval": {
+    "estimate": 7000149.765439544,
+    "pct_err": -0.025048779186693015,
+    "abs_log10_err": 0.011017112569730416
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.4712,
+  "usd_tokens": 0.0712,
+  "wall_s": 204.9
+ },
+ {
+  "id": "fc_us_starts_2026_08",
+  "as_of": "2026-08-17",
+  "answer_value": 1275000,
+  "source": "https://www.census.gov/construction/nrc/pdf/newresconst.pdf",
+  "estimate": 1271700.4607989273,
+  "p10": 860831.2000196424,
+  "p90": 1878675.0084793658,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.0025878738831942583,
+  "abs_log10_err": 0.001125356116048856,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 1271700.4607989273,
+    "pct_err": -0.0025878738831942583,
+    "abs_log10_err": 0.001125356116048856
+   },
+   "naive": {
+    "estimate": 1350000.0,
+    "pct_err": 0.05882352941176472,
+    "abs_log10_err": 0.024823583725032145
+   },
+   "structured_no_retrieval": {
+    "estimate": 1335707.7804621987,
+    "pct_err": 0.04761394546054798,
+    "abs_log10_err": 0.02020127096382156
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.5411,
+  "usd_tokens": 0.0811,
+  "wall_s": 168.4
+ },
+ {
+  "id": "fc_us_gen_2026_07",
+  "as_of": "2026-08-25",
+  "answer_value": 453744,
+  "source": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_1_01",
+  "estimate": 418471.161340424,
+  "p10": 278476.8594178143,
+  "p90": 628842.6020018551,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.07773731147866647,
+  "abs_log10_err": 0.03514536102185151,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 418471.161340424,
+    "pct_err": -0.07773731147866647,
+    "abs_log10_err": 0.03514536102185151
+   },
+   "naive": null,
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.6056,
+  "usd_tokens": 0.1456,
+  "wall_s": 402.5
+ },
+ {
+  "id": "fc_kr_online_2026_08",
+  "as_of": "2026-09-01",
+  "answer_value": 24211800000000,
+  "source": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=447300",
+  "estimate": 24473747015245.812,
+  "p10": 17764695719650.18,
+  "p90": 33716552336087.406,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a1"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.010818981457215493,
+  "abs_log10_err": 0.0046733886344292345,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 24473747015245.812,
+    "pct_err": 0.010818981457215493,
+    "abs_log10_err": 0.0046733886344292345
+   },
+   "naive": {
+    "estimate": 21500000000000.0,
+    "pct_err": -0.11200323809051782,
+    "abs_log10_err": 0.05158861787838975
+   },
+   "structured_no_retrieval": {
+    "estimate": 19062840058445.188,
+    "pct_err": -0.2126632444326656,
+    "abs_log10_err": 0.10383947373584253
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4514,
+  "usd_tokens": 0.0714,
+  "wall_s": 173.7
+ }
+]

@@ -1,0 +1,5342 @@
+{
+ "qid": "fc_kr_online_2026_08",
+ "question": "Assume today is 2026-09-01. You know nothing published after this date. Estimate the total value of online shopping transactions in South Korea in August 2026, in Korean won (KRW), as it will be first reported in the national statistics agency's monthly Online Shopping Trends release (온라인쇼핑동향, National Data Office, formerly Statistics Korea).",
+ "as_of": "2026-09-01",
+ "plan": {
+  "target": {
+   "what": "Total value of online shopping transactions (거래액) in South Korea during August 2026, as reported in the National Data Office (formerly Statistics Korea) monthly Online Shopping Trends (온라인쇼핑동향) release — the headline aggregate transaction value across online shopping channels (online shopping malls,",
+   "unit": "KRW (current prices, total for the month)",
+   "period_start": "2026-08-01",
+   "period_end": "2026-08-31",
+   "publisher": "National Data Office (국가데이터처, formerly Statistics Korea / 통계청) — Online Shopping Trends (온라인쇼핑동향)",
+   "cadence": "monthly",
+   "caveats": "Target period is completed relative to the 2026-09-01 cutoff but the August 2026 release would not yet be published (typically released ~1 month later, early October 2026), so the value is unobserved at cutoff. Working interpretation: headline total online shopping transaction value (거래액), all commo",
+   "outcome_type": "continuous",
+   "unit_canonical": "KRW"
+  },
+  "market_keywords": [
+   "korea online shopping",
+   "korea retail sales",
+   "korea e-commerce"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "Statistical agency time series",
+    "hypothesis": "The target is a continuation of a monthly series; recent published months (through ~June/July 2026) plus prior-year August values and month-over-month/YoY growth give the primary anchor. August 2026 ≈ latest published month × seasonal factor × trend growth.",
+    "data_to_find": "Monthly total online shopping transaction value (거래액) for 2024-2026 as published before 2026-09-01, especially August 2024, August 2025, and the most recent months (May-July 2026); also the YoY growth rate trend. Minimum: last 12-24 monthly totals and the August seasonal ratio.",
+    "search_hints": [
+     "온라인쇼핑동향 거래액 2026년 7월",
+     "통계청 온라인쇼핑동향 월별 거래액 추이",
+     "Korea online shopping transaction value monthly 2025 2026"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "Retail sales statistics",
+    "hypothesis": "Online shopping is a large share of total retail sales; the agency's Retail Sales Index / monthly retail sales value provides a broader total from which online share can be applied. Target ≈ total retail sales value × online share.",
+    "data_to_find": "Monthly total retail sales value (소매판매액) for 2025-2026 and the online/online-shopping share of retail sales (온라인쇼핑 비중) from the same or companion releases. Minimum: recent monthly retail sales totals and the online share percentage.",
+    "search_hints": [
+     "소매판매액 온라인쇼핑 비중 2026",
+     "통계청 소매판매 동향 월별",
+     "Korea retail sales online share 2025"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "related_series",
+    "perspective": "Mobile vs PC split",
+    "hypothesis": "Total online = mobile transactions + PC/other transactions; mobile share is stable and published. If total is hard to get, mobile value / mobile share reconstructs the total.",
+    "data_to_find": "Monthly mobile (모바일) online shopping transaction value and mobile share of total for 2025-2026. Minimum: recent mobile value and mobile share percentage.",
+    "search_hints": [
+     "온라인쇼핑 모바일 거래액 비중 2026",
+     "모바일쇼핑 거래액 월별",
+     "Korea mobile shopping transaction value share"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "related_series",
+    "perspective": "Commodity-group decomposition",
+    "hypothesis": "Total = sum over commodity groups (food/beverage, household goods, fashion, electronics, cosmetics, travel/services, e-coupons, etc.). Summing recent group-level values with trend growth gives the total and cross-checks the headline.",
+    "data_to_find": "Commodity-group-level online shopping transaction values for recent months (2025-2026) from the Online Shopping Trends release. Minimum: latest month's group breakdown and group YoY growth.",
+    "search_hints": [
+     "온라인쇼핑동향 상품군별 거래액 2026",
+     "온라인쇼핑 취급상품범위별 거래액",
+     "Korea online shopping by commodity group 2025"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "shocks",
+    "perspective": "Calendar and event effects",
+    "hypothesis": "August 2026 promotional events (e.g., Korea Sale Festa timing, major platform discount events, summer holiday travel bookings) and Chuseok timing shift the level vs. a naive trend. Identify measurable event effects to adjust the seasonal factor.",
+    "data_to_find": "Dates and scale of major 2026 online shopping promotions (Korea Sale Festa, platform mega-sales), Chuseok 2026 date, and any reported event-driven transaction spikes in 2025 comparable months. Minimum: event calendar and any quantified uplift.",
+    "search_hints": [
+     "코리아세일페스타 2026 일정",
+     "2026 추석 날짜",
+     "online shopping promotion Korea August 2026"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "forecasts_markets",
+    "perspective": "Industry and agency forecasts",
+    "hypothesis": "Published e-commerce market forecasts or agency projections for 2026 give an annual total; monthly August ≈ annual × August seasonal share. Provides an independent level check.",
+    "data_to_find": "2026 Korean e-commerce / online shopping market size forecasts (annual KRW), and any monthly seasonal share estimates. Minimum: one credible annual 2026 forecast and a monthly seasonal distribution.",
+    "search_hints": [
+     "한국 온라인쇼핑 시장 규모 2026 전망",
+     "Korea e-commerce market size forecast 2026",
+     "온라인쇼핑 거래액 연간 전망 2026"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "physical_flow",
+    "perspective": "Payment and card transaction data",
+    "hypothesis": "Card/electronic payment transaction values for online merchants approximate online shopping value; target ≈ online card payment value × coverage adjustment. Cross-checks the survey-based total.",
+    "data_to_find": "Monthly online/e-commerce card payment or electronic payment transaction values for 2025-2026 (Bank of Korea payment statistics, card company data). Minimum: recent monthly online payment value and the ratio to survey online shopping value.",
+    "search_hints": [
+     "온라인 카드결제액 월별 2026",
+     "한국은행 전자지급결제 통계 온라인",
+     "Korea online card payment value monthly"
+    ],
+    "expected_information": 2,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 7 candidate directions in 5 categories; running 7 (budget cap 10)"
+ ],
+ "existing": {
+  "status": "not_checked",
+  "note": "not checked: the existing-figure step runs only in live use with a human at the approval step (not in backtests, scored, --auto-approve or ablation runs)"
+ },
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "Statistical agency time series",
+   "hypothesis": "The target is a continuation of a monthly series; recent published months (through ~June/July 2026) plus prior-year August values and month-over-month/YoY growth give the primary anchor. August 2026 ≈ latest published month × seasonal factor × trend growth.",
+   "data_to_find": "Monthly total online shopping transaction value (거래액) for 2024-2026 as published before 2026-09-01, especially August 2024, August 2025, and the most recent months (May-July 2026); also the YoY growth rate trend. Minimum: last 12-24 monthly totals and the August seasonal ratio.",
+   "search_hints": [
+    "온라인쇼핑동향 거래액 2026년 7월",
+    "통계청 온라인쇼핑동향 월별 거래액 추이",
+    "Korea online shopping transaction value monthly 2025 2026"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "related_series",
+   "perspective": "Retail sales statistics",
+   "hypothesis": "Online shopping is a large share of total retail sales; the agency's Retail Sales Index / monthly retail sales value provides a broader total from which online share can be applied. Target ≈ total retail sales value × online share.",
+   "data_to_find": "Monthly total retail sales value (소매판매액) for 2025-2026 and the online/online-shopping share of retail sales (온라인쇼핑 비중) from the same or companion releases. Minimum: recent monthly retail sales totals and the online share percentage.",
+   "search_hints": [
+    "소매판매액 온라인쇼핑 비중 2026",
+    "통계청 소매판매 동향 월별",
+    "Korea retail sales online share 2025"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d3",
+   "category": "related_series",
+   "perspective": "Mobile vs PC split",
+   "hypothesis": "Total online = mobile transactions + PC/other transactions; mobile share is stable and published. If total is hard to get, mobile value / mobile share reconstructs the total.",
+   "data_to_find": "Monthly mobile (모바일) online shopping transaction value and mobile share of total for 2025-2026. Minimum: recent mobile value and mobile share percentage.",
+   "search_hints": [
+    "온라인쇼핑 모바일 거래액 비중 2026",
+    "모바일쇼핑 거래액 월별",
+    "Korea mobile shopping transaction value share"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d4",
+   "category": "related_series",
+   "perspective": "Commodity-group decomposition",
+   "hypothesis": "Total = sum over commodity groups (food/beverage, household goods, fashion, electronics, cosmetics, travel/services, e-coupons, etc.). Summing recent group-level values with trend growth gives the total and cross-checks the headline.",
+   "data_to_find": "Commodity-group-level online shopping transaction values for recent months (2025-2026) from the Online Shopping Trends release. Minimum: latest month's group breakdown and group YoY growth.",
+   "search_hints": [
+    "온라인쇼핑동향 상품군별 거래액 2026",
+    "온라인쇼핑 취급상품범위별 거래액",
+    "Korea online shopping by commodity group 2025"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d5",
+   "category": "shocks",
+   "perspective": "Calendar and event effects",
+   "hypothesis": "August 2026 promotional events (e.g., Korea Sale Festa timing, major platform discount events, summer holiday travel bookings) and Chuseok timing shift the level vs. a naive trend. Identify measurable event effects to adjust the seasonal factor.",
+   "data_to_find": "Dates and scale of major 2026 online shopping promotions (Korea Sale Festa, platform mega-sales), Chuseok 2026 date, and any reported event-driven transaction spikes in 2025 comparable months. Minimum: event calendar and any quantified uplift.",
+   "search_hints": [
+    "코리아세일페스타 2026 일정",
+    "2026 추석 날짜",
+    "online shopping promotion Korea August 2026"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d6",
+   "category": "forecasts_markets",
+   "perspective": "Industry and agency forecasts",
+   "hypothesis": "Published e-commerce market forecasts or agency projections for 2026 give an annual total; monthly August ≈ annual × August seasonal share. Provides an independent level check.",
+   "data_to_find": "2026 Korean e-commerce / online shopping market size forecasts (annual KRW), and any monthly seasonal share estimates. Minimum: one credible annual 2026 forecast and a monthly seasonal distribution.",
+   "search_hints": [
+    "한국 온라인쇼핑 시장 규모 2026 전망",
+    "Korea e-commerce market size forecast 2026",
+    "온라인쇼핑 거래액 연간 전망 2026"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "d7",
+   "category": "physical_flow",
+   "perspective": "Payment and card transaction data",
+   "hypothesis": "Card/electronic payment transaction values for online merchants approximate online shopping value; target ≈ online card payment value × coverage adjustment. Cross-checks the survey-based total.",
+   "data_to_find": "Monthly online/e-commerce card payment or electronic payment transaction values for 2025-2026 (Bank of Korea payment statistics, card company data). Minimum: recent monthly online payment value and the ratio to survey online shopping value.",
+   "search_hints": [
+    "온라인 카드결제액 월별 2026",
+    "한국은행 전자지급결제 통계 온라인",
+    "Korea online card payment value monthly"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "b1",
+   "category": "own_history",
+   "perspective": "agency monthly series",
+   "hypothesis": "Obtain the actual published monthly online shopping transaction values for Jan–Jul 2026 (and the August 2025 value) from the National Data Office / KOSIS Online Shopping Trends. This would replace the Dec-2025-anchored extrapolation with a genuine 2026 trend and a true prior-year August base, sharply reducing the dominant uncertainty in the level and growth factor.",
+   "data_to_find": "Monthly total online shopping 거래액 for 2025-08 and 2026-01 through 2026-07 (and mobile share), from KOSIS or agency press releases.",
+   "search_hints": [
+    "KOSIS 온라인쇼핑동향 월별 거래액 2026",
+    "국가데이터처 온라인쇼핑동향 2026년 6월",
+    "Statistics Korea online shopping trend 2026 monthly"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b2",
+   "category": "related_series",
+   "perspective": "seasonality",
+   "hypothesis": "Find the historical August-to-December and August-to-September seasonal ratios of the online shopping series (e.g., Aug 2024 vs Dec 2024, Aug 2025 vs Sep 2025). This supplies the seasonal factor needed to convert the December 2025 anchor into an August 2026 level, which is currently an assumption.",
+   "data_to_find": "Monthly online shopping 거래액 for August in 2023, 2024, 2025 and the corresponding December/September values to compute seasonal ratios.",
+   "search_hints": [
+    "온라인쇼핑 거래액 8월 2025",
+    "online shopping transaction August 2024 Korea monthly",
+    "KOSIS online shopping seasonal August"
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b3",
+   "category": "shocks",
+   "perspective": "event effect",
+   "hypothesis": "Quantify the effect of the 2026 Liberation Day 3-day weekend and any August 2026 platform promotion (e.g., summer travel/leisure booking surge) on online transaction value, to adjust the seasonal factor. Without a measured effect the holiday context cannot be used numerically.",
+   "data_to_find": "Reports of August 2026 online/travel booking volumes or platform sales vs prior August, or historical holiday-week online sales uplift estimates.",
+   "search_hints": [
+    "2026년 8월 온라인쇼핑 여행 예약 증가",
+    "광복절 연휴 온라인 매출 2026",
+    "Korea August 2026 e-commerce promotion sales"
+   ],
+   "expected_information": 3
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "온라인쇼핑동향 거래액 2026년 6월",
+     "통계청 온라인쇼핑동향 월별 거래액 추이 2025년 8월",
+     "2026년 7월 온라인쇼핑동향 거래액 국가데이터처",
+     "국가데이터처 온라인쇼핑동향 월별 거래액 2024년 8월 21조"
+    ],
+    "urls": [
+     "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+     "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=446320",
+     "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.009257735999999999,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "온라인쇼핑동향 거래액 2026년 6월",
+       "urls": [
+        "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=446320",
+        "https://biz.heraldcorp.com/article/10828802",
+        "https://news.einfomax.co.kr/news/articleView.html?idxno=4428301",
+        "https://www.yna.co.kr/view/AKR20260803056100002?input=1195m",
+        "https://www1.edaily.co.kr/News/Read?newsId=03191446645543712&mediaCodeNo=257",
+        "https://www.newsis.com/view/NISX20260803_0003733704",
+        "https://www.news1.kr/economy/trend/6247101",
+        "https://news.tvchosun.com/site/data/html_dir/2026/08/03/2026080390153.html",
+        "http://www.kookje.co.kr/news2011/asp/newsbody.asp?key=20260803.99099000401&kid=0240",
+        "https://m.nocutnews.co.kr/news/6557206?page=1"
+       ]
+      },
+      {
+       "query": "통계청 온라인쇼핑동향 월별 거래액 추이 2025년 8월",
+       "urls": [
+        "http://www.paxnet.co.kr/news/allView?currentPageNo=1&vNewsSetId=4667&articleId=2025060213580900280&objId=A2025060213580900280",
+        "https://kostat.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=437829",
+        "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+        "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+        "https://m.mt.co.kr/renew/view.html?no=2025090110493473645&ca=",
+        "https://m.mt.co.kr/renew/view.html?no=2025070108101158322&ca=",
+        "https://re-www.yna.co.kr/view/AKR20250901044800002?section=economy/all",
+        "https://news.mt.co.kr/mtview.php?no=2025040109345147013&VN",
+        "https://m.etoday.co.kr/news/view/2483701",
+        "https://www.newsprime.co.kr/news/article/?no=714209"
+       ]
+      },
+      {
+       "query": "2026년 7월 온라인쇼핑동향 거래액 국가데이터처",
+       "urls": [
+        "https://www.gov.kr/portal/ntnadmNews/4844676?srchOrgCd=1241000&pageIndex=2&hideurl=N",
+        "https://m.korea.kr/archive/expDocView.do?docId=41853&pageIndex=&group=S&srchCode=&startDate=&endDate=&srchKeyword=&groupId=&codeLevel1=&codeLevel2=",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+        "https://newsws.kbs.co.kr/news/pc/view/view.do?ncd=8651451",
+        "https://dealsite.co.kr/articles/168236/068000",
+        "https://mods.go.kr/board.es?act=view&bid=241&list_no=446725&mid=a10301120300&nPage=1&ref_bid=&tag=",
+        "https://www.yna.co.kr/view/AKR20260901057900002?input=1195m",
+        "https://www.newsis.com/view/NISX20260901_0003770725",
+        "https://www.heraldk.com/article/2026083121430422094",
+        "https://www.news1.kr/economy/trend/6275716"
+       ]
+      },
+      {
+       "query": "국가데이터처 온라인쇼핑동향 월별 거래액 2024년 8월 21조",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20251001062529",
+     "page_date": "2025-10-01",
+     "page_published": "2025-10-01",
+     "raw_path": "data/raw/agent/fc_kr_online_2026_08/78cb3411dc7f6d47.raw",
+     "text_chars": 584,
+     "leak_hits": [],
+     "chars_sent": 584,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 8,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=446320",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20251115153555",
+     "page_date": "2025-11-15",
+     "page_published": "2025-11-03",
+     "raw_path": "data/raw/agent/fc_kr_online_2026_08/ba5d654f6786c266.raw",
+     "text_chars": 938,
+     "leak_hits": [],
+     "chars_sent": 938,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 14
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      0
+     ],
+     "name": "South Korea total online shopping transaction value, September 2025 (headline aggregate)",
+     "value": 23795600000000.0,
+     "value_as_written": "23조7956억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "지난달 온라인쇼핑 거래액은 23조7956억원으로 전년 동월보다 13.3% 늘었다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      1
+     ],
+     "name": "South Korea total online shopping transaction value, September 2025, YoY growth rate",
+     "value": 13.3,
+     "value_as_written": "13.3%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "지난달 온라인쇼핑 거래액은 23조7956억원으로 전년 동월보다 13.3% 늘었다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      2
+     ],
+     "name": "South Korea total online shopping transaction value, July 2025 (prior month exceeding 23 trillion)",
+     "value": 23142700000000.0,
+     "value_as_written": "23조1427억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-07-01",
+     "period_end": "2025-07-31",
+     "published_at_if_visible": "",
+     "quote": "월간 거래액이 23조원을 넘어선 것도 지난 7월(23조1427억원)에 이어 두번째다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      3
+     ],
+     "name": "South Korea mobile shopping transaction value, September 2025",
+     "value": 18055200000000.0,
+     "value_as_written": "18조552억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "온라인쇼핑 거래액 중 모바일 쇼핑액은 18조552억원으로 전년대비 11.0%(1조7839억원) 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      4
+     ],
+     "name": "South Korea mobile shopping transaction value, September 2025, YoY growth rate",
+     "value": 11.0,
+     "value_as_written": "11.0%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "온라인쇼핑 거래액 중 모바일 쇼핑액은 18조552억원으로 전년대비 11.0%(1조7839억원) 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      5
+     ],
+     "name": "South Korea mobile shopping transaction value, September 2025, YoY increase amount",
+     "value": 1783900000000.0,
+     "value_as_written": "1조7839억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "온라인쇼핑 거래액 중 모바일 쇼핑액은 18조552억원으로 전년대비 11.0%(1조7839억원) 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      6
+     ],
+     "name": "South Korea mobile share of online shopping transaction value, September 2025",
+     "value": 75.9,
+     "value_as_written": "75.9%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "모바일 거래액 비중은 75.9%로 지난해 같은 달보다 1.6%포인트 하락했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      8
+     ],
+     "name": "South Korea comprehensive mall (종합몰) online shopping transaction value, September 2025",
+     "value": 13099800000000.0,
+     "value_as_written": "13조998억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "종합몰 거래액(13조998억원)과 전문몰 거래액(10조6958억원)이 각각 12.0%, 15.0% 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      9
+     ],
+     "name": "South Korea specialized mall (전문몰) online shopping transaction value, September 2025",
+     "value": 10695800000000.0,
+     "value_as_written": "10조6958억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "종합몰 거래액(13조998억원)과 전문몰 거래액(10조6958억원)이 각각 12.0%, 15.0% 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      10
+     ],
+     "name": "South Korea comprehensive mall transaction value, September 2025, YoY growth rate",
+     "value": 12.0,
+     "value_as_written": "12.0%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "종합몰 거래액(13조998억원)과 전문몰 거래액(10조6958억원)이 각각 12.0%, 15.0% 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      11
+     ],
+     "name": "South Korea specialized mall transaction value, September 2025, YoY growth rate",
+     "value": 15.0,
+     "value_as_written": "15.0%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "종합몰 거래액(13조998억원)과 전문몰 거래액(10조6958억원)이 각각 12.0%, 15.0% 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      12
+     ],
+     "name": "South Korea online-only mall (온라인 전용몰) transaction value, September 2025",
+     "value": 18285700000000.0,
+     "value_as_written": "18조2857억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "온라인 전용몰(18조2857억원·12.3%), 온·오프라인 병행몰(5조5099억원·16.9%) 모두 증가세를 보였다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      13
+     ],
+     "name": "South Korea online-only mall transaction value, September 2025, YoY growth rate",
+     "value": 12.3,
+     "value_as_written": "12.3%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "온라인 전용몰(18조2857억원·12.3%), 온·오프라인 병행몰(5조5099억원·16.9%) 모두 증가세를 보였다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      14
+     ],
+     "name": "South Korea online/offline combined mall (온·오프라인 병행몰) transaction value, September 2025",
+     "value": 5509900000000.0,
+     "value_as_written": "5조5099억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-09-01",
+     "period_end": "2025-09-30",
+     "published_at_if_visible": "",
+     "quote": "온라인 전용몰(18조2857억원·12.3%), 온·오프라인 병행몰(5조5099억원·16.9%) 모두 증가세를 보였다.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Total online shopping transaction value (거래액), South Korea, August (record high for August)",
+     "value_as_written": "22조 4천802억"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "YoY growth rate of total online shopping transaction value, South Korea, August",
+     "value_as_written": "6.6%"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      2
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Mobile shopping transaction value (모바일 쇼핑액), South Korea, August (record high for August)",
+     "value_as_written": "17조 8천489억"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      3
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "YoY growth rate of mobile shopping transaction value, South Korea, August",
+     "value_as_written": "8.9%"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      4
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Mobile share of online shopping transaction value, South Korea, August",
+     "value_as_written": "79.4%"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      5
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Change in mobile share of online shopping transaction value, South Korea, August YoY",
+     "value_as_written": "1.7%p"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      6
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Tesla vehicles sold in South Korea, August",
+     "value_as_written": "7천974대"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      7
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Tesla vehicles sold in South Korea, prior month",
+     "value_as_written": "7천357대"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+     "via": "snapshot",
+     "page_date": "2025-11-15",
+     "snapshot_ts": "20251115153555",
+     "order": [
+      3,
+      7
+     ],
+     "reason": "value_as_written not in quote as a whole number",
+     "name": "South Korea mobile share of online shopping transaction value, September 2025, YoY change in percentage points",
+     "value_as_written": "1.6%p"
+    }
+   ],
+   "wall_s": 73.1
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "소매판매액 온라인쇼핑 비중 2025 통계청",
+     "온라인쇼핑동향 2025년 6월 거래액 소매판매 비중",
+     "2026년 6월 온라인쇼핑동향 소매판매액 비중 국가데이터처",
+     "2026년 5월 소매판매액 온라인쇼핑 거래액 비중",
+     "\"2025년 8월 온라인쇼핑동향\" 거래액 소매판매액 비중"
+    ],
+    "urls": [
+     "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+     "https://www.newsprime.co.kr/news/article/?no=718542&sec_no=76",
+     "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "https://m2.edaily.co.kr/News/Read?newsId=03867126642230256&mediaCodeNo=257"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 30,
+    "web_search_requests": 5,
+    "usd": 0.008389751999999999,
+    "usd_search_fee_assumed": 0.05,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "소매판매액 온라인쇼핑 비중 2025 통계청",
+       "urls": [
+        "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+        "https://www.newsprime.co.kr/news/article/?no=718542&sec_no=76",
+        "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+        "https://m2.edaily.co.kr/News/Read?newsId=03867126642230256&mediaCodeNo=257",
+        "http://kwangju.co.kr/print.php?aid=1751444700786102005",
+        "https://www.newsis.com/view/NISX20250701_0003234480",
+        "http://guronews.kr/news/view.php?idx=3915&page=13",
+        "http://kwangju.co.kr/article.php?aid=1751444700786102005",
+        "https://www.incheonilbo.com/news/articleView.html?idxno=1280978",
+        "https://sri.kostat.go.kr/boardDownload.es?bid=241&list_no=443337&seq=1"
+       ]
+      },
+      {
+       "query": "온라인쇼핑동향 2025년 6월 거래액 소매판매 비중",
+       "urls": [
+        "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=437829",
+        "https://news.einfomax.co.kr/news/articleView.html?idxno=4367863",
+        "https://m.korea.kr/archive/expDocView.do?docId=41413",
+        "https://eiec.kdi.re.kr/policy/materialView.do?num=269366&pg=1&pp=40&device=pc&search_txt=%ec%a0%9c%ec%a1%b0%ec%97%85&topic=&type=A&depth1=&depth2=",
+        "https://www.mods.go.kr/boardDownload.es?bid=241&list_no=437829&seq=4",
+        "https://m.yonhapnewstv.co.kr/news/AKR20250801095446087",
+        "https://newsfc.co.kr/news/articleView.html?idxno=72925",
+        "https://mods.go.kr/boardDownload.es?bid=11722&list_no=437792&seq=3",
+        "https://stage2.edaily.co.kr/News/Read?newsId=03952406642263056&mediaCodeNo=257",
+        "https://www.kookje.co.kr/news2011/asp/newsbody.asp?code=0200&key=20250801.99099000056"
+       ]
+      },
+      {
+       "query": "2026년 6월 온라인쇼핑동향 소매판매액 비중 국가데이터처",
+       "urls": [
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446320&act=view&mainXml=Y",
+        "https://biz.heraldcorp.com/article/10828802",
+        "https://www.korea.kr/common/download.do?fileId=198519390&tblKey=GMN",
+        "https://news.einfomax.co.kr/news/articleView.html?idxno=4428301",
+        "https://m.nocutnews.co.kr/news/6557206?page=1",
+        "https://www.fnnews.com/news/202608030959037868",
+        "https://www.gnnews24.kr/news/articleView.html?idxno=33609",
+        "http://www.smedaily.co.kr/news/articleView.html?idxno=361193",
+        "https://www.newsfreezone.co.kr/news/articleView.html?idxno=702194",
+        "https://m.news.nate.com/view/20260803n18272"
+       ]
+      },
+      {
+       "query": "2026년 5월 소매판매액 온라인쇼핑 거래액 비중",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      },
+      {
+       "query": "\"2025년 8월 온라인쇼핑동향\" 거래액 소매판매액 비중",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.newsprime.co.kr/news/article/?no=718542&sec_no=76",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260202073346",
+     "page_date": "2026-02-02",
+     "page_published": "2026-02-02",
+     "raw_path": "data/raw/agent/fc_kr_online_2026_08/adcfd37dcd2d3b97.raw",
+     "text_chars": 1303,
+     "leak_hits": [],
+     "chars_sent": 1303,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 15
+    },
+    {
+     "url": "https://m2.edaily.co.kr/News/Read?newsId=03867126642230256&mediaCodeNo=257",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      0
+     ],
+     "name": "South Korea total retail sales value (소매판매액), full year 2025",
+     "value": 654883300000000.0,
+     "value_as_written": "654조8833억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "전체 소매판매액(654조8833억원)에서 온라인쇼핑 거래가 차지하는 비중은 전년보다 0.8%포인트(p) 상승한 28.2%로 역대 최고치를 나타냈다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      1
+     ],
+     "name": "Online shopping share of total retail sales (온라인쇼핑 비중), full year 2025",
+     "value": 28.2,
+     "value_as_written": "28.2%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "전체 소매판매액(654조8833억원)에서 온라인쇼핑 거래가 차지하는 비중은 전년보다 0.8%포인트(p) 상승한 28.2%로 역대 최고치를 나타냈다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      2
+     ],
+     "name": "Year-on-year change in online shopping share of retail sales, 2025 vs 2024",
+     "value": 0.8,
+     "value_as_written": "0.8%포인트(p)",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "전체 소매판매액(654조8833억원)에서 온라인쇼핑 거래가 차지하는 비중은 전년보다 0.8%포인트(p) 상승한 28.2%로 역대 최고치를 나타냈다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      3
+     ],
+     "name": "South Korea online shopping transaction value (온라인쇼핑 거래액), full year 2025",
+     "value": 272039800000000.0,
+     "value_as_written": "272조398억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "지난해 온라인쇼핑 거래액은 전년 대비 4.9% 증가한 272조398억원으로 집계됐다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      4
+     ],
+     "name": "Year-on-year growth rate of online shopping transaction value, full year 2025",
+     "value": 4.9,
+     "value_as_written": "4.9%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "지난해 온라인쇼핑 거래액은 전년 대비 4.9% 증가한 272조398억원으로 집계됐다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      5
+     ],
+     "name": "Year-on-year growth rate of online shopping transaction value, full year 2024",
+     "value": 7.1,
+     "value_as_written": "7.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2024-01-01",
+     "period_end": "2024-12-31",
+     "published_at_if_visible": "",
+     "quote": "온라인쇼핑 거래 증가율은 2017년부터 2023년까지 두자릿수 증가율을 기록하다 2024년 7.1%, 2025년 4.9%로 떨어졌다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      6
+     ],
+     "name": "South Korea online shopping transaction value, December 2025",
+     "value": 24290400000000.0,
+     "value_as_written": "24조2904억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-12-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "작년 12월 온라인쇼핑 거래액은 전년 동월 대비 6.2% 증가한 24조2904억원으로 나타났다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      7
+     ],
+     "name": "Year-on-year growth rate of online shopping transaction value, December 2025",
+     "value": 6.2,
+     "value_as_written": "6.2%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-12-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "작년 12월 온라인쇼핑 거래액은 전년 동월 대비 6.2% 증가한 24조2904억원으로 나타났다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      8
+     ],
+     "name": "South Korea mobile shopping transaction value, December 2025",
+     "value": 18799100000000.0,
+     "value_as_written": "18조7991억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-12-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "같은 기간 모바일 쇼핑 거래액은 6.2% 증가한 18조7991억원으로 집계됐다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      9
+     ],
+     "name": "South Korea mobile shopping transaction value, full year 2025",
+     "value": 211144800000000.0,
+     "value_as_written": "211조 1448억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "온라인쇼핑 거래액 중 모바일쇼핑 거래액은 211조 1448억원으로 6.5% 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      10
+     ],
+     "name": "Year-on-year growth rate of mobile shopping transaction value, full year 2025",
+     "value": 6.5,
+     "value_as_written": "6.5%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "온라인쇼핑 거래액 중 모바일쇼핑 거래액은 211조 1448억원으로 6.5% 증가했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      11
+     ],
+     "name": "Online shopping transaction value for food (식품), full year 2025",
+     "value": 47356300000000.0,
+     "value_as_written": "47조3563억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "작년온라인 거래액 중 품목별로 식품이 47조3563억원으로 가장 많았다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      12
+     ],
+     "name": "Online shopping transaction value for food services (음식서비스), full year 2025",
+     "value": 36989100000000.0,
+     "value_as_written": "36조9891억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "음식서비스 36조9891억원 등 음식료품 거래가 84조3454억원을 기록했다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      13
+     ],
+     "name": "Online shopping transaction value for travel and transport services (여행 및 교통서비스), full year 2025",
+     "value": 32464700000000.0,
+     "value_as_written": "32조4647억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "여행 및 교통서비스(32조4647억원), 컴퓨터, 통신기기 등 가전 판매(30조8537), 의복 (21조9961억원), 생활용품(18조9996억원) 등이 뒤를 이었다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d2",
+     "round": 1,
+     "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+     "via": "snapshot",
+     "page_date": "2026-02-02",
+     "snapshot_ts": "20260202073346",
+     "order": [
+      2,
+      14
+     ],
+     "name": "Online shopping transaction value for clothing (의복), full year 2025",
+     "value": 21996100000000.0,
+     "value_as_written": "21조9961억원",
+     "scale_word": "억",
+     "scale_basis": "quote",
+     "unit": "KRW",
+     "period_start": "2025-01-01",
+     "period_end": "2025-12-31",
+     "published_at_if_visible": "",
+     "quote": "여행 및 교통서비스(32조4647억원), 컴퓨터, 통신기기 등 가전 판매(30조8537), 의복 (21조9961억원), 생활용품(18조9996억원) 등이 뒤를 이었다.",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [],
+   "wall_s": 72.9
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "온라인쇼핑동향 모바일 거래액 비중 2026",
+     "Korea online shopping transaction value mobile share 2026 Statistics Korea",
+     "2026년 7월 온라인쇼핑동향 모바일쇼핑 거래액 비중",
+     "mods.go.kr 2026년 8월 온라인쇼핑동향"
+    ],
+    "urls": [
+     "https://mods.go.kr/board.es?act=view&bid=241&list_no=446725&mid=a10301120300&nPage=1&ref_bid=&tag=",
+     "https://eiec.kdi.re.kr/policy/materialView.do?num=286115&pg=&pp=&topic=O",
+     "https://www.gov.kr/portal/ntnadmNews/4823564?Mcode=10300&pageIndex=253&hideurl=N",
+     "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.005459412,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "온라인쇼핑동향 모바일 거래액 비중 2026",
+       "urls": [
+        "https://www.gov.kr/portal/ntnadmNews/4767960",
+        "https://www.gov.kr/portal/ntnadmNews/4738245",
+        "https://www.gov.kr/portal/ntnadmNews/4698529?Mcode=10300&pageIndex=116&hideurl=N",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=445708&act=view&mainXml=Y",
+        "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=445338",
+        "https://mods.go.kr/board.es?mid=a10301120100&bid=241&act=view&list_no=445338&tag=&nPage=1&ref_bid=240,241&keyField=T&keyWord=",
+        "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+        "https://www.kif.re.kr/kif2/publication/maildetview.aspx?nodeid=402&controlno=364737&ismail=1&email=%5B%24email%24%5D&SL=0",
+        "https://www.nongsaro.go.kr/portal/ps/psx/psxs/newsMainView.ps?newsSeqNo=140095&menuId=PS65437",
+        "https://www.fnnews.com/news/202604011816497442"
+       ]
+      },
+      {
+       "query": "Korea online shopping transaction value mobile share 2026 Statistics Korea",
+       "urls": [
+        "https://www.gov.kr/portal/ntnadmNews/4823564?Mcode=10300&pageIndex=253&hideurl=N",
+        "https://mods.go.kr/board.es?act=view&bid=11722&list_no=445713&mainXml=Y&mid=a20101000000&utm_source=linkedin&utm_medium=referral&utm_campaign=automation",
+        "https://m.korea.kr/briefing/pressReleaseView.do?newsId=156752308&pWise=mSub&pWiseSub=C7",
+        "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446320&act=view&mainXml=Y",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&tag=&act=view&list_no=444337",
+        "https://www.gov.kr/portal/ntnadmNews/4698529?srchOrgCd=1241000&pageIndex=1&hideurl=N",
+        "https://en.yna.co.kr/k-biz/view/AEN20260803004000320?section=economy-finance/economy",
+        "https://yonginilbo.com/mobile/article.html?no=111038",
+        "https://www.kif.re.kr/kif2/publication/maildetview.aspx?nodeid=402&controlno=364737&ismail=1&email=%5B%24email%24%5D&SL=0"
+       ]
+      },
+      {
+       "query": "2026년 7월 온라인쇼핑동향 모바일쇼핑 거래액 비중",
+       "urls": [
+        "https://mods.go.kr/board.es?act=view&bid=241&list_no=446725&mid=a10301120300&nPage=1&ref_bid=&tag=",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+        "https://m.korea.kr/archive/expDocView.do?docId=41853&pageIndex=&group=S&srchCode=&startDate=&endDate=&srchKeyword=&groupId=&codeLevel1=&codeLevel2=",
+        "https://www.gov.kr/portal/ntnadmNews/4844676?srchOrgCd=1241000&pageIndex=2&hideurl=N",
+        "https://www4.ajunews.com/view/20260901111640655",
+        "https://www.fntimes.com/html/view.php?ud=2026090115232667459bdb80fab5_18",
+        "https://eiec.kdi.re.kr/policy/materialView.do?num=286115&pg=&pp=&topic=O",
+        "https://m.sentv.co.kr/article/view/sentv202609010112",
+        "https://news.nate.com/view/20260901n17945",
+        "https://news.nate.com/view/20260901n16815"
+       ]
+      },
+      {
+       "query": "mods.go.kr 2026년 8월 온라인쇼핑동향",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/board.es?act=view&bid=241&list_no=446725&mid=a10301120300&nPage=1&ref_bid=&tag=",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://eiec.kdi.re.kr/policy/materialView.do?num=286115&pg=&pp=&topic=O",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.gov.kr/portal/ntnadmNews/4823564?Mcode=10300&pageIndex=253&hideurl=N",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 13.2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "온라인쇼핑동향 상품군별 거래액 2026",
+     "온라인쇼핑 취급상품범위별 거래액 2025 통계청",
+     "\"2026년 7월 온라인쇼핑동향\" 거래액",
+     "2026년 6월 온라인쇼핑동향 거래액 25조 상품군별"
+    ],
+    "urls": [
+     "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+     "https://m.korea.kr/archive/expDocView.do?docId=41853",
+     "https://www.news1.kr/economy/trend/6275716",
+     "https://bbs2.shinhansec.com/board/message/file.do?attachmentId=341268"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.006974628,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "온라인쇼핑동향 상품군별 거래액 2026",
+       "urls": [
+        "https://mods.go.kr/board.es?act=view&bid=241&list_no=444909&mid=a10301120300&ref_bid=&tag=",
+        "https://www.gov.kr/portal/ntnadmNews/4823564?Mcode=10300&pageIndex=253&hideurl=N",
+        "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=445338",
+        "https://mods.go.kr/board.es?mid=a10301120100&bid=241&act=view&list_no=445338&tag=&nPage=1&ref_bid=240,241&keyField=T&keyWord=",
+        "https://www.gov.kr/portal/ntnadmNews/4767960",
+        "https://www.kif.re.kr/kif2/publication/maildetview.aspx?nodeid=402&controlno=364737&ismail=1&email=%5B%24email%24%5D&SL=0",
+        "https://www.gov.kr/portal/gvrnPolicy/view/H2606000001295958?policyType=G00301&Mcode=11218",
+        "https://www4.ajunews.com/view/20260504093115838",
+        "https://kif.re.kr/kif/Publication/OthersDetail.aspx?NodeID=402&ControlNo=362274&ParentNodeID=0&PageNo=1&SearchText=&volumeID=0&SearchIndex=0",
+        "https://m.korea.kr/archive/expDocView.do?docId=41897&pageIndex=&group=S&srchCode=&startDate=&endDate=&srchKeyword=&groupId=&codeLevel1=&codeLevel2="
+       ]
+      },
+      {
+       "query": "온라인쇼핑 취급상품범위별 거래액 2025 통계청",
+       "urls": [
+        "https://mods.go.kr/boardDownload.es?bid=241&list_no=444909&seq=1",
+        "https://www.korea.kr/common/download.do?fileId=198519390&tblKey=GMN",
+        "https://m.korea.kr/briefing/pressReleaseView.do?newsId=156701257&pWise=mSub&pWiseSub=C4",
+        "https://m.korea.kr/archive/expDocView.do?docId=41413",
+        "https://kostat.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=437409",
+        "https://bbs2.shinhansec.com/board/message/file.do?attachmentId=341268",
+        "https://kostat.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=436309",
+        "https://www.mods.go.kr/boardDownload.es?bid=241&list_no=437829&seq=4",
+        "https://m.gov.kr/portal/ntnadmNews/4194163",
+        "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003299479"
+       ]
+      },
+      {
+       "query": "\"2026년 7월 온라인쇼핑동향\" 거래액",
+       "urls": [
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+        "https://mods.go.kr/board.es?act=view&bid=241&list_no=446725&mid=a10301120300&nPage=1&ref_bid=&tag=",
+        "https://www.gov.kr/portal/ntnadmNews/4844676?srchOrgCd=1241000&pageIndex=2&hideurl=N",
+        "https://m.korea.kr/archive/expDocView.do?docId=41853&pageIndex=&group=S&srchCode=&startDate=&endDate=&srchKeyword=&groupId=&codeLevel1=&codeLevel2=",
+        "https://dealsite.co.kr/articles/168236/068000",
+        "https://mn.kbs.co.kr/news/pc/view/view.do?ncd=8651451",
+        "https://www.fnnews.com/news/202609011106044113",
+        "https://news.einfomax.co.kr/news/articleView.html?idxno=4432866",
+        "https://www.newsis.com/view/NISX20260901_0003770725",
+        "https://www.news1.kr/economy/trend/6275716"
+       ]
+      },
+      {
+       "query": "2026년 6월 온라인쇼핑동향 거래액 25조 상품군별",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://m.korea.kr/archive/expDocView.do?docId=41853",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.news1.kr/economy/trend/6275716",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://bbs2.shinhansec.com/board/message/file.do?attachmentId=341268",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 9.3
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "코리아세일페스타 2026 일정",
+     "2026 추석 날짜",
+     "2025년 8월 온라인쇼핑동향 거래액 조원 통계청",
+     "2026년 8월 온라인쇼핑 거래액 증가율"
+    ],
+    "urls": [
+     "https://www.yna.co.kr/view/AKR20251001059200002",
+     "https://influk.bwell.jp/media/archives/941",
+     "https://www.ajunews.com/view/20260722094917670",
+     "https://bbs2.shinhansec.com/board/message/file.do?attachmentId=341268"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.007431648,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "코리아세일페스타 2026 일정",
+       "urls": [
+        "https://www.businesskorea.co.kr/news/articleView.html?idxno=276144",
+        "https://www.kdpress.co.kr/news/articleView.html?idxno=208317",
+        "https://www.ksilbo.co.kr/news/articleView.html?idxno=1066246",
+        "https://store.cafe24.com/kr/story/6686",
+        "https://influk.bwell.jp/media/archives/941",
+        "https://www.kyosu.net/news/articleView.html?idxno=209853",
+        "https://www.thepublic.kr/news/articleView.html?idxno=317560",
+        "https://ko.wikipedia.org/wiki/%ED%8A%B9%EC%88%98:%EA%B8%B0%EC%97%AC/~2026-48477-14",
+        "https://www.beyondpost.co.kr/view.php?ud=2026090310323695449aeda69934_30&mobile=1",
+        "https://www.nbntv.co.kr/news/articleView.html?idxno=4024499"
+       ]
+      },
+      {
+       "query": "2026 추석 날짜",
+       "urls": [
+        "https://german.korea.net/NewsFocus/HonoraryReporters/view?articleId=300153&pageIndex=1",
+        "https://www.ajunews.com/view/20260921094122088",
+        "https://www.gov.kr/portal/locgovNews/4860311?srchSidoArea=Y&srchArea=4872000000&pageIndex=8&hideurl=N",
+        "http://korean.people.com.cn/n4/2026/0630/c70075-20032639.html",
+        "https://www.khan.co.kr/article/202609222115005",
+        "https://www.nocutnews.co.kr/news/6583202.re",
+        "https://www.ajunews.com/view/20260722094917670",
+        "http://korean.people.com.cn/n4/2026/0721/c70075-20033383.html",
+        "http://overseas.mofa.go.kr/cn-chengdu-ko/brd/m_1312/index.do?53927",
+        "https://m.imaeil.com/page/view/2026091620325172752"
+       ]
+      },
+      {
+       "query": "2025년 8월 온라인쇼핑동향 거래액 조원 통계청",
+       "urls": [
+        "https://www.yna.co.kr/view/AKR20251001059200002?input=1195m",
+        "https://bbs2.shinhansec.com/board/message/file.do?attachmentId=341268",
+        "https://www.mods.go.kr/boardDownload.es?bid=241&list_no=437829&seq=4",
+        "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+        "http://www.kmtca.or.kr/inc/down.php?fileidx=164641",
+        "https://www.stat.or.kr/lib/download.php?file_name=2025+%ED%95%9C%EA%B5%AD%ED%86%B5%EA%B3%84%EC%97%B0%EA%B0%90.pdf&save_file=a_202604031005060.pdf&meta=free",
+        "https://likms.assembly.go.kr/filegate/servlet/FileGate?bookId=2E584347-5E4B-BB81-D854-624CEE644D4D&type=1",
+        "https://kosis.kr/upsHtml/online/downSrvcFile.do?PUBCODE=OE&FILE_NAME=/OE/100812.pdf&SEQ=459",
+        "https://www.korea.kr/common/download.do?fileId=198519390&tblKey=GMN",
+        "https://v.daum.net/v/20251001120124437"
+       ]
+      },
+      {
+       "query": "2026년 8월 온라인쇼핑 거래액 증가율",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.yna.co.kr/view/AKR20251001059200002",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://influk.bwell.jp/media/archives/941",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null,
+     "cdx_error": "URLError: <urlopen error [WinError 10061] 由于目标计算机积极拒绝，无法连接。>"
+    },
+    {
+     "url": "https://www.ajunews.com/view/20260722094917670",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260730222347",
+     "page_date": "2026-07-30",
+     "page_published": "2026-07-22",
+     "raw_path": "data/raw/agent/fc_kr_online_2026_08/ec8381d7fa6267a7.raw",
+     "text_chars": 884,
+     "leak_hits": [],
+     "chars_sent": 884,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 3
+    },
+    {
+     "url": "https://bbs2.shinhansec.com/board/message/file.do?attachmentId=341268",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      5
+     ],
+     "name": "Liberation Day 2026 date (South Korea)",
+     "value": 15.0,
+     "value_as_written": "8월 15일",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "day of month (August)",
+     "period_start": "2026-08-15",
+     "period_end": "2026-08-15",
+     "published_at_if_visible": "",
+     "quote": "올해 광복절인 8월 15일은 토요일로, 17일 월요일이 대체공휴일로 지정됐다.",
+     "reading": {
+      "number": 15.0
+     },
+     "value_check": "pending",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      6
+     ],
+     "name": "Liberation Day 2026 substitute holiday date (South Korea)",
+     "value": 17.0,
+     "value_as_written": "17일",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "day of month (August)",
+     "period_start": "2026-08-17",
+     "period_end": "2026-08-17",
+     "published_at_if_visible": "",
+     "quote": "올해 광복절인 8월 15일은 토요일로, 17일 월요일이 대체공휴일로 지정됐다.",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      7
+     ],
+     "name": "Liberation Day 2026 holiday length (South Korea)",
+     "value": 3.0,
+     "value_as_written": "사흘",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "days",
+     "period_start": "2026-08-15",
+     "period_end": "2026-08-17",
+     "published_at_if_visible": "",
+     "quote": "토요일부터 월요일까지 사흘을 쉴 수 있다.",
+     "reading": {
+      "number": 3.0
+     },
+     "value_check": "pending",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      0
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Number of remaining 3+ day holiday periods in H2 2026 (South Korea)",
+     "value_as_written": "다섯"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      1
+     ],
+     "reason": "period_end 2026-09-27 after as_of",
+     "name": "Chuseok 2026 holiday length for 5-day workweek employees (South Korea)",
+     "value_as_written": "나흘"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      2
+     ],
+     "reason": "period_end 2026-09-24 after as_of",
+     "name": "Chuseok 2026 holiday start date (South Korea)",
+     "value_as_written": "9월 24일"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      3
+     ],
+     "reason": "period_end 2026-09-26 after as_of",
+     "name": "Chuseok 2026 holiday end date (South Korea)",
+     "value_as_written": "26일"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      4
+     ],
+     "reason": "period_end 2026-09-27 after as_of",
+     "name": "Chuseok 2026 full rest period end for 5-day workweek employees (South Korea)",
+     "value_as_written": "27일"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      8
+     ],
+     "reason": "period_end 2026-10-05 after as_of",
+     "name": "National Foundation Day 2026 substitute holiday date (South Korea)",
+     "value_as_written": "5일"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      9
+     ],
+     "reason": "period_end 2026-10-09 after as_of",
+     "name": "Hangul Day 2026 date (South Korea)",
+     "value_as_written": "10월 9일"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      10
+     ],
+     "reason": "period_end 2026-12-27 after as_of",
+     "name": "Christmas 2026 holiday length (South Korea)",
+     "value_as_written": "사흘"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      11
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Additional weekday holidays remaining in 2026 for 5-day workweek employees (South Korea)",
+     "value_as_written": "6일"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      12
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Total 2026 public holidays for government offices (South Korea)",
+     "value_as_written": "70일"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      13
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Effective total holidays in 2026 for 5-day workweek employees (South Korea)",
+     "value_as_written": "118일"
+    },
+    {
+     "direction_id": "d5",
+     "round": 1,
+     "source_url": "https://www.ajunews.com/view/20260722094917670",
+     "via": "snapshot",
+     "page_date": "2026-07-30",
+     "snapshot_ts": "20260730222347",
+     "order": [
+      2,
+      14
+     ],
+     "reason": "period_end 2026-12-31 after as_of",
+     "name": "Total number of 3+ day holiday periods in 2026 (South Korea)",
+     "value_as_written": "여덟"
+    }
+   ],
+   "wall_s": 83.3
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "한국 온라인쇼핑 시장 규모 2026 전망",
+     "Korea e-commerce market size forecast 2026",
+     "2025년 8월 온라인쇼핑 거래액 통계청",
+     "온라인쇼핑동향 월별 거래액 2026년 6월 증가율"
+    ],
+    "urls": [
+     "https://www.edaily.co.kr/News/Read?newsId=03043846642370312",
+     "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+     "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "https://www.digitaltoday.co.kr/en/view/845/why-founders-are-turning-to-d2c-instead-of-platforms-in-a-300-trillion-won-ecommerce-market"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0066022319999999995,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "한국 온라인쇼핑 시장 규모 2026 전망",
+       "urls": [
+        "https://www.marketresearch.com/PayNXT360-v4075/South-Korea-B2C-Ecommerce-Size-45821509/",
+        "https://kci.go.kr/kciportal/mobile/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003171409",
+        "https://www.edaily.co.kr/News/Read?newsId=03043846642370312",
+        "https://m.sedaily.com/article/14151380",
+        "https://www.marketresearch.com/IMARC-v3797/South-Korea-commerce-Application-B2C-45732516/",
+        "https://slv.news.einfomax.co.kr/news/articleView.html?idxno=4386317",
+        "http://www.hansbiz.co.kr/news/articleView.html?idxno=841041",
+        "https://www.researchandmarkets.com/reports/5601178/south-korea-e-commerce-market-share-analysis",
+        "https://www.thebell.co.kr/front/newsview.asp?click=F&key=202602040907568360101882",
+        "https://www.theguru.co.kr/news/section_list_all.html?sec_no=53&page=95"
+       ]
+      },
+      {
+       "query": "Korea e-commerce market size forecast 2026",
+       "urls": [
+        "https://www.researchandmarkets.com/reports/5601178/south-korea-e-commerce-market-share-analysis",
+        "https://www.marketresearch.com/PayNXT360-v4075/South-Korea-B2C-Ecommerce-Size-45821509/",
+        "https://www.marketresearch.com/Search?qtype=2&categoryid=94&regionid=1229&datepub=12&sort=r&publisher=PayNXT360",
+        "https://www.marketresearch.com/IMARC-v3797/South-Korea-commerce-Application-B2C-45732516/",
+        "https://www.digitaltoday.co.kr/en/view/845/why-founders-are-turning-to-d2c-instead-of-platforms-in-a-300-trillion-won-ecommerce-market",
+        "https://www.6wresearch.com/industry-report/south-korea-ecommerce-market",
+        "https://www.edaily.co.kr/News/Read?newsId=03043846642370312",
+        "https://www.6wresearch.com/industry-report/south-korea-e-commerce-market",
+        "https://kci.go.kr/kciportal/mobile/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003171409",
+        "https://www.digitaltoday.co.kr/cn/view/30106/why-founders-are-turning-to-d2c-instead-of-platforms-in-a-300-trillion-won-ecommerce-market"
+       ]
+      },
+      {
+       "query": "2025년 8월 온라인쇼핑 거래액 통계청",
+       "urls": [
+        "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+        "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+        "http://www.jeonpa.co.kr/news/articleView.html?idxno=59946",
+        "https://www.mods.go.kr/boardDownload.es?bid=241&list_no=437829&seq=4",
+        "https://www.itfind.or.kr/trend/iitp/mailzineMore.do?groupcode=33&id=0000001951",
+        "http://www4.newstomato.com/ReadNews.aspx?no=281842",
+        "https://bbs2.shinhansec.com/board/message/file.do?attachmentId=341272",
+        "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+        "https://www.ajunews.com/view/20250801121648985?utm_source=ajunews&utm_medium=view&utm_campaign=newsquick_popular_list",
+        "https://www.junggi.co.kr/article/articleView.html?no=11567&cate1=5&cate2=10&prevPagename=searchMain.html&page=66"
+       ]
+      },
+      {
+       "query": "온라인쇼핑동향 월별 거래액 2026년 6월 증가율",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.edaily.co.kr/News/Read?newsId=03043846642370312",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.korea.kr/common/download.do?fileId=198377506&tblKey=GMN",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20251001062529",
+     "page_date": "2025-10-01",
+     "page_published": "2025-10-01",
+     "raw_path": "data/raw/agent/fc_kr_online_2026_08/78cb3411dc7f6d47.raw",
+     "text_chars": 584,
+     "leak_hits": [],
+     "chars_sent": 584,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 8,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://www.digitaltoday.co.kr/en/view/845/why-founders-are-turning-to-d2c-instead-of-platforms-in-a-300-trillion-won-ecommerce-market",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      2,
+      0
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Total online shopping transaction value, South Korea, August (record high for August)",
+     "value_as_written": "22조 4천802억"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      2,
+      1
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of total online shopping transaction value, South Korea, August",
+     "value_as_written": "6.6%"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      2,
+      2
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Mobile shopping transaction value, South Korea, August (record high for August)",
+     "value_as_written": "17조 8천489억"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      2,
+      3
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of mobile shopping transaction value, South Korea, August",
+     "value_as_written": "8.9%"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      2,
+      4
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Mobile share of online shopping transaction value, South Korea, August",
+     "value_as_written": "79.4%"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      2,
+      5
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year change in mobile share of online shopping transaction value, South Korea, August",
+     "value_as_written": "1.7%p"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      2,
+      6
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Tesla vehicles sold in South Korea, August",
+     "value_as_written": "7천974"
+    },
+    {
+     "direction_id": "d6",
+     "round": 1,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      2,
+      7
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Tesla vehicles sold in South Korea, prior month (July)",
+     "value_as_written": "7천357"
+    }
+   ],
+   "wall_s": 12.7
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {
+    "queries": [
+     "한국은행 전자지급결제 통계 온라인 카드결제액 월별",
+     "온라인쇼핑동향 거래액 2026년 6월 통계청",
+     "여신금융협회 온라인 가맹점 카드 승인액 전자상거래 월별 통계",
+     "온라인쇼핑 거래액 카드 결제 비중 결제수단 비율 한국은행 보도자료"
+    ],
+    "urls": [
+     "https://www.financialpost.co.kr/news/articleView.html?idxno=277719",
+     "https://www.gov.kr/portal/ntnadmNews/4823564?Mcode=10300&pageIndex=253&hideurl=N",
+     "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "https://slv.news.einfomax.co.kr/news/articleView.html?idxno=4406663"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.009461039999999999,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "한국은행 전자지급결제 통계 온라인 카드결제액 월별",
+       "urls": [
+        "http://www.foeconomy.co.kr/id/yoE85e6aBYnzO8bNTrAo?ckattempt=1",
+        "https://chosun-chosun-prod.cdn.arcpublishing.com/economy/economy_general/2026/03/30/IBWTK5NENFBH5EWXLIUO5SEPOU/",
+        "https://www.ebn.co.kr/externalArticle/posco/view.html?idxno=1703852",
+        "https://biz.heraldcorp.com/article/10887593?sec=002",
+        "https://www.financialpost.co.kr/news/articleView.html?idxno=277719",
+        "https://slv.news.einfomax.co.kr/news/articleView.html?idxno=4406663",
+        "https://m.yonhapnewstv.co.kr/news/AKR202609291420240EF",
+        "https://www.ebn.co.kr/news/articleView.html?idxno=1725975",
+        "https://biz.heraldcorp.com/article/10450569",
+        "https://www.sidae.com/article/2026092915274272452?DMBA"
+       ]
+      },
+      {
+       "query": "온라인쇼핑동향 거래액 2026년 6월 통계청",
+       "urls": [
+        "https://www.gov.kr/portal/ntnadmNews/4823564?Mcode=10300&pageIndex=253&hideurl=N",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446320&act=view&mainXml=Y",
+        "https://biz.heraldcorp.com/article/10828802",
+        "https://news.einfomax.co.kr/news/articleView.html?idxno=4428301",
+        "https://www.yna.co.kr/view/AKR20260803056100002?input=1195m",
+        "https://www.korea.kr/common/download.do?fileId=198519390&tblKey=GMN",
+        "https://www1.edaily.co.kr/News/Read?newsId=03191446645543712&mediaCodeNo=257",
+        "https://www5.ajunews.com/view/20260803093536243",
+        "https://www.news1.kr/economy/trend/6247101",
+        "https://newsappapi.kbs.co.kr/news/pc/view/view.do?ncd=8626893"
+       ]
+      },
+      {
+       "query": "여신금융협회 온라인 가맹점 카드 승인액 전자상거래 월별 통계",
+       "urls": [
+        "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+        "https://www.etnews.com/20260430000306",
+        "http://www.creditcard.re.kr/files/admin.2/2.%20%ec%8b%a0%ec%9a%a9%ec%b9%b4%eb%93%9c%20%ec%9d%b4%ec%9a%a9%eb%8d%b0%ec%9d%b4%ed%84%b0%ec%9d%98%20%ec%a7%80%ec%97%ad%20%ea%b2%bd%ea%b8%b0%ed%8c%90%eb%8b%a8%20%ec%a7%80%ed%91%9c%eb%a1%9c%ec%84%9c%20%ec%a0%95%eb%b3%b4%eb%a0%a5%20%eb%b6%84%ec%84%9d_%ec%9d%b8%ec%87%84%eb%b3%b8.pdf",
+        "https://www.newsprime.co.kr/news/article/?no=648346",
+        "https://xn--910bs4koon3ga84e.com/jayeongeobwiki/704?sfl=mb_id%2C1&stx=admin&page=4",
+        "https://www.vcs.go.kr/web/portal/community/1620d116789111eea7faf220ef6e9d49_2/12398?baUse=true&backCp=4&backSet=1&bcId=1620d116789111eea7faf220ef6e9d49_2&cp=4&extra1=noFirst&pageSize=10&sortDirection=DESC&sortOrder=BA_REGDATE",
+        "https://www.polinews.co.kr/news/articleList.html?page=12&total=12707&box_idxno=&sc_section_code=&sc_sub_section_code=S2N13&sc_serial_code=&sc_area=&sc_level=&sc_article_type=&sc_view_level=&sc_sdate=&sc_edate=&sc_serial_number=&sc_word=&sc_multi_code=&sc_is_image=&sc_is_movie=&sc_user_name=&sc_order_by=E&view_type=sm",
+        "https://m3.edaily.co.kr/News/Read?newsId=01928646638959440&mediaCodeNo=257",
+        "https://newsway.co.kr/news/view?ud=2024102815234810632",
+        "http://www.fintechpost.co.kr/news/articleView.html?idxno=230670"
+       ]
+      },
+      {
+       "query": "온라인쇼핑 거래액 카드 결제 비중 결제수단 비율 한국은행 보도자료",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.financialpost.co.kr/news/articleView.html?idxno=277719",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.gov.kr/portal/ntnadmNews/4823564?Mcode=10300&pageIndex=253&hideurl=N",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260801020942",
+     "page_date": "2026-08-01",
+     "page_published": "2026-07-30",
+     "raw_path": "data/raw/agent/fc_kr_online_2026_08/f066ec4d0198bf6e.raw",
+     "text_chars": 849,
+     "leak_hits": [],
+     "chars_sent": 849,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 14,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://slv.news.einfomax.co.kr/news/articleView.html?idxno=4406663",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      0
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Total credit/check/prepaid card approval value, South Korea, Q2 (current quarter)",
+     "value_as_written": "336조 9000억"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      1
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of total card approval value, South Korea, Q2",
+     "value_as_written": "7.6%"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      2
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Total card approval count, South Korea, Q2",
+     "value_as_written": "79억 6000만"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      3
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of total card approval count, South Korea, Q2",
+     "value_as_written": "6.0%"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      4
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Average approval value per card transaction, South Korea, Q2",
+     "value_as_written": "4만 2324"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      5
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of average approval value per card transaction, South Korea, Q2",
+     "value_as_written": "1.5%"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      6
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Credit card approval value, South Korea, Q2",
+     "value_as_written": "262조 2000억"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      7
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Check card approval value, South Korea, Q2",
+     "value_as_written": "68조 8000억"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      8
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year increase in wholesale/retail card approval value, South Korea, Q2",
+     "value_as_written": "9조 400억"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      9
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of wholesale/retail card approval value, South Korea, Q2",
+     "value_as_written": "5.9%"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      10
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year increase in accommodation/food service card approval value, South Korea, Q2",
+     "value_as_written": "2조 6360억"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      11
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of accommodation/food service card approval value, South Korea, Q2",
+     "value_as_written": "6.8%"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      12
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year decrease in transport (airline etc.) card approval value, South Korea, Q2",
+     "value_as_written": "4010억"
+    },
+    {
+     "direction_id": "d7",
+     "round": 1,
+     "source_url": "https://www2.edaily.co.kr/News/Read?newsId=03676886645519768&mediaCodeNo=257",
+     "via": "snapshot",
+     "page_date": "2026-08-01",
+     "snapshot_ts": "20260801020942",
+     "order": [
+      2,
+      13
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of transport card approval value, South Korea, Q2",
+     "value_as_written": "-8.3%"
+    }
+   ],
+   "wall_s": 81.3
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "korea online shopping",
+     "korea retail sales",
+     "korea e-commerce"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 20
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "search": {
+    "queries": [
+     "KOSIS 온라인쇼핑동향 2026년 6월 거래액",
+     "통계청 온라인쇼핑동향 2025년 8월 거래액",
+     "\"2026년 7월 온라인쇼핑동향\" 국가데이터처 거래액",
+     "2026년 5월 온라인쇼핑동향 거래액 25조 332억",
+     "\"2026년 4월 온라인쇼핑동향\" 거래액 전년동월대비",
+     "\"온라인쇼핑동향\" 2026년 1월 2월 거래액 조 원 국가데이터처 발표"
+    ],
+    "urls": [
+     "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=446320",
+     "https://www.korea.kr/common/download.do?fileId=198519390&tblKey=GMN",
+     "https://www.news1.kr/economy/trend/6247101",
+     "https://vop.co.kr/A00001696062.html"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 30,
+    "web_search_requests": 6,
+    "usd": 0.009248808,
+    "usd_search_fee_assumed": 0.06,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "KOSIS 온라인쇼핑동향 2026년 6월 거래액",
+       "urls": [
+        "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=446320",
+        "https://www.korea.kr/common/download.do?fileId=198519390&tblKey=GMN",
+        "https://www.news1.kr/economy/trend/6247101",
+        "https://vop.co.kr/A00001696062.html",
+        "https://newsappapi.kbs.co.kr/news/pc/view/view.do?ncd=8626893",
+        "https://news.einfomax.co.kr/news/articleView.html?idxno=4428301",
+        "http://www.kookje.co.kr/news2011/asp/newsbody.asp?key=20260803.99099000401&kid=0240",
+        "https://www.newsis.com/view/NISX20260803_0003733704",
+        "https://www.seoul.co.kr:8888/index.php?keyword=%ED%86%B5%EC%8B%A0%EA%B8%B0%EA%B8%B0",
+        "https://www.e-focus.co.kr/news/articleView.html?idxno=3002690"
+       ]
+      },
+      {
+       "query": "통계청 온라인쇼핑동향 2025년 8월 거래액",
+       "urls": [
+        "http://www.paxnet.co.kr/news/allView?currentPageNo=1&vNewsSetId=4667&articleId=2025100112010600257&isNowNews=1&objId=A2025100112010600257",
+        "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+        "https://www.yna.co.kr/view/AKR20251001059200002?input=1195m",
+        "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+        "https://mbiz.heraldcorp.com/article/10587873",
+        "https://m2.edaily.co.kr/News/Read?newsId=03378406642328656&mediaCodeNo=257",
+        "https://www.newscj.com/news/articleView.html?idxno=3324134",
+        "https://www.heraldk.com/article/2025093022032722828",
+        "https://www.wowtv.co.kr/NewsCenter/News/Read?articleId=2025100103347",
+        "https://www.mods.go.kr/boardDownload.es?bid=241&list_no=437829&seq=4"
+       ]
+      },
+      {
+       "query": "\"2026년 7월 온라인쇼핑동향\" 국가데이터처 거래액",
+       "urls": [
+        "https://www.gov.kr/portal/ntnadmNews/4844676?srchOrgCd=1241000&pageIndex=2&hideurl=N",
+        "https://m.korea.kr/archive/expDocView.do?docId=41853&pageIndex=&group=S&srchCode=&startDate=&endDate=&srchKeyword=&groupId=&codeLevel1=&codeLevel2=",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+        "https://mods.go.kr/board.es?act=view&bid=241&list_no=446725&mid=a10301120300&nPage=1&ref_bid=&tag=",
+        "https://newsws.kbs.co.kr/news/pc/view/view.do?ncd=8651451",
+        "https://dealsite.co.kr/articles/168236/068000",
+        "https://news.einfomax.co.kr/news/articleView.html?idxno=4432866",
+        "https://www.news1.kr/economy/trend/6275716",
+        "https://www.newsis.com/view/NISX20260901_0003770725",
+        "https://www.fnnews.com/news/202609011106044113"
+       ]
+      },
+      {
+       "query": "2026년 5월 온라인쇼핑동향 거래액 25조 332억",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      },
+      {
+       "query": "\"2026년 4월 온라인쇼핑동향\" 거래액 전년동월대비",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      },
+      {
+       "query": "\"온라인쇼핑동향\" 2026년 1월 2월 거래액 조 원 국가데이터처 발표",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301120300&bid=241&act=view&list_no=446320",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.korea.kr/common/download.do?fileId=198519390&tblKey=GMN",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.news1.kr/economy/trend/6247101",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://vop.co.kr/A00001696062.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 57.2
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "search": {
+    "queries": [
+     "온라인쇼핑동향 2025년 8월 거래액 통계청",
+     "online shopping transaction August 2024 Korea monthly KOSIS 거래액",
+     "2025년 9월 온라인쇼핑동향 거래액 국가데이터처",
+     "2025년 12월 온라인쇼핑동향 온라인쇼핑 거래액 조원",
+     "\"2025년 12월\" 온라인쇼핑동향 거래액 국가데이터처"
+    ],
+    "urls": [
+     "http://www.paxnet.co.kr/news/allView?currentPageNo=1&vNewsSetId=4667&articleId=2025100112010600257&isNowNews=1&objId=A2025100112010600257",
+     "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "https://www.newscj.com/news/articleView.html?idxno=3324134",
+     "http://www4.newstomato.com/ReadNews.aspx?no=1150963"
+    ],
+    "n_text_urls": 0,
+    "n_result_urls": 30,
+    "web_search_requests": 5,
+    "usd": 0.007120283999999999,
+    "usd_search_fee_assumed": 0.05,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "온라인쇼핑동향 2025년 8월 거래액 통계청",
+       "urls": [
+        "http://www.paxnet.co.kr/news/allView?currentPageNo=1&vNewsSetId=4667&articleId=2025100112010600257&isNowNews=1&objId=A2025100112010600257",
+        "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+        "https://www.newscj.com/news/articleView.html?idxno=3324134",
+        "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+        "https://m-cn.yna.co.kr/view/AJP20251001002300882",
+        "https://www.mods.go.kr/boardDownload.es?bid=241&list_no=437829&seq=4",
+        "http://www.jeonpa.co.kr/news/articleView.html?idxno=59946",
+        "https://www.itfind.or.kr/trend/iitp/mailzineMore.do?groupcode=33&id=0000001951",
+        "https://ajutv.ajunews.com/view/20250801121648985",
+        "https://www.ajunews.com/view/20250801121648985?utm_source=ajunews&utm_medium=view&utm_campaign=newsquick_popular_list"
+       ]
+      },
+      {
+       "query": "online shopping transaction August 2024 Korea monthly KOSIS 거래액",
+       "urls": [
+        "https://mods.go.kr/board.es?mid=a10301120300&act=view&bid=241&list_no=433015",
+        "https://m.korea.kr/briefing/pressReleaseView.do?newsId=156653302&pWise=mSub&pWiseSub=C7",
+        "https://www.gov.kr/portal/ntnadmNews/4033166",
+        "https://kostat.go.kr/board.es?mid=a20103040000&bid=11722&act=view&list_no=433060",
+        "https://www.korea.net/Government/Briefing-Room/Press-Releases/view?articleId=7587&insttCode=A110449&type=O",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=433015&act=view&mainXml=Y",
+        "https://www.kostat.go.kr/board.es?mid=a20101000000&bid=11722&list_no=433060&act=view&mainXml=Y",
+        "https://stat.bucheon.go.kr/site/program/board/basicboard/view?currentpage=1&menuid=092002004&pagesize=10&boardtypeid=6231&boardid=1143392",
+        "https://ar.yna.co.kr/view/AAR20241002001500885",
+        "https://www.asiae.co.kr/article/2024100210503358652"
+       ]
+      },
+      {
+       "query": "2025년 9월 온라인쇼핑동향 거래액 국가데이터처",
+       "urls": [
+        "https://www.mods.go.kr/boardDownload.es?bid=241&list_no=439110&seq=1",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=439110&tag=&nPage=1&ref_bid=203,204,205,206,207,210,211,11109,11113,11814,213,215,214,11860,11695,216,218,219,220,10820,11815,11895,11816,208,245,222,223,225,226,227,228,229,230,11321,232,233,234,12029,10920,11469,11470,11817,236,237,11471,238,240,241,11865,243,244,11893,11898,12031,11825,246,0067&keyField=T&keyWord=&bodo_b_type=all",
+        "https://www.yna.co.kr/view/AKR20251103066300002?input=1195m",
+        "https://www.mt.co.kr/economy/2025/11/03/2025110310475136945",
+        "https://eiec.kdi.re.kr/policy/materialView.do?num=272874&cat=epic1&source=newsletter&utm_campaign=9_KDI_Letter_Send&utm_source=newsletter&utm_medium=email",
+        "https://www.sisajournal.com/news/articleView.html?idxno=351498",
+        "http://www.srtimes.kr/news/articleView.html?idxno=188908",
+        "https://newspim.com/search?type=news&searchword=%EC%98%A8%EB%9D%BC%EC%9D%B8+%EC%87%BC%ED%95%91%EB%8F%99%ED%96%A5&searchfor%5B0%5D=1&sort=desc&period=all&searchrange%5B0%5D=title&searchrange%5B1%5D=contents&searchrange%5B2%5D=reporter&page=1",
+        "https://www.newspim.com/news/view/20251103000328",
+        "https://m.sedaily.com/NewsView/2H0B6U3TWB"
+       ]
+      },
+      {
+       "query": "2025년 12월 온라인쇼핑동향 온라인쇼핑 거래액 조원",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      },
+      {
+       "query": "\"2025년 12월\" 온라인쇼핑동향 거래액 국가데이터처",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "http://www.paxnet.co.kr/news/allView?currentPageNo=1&vNewsSetId=4667&articleId=2025100112010600257&isNowNews=1&objId=A2025100112010600257",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20251001062529",
+     "page_date": "2025-10-01",
+     "page_published": "2025-10-01",
+     "raw_path": "data/raw/agent/fc_kr_online_2026_08/78cb3411dc7f6d47.raw",
+     "text_chars": 584,
+     "leak_hits": [],
+     "chars_sent": 584,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 8,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://www.newscj.com/news/articleView.html?idxno=3324134",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260312045129",
+     "page_date": "2026-03-12",
+     "page_published": "2022-10-04",
+     "raw_path": "data/raw/agent/fc_kr_online_2026_08/1db8206a6e21cce5.raw",
+     "text_chars": 1213,
+     "leak_hits": [],
+     "chars_sent": 1213,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 0
+    }
+   ],
+   "points": [],
+   "dropped_points": [
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total online shopping transaction value, August (headline aggregate, all online shopping channels)",
+     "value_as_written": "22조 4천802억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total online shopping transaction value, year-on-year growth rate, August",
+     "value_as_written": "6.6%"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      2
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea mobile shopping transaction value, August",
+     "value_as_written": "17조 8천489억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      3
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea mobile shopping transaction value, year-on-year growth rate, August",
+     "value_as_written": "8.9%"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      4
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Mobile share of total online shopping transaction value, August",
+     "value_as_written": "79.4%"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      5
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Change in mobile share of online shopping transaction value, year-on-year, August (percentage points)",
+     "value_as_written": "1.7%p"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      6
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Tesla vehicles sold in South Korea, August",
+     "value_as_written": "7천974"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "https://www.ytn.co.kr/_ln/0102_202510011350546155",
+     "via": "snapshot",
+     "page_date": "2025-10-01",
+     "snapshot_ts": "20251001062529",
+     "order": [
+      1,
+      7
+     ],
+     "reason": "period year 2026 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Tesla vehicles sold in South Korea, prior month (July)",
+     "value_as_written": "7천357"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      0
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total online shopping transaction value (거래액), August (headline aggregate)",
+     "value_as_written": "17조7181억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      1
+     ],
+     "reason": "period year 2021 does not appear in the page text or URL (likely mis-dated)",
+     "name": "South Korea total online shopping transaction value (거래액), December (prior-year comparison month)",
+     "value_as_written": "17조8104억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      2
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year increase in total online shopping transaction value, August",
+     "value_as_written": "2조4425억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      3
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of total online shopping transaction value, August",
+     "value_as_written": "16.0%"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      4
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Food and beverages share of online shopping transaction value, August",
+     "value_as_written": "15.1%"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      5
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Food and beverages online shopping transaction value, August",
+     "value_as_written": "2조6724억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      6
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Food service (delivery) share of online shopping transaction value, August",
+     "value_as_written": "12.6%"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      7
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Food service (delivery) online shopping transaction value, August",
+     "value_as_written": "2조2334억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      8
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Home appliances/electronics/telecom devices share of online shopping transaction value, August",
+     "value_as_written": "10.8%"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      9
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Home appliances/electronics/telecom devices online shopping transaction value, August",
+     "value_as_written": "1조9087억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      10
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Travel and transportation services online shopping transaction value, August",
+     "value_as_written": "1조8729억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      11
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Year-on-year growth rate of travel and transportation services transaction value, August",
+     "value_as_written": "133.5%"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      12
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Household goods online shopping transaction value, August",
+     "value_as_written": "1조4946억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      13
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Total retail sales value, August",
+     "value_as_written": "46조4199억"
+    },
+    {
+     "direction_id": "b2",
+     "round": 2,
+     "source_url": "http://www4.newstomato.com/ReadNews.aspx?no=1150963",
+     "via": "snapshot",
+     "page_date": "2026-03-12",
+     "snapshot_ts": "20260312045129",
+     "order": [
+      3,
+      14
+     ],
+     "reason": "period year 2022 does not appear in the page text or URL (likely mis-dated)",
+     "name": "Online shopping share of total retail sales, August",
+     "value_as_written": "27.3%"
+    }
+   ],
+   "wall_s": 69.6
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "search": {
+    "queries": [
+     "2026년 8월 온라인쇼핑 여행 예약 증가",
+     "온라인쇼핑동향 2026년 6월 거래액 통계청",
+     "2026년 7월 온라인쇼핑동향 거래액 국가데이터처 발표",
+     "광복절 연휴 여행 예약 증가 2026년 8월 숙박 예약"
+    ],
+    "urls": [
+     "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+     "https://www.ttlnews.com/news/articleView.html?idxno=3136481",
+     "https://uk.advfn.com/stock-market/share-news/Growing-Sportcation-Travel-Trend-Trip-com-Group-R/99214517",
+     "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446320&act=view&mainXml=Y"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.009908964,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "2026년 8월 온라인쇼핑 여행 예약 증가",
+       "urls": [
+        "https://www.yna.co.kr/view/AKR20261001064600002?section=economy/all&site=major_news03",
+        "https://stock11.mk.co.kr/news/view/1168196",
+        "https://eiec.kdi.re.kr/policy//materialView.do?num=287670&pg=&pp=&device=mob&search_txt=&topic=&type=J&depth1=I0000&depth2=&code=I0500",
+        "https://www.hankooki.com/news/articleView.html?idxno=343642",
+        "https://www.mbngold.com/mg//news/view.php?news_no=MM1005929891&news_service_id=10001&page=13",
+        "https://n.news.naver.com/mnews/article/001/0016349954?sid=101",
+        "https://www.ttlnews.com/news/articleView.html?idxno=3136481",
+        "https://dev.ceo.ca/@newswire/growing-sportcation-travel-trend-tripcom-group-reports",
+        "https://wap.stockstar.com/detail/IG2026082800030552",
+        "https://uk.advfn.com/stock-market/share-news/Growing-Sportcation-Travel-Trend-Trip-com-Group-R/99214517"
+       ]
+      },
+      {
+       "query": "온라인쇼핑동향 2026년 6월 거래액 통계청",
+       "urls": [
+        "https://www.gov.kr/portal/ntnadmNews/4823564?Mcode=10300&pageIndex=253&hideurl=N",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446320&act=view&mainXml=Y",
+        "https://biz.heraldcorp.com/article/10828802",
+        "https://www.korea.kr/common/download.do?fileId=198519390&tblKey=GMN",
+        "https://news.einfomax.co.kr/news/articleView.html?idxno=4428301",
+        "https://www.yna.co.kr/view/AKR20260803056100002?input=1195m",
+        "https://www1.edaily.co.kr/News/Read?newsId=03191446645543712&mediaCodeNo=257",
+        "https://www.news1.kr/economy/trend/6247101",
+        "https://www5.ajunews.com/view/20260803093536243",
+        "https://news.tvchosun.com/site/data/html_dir/2026/08/03/2026080390153.html"
+       ]
+      },
+      {
+       "query": "2026년 7월 온라인쇼핑동향 거래액 국가데이터처 발표",
+       "urls": [
+        "https://www.gov.kr/portal/ntnadmNews/4844676?srchOrgCd=1241000&pageIndex=2&hideurl=N",
+        "https://m.korea.kr/archive/expDocView.do?docId=41853&pageIndex=&group=S&srchCode=&startDate=&endDate=&srchKeyword=&groupId=&codeLevel1=&codeLevel2=",
+        "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+        "https://newsws.kbs.co.kr/news/pc/view/view.do?ncd=8651451",
+        "https://dealsite.co.kr/articles/168236/068000",
+        "https://mods.go.kr/board.es?act=view&bid=241&list_no=446725&mid=a10301120300&nPage=1&ref_bid=&tag=",
+        "https://www.fntimes.com/html/view.php?ud=2026090115232667459bdb80fab5_18",
+        "https://www.newsis.com/view/NISX20260901_0003770725",
+        "https://www.heraldk.com/article/2026083121430422094",
+        "https://www.ajunews.com/view/20260901111640655"
+       ]
+      },
+      {
+       "query": "광복절 연휴 여행 예약 증가 2026년 8월 숙박 예약",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446725&act=view&mainXml=Y",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.ttlnews.com/news/articleView.html?idxno=3136481",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://uk.advfn.com/stock-market/share-news/Growing-Sportcation-Travel-Trend-Trip-com-Group-R/99214517",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&list_no=446320&act=view&mainXml=Y",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 36.3
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p4",
+      "p5",
+      "p6",
+      "p7",
+      "p8",
+      "p9",
+      "p10",
+      "p11",
+      "p12",
+      "p13",
+      "p14"
+     ],
+     "relation": "corroborating",
+     "note": "All from the same September 2025 Online Shopping Trends release (single article, single underlying survey). They are internally consistent (p1 ≈ p8+p9 ≈ p12+p14; p4/p1 ≈ p7) but are NOT independent measurements — they are one vintage of one survey. Useful as level anchors and as internal-consistency checks, not as multiple confirmations."
+    },
+    {
+     "ids": [
+      "p15",
+      "p16",
+      "p17",
+      "p18",
+      "p19",
+      "p20",
+      "p21",
+      "p22",
+      "p23",
+      "p24",
+      "p25",
+      "p26",
+      "p27",
+      "p28",
+      "p29"
+     ],
+     "relation": "corroborating",
+     "note": "All from one 2025 annual-summary article citing the same agency survey. p18/p15 ≈ p16 confirms the retail-share identity. p21/p22 (Dec 2025) and p23 (Dec mobile) are the most recent monthly levels available at cutoff and are the key trend anchors. Same underlying source as the September 2025 points, so cross-article agreement is not independent confirmation."
+    },
+    {
+     "ids": [
+      "p3",
+      "p1"
+     ],
+     "relation": "corroborating",
+     "note": "July 2025 (23.14 tn) and September 2025 (23.80 tn) bracket a plausible seasonal path; consistent with the same series."
+    },
+    {
+     "ids": [
+      "p30",
+      "p31",
+      "p32"
+     ],
+     "relation": "corroborating",
+     "note": "Calendar facts about August 2026 (Liberation Day Sat 15th, substitute holiday Mon 17th, 3-day weekend). Contextual only — no quantified transaction effect is supplied, so they cannot be converted into a numeric adjustment without an assumption."
+    },
+    {
+     "ids": [
+      "p18",
+      "p19",
+      "p20"
+     ],
+     "relation": "corroborating",
+     "note": "Growth deceleration 7.1% (2024) → 4.9% (2025) is the trend basis for projecting 2026 growth; consistent with Dec 2025 YoY of 6.2%."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p6",
+     "keep": false,
+     "reason": "Redundant restatement of p4/p5 (the YoY increase amount is derivable from level and growth rate); adds no independent information."
+    },
+    {
+     "id": "p17",
+     "keep": false,
+     "reason": "Redundant with p16 (the 0.8pp change is implied by the 28.2% level and prior year); not needed numerically."
+    },
+    {
+     "id": "p32",
+     "keep": false,
+     "reason": "Redundant with p30/p31 (holiday length is implied by the two dates); no separate numeric content."
+    }
+   ],
+   "extra_directions": [
+    {
+     "id": "b1",
+     "category": "own_history",
+     "perspective": "agency monthly series",
+     "hypothesis": "Obtain the actual published monthly online shopping transaction values for Jan–Jul 2026 (and the August 2025 value) from the National Data Office / KOSIS Online Shopping Trends. This would replace the Dec-2025-anchored extrapolation with a genuine 2026 trend and a true prior-year August base, sharply reducing the dominant uncertainty in the level and growth factor.",
+     "data_to_find": "Monthly total online shopping 거래액 for 2025-08 and 2026-01 through 2026-07 (and mobile share), from KOSIS or agency press releases.",
+     "search_hints": [
+      "KOSIS 온라인쇼핑동향 월별 거래액 2026",
+      "국가데이터처 온라인쇼핑동향 2026년 6월",
+      "Statistics Korea online shopping trend 2026 monthly"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b2",
+     "category": "related_series",
+     "perspective": "seasonality",
+     "hypothesis": "Find the historical August-to-December and August-to-September seasonal ratios of the online shopping series (e.g., Aug 2024 vs Dec 2024, Aug 2025 vs Sep 2025). This supplies the seasonal factor needed to convert the December 2025 anchor into an August 2026 level, which is currently an assumption.",
+     "data_to_find": "Monthly online shopping 거래액 for August in 2023, 2024, 2025 and the corresponding December/September values to compute seasonal ratios.",
+     "search_hints": [
+      "온라인쇼핑 거래액 8월 2025",
+      "online shopping transaction August 2024 Korea monthly",
+      "KOSIS online shopping seasonal August"
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b3",
+     "category": "shocks",
+     "perspective": "event effect",
+     "hypothesis": "Quantify the effect of the 2026 Liberation Day 3-day weekend and any August 2026 platform promotion (e.g., summer travel/leisure booking surge) on online transaction value, to adjust the seasonal factor. Without a measured effect the holiday context cannot be used numerically.",
+     "data_to_find": "Reports of August 2026 online/travel booking volumes or platform sales vs prior August, or historical holiday-week online sales uplift estimates.",
+     "search_hints": [
+      "2026년 8월 온라인쇼핑 여행 예약 증가",
+      "광복절 연휴 온라인 매출 2026",
+      "Korea August 2026 e-commerce promotion sales"
+     ],
+     "expected_information": 3
+    }
+   ],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p21 * a1 * a2",
+      "inputs": {
+       "p21": {
+        "id": "p21",
+        "role": "December 2025 total online shopping transaction value (KRW), the latest observed monthly level"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "August-to-December seasonal ratio converting the December level to an August level"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "YoY growth factor from Dec 2025 to Aug 2026 (roughly one year of trend growth)"
+       }
+      }
+     },
+     "unit": "KRW",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Anchors on the most recent observed monthly total (Dec 2025, p21), converts to an August seasonal level via a1, and applies roughly one year of trend growth via a2 to reach August 2026. Shared dependency: p21 and the growth trend come from the same agency survey; the seasonal and growth factors are assumptions, so the interval is dominated by a1 and a2 uncertainty. Failure mode: if 2026 growth diverges sharply from the 2024–2025 deceleration, the level is off."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p1 * a2",
+      "inputs": {
+       "p1": {
+        "id": "p1",
+        "role": "September 2025 total online shopping transaction value (KRW), used as a proxy for the August 2025 level"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "YoY growth factor from the 2025 base to August 2026"
+       }
+      }
+     },
+     "unit": "KRW",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Uses the September 2025 level (p1) as a stand-in for August 2025 (adjacent month, similar level per the Jul/Sep 2025 bracket) and applies the ~one-year growth factor a2 to reach August 2026. Independent of the December anchor in m1 in terms of base month, though it shares the same survey source and the same growth assumption a2. Failure mode: September 2025 may differ from August 2025 by a few percent, and the growth factor is an assumption."
+    },
+    {
+     "id": "m3",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p18 / k_months_per_year * a1 * a2",
+      "inputs": {
+       "p18": {
+        "id": "p18",
+        "role": "Full-year 2025 total online shopping transaction value (KRW)"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "August-to-December seasonal ratio applied to the average monthly level"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "YoY growth factor from 2025 to August 2026"
+       }
+      }
+     },
+     "unit": "KRW",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Cross-check route: takes the 2025 annual total (p18), divides by 12 for an average monthly level, then applies the August seasonal factor and one year of growth. Coarser than m1/m2 because it ignores within-year seasonality beyond the single a1 factor, but provides an independent level sanity check from the annual aggregate. Shares the a1/a2 assumptions and the same survey source."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "August-to-December seasonal ratio of online shopping value",
+     "value": 0.93,
+     "low": 0.85,
+     "high": 1.02,
+     "unit": "ratio",
+     "rationale": "December is a peak month (year-end/holiday shopping) and August is a normal-to-summer month; historically August online value runs somewhat below December. Using the 2025 monthly path (Jul 23.1tn, Sep 23.8tn, Dec 24.3tn) August is plausibly ~0.90–0.95 of December. Range spans a flat-to-slightly-higher August to allow for summer travel/services strength.",
+     "applies_when": "Used to convert the December 2025 level anchor to an August level; assumes the Aug/Dec seasonal shape is stable across years.",
+     "falsified_by": "Published monthly data showing August online value at or above December, or a strongly different seasonal ratio in 2024/2025.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "YoY growth factor for online shopping, Aug 2026 vs Aug 2025",
+     "value": 1.05,
+     "low": 1.0,
+     "high": 1.11,
+     "unit": "ratio",
+     "rationale": "Annual growth decelerated from 7.1% (2024) to 4.9% (2025); Dec 2025 YoY was 6.2%. A mid-single-digit 2026 growth (~5%) is consistent with the decelerating trend, with range covering continued ~6% momentum to a slowdown to ~0%.",
+     "applies_when": "Applied to a prior-year August base to project August 2026; assumes no major shock beyond trend.",
+     "falsified_by": "2026 monthly data showing growth well outside 0–11% YoY.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  },
+  {
+   "round": 2,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p2",
+      "p3"
+     ],
+     "relation": "corroborating",
+     "note": "Same source (Asiatoday, snapshot 2025-11-15) reporting the same Online Shopping Trends series: p1 is the September 2025 headline level, p2 its YoY growth, p3 the July 2025 level. They are internally consistent (Sept > July, both above 23 trillion) but share one underlying measurement, so they are not independent confirmations."
+    },
+    {
+     "ids": [
+      "p1",
+      "p4",
+      "p7"
+     ],
+     "relation": "corroborating",
+     "note": "p4 (mobile 18.0552 tn) / p1 (total 23.7956 tn) = 75.9%, exactly p7's stated mobile share. This is an arithmetic identity within one release, not independent evidence, but it confirms the mobile/total decomposition is coherent and usable for reconstruction."
+    },
+    {
+     "ids": [
+      "p8",
+      "p9",
+      "p12",
+      "p14"
+     ],
+     "relation": "corroborating",
+     "note": "Two alternative partitions of the same September 2025 total: comprehensive+specialized malls (p8+p9 = 23.7956 tn) and online-only+combined malls (p12+p14 = 23.7956 tn). Both sum to p1, confirming internal consistency of the release; they are the same measurement, not independent."
+    },
+    {
+     "ids": [
+      "p15",
+      "p16",
+      "p18"
+     ],
+     "relation": "corroborating",
+     "note": "Same source (womennews, 2026-02-02): p18/p15 = 41.5%? No — p16 states 28.2% online share of retail. Note p18 (272.04 tn) / p15 (654.88 tn) = 41.5%, which does NOT equal 28.2%; the 28.2% share is defined on a different retail-sales basis (retail sales index-based sales, not the nominal 소매판매액 total). Treat p16 as a share on its own definition, not as a ratio of p18 to p15."
+    },
+    {
+     "ids": [
+      "p18",
+      "p19",
+      "p20",
+      "p21",
+      "p22"
+     ],
+     "relation": "corroborating",
+     "note": "Same release: 2025 annual total 272.04 tn (+4.9%), December 2025 24.29 tn (+6.2%), and the growth deceleration narrative (7.1% in 2024, 4.9% in 2025). Consistent internally; single source."
+    },
+    {
+     "ids": [
+      "p21",
+      "p23"
+     ],
+     "relation": "corroborating",
+     "note": "December 2025 total 24.2904 tn and mobile 18.7991 tn imply mobile share 77.4%, consistent with the ~76% September 2025 share (p7). Same release."
+    },
+    {
+     "ids": [
+      "p26",
+      "p27",
+      "p28",
+      "p29"
+     ],
+     "relation": "corroborating",
+     "note": "Commodity-group annual 2025 values from the same release; they are components of the 272.04 tn total (food 47.36 + food services 36.99 + travel/transport 32.46 + electronics 30.85 + clothing 22.00 + household 19.00 ≈ 188.7 tn, remainder in other groups). Useful as a cross-check on total magnitude, not independent."
+    },
+    {
+     "ids": [
+      "p30",
+      "p31"
+     ],
+     "relation": "corroborating",
+     "note": "Calendar facts for August 2026: Liberation Day Saturday 15 Aug with substitute holiday Monday 17 Aug, giving a 3-day weekend. Relevant to a possible August demand bump but no measured transaction effect is supplied."
+    },
+    {
+     "ids": [
+      "p1",
+      "p21"
+     ],
+     "relation": "conflicting",
+     "note": "Not a true conflict: September 2025 (23.80 tn) vs December 2025 (24.29 tn) differ by season and by ~3 months of trend. They establish that December is a seasonal peak and August is typically below it, motivating the August/December seasonal ratio assumption."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p6",
+     "keep": false,
+     "reason": "Redundant with p4/p5: the YoY increase amount is derivable from the level and growth rate and adds no independent information."
+    },
+    {
+     "id": "p17",
+     "keep": false,
+     "reason": "The 0.8pp change in online share is a derived difference already implied by p16 and the prior-year share; redundant."
+    },
+    {
+     "id": "p32",
+     "keep": false,
+     "reason": "Holiday length is fully implied by p30/p31 (Sat 15, substitute Mon 17); redundant restatement."
+    }
+   ],
+   "extra_directions": [],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "unit": "KRW",
+     "params": {
+      "formula": "p21 * a1 * a2",
+      "inputs": {
+       "p21": {
+        "id": "p21",
+        "role": "December 2025 total online shopping transaction value (KRW), latest observed monthly level"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "August-to-December seasonal ratio converting the December level to an August level"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "YoY growth factor from Dec 2025 to Aug 2026 (about one year of trend growth)"
+       }
+      }
+     },
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Primary route: anchor on the latest observed monthly level (Dec 2025, p21), convert to an August level via the seasonal ratio a1, then apply one year of trend growth a2. Shared dependency: a1 and a2 both carry the seasonal/trend uncertainty; failure mode is a structural break in 2026 online shopping."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "unit": "KRW",
+     "params": {
+      "formula": "p1 * a2",
+      "inputs": {
+       "p1": {
+        "id": "p1",
+        "role": "September 2025 total online shopping transaction value (KRW), used as a proxy for the August 2025 level"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "YoY growth factor from the 2025 base to August 2026"
+       }
+      }
+     },
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Second route: use September 2025 (p1) as a proxy for the August 2025 base (September is typically slightly above August, so this is mildly conservative), then apply a2. Shares a2 with m1, so not fully independent; failure mode is a large August-vs-September seasonal gap."
+    },
+    {
+     "id": "m3",
+     "method": "formula_mc",
+     "unit": "(KRW/month) * 1 month",
+     "params": {
+      "formula": "p18 / k_months_per_year * a3 * a2",
+      "inputs": {
+       "p18": {
+        "id": "p18",
+        "role": "Full-year 2025 total online shopping transaction value (KRW)"
+       },
+       "a3": {
+        "id": "a3",
+        "role": "August-to-average-month seasonal ratio applied to the annual monthly average"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "YoY growth factor from 2025 to August 2026"
+       }
+      }
+     },
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Third route: annual 2025 total (p18) divided into a monthly average, adjusted by the August seasonal ratio a3, then grown by a2. Provides a level check independent of the December anchor; failure mode is that the annual average masks within-year seasonality and the 2025 annual total may be revised.",
+     "unit_from_judge": "KRW"
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "August-to-December seasonal ratio of online shopping value",
+     "value": 0.93,
+     "low": 0.85,
+     "high": 1.02,
+     "unit": "ratio",
+     "rationale": "December is the seasonal peak (year-end/holiday shopping); August is a normal-to-soft summer month. Historical Korean online-shopping monthly patterns put August roughly 5-10% below December. Range spans a flat-to-strong-December case.",
+     "applies_when": "Used to convert a December-anchored level to an August level for the same series definition.",
+     "falsified_by": "Published monthly data showing August 2025 at or above December 2025, or an August/December ratio outside 0.85-1.02.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "YoY growth factor for online shopping, Aug 2026 vs Aug 2025",
+     "value": 1.05,
+     "low": 1.0,
+     "high": 1.11,
+     "unit": "ratio",
+     "rationale": "Annual growth decelerated from 7.1% (2024) to 4.9% (2025); December 2025 ran +6.2% and September 2025 +13.3% (a high base effect month). A ~5% YoY factor for mid-2026 is consistent with the decelerating trend, with a range from flat to ~11%.",
+     "applies_when": "Applied to a 2025 base (August or September 2025) to project August 2026.",
+     "falsified_by": "Published 2026 monthly YoY growth outside 0-11%, or a clear re-acceleration/contraction in online shopping.",
+     "route": "m2"
+    },
+    {
+     "id": "a3",
+     "name": "August-to-average-month seasonal ratio of online shopping value",
+     "value": 0.97,
+     "low": 0.9,
+     "high": 1.04,
+     "unit": "ratio",
+     "rationale": "August is a slightly below-average month for online shopping (no major gifting holiday; Chuseok falls in autumn). Applied to the 2025 annual monthly average to place August 2026.",
+     "applies_when": "Used to convert an annual-average monthly level to an August level.",
+     "falsified_by": "Monthly data showing August consistently above the annual monthly average by more than 4%.",
+     "route": "m3"
+    }
+   ],
+   "unknown_ids_in_decisions": [],
+   "unit_reviews": [
+    {
+     "check": 1,
+     "methods": [
+      {
+       "method": "m1",
+       "label": "m1",
+       "judge_unit": "KRW",
+       "checkers": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p21",
+            "reason": "total online shopping transaction value in December 2025",
+            "unit": "KRW",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "ratio of August online shopping value to December online shopping value",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "year-over-year growth factor for online shopping value",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW * 1 * 1 = KRW",
+          "result_unit": "KRW",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p21",
+            "reason": "total online shopping transaction value in December 2025",
+            "unit": "KRW",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "ratio of August online shopping value to December online shopping value",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "year-over-year growth factor for online shopping value",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW * 1 * 1 = KRW",
+          "result_unit": "KRW",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p21",
+            "reason": "total online shopping transaction value in December 2025",
+            "unit": "KRW",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "ratio of August online shopping value to December online shopping value",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "year-over-year growth factor for online shopping value",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW * 1 * 1 = KRW",
+          "result_unit": "KRW",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        }
+       ],
+       "arbiter": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p21",
+            "reason": "total online shopping transaction value in December 2025, a money amount in KRW; the quote's 24조2904억원 with the note confirms value_used is in base KRW",
+            "unit": "KRW"
+           },
+           {
+            "name": "a1",
+            "reason": "ratio of August online shopping value to December online shopping value, a dimensionless ratio",
+            "unit": "1"
+           },
+           {
+            "name": "a2",
+            "reason": "year-over-year growth factor for online shopping value, a dimensionless ratio",
+            "unit": "1"
+           }
+          ],
+          "derivation": "KRW * 1 * 1 = KRW",
+          "result_unit": "KRW",
+          "fit_reason": "The formula gives a money total in KRW, the same kind of quantity as the target unit KRW for the August 2026 period; only the scale of the estimate may differ.",
+          "fits_target": true
+         },
+         "problem": ""
+        }
+       ],
+       "unit": "KRW",
+       "factor": 1.0
+      },
+      {
+       "method": "m2",
+       "label": "m2",
+       "judge_unit": "KRW",
+       "checkers": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "total online shopping transaction value in September 2025",
+            "unit": "KRW",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "growth factor, a pure ratio",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW * 1 = KRW",
+          "result_unit": "KRW",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "total online shopping transaction value in September 2025",
+            "unit": "KRW",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "growth factor, a pure ratio",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW * 1 = KRW",
+          "result_unit": "KRW",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "total online shopping transaction value in September 2025",
+            "unit": "KRW",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "growth factor, a pure ratio",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW * 1 = KRW",
+          "result_unit": "KRW",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1"
+        }
+       ],
+       "arbiter": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p1",
+            "reason": "headline aggregate online shopping transaction value for September 2025; the quote '23조7956억원' and the note confirm value_used is in base KRW, so the unit is KRW",
+            "unit": "KRW"
+           },
+           {
+            "name": "a2",
+            "reason": "YoY growth factor, a pure ratio with no unit",
+            "unit": "1"
+           }
+          ],
+          "derivation": "KRW * 1 = KRW",
+          "result_unit": "KRW",
+          "fit_reason": "The formula gives a money total in KRW, the same kind of quantity as the target unit (KRW over August 2026); only the scale/period alignment may differ, which code handles.",
+          "fits_target": true
+         },
+         "problem": ""
+        }
+       ],
+       "unit": "KRW",
+       "factor": 1.0
+      },
+      {
+       "method": "m3",
+       "label": "m3",
+       "judge_unit": "KRW",
+       "checkers": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p18",
+            "reason": "total online shopping transaction value over the full year 2025",
+            "unit": "KRW/year",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a3",
+            "reason": "August-to-average-month seasonal ratio (dimensionless)",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "year-over-year growth factor (dimensionless)",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "k_months_per_year",
+            "reason": "months per year",
+            "unit": "month/year",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW/year / (month/year) * 1 * 1 = KRW/month",
+          "result_unit": "KRW/month",
+          "declared_unit_matches": false
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p18",
+            "reason": "total online shopping transaction value in full year 2025",
+            "unit": "KRW/year",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a3",
+            "reason": "August-to-average-month seasonal ratio (dimensionless)",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "year-over-year growth factor (dimensionless)",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "k_months_per_year",
+            "reason": "months per year",
+            "unit": "month/year",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW/year / (month/year) * 1 * 1 = KRW/month",
+          "result_unit": "KRW/month",
+          "declared_unit_matches": false
+         },
+         "converts_to_target": "1"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p18",
+            "reason": "total online shopping transaction value over full year 2025",
+            "unit": "KRW/year",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a3",
+            "reason": "August-to-average-month seasonal ratio (dimensionless)",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "year-over-year growth factor (dimensionless)",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "k_months_per_year",
+            "reason": "months per year",
+            "unit": "month/year",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "KRW/year / (month/year) * 1 * 1 = KRW/month",
+          "result_unit": "KRW/month",
+          "declared_unit_matches": false
+         },
+         "converts_to_target": "1"
+        }
+       ],
+       "arbiter": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p18",
+            "reason": "Total online shopping transaction value over the full year 2025; the quote (272조398억원) and period (2025-01-01..2025-12-31) state a full-year total, so the unit is KRW per year, not a bare KRW total",
+            "unit": "KRW/year"
+           },
+           {
+            "name": "a3",
+            "reason": "August-to-average-month seasonal ratio, dimensionless",
+            "unit": "1"
+           },
+           {
+            "name": "a2",
+            "reason": "Year-over-year growth factor, dimensionless",
+            "unit": "1"
+           },
+           {
+            "name": "k_months_per_year",
+            "reason": "Months per year",
+            "unit": "month/year"
+           }
+          ],
+          "derivation": "KRW/year / (month/year) * 1 * 1 = KRW/month",
+          "result_unit": "KRW/month",
+          "fit_reason": "The formula gives a monthly rate (KRW/month); the target is a total over one month (August 2026), so code multiplies by the length of the target period (1 month) to get KRW, the same kind of quantity",
+          "fits_target": true
+         },
+         "problem": ""
+        }
+       ],
+       "unit": "(KRW/month) * 1 month",
+       "factor": 1.0
+      }
+     ]
+    }
+   ],
+   "audit_failed": {
+    "1": "input audit: p1: September 2025 value is a different period than the August 2025 base the role requires; no adjustment input bridges the month difference."
+   }
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    0
+   ],
+   "name": "South Korea total online shopping transaction value, September 2025 (headline aggregate)",
+   "value": 23795600000000.0,
+   "value_as_written": "23조7956억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "지난달 온라인쇼핑 거래액은 23조7956억원으로 전년 동월보다 13.3% 늘었다.",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    1
+   ],
+   "name": "South Korea total online shopping transaction value, September 2025, YoY growth rate",
+   "value": 13.3,
+   "value_as_written": "13.3%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "지난달 온라인쇼핑 거래액은 23조7956억원으로 전년 동월보다 13.3% 늘었다.",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    2
+   ],
+   "name": "South Korea total online shopping transaction value, July 2025 (prior month exceeding 23 trillion)",
+   "value": 23142700000000.0,
+   "value_as_written": "23조1427억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-07-01",
+   "period_end": "2025-07-31",
+   "published_at_if_visible": "",
+   "quote": "월간 거래액이 23조원을 넘어선 것도 지난 7월(23조1427억원)에 이어 두번째다.",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    3
+   ],
+   "name": "South Korea mobile shopping transaction value, September 2025",
+   "value": 18055200000000.0,
+   "value_as_written": "18조552억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "온라인쇼핑 거래액 중 모바일 쇼핑액은 18조552억원으로 전년대비 11.0%(1조7839억원) 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    4
+   ],
+   "name": "South Korea mobile shopping transaction value, September 2025, YoY growth rate",
+   "value": 11.0,
+   "value_as_written": "11.0%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "온라인쇼핑 거래액 중 모바일 쇼핑액은 18조552억원으로 전년대비 11.0%(1조7839억원) 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    5
+   ],
+   "name": "South Korea mobile shopping transaction value, September 2025, YoY increase amount",
+   "value": 1783900000000.0,
+   "value_as_written": "1조7839억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "온라인쇼핑 거래액 중 모바일 쇼핑액은 18조552억원으로 전년대비 11.0%(1조7839억원) 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Redundant with p4/p5: the YoY increase amount is derivable from the level and growth rate and adds no independent information."
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    6
+   ],
+   "name": "South Korea mobile share of online shopping transaction value, September 2025",
+   "value": 75.9,
+   "value_as_written": "75.9%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "모바일 거래액 비중은 75.9%로 지난해 같은 달보다 1.6%포인트 하락했다.",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    8
+   ],
+   "name": "South Korea comprehensive mall (종합몰) online shopping transaction value, September 2025",
+   "value": 13099800000000.0,
+   "value_as_written": "13조998억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "종합몰 거래액(13조998억원)과 전문몰 거래액(10조6958억원)이 각각 12.0%, 15.0% 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    9
+   ],
+   "name": "South Korea specialized mall (전문몰) online shopping transaction value, September 2025",
+   "value": 10695800000000.0,
+   "value_as_written": "10조6958억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "종합몰 거래액(13조998억원)과 전문몰 거래액(10조6958억원)이 각각 12.0%, 15.0% 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    10
+   ],
+   "name": "South Korea comprehensive mall transaction value, September 2025, YoY growth rate",
+   "value": 12.0,
+   "value_as_written": "12.0%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "종합몰 거래액(13조998억원)과 전문몰 거래액(10조6958억원)이 각각 12.0%, 15.0% 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    11
+   ],
+   "name": "South Korea specialized mall transaction value, September 2025, YoY growth rate",
+   "value": 15.0,
+   "value_as_written": "15.0%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "종합몰 거래액(13조998억원)과 전문몰 거래액(10조6958억원)이 각각 12.0%, 15.0% 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    12
+   ],
+   "name": "South Korea online-only mall (온라인 전용몰) transaction value, September 2025",
+   "value": 18285700000000.0,
+   "value_as_written": "18조2857억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "온라인 전용몰(18조2857억원·12.3%), 온·오프라인 병행몰(5조5099억원·16.9%) 모두 증가세를 보였다.",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    13
+   ],
+   "name": "South Korea online-only mall transaction value, September 2025, YoY growth rate",
+   "value": 12.3,
+   "value_as_written": "12.3%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "온라인 전용몰(18조2857억원·12.3%), 온·오프라인 병행몰(5조5099억원·16.9%) 모두 증가세를 보였다.",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.asiatoday.co.kr/kn/view.php?key=20251103010000860",
+   "via": "snapshot",
+   "page_date": "2025-11-15",
+   "snapshot_ts": "20251115153555",
+   "order": [
+    3,
+    14
+   ],
+   "name": "South Korea online/offline combined mall (온·오프라인 병행몰) transaction value, September 2025",
+   "value": 5509900000000.0,
+   "value_as_written": "5조5099억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-09-01",
+   "period_end": "2025-09-30",
+   "published_at_if_visible": "",
+   "quote": "온라인 전용몰(18조2857억원·12.3%), 온·오프라인 병행몰(5조5099억원·16.9%) 모두 증가세를 보였다.",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    0
+   ],
+   "name": "South Korea total retail sales value (소매판매액), full year 2025",
+   "value": 654883300000000.0,
+   "value_as_written": "654조8833억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "전체 소매판매액(654조8833억원)에서 온라인쇼핑 거래가 차지하는 비중은 전년보다 0.8%포인트(p) 상승한 28.2%로 역대 최고치를 나타냈다.",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    1
+   ],
+   "name": "Online shopping share of total retail sales (온라인쇼핑 비중), full year 2025",
+   "value": 28.2,
+   "value_as_written": "28.2%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "전체 소매판매액(654조8833억원)에서 온라인쇼핑 거래가 차지하는 비중은 전년보다 0.8%포인트(p) 상승한 28.2%로 역대 최고치를 나타냈다.",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    2
+   ],
+   "name": "Year-on-year change in online shopping share of retail sales, 2025 vs 2024",
+   "value": 0.8,
+   "value_as_written": "0.8%포인트(p)",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "전체 소매판매액(654조8833억원)에서 온라인쇼핑 거래가 차지하는 비중은 전년보다 0.8%포인트(p) 상승한 28.2%로 역대 최고치를 나타냈다.",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "The 0.8pp change in online share is a derived difference already implied by p16 and the prior-year share; redundant."
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    3
+   ],
+   "name": "South Korea online shopping transaction value (온라인쇼핑 거래액), full year 2025",
+   "value": 272039800000000.0,
+   "value_as_written": "272조398억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "지난해 온라인쇼핑 거래액은 전년 대비 4.9% 증가한 272조398억원으로 집계됐다.",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    4
+   ],
+   "name": "Year-on-year growth rate of online shopping transaction value, full year 2025",
+   "value": 4.9,
+   "value_as_written": "4.9%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "지난해 온라인쇼핑 거래액은 전년 대비 4.9% 증가한 272조398억원으로 집계됐다.",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    5
+   ],
+   "name": "Year-on-year growth rate of online shopping transaction value, full year 2024",
+   "value": 7.1,
+   "value_as_written": "7.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2024-01-01",
+   "period_end": "2024-12-31",
+   "published_at_if_visible": "",
+   "quote": "온라인쇼핑 거래 증가율은 2017년부터 2023년까지 두자릿수 증가율을 기록하다 2024년 7.1%, 2025년 4.9%로 떨어졌다.",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    6
+   ],
+   "name": "South Korea online shopping transaction value, December 2025",
+   "value": 24290400000000.0,
+   "value_as_written": "24조2904억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-12-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "작년 12월 온라인쇼핑 거래액은 전년 동월 대비 6.2% 증가한 24조2904억원으로 나타났다.",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    7
+   ],
+   "name": "Year-on-year growth rate of online shopping transaction value, December 2025",
+   "value": 6.2,
+   "value_as_written": "6.2%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-12-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "작년 12월 온라인쇼핑 거래액은 전년 동월 대비 6.2% 증가한 24조2904억원으로 나타났다.",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    8
+   ],
+   "name": "South Korea mobile shopping transaction value, December 2025",
+   "value": 18799100000000.0,
+   "value_as_written": "18조7991억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-12-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "같은 기간 모바일 쇼핑 거래액은 6.2% 증가한 18조7991억원으로 집계됐다.",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    9
+   ],
+   "name": "South Korea mobile shopping transaction value, full year 2025",
+   "value": 211144800000000.0,
+   "value_as_written": "211조 1448억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "온라인쇼핑 거래액 중 모바일쇼핑 거래액은 211조 1448억원으로 6.5% 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    10
+   ],
+   "name": "Year-on-year growth rate of mobile shopping transaction value, full year 2025",
+   "value": 6.5,
+   "value_as_written": "6.5%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "온라인쇼핑 거래액 중 모바일쇼핑 거래액은 211조 1448억원으로 6.5% 증가했다.",
+   "verified_by": "quote_in_page",
+   "id": "p25",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    11
+   ],
+   "name": "Online shopping transaction value for food (식품), full year 2025",
+   "value": 47356300000000.0,
+   "value_as_written": "47조3563억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "작년온라인 거래액 중 품목별로 식품이 47조3563억원으로 가장 많았다.",
+   "verified_by": "quote_in_page",
+   "id": "p26",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    12
+   ],
+   "name": "Online shopping transaction value for food services (음식서비스), full year 2025",
+   "value": 36989100000000.0,
+   "value_as_written": "36조9891억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "음식서비스 36조9891억원 등 음식료품 거래가 84조3454억원을 기록했다.",
+   "verified_by": "quote_in_page",
+   "id": "p27",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    13
+   ],
+   "name": "Online shopping transaction value for travel and transport services (여행 및 교통서비스), full year 2025",
+   "value": 32464700000000.0,
+   "value_as_written": "32조4647억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "여행 및 교통서비스(32조4647억원), 컴퓨터, 통신기기 등 가전 판매(30조8537), 의복 (21조9961억원), 생활용품(18조9996억원) 등이 뒤를 이었다.",
+   "verified_by": "quote_in_page",
+   "id": "p28",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "source_url": "https://www.womennews.co.kr/news/articleView.html?idxno=273137",
+   "via": "snapshot",
+   "page_date": "2026-02-02",
+   "snapshot_ts": "20260202073346",
+   "order": [
+    2,
+    14
+   ],
+   "name": "Online shopping transaction value for clothing (의복), full year 2025",
+   "value": 21996100000000.0,
+   "value_as_written": "21조9961억원",
+   "scale_word": "억",
+   "scale_basis": "quote",
+   "unit": "KRW",
+   "period_start": "2025-01-01",
+   "period_end": "2025-12-31",
+   "published_at_if_visible": "",
+   "quote": "여행 및 교통서비스(32조4647억원), 컴퓨터, 통신기기 등 가전 판매(30조8537), 의복 (21조9961억원), 생활용품(18조9996억원) 등이 뒤를 이었다.",
+   "verified_by": "quote_in_page",
+   "id": "p29",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.ajunews.com/view/20260722094917670",
+   "via": "snapshot",
+   "page_date": "2026-07-30",
+   "snapshot_ts": "20260730222347",
+   "order": [
+    2,
+    5
+   ],
+   "name": "Liberation Day 2026 date (South Korea)",
+   "value": 15.0,
+   "value_as_written": "8월 15일",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "day of month (August)",
+   "period_start": "2026-08-15",
+   "period_end": "2026-08-15",
+   "published_at_if_visible": "",
+   "quote": "올해 광복절인 8월 15일은 토요일로, 17일 월요일이 대체공휴일로 지정됐다.",
+   "reading": {
+    "number": 15.0
+   },
+   "value_check": "pending",
+   "verified_by": "quote_in_page",
+   "id": "p30",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.ajunews.com/view/20260722094917670",
+   "via": "snapshot",
+   "page_date": "2026-07-30",
+   "snapshot_ts": "20260730222347",
+   "order": [
+    2,
+    6
+   ],
+   "name": "Liberation Day 2026 substitute holiday date (South Korea)",
+   "value": 17.0,
+   "value_as_written": "17일",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "day of month (August)",
+   "period_start": "2026-08-17",
+   "period_end": "2026-08-17",
+   "published_at_if_visible": "",
+   "quote": "올해 광복절인 8월 15일은 토요일로, 17일 월요일이 대체공휴일로 지정됐다.",
+   "verified_by": "quote_in_page",
+   "id": "p31",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "source_url": "https://www.ajunews.com/view/20260722094917670",
+   "via": "snapshot",
+   "page_date": "2026-07-30",
+   "snapshot_ts": "20260730222347",
+   "order": [
+    2,
+    7
+   ],
+   "name": "Liberation Day 2026 holiday length (South Korea)",
+   "value": 3.0,
+   "value_as_written": "사흘",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "days",
+   "period_start": "2026-08-15",
+   "period_end": "2026-08-17",
+   "published_at_if_visible": "",
+   "quote": "토요일부터 월요일까지 사흘을 쉴 수 있다.",
+   "reading": {
+    "number": 3.0
+   },
+   "value_check": "pending",
+   "verified_by": "quote_in_page",
+   "id": "p32",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Holiday length is fully implied by p30/p31 (Sat 15, substitute Mon 17); redundant restatement."
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "formula_mc",
+    "params": {
+     "formula": "p21 * a1 * a2",
+     "inputs": {
+      "p21": {
+       "id": "p21",
+       "role": "December 2025 total online shopping transaction value (KRW), latest observed monthly level"
+      },
+      "a1": {
+       "id": "a1",
+       "role": "August-to-December seasonal ratio converting the December level to an August level"
+      },
+      "a2": {
+       "id": "a2",
+       "role": "YoY growth factor from Dec 2025 to Aug 2026 (about one year of trend growth)"
+      }
+     }
+    },
+    "rationale": "Primary route: anchor on the latest observed monthly level (Dec 2025, p21), convert to an August level via the seasonal ratio a1, then apply one year of trend growth a2. Shared dependency: a1 and a2 both carry the seasonal/trend uncertainty; failure mode is a structural break in 2026 online shopping.",
+    "estimate": 23781515418677.883,
+    "backtest": [],
+    "notes": [],
+    "coverage": {
+     "kind": "full"
+    },
+    "used_ids": [
+     "p21"
+    ],
+    "used_assumptions": [
+     "a1",
+     "a2"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p21",
+      "id": "p21",
+      "kind": "point",
+      "p10": 20242000000000.0,
+      "p90": 29148480000000.0,
+      "unit": "KRW"
+     },
+     {
+      "name": "a1",
+      "id": "a1",
+      "kind": "assumption",
+      "p10": 0.6584071688552608,
+      "p90": 1.316814337710522,
+      "unit": "ratio"
+     },
+     {
+      "name": "a2",
+      "id": "a2",
+      "kind": "assumption",
+      "p10": 0.9423375191511796,
+      "p90": 1.1779218989389746,
+      "unit": "ratio"
+     }
+    ],
+    "unit_check": {
+     "unit": "KRW",
+     "target_unit": "KRW",
+     "factor": 1.0
+    },
+    "mc": {
+     "p10": 15912896422811.926,
+     "p90": 35693423630113.66
+    },
+    "n_point_inputs": 1,
+    "n_assumption_inputs": 2,
+    "rests_mainly_on_assumptions": true
+   },
+   {
+    "id": "m2",
+    "label": "m3",
+    "method": "formula_mc",
+    "params": {
+     "formula": "p18 / k_months_per_year * a3 * a2",
+     "inputs": {
+      "p18": {
+       "id": "p18",
+       "role": "Full-year 2025 total online shopping transaction value (KRW)"
+      },
+      "a3": {
+       "id": "a3",
+       "role": "August-to-average-month seasonal ratio applied to the annual monthly average"
+      },
+      "a2": {
+       "id": "a2",
+       "role": "YoY growth factor from 2025 to August 2026"
+      }
+     }
+    },
+    "rationale": "Third route: annual 2025 total (p18) divided into a monthly average, adjusted by the August seasonal ratio a3, then grown by a2. Provides a level check independent of the December anchor; failure mode is that the annual average masks within-year seasonality and the 2025 annual total may be revised.",
+    "estimate": 23024447692969.297,
+    "backtest": [],
+    "notes": [],
+    "coverage": {
+     "kind": "full"
+    },
+    "used_ids": [
+     "p18"
+    ],
+    "used_assumptions": [
+     "a2",
+     "a3"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p18",
+      "id": "p18",
+      "kind": "point",
+      "p10": 226699833333333.34,
+      "p90": 326447760000000.0,
+      "unit": "KRW"
+     },
+     {
+      "name": "a3",
+      "id": "a3",
+      "kind": "assumption",
+      "p10": 0.6841052550594827,
+      "p90": 1.3682105101189657,
+      "unit": "ratio"
+     },
+     {
+      "name": "a2",
+      "id": "a2",
+      "kind": "assumption",
+      "p10": 0.9423375191511796,
+      "p90": 1.1779218989389746,
+      "unit": "ratio"
+     },
+     {
+      "name": "k_months_per_year",
+      "id": "k_months_per_year",
+      "kind": "constant",
+      "p10": 12.0,
+      "p90": 12.0,
+      "unit": "constant"
+     }
+    ],
+    "unit_check": {
+     "unit": "(KRW/month) * 1 month",
+     "target_unit": "KRW",
+     "factor": 1.0
+    },
+    "mc": {
+     "p10": 15367069697435.17,
+     "p90": 34805745065557.49
+    },
+    "n_point_inputs": 1,
+    "n_assumption_inputs": 2,
+    "rests_mainly_on_assumptions": true
+   }
+  ],
+  "result": {
+   "central": 23399920038685.805,
+   "p10": 15548354590013.865,
+   "p90": 35216347469240.55,
+   "sigma_ln": 0.31897100149412505,
+   "sigma_hist": null,
+   "sigma_spread": 0.01617601063000329,
+   "sigma_mc": 0.31897100149412505,
+   "n_backtest_folds": 0,
+   "weights": {
+    "m1": 0.5,
+    "m2": 0.5
+   },
+   "weight_rule": "equal",
+   "weight_basis": {
+    "m1": "equal",
+    "m2": "equal"
+   },
+   "basis": "monte_carlo",
+   "assumption_weight_share": 1.0
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {
+   "a1": [
+    "m1"
+   ],
+   "a2": [
+    "m1",
+    "m2"
+   ],
+   "a3": [
+    "m2"
+   ]
+  },
+  "excluded_by_input_audit": [
+   {
+    "label": "m2",
+    "method": "formula_mc",
+    "reason": "input audit: p1: September 2025 value is a different period than the August 2025 base the role requires; no adjustment input bridges the month difference."
+   }
+  ],
+  "methods_from_round": 2
+ },
+ "assumptions": {
+  "kept": [
+   {
+    "id": "a1",
+    "name": "August-to-December seasonal ratio of online shopping value",
+    "unit": "ratio",
+    "rationale": "December is the seasonal peak (year-end/holiday shopping); August is a normal-to-soft summer month. Historical Korean online-shopping monthly patterns put August roughly 5-10% below December. Range spans a flat-to-strong-December case.",
+    "applies_when": "Used to convert a December-anchored level to an August level for the same series definition.",
+    "falsified_by": "Published monthly data showing August 2025 at or above December 2025, or an August/December ratio outside 0.85-1.02.",
+    "route": "m1",
+    "value": 0.93,
+    "low": 0.85,
+    "high": 1.02,
+    "is_pct": false,
+    "p10_used": 0.6584071688552608,
+    "p90_used": 1.316814337710522,
+    "widened_by_floor": true,
+    "used_by": [
+     "m1"
+    ],
+    "used_by_labels": [
+     "m1"
+    ]
+   },
+   {
+    "id": "a2",
+    "name": "YoY growth factor for online shopping, Aug 2026 vs Aug 2025",
+    "unit": "ratio",
+    "rationale": "Annual growth decelerated from 7.1% (2024) to 4.9% (2025); December 2025 ran +6.2% and September 2025 +13.3% (a high base effect month). A ~5% YoY factor for mid-2026 is consistent with the decelerating trend, with a range from flat to ~11%.",
+    "applies_when": "Applied to a 2025 base (August or September 2025) to project August 2026.",
+    "falsified_by": "Published 2026 monthly YoY growth outside 0-11%, or a clear re-acceleration/contraction in online shopping.",
+    "route": "m2",
+    "value": 1.05,
+    "low": 1.0,
+    "high": 1.11,
+    "is_pct": false,
+    "p10_used": 0.9423375191511796,
+    "p90_used": 1.1779218989389746,
+    "widened_by_floor": true,
+    "used_by": [
+     "m1",
+     "m2"
+    ],
+    "used_by_labels": [
+     "m1",
+     "m3"
+    ]
+   },
+   {
+    "id": "a3",
+    "name": "August-to-average-month seasonal ratio of online shopping value",
+    "unit": "ratio",
+    "rationale": "August is a slightly below-average month for online shopping (no major gifting holiday; Chuseok falls in autumn). Applied to the 2025 annual monthly average to place August 2026.",
+    "applies_when": "Used to convert an annual-average monthly level to an August level.",
+    "falsified_by": "Monthly data showing August consistently above the annual monthly average by more than 4%.",
+    "route": "m3",
+    "value": 0.97,
+    "low": 0.9,
+    "high": 1.04,
+    "is_pct": false,
+    "p10_used": 0.6841052550594827,
+    "p90_used": 1.3682105101189657,
+    "widened_by_floor": true,
+    "used_by": [
+     "m2"
+    ],
+    "used_by_labels": [
+     "m3"
+    ]
+   }
+  ],
+  "rejected": [],
+  "from_round": 2,
+  "min_width": 2.0,
+  "max_per_run": 12,
+  "max_per_method": 6
+ },
+ "published": {
+  "status": "not_checked",
+  "note": "not checked: backtest or scored question (as_of before today, or an official value is registered), so the target cannot have been published by as_of"
+ },
+ "final": {
+  "template": "The best estimate for total online shopping transaction value (거래액) in South Korea for August 2026, as would be reported in the National Data Office's Online Shopping Trends release, is [[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]]).\n\nTwo routes were averaged: m1 anchors on the observed December 2025 level ([[p21_value]]) and applies an August-to-December seasonal ratio ([[a1_value]]) plus one year of growth ([[a2_value]]), giving [[m1_estimate]] [[unit]] at weight [[m1_weight]]. m2 divides the observed 2025 annual total ([[p18_value]]) into a monthly average, applies an August seasonal ratio ([[a3_value]]) and the same growth factor, giving [[m2_estimate]] [[unit]] at weight [[m2_weight]].\n\nOnly the two anchor points are observed; the seasonal ratios and growth factor are analyst assumptions, so the interval reflects input uncertainty, not demonstrated accuracy. The main risk is a structural break in 2026 online shopping. Timelier 2026 monthly data would most improve the estimate.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 August-to-December seasonal ratio of online shopping value: [[a1_value]] ratio, range [[a1_low]] to [[a1_high]] (range widened by code); used by m1. Overturned by: Published monthly data showing August 2025 at or above December 2025, or an August/December ratio outside [n]-[n].\n- a2 YoY growth factor for online shopping, Aug 2026 vs Aug 2025: [[a2_value]] ratio, range [[a2_low]] to [[a2_high]] (range widened by code); used by m1, m2. Overturned by: Published 2026 monthly YoY growth outside [n]-[n], or a clear re-acceleration/contraction in online shopping.\n- a3 August-to-average-month seasonal ratio of online shopping value: [[a3_value]] ratio, range [[a3_low]] to [[a3_high]] (range widened by code); used by m2. Overturned by: Monthly data showing August consistently above the annual monthly average by more than [n].",
+  "text": "The best estimate for total online shopping transaction value (거래액) in South Korea for August 2026, as would be reported in the National Data Office's Online Shopping Trends release, is 23,399,920,038,686 KRW (80% model-based interval 15,548,354,590,014 to 35,216,347,469,241 KRW).\n\nTwo routes were averaged: m1 anchors on the observed December 2025 level (24,290,400,000,000 KRW) and applies an August-to-December seasonal ratio (0.93) plus one year of growth (1.05), giving 23,781,515,418,678 KRW at weight 50%. m2 divides the observed 2025 annual total (272,039,800,000,000 KRW) into a monthly average, applies an August seasonal ratio (0.97) and the same growth factor, giving 23,024,447,692,969 KRW at weight 50%.\n\nOnly the two anchor points are observed; the seasonal ratios and growth factor are analyst assumptions, so the interval reflects input uncertainty, not demonstrated accuracy. The main risk is a structural break in 2026 online shopping. Timelier 2026 monthly data would most improve the estimate.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 August-to-December seasonal ratio of online shopping value: 0.93 ratio, range 0.6584 to 1.317 (range widened by code); used by m1. Overturned by: Published monthly data showing August 2025 at or above December 2025, or an August/December ratio outside [n]-[n].\n- a2 YoY growth factor for online shopping, Aug 2026 vs Aug 2025: 1.05 ratio, range 0.9423 to 1.178 (range widened by code); used by m1, m2. Overturned by: Published 2026 monthly YoY growth outside [n]-[n], or a clear re-acceleration/contraction in online shopping.\n- a3 August-to-average-month seasonal ratio of online shopping value: 0.97 ratio, range 0.6841 to 1.368 (range widened by code); used by m2. Overturned by: Monthly data showing August consistently above the annual monthly average by more than [n].",
+  "placeholders": {
+   "estimate": "23,399,920,038,686",
+   "p10": "15,548,354,590,014",
+   "p90": "35,216,347,469,241",
+   "unit": "KRW",
+   "interval_level": "80% model-based",
+   "interval_basis": "too few backtest years, so the interval width comes from Monte Carlo sampling of the formula inputs and reflects input uncertainty only",
+   "n_points_kept": "29",
+   "n_methods": "2",
+   "m1_estimate": "23,781,515,418,678",
+   "m1_weight": "50%",
+   "m1_backtest_error": "n/a",
+   "m2_estimate": "23,024,447,692,969",
+   "m2_weight": "50%",
+   "m2_backtest_error": "n/a",
+   "p21_value": "24,290,400,000,000 KRW",
+   "p18_value": "272,039,800,000,000 KRW",
+   "a1_value": "0.93",
+   "a1_low": "0.6584",
+   "a1_high": "1.317",
+   "a2_value": "1.05",
+   "a2_low": "0.9423",
+   "a2_high": "1.178",
+   "a3_value": "0.97",
+   "a3_low": "0.6841",
+   "a3_high": "1.368"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": true,
+  "model_text": "The best estimate for total online shopping transaction value (거래액) in South Korea for August 2026, as would be reported in the National Data Office's Online Shopping Trends release, is [[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]]).\n\nTwo routes were averaged: m1 anchors on the observed December 2025 level ([[p21_value]]) and applies an August-to-December seasonal ratio ([[a1_value]]) plus one year of growth ([[a2_value]]), giving [[m1_estimate]] [[unit]] at weight [[m1_weight]]. m2 divides the observed 2025 annual total ([[p18_value]]) into a monthly average, applies an August seasonal ratio ([[a3_value]]) and the same growth factor, giving [[m2_estimate]] [[unit]] at weight [[m2_weight]].\n\nOnly the two anchor points are observed; the seasonal ratios and growth factor are analyst assumptions, so the interval reflects input uncertainty, not demonstrated accuracy. The main risk is a structural break in 2026 online shopping. Timelier 2026 monthly data would most improve the estimate."
+ },
+ "started_at": "20261023T034213Z",
+ "wall_s": 197.4,
+ "budget": {
+  "usd_total_assumed": 0.5627,
+  "usd_tokens": 0.1227,
+  "usd_search_fee_assumed": 0.44,
+  "usd_cap": 1.0,
+  "pages_used": 8,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 35,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 40,
+  "pages_snapshot": 8,
+  "pages_live_dated": 0,
+  "pages_dropped": 32,
+  "pages_sent_to_extractor": {
+   "total": 8,
+   "snapshot": 8,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "directions_voided": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "v211g_check",
+ "settings": {
+  "max_tokens": {
+   "plan": 6000,
+   "extract": 16000,
+   "judge": 24000,
+   "repair": 24000,
+   "audit": 4000,
+   "unit_check": 4000,
+   "unit_arbiter": 4000,
+   "value_check": 2000,
+   "value_reread": 2000,
+   "published": 3000,
+   "early": 3000,
+   "final": 4000,
+   "search": 8192,
+   "naive": 500,
+   "structured": 6000,
+   "search_direct": 4096
+  },
+  "budget_defaults": {
+   "usd": 1.0,
+   "pages": 48,
+   "round1_pages": 40,
+   "llm_concurrency": 8,
+   "extra_directions": 3,
+   "urls_per_direction": 4,
+   "search_max_uses": 3,
+   "max_directions_hard": 16
+  },
+  "interval": {
+   "MIN_WIDTH": 2.0,
+   "MIN_WIDTH_CHANGE": 1.25,
+   "FALLBACK_SIGMA": 0.25,
+   "DEFAULT_REL_U": 0.2,
+   "EPS": 0.01
+  }
+ }
+}

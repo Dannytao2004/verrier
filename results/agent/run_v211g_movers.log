@@ -1,0 +1,55 @@
+[fc_jp_movers_2026_08] plan: 5 directions -> approved=True
+[fc_jp_movers_2026_08] done in 188.7s; estimate 367,713; usd 0.4821
+[
+ {
+  "id": "fc_jp_movers_2026_08",
+  "as_of": "2026-08-29",
+  "answer_value": 356920,
+  "source": "https://www.stat.go.jp/data/idou/sokuhou/tsuki/index.html",
+  "estimate": 367712.867406142,
+  "p10": 248596.9896609441,
+  "p90": 543903.4199105172,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a1"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.030238897809430787,
+  "abs_log10_err": 0.012937943122778914,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 367712.867406142,
+    "pct_err": 0.030238897809430787,
+    "abs_log10_err": 0.012937943122778914
+   },
+   "naive": {
+    "estimate": 400000.0,
+    "pct_err": 0.12069931637341691,
+    "abs_log10_err": 0.049489107014003365
+   },
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4821,
+  "usd_tokens": 0.1621,
+  "wall_s": 188.7
+ }
+]
