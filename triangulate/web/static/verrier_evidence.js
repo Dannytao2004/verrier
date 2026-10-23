@@ -33,7 +33,8 @@
       : `<div class="lbl">${T("Estimate", "估计")}</div><div class="cx-big">${fmt(e.central)}${bigUnit(e.unit)}</div>
         <p>80% model-based [${fmt(e.p10)}, ${fmt(e.p90)}]${e.unit ? " " + esc(e.unit) : ""}</p>
         <p class="fine">${T("Interval basis", "区间依据")} <b>${esc(e.basis || "—")}</b>${e.basis_text ? ": " + esc(e.basis_text) : ""}
-          · ${T("weights", "加权规则")} ${esc(e.weight_rule || "—")}</p>`;
+          · ${T("weights", "加权规则")} ${esc(e.weight_rule || "—")}</p>
+        ${(e.combination_text || []).map(x => `<p class="fine">${esc(x)}</p>`).join("")}`;
     const off = !o ? "" : d ? `<p class="fine">${T("True outcome", "真实结果")} <b>${esc(o.true_outcome ?? fmt(o.answer_value))}</b> · ${T("its probability", "它的概率")}
         ${prob(o.prob_true)} · Brier ${fmt(o.brier)}</p>`
       : `<p class="fine">OFFICIAL <b>${fmt(o.answer_value)}</b> · ${T("error", "误差")} <b>${pct(o.pct_err)}</b> · ${T("80% interval covers it", "80% 区间盖住")}
@@ -86,7 +87,8 @@
   // ---------- E-03 方法 ----------
   const MST = {computed: ["Computed", "已算出"], failed: ["Failed", "失败"],
     excluded_by_input_audit: ["Failed the input audit, not computed", "输入核对不通过，未计算"],
-    excluded_by_coverage: ["Covers part of the target, not combined", "只覆盖目标的一部分，不进合并"]};
+    excluded_by_coverage: ["Covers part of the target, not combined", "只覆盖目标的一部分，不进合并"],
+    baseline_only: ["Baseline only (seasonal naive), not combined", "只作对照基线（季节朴素），不进合并"]};
   function coverage(c) {
     const list = xs => (xs || []).map(esc).join(", ");
     if (c.kind === "full") return T("the whole target", "整个目标");
@@ -125,6 +127,8 @@
       ${u ? `<span><span class="lbl">${T("Unit check", "单位检查")}</span> ${esc(u.unit)} → ${esc(u.target_unit)} × ${factor(u.factor)}</span>` : ""}
       ${m.coverage ? `<span><span class="lbl">${T("Coverage", "覆盖范围")}</span> ${coverage(m.coverage)}</span>` : ""}
       ${c ? `<span class="fine">${T("Its own estimate (reference only)", "它自己的估计（只作参考）")} ${fmt(c.estimate)}${c.mc ? ` · P10..P90 ${fmt(c.mc.p10)}..${fmt(c.mc.p90)}` : ""}</span>` : ""}
+      ${m.baseline_only ? `<span class="fine">${T("Baseline (not combined)", "对照基线（不进合并）")} ${fmt(m.baseline_only.estimate)}</span>` : ""}
+      ${m.details ? `<span class="fine">${esc(m.details)}</span>` : ""}
       ${series(T("target series", "目标序列"), m.target_series)}${series(T("signal series", "信号序列"), m.signal_series)}
       ${(m.backtest || []).length ? `<span class="fine">${T("backtest", "回测")}: ${m.backtest.map(x => `${esc(x.year)} ${pct(Math.exp(x.log_err) - 1)}`).join(" · ")}</span>` : ""}
       ${m.error ? `<span class="cx-bad">${esc(m.error)}</span>` : ""}
@@ -135,8 +139,8 @@
   }
   function methods(r) {
     const ms = r.methods || [];
-    const inner = `<p class="fine">${T(`Methods from judge round ${esc(r.methods_from_round ?? "?")}. Methods with weight 0 are not in the combined estimate.`,
-        `裁判第 ${esc(r.methods_from_round ?? "?")} 轮给出的方法。权重为 0 的方法没有进入合并。`)}</p>
+    const inner = `<p class="fine">${T(`Methods from judge round ${esc(r.methods_from_round ?? "?")}. Weight = the method's coefficient in the combined estimate (log scale); with a median of routes, routes that are not the median have weight 0 but still count in the vote and the interval. Failed, part-only and baseline-only methods are not combined.`,
+        `裁判第 ${esc(r.methods_from_round ?? "?")} 轮给出的方法。权重 = 方法在合并（ln 空间）里的系数；路线取中位数时，不是中位数的路线权重为 0，但参与了投票和区间。失败、只覆盖一部分、只作对照基线的方法不进合并。`)}</p>
       ${(r.audit_errors || []).length ? `<div class="cx-err">${T("Input audit itself failed (no method was blocked)", "输入核对本身出错（没有拦方法）")}: ${r.audit_errors.map(esc).join("; ")}</div>` : ""}
       ${ms.length ? `<div class="cx-ms">${ms.map(method).join("")}</div>` : none()}`;
     return panel("E-03", T("Methods", "方法"), `${ms.filter(m => m.status === "computed").length}/${ms.length} ${T("computed", "算出")}`, inner);

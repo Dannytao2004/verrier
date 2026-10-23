@@ -1,5 +1,5 @@
 """v2.11e（计划 D2）：两条以上路线吻合时，代码否掉的方法也至少交回裁判一次。
-假模型：d1 一页 3 个点（p1..p3，1,000 / 1,100 / 1,210 widgets）；m1、m2 吻合，m3 是 formula_mc。
+假模型：d1 一页 5 个点（p1..p3 是往年 6 月 1,000 / 1,100 / 1,210 widgets，p4、p5 是 2025、2026 年 5 月）；m1、m2 吻合，m3 是 formula_mc。
 裁判第 1 轮不加方向，check 在第 1 轮就跑；修正轮的角色是 judge:r1:repair。图的离线测试需要 langgraph（.venv），没装时跳过。"""
 import unittest
 from datetime import date
@@ -11,8 +11,14 @@ try:
 except ImportError:
     HAVE_LG = False
 
-M1 = {"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}
-M2 = {"id": "m2", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 3}}
+# v2.12：series_naive 只作对照基线、不进合并，假裁判改用 series_auto；假网页多两个 5 月的点（2026 年 5 月 / 2025 年 5 月 = 1），
+# yoy1 = 去年 6 月 1,210 x 1 = 1,210，和以前 series_naive 的估计相同
+MONTHS = ((2023, 6, 30, "June", 1000), (2024, 6, 30, "June", 1100), (2025, 6, 30, "June", 1210),
+          (2025, 5, 31, "May", 1000), (2026, 5, 31, "May", 1000))
+MONTHS_TEXT = " ".join(f"{mon} {y}: {v:,} widgets." for y, _, _, mon, v in MONTHS)
+M1 = {"id": "m1", "method": "series_auto", "params": {"target_history": ["p1", "p2", "p3", "p4", "p5"]}}
+# m2 和 m1 同值（以前是 series_naive k=3 / k=1），仍是「两条吻合的路线」
+M2 = {"id": "m2", "method": "series_auto", "params": {"target_history": ["p1", "p2", "p3", "p4", "p5"]}}
 FAR = {"id": "m2", "method": "formula_mc",   # 只用来造「打架」的 m2（4 x 1,210，和 m1 差 3 倍以上）
        "params": {"formula": "c + c + c + c", "inputs": {"c": {"id": "p3", "role": "June 2025 widgets"}}}}
 
@@ -51,9 +57,9 @@ def run(replies, audit=None, r1_methods=None):
                                    "period_end": "2026-06-30", "publisher": "X"}, "market_keywords": [],
                         "directions": [{"category": "own_history", "hypothesis": "h", "data_to_find": "f"}]}, None
             if role.startswith("extract"):
-                return {"points": [{"name": f"widgets June {y}", "value_as_written": f"{v:,}", "unit": "widgets",
-                                    "period_start": f"{y}-06-01", "period_end": f"{y}-06-30", "quote": f"June {y}: {v:,} widgets"}
-                                   for y, v in ((2023, 1000), (2024, 1100), (2025, 1210))]}, None
+                return {"points": [{"name": f"widgets {mon} {y}", "value_as_written": f"{v:,}", "unit": "widgets",
+                                    "period_start": f"{y}-{mo:02d}-01", "period_end": f"{y}-{mo:02d}-{d}",
+                                    "quote": f"{mon} {y}: {v:,} widgets"} for y, mo, d, mon, v in MONTHS]}, None
             if role == "judge:r1":
                 return {"decisions": [], "extra_directions": [], "methods": r1_methods or [M1, M2, BAD]}, None
             if role == "judge:r1:repair":
@@ -71,7 +77,7 @@ def run(replies, audit=None, r1_methods=None):
 
     def fake_fetch(url, as_of, qid, **kw):
         return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01",
-                "text": "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets."}
+                "text": MONTHS_TEXT}
 
     ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
     with mock.patch.object(P, "fetch_page", fake_fetch), \

@@ -205,11 +205,14 @@ function coverageText(c) {   // v2.7d：方法声明的覆盖范围（compute �
 }
 function methodRows(ms) {
   const ST = {computed: "", failed: '<span class="bad">失败</span>', excluded_by_input_audit: '<span class="bad">输入核对不通过，未计算</span>',
-    excluded_by_coverage: '<span class="bad">只覆盖目标的一部分，不进合并</span>'};
+    excluded_by_coverage: '<span class="bad">只覆盖目标的一部分，不进合并</span>',
+    baseline_only: '<span class="muted">只作对照基线（季节朴素），不进合并</span>'};
   return ms.map(m => `<tr><td><b>${esc(m.id)}</b>${m.label && m.label !== m.id ? `<div class="muted small">裁判 id ${esc(m.label)}</div>` : ""}</td>
   <td>${esc(m.method)}<div>${ST[m.status] || ""}</div></td><td><code>${esc(m.formula)}</code>
   ${m.coverage ? `<div class="small">覆盖范围：${coverageText(m.coverage)}</div>` : ""}
   ${m.coverage_excluded ? `<div class="small muted">它自己的估计 ${fmt(m.coverage_excluded.estimate)}（只作参考）</div>` : ""}
+  ${m.baseline_only ? `<div class="small muted">对照基线 ${fmt(m.baseline_only.estimate)}（不进合并）</div>` : ""}
+  ${m.details ? `<div class="small">${esc(m.details)}</div>` : ""}
   ${m.target_series ? `<div class="small muted">目标序列：${Object.entries(m.target_series).map(([y, v]) => `${y}: ${fmt(v)}`).join("，")}</div>` : ""}
   ${m.signal_series ? `<div class="small muted">信号序列：${Object.entries(m.signal_series).map(([y, v]) => `${y}: ${fmt(v)}`).join("，")}</div>` : ""}</td>
   <td><ul class="inputs">${(m.inputs || []).map(i => `<li><b>${esc(i.name)}</b> = ${esc(i.id)}${i.p10 !== undefined && i.p10 !== null && i.p10 !== i.p90 ? `
@@ -248,7 +251,8 @@ async function pageResult(qid, tag) {
   ${r.aborted ? `<div class="err">中止：${esc(r.aborted)}</div>` : ""}
   ${r.discrete ? discreteBlock(r.discrete, o) : `<div class="row">
     <div class="card"><div class="muted">估计</div><div class="big">${fmt(e.central)}${e.unit ? ` <span class="muted">${esc(e.unit)}</span>` : ""}</div>
-      <div>80% 区间 [${fmt(e.p10)}, ${fmt(e.p90)}]${withUnit(e.unit)}</div><div class="muted small">区间依据 ${esc(e.basis)}${e.basis_text ? "：" + esc(e.basis_text) : ""} · 加权规则 ${esc(e.weight_rule)}</div></div>
+      <div>80% 区间 [${fmt(e.p10)}, ${fmt(e.p90)}]${withUnit(e.unit)}</div><div class="muted small">区间依据 ${esc(e.basis)}${e.basis_text ? "：" + esc(e.basis_text) : ""} · 加权规则 ${esc(e.weight_rule)}</div>
+      ${(e.combination_text || []).map(x => `<div class="muted small">${esc(x)}</div>`).join("")}</div>
     ${o ? `<div class="card"><div class="muted">官方值（只用于打分，agent 看不到）</div><div class="big">${fmt(o.answer_value)}</div>
       <div>误差 <b>${pct(o.pct_err)}</b> · 80% 区间盖住：${yesno(o.covered_80)}</div>
       <div class="muted small">公布 ${esc(o.released)} · ${link(o.source, "来源")}</div></div>` : ""}
@@ -262,7 +266,7 @@ async function pageResult(qid, tag) {
   </div>`}
   <h2>最终答案</h2><pre class="answer">${esc(r.final_text || "（没有）")}</pre>
   <h2>钉死的目标</h2>${targetTable(r.target)}
-  <h2>方法（代码计算）</h2><p class="muted small">裁判从第 ${esc(r.methods_from_round ?? "?")} 轮给出的方法。权重为 0 的方法没有进入合并。</p>
+  <h2>方法（代码计算）</h2><p class="muted small">裁判从第 ${esc(r.methods_from_round ?? "?")} 轮给出的方法。权重 = 方法在合并（ln 空间）里的系数；路线取中位数时，不是中位数的路线权重为 0，但参与了投票和区间。失败、只覆盖一部分、只作对照基线的方法不进合并。</p>
   <table><tr><th>id</th><th>方法</th><th>公式</th><th>输入（role 和它指向的证据）</th><th class="num">估计</th><th class="num">权重</th><th class="num">假设占比</th><th>回测 / 错误</th></tr>
   ${methodRows(r.methods)}</table>
   ${r.audit_errors.length ? `<p class="bad">输入核对本身出错（没有拦方法）：${r.audit_errors.map(esc).join("；")}</p>` : ""}

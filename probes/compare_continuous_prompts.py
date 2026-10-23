@@ -29,7 +29,10 @@ class FakeLLM:
         if role.startswith("judge"):
             n["judge"] += 1
             bad = [{"id": "m1", "method": "linear_fit", "params": {"target_history": ["p1"]}}]
-            good = [{"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}]
+            # v2.12：series_naive 只作对照基线、不进合并（v2.11 以前这里是 series_naive k=1）；修正轮里「能跑的方法」改成两个
+            # 保留点的平均，探针才能照旧跑到输入核对和终稿（第 2 轮丢了 p2）
+            good = [{"id": "m1", "method": "formula_mc", "params": {"formula": "mean(a, b)", "inputs": {
+                "a": {"id": "p1", "role": "June 2023 widgets"}, "b": {"id": "p3", "role": "June 2025 widgets"}}}}]
             ex = EXTRA if role == "judge:r1" else []
             return {"decisions": [{"id": "p2", "keep": False, "reason": "x"}] if role == "judge:r2" else [],
                     "extra_directions": ex, "methods": bad if role in ("judge:r1", "judge:r2") else good}, None

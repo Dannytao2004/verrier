@@ -34,7 +34,7 @@ from . import unit_review as UR
 from . import value_check as VC
 from .evidence import period_text
 from .markets import search_markets
-from .outputs import basis_text, unit_text
+from .outputs import basis_text, combination_details, method_details, unit_text
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
 from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
                       DISCRETE_OUTCOMES_GIVEN, DISCRETE_REVISE, DISCRETE_REVISE_DONE, EXTRA_RULE_R1, EXTRA_RULE_R2,
@@ -229,6 +229,17 @@ def key_assumptions_template(used: list, year: int, keep_ids=frozenset(), discre
     return "\n".join(lines)
 
 
+def method_details_template(comp: dict, r: dict, ph: dict) -> str:
+    """v2.12（决定 8）：终稿末尾的「Method details」：每个方法的算子、成员和各自的估计、数据窗口、参数、校准行，合并的块结构和
+    季节朴素对照。由 outputs.method_details / combination_details 生成，数字和带数字的标签都放进占位符（写进 ph）。
+    v2.12 以前的结果（没有 combination）返回空串。"""
+    def put(key, text):
+        ph[key] = text
+        return f"[[{key}]]"
+    lines = [x for x in (method_details(m, r, put) for m in comp.get("methods") or []) if x] + combination_details(r, put)
+    return ("\n\nMethod details (computed by code):\n" + "\n".join(f"- {x}" for x in lines)) if lines else ""
+
+
 REPAIR = """
 
 Your previous reply proposed these methods and assumptions:
@@ -255,8 +266,33 @@ REPAIR_OUTCOMES_REJECTED_KEEP = """ To keep the current list instead, leave "out
 OUTCOME_KEYS = ("outcomes", "outcomes_basis", "outcomes_revision_reason")
 
 
-SERIES_METHODS = ("series_naive", "yoy_scaling", "linear_fit", "ratio")
+SERIES_METHODS = ("series_naive", "yoy_scaling", "ratio")   # v2.12：linear_fit 删了（compute 直接报错，到不了输入核对）
 TARGET_HISTORY_ROLE = "the target quantity itself (same entity and measure), for an earlier period of the same calendar span"
+# v2.12：新算子的输入由代码写 role（裁判只列 id），输入核对和网页结果页共用
+TARGET_MONTHLY_ROLE = ("the target quantity itself (same entity, measure and unit), for one earlier calendar month or a "
+                       "year-to-date total from January")
+PARTIAL_ROLES = {"partial_this": "the target quantity itself (same entity and measure), for the part of the target period "
+                                 "that has already been observed",
+                 "partial_last": "the target quantity itself, for the same part of the calendar period in an earlier year",
+                 "full_last": "the target quantity itself, for the whole target calendar period in an earlier year"}
+
+
+def operator_inputs(method, prm: dict) -> list:
+    """序列类算子要核对的输入：[(输入名, id, role)]。序列方法和 series_auto 核对 target_history（signal 不核对，同 v2.11）；
+    partial_period 核对三组输入。formula_mc、outcome_probs 不走这里。"""
+    prm = prm or {}
+    if method in SERIES_METHODS:
+        return [(str(i), str(i), TARGET_HISTORY_ROLE) for i in prm.get("target_history") or []]
+    if method == "series_auto":
+        return [(str(i), str(i), TARGET_MONTHLY_ROLE) for i in prm.get("target_history") or []]
+    if method == "partial_period":
+        rows = []
+        for key, role in PARTIAL_ROLES.items():
+            v = prm.get(key)
+            for i in ([v] if isinstance(v, str) else v if isinstance(v, list) else []):
+                rows.append((f"{key}:{i}", str(i), role))
+        return rows
+    return []
 
 
 def _code_check(jr: dict, pts: list, target: dict, only_methods=None) -> tuple:
@@ -369,7 +405,8 @@ def _discrete_spec(target: dict, rec) -> str:
 
 
 def audit_rows(m_in: dict, m_out: dict, by_id: dict, kept_a: dict, target=None) -> list:
-    """一个方法里要核对的输入：[(输入名, id, 裁判写的 role, 证据描述)]。日历常数不核对；序列方法核对 target_history。
+    """一个方法里要核对的输入：[(输入名, id, 裁判写的 role, 证据描述)]。日历常数不核对；序列方法核对 target_history
+    （v2.12：series_auto、partial_period 的 role 由代码写，见 operator_inputs）。
     outcome_probs：role 由代码写成「target 取这个结果的概率」再附上裁判的 role（裁判没写 role 时留空，照旧拦下）；
     余下结果也核对一行（代码算的 1 - 其余之和、其余输入覆盖了哪些结果）。"""
     prm = m_in.get("params") or {}
@@ -381,8 +418,8 @@ def audit_rows(m_in: dict, m_out: dict, by_id: dict, kept_a: dict, target=None) 
             if not iid.startswith("k_"):
                 rows.append((name, iid, str(spec.get("role") or "").strip(), _evidence(iid, by_id, kept_a)))
         return rows
-    if m_out.get("method") in SERIES_METHODS:
-        return [(str(i), str(i), TARGET_HISTORY_ROLE, _evidence(str(i), by_id, kept_a)) for i in prm.get("target_history") or []]
+    if m_out.get("method") in SERIES_METHODS + ("series_auto", "partial_period"):
+        return [(n, i, role, _evidence(i, by_id, kept_a)) for n, i, role in operator_inputs(m_out.get("method"), prm)]
     if m_out.get("method") == "outcome_probs":   # 每个结果的概率输入各核对一次，余下结果另核对一次
         rows, covered = [], []
         for label, spec in (prm.get("probs") or {}).items():
@@ -915,6 +952,10 @@ def build(ctx: Context):
             if m.get("inputs_detail"):
                 summary.append(f"  inputs of {m['id']}: observed points {m.get('used_ids') or []}, "
                                f"assumptions {m.get('used_assumptions') or []}")
+            det = method_details(m, r)   # v2.12（决定 8）：算子、成员、数据窗口、参数、校准行
+            if det:
+                summary.append(f"  details: {det}")
+        summary += [f"- {x}" for x in combination_details(r)]   # v2.12：块结构、中心和区间规则、季节朴素对照
         # v2.6d（D4）：方法用到的观测点各给一个 p{n}_value 占位符，列进 summary（模型要说观测值时只能走占位符）
         p_ph, p_lines = point_placeholders(state.get("points") or [], comp.get("methods") or [])
         ph.update(p_ph)
@@ -954,7 +995,8 @@ def build(ctx: Context):
             digits_removed += n
         text = "".join(p if i % 2 == 0 else f"[[{p}]]" for i, p in enumerate(parts))
         if r.get("central") is not None:  # 代码生成的假设清单：数字只走占位符，模型写的名字和理由里的数字同样替换掉
-            extra = "\n\n" + key_assumptions_template(used_a, year, mids)
+            # v2.12（决定 8）：再接代码生成的方法细节和合并结构（数字只走占位符；文字全是代码写的）
+            extra = "\n\n" + key_assumptions_template(used_a, year, mids) + method_details_template(comp, r, ph)
             text += extra
             eparts = PLACEHOLDER.split(extra)  # 只切新加的这段，前面已经切好的片段不重新找占位符
             parts[-1] += eparts[0]

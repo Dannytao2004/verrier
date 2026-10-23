@@ -66,7 +66,8 @@ class TestPizzaUnitShown(unittest.TestCase):
         r, f = st["compute"]["result"], st["final"]
         self.assertAlmostEqual(r["central"], 74.72, delta=0.01)
         self.assertEqual(f["placeholders"]["unit"], "t/day")
-        self.assertEqual(f["text"].split("\n\n")[0], "About 74.72 t/day (80% model-based interval 35.67 to 157 t/day).")
+        # v2.12：两块的宽度取均方根（以前取最宽的 MC 宽度 35.67 到 157）
+        self.assertEqual(f["text"].split("\n\n")[0], "About 74.72 t/day (80% model-based interval 38.11 to 146 t/day).")
         self.assertNotIn("Unit not pinned", f["text"])
         user = llm.users["final"]
         self.assertIn("[[p90]], [[unit]], [[interval_level]]", user)          # 占位符清单里有 [[unit]]
@@ -76,7 +77,8 @@ class TestPizzaUnitShown(unittest.TestCase):
     def test_default_text_when_the_final_model_fails(self):
         st = pizza_state(FinalLLM(answer=None))
         self.assertTrue(st["final"]["text"].startswith(
-            "Estimate: 74.72 t/day (80% model-based interval 35.67 to 157 t/day, basis: too few backtest years"), st["final"]["text"])
+            "Estimate: 74.72 t/day (80% model-based interval 38.11 to 146 t/day, basis: several routes with separate inputs"),
+            st["final"]["text"])
 
     def test_ledger_graph_header_and_result_api(self):
         from fastapi.testclient import TestClient
@@ -100,11 +102,11 @@ class TestPizzaUnitShown(unittest.TestCase):
             led = c.get("/api/file", params={"qid": "ask_pizza", "tag": "web_1", "name": "ledger.md"}).text
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
-        self.assertIn("estimate <b>75</b> t/day &middot; 80% [36, 157] t/day (monte_carlo: ", page)
+        self.assertIn("estimate <b>75</b> t/day &middot; 80% [38, 146] t/day (blocks: ", page)
         self.assertEqual(res["estimate"]["unit"], "t/day")
         self.assertAlmostEqual(res["estimate"]["central"], 74.72, delta=0.01)
         self.assertIn("About 74.72 t/day", res["final_text"])
-        self.assertIn("Result: central **74.72** t/day, 80% interval [35.67, 157] t/day, basis monte_carlo (", led)
+        self.assertIn("Result: central **74.72** t/day, 80% interval [38.11, 146] t/day, basis blocks (", led)
 
 
 @unittest.skipUnless(HAVE_WEB, "fastapi / langgraph not installed (use .venv)")
@@ -157,7 +159,8 @@ class TestGraphRuns(unittest.TestCase):
         self.assertEqual(run["target"]["unit_canonical"], "widget")
         self.assertAlmostEqual(run["compute"]["central"], 1210.0)
         self.assertEqual(res["estimate"]["unit"], "widget")
-        self.assertTrue(res["final_text"].startswith("About 1,210 widget (80% model-based interval 1,071 to 1,367 widget)."),
+        # v2.12：series_auto 的 yoy1，区间是校准表 yoy|pairs1|h1 那一行
+        self.assertTrue(res["final_text"].startswith("About 1,210 widget (80% model-based interval 1,008 to 1,485 widget)."),
                         res["final_text"])
         self.assertNotIn("Unit not pinned", res["final_text"])
 

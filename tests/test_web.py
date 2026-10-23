@@ -246,6 +246,11 @@ class TestBacktestTables(unittest.TestCase):
 
 
 # ---------- 运行登记：真的 LangGraph 图 + 假模型 / 假搜索 / 假网页 ----------
+# v2.12：series_naive 只作对照基线、不进合并，假裁判改用 series_auto；加两个 5 月的点（同比增长正好 1），估计仍是 1,210
+MONTHS = ((2023, 6, 30, "June", 1000), (2024, 6, 30, "June", 1100), (2025, 6, 30, "June", 1210),
+          (2025, 5, 31, "May", 1000), (2026, 5, 31, "May", 1000))
+
+
 class FakeLLM:
     model = "fake"
 
@@ -261,12 +266,12 @@ class FakeLLM:
                                    {"category": "physical_flow", "hypothesis": "h2", "data_to_find": "f"},
                                    {"category": "attention", "hypothesis": "h3", "data_to_find": "f"}]}, None
         if role.startswith("extract"):
-            return {"points": [{"name": f"widgets June {y}", "value_as_written": f"{v:,}", "unit": "widgets",
-                                "period_start": f"{y}-06-01", "period_end": f"{y}-06-30", "quote": f"June {y}: {v:,} widgets"}
-                               for y, v in ((2023, 1000), (2024, 1100), (2025, 1210))]}, None
-        if role.startswith("judge"):
+            return {"points": [{"name": f"widgets {mon} {y}", "value_as_written": f"{v:,}", "unit": "widgets",
+                                "period_start": f"{y}-{m:02d}-01", "period_end": f"{y}-{m:02d}-{d}", "quote": f"{mon} {y}: {v:,} widgets"}
+                               for y, m, d, mon, v in MONTHS]}, None
+        if role.startswith("judge"):   # v2.12：series_auto 的 yoy1 = 去年 6 月 1,210 x 2026 年 5 月 / 2025 年 5 月（1,000 / 1,000）
             return {"decisions": [], "extra_directions": [],
-                    "methods": [{"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}]}, None
+                    "methods": [{"id": "m1", "method": "series_auto", "params": {"target_history": ["p1", "p2", "p3", "p4", "p5"]}}]}, None
         if role == "audit":
             return {"methods": []}, None
         if role == "final":
@@ -283,7 +288,8 @@ def fake_fetch(url, as_of, qid, **kw):
     if "b.org" in url:
         return {"url": url, "status": "dropped", "reason": "no snapshot", "snapshot_ts": None, "page_date": None}
     return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01",
-            "text": "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets."}
+            "text": "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets. May 2025: 1,000 widgets. "
+                    "May 2026: 1,000 widgets."}
 
 
 # web-v0.9：网页运行一定要自带 key。这把是假的（不发任何真实请求），测试检查它不出现在任何返回和写出的文件里
@@ -377,8 +383,8 @@ class TestApiRuns(unittest.TestCase):
         for d in st["directions"]:
             self.assertEqual(d["status"], "done")
             self.assertEqual(d["pages"], {"snapshot": 1, "live_dated": 0, "dropped": 1})
-            self.assertEqual(d["n_points"], 3)
-            self.assertEqual(d["n_kept"], 3)
+            self.assertEqual(d["n_points"], 5)   # v2.12：假网页多了两个 5 月的点
+            self.assertEqual(d["n_kept"], 5)
         self.assertEqual({s["key"]: s["status"] for s in st["stages"]}["final"], "done")
         self.assertAlmostEqual(st["compute"]["central"], 1210.0)
         saved = json.loads((self.tmp / st["qid"] / st["tag"] / "state.json").read_text(encoding="utf-8"))

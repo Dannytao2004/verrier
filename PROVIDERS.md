@@ -172,6 +172,7 @@ agent 里 `AgentLLM.ask` 和 `run_direction` 的搜索把它变成 `Budget.halt(
 - spec 路径：`deepseek-flash` + off 的请求体、请求头和默认路径完全相同（key 换成 spec 里的）。
 - G2（`probes/compare_continuous_prompts.py`）：HEAD 和 v2.10a 都是 `365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4`
   （NEXT.md 的 G2 表停在 U1 时期，没登记过这个值；这里只证明本阶段没改 prompt）。
+  v2.12（算子层）起 G2 的值和探针的改动登记在 NEXT.md 的 G2 表：`37afd11b…`，探针改过，和这里的 `365b0651…` 不可比。
 
 ## 8. Known limits / open items
 

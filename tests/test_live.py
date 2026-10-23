@@ -258,8 +258,17 @@ HIST = [(f"UK new car registrations, September {y}", v, f"{y}-09-01", f"{y}-09-3
         for y, v in ((2023, 270000), (2024, 290000), (2025, 312891))]
 SEP = [(TOTAL, 350518, "2026-09-01", "2026-09-30"),
        ("UK private new car registrations, September 2026", 149158, "2026-09-01", "2026-09-30")]
-PAGES = {"https://news.example.co.uk/sep": _pts(HIST + SEP),
+# v2.12：series_naive 只作对照基线，假裁判改用 series_auto（judge_methods）；新闻页多两个 8 月的点（同比增长正好 1），
+# yoy1 = 2025 年 9 月 312,891，和以前 series_naive 的估计相同。8 月的点排在 SEP 后面，p4 仍是 9 月总量
+AUG = [(f"UK new car registrations, August {y}", 100000, f"{y}-08-01", f"{y}-08-31") for y in (2025, 2026)]
+PAGES = {"https://news.example.co.uk/sep": _pts(HIST + SEP + AUG),
          "https://other.example.org/x": _pts([("UK used car sales, September 2026", 600000, "2026-09-01", "2026-09-30")])}
+
+
+def judge_methods(user: str) -> list:
+    """假裁判的方法：series_auto，target_history = 裁判表格里目标自身往年 9 月和 8 月的点（按名字找 id）。"""
+    ids = re.findall(r"^(p\d+) \| [^|]+ \| UK new car registrations, (?:September 202[345]|August 202[56]) \|", user, re.M)
+    return [{"id": "m1", "method": "series_auto", "params": {"target_history": ids}}]
 
 
 def live_graph(live=True, early=True, verdict="target", block_d2=None, extra=(), target=None):
@@ -288,8 +297,7 @@ def live_graph(live=True, early=True, verdict="target", block_d2=None, extra=(),
             if role.startswith("extract"):
                 return {"points": next(pts for u, pts in pages.items() if texts[u][:60] in user)}, None
             if role.startswith("judge"):
-                return {"decisions": [], "extra_directions": [],
-                        "methods": [{"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}]}, None
+                return {"decisions": [], "extra_directions": [], "methods": judge_methods(user)}, None
             if role == "audit":
                 return {"methods": []}, None
             if role == PB.EARLY_ROLE and block_d2 == "fetch":   # 等 d2 进了取页等待（过了取页前的检查）再确认

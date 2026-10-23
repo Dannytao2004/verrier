@@ -1,8 +1,11 @@
 """输出：state.json（全过程）、evidence ledger（Markdown）、依赖图 HTML（target <- methods <- data points / assumptions <- sources）。"""
 import html
 import json
+import math
+import re
 import urllib.parse
 
+from ..mc import Z90
 from ..viewer import VIS
 from .evidence import PAGE_DATE, period_text
 
@@ -25,6 +28,15 @@ BASIS_TEXT = {
                 "so code used its fixed default width",
     "no_method": "no method produced an estimate, so there is no interval",
     "published": "the value is already published, so there is no interval",
+    # v2.12（决定 5）：分块合并后的区间依据（methods.combine）；上面的旧键留给已存的运行
+    "series_calibration": "interval from the series method's measured errors on offline benchmark series with the same "
+                          "history length and horizon, not from this target's own errors",
+    "backtest_t": "interval width set from the method's backtest errors on earlier years of the target, widened for the "
+                  "small number of backtest years",
+    "blocks": "several routes with separate inputs: the width is the typical width of the routes' own intervals, "
+              "not narrowed for their number",
+    "blocks_disagree": "several routes with separate inputs that disagree more than their own intervals allow, so code "
+                       "widened the interval in proportion to the disagreement",
 }
 
 
@@ -57,6 +69,193 @@ def coverage_text(m: dict) -> str:
                 (f", missing {', '.join(c.get('missing'))}" if c.get("missing") else "")}.get(c.get("kind"), str(c))
     x = m.get("coverage_excluded")
     return s + (f"; not combined (its own estimate {_num(x.get('estimate'))})" if x else "")
+
+
+def _fx(sigma) -> str:
+    """ln 空间的 sigma -> 80% 区间的倍数写法（x/÷1.29）。"""
+    return "n/a" if sigma is None else f"x/÷{math.exp(Z90 * sigma):.2f}"
+
+
+def _mi(x: str) -> int:
+    return int(x[:4]) * 12 + int(x[5:7]) - 1
+
+
+def _consecutive(ms: list) -> bool:
+    return all(_mi(b) - _mi(a) == 1 for a, b in zip(ms, ms[1:]))
+
+
+def _span(ms, ids=None) -> str:
+    """用到的月份（YYYY-MM）。连续的一段（5 个月以上）写首尾；不连续的逐个列出，ids（{月: [点 id]}）给了就在每个月后面
+    写用了哪些点（v2.12d 审查：以前多于 4 个就写首尾，yoy 路径不连续的 5-7 个月看着像连续的一段，也看不出用了哪些点）。"""
+    ms = sorted(ms or [])
+    if not ms:
+        return "none"
+    if len(ms) > 4 and _consecutive(ms):
+        return f"{ms[0]}..{ms[-1]}"
+    return ", ".join(f"{x} ({', '.join(ids[x])})" if ids and ids.get(x) else x for x in ms)
+
+
+def _plain(key, text):
+    return text
+
+
+SIGMA_SOURCE = {"series_calibration": "benchmark calibration", "backtest_t": "t-corrected backtest errors",
+                "monte_carlo": "Monte Carlo of the formula inputs", "no_basis": "no error evidence, code's default width",
+                "method_spread": "disagreement inside the block"}
+
+
+def _sigma_text(ms: dict, put, mid: str) -> str:
+    """一个方法自己的区间宽度和它的来源（methods.combine 的 member_sigma）。"""
+    if not ms:
+        return ""
+    src = ms.get("source")
+    extra = (f", {put(mid + '_folds', str(ms['n_folds']))} backtest years, t {put(mid + '_t90', f'{ms['t90']:.3f}')}"
+             if src == "backtest_t" else
+             f", row {put(mid + '_row', str(ms.get('calibration_row')))} of table {put(mid + '_table', str(ms.get('table')))}"
+             if src == "series_calibration" else "")
+    return f"; own 80% width {put(mid + '_width', _fx(ms.get('sigma_ln')))} ({SIGMA_SOURCE.get(src, src)}{extra})"
+
+
+def _bt_text(m: dict, put, mid: str) -> str:
+    bt = m.get("backtest") or []
+    if not bt:
+        return "; no backtest year"
+    return f"; backtest years {put(mid + '_bt_years', ', '.join(str(b['year']) for b in bt))}"
+
+
+def _pairs_text(pairs: list) -> str:
+    """yoy 的同比对：「月份: 值 / 一年前的值」。"""
+    return "; ".join(f"{x['month']}: {_num(x.get('value'))} / {_num(x.get('year_earlier'))}" for x in pairs or [])
+
+
+def _member(k: str, est, p: dict, put, mid: str) -> str:
+    """series_auto 的一个成员：名字、估计、参数（v2.12d 审查：Theta 的模型、LightGBM 的模型文件和 sha、yoy 的每个同比对）。"""
+    key = re.sub(r"[^a-z0-9]", "", k.lower())
+    if k in ("AutoETS", "Theta"):
+        tag = put(f"{mid}_{key}_model", str(p.get("model") or "")) if p.get("model") else ""
+    elif k == "LightGBM":
+        sha = str(p.get("point_model_text_sha256") or "")
+        tag = (f"config {put(f'{mid}_{key}_cfg', str(p.get('cfg_key')))}"
+               + (f", model {put(f'{mid}_{key}_file', str(p['point_model']))} (text sha256 "
+                  f"{put(f'{mid}_{key}_sha', sha[:12])})" if p.get("point_model") and sha else ""))
+    elif k.startswith("yoy") and p.get("growth"):
+        base = (f" = {put(f'{mid}_{key}_base_value', _num(p['base_value']))}" if p.get("base_value") is not None else "")
+        tag = (f"base month {put(f'{mid}_{key}_base', str(p.get('base_month')))}{base} x growth "
+               f"{put(f'{mid}_{key}_growth', f'{p['growth']:.4f}')} over {put(f'{mid}_{key}_pairs', str(p.get('n_pairs')))} "
+               f"year-on-year pair(s)"
+               + (f": sum of these months / sum of the same months a year earlier, "
+                  f"{put(f'{mid}_{key}_pair_values', _pairs_text(p['pairs']))}" if p.get("pairs") else ""))
+    else:
+        tag = ""
+    return f"{k} {put(f'{mid}_{key}', _num(est))}" + (f" ({tag})" if tag else "")
+
+
+def method_details(m: dict, res: dict, put=_plain) -> str:
+    """v2.12（决定 8）：一个方法的细节，一行英文：算子、成员和各自的估计、用到的数据窗口（月份 / 年份）、参数、校准行、
+    它自己的区间宽度。put(key, 文字) 决定数字怎么出现：ledger 直接写，终稿换成占位符（graph.final_estimate）。
+    没算出估计、也不是对照基线的方法返回空串（它的错误在方法表里）；v2.12 以前的结果（没有 combination）也返回空串。"""
+    if "combination" not in (res or {}):
+        return ""
+    mid = re.sub(r"[^a-z0-9]", "", str(m.get("id", "")).lower()) or "m"
+    ms = (res.get("member_sigma") or {}).get(m.get("id"))
+    meth = m.get("method")
+
+    def n(v, k):
+        return put(f"{mid}_{k}", _num(v))
+    if m.get("baseline_only"):
+        b = m["baseline_only"]
+        return (f"{m['id']} series_naive: baseline only, not combined: {n(b.get('estimate'), 'baseline')} "
+                f"(year {put(mid + '_baseline_year', str((b.get('years_used') or ['?'])[-1]))})")
+    if m.get("estimate") is None:
+        return ""
+    if meth == "series_auto":
+        sa = m.get("series_auto") or {}
+        prm = sa.get("member_params") or {}
+        iv = sa.get("interval") or {}
+        win = sa.get("window") or []
+        members = ", ".join(_member(k, v, prm.get(k) or {}, put, mid) for k, v in (sa.get("members") or {}).items())
+        # v2.12d（审查）：模型路径没走成（模型文件缺、成员不是有限正数）时写明原因，不然「yoy path」和 13 个月以上的连续月对不上
+        failed = (f" Models path not used: {put(mid + '_models_failed', str(sa['models_path_failed']))}."
+                  if sa.get("models_path_failed") else "")
+        shape = "consecutive" if _consecutive(sorted(win)) else "not consecutive"
+        return (f"{m['id']} series_auto, {sa.get('path')} path: {sa.get('rule')}.{failed} Members: {members}. "
+                f"Data window {put(mid + '_window', _span(win, sa.get('window_month_ids')))} "
+                f"({put(mid + '_n_months', str(len(win)))} months used, {shape}; "
+                f"last month {put(mid + '_last_month', str(sa.get('last_month')))}, {put(mid + '_h', str(sa.get('h')))} month(s) "
+                f"before the target; the run of consecutive months ending there is "
+                f"{put(mid + '_consecutive', str(sa.get('consecutive_months')))} long). Calibrated 80% "
+                f"interval {n(iv.get('p10'), 'p10')} to {n(iv.get('p90'), 'p90')}" + _sigma_text(ms, put, mid))
+    if meth == "yoy_scaling" and m.get("detail"):
+        d = m["detail"]
+        return (f"{m['id']} yoy_scaling: target {put(mid + '_base_year', str(d['base_year']))} {n(d['target_base'], 'target_base')} "
+                f"x signal {n(d['signal_now'], 'signal_now')} / {n(d['signal_base'], 'signal_base')} (growth "
+                f"{put(mid + '_growth', f'{d['growth']:.4f}')})" + _bt_text(m, put, mid) + _sigma_text(ms, put, mid))
+    if meth == "ratio" and m.get("detail"):
+        d = m["detail"]
+        return (f"{m['id']} ratio: signal {n(d['signal_now'], 'signal_now')} x sum of target / sum of signal over "
+                f"{put(mid + '_years', ', '.join(str(y) for y in d['years']))} ({n(d['sum_target'], 'sum_target')} / "
+                f"{n(d['sum_signal'], 'sum_signal')} = {put(mid + '_ratio', f'{d['ratio']:.4g}')}, ratio of means)"
+                + _bt_text(m, put, mid) + _sigma_text(ms, put, mid))
+    if meth == "partial_period" and m.get("partial_period"):
+        d = m["partial_period"]
+        pt = d.get("partial_this") or {}
+        # v2.12d（审查）：每个往年的部分 / 全期都写 id 和值，覆盖率能照着重算
+        pairs = "; ".join(f"{x['year']}: partial {x['partial_id']} = {_num(x['partial'])} / full {x['full_id']} = "
+                          f"{_num(x['full'])}" for x in d.get("pairs") or [])
+        return (f"{m['id']} partial_period: partial_this {pt.get('id')} ({put(mid + '_partial_span', str(pt.get('period')))}) "
+                f"{n(pt.get('value'), 'partial_this')} / coverage {put(mid + '_coverage', f'{d['coverage_ratio']:.4f}')} "
+                f"(sum of partial / sum of full, ratio of means, over {put(mid + '_pairs', pairs)})"
+                + _bt_text(m, put, mid) + _sigma_text(ms, put, mid))
+    if meth == "formula_mc":
+        mc = m.get("mc") or {}
+        uc = m.get("unit_check")
+        return (f"{m['id']} formula_mc: {(m.get('params') or {}).get('formula')}; Monte Carlo P10 to P90 "
+                f"{n(mc.get('p10'), 'mc_p10')} to {n(mc.get('p90'), 'mc_p90')}"
+                + (f"; result unit {uc['unit']} converted to {uc['target_unit']}" if uc else "") + _sigma_text(ms, put, mid))
+    return f"{m['id']} {meth}" + _sigma_text(ms, put, mid)
+
+
+ACROSS_TEXT = {"single": "the only block", "geometric_mean": "the geometric mean of the two blocks",
+               "median": "the median of the blocks", "inverse_backtest_error": "the blocks weighted by inverse backtest error"}
+
+
+def combination_details(res: dict, put=_plain) -> list:
+    """v2.12（决定 8）：合并的块结构、中心规则、区间规则和季节朴素对照，几行英文（put 同 method_details）。"""
+    cb = res.get("combination")
+    if not cb:
+        return []
+    parts = []
+    for b in cb.get("blocks") or []:
+        bid = "block" + b["id"][1:]   # 占位符名 block1_value：b1 是追加方向的 id，别混
+        inner = ("" if len(b["members"]) == 1 else
+                 f", {'median' if b['rule'] == 'median' else 'geometric mean'} of methods sharing "
+                 f"{put(bid + '_shared', ', '.join(b.get('shared_inputs') or []) or 'most inputs')}")
+        parts.append(f"{b['id']} = {' + '.join(b['members'])}{inner}: {put(bid + '_value', _num(b['value']))} "
+                     f"(width {put(bid + '_width', _fx(b['sigma_ln']))}, {SIGMA_SOURCE.get(b['sigma_source'], b['sigma_source'])})")
+    lines = [f"Combination: {put('n_blocks', str(cb['n_blocks']))} block(s), equal weight per block (methods whose inputs "
+             f"overlap by at least half form one block; backtest errors set widths, not weights): {'; '.join(parts)}. "
+             f"Estimate = {ACROSS_TEXT.get(cb.get('rule_across_blocks'), cb.get('rule_across_blocks'))}."]
+    iv = res.get("interval") or {}
+    if cb["n_blocks"] >= 2:
+        flags = iv.get("flags") or []
+        br = iv.get("birge_ratio", 0)
+        lines.append(f"Interval: root mean square of the block widths {put('blocks_rms_width', _fx(iv.get('sigma_blocks_rms')))}; "
+                     f"Birge ratio {put('birge_ratio', f'{br:.2f}')} "
+                     + ("(above one, so the width is multiplied by it)" if br > 1 else "(not above one, so no widening)")
+                     + f"; final width {put('final_width', _fx(iv.get('sigma_ln')))}"
+                     + ("; the blocks are more than a factor of two apart" if "blocks_disagree_x2" in flags else "")
+                     + ("; widened to cover every block" if iv.get("widened_to_cover_blocks") else "") + ".")
+    else:
+        lines.append(f"Interval: {iv.get('rule')} ({put('final_width', _fx(iv.get('sigma_ln')))}).")
+    b = res.get("baseline")
+    if b:
+        d = b.get("estimate_vs_baseline")
+        lines.append(f"Seasonal naive baseline (not combined): {put('baseline', _num(b['estimate']))} "
+                     f"({put('baseline_period', str(b.get('period')))}" + (f", point{'s' if len(b['ids']) > 1 else ''} {', '.join(b['ids'])}" if b.get("ids") else "")
+                     + f", from {b.get('from')})"
+                     + ("" if d is None else f"; the estimate is {put('baseline_diff', f'{round(100 * d, 1) + 0.0:+.1f}%')} against it")
+                     + ".")
+    return lines
 
 
 def _top(dist: dict):
@@ -251,7 +450,9 @@ def ledger(state: dict, score: dict | None = None) -> str:
     for m in comp.get("methods") or []:
         e = m.get("backtest_mean_abs_log_err")
         es = "" if e is None else f"{e:.3f}"
-        inp = f"{m.get('used_ids') or []} / {m.get('used_assumptions') or []}" if m.get("inputs_detail") else ""
+        # v2.12d（审查）：每个算子都写输入（以前只有 formula_mc），series_auto / partial_period 的输入照样能对上点
+        inp = (f"{m.get('used_ids') or []} / {m.get('used_assumptions') or []}"
+               if m.get("inputs_detail") or m.get("used_ids") or m.get("used_assumptions") else "")
         L.append(f"| {m['id']} | {m['method']} | {_num(m.get('estimate'))} | {_md(inp)} | "
                  f"{[b['year'] for b in m.get('backtest') or []]} | {es} | {w.get(m['id'], 0):.2f} | {wb.get(m['id'], '')} | "
                  f"{_md(m.get('error') or '; '.join(m.get('notes') or []))[:200]} |")
@@ -259,6 +460,10 @@ def ledger(state: dict, score: dict | None = None) -> str:
     if cov:
         L.append("")
         L += [f"- {m['id']} coverage: {_md(coverage_text(m))}" for m in cov]
+    # v2.12（决定 8）：每个方法的算子、成员、数据窗口、参数、校准行，合并的块结构和季节朴素对照（旧运行没有这些字段时不写）
+    det = [x for x in (method_details(m, est) for m in comp.get("methods") or []) if x] + combination_details(est)
+    if det and r.get("mode") != "discrete":
+        L += ["", "Method details (computed by code):", ""] + [f"- {_md(x)}" for x in det]
     share = r.get("assumption_weight_share")
     tail = "" if share is None else f", weight on methods that use assumptions {share:.2f}"
     if r.get("mode") == "discrete":

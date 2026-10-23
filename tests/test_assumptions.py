@@ -197,28 +197,33 @@ class TestWeightingRule(unittest.TestCase):
     HIST = {f"p{i}": _pt(f"p{i}", v, f"{y}-08-31") for i, (y, v) in
             enumerate([(2021, 1.0e6), (2022, 0.6e6), (2023, 0.85e6), (2024, 0.87e6), (2025, 0.88e6)], 1)}
 
-    def test_untested_formula_gets_nonzero_weight_with_backtests(self):
+    # v2.12（决定 3、5）：series_naive 只作对照基线；路线按输入分块、块等权，回测误差不进权重
+    def test_series_naive_is_a_baseline_and_the_formula_route_carries_the_estimate(self):
         pts = dict(self.HIST, p9=_pt("p9", 958706.0, "2026-07-31"))
         ms = [{"method": "series_naive", "params": {"target_history": list(self.HIST), "k": 1}},
               {"method": "formula_mc", "params": {"formula": "j * r", "inputs": {"j": {"id": "p9"}, "r": {"id": "a1"}}}}]
         out = C.run(ms, pts, TARGET, assumptions=AS.validate([A()], TARGET))
         res = out["result"]
-        self.assertTrue(out["methods"][0]["backtest"])
-        self.assertFalse(out["methods"][1]["backtest"])
-        self.assertEqual(res["weight_rule"], "inverse_backtest_error")
-        self.assertEqual(res["weight_basis"], {"m1": "backtest", "m2": "median_of_backtested"})
-        self.assertGreater(res["weights"]["m2"], 0)
-        self.assertAlmostEqual(res["weights"]["m1"], res["weights"]["m2"])  # 只有一个回测方法：中位数 = 它自己
-        self.assertAlmostEqual(res["assumption_weight_share"], res["weights"]["m2"])
+        self.assertTrue(out["methods"][0]["backtest"])                      # 回测照算（只作诊断）
+        self.assertIsNone(out["methods"][0]["estimate"])
+        self.assertEqual(out["methods"][0]["baseline_only"]["estimate"], 0.88e6)
+        self.assertEqual(res["weights"], {"m2": 1.0})
+        self.assertEqual(res["weight_rule"], "single_block")
+        self.assertEqual(res["baseline"]["estimate"], 0.88e6)
+        self.assertAlmostEqual(res["baseline"]["estimate_vs_baseline"], res["central"] / 0.88e6 - 1)
+        self.assertAlmostEqual(res["assumption_weight_share"], 1.0)
 
-    def test_no_backtests_equal_weights(self):
-        pts = {"p9": _pt("p9", 958706.0, "2026-07-31"), "p8": _pt("p8", 881936.0, "2025-08-31")}
-        ms = [{"method": "series_naive", "params": {"target_history": ["p8"], "k": 1}},
+    def test_separate_routes_get_equal_block_weight(self):
+        # yoy_scaling（目标 2025 年 8 月 x 信号 7 月的同比）和 formula_mc 共用 p9，Jaccard 1/4 < 0.5：两块，各占一半
+        pts = {"p9": _pt("p9", 958706.0, "2026-07-31"), "p8": _pt("p8", 881936.0, "2025-08-31"),
+               "p7": _pt("p7", 900000.0, "2025-07-31")}
+        ms = [{"method": "yoy_scaling", "params": {"target_history": ["p8"], "signal_history": ["p7", "p9"]}},
               {"method": "formula_mc", "params": {"formula": "j * r", "inputs": {"j": {"id": "p9"}, "r": {"id": "a1"}}}}]
         res = C.run(ms, pts, TARGET, assumptions=AS.validate([A()], TARGET))["result"]
-        self.assertEqual(res["weight_rule"], "equal")
-        self.assertEqual(set(res["weight_basis"].values()), {"equal"})
-        self.assertAlmostEqual(res["weights"]["m1"], 0.5)
+        self.assertEqual(res["weight_rule"], "equal_blocks_geometric_mean")
+        self.assertEqual(res["weights"], {"m1": 0.5, "m2": 0.5})
+        self.assertEqual([b["members"] for b in res["combination"]["blocks"]], [["m1"], ["m2"]])
+        self.assertAlmostEqual(res["assumption_weight_share"], 0.5)
 
 
 class TestAblationFilters(unittest.TestCase):
@@ -245,7 +250,7 @@ class TestAblationFilters(unittest.TestCase):
     def test_methods_spec_lists_only_allowed_methods(self):
         s = AB.methods_spec()
         self.assertIn("formula_mc", s)
-        for m in ("series_naive", "yoy_scaling", "linear_fit", "- ratio", "Series rules"):
+        for m in ("series_naive", "series_auto", "yoy_scaling", "linear_fit", "- ratio", "partial_period", "Series rules"):
             self.assertNotIn(m, s)
 
     def test_compute_allows_only_formula_methods(self):

@@ -116,6 +116,13 @@ class TestRunDirection(unittest.TestCase):
         self.assertEqual(fetched, URLS)
 
 
+# v2.12：series_naive 只作对照基线、不进合并，假裁判改用 series_auto；假网页多两个 5 月的点（2026 年 5 月 / 2025 年 5 月 = 1），
+# yoy1 = 去年 6 月 1,210 x 1 = 1,210，和以前 series_naive 的估计相同
+MONTHS = ((2023, 6, 30, "June", 1000), (2024, 6, 30, "June", 1100), (2025, 6, 30, "June", 1210),
+          (2025, 5, 31, "May", 1000), (2026, 5, 31, "May", 1000))
+MONTHS_TEXT = " ".join(f"{mon} {y}: {v:,} widgets." for y, _, _, mon, v in MONTHS)
+
+
 @unittest.skipUnless(HAVE_LG, "langgraph not installed (use .venv)")
 class TestAuditLedgerAndGraph(unittest.TestCase):
     def test_audit_and_ledger_list_voided_directions(self):
@@ -161,14 +168,14 @@ class TestAuditLedgerAndGraph(unittest.TestCase):
                             "directions": [{"category": "own_history", "hypothesis": "h", "data_to_find": "f"},
                                            {"category": "physical_flow", "hypothesis": "h2", "data_to_find": "f2"}]}, None
                 if role.startswith("extract"):
-                    return {"points": [{"name": f"widgets June {y}", "value_as_written": f"{v:,}", "unit": "widgets",
-                                        "period_start": f"{y}-06-01", "period_end": f"{y}-06-30",
-                                        "quote": f"June {y}: {v:,} widgets"}
-                                       for y, v in ((2023, 1000), (2024, 1100), (2025, 1210))]}, None
+                    return {"points": [{"name": f"widgets {mon} {y}", "value_as_written": f"{v:,}", "unit": "widgets",
+                                        "period_start": f"{y}-{mo:02d}-01", "period_end": f"{y}-{mo:02d}-{d}",
+                                        "quote": f"{mon} {y}: {v:,} widgets"}
+                                       for y, mo, d, mon, v in MONTHS]}, None
                 if role.startswith("judge"):
                     return {"decisions": [], "extra_directions": [],
-                            "methods": [{"id": "m1", "method": "series_naive",
-                                         "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}]}, None
+                            "methods": [{"id": "m1", "method": "series_auto",
+                                         "params": {"target_history": ["p1", "p2", "p3", "p4", "p5"]}}]}, None
                 if role == "audit":
                     return {"methods": []}, None
                 if role == "final":
@@ -184,7 +191,7 @@ class TestAuditLedgerAndGraph(unittest.TestCase):
         def fake_fetch(url, as_of, qid, **kw):
             fetched.append(url)
             return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01",
-                    "text": "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets."}
+                    "text": MONTHS_TEXT}
 
         ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
         tmp = Path(tempfile.mkdtemp())

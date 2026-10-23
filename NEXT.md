@@ -166,6 +166,8 @@ tag `web-v0.5`（`ba53c97`）、`web-v0.4`（`f1ea8bd`）、`v2.6h`（`3d6b0a9`�
 | `v2.6d`–`v2.6h`、`web-v0.4`、`web-v0.5`、`v2.7a` | `bbcfa3b1da2ff3d90cf24d9f9c4473ab81e1406d79efab9aef58072ffc52649a` | S7 定的值。web-v0.4 / v0.5 只改网页；U0 只加新模块、不碰 prompt。U1 在 `v2.7a` 的导出（`probes/out/_old_v2_7a`）上量到的也是这个值 |
 | U1 工作区（计划 `v2.7b`） | `826f83628d710413883ea6c588a023f8624fcdb8cb0de6bb4be4b16c0e04095e` | PLAN_USER 多一段 unit_canonical 的要求、回复示例多一个键；探针的假规划没有 unit_canonical，所以多一条重问的 plan prompt（8 条变 9 条），其余 7 条 prompt 逐字节相同。第二、三轮重跑都是这个值；审查退回的那条只改测试，修完应保持不变。参考（不是门槛）：假规划带 `unit_canonical: "widget"` 时是 `fa81d279…`，plan 只问 1 次，裁判、输入核对、终稿的 target 那一行末尾多 `"unit_canonical": "widget"` |
 | U2–U4 | 还没有 | 计划都会变（U2 改 AUDIT、JUDGE / METHODS_SPEC；U3 改 AUDIT；U4 改 FINAL），每个阶段做完时登记 |
+| `v2.10a`–`v2.11g`（旧探针） | `365b06515d8caef8257020c2e5d574de7724be2f2270c122e6e21952517f78c4` | 中间几个阶段的值只记在 PROVIDERS.md 各节的 Verification 里，这张表没登记过；v2.11g 的导出（`probes/out/_old_v2.11g`）上用旧探针（HEAD 778fee0 的 `probes/compare_continuous_prompts.py`）重跑也是这个值 |
+| v2.12（算子层，`v2.12a` 起；新探针） | `37afd11b6169b483957b1c9c2d2c197f5b2bbba818429553987fccfb9f7aeab5` | METHODS_SPEC、裁判回复示例改了（series_auto、partial_period、ratio of means，删 series_naive / linear_fit），终稿多了代码写的方法细节和合并结构。**探针本身也改了**：假裁判修正轮里「能跑的方法」以前是 series_naive k=1，v2.12 它只作对照基线、不进合并，旧探针会停在没有估计，所以改成两个保留点的 formula_mc `mean(a, b)`（`probes/compare_continuous_prompts.py` 第 32–35 行）。所以这个值和 365b0651 不在一条可比的链上：新探针在 v2.11g 导出上是 `25907faa619761608a2c86297a43d8610b1a0b4449ec902e5ceb2cddeb354653`（10-23 重跑），在 v2.12 TASK A 的工作区上据 TASK B / C 的报告是 `b9b6e1b1…`（未核实：那份代码没留导出，输出文件也没找到）。审查修正（v2.12d）没改这条路径（一个 formula_mc，一块），值不变 |
 
 ## 没做的、等用户定的
 

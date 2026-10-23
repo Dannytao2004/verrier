@@ -31,10 +31,15 @@ PRE = {"https://smmt.example.co.uk/official": [(TL.TOTAL, 350518, "2026-09-01", 
        "https://analyst.example.org/est": [(CONSENSUS, 345000, "2026-09-01", "2026-09-30")]}
 PRE_ROLES = ("existing:search", "extract:existing", "existing:published", "existing:check")
 # HEAD b54beed（改前）上 test_live.live_graph 三条路径的 sha256：排序后的 (role, user) 加 state 的这些键（probes/out/v211f/head_sha.py）
+# v2.12 重新登记：假裁判改用 series_auto、新闻页多两个 8 月的点、合并规则和终稿的方法细节都变了（existing 步骤本身没改）。
+# b54beed 上的值是 live_auto fcf8a78c…、backtest 3b62e930…、live_early_stop cf1767ee…
+# v2.12d（审查修正）又登记一次：series_auto 的结果多了 seasonal_baseline、window_month_ids、yoy 的 base_value，对照多了点 id，
+# 终稿和终稿 prompt 的方法细节多写了同比对的值、逐月的点和校准表 id；数字、existing 步骤都没变（逐键比较：probes/out/v212d_existing_sha_diff.txt，只在本机）。
+# v2.12c 工作区上的值是 live_auto 95447ed8…、backtest d706917c…；live_early_stop 没有方法，不变
 HEAD_KEYS = ("plan", "directions", "approval", "points", "judge_rounds", "compute", "published", "final")
-HEAD_SHA = {"live_auto": "fcf8a78c81fad049c8d484bfa4299cc3d344dc9a8e1471b7f4d94a971cf50cad",
-            "backtest": "3b62e930ed3b20a832ba63e57498b0aa14112bb17c04bb669dbb502577d000d5",
-            "live_early_stop": "cf1767eeffc87d845d8296611e21fe2c08da49052b551c7228d6fe06d0165c2d"}
+HEAD_SHA = {"live_auto": "9f789faa9b2984bc5dfb08a1d41ba4483a925667025fc93057cfc100096dc054",
+            "backtest": "829af9c9fd332bb61dc137da18d6d5f15dffc4cf000bf9fd88d104cb11349e39",
+            "live_early_stop": "a4dc822dec1087cb5951fba1eff04f370ba1d561c8ea6eaddbc815299c4a539a"}
 
 
 class Harness:
@@ -67,8 +72,7 @@ class Harness:
                 if role.startswith("extract"):
                     return {"points": next(pts for u, pts in h.pages.items() if h.texts[u][:60] in user)}, None
                 if role.startswith("judge"):
-                    return {"decisions": [], "extra_directions": [], "methods": [
-                        {"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}]}, None
+                    return {"decisions": [], "extra_directions": [], "methods": TL.judge_methods(user)}, None
                 if role == "audit":
                     return {"methods": []}, None
                 if role in ("published", PB.EARLY_ROLE, "existing:published"):

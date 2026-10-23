@@ -264,6 +264,13 @@ class TestDisplay(unittest.TestCase):
         self.assertEqual(W._point_view({**NORMAL, "period_start": ""})["period_text"], "?..2025-06-30")
 
 
+# v2.12：series_naive 只作对照基线、不进合并，假裁判改用 series_auto；假网页多两个 5 月的点（2026 年 5 月 / 2025 年 5 月 = 1），
+# yoy1 = 去年 6 月 1,210 x 1 = 1,210，和以前 series_naive 的估计相同
+MONTHS = ((2023, 6, 30, "June", 1000), (2024, 6, 30, "June", 1100), (2025, 6, 30, "June", 1210),
+          (2025, 5, 31, "May", 1000), (2026, 5, 31, "May", 1000))
+MONTHS_TEXT = " ".join(f"{mon} {y}: {v:,} widgets." for y, _, _, mon, v in MONTHS)
+
+
 @unittest.skipUnless(HAVE_LG, "langgraph not installed (use .venv)")
 class TestPinnedJudgePrompt(unittest.TestCase):
     """假模型跑一遍图：页面日期点进裁判表的那一行逐字钉住；没有页面日期的页上同一个点被丢（own_history 和 base_rates 都一样）；
@@ -290,15 +297,15 @@ class TestPinnedJudgePrompt(unittest.TestCase):
                             "directions": [{"category": "own_history", "hypothesis": "h", "data_to_find": "f"},
                                            {"category": "base_rates", "hypothesis": "h2", "data_to_find": "f2"}]}, None
                 if role.startswith("extract"):
-                    pts = [{"name": f"widgets June {y}", "value_as_written": f"{v:,}", "unit": "widgets", "period_start": f"{y}-06-01",
-                            "period_end": f"{y}-06-30", "quote": f"June {y}: {v:,} widgets"} for y, v in ((2023, 1000), (2024, 1100), (2025, 1210))]
+                    pts = [{"name": f"widgets {mon} {y}", "value_as_written": f"{v:,}", "unit": "widgets", "period_start": f"{y}-{mo:02d}-01",
+                            "period_end": f"{y}-{mo:02d}-{d}", "quote": f"{mon} {y}: {v:,} widgets"} for y, mo, d, mon, v in MONTHS]
                     pts.append({"name": "widgets sold per day across all shops", "value_as_written": "5 billion", "unit": "widgets/day",
                                 "period_start": "", "period_end": "", "quote": "around 5 billion widgets per day"})
                     return {"points": pts}, None
                 if role.startswith("judge"):
                     ids = re.findall(r"^(p\d+) \| d1 \|", user, re.M)
                     return {"decisions": [], "extra_directions": [],
-                            "methods": [{"id": "m1", "method": "series_naive", "params": {"target_history": ids, "k": 1}}]}, None
+                            "methods": [{"id": "m1", "method": "series_auto", "params": {"target_history": ids}}]}, None
                 if role == "audit":
                     return {"methods": []}, None
                 if role == "final":
@@ -312,8 +319,7 @@ class TestPinnedJudgePrompt(unittest.TestCase):
         def fake_fetch(url, as_of, qid, **kw):
             return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01",
                     "page_published": "2026-05-25" if url.endswith("/dated") else None,
-                    "text": "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets. "
-                            "Shops sell around 5 billion widgets per day."}
+                    "text": MONTHS_TEXT + " Shops sell around 5 billion widgets per day."}
         ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
         with mock.patch.object(P, "fetch_page", fake_fetch), \
                 mock.patch.object(G, "search_markets", lambda k, a: {"keywords": k, "markets": [], "points": [], "note": "x"}):
@@ -325,7 +331,7 @@ class TestPinnedJudgePrompt(unittest.TestCase):
         dated = [p for p in st["points"] if p.get("period_source")]
         self.assertEqual([(p["direction_id"], p["source_url"], p["period_end"]) for p in dated],
                          [("d1", "https://a.org/dated", "2026-05-25"), ("d2", "https://a.org/dated", "2026-05-25")])
-        self.assertTrue(all("period_source" not in p for p in st["points"] if p["name"].startswith("widgets June")))
+        self.assertTrue(all("period_source" not in p for p in st["points"] if p["name"].startswith(("widgets June", "widgets May"))))
         drops = [(r["direction_id"], x["source_url"], x["reason"]) for r in st["results"] for x in r["dropped_points"]]
         self.assertEqual(drops, [("d1", "https://a.org/undated", MISSING), ("d2", "https://a.org/undated", MISSING)])
         judge = next(u for r, u in log if r == "judge:r1")

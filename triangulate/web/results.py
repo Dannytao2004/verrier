@@ -9,8 +9,8 @@ import urllib.parse
 from pathlib import Path
 
 from ..agent.evidence import period_text
-from ..agent.graph import TARGET_HISTORY_ROLE
-from ..agent.outputs import basis_text, unit_text
+from ..agent.graph import SERIES_METHODS, operator_inputs
+from ..agent.outputs import basis_text, combination_details, method_details, unit_text
 from ..agent.run import RES, score_one
 from ..forecast import QUESTIONS
 from ..mc import Z90
@@ -209,10 +209,11 @@ def _inputs(m: dict, pts: dict, kept_a: dict) -> list:
             d = det.get(name) or {}
             rows.append({"name": name, "id": iid, "role": str(spec.get("role") or ""), "evidence": _evidence(iid, pts, kept_a),
                          "p10": d.get("p10"), "p90": d.get("p90"), "sigma_ln": sigma_ln(d.get("p10"), d.get("p90")) if d else None})
-    else:
-        for i in prm.get("target_history") or []:
-            rows.append({"name": "target_history", "id": str(i), "role": TARGET_HISTORY_ROLE,
-                         "evidence": _evidence(str(i), pts, kept_a)})
+    else:   # v2.12：序列类算子的 role 由代码写（和输入核对同一份，graph.operator_inputs）；signal 不核对
+        meth = m.get("method") if m.get("method") in SERIES_METHODS + ("series_auto", "partial_period") else "series_naive"
+        for name, i, role in operator_inputs(meth, prm):
+            rows.append({"name": "target_history" if meth != "partial_period" else name.split(":")[0], "id": i, "role": role,
+                         "evidence": _evidence(i, pts, kept_a)})
         for i in prm.get("signal_history") or []:
             rows.append({"name": "signal_history", "id": str(i), "role": "signal series (aligned by year)",
                          "evidence": _evidence(str(i), pts, kept_a)})
@@ -223,13 +224,19 @@ def _formula(m: dict) -> str:
     prm = m.get("params") or {}
     if m.get("method") == "formula_mc":
         return str(prm.get("formula") or "")
-    if m.get("method") == "series_naive":
-        return f"mean of the last k={prm.get('k', 1)} years of the target"
+    if m.get("method") == "series_naive":   # v2.12：只作对照基线，不进合并；k > 1 的旧运行照旧写 k
+        k = prm.get("k", 1)
+        return ("baseline only: the target's latest earlier value for the same calendar period (not combined)" if k in (1, None)
+                else f"mean of the last k={k} years of the target")
     if m.get("method") == "outcome_probs":
         rem = prm.get("remainder")
         return "probability of each outcome from its input" + (f"; remainder {rem!r} = 1 minus the others" if rem else "")
     return {"yoy_scaling": "target[last year] x signal[this year] / signal[last year]",
-            "linear_fit": "linear regression of target on signal", "ratio": "signal[this year] x historical target/signal ratio"
+            "linear_fit": "linear regression of target on signal (removed in v2.12)",
+            "ratio": "signal[this year] x sum(target) / sum(signal) over aligned earlier years",
+            "series_auto": "target's own monthly series: code picks AutoETS + Theta + yoy3 + LightGBM (13+ consecutive months) "
+                           "or year-on-year growth",
+            "partial_period": "partial_this x sum(full_last) / sum(partial_last)"
             }.get(m.get("method"), str(m.get("method")))
 
 
@@ -266,6 +273,7 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
     comp = st.get("compute") or {}
     r = comp.get("result") or {}
     w, wb = r.get("weights") or {}, r.get("weight_basis") or {}
+    est = (comp.get("estimate_result") or {}) if r.get("basis") == "published" else r   # v2.12：方法细节按合并的那份结果写
     pts = {p["id"]: p for p in st.get("points") or [] if p.get("id")}
     av = st.get("assumptions") or {}
     kept_a = {a["id"]: a for a in av.get("kept") or [] if a.get("id")}
@@ -285,7 +293,10 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
                         "rationale": m.get("rationale"), "assumption_share": ms.get("share"),
                         "distribution": m.get("distribution"), "remainder": m.get("remainder"),
                         "status": "computed" if m.get("estimate") is not None or m.get("distribution") else
-                        "excluded_by_coverage" if m.get("coverage_excluded") else "failed",
+                        "excluded_by_coverage" if m.get("coverage_excluded") else
+                        "baseline_only" if m.get("baseline_only") else "failed",
+                        "baseline_only": m.get("baseline_only"), "details": method_details(m, est),   # v2.12（决定 8）
+                        "series_auto": m.get("series_auto"), "monthly_series": m.get("monthly_series"),
                         "coverage": m.get("coverage"), "coverage_excluded": m.get("coverage_excluded"),
                         "unit_check": m.get("unit_check")})   # P1：公式结果的单位 -> 目标单位和换算系数（compute v2.7c），控制台的证据页显示
     # 输入核对没过、compute 没有用的方法：公式和输入从裁判那一轮的原始方法列表里取
@@ -317,8 +328,10 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
            "budget": st.get("budget") or {}, "target": (st.get("plan") or {}).get("target") or {},
            "directions": [{k: d.get(k) for k in ("id", "category", "perspective", "hypothesis")} for d in st.get("directions") or []],
            "approvals": st.get("approvals") or [],
-           "estimate": {k: r.get(k) for k in ("central", "p10", "p90", "basis", "weight_rule", "sigma_ln")}
+           "estimate": {k: r.get(k) for k in ("central", "p10", "p90", "basis", "weight_rule", "sigma_ln", "combination",
+                                              "interval", "baseline")}
                        | {"basis_text": basis_text(r.get("basis")),   # v2.6d：区间依据的说明（outputs.BASIS_TEXT）
+                          "combination_text": combination_details(est),   # v2.12（决定 8）：块结构、区间规则、季节朴素对照
                           "unit": unit_text((st.get("plan") or {}).get("target"))},   # v2.7e：估计值和区间的单位
            "mode": r.get("mode") or "continuous", "discrete": discrete_view(st),
            "final_text": (st.get("final") or {}).get("text", ""), "methods": methods,

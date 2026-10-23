@@ -1,6 +1,9 @@
 """COMPUTE（只有代码）：把裁判选的方法和数据点 id 变成序列，跑方法、回测、加权、给区间。
 formula_mc 的输入可以是保留的数据点，也可以是校验通过的假设（assumptions.py）；规则：至少一个观测点、最多 3 个假设
-（v2.7d：coverage 为 sum 的方法每个部分最多 3 个、整个方法最多 8 个）。"""
+（v2.7d：coverage 为 sum 的方法每个部分最多 3 个、整个方法最多 8 个）。
+v2.12（算子层）：series_auto 用目标自身的月度序列（series.py，代码按数据选成员）；partial_period = 本期已知部分 x 往期
+全期 / 往期同一部分；series_naive 只有 k=1，而且只作对照基线（baseline_only，不进合并）；linear_fit 删了；ratio 改成 ratio of means。
+合并和区间（methods.combine）：按输入分块、块等权；结果另带 baseline（季节朴素：去年同一期间的值，只作对照）。"""
 import random
 import re
 import statistics
@@ -10,6 +13,7 @@ from . import ablation as AB
 from . import assumptions as A
 from . import methods as M
 from . import qty as Q
+from . import series as S
 from ..mc import sample_lognormal
 from .evidence import PAGE_DATE, parse_date
 
@@ -200,6 +204,120 @@ def build_series(ids, pts: dict, ref=None) -> tuple:
     return {y: statistics.median(v) for y, v in by_year.items()}, notes, used
 
 
+def _series_auto(prm: dict, pts: dict, tps, tpe, r: dict):
+    """series_auto：目标自身的月度序列 -> series.series_auto，结果直接写进方法结果 r。
+    v2.12d（审查）：月度序列和季节朴素对照（seasonal_baseline）在调 series_auto 之前就写进 r，series_auto 做不了
+    （h > 4、没有同比对）时 ledger、终稿照样有对照（决定 3）。"""
+    tm = S.target_month(tps, tpe)
+    if tm is None:
+        raise M.MethodError(f"series_auto needs a target that is one calendar month; the target period is {tps}..{tpe}")
+    ms = S.build_monthly(prm.get("target_history"), pts, tm)
+    r["notes"] += ms["notes"]
+    r.update(monthly_series={S.ym(t): v for t, v in ms["months"].items()}, used_ids=list(ms["used_ids"]),
+             seasonal_baseline=S.seasonal_baseline(ms, tm))
+    if ms["ytd"]:
+        r["ytd_series"] = {S.ym(t): v for t, v in ms["ytd"].items()}
+    try:
+        res = S.series_auto(ms, tm)
+    except S.SeriesError as e:
+        raise M.MethodError(f"series_auto: {e}") from None
+    r["notes"] += res.pop("notes")
+    r.update(estimate=res["estimate"], series_auto=res, used_ids=list(res["window_ids"]))
+
+
+def _pp_ids(v, key: str) -> list:
+    v = [v] if isinstance(v, str) else v
+    if not isinstance(v, list) or not v or not all(isinstance(x, str) and x.strip() for x in v):
+        raise M.MethodError(f"partial_period: {key} must be a data point id or a list of ids")
+    return [x.strip() for x in v]
+
+
+def _pp_point(pts: dict, iid: str, key: str) -> tuple:
+    """partial_period 的一个输入：(期初, 期末, 值)；不能用就抛 MethodError。"""
+    p = pts.get(iid)
+    if p is None or not p.get("keep", True):
+        raise M.MethodError(f"partial_period: {key} {iid} is unknown or discarded")
+    if p.get("period_source") == PAGE_DATE:
+        raise M.MethodError(f"partial_period: {key} {iid} has no stated period (page dated {p.get('period_end')})")
+    ps, pe = _span(p)
+    if pe is None:
+        raise M.MethodError(f"partial_period: {key} {iid} has no period_end")
+    if p.get("unit") == "%":
+        raise M.MethodError(f"partial_period: {key} {iid} is a percentage; the method scales quantities")
+    v = p.get("value")
+    if not isinstance(v, (int, float)) or not v > 0:
+        raise M.MethodError(f"partial_period: {key} {iid} value {v!r} is not positive")
+    return ps, pe, float(v)
+
+
+def _partial_period(prm: dict, pts: dict, tps, tpe, notes: list) -> dict:
+    """partial_period：target = partial_this x sum(full_last) / sum(partial_last)。代码核对期间、按年份配对、算覆盖率。
+    partial_this 的期间要落在目标期间里；每个 partial_last 和 partial_this 是同一日历期间、早 n 年；每个 full_last 和
+    目标是同一日历期间、早同样的 n 年。配不上对的点记 note、不用；同一个 n 有两个点就报错。"""
+    this_id = _pp_ids(prm.get("partial_this"), "partial_this")
+    if len(this_id) != 1:
+        raise M.MethodError("partial_period: partial_this must be one data point id")
+    ps0, pe0, v0 = _pp_point(pts, this_id[0], "partial_this")
+    tol = timedelta(days=TOL_DAYS)
+    if ps0 < tps - tol or pe0 > tpe + tol:
+        raise M.MethodError(f"partial_period: partial_this {this_id[0]} covers {ps0}..{pe0}, which is not inside the target "
+                            f"period {tps}..{tpe}")
+    sides = {"partial_last": {}, "full_last": {}}
+    for key, ref, what in (("partial_last", (ps0, pe0), "partial_this"), ("full_last", (tps, tpe), "the target")):
+        for iid in _pp_ids(prm.get(key), key):
+            ps, pe, v = _pp_point(pts, iid, key)
+            n = ref[1].year - pe.year
+            if n < 1 or not _same_calendar(ps, pe, *ref):
+                raise M.MethodError(f"partial_period: {key} {iid} covers {ps}..{pe}; it must be the same calendar span as "
+                                    f"{what} ({ref[0]}..{ref[1]}) in an earlier year")
+            if n in sides[key]:
+                raise M.MethodError(f"partial_period: {key} lists two points for {pe.year} ({sides[key][n][0]}, {iid})")
+            sides[key][n] = (iid, v, pe.year)
+    pl, fl = sides["partial_last"], sides["full_last"]
+    for n in sorted(set(pl) ^ set(fl)):
+        iid, _, y = pl.get(n) or fl.get(n)
+        other = "full_last" if n in pl else "partial_last"
+        notes.append(f"partial_period: {iid} ({y}) has no {other} value {n} year(s) before the target, not used")
+    both = sorted(set(pl) & set(fl), reverse=True)      # 年份从早到晚
+    pairs = {fl[n][2]: (pl[n][1], fl[n][1]) for n in both}
+    res = M.partial_period(v0, list(pairs.values()))
+    used = [this_id[0]] + [i for n in both for i in (pl[n][0], fl[n][0])]
+    units = sorted({str(pts[i].get("unit") or "") for i in used})
+    if len(units) > 1:
+        notes.append(f"partial_period: inputs have different unit strings {units}")
+    return {"estimate": res["estimate"], "backtest": M.backtest_partial(pairs), "used_ids": used,
+            "partial_period": {"rule": "partial_this x sum(full_last) / sum(partial_last) (ratio of means, beta = 1)",
+                               "partial_this": {"id": this_id[0], "value": v0, "period": f"{ps0}..{pe0}"},
+                               "pairs": [{"year": fl[n][2], "partial_id": pl[n][0], "partial": pl[n][1], "full_id": fl[n][0],
+                                          "full": fl[n][1], "coverage": pl[n][1] / fl[n][1]} for n in both],
+                               "coverage_ratio": res["coverage"]}}
+
+
+def baseline(results: list, year: int):
+    """v2.12（决定 3）：季节朴素对照基线 = 目标去年同一期间的值，不进合并。按顺序取第一个有的：series_auto 的月度序列里的
+    去年同月（v2.12d：series_auto 本身做不了时也有，见 _series_auto）、裁判给的 series_naive（baseline_only）、
+    yoy_scaling / ratio 的目标序列里去年那一项。v2.12d（审查）：只取 > 0 的值（去年同期是 0 的计数不能当对照的分母）。
+    都没有返回 None。"""
+    def pos(v):
+        return isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+    for r in results:
+        b = r.get("seasonal_baseline") or (r.get("series_auto") or {}).get("baseline")
+        if b and pos(b.get("estimate")):
+            return {"rule": "seasonal naive: the target's value for the same month last year", "estimate": b["estimate"],
+                    "period": b["month"], "from": r["id"], "ids": b.get("ids") or []}
+    for r in results:
+        b = r.get("baseline_only")
+        if b and pos(b.get("estimate")):
+            return {"rule": "seasonal naive: the target's latest earlier value for the same calendar period",
+                    "estimate": b["estimate"], "period": str((b.get("years_used") or ["?"])[-1]), "from": r["id"]}
+    for r in results:
+        v = (r.get("target_series") or {}).get(str(year - 1)) if r.get("method") in ("yoy_scaling", "ratio") else None
+        if pos(v):
+            return {"rule": "seasonal naive: the target's value for the same calendar period last year", "estimate": v,
+                    "period": str(year - 1), "from": r["id"]}
+    return None
+
+
 def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=None) -> dict:
     """assumptions：assumptions.validate() 的结果（{"kept": [...], "rejected": [...]}），没有就当空。
     only_methods：只允许这些方法（消融 --ablate-own-history 时 = {"formula_mc"}），其余记错误、不计算。"""
@@ -235,7 +353,7 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
             cap = A.MAX_PER_SUM if cov and cov["kind"] == "sum" else A.MAX_PER_METHOD
             if only_methods is not None and r["method"] not in only_methods:
                 raise M.MethodError(f"ablation: only {sorted(only_methods)} allowed (method needs target_history)")
-            if r["method"] in ("series_naive", "yoy_scaling", "linear_fit", "ratio"):
+            if r["method"] in ("series_naive", "yoy_scaling", "ratio"):
                 tgt, n1, u1 = build_series(prm.get("target_history"), pts, ref=(tps, tpe))
                 r["notes"] += n1
                 r["target_series"] = {str(y): v for y, v in sorted(tgt.items())}
@@ -246,14 +364,25 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                     r["notes"] += n2
                     r["signal_series"] = {str(y): v for y, v in sorted(sig.items())}
                     r["used_ids"] += u2
-                k = int(prm.get("k", 1) or 1) if r["method"] == "series_naive" else 1
-                k = min(max(k, 1), 3)
+                k = int(prm.get("k", 1) or 1) if r["method"] == "series_naive" else 1   # v2.12：k 只许 1，其他值报错
                 fn = {"series_naive": lambda: M.series_naive(tgt, year, k), "yoy_scaling": lambda: M.yoy_scaling(tgt, sig, year),
-                      "linear_fit": lambda: M.linear_fit(tgt, sig, year), "ratio": lambda: M.ratio(tgt, sig, year)}[r["method"]]
+                      "ratio": lambda: M.ratio(tgt, sig, year)}[r["method"]]
                 r["estimate"] = fn()
                 if r["method"] == "series_naive":
                     r["years_used"] = M.prior_years(tgt, year, k)
+                else:   # v2.12：算子用到的数记下来，ledger 和终稿显示
+                    r["detail"] = (M.yoy_detail if r["method"] == "yoy_scaling" else M.ratio_detail)(tgt, sig, year)
                 r["backtest"] = M.backtest(r["method"], tgt, sig, year, k)
+                if r["method"] == "series_naive":   # v2.12（决定 3）：季节朴素只作对照基线，不进合并；原因交给修正轮
+                    r["baseline_only"] = {"estimate": r["estimate"], "years_used": r["years_used"]}
+                    r["estimate"] = None
+                    raise M.MethodError(M.BASELINE_ONLY)
+            elif r["method"] == "series_auto":
+                _series_auto(prm, pts, tps, tpe, r)
+            elif r["method"] == "partial_period":
+                r.update(_partial_period(prm, pts, tps, tpe, r["notes"]))
+            elif r["method"] in M.REMOVED:
+                raise M.MethodError(M.REMOVED[r["method"]])
             elif r["method"] == "formula_mc":
                 env, used, used_a, detail = {}, [], [], []
                 inputs = dict(prm.get("inputs") or {})
@@ -375,6 +504,9 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
     res = M.combine(ok)
     w = res.get("weights") or {}
     res["assumption_weight_share"] = sum(w.get(r["id"], 0) for r in ok if r.get("used_assumptions"))
+    res["baseline"] = baseline(results, year)
+    if res["baseline"] and res.get("central") and res["baseline"]["estimate"] > 0:   # baseline() 只给 > 0 的值；这里再挡一次
+        res["baseline"]["estimate_vs_baseline"] = res["central"] / res["baseline"]["estimate"] - 1
     used_by = {}
     for r in ok:
         for aid in r.get("used_assumptions") or []:

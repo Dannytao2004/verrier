@@ -171,7 +171,9 @@ class TestEvidenceView(unittest.TestCase):
         self.assertEqual((uc["m2"]["unit"], uc["m3"]["unit"]), ("kg/year", "kg/year"))
         self.assertAlmostEqual(uc["m2"]["factor"] * 365250, 1, places=12)
         h = render(v, "q", "")
-        for s in ("74.72 <span", "80% model-based [35.67, 157] t/day", "<b>64.79</b>", "<b>86.18</b>",
+        for s in ("74.72 <span", "80% model-based [38.11, 146] t/day", "<b>64.79</b>", "<b>86.18</b>",
+                  "Combination: 2 block(s), equal weight per block",   # v2.12（决定 8）：块结构和方法细节
+                  "m1 formula_mc: a * b * c * d * e; Monte Carlo P10 to P90 30.87 to 135",
                   "Unit check</span><span class=\"zh\">单位检查</span></span> g/day → t/day × 0.000001</span>",
                   "kg/year → t/day × 0.000002738", "sum over channel: restaurant + frozen_retail",
                   "only frozen_retail of channel (siblings: restaurant, other)", "(reference only)", "22.29 · P10..P90 10.21..48.6",

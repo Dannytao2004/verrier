@@ -131,5 +131,5 @@ def own_value_reason(point: dict, target: dict, directions: dict) -> str:
 
 def methods_spec() -> str:
     """消融时给裁判的方法库说明：只留不需要 target_history 的方法（逐字取自 METHODS_SPEC，只删行）。"""
-    drop = ("- series_naive", "- yoy_scaling", "- linear_fit", "- ratio", "Series rules")
+    drop = ("- series_auto", "- yoy_scaling", "- ratio", "- partial_period", "Series rules")   # v2.12：新算子都要目标自身的历史
     return "\n".join(line for line in METHODS_SPEC.splitlines() if not line.startswith(drop))

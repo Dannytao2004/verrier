@@ -78,8 +78,12 @@ class TestPizzaCoverage(unittest.TestCase):
             self.assertAlmostEqual(ms[mid]["estimate"], e, delta=0.05)
             self.assertNotIn("coverage", ms[mid])
             self.assertNotIn("coverage_excluded", ms[mid])
-        self.assertAlmostEqual(out["result"]["central"], 44.2217, delta=0.001)   # 改前 v2.7c：m3 也等权进了合并
+        # 改前 v2.7c：m3 也进了合并（v2.11 是三者的几何平均 44.22）；v2.12：三条路线的输入不重叠（m2、m3 只共用 a6），
+        # 三块取中位数 = m2 的 59.89
+        self.assertAlmostEqual(out["result"]["central"], ms["m2"]["estimate"])
         self.assertEqual(sorted(out["result"]["weights"]), ["m1", "m2", "m3"])
+        self.assertEqual(out["result"]["weights"], {"m1": 0.0, "m2": 1.0, "m3": 0.0})
+        self.assertEqual(out["result"]["combination"]["n_blocks"], 3)
 
     def test_explicit_full_gives_the_same_numbers(self):
         a, b = run([M1, M2]), run([dict(M1, coverage={"kind": "full"}), M2])
@@ -110,8 +114,10 @@ class TestPizzaCoverage(unittest.TestCase):
         self.assertAlmostEqual(ms["m2"]["estimate"], 86.2, delta=0.05)
         r = out["result"]
         self.assertAlmostEqual(r["central"], 74.7, delta=0.05)
-        self.assertAlmostEqual(r["p10"], 35.67, delta=0.05)
-        self.assertAlmostEqual(r["p90"], 156.53, delta=0.05)
+        # v2.12：两块的宽度（MC）取均方根，两块没有超出各自宽度的分歧（Birge 比 < 1），不再取最宽的那个 MC 宽度
+        self.assertAlmostEqual(r["p10"], 38.11, delta=0.05)
+        self.assertAlmostEqual(r["p90"], 146.48, delta=0.05)
+        self.assertEqual(r["basis"], "blocks")
         self.assertGreater(r["weights"]["m2"], 0)
 
     def test_three_part_sum_with_allowance_for_other_is_pooled(self):
@@ -272,7 +278,9 @@ class TestRepairAndViews(unittest.TestCase):
         self.assertEqual(rp["errors_after"], [])
         ms = {m["id"]: m for m in st["compute"]["methods"]}
         self.assertEqual(ms["m3"]["coverage"]["kind"], "sum")
-        self.assertGreater(st["compute"]["result"]["weights"]["m3"], 0)
+        # v2.12：三块取中位数，m3（sum）进了合并：它是一块、参与投票（不是中位数时系数为 0）
+        self.assertIn(["m3"], [b["members"] for b in st["compute"]["result"]["combination"]["blocks"]])
+        self.assertIn("m3", st["compute"]["result"]["weights"])
         self.assertAlmostEqual(st["compute"]["result"]["central"], 1210, delta=1210 * 0.05)
         self.assertIn('declared coverage = {"kind": "sum"', users["audit"][-1])
         self.assertIn("Coverage: a method's result must cover the whole target", users["audit"][-1])

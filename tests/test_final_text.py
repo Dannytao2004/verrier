@@ -22,7 +22,10 @@ except ImportError:
 
 ANSWER = ("About [[estimate]] widgets in Q3 2026 ([[interval_level]] interval [[p10]] to [[p90]], basis: [[interval_basis]]). "
           "The observed 2025 monthly total in point p4 ([[p4_value]]) drives m1; p1 is not an input; roughly 1,234 more.")
-YEARS = ((2022, 950), (2023, 1000), (2024, 1100), (2025, 1210))   # 点 p1..p4；p1（2022）不是方法的输入
+# 点 p1..p6：往年 6 月和 2025、2026 年 5 月。v2.12：裁判用 series_auto（series_naive 只作对照基线），yoy1 = 6 月 1,210 x
+# 2026 年 5 月 / 2025 年 5 月（1,000 / 1,000）；方法的输入是用到的 3 个月 p4、p5、p6，p1..p3 不是
+YEARS = ((2022, 6, 30, "June", 950), (2023, 6, 30, "June", 1000), (2024, 6, 30, "June", 1100), (2025, 6, 30, "June", 1210),
+         (2025, 5, 31, "May", 1000), (2026, 5, 31, "May", 1000))
 
 
 def _graph_run(tmp: Path):
@@ -45,13 +48,13 @@ def _graph_run(tmp: Path):
                                    "publisher": "X"}, "market_keywords": [],
                         "directions": [{"category": "own_history", "hypothesis": "h", "data_to_find": "f"}]}, None
             if role.startswith("extract"):
-                return {"points": [{"name": f"widgets June {y}", "value_as_written": f"{v:,}", "unit": "widgets",
-                                    "period_start": f"{y}-06-01", "period_end": f"{y}-06-30", "quote": f"June {y}: {v:,} widgets"}
-                                   for y, v in YEARS]}, None
+                return {"points": [{"name": f"widgets {mon} {y}", "value_as_written": f"{v:,}", "unit": "widgets",
+                                    "period_start": f"{y}-{mo:02d}-01", "period_end": f"{y}-{mo:02d}-{d}",
+                                    "quote": f"{mon} {y}: {v:,} widgets"} for y, mo, d, mon, v in YEARS]}, None
             if role.startswith("judge"):
                 return {"decisions": [], "extra_directions": [],
-                        "methods": [{"id": "m1", "method": "series_naive",
-                                     "params": {"target_history": ["p2", "p3", "p4"], "k": 1}}]}, None
+                        "methods": [{"id": "m1", "method": "series_auto",
+                                     "params": {"target_history": ["p2", "p3", "p4", "p5", "p6"]}}]}, None
             if role == "audit":
                 return {"methods": []}, None
             if role == "final":
@@ -65,7 +68,7 @@ def _graph_run(tmp: Path):
 
     def fake_fetch(url, as_of, qid, **kw):
         return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01",
-                "text": " ".join(f"June {y}: {v:,} widgets." for y, v in YEARS)}
+                "text": " ".join(f"{mon} {y}: {v:,} widgets." for y, _, _, mon, v in YEARS)}
 
     ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
     with mock.patch.object(P, "fetch_page", fake_fetch), \
@@ -100,7 +103,7 @@ class TestScrubDigits(unittest.TestCase):
 class TestBasisText(unittest.TestCase):
     def test_mapping(self):
         self.assertEqual(set(O.BASIS_TEXT), {"historical_errors", "method_spread", "monte_carlo", "no_basis", "no_method",
-                                             "published"})
+                                             "published", "series_calibration", "backtest_t", "blocks", "blocks_disagree"})
         for k, v in O.BASIS_TEXT.items():
             self.assertEqual(O.basis_text(k), v)
             self.assertFalse(any(c.isdigit() for c in v), v)                       # 说明里不写数字
@@ -134,32 +137,46 @@ class TestFinalText(unittest.TestCase):
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
         f, r = st["final"], st["compute"]["result"]
-        self.assertEqual(r["basis"], "historical_errors")
-        basis = O.BASIS_TEXT["historical_errors"]
+        self.assertEqual(r["basis"], "series_calibration")   # v2.12：只有一个 series_auto，区间用它的校准行
+        basis = O.BASIS_TEXT["series_calibration"]
         self.assertEqual(f["placeholders"]["interval_level"], "80% model-based")
         self.assertEqual(f["placeholders"]["interval_basis"], basis)
-        # 方法用到的点 p2–p4 有占位符（值 + 单位）；p1 没被方法用到，没有
+        # 方法用到的点有占位符（值 + 单位）：series_auto 用到的 3 个月 p4–p6（按月份排）；p1..p3 没被方法用到，没有
         self.assertEqual(f["placeholders"]["p4_value"], "1,210 widgets")
-        self.assertEqual(f["placeholders"]["p2_value"], "1,000 widgets")
-        self.assertNotIn("p1_value", f["placeholders"])
-        self.assertIn("[[p2_value]], [[p3_value]], [[p4_value]]", seen["user"])
+        self.assertEqual(f["placeholders"]["p5_value"], "1,000 widgets")
+        for k in ("p1_value", "p2_value", "p3_value"):
+            self.assertNotIn(k, f["placeholders"])
+        self.assertIn("[[p5_value]], [[p4_value]], [[p6_value]]", seen["user"])
         self.assertIn("- observed point p4 (input of m1): widgets June 2025, value 1,210 widgets, period 2025-06-01..2025-06-30",
                       seen["user"])
-        self.assertIn(f"combined estimate 1,210, 80% model-based interval 1,071 to 1,367 (basis: {basis})", seen["user"])
+        self.assertIn(f"combined estimate 1,210, 80% model-based interval 1,008 to 1,485 (basis: {basis})", seen["user"])
+        # v2.12（决定 8）：summary 里有方法细节和块结构；终稿末尾有代码写的「Method details」，数字走占位符
+        self.assertIn("  details: m1 series_auto, yoy path: yoy1: last year's same month x the year-on-year growth", seen["user"])
+        self.assertIn("- Combination: 1 block(s), equal weight per block", seen["user"])
+        self.assertIn("\n\nMethod details (computed by code):\n- m1 series_auto, yoy path:", f["text"])
+        self.assertIn("Data window 2025-05 (p5), 2025-06 (p4), 2026-05 (p6) (3 months used, not consecutive; last month 2026-05",
+                      f["text"])
+        self.assertIn("row yoy|pairs1|h1", f["text"])
+        self.assertIn("Seasonal naive baseline (not combined): 1,210 (2025-06, point p4, from m1); the estimate is +0.0% "
+                      "against it.", f["text"])
+        self.assertIn("Data window [[m1_window]] ([[m1_n_months]] months used", f["template"])
+        self.assertEqual(f["placeholders"]["m1_row"], "yoy|pairs1|h1")
+        self.assertEqual(f["placeholders"]["block1_value"], "1,210")
         self.assertIn("quarter and half-year labels (Q1 to Q4, H1, H2)", seen["system"])
         # system 说的例外范围 = 代码保留的范围：年份离 as_of 不超过 10 年；点 id 只限 summary 里「- observed point」行列出的
         self.assertIn("four-digit years within ten years of the information cutoff", seen["system"])
         self.assertIn("method ids, and the ids of the assumptions and observed points listed in the '- assumption' and "
                       "'- observed point' lines below", seen["system"])
         self.assertEqual(f["text"].split("\n\n")[0],
-                         f"About 1,210 widgets in Q3 2026 (80% model-based interval 1,071 to 1,367, basis: {basis}). The observed "
+                         f"About 1,210 widgets in Q3 2026 (80% model-based interval 1,008 to 1,485, basis: {basis}). The observed "
                          "2025 monthly total in point p4 (1,210 widgets) drives m1; p[n] is not an input; roughly [n] more.")
         self.assertEqual(f["digits_removed"], 2)
         self.assertNotIn("unknown placeholder", f["text"])
         self.assertEqual(f["model_text"], ANSWER)       # 清洗之前的原文只进 state
         self.assertEqual(saved["final"]["model_text"], ANSWER)
-        self.assertIn(f"(historical_errors: {basis.replace(chr(39), '&#x27;')})", page)   # graph.html 页头
-        self.assertIn(f"basis historical_errors ({basis})", ledger)
+        self.assertIn(f"(series_calibration: {basis.replace(chr(39), '&#x27;')})", page)   # graph.html 页头
+        self.assertIn(f"basis series_calibration ({basis})", ledger)
+        self.assertIn("Method details (computed by code):\n\n- m1 series_auto, yoy path:", ledger)
 
     def test_graph_header_without_basis(self):
         # compute 为空的运行（例如 plan 失败）：graph.html 页头只写 basis 键「(None)」，和 v2.6c 一样，不出现「(None: )」

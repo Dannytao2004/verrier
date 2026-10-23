@@ -223,8 +223,15 @@ def graph_run(check, verdicts=None, extra_points=(), discrete=False):
                 for n, v in [(TOTAL, 350518), ("UK private new car registrations, September 2026", 149158),
                              ("Germany new car registrations, September 2026", 230000),
                              ("SMMT forecast of UK new car registrations, September 2026", 340000), *extra_points]]
+        # v2.12：series_naive 只作对照基线，假裁判改用 series_auto；8 月的两个点排在最后（前面的点 id 不变），
+        # 同比增长正好 1，yoy1 = 2025 年 9 月 312,891
+        n = len(pts)
+        pts += [{"name": f"UK new car registrations, August {y}", "value_as_written": "100,000", "unit": "new cars registered",
+                 "period_start": f"{y}-08-01", "period_end": f"{y}-08-31", "quote": f"August {y}: 100,000 new cars"}
+                for y in (2025, 2026)]
         judge = {"decisions": [], "extra_directions": [],
-                 "methods": [{"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}]}
+                 "methods": [{"id": "m1", "method": "series_auto",
+                              "params": {"target_history": ["p1", "p2", "p3", f"p{n + 1}", f"p{n + 2}"]}}]}
     text = " ".join(p["quote"] for p in pts) + " 2023 2024 2025 2026"
 
     class FakeLLM:
@@ -293,7 +300,7 @@ class TestPublishedGraph(unittest.TestCase):
         self.assertIn("Result: **published value 350,518** (data point p4)", led)
         self.assertIn("## Published-value check (live use only)", led)
         self.assertIn("| p5 | UK private new car registrations, September 2026 | 149,158 |", led)
-        self.assertIn("| m1 | series_naive | 312,891 |", led)
+        self.assertIn("| m1 | series_auto | 312,891 |", led)
         dg = outputs.dep_graph(st)
         self.assertEqual(dg["nodes"][0]["label"], "target\n350,518\npublished")
         self.assertIn({"from": "P:p4", "to": "target"}, dg["edges"])

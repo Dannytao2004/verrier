@@ -151,20 +151,20 @@ class TestMethods(unittest.TestCase):
 
     def test_series_naive(self):
         self.assertEqual(M.series_naive(self.T, 2026, 1), 133.1)
-        self.assertAlmostEqual(M.series_naive(self.T, 2026, 2), (121 + 133.1) / 2)
+        with self.assertRaisesRegex(M.MethodError, "k=2 is no longer available"):   # v2.12：k 只许 1
+            M.series_naive(self.T, 2026, 2)
         with self.assertRaises(M.MethodError):
-            M.series_naive({2025: 1.0}, 2026, 2)
+            M.series_naive({2026: 1.0}, 2026, 1)
 
     def test_yoy(self):
         self.assertAlmostEqual(M.yoy_scaling(self.T, self.S, 2026), 146.41)
         with self.assertRaises(M.MethodError):
             M.yoy_scaling(self.T, {2025: 1.0}, 2026)
 
-    def test_linear_and_ratio(self):
-        self.assertAlmostEqual(M.linear_fit(self.T, self.S, 2026), 146.41, places=6)  # 精确线性关系 y = 10x
-        self.assertAlmostEqual(M.ratio(self.T, self.S, 2026), 146.41, places=6)
-        with self.assertRaises(M.MethodError):
-            M.linear_fit({2024: 1.0, 2025: 2.0}, self.S, 2026)
+    def test_ratio(self):
+        self.assertAlmostEqual(M.ratio(self.T, self.S, 2026), 146.41, places=6)   # 比值恒为 10
+        self.assertFalse(hasattr(M, "linear_fit"))                                 # v2.12 删掉了
+        self.assertIn("linear_fit", M.REMOVED)
 
     def test_formula_mc(self):
         s = M.formula_mc("a * b", {"a": (1000.0, 0.0), "b": (0.08, 0.0)})
@@ -181,9 +181,8 @@ class TestMethods(unittest.TestCase):
         self.assertAlmostEqual(bt[0]["log_err"], math.log(100 / 110))
         bt = M.backtest("yoy_scaling", self.T, self.S, 2026)
         self.assertTrue(all(abs(b["log_err"]) < 1e-12 for b in bt))
-        # linear_fit / ratio 也只用被测年之前的年份（扩展窗口）：linear_fit 要 3 个更早的年份，只有 2025 能测
-        bt = M.backtest("linear_fit", self.T, self.S, 2026)
-        self.assertEqual([b["year"] for b in bt], [2025])
+        # ratio 也只用被测年之前的年份（扩展窗口）
+        self.assertEqual(M.backtest("linear_fit", self.T, self.S, 2026), [])
         bt = M.backtest("ratio", self.T, self.S, 2026)
         self.assertEqual([b["year"] for b in bt], [2023, 2024, 2025])
 
@@ -196,22 +195,27 @@ class TestMethods(unittest.TestCase):
 
 
 class TestCombine(unittest.TestCase):
-    def test_inverse_error_weights_and_hist_interval(self):
+    """v2.12（决定 5）：分块等权、回测误差只定宽度；细的规则在 tests/test_combine.py。"""
+
+    def test_backtests_set_width_not_weights(self):
         a = {"id": "m1", "estimate": 100.0, "backtest": [{"log_err": 0.1}, {"log_err": -0.1}]}
         b = {"id": "m2", "estimate": 110.0, "backtest": [{"log_err": 0.01}, {"log_err": -0.01}]}
         c = M.combine([a, b])
-        self.assertAlmostEqual(c["weights"]["m1"] / c["weights"]["m2"], (0.01 + M.EPS) / (0.1 + M.EPS))
-        self.assertEqual(c["weight_rule"], "inverse_backtest_error")
-        self.assertTrue(100 < c["central"] < 110)
-        self.assertIn(c["basis"], ("historical_errors", "method_spread"))
+        self.assertEqual(c["weights"], {"m1": 0.5, "m2": 0.5})                 # 不按回测误差加权
+        self.assertEqual(c["weight_rule"], "equal_blocks_geometric_mean")
+        self.assertAlmostEqual(c["central"], math.sqrt(100 * 110))
+        self.assertAlmostEqual(c["member_sigma"]["m1"]["sigma_ln"], 0.1 * M.t90(2) / M.Z90)   # t 修正的回测 RMSE
+        self.assertEqual(c["basis"], "blocks")                                # 宽的那块盖得住窄的那块：不算分歧
         self.assertAlmostEqual(math.log(c["p90"] / c["central"]), M.Z90 * c["sigma_ln"])
 
-    def test_no_backtest_equal_weights_spread(self):
+    def test_no_backtest_two_blocks_far_apart(self):
         c = M.combine([{"id": "m1", "estimate": 100.0}, {"id": "m2", "estimate": 400.0}])
-        self.assertEqual(c["weight_rule"], "equal")
+        self.assertEqual(c["weight_rule"], "equal_blocks_geometric_mean")
         self.assertAlmostEqual(c["central"], 200.0)
-        self.assertEqual(c["basis"], "method_spread")
-        self.assertAlmostEqual(c["sigma_ln"], math.log(2))
+        self.assertEqual(c["basis"], "blocks_disagree")
+        self.assertIn("blocks_disagree_x2", c["interval"]["flags"])
+        self.assertLessEqual(c["p10"], 100.0)
+        self.assertGreaterEqual(c["p90"], 400.0)
 
     def test_single_method_fallback_and_mc(self):
         self.assertEqual(M.combine([{"id": "m1", "estimate": 5.0}])["basis"], "no_basis")
@@ -222,7 +226,7 @@ class TestCombine(unittest.TestCase):
     def test_no_backtest_interval_has_floor(self):
         # 两个方法估计相同、没有回测：分歧为 0，区间不能退化成一个点
         c = M.combine([{"id": "m1", "estimate": 850000.0}, {"id": "m2", "estimate": 850000.0}])
-        self.assertEqual(c["basis"], "no_basis")
+        self.assertEqual(c["basis"], "blocks")
         self.assertAlmostEqual(c["sigma_ln"], M.FALLBACK_SIGMA)
         self.assertLess(c["p10"], 850000.0 * 0.8)
         c = M.combine([{"id": "m1", "estimate": 100.0, "mc": {"p10": 90.0, "p90": 110.0}}])
@@ -236,14 +240,18 @@ class TestCombine(unittest.TestCase):
                          "unit": "visits"} for i, (y, v) in enumerate([(2023, 846389.0), (2024, 868259.0), (2025, 881936.0)], 1)}
         tgt = {"period_start": "2026-08-01", "period_end": "2026-08-31"}
         for ids in ([None, None], ["naive_last_year", "naive_last_two"], ["m1", "m1"]):
-            ms = [{"method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": k}} for k in (1, 2)]
+            ms = [{"method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}} for _ in (1, 2)]
             for m, i in zip(ms, ids):
                 if i is not None:
                     m["id"] = i
             out = C.run(ms, pts, tgt)
             self.assertEqual([m["id"] for m in out["methods"]], ["m1", "m2"])
-            self.assertTrue(860000 < out["result"]["central"] < 890000, out["result"]["central"])
-            self.assertEqual(out["methods"][1]["years_used"], [2024, 2025])
+            # v2.12（决定 3）：series_naive 只作对照基线：不进合并，结果的 baseline 是去年同月
+            self.assertIsNone(out["result"]["central"])
+            self.assertEqual(out["methods"][1]["years_used"], [2025])
+            self.assertEqual(out["methods"][1]["baseline_only"]["estimate"], 881936.0)
+            self.assertIn("baseline only", out["methods"][1]["error"])
+            self.assertEqual(out["result"]["baseline"]["estimate"], 881936.0)
 
     def test_formula_uncertainty_set_by_code(self):
         from triangulate.agent import compute as C
@@ -258,12 +266,21 @@ class TestCombine(unittest.TestCase):
             self.assertEqual(m["rel_uncertainty_from_judge_ignored"], {"a": u})
         self.assertAlmostEqual(widths[0], widths[1])
 
-    def test_untested_method_gets_median_weight(self):
-        a = {"id": "m1", "estimate": 100.0, "backtest": [{"log_err": 0.05}]}
+    def test_three_blocks_take_the_median(self):
+        a = {"id": "m1", "estimate": 90.0, "backtest": [{"log_err": 0.05}]}
         b = {"id": "m2", "estimate": 100.0, "backtest": [{"log_err": 0.15}]}
-        c = M.combine([a, b, {"id": "m3", "estimate": 100.0}])
-        w1, w2, w3 = (c["weights"][k] for k in ("m1", "m2", "m3"))
-        self.assertAlmostEqual(w3, (w1 + w2) / 2)
+        c = M.combine([a, b, {"id": "m3", "estimate": 120.0}])
+        self.assertAlmostEqual(c["central"], 100.0)
+        self.assertEqual(c["weights"], {"m1": 0.0, "m2": 1.0, "m3": 0.0})
+        self.assertEqual(c["weight_rule"], "equal_blocks_median")
+        self.assertIn("not the median", c["weight_basis"]["m1"])
+
+
+# v2.12：series_naive 只作对照基线，假裁判改用 series_auto；假网页多两个 5 月的点（2026 年 5 月 / 2025 年 5 月 = 1），
+# yoy1 = 去年 6 月 1,210 x 1 = 1,210，和以前 series_naive 的估计相同
+MONTHS = ((2023, 6, 30, "June", 1000), (2024, 6, 30, "June", 1100), (2025, 6, 30, "June", 1210),
+          (2025, 5, 31, "May", 1000), (2026, 5, 31, "May", 1000))
+MONTHS_TEXT = " ".join(f"{mon} {y}: {v:,} widgets." for y, _, _, mon, v in MONTHS)
 
 
 @unittest.skipUnless(HAVE_LG, "langgraph not installed (use .venv)")
@@ -293,14 +310,14 @@ class TestGraphOffline(unittest.TestCase):
                 if role.startswith("extract"):
                     if "LEAKPAGE" in user:
                         raise AssertionError("leak-flagged page reached the extractor")
-                    pts = [{"name": f"widgets June {y}", "value_as_written": f"{v:,}", "scale_word": "", "unit": "widgets",
-                            "period_start": f"{y}-06-01", "period_end": f"{y}-06-30", "quote": f"June {y}: {v:,} widgets"}
-                           for y, v in ((2023, 1000), (2024, 1100), (2025, 1210))]
+                    pts = [{"name": f"widgets {mon} {y}", "value_as_written": f"{v:,}", "scale_word": "", "unit": "widgets",
+                            "period_start": f"{y}-{mo:02d}-01", "period_end": f"{y}-{mo:02d}-{d}", "quote": f"{mon} {y}: {v:,} widgets"}
+                           for y, mo, d, mon, v in MONTHS]
                     pts.append({"name": "bad", "value_as_written": "9", "quote": "not in page", "period_end": "2025-01-01"})
                     return {"points": pts}, None
                 if role.startswith("judge"):
                     return {"decisions": [], "extra_directions": [],
-                            "methods": [{"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}},
+                            "methods": [{"id": "m1", "method": "series_auto", "params": {"target_history": ["p1", "p2", "p3", "p4", "p5"]}},
                                         {"id": "m2", "method": "linear_fit", "params": {"target_history": ["p1"]}}]}, None
                 if role == "audit":
                     return {"methods": []}, None
@@ -313,7 +330,7 @@ class TestGraphOffline(unittest.TestCase):
                 return {"queries": ["q"], "urls": ["https://a.org/1", "https://leak.org/2"], "web_search_requests": 1}
 
         def fake_fetch(url, as_of, qid):
-            text = "LEAKPAGE value 4,242" if "leak" in url else "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets."
+            text = "LEAKPAGE value 4,242" if "leak" in url else MONTHS_TEXT
             return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01", "text": text}
 
         ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
@@ -326,7 +343,7 @@ class TestGraphOffline(unittest.TestCase):
             g.invoke(Command(resume={"approved": True}), cfg)
             st = g.get_state(cfg).values
         self.assertEqual(len([r for r in st["results"] if r["direction_id"] != "markets"]), 2)
-        self.assertEqual(len(st["points"]), 6)  # 2 个方向 x 3 个核对通过的点
+        self.assertEqual(len(st["points"]), 10)  # 2 个方向 x 5 个核对通过的点
         self.assertEqual([p["id"] for p in st["points"]][:3], ["p1", "p2", "p3"])
         leak_pages = [pg for r in st["results"] for pg in r["pages"] if pg.get("leak_hits")]
         self.assertEqual(len(leak_pages), 2)
@@ -375,13 +392,13 @@ class TestGraphRound2AndBudget(unittest.TestCase):
                         return {"points": [{"name": f"ratio {y}", "value_as_written": f"{v}%", "unit": "%",
                                             "period_start": f"{y}-01-01", "period_end": f"{y}-12-31", "quote": f"{y} ratio {v}%"}
                                            for y, v in ((2023, 10), (2024, 11), (2025, 12))]}, None
-                    return {"points": [{"name": f"widgets June {y}", "value_as_written": f"{v:,}", "unit": "widgets",
-                                        "period_start": f"{y}-06-01", "period_end": f"{y}-06-30", "quote": f"June {y}: {v:,} widgets"}
-                                       for y, v in ((2023, 1000), (2024, 1100), (2025, 1210))]}, None
+                    return {"points": [{"name": f"widgets {mon} {y}", "value_as_written": f"{v:,}", "unit": "widgets",
+                                        "period_start": f"{y}-{mo:02d}-01", "period_end": f"{y}-{mo:02d}-{d}",
+                                        "quote": f"{mon} {y}: {v:,} widgets"} for y, mo, d, mon, v in MONTHS]}, None
                 if role == "judge:r1":
                     return {"decisions": [{"id": "p1", "keep": False, "reason": "dup"}],
                             "extra_directions": [{"id": "b1", "hypothesis": "base rate", "data_to_find": "ratio"}],
-                            "methods": [{"id": "x", "method": "series_naive", "params": {"target_history": ["p2", "p3"], "k": 1}}]}, None
+                            "methods": [{"id": "x", "method": "series_auto", "params": {"target_history": ["p2", "p3", "p4", "p5"]}}]}, None
                 if role == "judge:r2":
                     return None, "reply is not valid JSON"
                 if role == "audit":
@@ -396,8 +413,7 @@ class TestGraphRound2AndBudget(unittest.TestCase):
                         "web_search_requests": 1}
 
         def fake_fetch(url, as_of, qid, **kw):
-            text = "BASE 2023 ratio 10% 2024 ratio 11% 2025 ratio 12%" if "base" in url else \
-                "June 2023: 1,000 widgets. June 2024: 1,100 widgets. June 2025: 1,210 widgets."
+            text = "BASE 2023 ratio 10% 2024 ratio 11% 2025 ratio 12%" if "base" in url else MONTHS_TEXT
             return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01", "text": text}
 
         ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
@@ -410,14 +426,14 @@ class TestGraphRound2AndBudget(unittest.TestCase):
             st = g.get_state(cfg).values
         self.assertEqual(calls.count("judge:r1"), 1)
         self.assertEqual(calls.count("judge:r2"), 1)
-        self.assertEqual([p["id"] for p in st["points"]], [f"p{i}" for i in range(1, 7)])
-        self.assertEqual({p["round"] for p in st["points"][3:]}, {2})
+        self.assertEqual([p["id"] for p in st["points"]], [f"p{i}" for i in range(1, 9)])
+        self.assertEqual({p["round"] for p in st["points"][5:]}, {2})
         self.assertFalse(st["points"][0]["keep"])                    # 第一轮裁判丢掉的
-        self.assertTrue(all(p["keep"] for p in st["points"][1:3]))   # 没列出的 = 保留
+        self.assertTrue(all(p["keep"] for p in st["points"][1:5]))   # 没列出的 = 保留
         self.assertEqual(st["compute"]["methods_from_round"], 1)     # 第二轮失败，回退到第一轮的方法
         self.assertAlmostEqual(st["compute"]["result"]["central"], 1210.0, places=6)
         self.assertEqual(st["compute"]["methods"][0]["label"], "x")
-        self.assertEqual(st["final"]["placeholders"]["n_points_kept"], "2")  # 只数经裁判看过、且保留的点
+        self.assertEqual(st["final"]["placeholders"]["n_points_kept"], "4")  # 只数经裁判看过、且保留的点
 
     def test_budget_abort_in_sub_agent(self):
         from triangulate.agent import pipeline as P

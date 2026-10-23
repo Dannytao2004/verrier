@@ -247,7 +247,9 @@ class TestSentinelNeverReachesAPrompt(unittest.TestCase):
                                        for y, v in ((2023, 1000), (2024, 1100), (2025, 1210))]}, None
                 if role.startswith("judge"):
                     bad = [{"id": "m1", "method": "linear_fit", "params": {"target_history": ["p1"]}}]
-                    good = [{"id": "m1", "method": "series_naive", "params": {"target_history": ["p1", "p2", "p3"], "k": 1}}]
+                    # v2.12：series_naive 只作对照基线、不进合并；修正轮里「能跑的方法」改成两个保留点的平均（formula_mc）
+                    good = [{"id": "m1", "method": "formula_mc", "params": {"formula": "mean(a, b)", "inputs": {
+                        "a": {"id": "p1", "role": "June 2023 widgets"}, "b": {"id": "p3", "role": "June 2025 widgets"}}}}]
                     return {"decisions": [], "extra_directions": extra if role == "judge:r1" else [],
                             "methods": bad if role in ("judge:r1", "judge:r2") else good}, None
                 if role == "audit":
