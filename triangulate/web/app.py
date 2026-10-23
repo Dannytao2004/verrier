@@ -148,8 +148,11 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
         keep = (body or {}).get("keep_direction_ids")
         if keep is not None and not (isinstance(keep, list) and all(isinstance(x, str) for x in keep)):
             raise HTTPException(400, "keep_direction_ids 必须是字符串列表")
+        use = (body or {}).get("use_existing")   # v2.11f：选用一个现成数据候选（id），不跑路线
+        if use is not None and not isinstance(use, str):
+            raise HTTPException(400, "use_existing 必须是字符串")
         try:
-            run.approve(keep)
+            run.approve(keep, use)
         except BadState as e:
             raise HTTPException(409, str(e)) from None
         except ValueError as e:

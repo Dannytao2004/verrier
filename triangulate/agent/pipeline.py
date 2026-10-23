@@ -245,14 +245,14 @@ class Budget:
         hit, miss, out = Budget.reserve_rates(m, tokens_in)
         return (tokens_in * miss + max_tokens * out) / 1e6
 
-    def search_reserve(self) -> float:
+    def search_reserve(self, max_uses: int | None = None) -> float:
         """一次搜索请求的预扣：search_input_tokens 个输入 token + 发出的 max_tokens 个输出 token + (2 x max_uses + 2) 次搜索费。
         v2.10f：Claude 的 pause_turn 续接每次另预扣同样一份（Searcher.renew -> renew_current）。v2.10i：token 部分提到
-        search_tokens_reserve（算法、浮点结果不变）。"""
+        search_tokens_reserve（算法、浮点结果不变）。v2.11f：max_uses 不给 = search_max_uses（现成数据前置步骤给 6）。"""
         m = self.model or MODEL
         n_in = self.SEARCH_INPUT_TOKENS if self.search_input_tokens is None else self.search_input_tokens
         tokens = MAX_TOKENS["search"] if self.search_tokens is None else self.search_tokens
-        return self.search_tokens_reserve(m, n_in, tokens) + (2 * self.search_max_uses + 2) * search_fee_usd(m)
+        return self.search_tokens_reserve(m, n_in, tokens) + (2 * (max_uses or self.search_max_uses) + 2) * search_fee_usd(m)
 
     @staticmethod
     def search_tokens_reserve(model: str, n_in: float, out_tokens: int) -> float:
@@ -347,6 +347,7 @@ class Context:
         self.check_published = False  # v2.4「答案已公布」检查（published.py）：只有 run.prepare_run 在真实使用时打开
         self.live_fetch = False  # v2.5 直接抓 live 页（fetch_live）：同上，只在真实使用时打开
         self.early = None        # v2.5 提前停（published.EarlyWatch）：同上
+        self.human = False       # v2.11f 有人在人工确认那一步（命令行不带 --auto-approve、网页运行）：现成数据前置步骤只在这时跑
         # v2.10d：按 spec.price_id 计价（Kimi 国内站是 "kimi-k3@cn"，其余就是模型名）
         self.budget = budget or (Budget() if spec is None else Budget.for_model(spec.price_id, usd=spec.usd_cap))
         self.calls_path = calls_path
@@ -513,6 +514,10 @@ def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict
         pd = date.fromisoformat(page["page_date"]) if page.get("page_date") else None
         pp = date.fromisoformat(page["page_published"]) if page.get("page_published") else None
         p, why = verify_point(r, text_n, ctx.as_of, pd, pp, url=page["url"])
+        if p is not None and getattr(ctx, "exclude", None):   # v2.11f：用户排除的现成数据：同一个数、期间重叠的点不当证据
+            from .existing import EXCLUDED, excluded_by   # 这里才 import：existing 本身 import 本模块
+            x = excluded_by(p, ctx.exclude)
+            p, why = (None, f"{EXCLUDED} {x}") if x else (p, why)
         base = {"direction_id": d["id"], "round": round_no, "source_url": page["url"], "via": page["status"],
                 "page_date": page.get("page_date"), "snapshot_ts": page.get("snapshot_ts"), "order": (len(out["pages"]), j)}
         if p is None:
@@ -545,10 +550,11 @@ def _timed_live(url: str, as_of: date, qid: str) -> dict:
     return page
 
 
-def _live_pages(ctx: Context, target: dict, d: dict, round_no: int, urls: list, out: dict):
+def _live_pages(ctx: Context, target: dict, d: dict, round_no: int, urls: list, out: dict, watch: bool = True):
     """v2.5 真实使用：这个方向的 URL 同时开抓（fetch_live；同一 host 的请求由 net 的限速排队，robots 照旧），按 URL 顺序
-    抽取（点的编号因此可复现）。每页核对完的点交给 ctx.early；确认了已公布的值就不再抽取，没开始的抓取取消。"""
-    b, w = ctx.budget, getattr(ctx, "early", None)
+    抽取（点的编号因此可复现）。每页核对完的点交给 ctx.early；确认了已公布的值就不再抽取，没开始的抓取取消。
+    v2.11f：watch=False（现成数据前置步骤）时不交给 ctx.early，也不因它停下。"""
+    b, w = ctx.budget, getattr(ctx, "early", None) if watch else None
     ok = [b.reserve_page(round_no) for _ in urls]
     pool = ThreadPoolExecutor(max_workers=max(1, sum(ok)), thread_name_prefix=f"fetch-{d['id']}")
     futs = [pool.submit(_timed_live, u, ctx.as_of, ctx.qid) if k else None for u, k in zip(urls, ok)]

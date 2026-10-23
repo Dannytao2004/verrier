@@ -333,6 +333,8 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
            "leakage": _leakage_view(st.get("leakage")), "ablation": bool(st.get("ablation")),
            "assumption_share": share, "aborted": st.get("aborted") or (st.get("budget") or {}).get("aborted") or None,
            "official": None}
+    if (st.get("existing") or {}).get("accepted"):   # v2.11f：用户选用了现成数据（只有这种运行多这个键）
+        out["existing"] = st["existing"]["accepted"]
     q = QUESTIONS_BY_ID.get(qid)
     if q is not None and q.get("answer_value") is not None:   # 只有回测题才显示官方值和误差
         s = score_one(q, st)

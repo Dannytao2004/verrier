@@ -6,6 +6,8 @@
 published（v2.4，只在真实使用时）：保留的点里有目标本身（已公布）时，结果就是这个值，估计方法只作参考（published.py）。
 v2.5 提前停（只在真实使用、连续值目标时）：子 agent 运行中就确认了已公布的值（published.EarlyWatch）时，裁判节点只编号、
 不调裁判，直接到 final（不估计）。
+v2.11f：plan 和 approve 之间多一个 existing 节点（现成数据前置步骤，existing.py，没有 interrupt）；人在同一个确认里选用了
+现成数据就走 use_existing -> END（不跑路线）。
 
 图里只放可序列化的数据；预算、LLM、哨兵等放在 Context 里，通过闭包交给节点。
 """
@@ -24,6 +26,7 @@ from . import ablation as AB
 from . import assumptions as AS
 from . import compute as C
 from . import discrete as D
+from . import existing as EX
 from . import jev as J
 from . import published as PB
 from . import qty as Q
@@ -49,6 +52,7 @@ class AgentState(TypedDict, total=False):
     as_of: str
     plan: dict
     plan_notes: list
+    existing: dict   # v2.11f：现成数据前置步骤的记录（existing.py）
     approval: dict
     directions: list
     results: Annotated[list, operator.add]
@@ -540,23 +544,41 @@ def build(ctx: Context):
         return {"plan": {"target": target, "market_keywords": kws, "candidates": cands}, "directions": dirs,
                 "plan_notes": notes}
 
+    def existing(state: AgentState):   # v2.11f：现成数据前置步骤（没有 interrupt；不跑时不发任何调用）
+        return {"existing": EX.run(ctx, state)}
+
     def approve(state: AgentState):
         if state.get("aborted"):
             return {"approval": {"approved": False, "by": "abort"}}
-        decision = interrupt({"target": state["plan"]["target"], "directions": state["directions"]})
+        ex = state.get("existing") or {}
+        shown = ex.get("candidates") or []
+        # v2.11f：找到了现成数据时 payload 多一个 existing（候选列表）；没找到时和以前完全相同
+        decision = interrupt({"target": state["plan"]["target"], "directions": state["directions"]}
+                             | ({"existing": shown} if shown else {}))
         decision = decision if isinstance(decision, dict) else {"approved": bool(decision)}
         upd = {"approval": decision}
         if decision.get("directions"):  # 人可以改方向列表
             ds = [_clean_direction(d, i + 1, "d") for i, d in enumerate(decision["directions"][: b.directions])]
             upd["directions"] = [d for d in ds if not (ablate and d["category"] == "own_history")]
+        pick = next((x for x in shown if x["id"] == decision.get("use_existing")), None)
+        if pick is not None:   # v2.11f：选用一个现成数据：不跑路线（fan_out -> use_existing）
+            upd["existing"] = {**ex, "accepted": pick}
+        elif shown and decision.get("approved"):   # 批准路线 = 排除全部候选：同值、期间重叠的点由 _process_page 丢掉
+            ctx.exclude = shown
+            upd["existing"] = {**ex, "excluded": [x["id"] for x in shown]}
         return upd
 
     def fan_out(state: AgentState):
+        if (state.get("existing") or {}).get("accepted"):
+            return "use_existing"
         if not state.get("approval", {}).get("approved"):
             return END
         t = state["plan"]["target"]
         sends = [Send("subagent", {"direction": d, "round": 1, "target": t}) for d in state["directions"]]
         return sends + [Send("markets", {"keywords": state["plan"].get("market_keywords", [])})]
+
+    def use_existing(state: AgentState):   # v2.11f：用户选用了现成数据：终稿由代码写，然后结束
+        return EX.accept(state)
 
     def subagent(task: dict):
         return {"results": [run_direction(ctx, task["target"], task["direction"], task["round"])]}
@@ -855,11 +877,12 @@ def build(ctx: Context):
     def final(state: AgentState):
         """已公布（published.py）：终稿由代码写；确认的点互相矛盾：照常写估计的终稿，后面附一句。"""
         pub = state.get("published") or {}
-        if pub.get("status") == "published":
-            return {"final": PB.final_text(state)}
-        out = final_estimate(state)
+        out = {"final": PB.final_text(state)} if pub.get("status") == "published" else final_estimate(state)
         if pub.get("status") == "conflict":
             note = "\n\n" + PB.conflict_note(pub)
+            out["final"] = {**out["final"], "text": out["final"]["text"] + note, "template": out["final"]["template"] + note}
+        note = EX.excluded_note(state)   # v2.11f：排除了现成数据时末尾列出被排除的值和因此丢掉的点（没排除时是空串，终稿和以前相同）
+        if note:
             out["final"] = {**out["final"], "text": out["final"]["text"] + note, "template": out["final"]["template"] + note}
         return out
 
@@ -1014,12 +1037,15 @@ def build(ctx: Context):
                 "model_error": err, "used_model_text": model_text is not None, "model_text": model_text}
 
     g = StateGraph(AgentState)
-    for name, fn in [("plan", plan), ("approve", approve), ("subagent", subagent), ("markets", markets),
+    for name, fn in [("plan", plan), ("existing", existing), ("approve", approve), ("use_existing", use_existing),
+                     ("subagent", subagent), ("markets", markets),
                      ("judge", judge), ("compute", compute), ("published", published), ("jev", jev), ("final", final)]:
         g.add_node(name, fn)
     g.add_edge(START, "plan")
-    g.add_edge("plan", "approve")
-    g.add_conditional_edges("approve", fan_out, ["subagent", "markets", END])
+    g.add_edge("plan", "existing")
+    g.add_edge("existing", "approve")
+    g.add_conditional_edges("approve", fan_out, ["subagent", "markets", "use_existing", END])
+    g.add_edge("use_existing", END)
     g.add_edge("subagent", "judge")
     g.add_edge("markets", "judge")
     g.add_conditional_edges("judge", after_judge, ["subagent", "compute", "final"])

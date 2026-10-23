@@ -46,7 +46,15 @@ BY_CONSTRUCTION = [
 
 def _ask_human(payload: dict) -> dict:
     print(json.dumps(payload, indent=1, ensure_ascii=False))
-    ans = input("Approve these directions? [y/N] ").strip().lower()
+    ids = [x["id"] for x in payload.get("existing") or []]
+    if not ids:
+        ans = input("Approve these directions? [y/N] ").strip().lower()
+        return {"approved": ans in ("y", "yes"), "by": "human"}
+    # v2.11f：找到了现成数据：回答它的 id 就用这个数、不跑路线；批准路线 = 排除这些现成数据（它们不再当证据）
+    ans = input(f"Approve these directions (this excludes the existing figures above), or use one of them? "
+                f"[y/N/{'/'.join(ids)}] ").strip().lower()
+    if ans in ids:
+        return {"approved": False, "use_existing": ans, "by": "human"}
     return {"approved": ans in ("y", "yes"), "by": "human"}
 
 
@@ -157,6 +165,7 @@ def initial_input(q: dict) -> dict:
 
 def run_question(q: dict, auto_approve: bool, tag: str = "", ablate_own_history: bool = False) -> dict:
     h = prepare_run(q, tag, ablate_own_history)
+    h["ctx"].human = not auto_approve   # v2.11f：有人确认时才跑现成数据前置步骤（existing.py）
     g, cfg = h["g"], h["cfg"]
     out = g.invoke(initial_input(q), cfg)
     approvals = []
@@ -242,6 +251,12 @@ def _save_run(h: dict, approvals: list) -> dict:
                  if (state.get("published") or {}).get("early_stop") else
                  f"estimate for reference {_n(e.get('central'))}, 80% [{_n(e.get('p10'))}, {_n(e.get('p90'))}] (not blended)"))
         est = f"published value {_n(r.get('central'))}"
+    elif r.get("basis") == "existing":   # v2.11f：用户选用了前置步骤找到的现成数据（existing.py）：没有估计
+        x = r.get("existing") or {}
+        v = PB._with_unit(r.get("central"), str(x.get("unit") or ""))   # 同终稿的写法（_n 会把 4.3% 写成 4）
+        meta = (f"as_of <b>{q['as_of']}</b> &middot; existing figure <b>{html.escape(v)}</b> "
+                f"({html.escape(str(x.get('type')))}, {html.escape(str(x.get('domain')))}) &middot; no estimate was made")
+        est = f"existing figure {v}"
     else:
         bt = basis_text(r.get("basis"))   # v2.6d：附 BASIS_TEXT 的说明（没有 basis 时说明是空串，只写键，同 v2.6c）
         ut = unit_text((state.get("plan") or {}).get("target"))   # v2.7e：估计值和区间后面跟单位（没有单位时和以前相同）

@@ -495,6 +495,7 @@
       <p class="sub">${T("Verrier stopped here. Unchecked routes will not run; kept routes are renumbered d1..dK.",
         "agent 停在这里等你确认。不勾的方向不会跑，保留的方向会重新编号 d1..dK。")}</p>
       ${(r.plan_notes || []).length ? `<p class="fine">${r.plan_notes.map(esc).join("<br>")}</p>` : ""}
+      ${existingList(r)}
       <div class="cx-dirs">${(r.directions_proposed || []).map(d => `<label class="cx-dir cx-pick">
         <input type="checkbox" class="cx-keep" value="${esc(d.id)}" checked>
         <span class="cx-dh"><b>${esc(d.id)}</b><span class="stencil">${esc(d.category)}</span>
@@ -506,7 +507,28 @@
         <button class="btn" type="button" id="cxAll">${T("All", "全选")}</button><button class="btn" type="button" id="cxNone">${T("None", "全不选")}</button>
         <span id="cxGateMsg" class="fine"></span></div></div>`;
   }
+  // v2.11f：前置步骤找到的现成数据（同一个确认里，没找到时什么都不加）：每个一个「用这个数」；批准下面的方向 = 排除它们
+  const XT = {official: ["Official figure", "官方数据"], estimate: ["Third-party estimate", "第三方估计"]};
+  const xType = x => T(...(XT[x.type] || [esc(x.type), esc(x.type)]));
+  function existingList(r) {
+    const xs = r.existing || [];
+    if (!xs.length) return "";
+    return `<p class="sub">${T("Verrier found existing figures for this exact target. Use one to stop here without running any route, or approve the routes below to estimate it: approving excludes these figures from the evidence.",
+        "agent 找到了这个目标本身的现成数据。用其中一个就到此为止、不跑任何方向；批准下面的方向就照常估计，这些现成数据不再当证据。")}</p>
+      <div class="cx-dirs" style="margin-bottom:12px">${xs.map(x => `<div class="cx-dir"><span class="cx-dh"><b>${esc(x.id)}</b><span class="stencil">${xType(x)}</span></span>
+        <span><b>${fmt(x.value)}</b> ${esc(x.unit)} · ${esc([x.period_start, x.period_end].filter(Boolean).join(" – "))}</span>
+        <span class="fine">${esc(x.domain)} · “${esc(x.quote)}”</span>
+        <span><button class="btn" type="button" data-use="${esc(x.id)}">${T("Use this figure", "用这个数")}<span>→</span></button></span></div>`).join("")}</div>`;
+  }
   function wireGate(r, tok) {
+    body.querySelectorAll("button[data-use]").forEach(b => { b.onclick = async () => {
+      b.disabled = true;
+      try {
+        await post(`/api/runs/${encodeURIComponent(r.id)}/approve`, {use_existing: b.dataset.use});
+        stop();
+        viewRun(r.id, tok).catch(fail(tok));
+      } catch (e) { $("cxGateMsg").innerHTML = `<span class="cx-bad">${esc(e.message)}</span>`; b.disabled = false; }
+    }; });
     const boxes = () => [...body.querySelectorAll("input.cx-keep")];
     const sync = b => b.closest(".cx-dir").classList.toggle("off", !b.checked);
     boxes().forEach(b => { b.onchange = () => sync(b); });
@@ -603,9 +625,12 @@
   // ---------- 结果 ----------
   function delivered(r, qid, tag) {
     const e = r.estimate || {}, o = r.official, sh = (r.assumption_share || {}).overall, ev = r.evidence || {}, b = r.budget || {};
-    const ms = r.methods || [], d = r.discrete;
+    const ms = r.methods || [], d = r.discrete, x = r.existing;   // v2.11f：x = 用户选用的现成数据（没有区间、没有方法）
     const main = d ? `<div class="lbl">${T("Most likely outcome", "最可能的结果")}</div><div class="cx-big">${esc(d.most_likely ?? "—")}</div>
         <p class="fine">${prob(d.most_likely_prob)} · ${(d.outcomes || []).map(x => `${esc(x.label)} ${prob(x.prob)}`).join(" · ")}</p>`
+      : x ? `<div class="lbl">${T("Existing figure", "现成数据")} · ${xType(x)}</div><div class="cx-big">${fmt(x.value)}${bigUnit(x.unit)}</div>
+        <p class="fine">${T("Not an estimate by Verrier", "不是 Verrier 的估计")} · ${T("source", "出处")}
+          ${/^https?:\/\//.test(x.source_url || "") ? `<a href="${esc(x.source_url)}" target="_blank" rel="noopener">${esc(x.domain)}</a>` : esc(x.domain)}</p>`
       : `<div class="lbl">${T("Estimate", "估计")}</div><div class="cx-big">${fmt(e.central)}${bigUnit(e.unit)}</div>
         <p class="fine">80% model-based [${fmt(e.p10)}, ${fmt(e.p90)}]${e.unit ? " " + esc(e.unit) : ""}${e.basis_text ? " · " + esc(e.basis_text) : ""}</p>`;
     return `<div class="cx-deliv"><div class="bh"><span>R-01 · ${T("Delivered", "已交付")}</span><i class="hz"></i><span class="sp"></span><span>${esc(qid)} / ${esc(tag || "—")}</span></div>
@@ -617,7 +642,7 @@
       </div><div class="cx-meta">
         <div><span class="lbl">${T("Kept points", "保留的点")}</span><b>${(ev.kept || []).length}</b></div>
         <div><span class="lbl">${T("Discarded", "丢弃的点")}</span><b>${(ev.discarded || []).length}</b></div>
-        <div><span class="lbl">${T("Methods computed", "算出的方法")}</span><b>${ms.filter(m => m.status === "computed").length}/${ms.length}</b></div>
+        ${x ? "" : `<div><span class="lbl">${T("Methods computed", "算出的方法")}</span><b>${ms.filter(m => m.status === "computed").length}/${ms.length}</b></div>`}
         <div><span class="lbl">${T("Cost", "花费")}</span><b>${usd(b.usd_total_assumed)}</b></div>
       </div></div>
       <h3 class="cx-h">${T("Final answer", "最终答案")}</h3><pre class="cx-answer">${esc(r.final_text || "—")}</pre>

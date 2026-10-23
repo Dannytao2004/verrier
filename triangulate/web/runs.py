@@ -42,7 +42,7 @@ NEED_KEY = ("需要你自己的 API key：网页运行只用你填的 key，从�
             "/ Your own API key is required: web runs only use the key you enter and never the server's key file.")
 # 运行结束清 key 之前要过一遍 redact_obj 的字段（状态视图里的文字都来自这些）
 _SCRUB_FIELDS = ("q", "error", "stopped", "target", "proposed", "plan_notes", "dirs", "markets", "judge", "compute", "approvals",
-                 "result")
+                 "result", "existing")
 
 
 class Busy(RuntimeError):
@@ -80,6 +80,7 @@ class WebRun:
         self.cancel_requested = False
         self.approvals = []
         self.target, self.proposed, self.plan_notes = None, [], []
+        self.existing = []   # v2.11f：人工确认里给人看的现成数据候选（graph.approve 的 payload）；没找到时是空列表
         self.plan_done = False
         self.dirs, self.order = {}, []       # 方向 id -> 进度；批准后的方向（approve 节点会重新编号 d1..dK）+ 第二轮方向
         self.markets = None
@@ -128,6 +129,7 @@ class WebRun:
     def _plan_phase(self):
         h = self._prepare(self.q, self.tag, spec=self._spec)
         h["ctx"].progress = self._on_event
+        h["ctx"].human = True   # v2.11f：网页运行一定有人确认：跑现成数据前置步骤（existing.py）
         self.h = h
         if self.cancel_requested:
             self._abort_budget()
@@ -150,6 +152,7 @@ class WebRun:
             with self.lock:
                 self.target = payload.get("target") or self.target
                 self.proposed = list(payload.get("directions") or [])
+                self.existing = list(payload.get("existing") or [])
                 cancelled = self.cancel_requested
                 if cancelled:  # 规划时点了取消：不进入等待确认，直接按「不批准」结束（审查发现：否则会占着名额、还能被批准）
                     self.approvals.append({"approved": False, "by": "web-cancel"})
@@ -203,10 +206,13 @@ class WebRun:
             pass
 
     # ---------- 用户操作 ----------
-    def approve(self, keep_ids=None):
+    def approve(self, keep_ids=None, use_existing=None):
+        """v2.11f：use_existing = 选用的现成数据候选 id（不跑路线）；批准路线时给人看过的候选都算排除。"""
         with self.lock:
             if self.status != "awaiting_approval" or self.cancel_requested:
                 raise BadState(f"run is {self.status}{' (cancel requested)' if self.cancel_requested else ''}, not awaiting_approval")
+            if use_existing is not None and use_existing not in [x.get("id") for x in self.existing]:
+                raise ValueError(f"unknown existing figure id: {use_existing!r}")
             ids = [d.get("id") for d in self.proposed]
             if keep_ids is None:
                 keep = ids
@@ -217,8 +223,9 @@ class WebRun:
                 keep = [i for i in ids if i in set(keep_ids)]
                 if not keep:
                     raise ValueError("至少保留一个方向（全部不要请用「取消」）")
-            decision = {"approved": True, "by": "web"}
-            if len(keep) < len(ids):   # 只在真的去掉了方向时才带 directions，否则和命令行的批准完全一样
+            decision = {"approved": True, "by": "web"} if use_existing is None else {"approved": False, "use_existing": use_existing,
+                                                                                    "by": "web"}
+            if use_existing is None and len(keep) < len(ids):   # 只在真的去掉了方向时才带 directions，否则和命令行的批准完全一样
                 decision["directions"] = [d for d in self.proposed if d.get("id") in keep]
             self.approvals.append(decision)
             self.status = "running"
@@ -264,6 +271,8 @@ class WebRun:
             d.update(category=x.get("category", ""), hypothesis=str(x.get("hypothesis", ""))[:300], round=rnd)
 
     def _on_event(self, ev: dict):
+        if ev.get("direction_id") == "existing":   # v2.11f：前置步骤的取页、抽取事件不进方向进度（没有新的阶段）
+            return
         with self.lock:
             d = self._dir(ev["direction_id"], ev.get("round"))
             k = ev.get("kind")
@@ -332,7 +341,7 @@ class WebRun:
                                     "outcomes": r.get("outcomes"),
                                     "n_computed": sum(1 for m in ms if m.get("estimate") is not None or m.get("distribution")),
                                     "n_excluded_by_input_audit": len(c.get("excluded_by_input_audit") or [])}
-                elif node == "final":
+                elif node in ("final", "use_existing"):   # v2.11f：选用现成数据时终稿由 use_existing 写
                     self.final_done = True
 
     def _roles(self) -> dict:
@@ -358,10 +367,11 @@ class WebRun:
             S.append({"key": key, "label": label, "status": status, "detail": detail})
         add("plan", "规划方向", "done" if self.plan_done else ("running" if st == "planning" else "pending"),
             f"提出 {len(self.proposed)} 个方向" if self.proposed else "")
-        add("approve", "人工确认", "done" if any(a.get("approved") for a in self.approvals) else
+        add("approve", "人工确认", "done" if any(a.get("approved") or a.get("use_existing") for a in self.approvals) else
             "waiting" if st == "awaiting_approval" else "pending",
-            next((f"保留 {len(a['directions'])} 个方向" if a.get("directions") else "全部保留"
-                  for a in self.approvals if a.get("approved")), ""))
+            next((f"选用现成数据 {a['use_existing']}" if a.get("use_existing") else
+                  f"保留 {len(a['directions'])} 个方向" if a.get("directions") else "全部保留"
+                  for a in self.approvals if a.get("approved") or a.get("use_existing")), ""))
         for rnd in (1, 2):
             ds = [self.dirs[i] for i in self.order if self.dirs[i]["round"] == rnd]
             if rnd == 2 and not ds:
@@ -407,6 +417,8 @@ class WebRun:
                     "markets": self.markets, "judge": {str(k): v for k, v in self.judge.items()},
                     "stages": self._stages(roles), "calls": roles, "compute": self.compute,
                     "approvals": list(self.approvals), "result": self.result}
+            if self.existing:   # v2.11f：只有找到了现成数据的运行才带这个键（没找到时状态视图和以前相同）
+                view["existing"] = list(self.existing)
             return self._public(view)
 
     def brief(self) -> dict:
