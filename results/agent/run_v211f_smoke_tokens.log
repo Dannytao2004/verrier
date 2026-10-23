@@ -1,0 +1,142 @@
+{
+ "target": {
+  "what": "Total number of tokens processed (input plus output, including cached and reasoning tokens where applicable) by all large language models worldwide during calendar year 2025, aggregated across both provider-operated consumer/enterprise products (chat apps, coding assistants, embedded features) and t",
+  "unit": "token",
+  "period_start": "2025-01-01",
+  "period_end": "2025-12-31",
+  "publisher": "None — no single official publisher exists; would require synthesis across provider disclosures (OpenAI, Google, Anthropic, Meta, Microsoft, ByteDance, Alibaba, DeepSeek, xAI, Mistral, etc.) and third-party trackers (OpenRouter, Poe, Artificial Analysis, Similarweb, a16z, Epoch AI).",
+  "cadence": "Irregular / event-driven: occasional provider blog disclosures (e.g., Google's monthly token counts, Microsoft Azure Foundry token stats, OpenRouter weekly token rankings), plus annual reviews. No consistent global series.",
+  "caveats": "Working interpretation: worldwide, all providers, full calendar year 2025, tokens = input + output tokens billed/processed at inference (including cached input and reasoning tokens). Alternatives that would materially change the answer: (a) API-only vs. API+first-party products (first-party consumer",
+  "outcome_type": "continuous",
+  "unit_canonical": "token"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "related_series",
+   "perspective": "Hyperscaler / frontier-lab disclosures (Google, Microsoft, Meta, OpenAI, Anthropic, xAI, ByteDance, Alibaba)",
+   "hypothesis": "Several major providers periodically disclose aggregate token throughput (e.g., Google's 'X trillion tokens per month' for Gemini API, Microsoft's Azure AI Foundry token counts, Meta's Llama token stats). Summing disclosed monthly/quarterly rates across the largest providers, then scaling up for the long tail of smaller providers, yields a bottom-up global total. Direction: higher disclosed rates → higher total; coverage gap is the main uncertainty.",
+   "data_to_find": "Any provider-published token-per-month or token-per-quarter figures covering any part of 2025 (Google Gemini API, Microsoft Azure AI Foundry, OpenAI, Anthropic, xAI, ByteDance Doubao, Alibaba Qwen, DeepSeek, Mistral). Minimum: at least 3-4 large-provider datapoints with dates, plus an estimate of each provider's share of global volume to bridge to the total.",
+   "search_hints": [
+    "Google Gemini API trillion tokens per month 2025",
+    "Azure AI Foundry tokens processed monthly 2025",
+    "OpenAI tokens per day 2025 disclosure"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "capacity_consumption",
+   "perspective": "Datacenter / GPU capacity and utilisation (NVIDIA shipments, hyperscaler capex, inference vs. training split)",
+   "hypothesis": "Global inference token throughput is bounded by deployed inference compute: (GPU fleet dedicated to inference) × (tokens/sec per GPU at realistic batch/utilisation) × (seconds in year). This gives an upper bound and, with an inference-share and utilisation assumption, a central estimate. Direction: more inference GPUs and higher utilisation → more tokens.",
+   "data_to_find": "2025 NVIDIA/AMD datacenter GPU shipments or installed base; hyperscaler capex split between training and inference; published tokens/sec per GPU (e.g., H100/H200/B200 inference benchmarks at production batch sizes); average utilisation of inference fleets. Minimum: an inference-GPU count and a tokens/sec-per-GPU figure.",
+   "search_hints": [
+    "NVIDIA data center GPU shipments 2025 inference",
+    "H100 tokens per second inference benchmark batch",
+    "hyperscaler capex 2025 training inference split"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d3",
+   "category": "related_series",
+   "perspective": "User-base × usage decomposition (ChatGPT/Gemini/Meta AI/Claude weekly actives × messages × tokens per message)",
+   "hypothesis": "Total tokens ≈ Σ over products (weekly/monthly active users × sessions or messages per user × tokens per message, including context). Provider user disclosures (OpenAI 800M weekly, Meta AI 1B+, Gemini app users) combined with average tokens-per-request benchmarks give a first-party-product total; API adds a separate component. Direction: more users and longer contexts → more tokens.",
+   "data_to_find": "2025 user/usage disclosures for major consumer LLM products (ChatGPT weekly actives, Gemini app MAU, Meta AI MAU, Claude, Copilot, Doubao, Qwen app), average messages per user per day, and average tokens per request (input+output, including system prompt and context). Minimum: 2-3 large products' user counts plus a tokens-per-request benchmark.",
+   "search_hints": [
+    "ChatGPT weekly active users 2025",
+    "average tokens per ChatGPT request",
+    "Gemini app monthly active users 2025"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d4",
+   "category": "forecasts_markets",
+   "perspective": "Analyst forecasts and market-sizing reports on AI inference / token volume",
+   "hypothesis": "Research firms (Epoch AI, a16z, Menlo Ventures, IDC, Gartner, SemiAnalysis) publish estimates of total inference tokens or inference compute for 2025. These provide an independent cross-check or a direct figure. Direction: forecasters' central estimates anchor the range; check whether they cover API only or all usage.",
+   "data_to_find": "Published 2025 estimates of global LLM token volume or inference compute (Epoch AI token-throughput estimates, Menlo Ventures enterprise LLM API spend/tokens, a16z, IDC). Minimum: one or two independent aggregate estimates with stated scope.",
+   "search_hints": [
+    "Epoch AI tokens processed 2025 estimate",
+    "global LLM inference tokens 2025 report",
+    "Menlo Ventures LLM API token volume 2025"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d5",
+   "category": "related_series",
+   "perspective": "Third-party API aggregators and routers (OpenRouter, Poe, Together, Fireworks, Groq)",
+   "hypothesis": "OpenRouter publishes weekly token totals across its marketplace; scaling OpenRouter's share of global API token volume (estimated via revenue or request share) gives an API-segment total. API segment is a minority of total tokens but more observable. Direction: higher OpenRouter volume → higher API total; share assumption is the key transfer.",
+   "data_to_find": "OpenRouter weekly/monthly token totals for 2025 (they publish rankings and sometimes aggregate tokens), plus any estimate of OpenRouter's share of total API inference market (revenue or request share vs. direct provider APIs). Substitute: Poe or Together AI disclosed volumes.",
+   "search_hints": [
+    "OpenRouter tokens per week 2025",
+    "OpenRouter market share API inference",
+    "Poe tokens processed 2025"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d6",
+   "category": "physical_flow",
+   "perspective": "Energy / power draw of AI datacenters as a proxy for inference work",
+   "hypothesis": "AI datacenter electricity consumption in 2025, split into inference vs. training, converted via energy-per-token (joules/token) benchmarks, yields a token total. Direction: higher AI datacenter power and higher inference share → more tokens; energy-per-token is the conversion factor with wide uncertainty.",
+   "data_to_find": "2025 AI datacenter power consumption estimates (IEA, EPRI, SemiAnalysis, LBNL), inference share of AI compute, and published joules-per-token figures (e.g., from Epoch AI, Google, or academic measurements). Minimum: an inference-energy total and a joules/token range.",
+   "search_hints": [
+    "AI data center electricity consumption 2025 IEA",
+    "joules per token LLM inference energy",
+    "inference share of AI compute 2025"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d7",
+   "category": "base_rates",
+   "perspective": "Token-per-request and context-length benchmarks (Artificial Analysis, provider docs, academic measurement)",
+   "hypothesis": "The tokens-per-interaction conversion factor (input context + output, including reasoning) is needed by d5 and d1. Longer contexts and reasoning models raise tokens per request substantially in 2025. Direction: higher measured tokens/request → higher totals from any user- or request-based route.",
+   "data_to_find": "Measured average input and output tokens per request for major models/products in 2025 (Artificial Analysis, OpenRouter per-model token stats, provider usage dashboards, academic studies). Minimum: a range for chat-style and coding-agent-style requests, plus reasoning-token multipliers.",
+   "search_hints": [
+    "average input output tokens per LLM request 2025",
+    "Artificial Analysis tokens per request",
+    "reasoning tokens per query 2025"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "d8",
+   "category": "own_history",
+   "perspective": "Time series of disclosed token growth to extrapolate 2025 from earlier anchors",
+   "hypothesis": "Where providers disclosed token volumes in 2023-2024 (e.g., Google's progression from 9.7T to 480T tokens/month, Microsoft's Azure OpenAI token growth), fitting growth curves and extrapolating through 2025 constrains the total. Direction: faster observed growth → higher 2025 total.",
+   "data_to_find": "Historical token-volume disclosures for 2023-2024 and any 2025 partials (Google Gemini API monthly tokens, Azure OpenAI/Foundry tokens, OpenAI usage stats), aligned by date, to fit growth and extrapolate to full-year 2025. Minimum: 2-3 dated datapoints per major provider.",
+   "search_hints": [
+    "Google Gemini API tokens per month history 2024 2025",
+    "Azure OpenAI tokens processed growth 2024",
+    "LLM token volume growth 2023 2024 2025"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c8"
+  }
+ ]
+}
+Approve these directions? [y/N] [ask_8db1fabf] plan: 8 directions -> approved=True
+[ask_8db1fabf] done in 308.2s; estimate 316,030,734,102,294,400; usd 0.7857
+Best computed estimate for the pinned target — total tokens processed worldwide by all large language models during calendar year 2025, across API and first-party products, input plus output including cached and reasoning tokens — is 316,030,734,102,294,400 token (80% model-based interval 93,645,241,551,696,832 to 1,066,529,630,788,542,720 token). This comes from method m3 at weight 100%, an energy route: IEA's AI-focused data-centre electricity for 2025 of 155 TWh, multiplied by an assumed inference share of 0.7 (range 0.461 to 0.922) and an assumed 3,000 tokens per Wh (range 1,000 to 10,000). The electricity figure is observed; the two conversion factors are analyst assumptions, not measurements. Other methods (provider-disclosure bottom-up, Google-only, OpenRouter-scaled, third-party annualized) were discarded for missing inputs, so no cross-method averaging occurred. The result is most fragile to the tokens-per-Wh assumption, which spans an order of magnitude and varies with model size, batch and utilisation. Better evidence would be provider-reported annual token volumes and measured inference energy per token.
+
+Key assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):
+- a3 Inference share of AI-focused data-centre electricity, 2025: 0.7 share, range 0.461 to 0.922 (range widened by code); used by m3. Overturned by: Evidence that training dominates AI DC electricity in 2025.
+- a4 Tokens per Wh of inference energy, 2025 frontier serving: 3,000 tokens per Wh, range 1,000 to 10,000; used by m3. Overturned by: A measured 2025 tokens-per-joule benchmark outside [n]–[n] tokens/Wh.

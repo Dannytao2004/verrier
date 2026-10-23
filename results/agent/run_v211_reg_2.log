@@ -1,0 +1,222 @@
+[fc_hk_visitors_2026_09] plan: 6 directions -> approved=True
+[fc_hk_visitors_2026_09] done in 215.4s; estimate 4,089,332; usd 0.4767
+[fc_us_starts_2026_08] plan: 7 directions -> approved=True
+[fc_us_starts_2026_08] done in 227.1s; estimate 1,265,969; usd 0.5853
+[fc_us_gen_2026_07] plan: 7 directions -> approved=True
+[fc_us_gen_2026_07] done in 266.8s; estimate n/a; usd 0.7196
+[fc_kr_online_2026_08] plan: 6 directions -> approved=True
+[fc_kr_online_2026_08] done in 206.8s; estimate 40,379,441,630,573; usd 0.4807
+[
+ {
+  "id": "fc_hk_visitors_2026_09",
+  "as_of": "2026-09-14",
+  "answer_value": 4031090,
+  "source": "https://www.discoverhongkong.com/content/dam/dhk/intl/corporate/newsroom/press-release/hktb/2026/10-Sep-Visitor-Arrivals-E.pdf",
+  "estimate": 4089332.467200303,
+  "p10": 2418235.986305285,
+  "p90": 6915222.551479889,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.014448317254217358,
+  "abs_log10_err": 0.0062299260829619925,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 4089332.467200303,
+    "pct_err": 0.014448317254217358,
+    "abs_log10_err": 0.0062299260829619925
+   },
+   "naive": {
+    "estimate": 3200000.0,
+    "pct_err": -0.20617004333815425,
+    "abs_log10_err": 0.10027251620303762
+   },
+   "structured_no_retrieval": {
+    "estimate": 3614797.1514228885,
+    "pct_err": -0.10327054185768902,
+    "abs_log10_err": 0.04733856315227248
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4767,
+  "usd_tokens": 0.1167,
+  "wall_s": 215.4
+ },
+ {
+  "id": "fc_us_starts_2026_08",
+  "as_of": "2026-08-17",
+  "answer_value": 1275000,
+  "source": "https://www.census.gov/construction/nrc/pdf/newresconst.pdf",
+  "estimate": 1265968.7171465894,
+  "p10": 918925.4525142914,
+  "p90": 1744077.0504382735,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a2",
+   "a3",
+   "a4"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.007083359100714226,
+  "abs_log10_err": 0.003087210635613843,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 1265968.7171465894,
+    "pct_err": -0.007083359100714226,
+    "abs_log10_err": 0.003087210635613843
+   },
+   "naive": {
+    "estimate": 1350000.0,
+    "pct_err": 0.05882352941176472,
+    "abs_log10_err": 0.024823583725032145
+   },
+   "structured_no_retrieval": {
+    "estimate": 1335707.7804621987,
+    "pct_err": 0.04761394546054798,
+    "abs_log10_err": 0.02020127096382156
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.5853,
+  "usd_tokens": 0.1653,
+  "wall_s": 227.1
+ },
+ {
+  "id": "fc_us_gen_2026_07",
+  "as_of": "2026-08-25",
+  "answer_value": 453744,
+  "source": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_1_01",
+  "estimate": null,
+  "p10": null,
+  "p90": null,
+  "basis": "no_method",
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": 0,
+  "ablation": false,
+  "pct_err": null,
+  "abs_log10_err": null,
+  "covered_80": null,
+  "arms": {
+   "agent": null,
+   "naive": null,
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.7196,
+  "usd_tokens": 0.2896,
+  "wall_s": 266.8
+ },
+ {
+  "id": "fc_kr_online_2026_08",
+  "as_of": "2026-09-01",
+  "answer_value": 24211800000000,
+  "source": "https://mods.go.kr/board.es?mid=a10301010000&bid=241&act=view&list_no=447300",
+  "estimate": 40379441630572.98,
+  "p10": 23588813318521.984,
+  "p90": 69121718179717.78,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.6677587635191509,
+  "abs_log10_err": 0.22213323140407507,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 40379441630572.98,
+    "pct_err": 0.6677587635191509,
+    "abs_log10_err": 0.22213323140407507
+   },
+   "naive": {
+    "estimate": 21500000000000.0,
+    "pct_err": -0.11200323809051782,
+    "abs_log10_err": 0.05158861787838975
+   },
+   "structured_no_retrieval": {
+    "estimate": 19062840058445.188,
+    "pct_err": -0.2126632444326656,
+    "abs_log10_err": 0.10383947373584253
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.4807,
+  "usd_tokens": 0.1107,
+  "wall_s": 206.8
+ }
+]

@@ -1,0 +1,218 @@
+[fc_pola_teu_2026_09] plan: 7 directions -> approved=True
+[fc_pola_teu_2026_09] done in 204.7s; estimate 886,499; usd 0.5362
+[fc_es_transit_2026_08] plan: 6 directions -> approved=True
+[fc_es_transit_2026_08] done in 263.3s; estimate n/a; usd 0.5251
+[fc_ca_rail_2026_07] plan: 6 directions -> approved=True
+[fc_ca_rail_2026_07] done in 229.4s; estimate 29,647,319; usd 0.482
+[fc_de_cars_2026_09] plan: 6 directions -> approved=True
+[fc_de_cars_2026_09] done in 227.0s; estimate 238; usd 0.5604
+[
+ {
+  "id": "fc_pola_teu_2026_09",
+  "as_of": "2026-09-10",
+  "answer_value": 1042652,
+  "source": "https://portoflosangeles.org/references/2026-news-releases/news_100926_sept_cargo",
+  "estimate": 886499.1923252634,
+  "p10": 643480.8857656149,
+  "p90": 1221296.2892569865,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a1"
+  ],
+  "assumption_weight_share": 0.5,
+  "ablation": false,
+  "pct_err": -0.14976502963091864,
+  "abs_log10_err": 0.07046103636491294,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 886499.1923252634,
+    "pct_err": -0.14976502963091864,
+    "abs_log10_err": 0.07046103636491294
+   },
+   "naive": {
+    "estimate": 780000.0,
+    "pct_err": -0.2519076355294,
+    "abs_log10_err": 0.1260447779330374
+   },
+   "structured_no_retrieval": {
+    "estimate": 779969.603847736,
+    "pct_err": -0.251936788259423,
+    "abs_log10_err": 0.1260617024694751
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5362,
+  "usd_tokens": 0.1462,
+  "wall_s": 204.7
+ },
+ {
+  "id": "fc_es_transit_2026_08",
+  "as_of": "2026-09-11",
+  "answer_value": 371623271,
+  "source": "https://www.ine.es/dyngs/Prensa/TV0826.htm",
+  "estimate": null,
+  "p10": null,
+  "p90": null,
+  "basis": "no_method",
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": 0,
+  "ablation": false,
+  "pct_err": null,
+  "abs_log10_err": null,
+  "covered_80": null,
+  "arms": {
+   "agent": null,
+   "naive": {
+    "estimate": 480000000.0,
+    "pct_err": 0.2916306309569079,
+    "abs_log10_err": 0.11113833573953483
+   },
+   "structured_no_retrieval": {
+    "estimate": 431746670.0495819,
+    "pct_err": 0.16178588302017793,
+    "abs_log10_err": 0.06512609501532916
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5251,
+  "usd_tokens": 0.1651,
+  "wall_s": 263.3
+ },
+ {
+  "id": "fc_ca_rail_2026_07",
+  "as_of": "2026-08-29",
+  "answer_value": 31686803,
+  "source": "https://www150.statcan.gc.ca/n1/daily-quotidien/260928/dq260928a-eng.htm",
+  "estimate": 29647318.545572706,
+  "p10": 20062098.973736357,
+  "p90": 43812140.399333365,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.06436384429275788,
+  "abs_log10_err": 0.02889300413442068,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 29647318.545572706,
+    "pct_err": -0.06436384429275788,
+    "abs_log10_err": 0.02889300413442068
+   },
+   "naive": null,
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.482,
+  "usd_tokens": 0.122,
+  "wall_s": 229.4
+ },
+ {
+  "id": "fc_de_cars_2026_09",
+  "as_of": "2026-09-05",
+  "answer_value": 256774,
+  "source": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+  "estimate": 237.8875885437522,
+  "p10": 160.8690527777212,
+  "p90": 351.7799340893413,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 0.6666666666666666,
+  "ablation": false,
+  "pct_err": -0.9990735526628718,
+  "abs_log10_err": 3.0331792626318217,
+  "covered_80": false,
+  "arms": {
+   "agent": {
+    "estimate": 237.8875885437522,
+    "pct_err": -0.9990735526628718,
+    "abs_log10_err": 3.0331792626318217
+   },
+   "naive": {
+    "estimate": 210000.0,
+    "pct_err": -0.1821601875579303,
+    "abs_log10_err": 0.08733175181170402
+   },
+   "structured_no_retrieval": {
+    "estimate": 2337.3841124546584,
+    "pct_err": -0.9908971153136429,
+    "abs_log10_err": 2.0408209587953383
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5604,
+  "usd_tokens": 0.2004,
+  "wall_s": 227.0
+ }
+]

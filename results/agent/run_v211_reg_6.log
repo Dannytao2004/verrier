@@ -1,0 +1,172 @@
+[fc_kr_births_2026_07] plan: 6 directions -> approved=True
+[fc_kr_births_2026_07] done in 302.2s; estimate 23,306; usd 0.5502
+[fc_nhs_ae_2026_09] plan: 6 directions -> approved=True
+[fc_nhs_ae_2026_09] done in 174.3s; estimate 2,374,877; usd 0.4987
+[fc_jp_movers_2026_08] plan: 7 directions -> approved=True
+[fc_jp_movers_2026_08] done in 230.7s; estimate 125,666; usd 0.6246
+[
+ {
+  "id": "fc_kr_births_2026_07",
+  "as_of": "2026-08-23",
+  "answer_value": 24275,
+  "source": "https://www.koreatimes.co.kr/southkorea/society/20260923/births-up-11-in-july-extending-gains-to-25th-consecutive-month",
+  "estimate": 23306.34588645762,
+  "p10": 16917.317268660252,
+  "p90": 32108.268110893976,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.03990336204088074,
+  "abs_log10_err": 0.017685051106142154,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 23306.34588645762,
+    "pct_err": -0.03990336204088074,
+    "abs_log10_err": 0.017685051106142154
+   },
+   "naive": {
+    "estimate": 19000.0,
+    "pct_err": -0.21730175077239955,
+    "abs_log10_err": 0.10640563762721349
+   },
+   "structured_no_retrieval": {
+    "estimate": 20209.9130731277,
+    "pct_err": -0.16745981161162926,
+    "abs_log10_err": 0.07959479304802192
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.5502,
+  "usd_tokens": 0.1502,
+  "wall_s": 302.2
+ },
+ {
+  "id": "fc_nhs_ae_2026_09",
+  "as_of": "2026-09-08",
+  "answer_value": 2440000,
+  "source": "https://www.gov.uk/government/statistics/ae-attendances-and-emergency-admissions-for-september-2026-and-quarterly-report-q2",
+  "estimate": 2374876.8382761492,
+  "p10": 1723845.7346698581,
+  "p90": 3271777.67914405,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 0.75,
+  "ablation": false,
+  "pct_err": -0.026689820378627327,
+  "abs_log10_err": 0.011748734417418211,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 2374876.8382761492,
+    "pct_err": -0.026689820378627327,
+    "abs_log10_err": 0.011748734417418211
+   },
+   "naive": {
+    "estimate": 2100000.0,
+    "pct_err": -0.139344262295082,
+    "abs_log10_err": 0.06517053160481018
+   },
+   "structured_no_retrieval": {
+    "estimate": 2423248.5696216593,
+    "pct_err": -0.006865340318992108,
+    "abs_log10_err": 0.0029918612816411103
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.4987,
+  "usd_tokens": 0.1187,
+  "wall_s": 174.3
+ },
+ {
+  "id": "fc_jp_movers_2026_08",
+  "as_of": "2026-08-29",
+  "answer_value": 356920,
+  "source": "https://www.stat.go.jp/data/idou/sokuhou/tsuki/index.html",
+  "estimate": 125666.15990006352,
+  "p10": 27259.971311857127,
+  "p90": 579310.3581572507,
+  "basis": "method_spread",
+  "scored": true,
+  "n_assumptions_used": 2,
+  "assumptions_used": [
+   "a1",
+   "a2"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.6479150512718157,
+  "abs_log10_err": 0.4533525401783574,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 125666.15990006352,
+    "pct_err": -0.6479150512718157,
+    "abs_log10_err": 0.4533525401783574
+   },
+   "naive": {
+    "estimate": 400000.0,
+    "pct_err": 0.12069931637341691,
+    "abs_log10_err": 0.049489107014003365
+   },
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.6246,
+  "usd_tokens": 0.2046,
+  "wall_s": 230.7
+ }
+]

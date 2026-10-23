@@ -1,0 +1,147 @@
+{
+ "target": {
+  "what": "Total quantity of pizza consumed per day by people in Chicago (city residents eating pizza within the city, all channels: restaurants, delivery, takeout, frozen/prepared at home), expressed as a daily flow averaged over a representative recent period",
+  "unit": "pizza slices per day (or equivalent whole pizzas per day)",
+  "period_start": "2025-01-01",
+  "period_end": "2025-12-31",
+  "publisher": "None official; assembled from industry, census, and survey sources",
+  "cadence": "Not published; estimate is a single annual-average daily flow",
+  "caveats": "Ambiguous: 'Chicagoans' could mean city residents (population ~2.7M) or the Chicago metro (~9.5M); working interpretation is City of Chicago residents. 'Pizza' could be counted in slices, whole pies, or by weight; working unit is slices/day with a slice-to-pie conversion (~8 slices/pie) as an altern",
+  "outcome_type": "continuous",
+  "unit_canonical": "slice/day"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "related_series",
+   "perspective": "Industry trade association / market research",
+   "hypothesis": "US per-capita pizza consumption (slices or pounds per person per year) multiplied by Chicago population gives a national-average baseline; Chicago's actual level is adjusted by a local consumption index. Role: supplies the per-capita base rate.",
+   "data_to_find": "US annual pizza consumption per capita (slices/person/year or lbs/person/year) from trade sources (e.g., PMQ Pizza Magazine, Technomic, USDA/ERS food availability for 'pizza' if available); Chicago city population from Census ACS/vintage estimates for the same year. Substitute: total US pizza sales divided by US population.",
+   "search_hints": [
+    "US per capita pizza consumption slices per year",
+    "PMQ pizza industry census per capita",
+    "how many slices of pizza does the average American eat per year"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "related_series",
+   "perspective": "Pizza restaurant operators / POS aggregators",
+   "hypothesis": "Chicago pizza restaurant sales (annual, city or metro) divided by average price per pizza/slice yields units sold; multiplied by average slices per unit gives slices/day. Role: bottom-up sales-based route.",
+   "data_to_find": "Annual pizza restaurant sales for Chicago (city or Cook County) from industry reports or chain disclosures; average pizza price in Chicago; average slices per whole pizza. Substitute: number of pizza establishments times average revenue per establishment.",
+   "search_hints": [
+    "Chicago pizza restaurant industry sales annual",
+    "Chicago pizza market size revenue",
+    "number of pizzerias in Chicago"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d3",
+   "category": "capacity_consumption",
+   "perspective": "Pizzeria operators",
+   "hypothesis": "Number of pizzerias in Chicago times average daily pies sold per pizzeria times slices per pie gives slices/day. Role: capacity/throughput route independent of per-capita surveys.",
+   "data_to_find": "Count of pizza restaurants in Chicago (city); average daily pizza/pie sales per independent pizzeria (industry benchmarks, e.g., pies per week). Substitute: total restaurant count times pizza-share of restaurants times average covers.",
+   "search_hints": [
+    "how many pizzerias in Chicago",
+    "average pizzas sold per day pizzeria",
+    "pizza restaurant weekly sales benchmark"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d4",
+   "category": "base_rates",
+   "perspective": "Consumer survey / dietary intake",
+   "hypothesis": "Share of adults eating pizza on a given day times population times average slices per eating occasion gives slices/day. Role: frequency-based decomposition.",
+   "data_to_find": "Share of US adults consuming pizza on a given day (NHANES or food survey data); average slices per pizza-eating occasion; Chicago adult population. Substitute: weekly pizza meals per person from survey data.",
+   "search_hints": [
+    "NHANES pizza consumption percentage adults any given day",
+    "how often do Americans eat pizza survey",
+    "average slices per sitting pizza"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d5",
+   "category": "physical_flow",
+   "perspective": "Food distributors / supply chain",
+   "hypothesis": "Pizza-related input flows into Chicago (pizza flour, cheese, tomato sauce, or pizza boxes) converted to pizza units via recipe coefficients gives slices/day. Role: physical throughput cross-check.",
+   "data_to_find": "Chicago-area pizza cheese or pizza box shipments/consumption; flour or mozzarella distribution volumes for foodservice in Chicago; conversion factors (oz cheese per slice, boxes per pie). Substitute: national pizza cheese consumption scaled by Chicago population share.",
+   "search_hints": [
+    "pizza cheese consumption United States per capita",
+    "pizza box sales United States annual",
+    "mozzarella consumption foodservice per capita"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d6",
+   "category": "related_series",
+   "perspective": "Chain and delivery platforms",
+   "hypothesis": "Major pizza chains' Chicago-market store counts times per-store weekly sales (from 10-K disclosures) gives chain slices/day; independent pizzerias added via share. Role: triangulates d3 with disclosed chain data.",
+   "data_to_find": "Domino's, Pizza Hut, Papa John's store counts in Chicago metro and average US franchise weekly/average unit volume; Chicago share of chain sales. Substitute: metro-level store counts from chain store locators.",
+   "search_hints": [
+    "Domino's Chicago stores number",
+    "Pizza Hut Chicago locations count",
+    "average unit volume pizza franchise weekly sales"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "d7",
+   "category": "own_history",
+   "perspective": "Local media / regional consumption rankings",
+   "hypothesis": "Chicago pizza consumption per capita relative to US average (local index) adjusts the national base rate; historical rankings or local surveys indicate whether Chicago over- or under-indexes. Role: transfer adjustment for d1.",
+   "data_to_find": "Evidence on Chicago pizza consumption per capita vs. national average, pizza spending per household in Chicago, or rankings of pizza-consuming metros. Substitute: Chicago household food-away-from-home pizza spending from BLS CES metro data.",
+   "search_hints": [
+    "Chicago pizza consumption per capita ranking",
+    "Chicago households pizza spending BLS consumer expenditure survey",
+    "best pizza cities consumption per capita"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d8",
+   "category": "shocks",
+   "perspective": "Calendar and event effects",
+   "hypothesis": "Day-of-week and event effects (weekends, Super Bowl, Pi Day, National Pizza Day) shift daily volumes; annual average is the target, so these mainly affect variance not level. Role: constrains whether a single-day snapshot can proxy the daily average.",
+   "data_to_find": "Evidence on day-of-week/seasonal variation in pizza sales (e.g., Friday share of weekly pizza sales); major Chicago pizza events. Substitute: chain commentary on weekend/holiday sales uplift.",
+   "search_hints": [
+    "pizza sales by day of week share Friday",
+    "Super Bowl pizza sales increase percentage",
+    "National Pizza Day sales data"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c8"
+  }
+ ]
+}
+Approve these directions? [y/N] [ask_88baf0ee] plan: 8 directions -> approved=True
+[ask_88baf0ee] done in 397.9s; estimate 746,963; usd 0.8696
+Best estimate: 746,963 slice/day (80% model-based interval 336,898 to 1,656,150 slice/day), for City of Chicago residents eating pizza within the city across restaurants, delivery, takeout, and frozen/prepared at home, averaged over 2025. Four routes were combined at roughly equal weight (3 methods): a bottom-up sales route using 1,987 Pizza restaurants establishments, 658,548 USD per pizzeria per year benchmark sales, and 28.2 USD per pizza local price; a national pie-count route from 3,000,000,000 pizzas per year; and a Chicago-DMA frequency route using 5.66 pizza orders per month orders with 4 slices per eating occasion and 3 slices per eating occasion per occasion. Only these points are observed; slices per pie (8), restaurant share (0.75), benchmark ratio (0.75), coverage (0.85), Chicago population (2,700,000), US population (330,000,000), and the local index (1.1) are analyst assumptions. The interval reflects disagreement among methods, not demonstrated accuracy. The biggest risk is the slice-count and frequency conflict; a Chicago-specific consumption survey would most improve it.
+
+Key assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):
+- a1 Chicago-to-US ratio of pizza eating-occasion frequency (dimensionless): 1.1 dimensionless, range 0.7714 to 1.543 (range widened by code); used by m3. Overturned by: A Chicago-specific intake survey showing per-capita pizza eating at or below the national average.
+- a2 Average slices per whole pizza (Chicago mix of thin, deep-dish, chain and frozen): 8 slices per pizza, range 5.477 to 10.95 (range widened by code); used by m1, m3. Overturned by: A Chicago-specific distribution of pie sizes/styles sold showing a mean slice count outside [n]-[n].
+- a3 Share of Chicago pizza consumption occurring through restaurants/delivery/takeout (vs grocery/frozen/homemade): 0.75 fraction, range 0.5196 to 1.039 (range widened by code); used by m1. Overturned by: Evidence that frozen/homemade pizza accounts for more than ~[n] of Chicago pizza occasions.
+- a4 Ratio of average Chicago pizzeria annual sales to the Slice top-quartile benchmark ($[n]): 0.75 dimensionless, range 0.5 to 1; used by m1. Overturned by: Chicago-specific average pizzeria revenue data showing it at or above $[n]k/year.
+- a5 Share of Chicago pizza restaurant sales captured by the [n] counted establishments (coverage of the establishment count): 0.85 fraction, range 0.5766 to 1.153 (range widened by code); used by m1. Overturned by: Evidence that non-pizzeria outlets sell a large share (>[n]) of Chicago restaurant pizza.
+- a7 Chicago resident population (City of Chicago, 2025): 2,700,000 people, range 1,903,943 to 3,807,887 (range widened by code); used by m3, m4. Overturned by: A Census estimate placing the 2025 city population outside [n]-[n] million.
+- a8 US resident population (2025): 330,000,000 people, range 233,238,076 to 466,476,152 (range widened by code); used by m3. Overturned by: A Census estimate placing the 2025 US population outside [n]-[n] million.

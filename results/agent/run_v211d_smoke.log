@@ -1,0 +1,15 @@
+[ask_8db1fabf] plan: 8 directions -> approved=True
+[ask_8db1fabf] done in 197.1s; estimate 8,823,541,116,880,328; usd 0.6022
+The best computed estimate for total tokens processed by all large language models worldwide across provider products and APIs during calendar year 2025 is 8,823,541,116,880,328 token (80% model-based interval 5,067,866,875,583,212 to 15,362,455,201,098,426 token). This combines two methods: 10,865,729,989,569,106 token at weight 50% and 7,165,176,929,301,282 token at weight 50%.
+
+Method m1 sums provider volumes anchored on observed points: OpenAI API at 8,600,000,000,000 tokens per day and Microsoft Foundry at 500,000,000,000,000 tokens, then scales Google and others via assumptions 1,300 (range 160–1,300), 2 (1–5), 0.3 (0.1–0.5), 0.5 (0.2–1.5), and 0.8 (0.3–2). Method m2 scales the observed 40,000,000,000,000 tokens per day back to 2025 using assumption 0.5 (0.3–0.8).
+
+Only the three observed points are measured; everything else is assumption-driven, and the interval reflects input uncertainty, not demonstrated accuracy. The biggest risk is definitional double-counting and the wide Google range. Better provider disclosures of product-side token volumes would most improve the estimate.
+
+Key assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):
+- a1 Google late-2025 monthly tokens (definition-adjusted): 1,300 trillion tokens per month, range 160 to 1,300; used by m1. Overturned by: A clear Google statement that monthly tokens were ~[n]T in late 2025, or that [n]T includes non-LLM tokens.
+- a2 OpenAI product (ChatGPT) tokens as multiple of API tokens: 2 multiple, range 1 to 5; used by m1. Overturned by: A disclosure showing ChatGPT token volume is less than API or more than [n]× API.
+- a3 Microsoft non-OpenAI Azure tokens as share of total Azure tokens: 0.3 share, range 0.1 to 0.5; used by m1. Overturned by: Evidence that OpenAI represents a very different share of Azure tokens.
+- a4 Other providers' 2025 token volume as multiple of Google's: 0.5 multiple, range 0.2 to 1.5; used by m1. Overturned by: Evidence that other providers collectively process more than [n]× Google's tokens or less than [n].
+- a5 Chinese providers' 2025 token volume as multiple of Google's: 0.8 multiple, range 0.3 to 2; used by m1. Overturned by: Evidence that Chinese providers' combined tokens are outside this range relative to Google.
+- a6 Global token volume growth factor from Q1 2026 to 2025 average: 0.5 factor, range 0.3 to 0.8; used by m2. Overturned by: Evidence that growth was much faster or slower, or that Q1 2026 estimate is off.
