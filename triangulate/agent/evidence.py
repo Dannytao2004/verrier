@@ -4,6 +4,7 @@ import math
 import re
 import unicodedata
 from datetime import date
+from decimal import Decimal
 
 import dateparser
 
@@ -873,22 +874,93 @@ def period_text(p: dict, blank: str = "?") -> str:
 
 
 # ---------- 泄漏哨兵 ----------
+def _kr_cheon(x: int) -> str:
+    """韩文一段（1–9999）里的「N천M」写法：2118 -> 2천118，2000 -> 2천；1000 以下原样。"""
+    return f"{x // 1000}천{x % 1000 or ''}" if x >= 1000 else str(x)
+
+
 def _cjk_exact_forms(n: int) -> set:
     """整数 n（|n| >= 1 万）的中日韩精确写法：35万6920 / 35萬6920 / 35만6920，以及各段写千分位的 35万6,920；
-    1 亿以上再加億 / 亿 / 억 一段（1億2345万6789），为 0 的段省略（300万）。不登记四舍五入写法（344万、13.4萬）。"""
+    1 亿以上再加億 / 亿 / 억 一段（1億2345万6789），为 0 的段省略（300万）。不登记四舍五入写法（344万、13.4萬）。
+    v2.12c（S31）：1 兆以上另加兆 / 조 一段（24兆2118億、24조 2,118억，조 / 억 / 만 之间有没有空格都算），韩文各段另加
+    「N천M」写法（24조 2천118억、2만4천275）。"""
     sign, a = ("-" if n < 0 else ""), abs(n)
     hi, mid, lo = a // 10**8, a // 10**4 % 10**4, a % 10**4
     forms = set()
     for wan, yi in (("万", "億"), ("万", "亿"), ("萬", "億"), ("만", "억")):
         for f in (str, "{:,}".format):
             forms.add(sign + (f(hi) + yi if hi else "") + (f(mid) + wan if mid else "") + (f(lo) if lo else ""))
+    cho = a // 10**12
+    segs = ([(cho, "兆", "조"), (hi % 10**4, "億", "억")] if cho else [(hi, "億", "억")]) + [(mid, "万", "만"), (lo, "", "")]
+    for f in (str, "{:,}".format, _kr_cheon):
+        kr = [f(x) + kw for x, _, kw in segs if x]
+        forms |= {sign + "".join(kr), sign + " ".join(kr)}
+        if cho and f is not _kr_cheon:
+            forms.add(sign + "".join(f(x) + jw for x, jw, _ in segs if x))
     return forms
 
 
-def leak_forms(true_value: float) -> list:
+# v2.12c（S31）：十亿以上的英文写法和中日韩的大数写法 [人为约定：照 million 的规则往上推，另加标题常用的一位小数]
+# v2.12d（审查）：一位小数在倍数前面只有一位整数时（7.9 billion、3.7 trillion、3.7亿）只有两位有效数字，同一题其他月份的
+# 正常页面大面积撞车（新西兰题 as_of 前 12 个官方页撞了 8 个），所以只给目标真值（answer）登记（coarse），其他登记值至少三位
+# 有效数字，和 million 档一样
+_BIG_EN = ((10**9, (" billion", "bn", " bn", "B", " B")), (10**12, (" trillion", "tn", " tn")))
+_CJK_E12 = ("万亿", "兆", "조")
+_CJK_E8 = ("亿", "億", "억")
+
+
+def _group(x: str) -> str:
+    """十进制串的整数部分加千分位：3724.7 -> 3,724.7。"""
+    ip, dot, fp = x.partition(".")
+    return f"{int(ip):,}" + dot + fp
+
+
+def _digits(a: int, s: int, coarse: bool, ds=(1, 2, 3)) -> tuple:
+    """四舍五入到几位小数：|n| / s < 10 时一位小数只有两位有效数字，只在 coarse（目标真值）时用。"""
+    return ds if coarse or a >= 10 * s else ds[1:]
+
+
+def _scaled(n: int, s: int, coarse: bool = False) -> set:
+    """n / s 的写法：四舍五入到一、二、三位小数（一位小数见 _digits），加上精确值的短写（3.7247、24.2118，最多 4 位小数）；
+    整数部分 >= 1000 时另加千分位写法（3,724.7）。"""
+    xs = {f"{n / s:.{d}f}" for d in _digits(abs(n), s, coarse)}
+    ex = format((Decimal(n) / Decimal(s)).normalize(), "f")
+    if len(ex.partition(".")[2]) <= 4:
+        xs.add(ex)
+    return xs | {_group(x) for x in xs}
+
+
+def _big_forms(n: int, coarse: bool = False) -> set:
+    """v2.12c（S31）：|n| >= 1 亿的整数的大数写法（规则都是 [人为约定]，四舍五入写法命中照旧整页作废，D3）。
+    两位有效数字的一位小数（7.9 billion、3.7 trillion / 3.7万亿、3.7亿）只在 coarse 时登记（v2.12d，见 _digits）：
+    - >= 1e9：x.x / x.xx / x.xxx（和精确短写）billion、bn、B（$768.6 billion、7.9 billion、768.553bn），以及取整到百万的 7,944 million；
+    - >= 1e12：同样的 trillion、tn，以及中日韩的万亿 / 兆 / 조（3.7247万亿、24.2조）；
+    - >= 1e10：取整到亿的 37247亿 / 37,247億 / 242118억（三位有效数字以上）；
+    - 1e8 <= |n| < 1e12：x.x / x.xx 亿 / 億 / 억（79.4亿、3.72億）。
+    精确的中日韩分段写法（24조 2,118억）在 _cjk_exact_forms。"""
+    a, forms = abs(n), set()
+    for s, words in _BIG_EN:
+        if a >= s:
+            forms |= {x + w for x in _scaled(n, s, coarse) for w in words}
+    if a >= 10**9:
+        forms.add(f"{round(n / 1e6):,} million")
+    if a >= 10**12:
+        forms |= {x + w for x in _scaled(n, 10**12, coarse) for w in _CJK_E12}
+    if a >= 10**10:
+        k = round(n / 1e8)
+        forms |= {f(k) + w for f in (str, "{:,}".format) for w in _CJK_E8}
+    if a < 10**12:
+        forms |= {f"{n / 1e8:.{d}f}" + w for d in _digits(a, 10**8, coarse, (1, 2)) for w in _CJK_E8}
+    return forms
+
+
+def leak_forms(true_value: float, coarse: bool = False) -> list:
     """一个值的常见写法。整数：千分位（, 空格 .）、无分隔、四舍五入到百和千、x.x / x.xx thousand 和 k、整数 k、
     0.xxx / 0.xx million 和 M、x.xx million。大小写不敏感（856K = 856k）。
     v2.6e：1 万以上的整数加中日韩的精确写法（_cjk_exact_forms，例如 35万6920）；中日韩的四舍五入写法不登记（少误杀，见 C3）。
+    v2.12c（S31）：1 亿以上的整数另加十亿 / 万亿级写法（_big_forms：768.6 billion、7.9 billion、37247亿、3.7247万亿），
+    其中取整到亿、x.x 亿、x.x 万亿 / 兆 / 조 是中日韩的四舍五入写法；1 亿以下的写法表不变。
+    v2.12d：coarse = 这个值是目标真值，才登记两位有效数字的大数写法（7.9 billion；见 _digits）。
     小于 1000 的数太容易撞车，只登记原样写法，并在报告里说明哨兵弱。"""
     v = float(true_value)
     forms = set()
@@ -905,14 +977,17 @@ def leak_forms(true_value: float) -> list:
         if abs(n) >= 100_000:
             for mx in (f"{n / 1e6:.3f}", f"{n / 1e6:.2f}"):
                 forms |= {f"{mx} million", f"{mx}M", f"{mx} M"}
+        if abs(n) >= 10**8:   # v2.12c（S31）
+            forms |= _big_forms(n, coarse)
     else:
         forms |= {f"{v:g}", f"{v:.1f}", f"{v:.2f}"}
     return sorted(forms)
 
 
-def leak_numbers(true_value: float) -> set:
+def leak_numbers(true_value: float, coarse: bool = False) -> set:
     """v2.8p：leak_forms 各种写法对应的数值（原值、四舍五入到百 / 千、x.x / x.xx thousand、0.xxx / x.xx million），
-    用来和抽取员读出的数比（单词写的数页面文字里搜不到：two million、四百万）。"""
+    用来和抽取员读出的数比（单词写的数页面文字里搜不到：two million、四百万）。v2.12c（S31）：加 _big_forms 的四舍五入写法
+    （两位有效数字的只在 coarse 时，同 leak_forms）。"""
     v = float(true_value)
     out = {v}
     if v == int(v):
@@ -921,20 +996,39 @@ def leak_numbers(true_value: float) -> set:
             out |= {float(round(n, -2)), float(round(n, -3)), round(n / 1e3, 1) * 1e3, round(n / 1e3, 2) * 1e3}
         if abs(n) >= 100_000:
             out |= {round(n / 1e6, 3) * 1e6, round(n / 1e6, 2) * 1e6}
+        a = abs(n)   # v2.12c（S31）：_big_forms 的四舍五入写法对应的数
+        if 10**8 <= a < 10**12:
+            out |= {round(n / 1e8, d) * 1e8 for d in _digits(a, 10**8, coarse, (1, 2))}
+        if a >= 10**9:
+            out |= {round(n / 1e9, d) * 1e9 for d in _digits(a, 10**9, coarse)} | {round(n / 1e6) * 1e6}
+        if a >= 10**10:
+            out.add(round(n / 1e8) * 1e8)
+        if a >= 10**12:
+            out |= {round(n / 1e12, d) * 1e12 for d in _digits(a, 10**12, coarse)}
     else:
         out |= {round(v, 1), round(v, 2)}
     return out
 
 
-def leak_number_hit(x, values) -> bool:
-    """x 是不是登记值（真值等）的某种写法对应的数。values：一个数或一组数，空 = 不查。"""
+def _answer(values, answer):
+    """v2.12d：哪个登记值是目标真值（两位有效数字的写法只给它）：给了 answer 就是它；values 是一个数时就是这个数；否则没有。"""
+    return answer if answer is not None else None if isinstance(values, (list, tuple, set)) else values
+
+
+def _is(v, ans) -> bool:
+    return v is not None and ans is not None and math.isclose(float(v), float(ans), rel_tol=1e-12, abs_tol=0.0)
+
+
+def leak_number_hit(x, values, answer=None) -> bool:
+    """x 是不是登记值（真值等）的某种写法对应的数。values：一个数或一组数，空 = 不查；answer：目标真值（见 _answer）。"""
     if not values or not isinstance(x, (int, float)) or isinstance(x, bool):
         return False
     vals = values if isinstance(values, (list, tuple, set)) else [values]
-    return any(math.isclose(x, t, rel_tol=1e-9, abs_tol=1e-9) for v in vals for t in leak_numbers(v))
+    ans = _answer(values, answer)
+    return any(math.isclose(x, t, rel_tol=1e-9, abs_tol=1e-9) for v in vals for t in leak_numbers(v, _is(v, ans)))
 
 
-def leak_point_hit(p: dict, values) -> bool:
+def leak_point_hit(p: dict, values, answer=None) -> bool:
     """一个通过核对的点是不是登记值（pipeline._process_page 命中就整页作废）。抽取员读的数（reading）：leak_number_hit，
     含四舍五入写法（v2.8p）。v2.11a：代码解析的中日韩写法（2만4천275명、1億3千万、22조 4천802억）只比精确值：这些写法
     v2.10i 解析不了、走读数路径被比过，现在代码能读，页面哨兵的写法表（_cjk_exact_forms）又没有；四舍五入写法照旧不比（C3）。
@@ -942,7 +1036,7 @@ def leak_point_hit(p: dict, values) -> bool:
     if not values:
         return False
     if p.get("reading"):
-        return any(leak_number_hit(p.get(k), values) for k in ("value", "value_low", "value_high"))
+        return any(leak_number_hit(p.get(k), values, answer) for k in ("value", "value_low", "value_high"))
     if not re.search(rf"[{_BIG_CHARS}{_CJK_NUMERAL_CHARS}]", str(p.get("value_as_written") or "")):
         return False
     vals = values if isinstance(values, (list, tuple, set)) else [values]
@@ -951,12 +1045,18 @@ def leak_point_hit(p: dict, values) -> bool:
         v is not None and math.isclose(x, float(v), rel_tol=1e-9, abs_tol=1e-9) for v in vals)
 
 
-def leak_patterns(values) -> list:
+_ABBREV = ("k", "M", "B", "bn", "tn")   # v2.12c（S31）：B / bn / tn 同 k / M
+
+
+def leak_patterns(values, answer=None) -> list:
     """values：一个数或一组数（目标真值，以及同一题里所有「公布日晚于 as_of」的已知官方值）。
-    v2.6c：以 k 或 M 结尾的缩写写法后面不能接字母（「7.27 M」不再命中「7.27 miles」）；thousand、million 这类写法不变。"""
+    answer：目标真值（v2.12d：两位有效数字的大数写法只给它登记，见 _digits；values 是一个数时默认就是它）。
+    v2.6c：以 k 或 M 结尾的缩写写法后面不能接字母（「7.27 M」不再命中「7.27 miles」）；thousand、million 这类写法不变。
+    v2.12c（S31）：B / bn / tn 结尾的写法同样（「7.9 B」不命中「7.9 Bq」）。"""
     vals = values if isinstance(values, (list, tuple, set)) else [values]
-    forms = sorted({f for v in vals if v is not None for f in leak_forms(v)})
-    return [re.compile(rf"(?<![\d.,]){re.escape(f)}(?!\d|[.,]\d)" + ("(?![A-Za-z])" if f.endswith(("k", "M")) else ""), re.I)
+    ans = _answer(values, answer)
+    forms = sorted({f for v in vals if v is not None for f in leak_forms(v, _is(v, ans))})
+    return [re.compile(rf"(?<![\d.,]){re.escape(f)}(?!\d|[.,]\d)" + ("(?![A-Za-z])" if f.endswith(_ABBREV) else ""), re.I)
             for f in forms]
 
 

@@ -339,7 +339,7 @@ class Context:
     spec = None   # 类级默认：测试会用 object.__new__ 绕过 __init__
 
     def __init__(self, qid: str, question: str, as_of: str, calls_path, leak_value=None, budget: Budget | None = None,
-                 ablate_own_history: bool = False, spec=None):
+                 ablate_own_history: bool = False, spec=None, leak_answer=None):
         self.spec = spec
         self.qid, self.question, self.as_of_s = qid, question, as_of
         self.as_of = date.fromisoformat(as_of)
@@ -359,8 +359,10 @@ class Context:
         if spec is not None:   # v2.10f：Claude 搜索的 pause_turn 续接之前再预扣一份（放不下就不续）
             self.searcher.renew = self.budget.renew_current
         # 哨兵只在代码里用：真值（和其他 as_of 之后才公布的已知值）不进任何 prompt。可以是一个数或一组数
-        self.leak_patterns = ev.leak_patterns(leak_value) if leak_value else []
+        # v2.12d：leak_answer = 目标真值，两位有效数字的大数写法（7.9 billion）只给它登记（ev._digits）
+        self.leak_patterns = ev.leak_patterns(leak_value, answer=leak_answer) if leak_value else []
         self.leak_values = leak_value   # v2.8p：抽取员读出的数（单词、分数）也按数值和它比，见 _process_page
+        self.leak_answer = leak_answer
         self.progress = None  # 可选的进度回调 progress(event: dict)，网页用；只读通知，不影响运行
 
 
@@ -529,7 +531,7 @@ def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict
             out["points"].append(new[-1])
     # v2.8p：页面哨兵只搜数字写法；抽取员读出的数（单词、分数写的：two million）也按数值和登记值比，命中就整页作废。
     # v2.11a：代码解析的中日韩写法也按精确值比（2만4천275명 以前走读数，现在代码能读，页面哨兵的写法表里没有；见 ev.leak_point_hit）
-    hit = [p for p in new if ev.leak_point_hit(p, getattr(ctx, "leak_values", None))]
+    hit = [p for p in new if ev.leak_point_hit(p, getattr(ctx, "leak_values", None), getattr(ctx, "leak_answer", None))]
     if hit:
         page["leak_hits"] = [f'{p["value_as_written"]} (read as {p["value"]:g})' for p in hit]
         page["status_detail"] = ("excluded: leak sentinel hit (number read from words)" if any(p.get("reading") for p in hit)

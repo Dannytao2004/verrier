@@ -63,7 +63,7 @@ def _after(s, a: date, end: bool) -> bool:
     return d is not None and d > a
 
 
-def leakage_audit(state: dict, as_of: str, leak_values=None) -> dict:
+def leakage_audit(state: dict, as_of: str, leak_values=None, answer=None) -> dict:
     """运行后的泄漏检查，全部从 state 里量出来。"""
     a = date.fromisoformat(as_of)
     pages = [pg for r in state.get("results") or [] for pg in r.get("pages") or []]
@@ -72,7 +72,7 @@ def leakage_audit(state: dict, as_of: str, leak_values=None) -> dict:
                    if _after(p.get("period_end"), a, True) or _after(p.get("published_at_if_visible"), a, False)
                    or _after(p.get("page_date"), a, False)]
     late_snaps = [pg["url"] for pg in pages if pg.get("snapshot_ts") and pg["snapshot_ts"][:8] > a.strftime("%Y%m%d")]
-    pats = ev.leak_patterns(leak_values) if leak_values else []
+    pats = ev.leak_patterns(leak_values, answer=answer) if leak_values else []   # v2.12d：answer 同 Context.leak_answer
     queries = [q for r in state.get("results") or [] for q in (r.get("search") or {}).get("queries") or []]
     av = state.get("assumptions") or {}
     a_text = [(a.get("id"), " ".join(str(a.get(k, "")) for k in ("name", "value", "low", "high", "rationale",
@@ -146,7 +146,7 @@ def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False, spec=N
         calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
     leak_values = q.get("leak_values") or ([q["answer_value"]] if q.get("answer_value") is not None else None)
     ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values, ablate_own_history=ablate_own_history,
-                  spec=spec)
+                  spec=spec, leak_answer=q.get("answer_value"))
     # 有真值的题（回测 / 留出测试，--auto-approve 没人把关）只在题目明确标了 outcome_type = discrete 时才接受离散目标
     ctx.allow_discrete = q.get("answer_value") is None or q.get("outcome_type") == "discrete"
     ctx.check_published = checks_published(q)
@@ -228,7 +228,7 @@ def _save_run(h: dict, approvals: list) -> dict:
     scrub = (lambda t: t) if spec is None else spec.redact   # 兜底：写盘的文字里不留 key（正常路径上本来就没有）
     state = dict(g.get_state(cfg).values)
     state.update(started_at=stamp, wall_s=round(time.time() - t0, 1), budget=ctx.budget.snapshot(), approvals=approvals,
-                 leakage=leakage_audit(state, q["as_of"], leak_values), model=ctx.llm.model, tag=tag,
+                 leakage=leakage_audit(state, q["as_of"], leak_values, q.get("answer_value")), model=ctx.llm.model, tag=tag,
                  settings=run_settings(spec))
     if spec is not None:
         state["provider"] = spec.provider

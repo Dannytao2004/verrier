@@ -453,17 +453,18 @@ class TestReviewFixes(unittest.TestCase):
 
 
 class TestLeakGuardForCjkParsedNumbers(unittest.TestCase):
-    """v2.11a：2만4천275명 以前走读数、被按数值比过；现在代码能读，页面哨兵的写法表里没有。代码解析的中日韩写法按精确值比。"""
+    """v2.11a：2만4천275명 以前走读数、被按数值比过；现在代码能读，页面哨兵的写法表里没有。代码解析的中日韩写法按精确值比。
+    v2.12c（S31）：页面哨兵也登记了这个写法。"""
 
-    def _page(self, raw, text, leak):
+    def _page(self, raw, text, leak, pats=None):
         from types import SimpleNamespace
         from triangulate.agent import pipeline as P
 
         class LLM:
             def ask(self, *a, **k):
                 return {"points": [dict(raw)]}, None
-        ctx = SimpleNamespace(leak_patterns=ev.leak_patterns(leak), leak_values=leak, as_of=date(2026, 9, 30), qid="t",
-                              llm=LLM(), budget=None)
+        ctx = SimpleNamespace(leak_patterns=ev.leak_patterns(leak) if pats is None else pats, leak_values=leak,
+                              as_of=date(2026, 9, 30), qid="t", llm=LLM(), budget=None)
         page = {"url": "https://example.kr/news/2026-09-23", "status": "live_dated", "page_date": "2026-09-23"}
         out = {"pages": [], "points": [], "dropped_points": []}
         P._process_page(ctx, {"what": "x"}, {"id": "d1"}, 1, page, text, out)
@@ -473,8 +474,12 @@ class TestLeakGuardForCjkParsedNumbers(unittest.TestCase):
         text = "국가데이터처가 23일 발표한 '7월 인구동향'에 따르면 지난 7월 출생아 수는 2만4천275명으로 작년 동월보다 증가했다."
         raw = {"name": "births", "value_as_written": "2만4천275명", "scale_word": "", "unit": "live births",
                "period_start": "2026-07-01", "period_end": "2026-07-31", "quote": "지난 7월 출생아 수는 2만4천275명으로"}
+        # v2.12c（S31）：页面哨兵登记了「N천M」写法，这一页在抽取之前就整页作废（以前认不出，见下面）
+        self.assertEqual(ev.leak_scan(text, ev.leak_patterns([24275, 170079])), [r"(?<![\d.,])2만4천275(?!\d|[.,]\d)"])
         page, out = self._page(raw, text, [24275, 170079])
-        self.assertEqual(ev.leak_scan(text, ev.leak_patterns([24275, 170079])), [])   # 页面哨兵认不出这个写法
+        self.assertEqual((out["points"], page["status_detail"]), ([], "excluded: leak sentinel hit"))
+        # 代码解析的中日韩写法照旧按精确值比：把页面哨兵关掉（模拟写法表漏掉的写法）
+        page, out = self._page(raw, text, [24275, 170079], pats=[])
         self.assertEqual((out["points"], page["status_detail"]), ([], "excluded: leak sentinel hit (CJK number parsed by code)"))
         self.assertEqual(page["leak_hits"], ["2만4천275명 (read as 24275)"])
         page, out = self._page(raw, text, [24276])   # 不是登记值：照常

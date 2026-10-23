@@ -263,10 +263,61 @@ QUESTIONS += [
                  "reported in Meta's third-quarter 2026 earnings press release.",
      "answer_unit": "USD", "unit_hint": "an amount of money in USD"},
 ]
+# 留出测试 3（2026-10-23 加入，三臂 x 思考开 / 关的对比，在任何模型调用之前登记；只由 probes/run_test3.py 跑和打分，
+# 下面的 run / report 跳过它）。选题和复查：复查表的 final_four
+# （公布日 2026-03-01..10-22、晚于 DeepSeek 知识截止 2026-02；as_of = 公布日前 28-30 天；数值、公布日、首发都由复查 agent
+# 重新打开官方页核过）。leak_values 照复查后的版本（英国破产去掉了三位数的分项）。
+QUESTIONS += [
+    # 国家统计局 2026-05-18「2026年4月份社会消费品零售总额」：4 月 37247亿元（+0.2%）；2025 年 4 月首发 37174亿元。
+    # leak_values：真值（元和亿元两种写法）、同页的 1-4 月累计和分项、5-9 月各稿的当月值和累计（都晚于 as_of）。
+    {"id": "fc_cn_retail_2026_04", "set": "test3", "as_of": "2026-04-18", "released": "2026-05-18", "answer_value": 3724700000000,
+     "last_year": 3717400000000, "source": "https://www.stats.gov.cn/sj/zxfb/202605/t20260518_1963727.html",
+     "question": _ASOF.format(as_of="2026-04-18") + "Estimate China's total retail sales of consumer goods (社会消费品零售总额) for "
+                 "the single month of April 2026 (not the January-April cumulative total), in Chinese yuan (CNY; the release "
+                 "states it in 亿元, i.e. units of 100 million yuan), as it will be first reported in the National Bureau of "
+                 "Statistics of China's monthly release on retail sales of consumer goods.",
+     "answer_unit": "CNY", "unit_hint": "an amount of money in CNY",
+     "leak_values": [3724700000000, 37247, 164941, 34218, 152053, 32347, 142921, 22020, 32987, 146058, 18883, 14147, 63052,
+                     65308, 41185, 24123, 41090, 206031, 42691, 248722, 39022, 287744, 39824, 327569, 42433, 370001]},
+    # Census 2026-07-16 adv2606：6 月零售和餐饮季调额 768,553 百万美元（正文「$768.6 billion」）；2025 年 6 月首发 720,106。
+    # leak_values：真值、正文的取整值、同表 6 月未季调值，7-9 月稿和 10-15 年度修订后的值。
+    {"id": "fc_us_retail_2026_06", "set": "test3", "as_of": "2026-06-18", "released": "2026-07-16", "answer_value": 768553000000,
+     "last_year": 720106000000, "source": "https://www2.census.gov/retail/releases/historical/marts/adv2606.pdf",
+     "question": _ASOF.format(as_of="2026-06-18") + "Estimate total U.S. retail and food services sales for June 2026 (seasonally "
+                 "adjusted and adjusted for holiday and trading-day differences, but not for price changes; a monthly amount, "
+                 "not an annual rate), in US dollars (the release states it in millions of dollars), as it will be first "
+                 "reported (advance estimate) in the U.S. Census Bureau's Advance Monthly Sales for Retail and Food Services "
+                 "release.",
+     "answer_unit": "USD", "unit_hint": "an amount of money in USD",
+     "leak_values": [768553000000, 768600000000, 768553, 776915, 766876, 768072, 766192, 763602, 768587, 764462, 773947,
+                     745021, 739322, 729915]},
+    # Insolvency Service 2026-09-18：8 月登记公司破产 1,946；2025 年 8 月首发 2,048（本期稿写 2,007）。
+    # leak_values：真值、7 月修订值、8 月 CVL、9 月稿的 9 月值和 8 月修订值、9 月 CVL（三位数的分项复查时去掉了：182 撞上 as_of 前的 6 月稿）。
+    {"id": "fc_uk_insolv_2026_08", "set": "test3", "as_of": "2026-08-19", "released": "2026-09-18", "answer_value": 1946,
+     "last_year": 2048,
+     "source": "https://www.gov.uk/government/statistics/company-insolvencies-august-2026/commentary-company-insolvency-statistics-august-2026",
+     "question": _ASOF.format(as_of="2026-08-19") + "Estimate the number of registered company insolvencies in England and Wales in "
+                 "August 2026 (the headline monthly total of compulsory liquidations, creditors' voluntary liquidations, "
+                 "administrations, company voluntary arrangements and receivership appointments, in which the first three are "
+                 "seasonally adjusted), as it will be first reported in the Insolvency Service's monthly Company Insolvency "
+                 "Statistics release.",
+     "answer_unit": "", "unit_hint": "a count of company insolvencies",
+     "leak_values": [1946, 1934, 1431, 1882, 1953, 1420]},
+    # Stats NZ 2026-04-20「Overseas merchandise trade: March 2026」：3 月货物出口 7,943,894,499 新西兰元（页面 G1 图表数据；
+    # 正文「$7.9 billion」）；2025 年 3 月首发 7,594,592,976。leak_values：真值、同页 3 月进口、4-9 月各稿的出口。
+    {"id": "fc_nz_exports_2026_03", "set": "test3", "as_of": "2026-03-21", "released": "2026-04-20", "answer_value": 7943894499,
+     "last_year": 7594592976, "source": "https://www.stats.govt.nz/information-releases/overseas-merchandise-trade-march-2026/",
+     "question": _ASOF.format(as_of="2026-03-21") + "Estimate the total value of New Zealand's goods exports in March 2026 (actual "
+                 "monthly value, not seasonally adjusted), in New Zealand dollars (NZD), as it will be first reported in Stats "
+                 "NZ's monthly Overseas merchandise trade release.",
+     "answer_unit": "NZD", "unit_hint": "an amount of money in NZD",
+     "leak_values": [7943894499, 7245909283, 8620109942, 8876680404, 8092970496, 7391317405, 6655897873, 6466753919]},
+]
 for _q in QUESTIONS:
-    if _q.get("set") in ("test2", "test2_live"):
+    if _q.get("set") in ("test2", "test2_live", "test3"):
         _q["strict"] = False
 FNS = {"naive": run_naive, "structured": run_structured}
+OWN_RUNNER = ("test3",)   # 这些题集由自己的脚本跑和打分（probes/run_test3.py），run / report 不碰
 
 
 def _raw(arm, qid):
@@ -274,7 +325,8 @@ def _raw(arm, qid):
 
 
 def run(force: bool = False):
-    tasks = [(arm, q) for q in QUESTIONS for arm in FNS if force or not _raw(arm, q["id"]).exists()]
+    tasks = [(arm, q) for q in QUESTIONS for arm in FNS
+             if q.get("set") not in OWN_RUNNER and (force or not _raw(arm, q["id"]).exists())]
     if not tasks:
         return
     llm = LLM(calls_path=FC / "calls.jsonl")
@@ -326,7 +378,7 @@ def _pct(est, ans):
 def report():
     rows = []
     for q in QUESTIONS:
-        if q.get("answer_value") is None:   # 未公布题（set = live）：公布后登记真值再打分
+        if q.get("answer_value") is None or q.get("set") in OWN_RUNNER:   # 未公布题（set = live）：公布后登记真值再打分
             continue
         ans = q["answer_value"]
         row = {k: q.get(k) for k in ("id", "month", "as_of", "released", "answer_value", "source")}
