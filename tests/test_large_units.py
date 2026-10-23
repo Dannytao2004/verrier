@@ -422,10 +422,10 @@ class TestReviewFixes(unittest.TestCase):
         for vw in ("1억2천500", "1억 2천500", "1조2천", "2천5백만", "45천802억"):
             with self.assertRaises(ValueError, msg=vw):
                 ev.parse_value(vw, "")   # 억 / 조 后面的尾段（口语常省 만 / 억）、천 后面接 백、两位数 + 천：不猜
-        self.assertIn("scale conflict", err("22조 4천802억", "억"))
+        self.assertEqual(ev.parse_value("22조 4천802억", "억"), (2.24802e13, False))   # v2.11g（S61）：配末段倍数字不再冲突
         q = "옛 통계청인 국가데이터처는 지난 8월 온라인으로 물건을 구매한 총액이 22조 4천802억 원으로 1년 전보다 6.6% 늘었다고"
-        p, why = vp(q, "22조 4천802억", "억", "KRW", number=224802)   # fc_kr_online 的已存点：照旧走读数
-        self.assertEqual((why, p["value"], p["value_check"]), ("", 2.24802e13, "pending"))
+        p, why = vp(q, "22조 4천802억", "억", "KRW", number=224802)   # fc_kr_online 的已存点：v2.11g 起由代码解析，不再走读数
+        self.assertEqual((why, p["value"], p.get("value_check")), ("", 2.24802e13, None))
         p, why = vp(q, "22조 4천802억", "", "KRW")
         self.assertEqual((why, p["value"]), ("", 2.24802e13))
 
@@ -490,3 +490,12 @@ class TestLeakGuardForCjkParsedNumbers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestUnitRuleShareOfPeriod(unittest.TestCase):
+    """v2.11g（BUGS S60）：「全年总量 × 某月份额」是个数，不是速率；G2 的探针不经过单位核对，这里钉住规则原文。"""
+
+    def test_rule_text(self):
+        from triangulate.agent import prompts as PR
+        self.assertIn("is a count (person), not a rate (person/year): the share has already turned the year into the target "
+                      "period", PR.UNIT_RULES)

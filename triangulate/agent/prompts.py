@@ -429,7 +429,8 @@ UNIT_RULES = """Unit notation (pint):
 - units and nouns joined by * and /, with parentheses: kg/year, kcal/(person*day);
 - a number that is part of the unit stays inside it: kcal/(100 g), birth/(1000 person), 0.01 L/year;
 - counted things are singular nouns (person, household, cup, trip, visitor); money is a currency code (USD); a pure number, ratio or share is 1;
-- write out what a number is per (per person, per day, per year) when its description, quote or period says so, even if unit_as_recorded leaves it out."""
+- write out what a number is per (per person, per day, per year) when its description, quote or period says so, even if unit_as_recorded leaves it out;
+- a total for its own stated period (2025 passengers) that the formula multiplies by the share of that total falling in the target period (September's share of 2025) is a count (person), not a rate (person/year): the share has already turned the year into the target period."""
 
 UNIT_CHECK_SYSTEM = """You work out the units of one estimation formula. You do not judge whether the estimate is good and you do not compute its value. Reply with one JSON object only."""
 

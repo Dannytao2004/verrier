@@ -254,7 +254,7 @@ def _sw_key(scale_word: str) -> tuple:
 
 def _cjk_sum(s: str, m) -> tuple:
     """m 是 s 里的第一个数字，后面紧跟中日韩倍数字：读「数字 + 倍数字」连写（3409万、519万548、1億2345万、2만 9000），
-    返回 (各段之和, 第一段的倍数字, 读到的位置)；加法只在这里由代码做。后一段的倍数必须比前一段小，而且整段不满前一段的
+    返回 (各段之和, 第一段的倍数字, 读到的位置, 最后一个带倍数字的段的倍数字)；加法只在这里由代码做。后一段的倍数必须比前一段小，而且整段不满前一段的
     一个倍数单位（35万6713 可以；35万67130、5万3万 报错）；有几段时每段都必须是整数。段与段之间只有韩文
     （만 / 억 / 조 后面）允许一个空格（2만 9000）；「3409万 2025」不连读，按「多于一个数字」报错。
     v2.11a：一段的倍数也可以是末字为大倍数字的复合词（1億3千万、27억6천만、1조 2천억、3万亿5千亿，第一段也行：3천억 5천만）；
@@ -263,19 +263,21 @@ def _cjk_sum(s: str, m) -> tuple:
     first = _CJK_LEAD.match(s[m.end():])
     segs = [(abs(float(m.group().replace(",", ""))), SCALES[first.group(1)], "." in m.group())]
     prev, pos = first.group(1), m.end() + first.end()
+    last = prev
     while not (s[pos:pos + 1].isspace() and prev[-1:] not in _KR_BIG) and (
             g := (_CJK_SEG_KR if prev[-1:] == _KR_MAN else _CJK_SEG).match(s, pos)):
         segs.append((float(g.group(1).replace(",", "")), SCALES[g.group(2)] if g.group(2) else 1.0, "." in g.group(1)))
         prev, pos = g.group(2) or "", g.end()
         if not prev:
             break
+        last = prev
     for (_, hi, _), (n, f, _) in zip(segs, segs[1:]):
         if f >= hi or n * f >= hi:
             raise ValueError("malformed CJK number: each part must be smaller than the scale before it")
     if len(segs) > 1 and any(dec for _, _, dec in segs):
         raise ValueError("malformed CJK number: decimal in a multi-part number")
     total = sum(n * f for n, f, _ in segs)
-    return (-total if m.group().startswith("-") else total), first.group(1), pos
+    return (-total if m.group().startswith("-") else total), first.group(1), pos, last
 
 
 def _kr_groups(s: str) -> str:
@@ -390,8 +392,10 @@ def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
         is_pct = True
     if sw not in _SW_FACTOR:
         raise ValueError(f"unknown scale word {scale_word!r}")
+    # v2.11g（BUGS S61）：中日韩连写数字配的是末段的倍数字（10조2943억원 配 억）也算一致，各段已经由代码乘过
     if text_scale and sw and text_f != _SW_FACTOR[sw] and not (
-            text_scale in EN_STACKED and EN_SCALES[text_scale.split()[-1]] == _SW_FACTOR[sw]):
+            text_scale in EN_STACKED and EN_SCALES[text_scale.split()[-1]] == _SW_FACTOR[sw]) and not (
+            cjk and _SW_FACTOR[sw] in (SCALES[cjk[3]], SCALES.get(cjk[3][-1:]))):   # 3천억 配 억、1億3千万 配 万
         raise ValueError(f"scale conflict: {text_scale!r} in value vs {scale_word!r}")
     factor = 1.0 if cjk else text_f if text_scale else _SW_FACTOR[sw]   # 中日韩写法的倍数已经在各段里乘过
     return num * factor, is_pct

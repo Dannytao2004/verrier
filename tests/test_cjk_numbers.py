@@ -55,7 +55,7 @@ class TestParseValueCjk(unittest.TestCase):
                             ("1億12345万", "", "malformed CJK number"), ("1.5万3000", "", "decimal in a multi-part"),
                             ("61万1千", "", "CJK numerals"), ("1千2百", "", "more than one number"), ("三百", "", "no number"),
                             ("3409万 2025", "", "more than one number"), ("3409万", "million", "scale conflict"),
-                            ("1億2345万", "万", "scale conflict"), ("2", "成", "unknown scale word"),
+                            ("2", "成", "unknown scale word"),
                             ("5", "万5", "unknown scale word"), ("5", "万千", "unknown scale word"),
                             ("500兆瓦", "", "ambiguous '兆'"), ("500 兆瓦", "", "ambiguous '兆'"), ("500", "兆瓦", "ambiguous '兆'"),
                             ("3.5", "兆赫", "ambiguous '兆'"), ("12", "兆字节", "ambiguous '兆'"),
@@ -64,6 +64,14 @@ class TestParseValueCjk(unittest.TestCase):
             with self.assertRaises(ValueError, msg=vw) as cm:
                 ev.parse_value(vw, sw)
             self.assertIn(msg, str(cm.exception), vw)
+
+    def test_compound_with_its_last_scale_as_scale_word(self):
+        """v2.11g（BUGS S61）：连写数字配末段的倍数字不再判 scale conflict（以前走读数，核对模型把 10조2943원 对 102943 判错）。"""
+        for vw, sw, v in [("1億2345万", "万", 1.2345e8), ("10조2943억원", "억", 1.02943e13), ("1조6680억", "억", 1.668e12),
+                          ("1億3千万", "万", 1.3e8), ("3천억", "억", 3e11)]:
+            self.assertEqual(ev.parse_value(vw, sw), (v, False), vw)
+        with self.assertRaises(ValueError):
+            ev.parse_value("3조", "억")   # 单段、倍数不一致：照旧报错
 
     def test_percentage_points_are_not_a_numeral(self):
         """「百分点」的「百」不是数词（v2.6d 得 (0.5, False)，第一轮改动曾把它变成报错）。"""
