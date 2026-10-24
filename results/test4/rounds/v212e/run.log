@@ -1,0 +1,12 @@
+{"at": "2026-10-24T06:03:31+00:00", "event": "start", "cid": "fc_cn_profits_2026_09__agent__off", "as_of": "2026-10-24", "thinking": {}}
+{"at": "2026-10-24T06:07:37+00:00", "event": "end", "cid": "fc_cn_profits_2026_09__agent__off", "outcome": "done", "wall_s": 246.3, "usd": 0.4538, "error": null}
+{"at": "2026-10-24T06:07:37+00:00", "event": "cost", "cid": "fc_cn_profits_2026_09__agent__off", "usd": 0.4538, "cumulative_usd": 0.4538}
+{"at": "2026-10-24T06:07:37+00:00", "event": "start", "cid": "fc_cn_profits_2026_09__agent__think", "as_of": "2026-10-24", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+{"at": "2026-10-24T06:19:01+00:00", "event": "end", "cid": "fc_cn_profits_2026_09__agent__think", "outcome": "done", "wall_s": 684.2, "usd": 0.6125, "error": null}
+{"at": "2026-10-24T06:19:01+00:00", "event": "cost", "cid": "fc_cn_profits_2026_09__agent__think", "usd": 0.6125, "cumulative_usd": 1.0663}
+{"at": "2026-10-24T06:19:01+00:00", "event": "start", "cid": "fc_tw_visitors_2026_09__agent__off", "as_of": "2026-10-24", "thinking": {}}
+{"at": "2026-10-24T06:21:23+00:00", "event": "end", "cid": "fc_tw_visitors_2026_09__agent__off", "outcome": "done", "wall_s": 141.7, "usd": 0.4744, "error": null}
+{"at": "2026-10-24T06:21:23+00:00", "event": "cost", "cid": "fc_tw_visitors_2026_09__agent__off", "usd": 0.4744, "cumulative_usd": 1.5407}
+{"at": "2026-10-24T06:21:23+00:00", "event": "start", "cid": "fc_tw_visitors_2026_09__agent__think", "as_of": "2026-10-24", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+{"at": "2026-10-24T06:27:56+00:00", "event": "end", "cid": "fc_tw_visitors_2026_09__agent__think", "outcome": "done", "wall_s": 393.4, "usd": 0.563, "error": null}
+{"at": "2026-10-24T06:27:56+00:00", "event": "cost", "cid": "fc_tw_visitors_2026_09__agent__think", "usd": 0.563, "cumulative_usd": 2.1037}

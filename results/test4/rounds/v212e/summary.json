@@ -1,0 +1,405 @@
+{
+ "set": "test4",
+ "configs": [
+  {
+   "config": "fc_cn_profits_2026_09__naive__off",
+   "qid": "fc_cn_profits_2026_09",
+   "arm": "naive",
+   "thinking": "off",
+   "outcome": "not run",
+   "as_of": null,
+   "usd": null,
+   "wall_s": null,
+   "answer_value": null,
+   "scored": false,
+   "estimate": null,
+   "p10": null,
+   "p90": null,
+   "detail": ""
+  },
+  {
+   "config": "fc_cn_profits_2026_09__naive__think",
+   "qid": "fc_cn_profits_2026_09",
+   "arm": "naive",
+   "thinking": "think",
+   "outcome": "not run",
+   "as_of": null,
+   "usd": null,
+   "wall_s": null,
+   "answer_value": null,
+   "scored": false,
+   "estimate": null,
+   "p10": null,
+   "p90": null,
+   "detail": ""
+  },
+  {
+   "config": "fc_cn_profits_2026_09__search_direct__off",
+   "qid": "fc_cn_profits_2026_09",
+   "arm": "search_direct",
+   "thinking": "off",
+   "outcome": "not run",
+   "as_of": null,
+   "usd": null,
+   "wall_s": null,
+   "answer_value": null,
+   "scored": false,
+   "estimate": null,
+   "p10": null,
+   "p90": null,
+   "detail": ""
+  },
+  {
+   "config": "fc_cn_profits_2026_09__search_direct__think",
+   "qid": "fc_cn_profits_2026_09",
+   "arm": "search_direct",
+   "thinking": "think",
+   "outcome": "not run",
+   "as_of": null,
+   "usd": null,
+   "wall_s": null,
+   "answer_value": null,
+   "scored": false,
+   "estimate": null,
+   "p10": null,
+   "p90": null,
+   "detail": ""
+  },
+  {
+   "config": "fc_cn_profits_2026_09__agent__off",
+   "qid": "fc_cn_profits_2026_09",
+   "arm": "agent",
+   "thinking": "off",
+   "outcome": "done",
+   "as_of": "2026-10-24",
+   "usd": 0.4538,
+   "wall_s": 246.3,
+   "answer_value": null,
+   "scored": false,
+   "estimate": 5644937033269.726,
+   "p10": 4097475907148.674,
+   "p90": 7776815491211.574,
+   "detail": "",
+   "estimate_as_run": 5644937033269.726,
+   "unit_note": "CNY",
+   "basis": "blocks",
+   "published_check": "no_candidates",
+   "pages_live_dated": 26,
+   "pages_snapshot": 0,
+   "methods": [
+    [
+     "m1",
+     "formula_mc",
+     null
+    ],
+    [
+     "m2",
+     "formula_mc",
+     6031669200469.102
+    ],
+    [
+     "m3",
+     "formula_mc",
+     5283000948908.432
+    ],
+    [
+     "m4",
+     "formula_mc",
+     null
+    ]
+   ],
+   "arm_status": "ok"
+  },
+  {
+   "config": "fc_cn_profits_2026_09__agent__think",
+   "qid": "fc_cn_profits_2026_09",
+   "arm": "agent",
+   "thinking": "think",
+   "outcome": "done",
+   "as_of": "2026-10-24",
+   "usd": 0.6125,
+   "wall_s": 684.2,
+   "answer_value": null,
+   "scored": false,
+   "estimate": 6000004778609.2705,
+   "p10": 3993391631698.943,
+   "p90": 9014907793558.496,
+   "detail": "",
+   "estimate_as_run": 6000004778609.2705,
+   "unit_note": "CNY",
+   "basis": "blocks",
+   "published_check": "not_confirmed",
+   "pages_live_dated": 38,
+   "pages_snapshot": 0,
+   "methods": [
+    [
+     "m1",
+     "partial_period",
+     6036135525264.385
+    ],
+    [
+     "m2",
+     "formula_mc",
+     5993155464529.864
+    ],
+    [
+     "m3",
+     "formula_mc",
+     6000004778609.264
+    ],
+    [
+     "m4",
+     "formula_mc",
+     5950783187492.758
+    ]
+   ],
+   "arm_status": "ok"
+  },
+  {
+   "config": "fc_tw_visitors_2026_09__naive__off",
+   "qid": "fc_tw_visitors_2026_09",
+   "arm": "naive",
+   "thinking": "off",
+   "outcome": "not run",
+   "as_of": null,
+   "usd": null,
+   "wall_s": null,
+   "answer_value": null,
+   "scored": false,
+   "estimate": null,
+   "p10": null,
+   "p90": null,
+   "detail": ""
+  },
+  {
+   "config": "fc_tw_visitors_2026_09__naive__think",
+   "qid": "fc_tw_visitors_2026_09",
+   "arm": "naive",
+   "thinking": "think",
+   "outcome": "not run",
+   "as_of": null,
+   "usd": null,
+   "wall_s": null,
+   "answer_value": null,
+   "scored": false,
+   "estimate": null,
+   "p10": null,
+   "p90": null,
+   "detail": ""
+  },
+  {
+   "config": "fc_tw_visitors_2026_09__search_direct__off",
+   "qid": "fc_tw_visitors_2026_09",
+   "arm": "search_direct",
+   "thinking": "off",
+   "outcome": "not run",
+   "as_of": null,
+   "usd": null,
+   "wall_s": null,
+   "answer_value": null,
+   "scored": false,
+   "estimate": null,
+   "p10": null,
+   "p90": null,
+   "detail": ""
+  },
+  {
+   "config": "fc_tw_visitors_2026_09__search_direct__think",
+   "qid": "fc_tw_visitors_2026_09",
+   "arm": "search_direct",
+   "thinking": "think",
+   "outcome": "not run",
+   "as_of": null,
+   "usd": null,
+   "wall_s": null,
+   "answer_value": null,
+   "scored": false,
+   "estimate": null,
+   "p10": null,
+   "p90": null,
+   "detail": ""
+  },
+  {
+   "config": "fc_tw_visitors_2026_09__agent__off",
+   "qid": "fc_tw_visitors_2026_09",
+   "arm": "agent",
+   "thinking": "off",
+   "outcome": "done",
+   "as_of": "2026-10-24",
+   "usd": 0.4744,
+   "wall_s": 141.7,
+   "answer_value": null,
+   "scored": false,
+   "estimate": 612056.511659744,
+   "p10": 414073.7127653131,
+   "p90": 904701.6555658918,
+   "detail": "",
+   "estimate_as_run": 612056.511659744,
+   "unit_note": "visitor",
+   "basis": "blocks",
+   "published_check": "no_candidates",
+   "pages_live_dated": 27,
+   "pages_snapshot": 0,
+   "methods": [
+    [
+     "m1",
+     "formula_mc",
+     614333.0067604166
+    ],
+    [
+     "m2",
+     "formula_mc",
+     609788.4524234748
+    ]
+   ],
+   "arm_status": "ok"
+  },
+  {
+   "config": "fc_tw_visitors_2026_09__agent__think",
+   "qid": "fc_tw_visitors_2026_09",
+   "arm": "agent",
+   "thinking": "think",
+   "outcome": "done",
+   "as_of": "2026-10-24",
+   "usd": 0.563,
+   "wall_s": 393.4,
+   "answer_value": null,
+   "scored": false,
+   "estimate": 608654.6848145286,
+   "p10": 441802.6086211501,
+   "p90": 838520.4571400493,
+   "detail": "",
+   "estimate_as_run": 608654.6848145286,
+   "unit_note": "visitor",
+   "basis": "blocks",
+   "published_check": "no_candidates",
+   "pages_live_dated": 21,
+   "pages_snapshot": 0,
+   "methods": [
+    [
+     "m1",
+     "formula_mc",
+     611005.9767458923
+    ],
+    [
+     "m2",
+     "yoy_scaling",
+     592077.2812515785
+    ],
+    [
+     "m3",
+     "yoy_scaling",
+     612887.5723190476
+    ],
+    [
+     "m4",
+     "formula_mc",
+     606312.4411968589
+    ]
+   ],
+   "arm_status": "ok"
+  }
+ ],
+ "summary": [
+  {
+   "arm": "naive",
+   "thinking": "off",
+   "n": 2,
+   "n_estimates": 0,
+   "n_scored": 0,
+   "median_abs_pct_err": null,
+   "median_abs_log10_err": null,
+   "within_10pct": 0,
+   "within_5pct": 0,
+   "covered_80": "n/a (no official value yet)",
+   "usd": 0,
+   "failures": [
+    "fc_cn_profits_2026_09: not run",
+    "fc_tw_visitors_2026_09: not run"
+   ]
+  },
+  {
+   "arm": "naive",
+   "thinking": "think",
+   "n": 2,
+   "n_estimates": 0,
+   "n_scored": 0,
+   "median_abs_pct_err": null,
+   "median_abs_log10_err": null,
+   "within_10pct": 0,
+   "within_5pct": 0,
+   "covered_80": "n/a (no official value yet)",
+   "usd": 0,
+   "failures": [
+    "fc_cn_profits_2026_09: not run",
+    "fc_tw_visitors_2026_09: not run"
+   ]
+  },
+  {
+   "arm": "search_direct",
+   "thinking": "off",
+   "n": 2,
+   "n_estimates": 0,
+   "n_scored": 0,
+   "median_abs_pct_err": null,
+   "median_abs_log10_err": null,
+   "within_10pct": 0,
+   "within_5pct": 0,
+   "covered_80": "n/a (no official value yet)",
+   "usd": 0,
+   "failures": [
+    "fc_cn_profits_2026_09: not run",
+    "fc_tw_visitors_2026_09: not run"
+   ]
+  },
+  {
+   "arm": "search_direct",
+   "thinking": "think",
+   "n": 2,
+   "n_estimates": 0,
+   "n_scored": 0,
+   "median_abs_pct_err": null,
+   "median_abs_log10_err": null,
+   "within_10pct": 0,
+   "within_5pct": 0,
+   "covered_80": "n/a (no official value yet)",
+   "usd": 0,
+   "failures": [
+    "fc_cn_profits_2026_09: not run",
+    "fc_tw_visitors_2026_09: not run"
+   ]
+  },
+  {
+   "arm": "agent",
+   "thinking": "off",
+   "n": 2,
+   "n_estimates": 2,
+   "n_scored": 0,
+   "median_abs_pct_err": null,
+   "median_abs_log10_err": null,
+   "within_10pct": 0,
+   "within_5pct": 0,
+   "covered_80": "n/a (no official value yet)",
+   "usd": 0.9282,
+   "failures": []
+  },
+  {
+   "arm": "agent",
+   "thinking": "think",
+   "n": 2,
+   "n_estimates": 2,
+   "n_scored": 0,
+   "median_abs_pct_err": null,
+   "median_abs_log10_err": null,
+   "within_10pct": 0,
+   "within_5pct": 0,
+   "covered_80": "n/a (no official value yet)",
+   "usd": 1.1755,
+   "failures": []
+  }
+ ],
+ "official": {
+  "fc_cn_profits_2026_09": null,
+  "fc_tw_visitors_2026_09": null
+ }
+}
