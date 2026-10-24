@@ -1,0 +1,1 @@
+{"arm": "naive", "qid": "fc_uk_insolv_2026_08", "attempt": 1, "model": "deepseek-flash", "thinking": "high", "http": 200, "http_try": 1, "latency_s": 3.48, "at": "2026-10-23T23:14:40+00:00", "finish_reason": "stop", "prompt_tokens": 278, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 278, "completion_tokens": 543, "usd": 0.000367, "reasoning_tokens": 530, "ok": true}

@@ -1,0 +1,15 @@
+{
+ "cid": "fc_uk_insolv_2026_08__structured__off",
+ "qid": "fc_uk_insolv_2026_08",
+ "arm": "structured",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "started_at": "2026-10-23T23:15:50+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\structured_off\\fc_uk_insolv_2026_08.json",
+ "usd": 0.001682,
+ "attempts_in_arm": 2,
+ "outcome": "done",
+ "wall_s": 10.1,
+ "finished_at": "2026-10-23T23:16:00+00:00"
+}

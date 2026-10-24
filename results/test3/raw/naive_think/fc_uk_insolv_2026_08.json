@@ -1,0 +1,20 @@
+{
+ "qid": "fc_uk_insolv_2026_08",
+ "arm": "naive",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 1900,
+    "unit": ""
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1,
+ "thinking_by_role": {
+  "naive": "high"
+ }
+}

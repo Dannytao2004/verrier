@@ -1,0 +1,189 @@
+{
+ "qid": "fc_cn_retail_2026_04",
+ "arm": "structured",
+ "target_unit": "CNY",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "China's total retail sales of consumer goods (社会消费品零售总额) for the single month of April 2026, as first reported by the National Bureau of Statistics of China.",
+     "unit": "CNY"
+    },
+    "inputs": [
+     {
+      "name": "annual_retail_sales_2025",
+      "description": "China's total retail sales of consumer goods in calendar year 2025",
+      "value": 50000000000000.0,
+      "low": 48000000000000.0,
+      "high": 52000000000000.0,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "2024 was about 48.8 trillion CNY; modest nominal growth puts 2025 near 50 trillion."
+      }
+     },
+     {
+      "name": "april_share_of_year",
+      "description": "Share of annual retail sales falling in April (a low-season month, ~30 days)",
+      "value": 0.077,
+      "low": 0.072,
+      "high": 0.082,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "April is a normal 30-day month with no major holiday spike; roughly 1/13 of the year."
+      }
+     },
+     {
+      "name": "monthly_retail_sales_2025_avg",
+      "description": "Average monthly retail sales in 2025",
+      "value": 4170000000000.0,
+      "low": 4000000000000.0,
+      "high": 4330000000000.0,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual total divided by 12."
+      }
+     },
+     {
+      "name": "april_seasonal_factor",
+      "description": "April sales relative to an average month",
+      "value": 0.95,
+      "low": 0.9,
+      "high": 1.0,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "April lacks Spring Festival and Golden Week boosts, so slightly below average."
+      }
+     },
+     {
+      "name": "yoy_nominal_growth",
+      "description": "Year-on-year nominal growth of retail sales in April 2026",
+      "value": 1.04,
+      "low": 0.98,
+      "high": 1.1,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent monthly growth has been low single digit; trade-in programs fading."
+      }
+     },
+     {
+      "name": "april_2025_retail_sales",
+      "description": "Retail sales in April 2025 (base for year-on-year growth)",
+      "value": 3720000000000.0,
+      "low": 3600000000000.0,
+      "high": 3850000000000.0,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "April 2025 was around 3.7 trillion CNY based on recent monthly levels."
+      }
+     },
+     {
+      "name": "population_china",
+      "description": "Population of China",
+      "value": 1408000000.0,
+      "low": 1400000000.0,
+      "high": 1415000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Population peaked near 1.41 billion and is slowly declining."
+      }
+     },
+     {
+      "name": "monthly_retail_spend_per_capita",
+      "description": "Average monthly retail spending per person in China",
+      "value": 2950,
+      "low": 2800,
+      "high": 3100,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual per-capita retail spend ~35,000 CNY divided by 12."
+      }
+     },
+     {
+      "name": "april_per_capita_factor",
+      "description": "April per-capita spending relative to an average month",
+      "value": 0.95,
+      "low": 0.9,
+      "high": 1.0,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Seasonal dip in April."
+      }
+     },
+     {
+      "name": "gdp_2025",
+      "description": "China's nominal GDP in 2025",
+      "value": 140000000000000.0,
+      "low": 135000000000000.0,
+      "high": 145000000000000.0,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "2024 GDP was about 134.9 trillion CNY; ~4% nominal growth."
+      }
+     },
+     {
+      "name": "retail_to_gdp_ratio",
+      "description": "Ratio of annual retail sales to GDP",
+      "value": 0.36,
+      "low": 0.34,
+      "high": 0.38,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Retail sales have hovered around 35-37% of GDP in recent years."
+      }
+     },
+     {
+      "name": "april_share_of_year_proxy",
+      "description": "April's share of annual retail sales used in the proxy path",
+      "value": 0.077,
+      "low": 0.072,
+      "high": 0.082,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Same seasonal reasoning as top-down."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate 2025 annual retail sales to April using April's share of the year",
+      "formula": "annual_retail_sales_2025 * april_share_of_year",
+      "output_unit": "CNY"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Population times per-capita monthly retail spend, adjusted for April seasonality",
+      "formula": "population_china * monthly_retail_spend_per_capita * april_per_capita_factor",
+      "output_unit": "CNY"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale GDP by retail-to-GDP ratio and April's share of the year",
+      "formula": "gdp_2025 * retail_to_gdp_ratio * april_share_of_year_proxy",
+      "output_unit": "CNY"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1,
+ "thinking_by_role": {}
+}

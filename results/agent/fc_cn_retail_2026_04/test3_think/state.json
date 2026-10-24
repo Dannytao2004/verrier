@@ -1,0 +1,4697 @@
+{
+ "qid": "fc_cn_retail_2026_04",
+ "question": "Assume today is 2026-04-18. You know nothing published after this date. Estimate China's total retail sales of consumer goods (社会消费品零售总额) for the single month of April 2026 (not the January-April cumulative total), in Chinese yuan (CNY; the release states it in 亿元, i.e. units of 100 million yuan), as it will be first reported in the National Bureau of Statistics of China's monthly release on retail sales of consumer goods.",
+ "as_of": "2026-04-18",
+ "plan": {
+  "target": {
+   "what": "Single-month total retail sales of consumer goods (社会消费品零售总额) in mainland China, covering retail sales of goods and catering services to consumers, as first reported by NBS for April 2026; excludes services retail sales outside goods/catering and excludes Hong Kong, Macao, and Taiwan.",
+   "unit": "100 million CNY (亿元)",
+   "period_start": "2026-04-01",
+   "period_end": "2026-04-30",
+   "publisher": "National Bureau of Statistics of China (NBS)",
+   "cadence": "Monthly; April single-month value is first reported in the May monthly release, typically mid-May, together with the January-April cumulative total.",
+   "caveats": "At the 2026-04-18 cutoff, April 2026 is not yet complete (ongoing/future), so this is a forecast of the first reported value, which is preliminary and subject to revision. NBS retail sales covers goods retail and catering revenue, not total household consumption expenditure or broader services retai",
+   "outcome_type": "continuous",
+   "unit_canonical": "CNY*10**8"
+  },
+  "market_keywords": [
+   "china retail sales",
+   "china consumption",
+   "april retail sales"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "NBS monthly statistical releases and historical time series",
+    "hypothesis": "April 2026 retail sales can be bridged from recent NBS monthly history using April/March seasonal ratios or April-vs-Q1 patterns; recent 2026 momentum (January-February and March, if released by cutoff) constrains the year-on-year growth rate applied to the April 2025 level.",
+    "data_to_find": "NBS monthly total retail sales in 亿元 for April 2023, April 2024, April 2025; March 2025 and March 2026; January-February 2026; Q1 2026 if available; monthly year-on-year growth rates; April/March seasonal ratio and April share of Q2 in prior years. Minimum evidence: April 2025 level, March 2026 level, and Q1 2026 growth.",
+    "search_hints": [
+     "国家统计局 社会消费品零售总额 2026年3月",
+     "NBS China total retail sales of consumer goods April 2025",
+     "社会消费品零售总额 2026年一季度"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "NBS consumption category tables and industry associations",
+    "hypothesis": "Total retail sales is the sum of goods retail and catering; within goods, auto, petroleum, food, apparel, home appliances, and online physical goods have large weights. Forecasting large components separately plus a residual can reduce error, especially if early-April auto and appliance signals reveal deviations from the March trend.",
+    "data_to_find": "NBS category-level retail sales for March 2026 and April 2025 in 亿元 and year-on-year growth; weights of auto, petroleum, food, apparel, home appliances, catering, and online physical goods; CPCA weekly passenger vehicle retail for early April 2026 and March 2026; appliance trade-in sales if available. Minimum evidence: category weights and an early-April auto signal.",
+    "search_hints": [
+     "乘联会 2026年4月 零售 销量 周度",
+     "国家统计局 2026年3月 社会消费品零售总额 汽车 石油",
+     "China retail sales categories April 2025 auto petroleum"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "physical_flow",
+    "perspective": "E-commerce platforms, express logistics operators, and State Post Bureau",
+    "hypothesis": "Online physical goods retail is a large and timely component of total retail sales; express parcel volume and e-commerce promotion intensity can proxy its April momentum. Total retail can be approximated as online physical goods retail divided by a seasonal online share.",
+    "data_to_find": "State Post Bureau monthly express delivery volume and revenue for March 2026 and April 2025; NBS online retail sales of physical goods for April 2025 and Q1 2026; April seasonal online share of total retail; any early-April e-commerce campaign or weekly parcel indicators published before cutoff. Minimum evidence: online physical goods share and March 2026 online retail.",
+    "search_hints": [
+     "国家邮政局 2026年3月 快递业务量",
+     "全国网上零售额 实物商品 2026年一季度",
+     "China online retail sales physical goods April 2025"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "administrative",
+    "perspective": "State Taxation Administration, Ministry of Commerce, and holiday consumption releases",
+    "hypothesis": "VAT invoice retail sales revenue and Ministry of Commerce key retail enterprise sales are independent administrative traces of consumption activity; their Q1 2026 growth and Qingming holiday consumption data can validate or adjust an NBS-based April forecast, especially as partial-month signals.",
+    "data_to_find": "State Taxation Administration VAT invoice sales revenue for retail/consumer services in March 2026 and Q1 2026; Ministry of Commerce key retail enterprise sales for Q1 2026 or March; April 2026 Qingming holiday consumption data released around April 7. Minimum evidence: Q1 2026 VAT retail growth and Qingming consumption growth.",
+    "search_hints": [
+     "税务总局 增值税发票 零售 2026年一季度",
+     "商务部 重点零售企业 销售额 2026年一季度",
+     "2026年清明 消费 数据 零售"
+    ],
+    "expected_information": 2,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "shocks",
+    "perspective": "Policy announcements and early-month sales indicators",
+    "hypothesis": "Consumer goods trade-in subsidies, auto purchase incentives, and local consumption vouchers in 2026 alter April year-on-year growth; measuring announced subsidy scale and early-April redemption can adjust a base forecast derived from history.",
+    "data_to_find": "2026 consumer goods trade-in program scope and funds allocated by April 18; auto and appliance trade-in redemption data for Q1 2026 and early April; local consumption voucher announcements; comparison with 2025 April policy effect. Minimum evidence: policy status and Q1 uplift estimate.",
+    "search_hints": [
+     "2026 消费品以旧换新 资金 政策 4月",
+     "汽车以旧换新 2026 一季度 数据",
+     "China consumer goods trade-in program April 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "forecasts_markets",
+    "perspective": "Analyst consensus and research institutes",
+    "hypothesis": "Published forecasts for China March 2026 retail sales, Q1 2026 consumption, and Q2/2026 retail sales growth can anchor April growth expectations; April-specific forecasts may not exist, so these are mainly sanity checks on the historical and component routes.",
+    "data_to_find": "Consensus forecasts for China March 2026 retail sales year-on-year growth and Q1 2026 GDP/consumption; forecasts for 2026 retail sales growth; any prediction market or nowcast for April 2026 published before cutoff. Minimum evidence: March 2026 retail sales consensus and Q1 consumption forecast.",
+    "search_hints": [
+     "China March 2026 retail sales forecast consensus",
+     "中国 2026年3月 社会消费品零售总额 预测",
+     "2026 China consumption forecast April"
+    ],
+    "expected_information": 2,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 6 candidate directions in 6 categories; running 6 (budget cap 10)"
+ ],
+ "existing": {
+  "status": "not_checked",
+  "note": "not checked: the existing-figure step runs only in live use with a human at the approval step (not in backtests, scored, --auto-approve or ablation runs)"
+ },
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "NBS monthly statistical releases and historical time series",
+   "hypothesis": "April 2026 retail sales can be bridged from recent NBS monthly history using April/March seasonal ratios or April-vs-Q1 patterns; recent 2026 momentum (January-February and March, if released by cutoff) constrains the year-on-year growth rate applied to the April 2025 level.",
+   "data_to_find": "NBS monthly total retail sales in 亿元 for April 2023, April 2024, April 2025; March 2025 and March 2026; January-February 2026; Q1 2026 if available; monthly year-on-year growth rates; April/March seasonal ratio and April share of Q2 in prior years. Minimum evidence: April 2025 level, March 2026 level, and Q1 2026 growth.",
+   "search_hints": [
+    "国家统计局 社会消费品零售总额 2026年3月",
+    "NBS China total retail sales of consumer goods April 2025",
+    "社会消费品零售总额 2026年一季度"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "related_series",
+   "perspective": "NBS consumption category tables and industry associations",
+   "hypothesis": "Total retail sales is the sum of goods retail and catering; within goods, auto, petroleum, food, apparel, home appliances, and online physical goods have large weights. Forecasting large components separately plus a residual can reduce error, especially if early-April auto and appliance signals reveal deviations from the March trend.",
+   "data_to_find": "NBS category-level retail sales for March 2026 and April 2025 in 亿元 and year-on-year growth; weights of auto, petroleum, food, apparel, home appliances, catering, and online physical goods; CPCA weekly passenger vehicle retail for early April 2026 and March 2026; appliance trade-in sales if available. Minimum evidence: category weights and an early-April auto signal.",
+   "search_hints": [
+    "乘联会 2026年4月 零售 销量 周度",
+    "国家统计局 2026年3月 社会消费品零售总额 汽车 石油",
+    "China retail sales categories April 2025 auto petroleum"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d3",
+   "category": "physical_flow",
+   "perspective": "E-commerce platforms, express logistics operators, and State Post Bureau",
+   "hypothesis": "Online physical goods retail is a large and timely component of total retail sales; express parcel volume and e-commerce promotion intensity can proxy its April momentum. Total retail can be approximated as online physical goods retail divided by a seasonal online share.",
+   "data_to_find": "State Post Bureau monthly express delivery volume and revenue for March 2026 and April 2025; NBS online retail sales of physical goods for April 2025 and Q1 2026; April seasonal online share of total retail; any early-April e-commerce campaign or weekly parcel indicators published before cutoff. Minimum evidence: online physical goods share and March 2026 online retail.",
+   "search_hints": [
+    "国家邮政局 2026年3月 快递业务量",
+    "全国网上零售额 实物商品 2026年一季度",
+    "China online retail sales physical goods April 2025"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d4",
+   "category": "shocks",
+   "perspective": "Policy announcements and early-month sales indicators",
+   "hypothesis": "Consumer goods trade-in subsidies, auto purchase incentives, and local consumption vouchers in 2026 alter April year-on-year growth; measuring announced subsidy scale and early-April redemption can adjust a base forecast derived from history.",
+   "data_to_find": "2026 consumer goods trade-in program scope and funds allocated by April 18; auto and appliance trade-in redemption data for Q1 2026 and early April; local consumption voucher announcements; comparison with 2025 April policy effect. Minimum evidence: policy status and Q1 uplift estimate.",
+   "search_hints": [
+    "2026 消费品以旧换新 资金 政策 4月",
+    "汽车以旧换新 2026 一季度 数据",
+    "China consumer goods trade-in program April 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d5",
+   "category": "administrative",
+   "perspective": "State Taxation Administration, Ministry of Commerce, and holiday consumption releases",
+   "hypothesis": "VAT invoice retail sales revenue and Ministry of Commerce key retail enterprise sales are independent administrative traces of consumption activity; their Q1 2026 growth and Qingming holiday consumption data can validate or adjust an NBS-based April forecast, especially as partial-month signals.",
+   "data_to_find": "State Taxation Administration VAT invoice sales revenue for retail/consumer services in March 2026 and Q1 2026; Ministry of Commerce key retail enterprise sales for Q1 2026 or March; April 2026 Qingming holiday consumption data released around April 7. Minimum evidence: Q1 2026 VAT retail growth and Qingming consumption growth.",
+   "search_hints": [
+    "税务总局 增值税发票 零售 2026年一季度",
+    "商务部 重点零售企业 销售额 2026年一季度",
+    "2026年清明 消费 数据 零售"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d6",
+   "category": "forecasts_markets",
+   "perspective": "Analyst consensus and research institutes",
+   "hypothesis": "Published forecasts for China March 2026 retail sales, Q1 2026 consumption, and Q2/2026 retail sales growth can anchor April growth expectations; April-specific forecasts may not exist, so these are mainly sanity checks on the historical and component routes.",
+   "data_to_find": "Consensus forecasts for China March 2026 retail sales year-on-year growth and Q1 2026 GDP/consumption; forecasts for 2026 retail sales growth; any prediction market or nowcast for April 2026 published before cutoff. Minimum evidence: March 2026 retail sales consensus and Q1 consumption forecast.",
+   "search_hints": [
+    "China March 2026 retail sales forecast consensus",
+    "中国 2026年3月 社会消费品零售总额 预测",
+    "2026 China consumption forecast April"
+   ],
+   "expected_information": 2,
+   "selected": true,
+   "candidate_id": "c6"
+  },
+  {
+   "id": "b1",
+   "category": "own_history",
+   "perspective": "Historical NBS monthly total retail sales levels",
+   "hypothesis": "The forecast currently relies on assumed seasonal ratios because no kept point gives April 2025 single-month retail or 2025 Q1 total. Retrieving 2024-2025 monthly NBS total retail levels would replace assumptions a1/a2 with measured April/March and April/Q1 ratios and permit a backtested seasonal bridge.",
+   "data_to_find": "NBS monthly table for total retail sales of consumer goods: April 2025 and April 2024 single-month levels in 亿元, March 2025/2024 levels, and Q1 2025 total; ideally 2019-2025 monthly series.",
+   "search_hints": [
+    "N",
+    "B",
+    "S",
+    " "
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b2",
+   "category": "related_series",
+   "perspective": "Early-April 2026 high-frequency consumption signals",
+   "hypothesis": "April-specific auto, appliance/trade-in, and e-commerce parcel data would allow adjustment of the assumed April/March and April/Q1 seasonal ratios for 2026 momentum, especially after March growth of 1.7% versus Q1 growth of 2.4%.",
+   "data_to_find": "CPCA passenger-vehicle retail for 2026-04-01 to 2026-04-15; trade-in redemption counts/sales for early April 2026; express parcel volume for early April 2026.",
+   "search_hints": [
+    "乘",
+    "联",
+    "会",
+    " "
+   ],
+   "expected_information": 3
+  },
+  {
+   "id": "b3",
+   "category": "shocks",
+   "perspective": "Trade-in subsidy intensity and timing",
+   "hypothesis": "p21 cumulative trade-in sales and p20's second batch allocation may indicate an April subsidy boost, but without comparable 2025 trade-in sales and redemption timing they cannot be converted into an incremental April retail adjustment over the seasonal baseline.",
+   "data_to_find": "2025 cumulative trade-in sales through a comparable mid-April date; monthly trade-in sales and redemption timing in 2025; official estimates of the subsidy's lift to total retail sales.",
+   "search_hints": [
+    "2",
+    "0",
+    "2",
+    "5"
+   ],
+   "expected_information": 3
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "国家统计局 社会消费品零售总额 2026年3月",
+     "社会消费品零售总额 2026年一季度 同比增长",
+     "2025年4月份社会消费品零售总额 37174亿元 增长5.1% 国家统计局",
+     "2026年1-2月份社会消费品零售总额 同比增长 国家统计局"
+    ],
+    "urls": [
+     "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+     "https://news.cnr.cn/native/gd/kx/20260416/t20260416_527586744.shtml",
+     "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm"
+    ],
+    "n_text_urls": 3,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0018051179999999999,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "国家统计局 社会消费品零售总额 2026年3月",
+       "urls": [
+        "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+        "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+        "http://www.jingjiribao.cn/static/detail.jsp?id=650307",
+        "https://m.gmw.cn/2026-04/16/content_1304420344.htm",
+        "https://www.stcn.com/article/detail/3754105.html",
+        "https://finance.ifeng.com/c/8sMjpd6NtpA?ch=ttsearch",
+        "https://dzswgf.mofcom.gov.cn/news/43/2026/4/1776318055886.html",
+        "https://www.stcn.com/article/kx-tag-detail.html?tag=rAqL7zA-_NRG",
+        "https://m.gmw.cn/2026-04/16/content_1304420422.htm",
+        "http://big5.cctv.com/gate/big5/news.cctv.com/2026/04/16/ARTIDKHOqov3tcUO0YpsrUvM260416.shtml"
+       ]
+      },
+      {
+       "query": "社会消费品零售总额 2026年一季度 同比增长",
+       "urls": [
+        "https://news.cnr.cn/native/gd/kx/20260416/t20260416_527586744.shtml",
+        "https://news.cnr.cn/native/gd/kx/20260423/t20260423_527597233.shtml",
+        "https://www.xinhuanet.com/fortune/20260416/c89c2dcc907447a18b6c4e2813e443ce/c.html",
+        "https://stcn.com/article/detail/3757839.html",
+        "https://dzswgf.mofcom.gov.cn/news/phone/43/2026/4/m-1777008082772.html",
+        "https://m.cnfin.com/hg-lb//zixun/20260416/4400463_1.html",
+        "https://news.ifeng.com/c/8sN9nyAm2XQ?ch=ttsearch",
+        "https://fdi.mofcom.gov.cn/come-zonghe-con.html?id=48769",
+        "http://vip.people.com.cn/albumsDetail?aid=2066767",
+        "http://www.qhrb.com.cn/articles/344568"
+       ]
+      },
+      {
+       "query": "2025年4月份社会消费品零售总额 37174亿元 增长5.1% 国家统计局",
+       "urls": [
+        "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+        "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/bumen/202505/content_7024220.htm",
+        "https://m.gmw.cn/2025-05/19/content_1304039926.htm",
+        "https://www.ceweekly.cn/news/important/2025/0523/474118.html",
+        "https://www.cnfin.com/hg-lb/detail/20250520/4236101_1.html",
+        "https://jingji.cctv.cn/2025/05/19/ARTIzLL6nUa3pGRD1TVXyGNq250519.shtml",
+        "https://baijiahao.baidu.com/s?for=pc&id=1832549092134094998&wfr=spider",
+        "https://www.news.cn/fortune/20250519/92a76252ce354a42af96df506fabb187/c.html",
+        "http://www.xinhuanet.com/fortune/20250520/a9aef9dff1c245eb9840da89b114aed0/c.html",
+        "https://app.xinhuanet.com/news/article.html?articleId=a39987b83ce458835df1cd612fd1abe8"
+       ]
+      },
+      {
+       "query": "2026年1-2月份社会消费品零售总额 同比增长 国家统计局",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260416125004",
+     "page_date": "2026-04-16",
+     "page_published": "2026-04-01",
+     "raw_path": "data/raw/agent/fc_cn_retail_2026_04/0e209395f935de65.raw",
+     "text_chars": 1533,
+     "leak_hits": [],
+     "chars_sent": 1533,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 2
+    },
+    {
+     "url": "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://news.cnr.cn/native/gd/kx/20260416/t20260416_527586744.shtml",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260416152146",
+     "page_date": "2026-04-16",
+     "page_published": "2026-04-01",
+     "raw_path": "data/raw/agent/fc_cn_retail_2026_04/e98883f181eec735.raw",
+     "text_chars": 1533,
+     "leak_hits": [],
+     "chars_sent": 1533,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 15,
+     "n_points_verified": 3
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      1
+     ],
+     "name": "March 2026 total retail sales year-on-year growth rate",
+     "value": 1.7,
+     "value_as_written": "1.7%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "2026年3月份社会消费品零售总额增长1.7%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      3
+     ],
+     "name": "Q1 2026 total retail sales year-on-year growth rate",
+     "value": 2.4,
+     "value_as_written": "2.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "1-3月份,社会消费品零售总额127695亿元,同比增长2.4%。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      1
+     ],
+     "name": "March 2026 total retail sales year-on-year growth rate",
+     "value": 1.7,
+     "value_as_written": "1.7%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "3月份,社會消費品零售總額41616億元,同比增長1.7%。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      3
+     ],
+     "name": "Q1 2026 total retail sales year-on-year growth rate",
+     "value": 2.4,
+     "value_as_written": "2.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "1-3月份,社會消費品零售總額127695億元,同比增長2.4%。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      13
+     ],
+     "name": "Q1 2026 online goods retail sales share of total retail sales",
+     "value": 24.8,
+     "value_as_written": "24.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "",
+     "quote": "網上商品零售額31614億元,增長7.5%,佔社會消費品零售總額的比重為24.8%;",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      0
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 total retail sales of consumer goods, mainland China",
+     "value_as_written": "41616"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      2
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 (January-March) total retail sales of consumer goods, mainland China",
+     "value_as_written": "127695"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      4
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 retail sales excluding automobiles",
+     "value_as_written": "37875"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      5
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 retail sales excluding automobiles",
+     "value_as_written": "117727"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      6
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 urban retail sales",
+     "value_as_written": "36125"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      7
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 rural retail sales",
+     "value_as_written": "5491"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      8
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 urban retail sales",
+     "value_as_written": "110574"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      9
+     ],
+     "reason": "quote not found verbatim in page (elisions must skip <= 150 chars within one sentence)",
+     "name": "Q1 2026 rural retail sales",
+     "value_as_written": "17121"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      10
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 retail sales of goods",
+     "value_as_written": "37257"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      11
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 catering revenue",
+     "value_as_written": "4359"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      12
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 retail sales of goods",
+     "value_as_written": "113072"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      13
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 catering revenue",
+     "value_as_written": "14623"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416125004",
+     "order": [
+      0,
+      14
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 online retail sales of goods and services",
+     "value_as_written": "49774"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      0
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 total retail sales of consumer goods, mainland China",
+     "value_as_written": "41616"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      2
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 (January-March) total retail sales of consumer goods, mainland China",
+     "value_as_written": "127695"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      4
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 retail sales excluding automobiles",
+     "value_as_written": "37875"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      5
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 retail sales excluding automobiles",
+     "value_as_written": "117727"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      6
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 urban retail sales",
+     "value_as_written": "36125"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      7
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 rural retail sales",
+     "value_as_written": "5491"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      8
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 goods retail sales",
+     "value_as_written": "37257"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      9
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "March 2026 catering revenue",
+     "value_as_written": "4359"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      10
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 goods retail sales",
+     "value_as_written": "113072"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      11
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 catering revenue",
+     "value_as_written": "14623"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      12
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 online retail sales of goods and services",
+     "value_as_written": "49774"
+    },
+    {
+     "direction_id": "d1",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416152146",
+     "order": [
+      3,
+      14
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 online goods retail sales",
+     "value_as_written": "31614"
+    }
+   ],
+   "wall_s": 33.4
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {
+    "queries": [
+     "乘联会 2026年4月 零售 销量 周度",
+     "国家统计局 2026年3月 社会消费品零售总额 汽车 石油",
+     "2025年4月份社会消费品零售总额 汽车类 石油及制品类 家用电器 餐饮收入 亿元 国家统计局",
+     "2025年4月 社零 商品零售 餐饮收入 汽车类 服装鞋帽 网上商品零售额 数据表"
+    ],
+    "urls": [
+     "https://www.stats.gov.cn//xxgk/sjfb/zxfb2020/202604/t20260416_1963325.html",
+     "http://field.10jqka.com.cn/20260415/c676015302.shtml",
+     "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+     "https://finance.eastmoney.com/a/202505193408630152.html"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0028080239999999997,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "乘联会 2026年4月 零售 销量 周度",
+       "urls": [
+        "https://stock.jrj.com.cn/2026/05/08163357038739.shtml",
+        "https://cn.investing.com/news/stock-market-news/article-3355946",
+        "https://www.autoreport.cn/xiaoliangshuju/20260508/17109780929.html",
+        "http://www.shanqx.com/index.php?m=home&c=View&a=index&aid=3323",
+        "https://news.mysteel.com/a/26042916/21BB33823F6649EF.html",
+        "http://field.10jqka.com.cn/20260415/c676015302.shtml",
+        "https://www.itiger.com/hant/news/2625911154",
+        "https://www.zhitongcaijing.com/content/detail/1436142.html",
+        "https://news.m.yiche.com/xiaoliangshuju/20260429/17109538990.html",
+        "https://chejiahao.autohome.com.cn/info/25451054"
+       ]
+      },
+      {
+       "query": "国家统计局 2026年3月 社会消费品零售总额 汽车 石油",
+       "urls": [
+        "http://stock.finance.sina.com.cn/stock/go.php/vReport_Show/kind/industry/rptid/829922655547/index.phtml",
+        "https://www.stats.gov.cn//xxgk/sjfb/zxfb2020/202604/t20260416_1963325.html",
+        "http://stock.finance.sina.com.cn/stock/go.php/vReport_Show/kind/search/rptid/829669920226/index.phtml",
+        "https://m.wlzq.cn/s/wlzqresearch/articledetail/728435/1",
+        "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+        "http://vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/lastest/rptid/829706633160/index.phtml",
+        "https://m.gmw.cn/2026-04/16/content_1304420344.htm",
+        "https://mp.weixin.qq.com/s?__biz=MzU5MTUxMTIwNA==&chksm=ff05a087d73cbb768154fecd6d7c98bb87c3d7848db90ed409d82b9ff74e4210eb8b47dfadb1&idx=6&mid=2247513097&sn=37b437a8a285a10552ac5300bd353517",
+        "https://dzswgf.mofcom.gov.cn/news/43/2026/4/1776318055886.html",
+        "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm"
+       ]
+      },
+      {
+       "query": "2025年4月份社会消费品零售总额 汽车类 石油及制品类 家用电器 餐饮收入 亿元 国家统计局",
+       "urls": [
+        "https://www.cnstock.com/commonDetail/442239",
+        "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+        "https://finance.jrj.com.cn/2025/05/19100550486060.shtml",
+        "http://vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/lastest/rptid/801022137746/index.phtml",
+        "http://vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/lastest/rptid/801228342268/index.phtml",
+        "https://news.steelhome.com/2025/05/19/n4455731.html?type=old",
+        "https://finance.eastmoney.com/a/202505193408630152.html",
+        "https://news.metal.net.cn/content-335-7864667-1.html",
+        "https://www.yicai.com/news/102621615.html",
+        "https://www.ebuxiu.com/news/news?id=4455731"
+       ]
+      },
+      {
+       "query": "2025年4月 社零 商品零售 餐饮收入 汽车类 服装鞋帽 网上商品零售额 数据表",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.stats.gov.cn//xxgk/sjfb/zxfb2020/202604/t20260416_1963325.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://field.10jqka.com.cn/20260415/c676015302.shtml",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://finance.eastmoney.com/a/202505193408630152.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 24.1
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {
+    "queries": [
+     "国家邮政局 2026年3月 快递业务量",
+     "全国网上零售额 实物商品 2026年一季度",
+     "2025年1-4月 全国网上零售额 实物商品网上零售额 亿元 国家统计局",
+     "2025年4月 社会消费品零售总额 37174亿元 网上零售"
+    ],
+    "urls": [
+     "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+     "https://stock.finance.sina.com.cn/stock/view/paper.php?symbol=sh000001&reportid=829755844571&autocallup=no&isfromsina=no",
+     "http://www.scio.gov.cn/live/2026/38333/tw/",
+     "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0023478360000000003,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "国家邮政局 2026年3月 快递业务量",
+       "urls": [
+        "https://www.spb.gov.cn/gjyzj/c100015/c100016/202604/d2240ad07f3a4b9cbf5df268c3c17373.shtml",
+        "https://news.cnr.cn/native/gd/kx/20260422/t20260422_527594911.shtml",
+        "http://rss.jingjiribao.cn/static/detail.jsp?id=650701",
+        "https://jingji.cctv.cn/2026/04/22/ARTIisbiHV4snofZwATX0dyJ260422.shtml",
+        "https://news.qq.com/rain/a/20260422A05O4O00?suid=&media_id=",
+        "https://dzswgf.mofcom.gov.cn/news/phone/43/2026/4/m-1776835997411.html",
+        "http://chinawuliu.com.cn/zixun/202604/22/665650.shtml",
+        "https://dzswgf.mofcom.gov.cn/news/43/2026/4/1776836038700.html",
+        "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+        "http://www.rmzxw.com.cn/c/2026-04-23/3905681.shtml"
+       ]
+      },
+      {
+       "query": "全国网上零售额 实物商品 2026年一季度",
+       "urls": [
+        "https://stock.finance.sina.com.cn/stock/view/paper.php?symbol=sh000001&reportid=829755844571&autocallup=no&isfromsina=no",
+        "https://www.cncic.org/?p=6857",
+        "http://www.scio.gov.cn/live/2026/38333/tw/",
+        "http://english.news.cn/20260416/4d36d844d430435c91caef668b72dfbd/c.html",
+        "https://stcn.com/article/detail/3757839.html",
+        "https://www.jwview.com/jingwei/html/04-16/667280.shtml",
+        "https://www.9fzt.com/industryReport/article.html?id=830358137337",
+        "http://adimg.ce.cn/xwzx/gnsz/gdxw/202604/t20260417_2911556.shtml",
+        "http://rss.jingjiribao.cn/static/detail.jsp?id=655548",
+        "http://finance.people.com.cn/BIG5/n1/2026/0416/c1004-40702663.html"
+       ]
+      },
+      {
+       "query": "2025年1-4月 全国网上零售额 实物商品网上零售额 亿元 国家统计局",
+       "urls": [
+        "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+        "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/bumen/202505/content_7024242.htm",
+        "https://jl.ifeng.com/c/8jTf6I3Mwuf",
+        "https://finance.jrj.com.cn/2025/05/19100550486060.shtml",
+        "https://www.yilantop.com/news/61942",
+        "https://dxpress.gelonghui.com/live/1916920",
+        "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/bumen/202505/content_7024220.htm",
+        "http://money.fjsen.com/2025-05/19/content_31906293.htm",
+        "https://news.steelhome.com/2025/05/19/n4455731.html?type=old",
+        "https://www.guandian.cn/article/20250519/486380.html"
+       ]
+      },
+      {
+       "query": "2025年4月 社会消费品零售总额 37174亿元 网上零售",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://stock.finance.sina.com.cn/stock/view/paper.php?symbol=sh000001&reportid=829755844571&autocallup=no&isfromsina=no",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://www.scio.gov.cn/live/2026/38333/tw/",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260416024106",
+     "page_date": "2026-04-16",
+     "page_published": "2026-04-16",
+     "raw_path": "data/raw/agent/fc_cn_retail_2026_04/e5d9078f660feb93.raw",
+     "text_chars": 1276,
+     "leak_hits": [],
+     "chars_sent": 1276,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 14,
+     "n_points_verified": 14
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      0
+     ],
+     "name": "China express delivery business volume, March 2026, estimated (预计在...左右)",
+     "value": 17300000000.0,
+     "value_as_written": "173亿件",
+     "scale_word": "亿",
+     "scale_basis": "quote",
+     "unit": "parcels",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "3月快递业务量预计在173亿件左右,快递业务收入预计同比增长4%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      1
+     ],
+     "name": "China express delivery business revenue, March 2026, estimated year-on-year growth",
+     "value": 4.0,
+     "value_as_written": "4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "3月快递业务量预计在173亿件左右,快递业务收入预计同比增长4%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      2
+     ],
+     "name": "China express delivery business volume, Q1 2026, estimated year-on-year growth",
+     "value": 6.0,
+     "value_as_written": "6%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "一季度,快递业务量预计同比增长6%,快递业务收入预计同比增长6.5%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      3
+     ],
+     "name": "China express delivery business revenue, Q1 2026, estimated year-on-year growth",
+     "value": 6.5,
+     "value_as_written": "6.5%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "一季度,快递业务量预计同比增长6%,快递业务收入预计同比增长6.5%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      4
+     ],
+     "name": "China express delivery average daily business volume, March 2026",
+     "value": 550000000.0,
+     "value_as_written": "5.5亿件",
+     "scale_word": "亿",
+     "scale_basis": "quote",
+     "unit": "parcels per day",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "3月,快递业务规模与业务收入均平稳增长,日均业务量超5.5亿件",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      5
+     ],
+     "name": "China express delivery development index, March 2026",
+     "value": 410.9,
+     "value_as_written": "410.9",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "index points",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "经测算,2026年3月中国快递发展指数为410.9,同比提升2.4%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      6
+     ],
+     "name": "China express delivery development index, March 2026, year-on-year change",
+     "value": 2.4,
+     "value_as_written": "2.4%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "经测算,2026年3月中国快递发展指数为410.9,同比提升2.4%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      7
+     ],
+     "name": "China express delivery development scale index, March 2026",
+     "value": 608.2,
+     "value_as_written": "608.2",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "index points",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "其中发展规模指数为608.2,同比提升5.1%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      8
+     ],
+     "name": "China express delivery development scale index, March 2026, year-on-year change",
+     "value": 5.1,
+     "value_as_written": "5.1%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "3月,发展规模指数为608.2,同比提升5.1%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      9
+     ],
+     "name": "China express delivery service quality index, March 2026",
+     "value": 503.9,
+     "value_as_written": "503.9",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "index points",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "服务质量指数为503.9,与去年同期基本持平",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      10
+     ],
+     "name": "China express delivery development capability index, March 2026",
+     "value": 237.4,
+     "value_as_written": "237.4",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "index points",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "发展能力指数为237.4,同比提升3.2%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      11
+     ],
+     "name": "China express delivery development trend index, March 2026",
+     "value": 60.0,
+     "value_as_written": "60",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "index points",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "3月,发展趋势指数为60",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      12
+     ],
+     "name": "China express delivery public satisfaction score, March 2026, estimated",
+     "value": 84.9,
+     "value_as_written": "84.9分",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "points (satisfaction score)",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "快递服务公众满意度预计为84.9分,同比提升0.2分",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d3",
+     "round": 1,
+     "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416024106",
+     "order": [
+      3,
+      13
+     ],
+     "name": "China key regions 72-hour on-time delivery rate, March 2026, estimated",
+     "value": 85.3,
+     "value_as_written": "85.3%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-03-01",
+     "period_end": "2026-03-31",
+     "published_at_if_visible": "2026-04-16",
+     "quote": "重点地区72小时妥投率预计为85.3%",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [],
+   "wall_s": 34.5
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {
+    "queries": [
+     "2026 消费品以旧换新 资金 政策 4月 国家发改委",
+     "汽车以旧换新 2026 一季度 数据 补贴",
+     "2026年一季度 社会消费品零售总额 同比 国家统计局 4月16日",
+     "2026年 消费品以旧换新 超长期特别国债 资金 第一批 全年 规模 亿元"
+    ],
+    "urls": [
+     "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+     "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "https://news.cnr.cn/native/gd/kx/20260416/t20260416_527586744.shtml",
+     "https://finance.sina.com.cn/wm/2026-04-04/doc-inhtichc3062376.shtml"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.001860144,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "2026 消费品以旧换新 资金 政策 4月 国家发改委",
+       "urls": [
+        "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+        "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+        "https://m.gmw.cn/2026-04/10/content_1304412587.htm",
+        "https://www.nmg.gov.cn/zwyw/qgyw/202604/t20260413_2888275.html",
+        "http://finance.people.com.cn/BIG5/n1/2026/0410/c1004-40699030.html",
+        "https://m.gmw.cn/2026-04/10/content_1304412431.htm",
+        "http://finance.people.com.cn/BIG5/n1/2026/0410/c1004-40699034.html",
+        "https://www.zhaoqing.gov.cn/zqczj/gkmlpt/content/3/3231/post_3231327.html",
+        "http://www.hunan.xinhua.org/20260410/4a233ef551614e559f2d3d5d9a950388/c.html",
+        "https://www.cei.cn//defaultsite/s/article/2026/04/10/4b4ff607-9d2fc921-019d-769bc42a-66ce_home.html?referCode=sxb0a&columnId=4028c7ca-37115425-0137-11565349-016f"
+       ]
+      },
+      {
+       "query": "汽车以旧换新 2026 一季度 数据 补贴",
+       "urls": [
+        "http://rss.jingjiribao.cn/static/detail.jsp?id=647942",
+        "https://www.nmg.gov.cn/zwyw/qgyw/202604/t20260404_2885223.html?dzb=true",
+        "https://big5.cctv.com/gate/big5/tv.cctv.cn/2026/04/04/VIDEfnaGfJ2xjmm4gpWpMMAe260404.shtml",
+        "https://www.zhaoqing.gov.cn/zqfzj/gkmlpt/content/3/3226/post_3226633.html",
+        "https://dzswgf.mofcom.gov.cn/news/43/2026/4/1775541174217.html",
+        "https://finance.sina.com.cn/wm/2026-04-04/doc-inhtichc3062376.shtml",
+        "https://epaper.neamco.com/gmrb/html/content/202604/05/content_10317.html",
+        "https://www.cnstock.com/commonDetail/665378?commTag=true",
+        "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+        "https://jnzstatic.cs.com.cn/zzb/htmlInfo/118869.html"
+       ]
+      },
+      {
+       "query": "2026年一季度 社会消费品零售总额 同比 国家统计局 4月16日",
+       "urls": [
+        "https://news.cnr.cn/native/gd/kx/20260416/t20260416_527586744.shtml",
+        "https://www.xinhuanet.com/fortune/20260416/c89c2dcc907447a18b6c4e2813e443ce/c.html",
+        "https://news.ifeng.com/c/8sN9nyAm2XQ?ch=ttsearch",
+        "https://stcn.com/article/detail/3757839.html",
+        "https://stcn.com/article/detail/3754195.html",
+        "https://www.163.com/dy/article/KQKPVTP605346RC6.html?spss=dy_author&referFrom=",
+        "http://vip.people.com.cn/albumsDetail?aid=2066767",
+        "https://www.news.cn/fortune/20260416/ad39b1dd9412422fa85b0fd6c9c32b12/c.html",
+        "https://k.sina.cn/article_1699432410_654b47da02001q1k2.html?from=news&subch=onews",
+        "http://finance.people.com.cn/BIG5/n1/2026/0416/c1004-40702649.html"
+       ]
+      },
+      {
+       "query": "2026年 消费品以旧换新 超长期特别国债 资金 第一批 全年 规模 亿元",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260412165040",
+     "page_date": "2026-04-12",
+     "page_published": "2026-04-01",
+     "raw_path": "data/raw/agent/fc_cn_retail_2026_04/5b6ea0229f7dedf5.raw",
+     "text_chars": 903,
+     "leak_hits": [],
+     "chars_sent": 903,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 5,
+     "n_points_verified": 5
+    },
+    {
+     "url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260416153816",
+     "page_date": "2026-04-16",
+     "page_published": "2026-04-01",
+     "raw_path": "data/raw/agent/fc_cn_retail_2026_04/3e66ae301cb4a727.raw",
+     "text_chars": 712,
+     "leak_hits": [],
+     "chars_sent": 712,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 14,
+     "n_points_verified": 0
+    },
+    {
+     "url": "https://news.cnr.cn/native/gd/kx/20260416/t20260416_527586744.shtml",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://finance.sina.com.cn/wm/2026-04-04/doc-inhtichc3062376.shtml",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-12",
+     "snapshot_ts": "20260412165040",
+     "order": [
+      0,
+      0
+     ],
+     "name": "Second batch of ultra-long special treasury bond funds allocated in 2026 to support consumer goods trade-in",
+     "value": 62500000000.0,
+     "value_as_written": "625亿元",
+     "scale_word": "亿",
+     "scale_basis": "quote",
+     "unit": "CNY",
+     "period_start": "2026-01-01",
+     "period_end": "2026-04-10",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "及时向地方下达了今年第二批625亿元超长期特别国债资金,支持地方继续平稳有序实施消费品以旧换新政策。",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-12",
+     "snapshot_ts": "20260412165040",
+     "order": [
+      0,
+      1
+     ],
+     "name": "Cumulative nationwide consumer goods trade-in sales in 2026 year-to-date",
+     "value": 433200000000.0,
+     "value_as_written": "4332亿元",
+     "scale_word": "亿",
+     "scale_basis": "quote",
+     "unit": "CNY",
+     "period_start": "2026-01-01",
+     "period_end": "2026-04-10",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "今年以来,全国消费品以旧换新销售额超过4332亿元",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-12",
+     "snapshot_ts": "20260412165040",
+     "order": [
+      0,
+      2
+     ],
+     "name": "Cumulative beneficiaries (person-times) of consumer goods trade-in in 2026 year-to-date",
+     "value": 60930000.0,
+     "value_as_written": "6093万人次",
+     "scale_word": "万",
+     "scale_basis": "quote",
+     "unit": "person-times",
+     "period_start": "2026-01-01",
+     "period_end": "2026-04-10",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "惠及超过6093万人次",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-12",
+     "snapshot_ts": "20260412165040",
+     "order": [
+      0,
+      3
+     ],
+     "name": "Year-on-year growth of total retail sales of consumer goods, January-February 2026",
+     "value": 2.8,
+     "value_as_written": "2.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "带动1至2月社会消费品零售总额同比增长2.8%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-12",
+     "snapshot_ts": "20260412165040",
+     "order": [
+      0,
+      4
+     ],
+     "name": "Acceleration of Jan-Feb 2026 retail sales growth versus December 2025 (percentage points)",
+     "value": 1.9,
+     "value_as_written": "1.9个百分点",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percentage points",
+     "period_start": "2026-01-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "比上年12月份加快1.9个百分点",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      0
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 consumer goods trade-in total sales (cumulative, Jan-Mar)",
+     "value_as_written": "4331.7"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      1
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 consumer goods trade-in beneficiaries (person-times)",
+     "value_as_written": "6093.3"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      2
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 auto trade-in subsidy applications received",
+     "value_as_written": "140.8"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      3
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 new vehicle sales value driven by auto trade-in subsidies",
+     "value_as_written": "2286.9"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      4
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 scrappage-update subsidy applications",
+     "value_as_written": "40.3"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      5
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 sales value driven by scrappage-update subsidies",
+     "value_as_written": "519.6"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      6
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 replacement-update subsidy applications",
+     "value_as_written": "100.5"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      7
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 sales value driven by replacement-update subsidies",
+     "value_as_written": "1767.3"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      8
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 units sold of 6 categories of home appliances trade-in plus digital/smart products purchase",
+     "value_as_written": "5952.5"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      9
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 sales value driven by 6 appliance categories trade-in plus digital/smart products",
+     "value_as_written": "2044.8"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      10
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 units sold of 6 categories of home appliances trade-in",
+     "value_as_written": "2320.5"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      11
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 sales value driven by 6 appliance categories trade-in",
+     "value_as_written": "954.3"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      12
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 units sold of digital and smart products purchase",
+     "value_as_written": "3632"
+    },
+    {
+     "direction_id": "d4",
+     "round": 1,
+     "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7064663.htm",
+     "via": "snapshot",
+     "page_date": "2026-04-16",
+     "snapshot_ts": "20260416153816",
+     "order": [
+      1,
+      13
+     ],
+     "reason": "number: value_as_written is only part of a larger CJK number in the quote",
+     "name": "Q1 2026 sales value driven by digital and smart products purchase",
+     "value_as_written": "1090.5"
+    }
+   ],
+   "wall_s": 36.6
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {
+    "queries": [
+     "税务总局 增值税发票 零售 2026年一季度 销售收入",
+     "2026年清明 消费 数据 零售 商务部",
+     "税务总局 增值税发票数据 2026年一季度 消费品 零售 销售收入 同比增长",
+     "国家统计局 2026年一季度 社会消费品零售总额 同比增长 3月份"
+    ],
+    "urls": [
+     "https://mrdx.cn/h5/mrdx/content/20260407/Articel01006NR.htm",
+     "https://news.cctv.com/2026/04/07/ARTIYePaRsp25N7mDZK2rFEC260407.shtml",
+     "http://yule.qlwb.com.cn/detail/25931815.html",
+     "https://guoyanwang.clcn.net.cn/webui/DocSummary.aspx?docid=8186840&leafid=14099"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 21,
+    "web_search_requests": 4,
+    "usd": 0.001810002,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "税务总局 增值税发票 零售 2026年一季度 销售收入",
+       "urls": [
+        "https://so.html5.qq.com/page/real/search_news?docid=70000021_11367f6797656252"
+       ]
+      },
+      {
+       "query": "2026年清明 消费 数据 零售 商务部",
+       "urls": [
+        "https://m.gmw.cn/2026-04/07/content_1304408337.htm",
+        "http://rss.jingjiribao.cn/static/detail.jsp?id=648414",
+        "http://china.cnr.cn/news/20260407/t20260407_527575922.shtml",
+        "http://new.chinareports.org.cn/index.php/index/news/88194.html",
+        "http://mrdx.cn/h5/mrdx/content/20260407/Articel01006NR.htm",
+        "https://news.cctv.cn/2026/04/07/ARTIg9iCEFadCAdVDBR9pz5L260407.shtml",
+        "https://ysxw.cctv.cn/article.html?channelId=1119&item_id=2680221106054447611&t=1775526460731&toc_style_id=feeds_default",
+        "https://tv.cctv.com/2026/04/06/VIDEPwJijN8OZstHLkEhBlOr260406.shtml",
+        "https://news.cctv.com/2026/04/07/ARTIYePaRsp25N7mDZK2rFEC260407.shtml",
+        "https://www.sohu.com/a/1006198434_122512986?scm=10001.325_13-325_13.0.0-0-0-0-0.5_1334&spm=smpc.channel_248.block3_308_NDdFbm_1_fd.7.1775529214844fO4FBVp_324"
+       ]
+      },
+      {
+       "query": "税务总局 增值税发票数据 2026年一季度 消费品 零售 销售收入 同比增长",
+       "urls": [
+        "http://shanghai.chinatax.gov.cn/gate/big5/shanghai.chinatax.gov.cn/xwdt/mtsd/202604/t480154.html",
+        "https://www.sjqcj.com/news/detail?id=89854",
+        "https://so.html5.qq.com/page/real/search_news?docid=70000021_11367f6797656252",
+        "https://m.bolamarilla.com/news/108e499887.html",
+        "https://so.html5.qq.com/page/real/search_news?docid=70000021_41667f7229601252",
+        "http://www.qlwb.com.cn/detail/25933121.html",
+        "https://zhejiang.chinatax.gov.cn/art/2026/4/20/art_13230_653404.html",
+        "https://guoyanwang.clcn.net.cn/webui/DocSummary.aspx?docid=8186840&leafid=14099",
+        "http://yule.qlwb.com.cn/detail/25931815.html",
+        "https://guoyanwang.clcn.net.cn/webui/DocSummary.aspx?docid=8211534&leafid=14102"
+       ]
+      },
+      {
+       "query": "国家统计局 2026年一季度 社会消费品零售总额 同比增长 3月份",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://mrdx.cn/h5/mrdx/content/20260407/Articel01006NR.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://news.cctv.com/2026/04/07/ARTIYePaRsp25N7mDZK2rFEC260407.shtml",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260407071117",
+     "page_date": "2026-04-07",
+     "page_published": "2026-04-07",
+     "raw_path": "data/raw/agent/fc_cn_retail_2026_04/39752607837c385d.raw",
+     "text_chars": 300,
+     "leak_hits": [],
+     "chars_sent": 300,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "http://yule.qlwb.com.cn/detail/25931815.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://guoyanwang.clcn.net.cn/webui/DocSummary.aspx?docid=8186840&leafid=14099",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 33.0
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {
+    "queries": [
+     "China March 2026 retail sales forecast consensus",
+     "中国 2026年3月 社会消费品零售总额 预测 同比",
+     "2026年 社会消费品零售总额 全年增速 预测 机构 展望",
+     "China April 2026 retail sales forecast analyst poll Reuters"
+    ],
+    "urls": [
+     "https://cmegroup.econoday.com/byevent?fid=679968&year=2026&ctyall=10737566&lid=0",
+     "http://www.aastock.com/sc/stocks/analysis/china-hot-topic-content.aspx?id=NOW.1518049&catg=4&source=AAFN",
+     "http://vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/lastest/rptid/828782520181/index.phtml",
+     "http://guoyanwang.clcn.net.cn/webui/DocSummary.aspx?docid=8155690&leafid=26601"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.0030120599999999996,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "China March 2026 retail sales forecast consensus",
+       "urls": [
+        "https://cmegroup.econoday.com/byevent?fid=679968&year=2026&ctyall=10737566&lid=0",
+        "https://trade.yuanta.com.hk/Portal/hk/Article/Index/99a1a209-028e-4276-93b6-6eddab3d338e",
+        "http://www.aastock.com/sc/stocks/analysis/china-hot-topic-content.aspx?id=NOW.1518049&catg=4&source=AAFN",
+        "https://se.marketscreener.com/nyheter/detaljhandelsforsaljningen-i-kina-okade-mindre-an-vantat-i-rstakt-i-mars-ce7e50ddd880f221",
+        "http://vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/lastest/rptid/828782520181/index.phtml",
+        "https://tradingeconomics.com/china/retail-sales-annual/news/542298",
+        "http://www.aastocks.com/tc/stocks/analysis/china-hot-topic-content.aspx?id=NOW.1518042&source=AAFN&catg=4",
+        "https://www.hellenicshippingnews.com/china-retail-sales-growth-slows-more-than-expected/",
+        "http://quotes.aastocks.com/sc/stocks/analysis/china-hot-topic-content.aspx?id=NOW.1518049&catg=4&source=AAFN",
+        "https://sustainable.jfinfo.com/news/4067303"
+       ]
+      },
+      {
+       "query": "中国 2026年3月 社会消费品零售总额 预测 同比",
+       "urls": [
+        "http://vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/lastest/rptid/829706633160/index.phtml",
+        "http://stock.finance.sina.com.cn/stock/go.php/vReport_Show/kind/search/rptid/829766940594/index.phtml",
+        "http://mp.weixin.qq.com/s?__biz=Mzg2Mjg1NTg3NA==&mid=2247512855&idx=2&sn=cb402289a8ee7e1138e9da18d2155d6f",
+        "https://trade.yuanta.com.hk/Portal/hk/Article/Index/99a1a209-028e-4276-93b6-6eddab3d338e",
+        "http://field.10jqka.com.cn/20260416/c676043661.shtml",
+        "http://stock.stockstar.com/JC2026041600034736.shtml",
+        "http://www.aastock.com/sc/stocks/analysis/china-hot-topic-content.aspx?id=NOW.1518049&catg=4&source=AAFN",
+        "http://quotes.aastocks.com/sc/stocks/analysis/china-hot-topic-content.aspx?id=NOW.1518049&catg=4&source=AAFN",
+        "http://aastocks.com/tc/stocks/news/aafn-con/NOW.1518049/economic-data/AAFN",
+        "http://field.10jqka.com.cn/20260417/c676081882.shtml"
+       ]
+      },
+      {
+       "query": "2026年 社会消费品零售总额 全年增速 预测 机构 展望",
+       "urls": [
+        "https://www.cei.cn//defaultsite/s/article/2026/01/21/4b4ff607-99db89c9-019b-deba30d8-2d1d_2026.html?referCode=ybqh1&columnId=4028c7ca-37115425-0137-115654a0-0179",
+        "https://www.pishu.com.cn/pszjgd/616369.shtml",
+        "https://www.pishu.com.cn/zgjjqjgmxlpsgd/616364.shtml",
+        "http://guoyanwang.clcn.net.cn/webui/DocSummary.aspx?docid=8155690&leafid=26601",
+        "https://guoyanwang.clcn.net.cn/webui/DocSummary.aspx?docid=8135377&leafid=3059",
+        "https://www.stcn.com/article/detail/3503173.html",
+        "https://stcn.com/article/detail/3604917.html",
+        "http://www.pishu.com.cn/skwx_ps/ps/literature?SiteID=14&ID=16674125",
+        "https://app.dahecube.com/nweb/wap/article.html?artid=257903?chname=%e6%96%b0%e9%9b%b6%e5%94%ae?qtype=0",
+        "https://www.qzwb.com/gb/content/2026-01/20/content_9211627.htm"
+       ]
+      },
+      {
+       "query": "China April 2026 retail sales forecast analyst poll Reuters",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://cmegroup.econoday.com/byevent?fid=679968&year=2026&ctyall=10737566&lid=0",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://www.aastock.com/sc/stocks/analysis/china-hot-topic-content.aspx?id=NOW.1518049&catg=4&source=AAFN",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/lastest/rptid/828782520181/index.phtml",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://guoyanwang.clcn.net.cn/webui/DocSummary.aspx?docid=8155690&leafid=26601",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 15.5
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "china retail sales",
+     "china consumption",
+     "april retail sales"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 1
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  },
+  {
+   "direction_id": "b1",
+   "round": 2,
+   "search": {
+    "queries": [
+     "2025年4月 社会消费品零售总额 37174亿元 国家统计局",
+     "国家统计局 2025年4月份社会消费品零售总额增长 同比增长",
+     "2025年3月份社会消费品零售总额 40330亿元 1—3月份 124671亿元 国家统计局",
+     "2024年4月份社会消费品零售总额 35699亿元 3月份 39020亿元 国家统计局"
+    ],
+    "urls": [
+     "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+     "https://www.stats.gov.cn/zwfwck/sjfb/202504/t20250416_1959317.html",
+     "https://data.stats.gov.cn/easyquery.htm?cn=A01",
+     "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/bumen/202505/content_7024220.htm"
+    ],
+    "n_text_urls": 3,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.002536362,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "2025年4月 社会消费品零售总额 37174亿元 国家统计局",
+       "urls": [
+        "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+        "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/bumen/202505/content_7024220.htm",
+        "https://jingji.cctv.cn/2025/05/19/ARTIzLL6nUa3pGRD1TVXyGNq250519.shtml",
+        "https://app.xinhuanet.com/news/article.html?articleId=a39987b83ce458835df1cd612fd1abe8",
+        "https://www.ceweekly.cn/news/important/2025/0523/474118.html",
+        "https://www.news.cn/fortune/20250519/92a76252ce354a42af96df506fabb187/c.html",
+        "http://www.xinhuanet.com/fortune/20250520/a9aef9dff1c245eb9840da89b114aed0/c.html",
+        "https://m.gmw.cn/2025-05/19/content_1304039926.htm",
+        "https://www.cnfin.com/hg-lb/detail/20250520/4236101_1.html",
+        "https://stcn.com/article/detail/1835191.html"
+       ]
+      },
+      {
+       "query": "国家统计局 2025年4月份社会消费品零售总额增长 同比增长",
+       "urls": [
+        "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+        "https://app.xinhuanet.com/news/article.html?articleId=a39987b83ce458835df1cd612fd1abe8",
+        "https://finance.sina.cn/2025-05-19/detail-inexaksa7884020.d.html?cid=76729&node_id=76729&oid=3810799476843554&vt=4",
+        "https://www.news.cn/fortune/20250519/92a76252ce354a42af96df506fabb187/c.html",
+        "http://gzw.fj.gov.cn/zwgk/gzdt/gzjg/tpkh/202505/t20250529_6919657.htm",
+        "http://finance.china.com.cn/news/20250520/6243211.shtml",
+        "https://jl.ifeng.com/c/8jUfwtys2jq",
+        "https://stcn.com/article/detail/1836768.html",
+        "https://news.cri.cn/20250519/8d9e1556-bcce-aec2-cb90-a3e3d9f8aae2.html",
+        "https://render.alipay.com/p/yuyan/180020010001268694/news.html?newsId=237594795"
+       ]
+      },
+      {
+       "query": "2025年3月份社会消费品零售总额 40330亿元 1—3月份 124671亿元 国家统计局",
+       "urls": [
+        "https://www.gov.cn/lianbo/bumen/202504/content_7018995.htm",
+        "https://www.stats.gov.cn/zwfwck/sjfb/202504/t20250416_1959317.html",
+        "https://www.cei.cn//defaultsite/s/article/2025/04/16/4b4ff607-94e3be0c-0196-3ca9c545-4ae2_2025.html?referCode=ybqh1&columnId=4028c7ca-37115425-0137-115654a0-0179",
+        "https://m.gmw.cn/2025-04/16/content_1304016520.htm",
+        "https://www.gov.cn/lianbo/bumen/202504/content_7019031.htm",
+        "https://www.sohu.com/a/884837819_115433?scm=10001.325_13-109000.0.0.5_32&spm=smpc.channel_248.block3_308_NDdFbm_1_fd.14.17447705286723vTeMQm_324",
+        "https://finance.cnr.cn/jjgd/20250418/t20250418_527139051.shtml",
+        "https://www.cls.cn/detail/2005234",
+        "https://finance.jrj.com.cn/2025/04/16101149571205.shtml",
+        "https://www.bbtnews.com.cn/2025/0416/553838.shtml"
+       ]
+      },
+      {
+       "query": "2024年4月份社会消费品零售总额 35699亿元 3月份 39020亿元 国家统计局",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202505/t20250519_1959858.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.stats.gov.cn/zwfwck/sjfb/202504/t20250416_1959317.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://data.stats.gov.cn/easyquery.htm?cn=A01",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260310162942",
+     "page_date": "2026-03-10",
+     "page_published": null,
+     "raw_path": "data/raw/agent/fc_cn_retail_2026_04/74bca7f408fa7516.raw",
+     "text_chars": 700,
+     "leak_hits": [],
+     "chars_sent": 700,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 0,
+     "n_points_verified": 0
+    },
+    {
+     "url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/bumen/202505/content_7024220.htm",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 17.3
+  },
+  {
+   "direction_id": "b2",
+   "round": 2,
+   "search": {
+    "queries": [
+     "乘联分会 2026年4月1-15日 乘用车零售 销量",
+     "2026年4月 全国快递业务量 日均 亿件 国家邮政局",
+     "以旧换新 2026年4月 汽车报废更新 补贴 申请 数量 商务部",
+     "国家邮政局 2026年4月中国快递发展指数 443.2 日均快递业务量 5.5亿件"
+    ],
+    "urls": [
+     "http://field.10jqka.com.cn/20260415/c676015302.shtml",
+     "https://www.nmg.gov.cn/zwyw/qgyw/202604/t20260416_2890346.html",
+     "https://app.lanjinger.com/t/973896",
+     "http://wdatacn.aastocks.com/sc/(Z(@@78XMF=@@sPxRU%7B%7B%7Bthis9377701%7D%7D%7Dxca"
+    ],
+    "n_text_urls": 4,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.003177234,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "乘联分会 2026年4月1-15日 乘用车零售 销量",
+       "urls": [
+        "https://www.aastock.tw/sc/(Z(@@n7cjDGdCXMF=@@4R05J%7B%7B%7Bthis%7D%7D%7Dxca",
+        "https://www.aastocks.com/sc/usq/quote/stock-news-content.aspx?symbol=NIO&id=NOW.1517879&source=AAFN",
+        "https://chejiahao.autohome.com.cn/info/25224812",
+        "http://quotes.aastocks.com/en/mobile/news.aspx?newsid=NOW.1517879&newssource=AAFN&totc=1",
+        "http://field.10jqka.com.cn/20260415/c676015302.shtml",
+        "https://m.gasgoo.com/news/70453894.html",
+        "http://www.shanqx.com/index.php?m=home&c=View&a=index&aid=3323",
+        "https://www.marklines.com/cn/report/cpca079_202605",
+        "https://sdxw.iqilu.com/share/YS0yMS0xNzE5MzA2Mw==.html",
+        "https://news.m.yiche.com/xiaoliangshuju/20260429/17109538990.html"
+       ]
+      },
+      {
+       "query": "2026年4月 全国快递业务量 日均 亿件 国家邮政局",
+       "urls": [
+        "https://www.sohu.com/a/1025209895_255783?scm=10001.325_13-325_13.0.0-0-0-0-0.5_1334&spm=smpc.channel_248.block3_308_NDdFbm_1_fd.1.1779268419228lePBhCB_324",
+        "http://www3.xinhuanet.com/tech/20260525/2934d3f028d64dd9ab4c53273e71be7e/c.html",
+        "http://slzg.china.com.cn/2026-05/21/content_43432021.htm",
+        "https://www.mot.gov.cn/shuju/tongjishuju/youzheng/202605/t20260527_4206356.html",
+        "http://rss.jingjiribao.cn/static/detail.jsp?id=658666",
+        "http://www.chinawuliu.com.cn/zixun/202605/20/666351.shtml",
+        "http://ec100.cn/detail--6659451.html",
+        "https://app.lanjinger.com/t/973896",
+        "https://m.toutiao.com/article/7641897648648028687/?upstream_biz=toutiao_pc",
+        "https://zjic.zj.gov.cn/ywdh/cyfz/202605/t20260521_24085460.shtml"
+       ]
+      },
+      {
+       "query": "以旧换新 2026年4月 汽车报废更新 补贴 申请 数量 商务部",
+       "urls": [
+        "http://www.aastocks.com/tc/(Z(Ev7VLeqO=",
+        "https://www.aastock.tw/sc/(Z(@@n7cjDGdCXMF=@@4R05J%7B%7B%7Bthis%7D%7D%7Dxca",
+        "https://www.sohu.com/a/1009974813_267106?scm=10001.7746_13-119000.0.0-0-0-0-0.0&spm=smpc.channel_354.block3_32_P7Ovbu_1_fd.24.1776248538677cL40E1b_7746",
+        "https://finance.sina.com.cn/jjxw/2026-04-16/doc-inhusenn4069974.shtml",
+        "https://www.nmg.gov.cn/zwyw/qgyw/202604/t20260416_2890346.html",
+        "https://www.workercn.cn/c/2026-04-16/8781438.shtml",
+        "https://www.163.com/dy/article/KQKJKVIE0514R9OJ.html?referFrom=",
+        "http://www.jjckb.cn/20260415/23f4cf645ce04dd98937dd70f1ffe7ee/c.html",
+        "https://jrj.wuhan.gov.cn/ynzx_57/xwzx/202604/t20260416_2753807.shtml",
+        "http://wdatacn.aastocks.com/sc/(Z(@@78XMF=@@sPxRU%7B%7B%7Bthis9377701%7D%7D%7Dxca"
+       ]
+      },
+      {
+       "query": "国家邮政局 2026年4月中国快递发展指数 443.2 日均快递业务量 5.5亿件",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "http://field.10jqka.com.cn/20260415/c676015302.shtml",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://www.nmg.gov.cn/zwyw/qgyw/202604/t20260416_2890346.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "https://app.lanjinger.com/t/973896",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://wdatacn.aastocks.com/sc/(Z(@@78XMF=@@sPxRU%7B%7B%7Bthis9377701%7D%7D%7Dxca",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [],
+   "dropped_points": [],
+   "wall_s": 21.8
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "search": {
+    "queries": [
+     "2025年消费品以旧换新累计销售额 4月中旬 商务部",
+     "以旧换新 拉动社会消费品零售总额 增速 个百分点 2025 商务部 数据",
+     "2026年 消费品以旧换新 第二批 资金 下达 超长期特别国债 亿元 4月",
+     "2025年4月 社会消费品零售总额 同比增长5.1% 以旧换新 拉动 增速 百分点"
+    ],
+    "urls": [
+     "http://finance.people.com.cn/BIG5/n1/2025/0426/c1004-40468546.html",
+     "http://bgimg.ce.cn/cysc/newmain/yc/jsxw/202601/t20260102_2679232.shtml",
+     "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+     "https://finance.people.com.cn/BIG5/n1/2025/0426/c1004-40468546.html"
+    ],
+    "n_text_urls": 3,
+    "n_result_urls": 30,
+    "web_search_requests": 4,
+    "usd": 0.001963512,
+    "usd_search_fee_assumed": 0.04,
+    "candidates": {
+     "provider": "deepseek",
+     "by_query": [
+      {
+       "query": "2025年消费品以旧换新累计销售额 4月中旬 商务部",
+       "urls": [
+        "https://finance.people.com.cn/BIG5/n1/2025/0426/c1004-40468546.html",
+        "http://bgimg.ce.cn/cysc/newmain/yc/jsxw/202601/t20260102_2679232.shtml",
+        "http://news.big5.enorth.com.cn/system/2026/01/03/059043449.shtml",
+        "https://finance.cnr.cn/cjtt/yw/20250425/t20250425_527148583.shtml",
+        "https://www.yicai.com/news/102589902.html",
+        "https://dzh.com.cn/index/detail?mod=txs&url=/wap/data/news/txs/2026/01/510912.json",
+        "http://www.163.com/dy/article/JU0HVHK105198CJN.html",
+        "http://mrdx.cn/content/20250426/Articel03003NU.htm",
+        "https://www.hkej.com/instantnews/article?id=4286849",
+        "http://m.hxnews.com/news/cjpd/cjxw/202601/04/2233610.shtml"
+       ]
+      },
+      {
+       "query": "以旧换新 拉动社会消费品零售总额 增速 个百分点 2025 商务部 数据",
+       "urls": [
+        "https://www.ceweekly.cn/economic/industry/2026/0104/487048.html",
+        "http://finance.people.com.cn/BIG5/n1/2026/0102/c1004-40637497.html",
+        "http://big5.china.com.cn/gate/big5/news.china.com.cn/2026-01/01/content_118257433.shtml",
+        "http://finance.people.com.cn/BIG5/n1/2026/0103/c1004-40637782.html",
+        "http://finance.people.com.cn/n1/2026/0103/c1004-40637782.html",
+        "http://gdj.gansu.gov.cn/gdj/c109244/202601/174265131.shtml",
+        "https://www.chinanews.com.cn/cj/2026/01-02/10544936.shtml",
+        "http://bgimg.ce.cn/cysc/newmain/yc/jsxw/202601/t20260102_2679232.shtml",
+        "https://m.gmw.cn/toutiao/2026-01/09/content_38526600.htm",
+        "https://ylxf.1237125.cn/show/search?kw=%e6%96%b0%e7%ba%bf&page=3"
+       ]
+      },
+      {
+       "query": "2026年 消费品以旧换新 第二批 资金 下达 超长期特别国债 亿元 4月",
+       "urls": [
+        "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+        "https://m.gmw.cn/2026-04/10/content_1304412431.htm",
+        "http://finance.people.com.cn/BIG5/n1/2026/0411/c1004-40699205.html",
+        "http://finance.people.com.cn/BIG5/n1/2026/0410/c1004-40699030.html",
+        "https://m.gmw.cn/2026-04/10/content_1304412587.htm",
+        "http://www.jingjiribao.cn/static/detail.jsp?id=649061",
+        "https://www.zhaoqing.gov.cn/zqczj/gkmlpt/content/3/3231/post_3231327.html",
+        "https://www.nmg.gov.cn/zwyw/qgyw/202604/t20260413_2888275.html",
+        "https://politics.gmw.cn/2026-04/10/content_38700745.htm",
+        "https://www.cei.cn//defaultsite/s/article/2026/04/10/4b4ff607-9d2fc921-019d-769bc42a-66ce_home.html?referCode=sxb0a&columnId=4028c7ca-37115425-0137-11565349-016f"
+       ]
+      },
+      {
+       "query": "2025年4月 社会消费品零售总额 同比增长5.1% 以旧换新 拉动 增速 百分点",
+       "urls": [],
+       "error": "max_uses_exceeded"
+      }
+     ]
+    }
+   },
+   "pages": [
+    {
+     "url": "http://finance.people.com.cn/BIG5/n1/2025/0426/c1004-40468546.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://bgimg.ce.cn/cysc/newmain/yc/jsxw/202601/t20260102_2679232.shtml",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    },
+    {
+     "url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+     "status": "snapshot",
+     "reason": "",
+     "snapshot_ts": "20260414232159",
+     "page_date": "2026-04-14",
+     "page_published": "2026-04-11",
+     "raw_path": "data/raw/agent/fc_cn_retail_2026_04/ab1bfc710fea387c.raw",
+     "text_chars": 445,
+     "leak_hits": [],
+     "chars_sent": 445,
+     "truncated": false,
+     "late_dates_in_sent_text": [],
+     "extract_error": null,
+     "n_points_raw": 5,
+     "n_points_verified": 5
+    },
+    {
+     "url": "https://finance.people.com.cn/BIG5/n1/2025/0426/c1004-40468546.html",
+     "status": "dropped",
+     "reason": "no snapshot <= as_of; live pages not used in backtests (as_of before fetch day)",
+     "snapshot_ts": null,
+     "page_date": null
+    }
+   ],
+   "points": [
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414232159",
+     "order": [
+      2,
+      0
+     ],
+     "name": "Cumulative nationwide trade-in sales of consumer goods, year-to-date (as of report, mid-April 2026)",
+     "value": 433200000000.0,
+     "value_as_written": "4332",
+     "scale_word": "亿",
+     "scale_basis": "quote",
+     "unit": "CNY",
+     "period_start": "2026-01-01",
+     "period_end": "2026-04-10",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "今年以来,全国消费品以旧换新销售额超过4332亿元",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414232159",
+     "order": [
+      2,
+      1
+     ],
+     "name": "Cumulative beneficiaries (person-times) of trade-in program, year-to-date (as of report, mid-April 2026)",
+     "value": 60930000.0,
+     "value_as_written": "6093",
+     "scale_word": "万",
+     "scale_basis": "quote",
+     "unit": "person-times",
+     "period_start": "2026-01-01",
+     "period_end": "2026-04-10",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "惠及超过6093万人次",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414232159",
+     "order": [
+      2,
+      2
+     ],
+     "name": "Year-on-year growth of total retail sales of consumer goods, January-February 2026",
+     "value": 2.8,
+     "value_as_written": "2.8%",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "%",
+     "period_start": "2026-01-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "带动1至2月社会消费品零售总额同比增长2.8%",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414232159",
+     "order": [
+      2,
+      3
+     ],
+     "name": "Acceleration of Jan-Feb 2026 retail sales growth versus December 2025 (percentage points)",
+     "value": 1.9,
+     "value_as_written": "1.9",
+     "scale_word": "",
+     "scale_basis": "none_needed",
+     "unit": "percentage points",
+     "period_start": "2026-01-01",
+     "period_end": "2026-02-28",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "比上年12月份加快1.9个百分点",
+     "verified_by": "quote_in_page"
+    },
+    {
+     "direction_id": "b3",
+     "round": 2,
+     "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+     "via": "snapshot",
+     "page_date": "2026-04-14",
+     "snapshot_ts": "20260414232159",
+     "order": [
+      2,
+      4
+     ],
+     "name": "Second batch of ultra-long special treasury bond funds allocated to localities for trade-in program in 2026",
+     "value": 62500000000.0,
+     "value_as_written": "625",
+     "scale_word": "亿",
+     "scale_basis": "quote",
+     "unit": "CNY",
+     "period_start": "2026-04-01",
+     "period_end": "2026-04-10",
+     "published_at_if_visible": "2026-04-10",
+     "quote": "及时向地方下达了今年第二批625亿元超长期特别国债资金",
+     "verified_by": "quote_in_page"
+    }
+   ],
+   "dropped_points": [],
+   "wall_s": 26.7
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "assessment": [
+    {
+     "ids": [
+      "p1",
+      "p3"
+     ],
+     "relation": "corroborating",
+     "note": "Both report March 2026 total retail sales year-on-year growth of 1.7%; p3 additionally gives the March level of 41616亿元. They are the same NBS release in different language versions, so agreement is not independent. p1 is redundant for growth because p3 contains both level and growth."
+    },
+    {
+     "ids": [
+      "p2",
+      "p4"
+     ],
+     "relation": "corroborating",
+     "note": "Both report Q1 2026 total retail sales year-on-year growth of 2.4%; p2 gives the cumulative Q1 level of 127695亿元. They are duplicate language versions of the same NBS release, not independent measurements."
+    },
+    {
+     "ids": [
+      "p2",
+      "p3",
+      "p23"
+     ],
+     "relation": "corroborating",
+     "note": "Q1 level p2 minus March level p3 implies Jan-Feb level of 86079亿元; Jan-Feb growth p23 of 2.8% is arithmetically consistent with Q1 growth 2.4% and March growth 1.7% given the relative month sizes. This is internal consistency within/around the same official release, not independent confirmation."
+    },
+    {
+     "ids": [
+      "p5",
+      "p2"
+     ],
+     "relation": "corroborating",
+     "note": "p5 states Q1 2026 online goods retail of 31614亿元 and a 24.8% share of total retail; dividing implies total retail close to p2's 127695亿元. Same release, so useful as a scope/share check, not as independent evidence."
+    },
+    {
+     "ids": [
+      "p6",
+      "p8",
+      "p10"
+     ],
+     "relation": "corroborating",
+     "note": "p6 gives March express volume near 173亿 parcels, p10 states daily average over 5.5亿 (consistent with 31 days), and p8 gives Q1 express volume growth near 6%. They share the same logistics-association source; p10 is largely derived from p6. These are March/Q1 signals, not April NBS retail values."
+    },
+    {
+     "ids": [
+      "p11",
+      "p12",
+      "p13",
+      "p14",
+      "p15",
+      "p16",
+      "p17",
+      "p18",
+      "p19"
+     ],
+     "relation": "corroborating",
+     "note": "These are March 2026 express development indices and subindices from the same source. Several are index levels and their growth rates, so they overlap mechanically. They are March-only, logistics-sector measures, and not directly aligned with NBS total retail sales."
+    },
+    {
+     "ids": [
+      "p20",
+      "p21",
+      "p22"
+     ],
+     "relation": "corroborating",
+     "note": "All three come from the same 2026-04-10 policy announcement: second batch of 625亿元 ultra-long special treasury bonds, cumulative trade-in sales over 4332亿元, and over 6093万人次 beneficiaries. p20 is funding, p21 is trade-in sales, and p22 is beneficiary counts; they are not independent estimates of total retail and cover only the subsidised trade-in segment."
+    },
+    {
+     "ids": [
+      "p23",
+      "p24"
+     ],
+     "relation": "corroborating",
+     "note": "Both come from the same trade-in policy article: Jan-Feb 2026 retail growth 2.8% and acceleration of 1.9 percentage points versus December 2025. p23 is useful as a consistency check on Q1/March growth, while p24 is contextual momentum and not an April-specific input."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p1",
+     "keep": false,
+     "reason": "Redundant duplicate of the March 2026 growth already contained in p3; p3 also supplies the March level."
+    },
+    {
+     "id": "p4",
+     "keep": false,
+     "reason": "Redundant duplicate of the Q1 2026 growth already contained in p2; p2 also supplies the Q1 level."
+    },
+    {
+     "id": "p7",
+     "keep": false,
+     "reason": "March express revenue growth is not directly linked to NBS retail and is not needed given the kept volume measures."
+    },
+    {
+     "id": "p9",
+     "keep": false,
+     "reason": "Q1 express revenue growth is redundant with kept express volume growth and is not linked to April retail."
+    },
+    {
+     "id": "p10",
+     "keep": false,
+     "reason": "Derived from p6's March volume; adds no independent information."
+    },
+    {
+     "id": "p11",
+     "keep": false,
+     "reason": "March express development index summary is not April-specific and is not directly linked to NBS retail sales."
+    },
+    {
+     "id": "p12",
+     "keep": false,
+     "reason": "Growth rate of the same express development index; redundant with p11 and not April-specific."
+    },
+    {
+     "id": "p13",
+     "keep": false,
+     "reason": "Express scale subindex is March-only and less directly relevant than kept volume measures."
+    },
+    {
+     "id": "p14",
+     "keep": false,
+     "reason": "Growth rate of p13; redundant and not April-specific."
+    },
+    {
+     "id": "p15",
+     "keep": false,
+     "reason": "Express service-quality subindex is not a retail-sales indicator."
+    },
+    {
+     "id": "p16",
+     "keep": false,
+     "reason": "Express development-capability subindex is not a retail-sales indicator."
+    },
+    {
+     "id": "p17",
+     "keep": false,
+     "reason": "Express trend index is a March-only logistics indicator, not an April retail input."
+    },
+    {
+     "id": "p18",
+     "keep": false,
+     "reason": "Express satisfaction score is unrelated to total retail sales levels."
+    },
+    {
+     "id": "p19",
+     "keep": false,
+     "reason": "On-time delivery rate is unrelated to total retail sales levels."
+    },
+    {
+     "id": "p22",
+     "keep": false,
+     "reason": "Beneficiary count is a redundant administrative detail of the same trade-in announcement and is not used to size retail sales."
+    },
+    {
+     "id": "p24",
+     "keep": false,
+     "reason": "Acceleration versus December 2025 is contextual but not directly useful for the April 2026 single-month forecast."
+    }
+   ],
+   "extra_directions": [
+    {
+     "id": "b1",
+     "category": "own_history",
+     "perspective": "Historical NBS monthly total retail sales levels",
+     "hypothesis": "The forecast currently relies on assumed seasonal ratios because no kept point gives April 2025 single-month retail or 2025 Q1 total. Retrieving 2024-2025 monthly NBS total retail levels would replace assumptions a1/a2 with measured April/March and April/Q1 ratios and permit a backtested seasonal bridge.",
+     "data_to_find": "NBS monthly table for total retail sales of consumer goods: April 2025 and April 2024 single-month levels in 亿元, March 2025/2024 levels, and Q1 2025 total; ideally 2019-2025 monthly series.",
+     "search_hints": [
+      "N",
+      "B",
+      "S",
+      " "
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b2",
+     "category": "related_series",
+     "perspective": "Early-April 2026 high-frequency consumption signals",
+     "hypothesis": "April-specific auto, appliance/trade-in, and e-commerce parcel data would allow adjustment of the assumed April/March and April/Q1 seasonal ratios for 2026 momentum, especially after March growth of 1.7% versus Q1 growth of 2.4%.",
+     "data_to_find": "CPCA passenger-vehicle retail for 2026-04-01 to 2026-04-15; trade-in redemption counts/sales for early April 2026; express parcel volume for early April 2026.",
+     "search_hints": [
+      "乘",
+      "联",
+      "会",
+      " "
+     ],
+     "expected_information": 3
+    },
+    {
+     "id": "b3",
+     "category": "shocks",
+     "perspective": "Trade-in subsidy intensity and timing",
+     "hypothesis": "p21 cumulative trade-in sales and p20's second batch allocation may indicate an April subsidy boost, but without comparable 2025 trade-in sales and redemption timing they cannot be converted into an incremental April retail adjustment over the seasonal baseline.",
+     "data_to_find": "2025 cumulative trade-in sales through a comparable mid-April date; monthly trade-in sales and redemption timing in 2025; official estimates of the subsidy's lift to total retail sales.",
+     "search_hints": [
+      "2",
+      "0",
+      "2",
+      "5"
+     ],
+     "expected_information": 3
+    }
+   ],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "march * ratio",
+      "inputs": {
+       "march": {
+        "id": "p3",
+        "role": "March 2026 total retail sales of consumer goods, 亿元, same NBS series and scope as the target, one month before the target period"
+       },
+       "ratio": {
+        "id": "a1",
+        "role": "dimensionless ratio of April 2026 single-month total retail sales to March 2026 total retail sales, transferring the March level to April"
+       }
+      }
+     },
+     "unit": "CNY*10**8",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Bridge from the observed March 2026 level to April 2026 using normal April/March seasonality. This covers the full target scope. Shared dependency: it uses the same NBS target series and a calendar-seasonality assumption as m2, so the two are not independent measurements. Failure modes are a national shock, Qingming holiday-timing effects, trade-in redemption timing, or revision of the March level."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "q1 * ratio",
+      "inputs": {
+       "q1": {
+        "id": "p2",
+        "role": "Q1 2026 cumulative total retail sales of consumer goods, 亿元, same NBS series and scope as the target, covering January through March 2026"
+       },
+       "ratio": {
+        "id": "a2",
+        "role": "dimensionless ratio of April 2026 single-month total retail sales to Q1 2026 cumulative total retail sales"
+       }
+      }
+     },
+     "unit": "CNY*10**8",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "Bridge from the observed Q1 2026 cumulative level to April 2026 using normal April/Q1 seasonality. This uses a broader base than m1 and is less sensitive to March monthly noise, but it assumes a stable April share of Q1. Shared dependency: same NBS target series and seasonal logic as m1, so agreement would not be independent confirmation. Failure modes are a shift in Qingming timing, trade-in redemption timing, or revision to the Q1 total."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "April 2026 total retail sales divided by March 2026 total retail sales",
+     "value": 0.91,
+     "low": 0.88,
+     "high": 0.94,
+     "unit": "ratio",
+     "rationale": "China's monthly NBS total retail sales normally fall from March to April; in recent normal years the April/March ratio has clustered near 0.91, with the range covering ordinary holiday-timing and seasonal variation while excluding a nationwide lockdown-type break. This is a dimensionless change factor applied to the observed March level, not an assumed target level.",
+     "applies_when": "April 2026 has no nationwide mobility restriction, major statistical break, or extreme holiday-timing shift relative to normal years.",
+     "falsified_by": "Evidence that April 2026 retail sales are at or above March 2026, or historical April/March ratios consistently outside the stated range.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "April 2026 total retail sales divided by Q1 2026 total retail sales",
+     "value": 0.298,
+     "low": 0.288,
+     "high": 0.308,
+     "unit": "ratio",
+     "rationale": "April single-month total retail sales in normal years have been roughly 29-30% of the Q1 cumulative total because Q1 includes January-February plus March; the range covers ordinary variation in the April share. This is a dimensionless change factor applied to the observed Q1 level, not an assumed target level.",
+     "applies_when": "The April 2026 monthly seasonal pattern is broadly normal and the Q1 2026 total is not materially revised before the April release.",
+     "falsified_by": "Evidence that April's share of Q1 is persistently outside the stated range in 2026 due to policy timing or a statistical break.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": []
+  },
+  {
+   "round": 2,
+   "assessment": [
+    {
+     "ids": [
+      "p2",
+      "p3",
+      "p23",
+      "p28"
+     ],
+     "relation": "corroborating",
+     "note": "All are NBS total-retail growth rates for overlapping 2026 periods: Q1 2.4%, March 1.7%, Jan-Feb 2.8%. p28 says Jan-Feb accelerated 1.9 pp versus December 2025, consistent with a weak December base. They jointly imply March slowed sharply versus Q1. p23 and p27 are duplicate copies. The quoted texts also contain level figures (Q1 127695亿元, March 41616亿元), but the kept point values are growth rates, so those levels cannot be used as if they were point values."
+    },
+    {
+     "ids": [
+      "p21",
+      "p25",
+      "p26",
+      "p20",
+      "p29"
+     ],
+     "relation": "corroborating",
+     "note": "These describe the same 2026 consumer-goods trade-in program. p21 and p25 are duplicate 4332亿元 YTD trade-in sales through 2026-04-10; p20 and p29 are duplicate 625亿元 second-batch funding allocations; p26 adds 60.93 million beneficiary person-times. They corroborate program scale but are not total retail sales: p20 is allocated funding, not sales, and p21 is trade-in sales of selected goods, not the full NBS retail total."
+    },
+    {
+     "ids": [
+      "p5",
+      "p6",
+      "p8"
+     ],
+     "relation": "corroborating",
+     "note": "p5 gives the Q1 2026 NBS online-goods share of total retail (24.8%); p6 gives estimated March express parcel volume (17.3 billion parcels); p8 gives estimated Q1 express volume growth (6%). They point to substantial online/express activity, but they are different measurements: express parcels include non-online and return flows, while p5 is an NBS retail share. A value-per-parcel and seasonal-share conversion is required."
+    },
+    {
+     "ids": [
+      "p3",
+      "p2"
+     ],
+     "relation": "conflicting",
+     "note": "This is a timing/speed conflict rather than a definitional one: March 2026 growth at 1.7% is materially below Q1 2026 growth at 2.4%, so momentum weakened into March. Any April forecast must allow for either continued weakness or a rebound, and neither point supplies an April level directly."
+    }
+   ],
+   "decisions": [
+    {
+     "id": "p25",
+     "keep": false,
+     "reason": "Duplicate of p21: same 4332亿元 cumulative trade-in sales, same 2026-01-01..2026-04-10 period, and same underlying People's Daily/gov.cn reporting; p21 is the retained copy."
+    },
+    {
+     "id": "p27",
+     "keep": false,
+     "reason": "Duplicate of p23: same 2.8% Jan-Feb 2026 retail growth and same policy-report context; p23 is the retained copy."
+    },
+    {
+     "id": "p29",
+     "keep": false,
+     "reason": "Duplicate of p20: same 625亿元 second-batch ultra-long special treasury bond allocation; p20 is the retained copy."
+    }
+   ],
+   "extra_directions": [],
+   "methods": [
+    {
+     "id": "m1",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p6 * a1 * a2 / (p5 * a3)",
+      "inputs": {
+       "p6": {
+        "id": "p6",
+        "role": "China express delivery business volume, March 2026, estimated, in parcels (about 17.3 billion parcels); used as the March parcel level to project April parcels"
+       },
+       "a1": {
+        "id": "a1",
+        "role": "dimensionless ratio of April 2026 express parcel volume to March 2026 express parcel volume"
+       },
+       "a2": {
+        "id": "a2",
+        "role": "CNY of online physical goods retail sales per express parcel in April 2026"
+       },
+       "p5": {
+        "id": "p5",
+        "role": "Q1 2026 online goods retail sales share of total retail sales, as a fraction (24.8%); used as the Q1 online share and adjusted to April by a3"
+       },
+       "a3": {
+        "id": "a3",
+        "role": "dimensionless ratio of April 2026 online goods share to Q1 2026 online goods share"
+       }
+      }
+     },
+     "unit": "CNY",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "This route expresses total retail as online physical-goods retail divided by the online share. Online goods retail is April express parcels times average online-goods value per parcel. p6 supplies the March parcel level, a1 transfers it to April, a2 converts parcels to CNY, p5 supplies the Q1 online share, and a3 adjusts that share to April. Shared dependencies and failure modes: p6 is an estimate and includes all express parcels, not only online physical goods; a2 must absorb returns, non-online parcels and mix; a3 assumes April online share is modestly above the Q1 share. If parcel mix or online share seasonality differs sharply, this route will miss."
+    },
+    {
+     "id": "m2",
+     "method": "formula_mc",
+     "params": {
+      "formula": "p21 * a4 / a5",
+      "inputs": {
+       "p21": {
+        "id": "p21",
+        "role": "Cumulative nationwide consumer goods trade-in sales in 2026 from 2026-01-01 through 2026-04-10, CNY"
+       },
+       "a4": {
+        "id": "a4",
+        "role": "dimensionless ratio of April 2026 full-month consumer goods trade-in sales to cumulative trade-in sales Jan 1-Apr 10 2026 (p21)"
+       },
+       "a5": {
+        "id": "a5",
+        "role": "consumer goods trade-in sales as a fraction of total retail sales of consumer goods in April 2026"
+       }
+      }
+     },
+     "unit": "CNY",
+     "coverage": {
+      "kind": "full"
+     },
+     "rationale": "This route treats the large, policy-supported trade-in component as an observable anchor. p21 gives cumulative 2026 trade-in sales through Apr 10; a4 projects the April full-month trade-in amount from that cumulative total; a5 scales trade-in sales up to total retail sales. p20/p29 indicate the second 625亿元 batch was allocated around Apr 10 and could affect late-April redemption, which is why a4 has an upside range. Failure modes: p21 is gross trade-in sales of selected goods, not total retail; some trade-in sales may not map one-for-one into NBS retail; the April daily pace and April trade-in share are uncertain. The result is not independent of m1 because both ultimately depend on April consumer momentum, but they use different primary observations."
+    }
+   ],
+   "assumptions": [
+    {
+     "id": "a1",
+     "name": "April 2026 express parcel volume divided by March 2026 express parcel volume",
+     "value": 0.94,
+     "low": 0.88,
+     "high": 1.0,
+     "unit": "ratio",
+     "rationale": "March has 31 days and April 30, and April normally lacks a major e-commerce festival while still having Qingming and spring demand. March 2026 parcel volume was estimated at 17.3 billion; a ratio slightly below 1 is more plausible than a large increase. The range allows flat April volume or a modest decline.",
+     "applies_when": "Used in m1 to project April 2026 parcels from p6 March 2026 estimated parcels; it should not be used if April contains an unusual promotion or a parcel-data disruption.",
+     "falsified_by": "Published April express parcel volume implying an April/March ratio outside roughly 0.88-1.00.",
+     "route": "m1"
+    },
+    {
+     "id": "a2",
+     "name": "Online physical goods retail sales per express parcel, April 2026",
+     "value": 66,
+     "low": 58,
+     "high": 75,
+     "unit": "CNY/parcel",
+     "rationale": "A large share of express volume is online physical-goods delivery. The p5 quote implies Q1 2026 online goods retail of 31614亿元, and p6/p8 imply Q1 parcel volume near the high-40-billion range, giving an average near 60-70 CNY per parcel. I use 66 CNY/parcel as a central conversion, with a range for mix shifts between low-value and high-value parcels.",
+     "applies_when": "Used in m1 to convert total express parcels into online physical-goods retail value; it assumes the average online-goods value per parcel remains near the Q1/historical range and that returns/non-online parcels are broadly stable in the average.",
+     "falsified_by": "Evidence that April online physical-goods value per express parcel fell below 58 or rose above 75 CNY, for example from a large shift in parcel mix or promotional discounting.",
+     "route": "m1"
+    },
+    {
+     "id": "a3",
+     "name": "April 2026 online goods share relative to Q1 2026 online goods share",
+     "value": 1.1,
+     "low": 1.04,
+     "high": 1.16,
+     "unit": "ratio",
+     "rationale": "p5 gives a Q1 2026 online-goods share of 24.8%. April online share is usually higher than the Q1 average because Q1 includes the Jan-Feb holiday period with more offline spending. A modest upward adjustment of about 10% is consistent with historical April-versus-Q1 patterns; the range keeps the share in roughly 25.8%-28.8%.",
+     "applies_when": "Used in m1 to adjust p5 Q1 online share to an April share; if April online share were exactly the Q1 share, this ratio would be 1.0.",
+     "falsified_by": "April online-goods share below about 25.8% or above about 28.8%, or direct evidence that April online share moved very differently from the Q1 share.",
+     "route": "m1"
+    },
+    {
+     "id": "a4",
+     "name": "April 2026 full-month trade-in sales divided by cumulative trade-in sales Jan 1-Apr 10 2026",
+     "value": 0.3,
+     "low": 0.25,
+     "high": 0.36,
+     "unit": "ratio",
+     "rationale": "p21 covers Jan 1-Apr 10, about 100 days, while April has 30 days. Constant daily trade-in sales would give roughly 30/100 = 0.30 of p21 as the April full-month amount. The second batch of 625亿元 was allocated around Apr 10 (p20), which could lift late-April redemption, so the high end is above the constant-pace value.",
+     "applies_when": "Used in m2 to convert p21 cumulative trade-in sales through Apr 10 into an April full-month trade-in sales estimate; it assumes the daily trade-in pace does not shift drastically after Apr 10.",
+     "falsified_by": "Evidence that April trade-in sales were far below 25% or far above 36% of the Jan 1-Apr 10 cumulative total, such as a sudden program suspension or a large late-April surge.",
+     "route": "m2"
+    },
+    {
+     "id": "a5",
+     "name": "Consumer goods trade-in sales share of total retail sales in April 2026",
+     "value": 3.3,
+     "low": 2.8,
+     "high": 3.9,
+     "unit": "%",
+     "rationale": "p21 reports 4332亿元 of trade-in sales through Apr 10. Relative to China's monthly total retail scale, this is a small component, roughly low-3% of total retail sales. Trade-in sales are included in goods retail but do not cover all retail, so the share should be treated as a conversion ratio, not as the target itself. The range reflects uncertainty about whether all trade-in sales map one-for-one into NBS retail and about April program intensity.",
+     "applies_when": "Used in m2 to scale trade-in sales up to total retail sales; it assumes the April trade-in sales share is near the early-2026 ratio and that trade-in sales remain within NBS goods retail coverage.",
+     "falsified_by": "Evidence that trade-in sales were below 2.8% or above 3.9% of April total retail sales, or that a large part of trade-in sales fell outside the NBS retail definition.",
+     "route": "m2"
+    }
+   ],
+   "unknown_ids_in_decisions": [],
+   "unit_reviews": [
+    {
+     "check": 1,
+     "methods": [
+      {
+       "method": "m1",
+       "label": "m1",
+       "judge_unit": "CNY",
+       "checkers": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p6",
+            "reason": "number of express parcels delivered in March 2026",
+            "unit": "parcel",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "ratio of April parcel volume to March parcel volume",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "CNY of online physical goods retail sales per parcel",
+            "unit": "CNY/parcel",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "p5",
+            "reason": "online goods share of total retail sales, as a fraction",
+            "unit": "1",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a3",
+            "reason": "ratio of April online goods share to Q1 online goods share",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "parcel * 1 * CNY/parcel / (1 * 1) = CNY",
+          "result_unit": "CNY",
+          "declared_unit_matches": false
+         },
+         "converts_to_target": "1e-08"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p6",
+            "reason": "number of express parcels delivered in March 2026",
+            "unit": "parcel",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "ratio of April parcel volume to March parcel volume",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "CNY of online physical goods retail sales per parcel",
+            "unit": "CNY/parcel",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "p5",
+            "reason": "online goods share of total retail sales, as a fraction",
+            "unit": "1",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a3",
+            "reason": "ratio of April online goods share to Q1 online goods share",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "parcel * 1 * CNY/parcel / (1 * 1) = CNY",
+          "result_unit": "CNY",
+          "declared_unit_matches": false
+         },
+         "converts_to_target": "1e-08"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p6",
+            "reason": "number of express parcels delivered in March 2026",
+            "unit": "parcel",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a1",
+            "reason": "ratio of April 2026 parcel volume to March 2026 parcel volume",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a2",
+            "reason": "CNY of online physical goods retail sales per express parcel in April 2026",
+            "unit": "CNY/parcel",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "p5",
+            "reason": "share of total retail sales that is online goods retail, Q1 2026",
+            "unit": "1",
+            "recorded_unit_ok": false
+           },
+           {
+            "name": "a3",
+            "reason": "ratio of April 2026 online goods share to Q1 2026 online goods share",
+            "unit": "1",
+            "recorded_unit_ok": true
+           }
+          ],
+          "derivation": "parcel * 1 * CNY/parcel / (1 * 1) = CNY",
+          "result_unit": "CNY",
+          "declared_unit_matches": false
+         },
+         "converts_to_target": "1e-08"
+        }
+       ],
+       "arbiter": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p6",
+            "reason": "China express delivery business volume for March 2026, about 17.3 billion parcels; the quote and period support a parcel count, and value_used is in base parcels",
+            "unit": "parcel"
+           },
+           {
+            "name": "a1",
+            "reason": "Dimensionless ratio of April 2026 express parcel volume to March 2026 express parcel volume",
+            "unit": "1"
+           },
+           {
+            "name": "a2",
+            "reason": "CNY of online physical goods retail sales per express parcel in April 2026",
+            "unit": "CNY/parcel"
+           },
+           {
+            "name": "p5",
+            "reason": "Q1 2026 online goods retail sales share of total retail sales; recorded as 24.8% but value_used is the fraction 0.248, so it is a dimensionless share",
+            "unit": "1"
+           },
+           {
+            "name": "a3",
+            "reason": "Dimensionless ratio of April 2026 online goods share to Q1 2026 online goods share",
+            "unit": "1"
+           }
+          ],
+          "derivation": "parcel * 1 * CNY/parcel / (1 * 1) = CNY",
+          "result_unit": "CNY",
+          "fit_reason": "The formula gives a CNY total for April after converting March parcels to April parcels and dividing by the April online-goods share. The target is a single-month total in CNY*10**8, so this is the same kind of quantity with only a scale difference.",
+          "fits_target": true
+         },
+         "problem": ""
+        }
+       ],
+       "unit": "CNY",
+       "factor": 1e-08
+      },
+      {
+       "method": "m2",
+       "label": "m2",
+       "judge_unit": "CNY",
+       "checkers": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p21",
+            "reason": "cumulative consumer goods trade-in sales over 2026-01-01..2026-04-10, a money total for that period",
+            "unit": "CNY",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a4",
+            "reason": "ratio of April 2026 full-month trade-in sales to cumulative Jan 1-Apr 10 trade-in sales",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a5",
+            "reason": "trade-in sales as a fraction of total retail sales in April 2026",
+            "unit": "1",
+            "recorded_unit_ok": false
+           }
+          ],
+          "derivation": "CNY * 1 / 1 = CNY",
+          "result_unit": "CNY",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1e-08"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p21",
+            "reason": "cumulative consumer goods trade-in sales over Jan 1-Apr 10 2026, a money total for that period",
+            "unit": "CNY",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a4",
+            "reason": "ratio of April full-month trade-in sales to cumulative Jan 1-Apr 10 trade-in sales, a pure number",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a5",
+            "reason": "trade-in sales as a fraction of total retail sales in April 2026, a pure number",
+            "unit": "1",
+            "recorded_unit_ok": false
+           }
+          ],
+          "derivation": "CNY * 1 / 1 = CNY",
+          "result_unit": "CNY",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1e-08"
+        },
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p21",
+            "reason": "cumulative consumer goods trade-in sales over 2026-01-01..2026-04-10, a money total for that period",
+            "unit": "CNY",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a4",
+            "reason": "April 2026 full-month trade-in sales as a fraction of the Jan 1-Apr 10 cumulative trade-in sales",
+            "unit": "1",
+            "recorded_unit_ok": true
+           },
+           {
+            "name": "a5",
+            "reason": "trade-in sales as a fraction of total retail sales of consumer goods in April 2026",
+            "unit": "1",
+            "recorded_unit_ok": false
+           }
+          ],
+          "derivation": "CNY * 1 / 1 = CNY",
+          "result_unit": "CNY",
+          "declared_unit_matches": true
+         },
+         "converts_to_target": "1e-08"
+        }
+       ],
+       "arbiter": [
+        {
+         "reply": {
+          "inputs": [
+           {
+            "name": "p21",
+            "reason": "Cumulative consumer goods trade-in sales over 2026-01-01..2026-04-10, a money total for that period; value_used is in base CNY after applying the 亿 multiplier.",
+            "unit": "CNY"
+           },
+           {
+            "name": "a4",
+            "reason": "April 2026 full-month trade-in sales divided by cumulative Jan 1-Apr 10 trade-in sales; a dimensionless ratio.",
+            "unit": "1"
+           },
+           {
+            "name": "a5",
+            "reason": "Trade-in sales as a fraction of total retail sales in April 2026; recorded as a percent but the code uses the fraction, so the formula unit is dimensionless 1.",
+            "unit": "1"
+           }
+          ],
+          "derivation": "CNY * 1 / 1 = CNY",
+          "result_unit": "CNY",
+          "fit_reason": "The formula gives a money total in CNY for April 2026, which is the same kind of quantity as the target CNY*10**8 over 2026-04-01..2026-04-30; only the scale differs by 1e-8.",
+          "fits_target": true
+         },
+         "problem": ""
+        }
+       ],
+       "unit": "CNY",
+       "factor": 1e-08
+      }
+     ]
+    }
+   ],
+   "audit_failed": {}
+  }
+ ],
+ "points": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416125004",
+   "order": [
+    0,
+    1
+   ],
+   "name": "March 2026 total retail sales year-on-year growth rate",
+   "value": 1.7,
+   "value_as_written": "1.7%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "2026年3月份社会消费品零售总额增长1.7%",
+   "verified_by": "quote_in_page",
+   "id": "p1",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Redundant duplicate of the March 2026 growth already contained in p3; p3 also supplies the March level."
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "https://www.gov.cn/lianbo/202604/content_7065903.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416125004",
+   "order": [
+    0,
+    3
+   ],
+   "name": "Q1 2026 total retail sales year-on-year growth rate",
+   "value": 2.4,
+   "value_as_written": "2.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "1-3月份,社会消费品零售总额127695亿元,同比增长2.4%。",
+   "verified_by": "quote_in_page",
+   "id": "p2",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416152146",
+   "order": [
+    3,
+    1
+   ],
+   "name": "March 2026 total retail sales year-on-year growth rate",
+   "value": 1.7,
+   "value_as_written": "1.7%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "3月份,社會消費品零售總額41616億元,同比增長1.7%。",
+   "verified_by": "quote_in_page",
+   "id": "p3",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416152146",
+   "order": [
+    3,
+    3
+   ],
+   "name": "Q1 2026 total retail sales year-on-year growth rate",
+   "value": 2.4,
+   "value_as_written": "2.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "1-3月份,社會消費品零售總額127695億元,同比增長2.4%。",
+   "verified_by": "quote_in_page",
+   "id": "p4",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Redundant duplicate of the Q1 2026 growth already contained in p2; p2 also supplies the Q1 level."
+  },
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "source_url": "http://big5.www.gov.cn/gate/big5/www.gov.cn/lianbo/202604/content_7065903.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416152146",
+   "order": [
+    3,
+    13
+   ],
+   "name": "Q1 2026 online goods retail sales share of total retail sales",
+   "value": 24.8,
+   "value_as_written": "24.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "",
+   "quote": "網上商品零售額31614億元,增長7.5%,佔社會消費品零售總額的比重為24.8%;",
+   "verified_by": "quote_in_page",
+   "id": "p5",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    0
+   ],
+   "name": "China express delivery business volume, March 2026, estimated (预计在...左右)",
+   "value": 17300000000.0,
+   "value_as_written": "173亿件",
+   "scale_word": "亿",
+   "scale_basis": "quote",
+   "unit": "parcels",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "3月快递业务量预计在173亿件左右,快递业务收入预计同比增长4%",
+   "verified_by": "quote_in_page",
+   "id": "p6",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    1
+   ],
+   "name": "China express delivery business revenue, March 2026, estimated year-on-year growth",
+   "value": 4.0,
+   "value_as_written": "4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "3月快递业务量预计在173亿件左右,快递业务收入预计同比增长4%",
+   "verified_by": "quote_in_page",
+   "id": "p7",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "March express revenue growth is not directly linked to NBS retail and is not needed given the kept volume measures."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    2
+   ],
+   "name": "China express delivery business volume, Q1 2026, estimated year-on-year growth",
+   "value": 6.0,
+   "value_as_written": "6%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "一季度,快递业务量预计同比增长6%,快递业务收入预计同比增长6.5%",
+   "verified_by": "quote_in_page",
+   "id": "p8",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    3
+   ],
+   "name": "China express delivery business revenue, Q1 2026, estimated year-on-year growth",
+   "value": 6.5,
+   "value_as_written": "6.5%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "一季度,快递业务量预计同比增长6%,快递业务收入预计同比增长6.5%",
+   "verified_by": "quote_in_page",
+   "id": "p9",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Q1 express revenue growth is redundant with kept express volume growth and is not linked to April retail."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    4
+   ],
+   "name": "China express delivery average daily business volume, March 2026",
+   "value": 550000000.0,
+   "value_as_written": "5.5亿件",
+   "scale_word": "亿",
+   "scale_basis": "quote",
+   "unit": "parcels per day",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "3月,快递业务规模与业务收入均平稳增长,日均业务量超5.5亿件",
+   "verified_by": "quote_in_page",
+   "id": "p10",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Derived from p6's March volume; adds no independent information."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    5
+   ],
+   "name": "China express delivery development index, March 2026",
+   "value": 410.9,
+   "value_as_written": "410.9",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "index points",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "经测算,2026年3月中国快递发展指数为410.9,同比提升2.4%",
+   "verified_by": "quote_in_page",
+   "id": "p11",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "March express development index summary is not April-specific and is not directly linked to NBS retail sales."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    6
+   ],
+   "name": "China express delivery development index, March 2026, year-on-year change",
+   "value": 2.4,
+   "value_as_written": "2.4%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "经测算,2026年3月中国快递发展指数为410.9,同比提升2.4%",
+   "verified_by": "quote_in_page",
+   "id": "p12",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Growth rate of the same express development index; redundant with p11 and not April-specific."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    7
+   ],
+   "name": "China express delivery development scale index, March 2026",
+   "value": 608.2,
+   "value_as_written": "608.2",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "index points",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "其中发展规模指数为608.2,同比提升5.1%",
+   "verified_by": "quote_in_page",
+   "id": "p13",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Express scale subindex is March-only and less directly relevant than kept volume measures."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    8
+   ],
+   "name": "China express delivery development scale index, March 2026, year-on-year change",
+   "value": 5.1,
+   "value_as_written": "5.1%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "3月,发展规模指数为608.2,同比提升5.1%",
+   "verified_by": "quote_in_page",
+   "id": "p14",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Growth rate of p13; redundant and not April-specific."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    9
+   ],
+   "name": "China express delivery service quality index, March 2026",
+   "value": 503.9,
+   "value_as_written": "503.9",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "index points",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "服务质量指数为503.9,与去年同期基本持平",
+   "verified_by": "quote_in_page",
+   "id": "p15",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Express service-quality subindex is not a retail-sales indicator."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    10
+   ],
+   "name": "China express delivery development capability index, March 2026",
+   "value": 237.4,
+   "value_as_written": "237.4",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "index points",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "发展能力指数为237.4,同比提升3.2%",
+   "verified_by": "quote_in_page",
+   "id": "p16",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Express development-capability subindex is not a retail-sales indicator."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    11
+   ],
+   "name": "China express delivery development trend index, March 2026",
+   "value": 60.0,
+   "value_as_written": "60",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "index points",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "3月,发展趋势指数为60",
+   "verified_by": "quote_in_page",
+   "id": "p17",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Express trend index is a March-only logistics indicator, not an April retail input."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    12
+   ],
+   "name": "China express delivery public satisfaction score, March 2026, estimated",
+   "value": 84.9,
+   "value_as_written": "84.9分",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "points (satisfaction score)",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "快递服务公众满意度预计为84.9分,同比提升0.2分",
+   "verified_by": "quote_in_page",
+   "id": "p18",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Express satisfaction score is unrelated to total retail sales levels."
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "source_url": "http://www.chinawuliu.com.cn/zixun/202604/16/665543.shtml",
+   "via": "snapshot",
+   "page_date": "2026-04-16",
+   "snapshot_ts": "20260416024106",
+   "order": [
+    3,
+    13
+   ],
+   "name": "China key regions 72-hour on-time delivery rate, March 2026, estimated",
+   "value": 85.3,
+   "value_as_written": "85.3%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-03-01",
+   "period_end": "2026-03-31",
+   "published_at_if_visible": "2026-04-16",
+   "quote": "重点地区72小时妥投率预计为85.3%",
+   "verified_by": "quote_in_page",
+   "id": "p19",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "On-time delivery rate is unrelated to total retail sales levels."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-12",
+   "snapshot_ts": "20260412165040",
+   "order": [
+    0,
+    0
+   ],
+   "name": "Second batch of ultra-long special treasury bond funds allocated in 2026 to support consumer goods trade-in",
+   "value": 62500000000.0,
+   "value_as_written": "625亿元",
+   "scale_word": "亿",
+   "scale_basis": "quote",
+   "unit": "CNY",
+   "period_start": "2026-01-01",
+   "period_end": "2026-04-10",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "及时向地方下达了今年第二批625亿元超长期特别国债资金,支持地方继续平稳有序实施消费品以旧换新政策。",
+   "verified_by": "quote_in_page",
+   "id": "p20",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-12",
+   "snapshot_ts": "20260412165040",
+   "order": [
+    0,
+    1
+   ],
+   "name": "Cumulative nationwide consumer goods trade-in sales in 2026 year-to-date",
+   "value": 433200000000.0,
+   "value_as_written": "4332亿元",
+   "scale_word": "亿",
+   "scale_basis": "quote",
+   "unit": "CNY",
+   "period_start": "2026-01-01",
+   "period_end": "2026-04-10",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "今年以来,全国消费品以旧换新销售额超过4332亿元",
+   "verified_by": "quote_in_page",
+   "id": "p21",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-12",
+   "snapshot_ts": "20260412165040",
+   "order": [
+    0,
+    2
+   ],
+   "name": "Cumulative beneficiaries (person-times) of consumer goods trade-in in 2026 year-to-date",
+   "value": 60930000.0,
+   "value_as_written": "6093万人次",
+   "scale_word": "万",
+   "scale_basis": "quote",
+   "unit": "person-times",
+   "period_start": "2026-01-01",
+   "period_end": "2026-04-10",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "惠及超过6093万人次",
+   "verified_by": "quote_in_page",
+   "id": "p22",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Beneficiary count is a redundant administrative detail of the same trade-in announcement and is not used to size retail sales."
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-12",
+   "snapshot_ts": "20260412165040",
+   "order": [
+    0,
+    3
+   ],
+   "name": "Year-on-year growth of total retail sales of consumer goods, January-February 2026",
+   "value": 2.8,
+   "value_as_written": "2.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "带动1至2月社会消费品零售总额同比增长2.8%",
+   "verified_by": "quote_in_page",
+   "id": "p23",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "source_url": "https://www.gov.cn/lianbo/202604/content_7065162.htm",
+   "via": "snapshot",
+   "page_date": "2026-04-12",
+   "snapshot_ts": "20260412165040",
+   "order": [
+    0,
+    4
+   ],
+   "name": "Acceleration of Jan-Feb 2026 retail sales growth versus December 2025 (percentage points)",
+   "value": 1.9,
+   "value_as_written": "1.9个百分点",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percentage points",
+   "period_start": "2026-01-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "比上年12月份加快1.9个百分点",
+   "verified_by": "quote_in_page",
+   "id": "p24",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Acceleration versus December 2025 is contextual but not directly useful for the April 2026 single-month forecast."
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414232159",
+   "order": [
+    2,
+    0
+   ],
+   "name": "Cumulative nationwide trade-in sales of consumer goods, year-to-date (as of report, mid-April 2026)",
+   "value": 433200000000.0,
+   "value_as_written": "4332",
+   "scale_word": "亿",
+   "scale_basis": "quote",
+   "unit": "CNY",
+   "period_start": "2026-01-01",
+   "period_end": "2026-04-10",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "今年以来,全国消费品以旧换新销售额超过4332亿元",
+   "verified_by": "quote_in_page",
+   "id": "p25",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p21: same 4332亿元 cumulative trade-in sales, same 2026-01-01..2026-04-10 period, and same underlying People's Daily/gov.cn reporting; p21 is the retained copy."
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414232159",
+   "order": [
+    2,
+    1
+   ],
+   "name": "Cumulative beneficiaries (person-times) of trade-in program, year-to-date (as of report, mid-April 2026)",
+   "value": 60930000.0,
+   "value_as_written": "6093",
+   "scale_word": "万",
+   "scale_basis": "quote",
+   "unit": "person-times",
+   "period_start": "2026-01-01",
+   "period_end": "2026-04-10",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "惠及超过6093万人次",
+   "verified_by": "quote_in_page",
+   "id": "p26",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414232159",
+   "order": [
+    2,
+    2
+   ],
+   "name": "Year-on-year growth of total retail sales of consumer goods, January-February 2026",
+   "value": 2.8,
+   "value_as_written": "2.8%",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "%",
+   "period_start": "2026-01-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "带动1至2月社会消费品零售总额同比增长2.8%",
+   "verified_by": "quote_in_page",
+   "id": "p27",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p23: same 2.8% Jan-Feb 2026 retail growth and same policy-report context; p23 is the retained copy."
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414232159",
+   "order": [
+    2,
+    3
+   ],
+   "name": "Acceleration of Jan-Feb 2026 retail sales growth versus December 2025 (percentage points)",
+   "value": 1.9,
+   "value_as_written": "1.9",
+   "scale_word": "",
+   "scale_basis": "none_needed",
+   "unit": "percentage points",
+   "period_start": "2026-01-01",
+   "period_end": "2026-02-28",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "比上年12月份加快1.9个百分点",
+   "verified_by": "quote_in_page",
+   "id": "p28",
+   "keep": true,
+   "judged_round": 2
+  },
+  {
+   "direction_id": "b3",
+   "round": 2,
+   "source_url": "http://paper.people.com.cn/rmrb/pc/content/202604/11/content_30150415.html",
+   "via": "snapshot",
+   "page_date": "2026-04-14",
+   "snapshot_ts": "20260414232159",
+   "order": [
+    2,
+    4
+   ],
+   "name": "Second batch of ultra-long special treasury bond funds allocated to localities for trade-in program in 2026",
+   "value": 62500000000.0,
+   "value_as_written": "625",
+   "scale_word": "亿",
+   "scale_basis": "quote",
+   "unit": "CNY",
+   "period_start": "2026-04-01",
+   "period_end": "2026-04-10",
+   "published_at_if_visible": "2026-04-10",
+   "quote": "及时向地方下达了今年第二批625亿元超长期特别国债资金",
+   "verified_by": "quote_in_page",
+   "id": "p29",
+   "keep": false,
+   "judged_round": 2,
+   "judge_reason": "Duplicate of p20: same 625亿元 second-batch ultra-long special treasury bond allocation; p20 is the retained copy."
+  }
+ ],
+ "compute": {
+  "target_year": 2026,
+  "methods": [
+   {
+    "id": "m1",
+    "label": "m1",
+    "method": "formula_mc",
+    "params": {
+     "formula": "p6 * a1 * a2 / (p5 * a3)",
+     "inputs": {
+      "p6": {
+       "id": "p6",
+       "role": "China express delivery business volume, March 2026, estimated, in parcels (about 17.3 billion parcels); used as the March parcel level to project April parcels"
+      },
+      "a1": {
+       "id": "a1",
+       "role": "dimensionless ratio of April 2026 express parcel volume to March 2026 express parcel volume"
+      },
+      "a2": {
+       "id": "a2",
+       "role": "CNY of online physical goods retail sales per express parcel in April 2026"
+      },
+      "p5": {
+       "id": "p5",
+       "role": "Q1 2026 online goods retail sales share of total retail sales, as a fraction (24.8%); used as the Q1 online share and adjusted to April by a3"
+      },
+      "a3": {
+       "id": "a3",
+       "role": "dimensionless ratio of April 2026 online goods share to Q1 2026 online goods share"
+      }
+     }
+    },
+    "rationale": "This route expresses total retail as online physical-goods retail divided by the online share. Online goods retail is April express parcels times average online-goods value per parcel. p6 supplies the March parcel level, a1 transfers it to April, a2 converts parcels to CNY, p5 supplies the Q1 online share, and a3 adjusts that share to April. Shared dependencies and failure modes: p6 is an estimate",
+    "estimate": 39008.335700304706,
+    "backtest": [],
+    "notes": [],
+    "coverage": {
+     "kind": "full"
+    },
+    "used_ids": [
+     "p6",
+     "p5"
+    ],
+    "used_assumptions": [
+     "a1",
+     "a2",
+     "a3"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p6",
+      "id": "p6",
+      "kind": "point",
+      "p10": 14416666666.666668,
+      "p90": 20760000000.0,
+      "unit": "parcels"
+     },
+     {
+      "name": "a1",
+      "id": "a1",
+      "kind": "assumption",
+      "p10": 0.6633249580710799,
+      "p90": 1.32664991614216,
+      "unit": "ratio"
+     },
+     {
+      "name": "a2",
+      "id": "a2",
+      "kind": "assumption",
+      "p10": 46.63689526544407,
+      "p90": 93.27379053088815,
+      "unit": "CNY/parcel"
+     },
+     {
+      "name": "p5",
+      "id": "p5",
+      "kind": "point",
+      "p10": 0.20666666666666667,
+      "p90": 0.2976,
+      "unit": "%"
+     },
+     {
+      "name": "a3",
+      "id": "a3",
+      "kind": "assumption",
+      "p10": 0.7766595135579039,
+      "p90": 1.553319027115808,
+      "unit": "ratio"
+     }
+    ],
+    "unit_check": {
+     "unit": "CNY",
+     "target_unit": "CNY*10**8",
+     "factor": 1e-08
+    },
+    "mc": {
+     "p10": 20359.97775237803,
+     "p90": 75928.9200405278
+    },
+    "n_point_inputs": 2,
+    "n_assumption_inputs": 3,
+    "rests_mainly_on_assumptions": true
+   },
+   {
+    "id": "m2",
+    "label": "m2",
+    "method": "formula_mc",
+    "params": {
+     "formula": "p21 * a4 / a5",
+     "inputs": {
+      "p21": {
+       "id": "p21",
+       "role": "Cumulative nationwide consumer goods trade-in sales in 2026 from 2026-01-01 through 2026-04-10, CNY"
+      },
+      "a4": {
+       "id": "a4",
+       "role": "dimensionless ratio of April 2026 full-month consumer goods trade-in sales to cumulative trade-in sales Jan 1-Apr 10 2026 (p21)"
+      },
+      "a5": {
+       "id": "a5",
+       "role": "consumer goods trade-in sales as a fraction of total retail sales of consumer goods in April 2026"
+      }
+     }
+    },
+    "rationale": "This route treats the large, policy-supported trade-in component as an observable anchor. p21 gives cumulative 2026 trade-in sales through Apr 10; a4 projects the April full-month trade-in amount from that cumulative total; a5 scales trade-in sales up to total retail sales. p20/p29 indicate the second 625亿元 batch was allocated around Apr 10 and could affect late-April redemption, which is why a4 h",
+    "estimate": 39176.41664727191,
+    "backtest": [],
+    "notes": [],
+    "coverage": {
+     "kind": "full"
+    },
+    "used_ids": [
+     "p21"
+    ],
+    "used_assumptions": [
+     "a4",
+     "a5"
+    ],
+    "inputs_detail": [
+     {
+      "name": "p21",
+      "id": "p21",
+      "kind": "point",
+      "p10": 361000000000.0,
+      "p90": 519840000000.0,
+      "unit": "CNY"
+     },
+     {
+      "name": "a4",
+      "id": "a4",
+      "kind": "assumption",
+      "p10": 0.21213203435596423,
+      "p90": 0.4242640687119285,
+      "unit": "ratio"
+     },
+     {
+      "name": "a5",
+      "id": "a5",
+      "kind": "assumption",
+      "p10": 0.023366642891095843,
+      "p90": 0.04673328578219169,
+      "unit": "%"
+     }
+    ],
+    "unit_check": {
+     "unit": "CNY",
+     "target_unit": "CNY*10**8",
+     "factor": 1e-08
+    },
+    "mc": {
+     "p10": 23356.24959186171,
+     "p90": 66487.48578919384
+    },
+    "n_point_inputs": 1,
+    "n_assumption_inputs": 2,
+    "rests_mainly_on_assumptions": true
+   }
+  ],
+  "result": {
+   "central": 39092.28583891955,
+   "p10": 21573.898986404816,
+   "p90": 70835.91209335027,
+   "sigma_ln": 0.4638447383899278,
+   "basis": "blocks",
+   "weights": {
+    "m1": 0.5,
+    "m2": 0.5
+   },
+   "weight_rule": "equal_blocks_geometric_mean",
+   "weight_basis": {
+    "m1": "B1 of 2 blocks; geometric mean of blocks",
+    "m2": "B2 of 2 blocks; geometric mean of blocks"
+   },
+   "n_backtest_folds": 0,
+   "combination": {
+    "n_blocks": 2,
+    "rule_across_blocks": "geometric_mean",
+    "jaccard_threshold": 0.5,
+    "blocks": [
+     {
+      "id": "B1",
+      "members": [
+       "m1"
+      ],
+      "value": 39008.3357003047,
+      "rule": "single",
+      "coef": 0.5,
+      "sigma_ln": 0.5135285135803088,
+      "sigma_source": "monte_carlo",
+      "spread_ln": 0.0,
+      "shared_inputs": []
+     },
+     {
+      "id": "B2",
+      "members": [
+       "m2"
+      ],
+      "value": 39176.41664727189,
+      "rule": "single",
+      "coef": 0.5,
+      "sigma_ln": 0.40815725940382297,
+      "sigma_source": "monte_carlo",
+      "spread_ln": 0.0,
+      "shared_inputs": []
+     }
+    ],
+    "weight_gate": "off: inverse backtest-error weights need a bank-level gate (>= 30 scored questions with >= 2 backtested routes, hit rate >= 0.7; METHODS_ZH 4.1), which has not been run"
+   },
+   "member_sigma": {
+    "m1": {
+     "sigma_ln": 0.5135285135803088,
+     "source": "monte_carlo",
+     "sigma_mc": 0.5135285135803088
+    },
+    "m2": {
+     "sigma_ln": 0.40815725940382297,
+     "source": "monte_carlo",
+     "sigma_mc": 0.40815725940382297
+    }
+   },
+   "interval": {
+    "n_blocks": 2,
+    "flags": [],
+    "rule": "several blocks: root mean square of the block widths, times the Birge ratio when it exceeds 1",
+    "sigma_blocks_rms": 0.4638447383899278,
+    "chi2": 4.296144767194174e-05,
+    "dof": 1,
+    "birge_ratio": 0.006554498277667158,
+    "scale": 1.0,
+    "chi2_weighted_mean": 39111.258283369476,
+    "sigma_ln": 0.4638447383899278
+   },
+   "assumption_weight_share": 1.0,
+   "baseline": null
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {
+   "a1": [
+    "m1"
+   ],
+   "a2": [
+    "m1"
+   ],
+   "a3": [
+    "m1"
+   ],
+   "a4": [
+    "m2"
+   ],
+   "a5": [
+    "m2"
+   ]
+  },
+  "excluded_by_input_audit": [],
+  "methods_from_round": 2
+ },
+ "assumptions": {
+  "kept": [
+   {
+    "id": "a1",
+    "name": "April 2026 express parcel volume divided by March 2026 express parcel volume",
+    "unit": "ratio",
+    "rationale": "March has 31 days and April 30, and April normally lacks a major e-commerce festival while still having Qingming and spring demand. March 2026 parcel volume was estimated at 17.3 billion; a ratio slightly below 1 is more plausible than a large increase. The range allows flat April volume or a modest",
+    "applies_when": "Used in m1 to project April 2026 parcels from p6 March 2026 estimated parcels; it should not be used if April contains an unusual promotion or a parcel-data disruption.",
+    "falsified_by": "Published April express parcel volume implying an April/March ratio outside roughly 0.88-1.00.",
+    "route": "m1",
+    "value": 0.94,
+    "low": 0.88,
+    "high": 1.0,
+    "is_pct": false,
+    "p10_used": 0.6633249580710799,
+    "p90_used": 1.32664991614216,
+    "widened_by_floor": true,
+    "used_by": [
+     "m1"
+    ],
+    "used_by_labels": [
+     "m1"
+    ]
+   },
+   {
+    "id": "a2",
+    "name": "Online physical goods retail sales per express parcel, April 2026",
+    "unit": "CNY/parcel",
+    "rationale": "A large share of express volume is online physical-goods delivery. The p5 quote implies Q1 2026 online goods retail of 31614亿元, and p6/p8 imply Q1 parcel volume near the high-40-billion range, giving an average near 60-70 CNY per parcel. I use 66 CNY/parcel as a central conversion, with a range for ",
+    "applies_when": "Used in m1 to convert total express parcels into online physical-goods retail value; it assumes the average online-goods value per parcel remains near the Q1/historical range and that returns/non-online parcels are broadly stable in the average.",
+    "falsified_by": "Evidence that April online physical-goods value per express parcel fell below 58 or rose above 75 CNY, for example from a large shift in parcel mix or promotional discounting.",
+    "route": "m1",
+    "value": 66.0,
+    "low": 58.0,
+    "high": 75.0,
+    "is_pct": false,
+    "p10_used": 46.63689526544407,
+    "p90_used": 93.27379053088815,
+    "widened_by_floor": true,
+    "used_by": [
+     "m1"
+    ],
+    "used_by_labels": [
+     "m1"
+    ]
+   },
+   {
+    "id": "a3",
+    "name": "April 2026 online goods share relative to Q1 2026 online goods share",
+    "unit": "ratio",
+    "rationale": "p5 gives a Q1 2026 online-goods share of 24.8%. April online share is usually higher than the Q1 average because Q1 includes the Jan-Feb holiday period with more offline spending. A modest upward adjustment of about 10% is consistent with historical April-versus-Q1 patterns; the range keeps the shar",
+    "applies_when": "Used in m1 to adjust p5 Q1 online share to an April share; if April online share were exactly the Q1 share, this ratio would be 1.0.",
+    "falsified_by": "April online-goods share below about 25.8% or above about 28.8%, or direct evidence that April online share moved very differently from the Q1 share.",
+    "route": "m1",
+    "value": 1.1,
+    "low": 1.04,
+    "high": 1.16,
+    "is_pct": false,
+    "p10_used": 0.7766595135579039,
+    "p90_used": 1.553319027115808,
+    "widened_by_floor": true,
+    "used_by": [
+     "m1"
+    ],
+    "used_by_labels": [
+     "m1"
+    ]
+   },
+   {
+    "id": "a4",
+    "name": "April 2026 full-month trade-in sales divided by cumulative trade-in sales Jan 1-Apr 10 2026",
+    "unit": "ratio",
+    "rationale": "p21 covers Jan 1-Apr 10, about 100 days, while April has 30 days. Constant daily trade-in sales would give roughly 30/100 = 0.30 of p21 as the April full-month amount. The second batch of 625亿元 was allocated around Apr 10 (p20), which could lift late-April redemption, so the high end is above the co",
+    "applies_when": "Used in m2 to convert p21 cumulative trade-in sales through Apr 10 into an April full-month trade-in sales estimate; it assumes the daily trade-in pace does not shift drastically after Apr 10.",
+    "falsified_by": "Evidence that April trade-in sales were far below 25% or far above 36% of the Jan 1-Apr 10 cumulative total, such as a sudden program suspension or a large late-April surge.",
+    "route": "m2",
+    "value": 0.3,
+    "low": 0.25,
+    "high": 0.36,
+    "is_pct": false,
+    "p10_used": 0.21213203435596423,
+    "p90_used": 0.4242640687119285,
+    "widened_by_floor": true,
+    "used_by": [
+     "m2"
+    ],
+    "used_by_labels": [
+     "m2"
+    ]
+   },
+   {
+    "id": "a5",
+    "name": "Consumer goods trade-in sales share of total retail sales in April 2026",
+    "unit": "%",
+    "rationale": "p21 reports 4332亿元 of trade-in sales through Apr 10. Relative to China's monthly total retail scale, this is a small component, roughly low-3% of total retail sales. Trade-in sales are included in goods retail but do not cover all retail, so the share should be treated as a conversion ratio, not as ",
+    "applies_when": "Used in m2 to scale trade-in sales up to total retail sales; it assumes the April trade-in sales share is near the early-2026 ratio and that trade-in sales remain within NBS goods retail coverage.",
+    "falsified_by": "Evidence that trade-in sales were below 2.8% or above 3.9% of April total retail sales, or that a large part of trade-in sales fell outside the NBS retail definition.",
+    "route": "m2",
+    "value": 3.3,
+    "low": 2.8,
+    "high": 3.9,
+    "is_pct": true,
+    "p10_used": 0.023366642891095843,
+    "p90_used": 0.04673328578219169,
+    "widened_by_floor": true,
+    "used_by": [
+     "m2"
+    ],
+    "used_by_labels": [
+     "m2"
+    ]
+   }
+  ],
+  "rejected": [],
+  "from_round": 2,
+  "min_width": 2.0,
+  "max_per_run": 12,
+  "max_per_method": 6
+ },
+ "published": {
+  "status": "not_checked",
+  "note": "not checked: backtest or scored question (as_of before today, or an official value is registered), so the target cannot have been published by as_of"
+ },
+ "final": {
+  "template": "The estimate for mainland China's single-month total retail sales of consumer goods (goods retail plus catering) in April 2026 is [[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]]).\n\nTwo routes were combined with equal weight per block. m1 ([[m1_estimate]] [[unit]], weight [[m1_weight]]) divides online physical-goods retail by the online share: March parcels [[p6_value]] times an April ratio [[a1_value]] and per-parcel value [[a2_value]], divided by the Q1 online share [[p5_value]] adjusted by [[a3_value]]. m2 ([[m2_estimate]] [[unit]], weight [[m2_weight]]) scales cumulative trade-in sales [[p21_value]] by an April fraction [[a4_value]] and a trade-in share [[a5_value]].\n\nOnly the parcel level, online share, and trade-in total are observed; the transfers ([[a1_value]], [[a2_value]], [[a3_value]], [[a4_value]], [[a5_value]]) are analyst assumptions. The interval is conditional on these. The biggest risk is the parcel-to-CNY and trade-in-share conversions. Better evidence would be actual April parcel volumes and monthly online-retail data.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 April 2026 express parcel volume divided by March 2026 express parcel volume: [[a1_value]] ratio, range [[a1_low]] to [[a1_high]] (range widened by code); used by m1. Overturned by: Published April express parcel volume implying an April/March ratio outside roughly [n]-[n].\n- a2 Online physical goods retail sales per express parcel, April 2026: [[a2_value]] CNY/parcel, range [[a2_low]] to [[a2_high]] (range widened by code); used by m1. Overturned by: Evidence that April online physical-goods value per express parcel fell below [n] or rose above [n] CNY, for example from a large shift in parcel mix or promotional discounting.\n- a3 April 2026 online goods share relative to Q1 2026 online goods share: [[a3_value]] ratio, range [[a3_low]] to [[a3_high]] (range widened by code); used by m1. Overturned by: April online-goods share below about [n] or above about [n], or direct evidence that April online share moved very differently from the Q1 share.\n- a4 April 2026 full-month trade-in sales divided by cumulative trade-in sales Jan [n]-Apr [n] 2026: [[a4_value]] ratio, range [[a4_low]] to [[a4_high]] (range widened by code); used by m2. Overturned by: Evidence that April trade-in sales were far below [n] or far above [n] of the Jan [n]-Apr [n] cumulative total, such as a sudden program suspension or a large late-April surge.\n- a5 Consumer goods trade-in sales share of total retail sales in April 2026: [[a5_value]], range [[a5_low]] to [[a5_high]] (range widened by code); used by m2. Overturned by: Evidence that trade-in sales were below [n] or above [n] of April total retail sales, or that a large part of trade-in sales fell outside the NBS retail definition.\n\nMethod details (computed by code):\n- m1 formula_mc: p6 * a1 * a2 / (p5 * a3); Monte Carlo P10 to P90 [[m1_mc_p10]] to [[m1_mc_p90]]; result unit CNY converted to CNY*10**8; own 80% width [[m1_width]] (Monte Carlo of the formula inputs)\n- m2 formula_mc: p21 * a4 / a5; Monte Carlo P10 to P90 [[m2_mc_p10]] to [[m2_mc_p90]]; result unit CNY converted to CNY*10**8; own 80% width [[m2_width]] (Monte Carlo of the formula inputs)\n- Combination: [[n_blocks]] block(s), equal weight per block (methods whose inputs overlap by at least half form one block; backtest errors set widths, not weights): B1 = m1: [[block1_value]] (width [[block1_width]], Monte Carlo of the formula inputs); B2 = m2: [[block2_value]] (width [[block2_width]], Monte Carlo of the formula inputs). Estimate = the geometric mean of the two blocks.\n- Interval: root mean square of the block widths [[blocks_rms_width]]; Birge ratio [[birge_ratio]] (not above one, so no widening); final width [[final_width]].",
+  "text": "The estimate for mainland China's single-month total retail sales of consumer goods (goods retail plus catering) in April 2026 is 39,092 CNY*10**8 (80% model-based interval 21,574 to 70,836 CNY*10**8).\n\nTwo routes were combined with equal weight per block. m1 (39,008 CNY*10**8, weight 50%) divides online physical-goods retail by the online share: March parcels 17,300,000,000 parcels times an April ratio 0.94 and per-parcel value 66, divided by the Q1 online share 24.8% adjusted by 1.1. m2 (39,176 CNY*10**8, weight 50%) scales cumulative trade-in sales 433,200,000,000 CNY by an April fraction 0.3 and a trade-in share 3.3%.\n\nOnly the parcel level, online share, and trade-in total are observed; the transfers (0.94, 66, 1.1, 0.3, 3.3%) are analyst assumptions. The interval is conditional on these. The biggest risk is the parcel-to-CNY and trade-in-share conversions. Better evidence would be actual April parcel volumes and monthly online-retail data.\n\nKey assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):\n- a1 April 2026 express parcel volume divided by March 2026 express parcel volume: 0.94 ratio, range 0.6633 to 1.327 (range widened by code); used by m1. Overturned by: Published April express parcel volume implying an April/March ratio outside roughly [n]-[n].\n- a2 Online physical goods retail sales per express parcel, April 2026: 66 CNY/parcel, range 46.64 to 93.27 (range widened by code); used by m1. Overturned by: Evidence that April online physical-goods value per express parcel fell below [n] or rose above [n] CNY, for example from a large shift in parcel mix or promotional discounting.\n- a3 April 2026 online goods share relative to Q1 2026 online goods share: 1.1 ratio, range 0.7767 to 1.553 (range widened by code); used by m1. Overturned by: April online-goods share below about [n] or above about [n], or direct evidence that April online share moved very differently from the Q1 share.\n- a4 April 2026 full-month trade-in sales divided by cumulative trade-in sales Jan [n]-Apr [n] 2026: 0.3 ratio, range 0.2121 to 0.4243 (range widened by code); used by m2. Overturned by: Evidence that April trade-in sales were far below [n] or far above [n] of the Jan [n]-Apr [n] cumulative total, such as a sudden program suspension or a large late-April surge.\n- a5 Consumer goods trade-in sales share of total retail sales in April 2026: 3.3%, range 2.337% to 4.673% (range widened by code); used by m2. Overturned by: Evidence that trade-in sales were below [n] or above [n] of April total retail sales, or that a large part of trade-in sales fell outside the NBS retail definition.\n\nMethod details (computed by code):\n- m1 formula_mc: p6 * a1 * a2 / (p5 * a3); Monte Carlo P10 to P90 20,360 to 75,929; result unit CNY converted to CNY*10**8; own 80% width x/÷1.93 (Monte Carlo of the formula inputs)\n- m2 formula_mc: p21 * a4 / a5; Monte Carlo P10 to P90 23,356 to 66,487; result unit CNY converted to CNY*10**8; own 80% width x/÷1.69 (Monte Carlo of the formula inputs)\n- Combination: 2 block(s), equal weight per block (methods whose inputs overlap by at least half form one block; backtest errors set widths, not weights): B1 = m1: 39,008 (width x/÷1.93, Monte Carlo of the formula inputs); B2 = m2: 39,176 (width x/÷1.69, Monte Carlo of the formula inputs). Estimate = the geometric mean of the two blocks.\n- Interval: root mean square of the block widths x/÷1.81; Birge ratio 0.01 (not above one, so no widening); final width x/÷1.81.",
+  "placeholders": {
+   "estimate": "39,092",
+   "p10": "21,574",
+   "p90": "70,836",
+   "unit": "CNY*10**8",
+   "interval_level": "80% model-based",
+   "interval_basis": "several routes with separate inputs: the width is the typical width of the routes' own intervals, not narrowed for their number",
+   "n_points_kept": "10",
+   "n_methods": "2",
+   "m1_estimate": "39,008",
+   "m1_weight": "50%",
+   "m1_backtest_error": "n/a",
+   "m2_estimate": "39,176",
+   "m2_weight": "50%",
+   "m2_backtest_error": "n/a",
+   "p6_value": "17,300,000,000 parcels",
+   "p5_value": "24.8%",
+   "p21_value": "433,200,000,000 CNY",
+   "a1_value": "0.94",
+   "a1_low": "0.6633",
+   "a1_high": "1.327",
+   "a2_value": "66",
+   "a2_low": "46.64",
+   "a2_high": "93.27",
+   "a3_value": "1.1",
+   "a3_low": "0.7767",
+   "a3_high": "1.553",
+   "a4_value": "0.3",
+   "a4_low": "0.2121",
+   "a4_high": "0.4243",
+   "a5_value": "3.3%",
+   "a5_low": "2.337%",
+   "a5_high": "4.673%",
+   "m1_mc_p10": "20,360",
+   "m1_mc_p90": "75,929",
+   "m1_width": "x/÷1.93",
+   "m2_mc_p10": "23,356",
+   "m2_mc_p90": "66,487",
+   "m2_width": "x/÷1.69",
+   "block1_value": "39,008",
+   "block1_width": "x/÷1.93",
+   "block2_value": "39,176",
+   "block2_width": "x/÷1.69",
+   "n_blocks": "2",
+   "blocks_rms_width": "x/÷1.81",
+   "birge_ratio": "0.01",
+   "final_width": "x/÷1.81"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": true,
+  "model_text": "The estimate for mainland China's single-month total retail sales of consumer goods (goods retail plus catering) in April 2026 is [[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]]).\n\nTwo routes were combined with equal weight per block. m1 ([[m1_estimate]] [[unit]], weight [[m1_weight]]) divides online physical-goods retail by the online share: March parcels [[p6_value]] times an April ratio [[a1_value]] and per-parcel value [[a2_value]], divided by the Q1 online share [[p5_value]] adjusted by [[a3_value]]. m2 ([[m2_estimate]] [[unit]], weight [[m2_weight]]) scales cumulative trade-in sales [[p21_value]] by an April fraction [[a4_value]] and a trade-in share [[a5_value]].\n\nOnly the parcel level, online share, and trade-in total are observed; the transfers ([[a1_value]], [[a2_value]], [[a3_value]], [[a4_value]], [[a5_value]]) are analyst assumptions. The interval is conditional on these. The biggest risk is the parcel-to-CNY and trade-in-share conversions. Better evidence would be actual April parcel volumes and monthly online-retail data."
+ },
+ "started_at": "20261023T233157Z",
+ "wall_s": 289.6,
+ "budget": {
+  "usd_total_assumed": 0.4179,
+  "usd_tokens": 0.0579,
+  "usd_search_fee_assumed": 0.36,
+  "usd_cap": 1.0,
+  "pages_used": 8,
+  "pages_cap": 48,
+  "round1_pages": 40,
+  "max_directions": 10,
+  "urls_per_direction": 4,
+  "n_calls_logged": 30,
+  "aborted": ""
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 36,
+  "pages_snapshot": 8,
+  "pages_live_dated": 0,
+  "pages_dropped": 28,
+  "pages_sent_to_extractor": {
+   "total": 8,
+   "snapshot": 8,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "directions_voided": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "test3_think",
+ "settings": {
+  "max_tokens": {
+   "plan": 6000,
+   "extract": 16000,
+   "judge": 24000,
+   "repair": 24000,
+   "audit": 4000,
+   "unit_check": 4000,
+   "unit_arbiter": 4000,
+   "value_check": 2000,
+   "value_reread": 2000,
+   "published": 3000,
+   "early": 3000,
+   "final": 4000,
+   "search": 8192,
+   "naive": 500,
+   "structured": 6000,
+   "search_direct": 4096
+  },
+  "budget_defaults": {
+   "usd": 1.0,
+   "pages": 48,
+   "round1_pages": 40,
+   "llm_concurrency": 8,
+   "extra_directions": 3,
+   "urls_per_direction": 4,
+   "search_max_uses": 3,
+   "max_directions_hard": 16
+  },
+  "interval": {
+   "MIN_WIDTH": 2.0,
+   "MIN_WIDTH_CHANGE": 1.25,
+   "FALLBACK_SIGMA": 0.25,
+   "DEFAULT_REL_U": 0.2,
+   "EPS": 0.01
+  },
+  "thinking": {
+   "by_role": {
+    "plan": "high",
+    "judge": "high",
+    "repair": "high",
+    "audit": "low",
+    "unit_arbiter": "low"
+   },
+   "extra_max_tokens": 24000
+  }
+ }
+}

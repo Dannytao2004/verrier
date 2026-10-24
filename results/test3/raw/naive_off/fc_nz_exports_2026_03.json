@@ -1,0 +1,18 @@
+{
+ "qid": "fc_nz_exports_2026_03",
+ "arm": "naive",
+ "target_unit": "NZD",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 6500000000.0,
+    "unit": "NZD"
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1,
+ "thinking_by_role": {}
+}

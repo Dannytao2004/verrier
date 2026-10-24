@@ -1,0 +1,1 @@
+{"arm": "naive", "qid": "fc_cn_retail_2026_04", "attempt": 1, "model": "deepseek-flash", "thinking": "high", "http": 200, "http_try": 1, "latency_s": 9.07, "at": "2026-10-23T23:14:18+00:00", "finish_reason": "stop", "prompt_tokens": 275, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 275, "completion_tokens": 1500, "usd": 0.000941, "reasoning_tokens": 1482, "ok": true}

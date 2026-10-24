@@ -1,0 +1,241 @@
+{
+ "qid": "fc_cn_retail_2026_04",
+ "arm": "structured",
+ "target_unit": "CNY",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "China's total retail sales of consumer goods in the single month of April 2026, as first reported by the National Bureau of Statistics of China.",
+     "unit": "CNY"
+    },
+    "inputs": [
+     {
+      "name": "annual_retail_sales_2026",
+      "description": "China's total retail sales of consumer goods for the full calendar year 2026",
+      "value": 50500000000000.0,
+      "low": 47000000000000.0,
+      "high": 54000000000000.0,
+      "unit": "CNY/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "2024 total was about 48.8 trillion CNY; roughly 3-5% nominal growth gives about 50-51 trillion in 2026."
+      }
+     },
+     {
+      "name": "april_share_of_annual",
+      "description": "Share of the full year's retail sales falling in April (a below-average month because January-February carries the Spring Festival boost)",
+      "value": 0.075,
+      "low": 0.07,
+      "high": 0.08,
+      "unit": "share",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "April 2023 and April 2024 each came to about 7.3-7.5% of their full-year totals."
+      }
+     },
+     {
+      "name": "per_capita_monthly_retail",
+      "description": "Average monthly retail spending per person in China",
+      "value": 2650,
+      "low": 2400,
+      "high": 2900,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual per-capita retail sales of about 34,000-35,000 CNY spread over 12 months, with April slightly below the monthly average."
+      }
+     },
+     {
+      "name": "china_population",
+      "description": "China's population in 2026",
+      "value": 1405000000.0,
+      "low": 1390000000.0,
+      "high": 1420000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Population was about 1.408 billion in 2024 and is drifting slowly downward."
+      }
+     },
+     {
+      "name": "april_2025_retail_sales",
+      "description": "China's total retail sales of consumer goods in April 2025",
+      "value": 3720000000000.0,
+      "low": 3650000000000.0,
+      "high": 3800000000000.0,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recalled from the NBS monthly series: April 2025 retail sales were about 3.72 trillion CNY."
+      }
+     },
+     {
+      "name": "nominal_growth_factor",
+      "description": "Ratio of April 2026 retail sales to April 2025 retail sales in nominal terms",
+      "value": 1.04,
+      "low": 0.99,
+      "high": 1.09,
+      "unit": "factor",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent monthly nominal growth has run about 3-5%, with trade-in subsidies supporting goods sales."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Take the full-year 2026 retail total and allocate the April share of it.",
+      "formula": "annual_retail_sales_2026 * april_share_of_annual",
+      "output_unit": "CNY"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Multiply average monthly retail spending per person by the population.",
+      "formula": "per_capita_monthly_retail * china_population",
+      "output_unit": "CNY"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale last year's same-month retail sales by the nominal year-on-year growth factor.",
+      "formula": "april_2025_retail_sales * nominal_growth_factor",
+      "output_unit": "CNY"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_retail_sales_2026 ('CNY/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "China's total retail sales of consumer goods in the single month of April 2026, as first reported by the National Bureau of Statistics of China.",
+     "unit": "CNY"
+    },
+    "inputs": [
+     {
+      "name": "annual_retail_sales_2026",
+      "description": "China's total retail sales of consumer goods for the full calendar year 2026",
+      "value": 50500000000000.0,
+      "low": 47000000000000.0,
+      "high": 54000000000000.0,
+      "unit": "CNY/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "2024 total was about 48.8 trillion CNY; roughly 3-5% nominal growth gives about 50-51 trillion in 2026."
+      }
+     },
+     {
+      "name": "april_share_of_annual",
+      "description": "Share of the full year's retail sales falling in April (a below-average month because January-February carries the Spring Festival boost)",
+      "value": 0.075,
+      "low": 0.07,
+      "high": 0.08,
+      "unit": "share",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "April 2023 and April 2024 each came to about 7.3-7.5% of their full-year totals."
+      }
+     },
+     {
+      "name": "period_length",
+      "description": "Length of the period over which the annual total is spread, used to convert an annual flow into a one-year quantity",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The annual total is defined over exactly one year."
+      }
+     },
+     {
+      "name": "per_capita_monthly_retail",
+      "description": "Average monthly retail spending per person in China",
+      "value": 2650,
+      "low": 2400,
+      "high": 2900,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual per-capita retail sales of about 34,000-35,000 CNY spread over 12 months, with April slightly below the monthly average."
+      }
+     },
+     {
+      "name": "china_population",
+      "description": "China's population in 2026",
+      "value": 1405000000.0,
+      "low": 1390000000.0,
+      "high": 1420000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Population was about 1.408 billion in 2024 and is drifting slowly downward."
+      }
+     },
+     {
+      "name": "april_2025_retail_sales",
+      "description": "China's total retail sales of consumer goods in April 2025",
+      "value": 3720000000000.0,
+      "low": 3650000000000.0,
+      "high": 3800000000000.0,
+      "unit": "CNY",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recalled from the NBS monthly series: April 2025 retail sales were about 3.72 trillion CNY."
+      }
+     },
+     {
+      "name": "nominal_growth_factor",
+      "description": "Ratio of April 2026 retail sales to April 2025 retail sales in nominal terms",
+      "value": 1.04,
+      "low": 0.99,
+      "high": 1.09,
+      "unit": "factor",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent monthly nominal growth has run about 3-5%, with trade-in subsidies supporting goods sales."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Take the full-year 2026 retail total, apply the April share, and multiply by the one-year period to express the April amount.",
+      "formula": "annual_retail_sales_2026 * april_share_of_annual * period_length",
+      "output_unit": "CNY"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Multiply average monthly retail spending per person by the population.",
+      "formula": "per_capita_monthly_retail * china_population",
+      "output_unit": "CNY"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale last year's same-month retail sales by the nominal year-on-year growth factor.",
+      "formula": "april_2025_retail_sales * nominal_growth_factor",
+      "output_unit": "CNY"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2,
+ "thinking_by_role": {
+  "structured": "high"
+ }
+}

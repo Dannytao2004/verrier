@@ -1,0 +1,17 @@
+{
+ "cid": "fc_cn_retail_2026_04__structured__think",
+ "qid": "fc_cn_retail_2026_04",
+ "arm": "structured",
+ "thinking": "think",
+ "thinking_by_role": {
+  "structured": "high"
+ },
+ "started_at": "2026-10-23T23:14:54+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\structured_think\\fc_cn_retail_2026_04.json",
+ "usd": 0.002665,
+ "attempts_in_arm": 2,
+ "outcome": "done",
+ "wall_s": 17.1,
+ "finished_at": "2026-10-23T23:15:11+00:00"
+}

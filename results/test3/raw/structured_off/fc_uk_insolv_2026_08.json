@@ -1,0 +1,337 @@
+{
+ "qid": "fc_uk_insolv_2026_08",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Number of registered company insolvencies in England and Wales in August 2026 as first reported in the Insolvency Service's monthly Company Insolvency Statistics release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_insolvencies_2025",
+      "description": "Total registered company insolvencies in England and Wales in calendar year 2025",
+      "value": 23000,
+      "low": 21000,
+      "high": 25000,
+      "unit": "insolvencies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual totals have run around 23-25k; 2025 assumed slightly below the 2023-24 peak."
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Factor by which the annual insolvency rate changes from 2025 to 2026",
+      "value": 1.03,
+      "low": 0.9,
+      "high": 1.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Insolvencies have been broadly flat to slightly rising; wide interval reflects macro uncertainty."
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Number of months in a year",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calendar definition."
+      }
+     },
+     {
+      "name": "august_seasonal_factor",
+      "description": "Ratio of the August monthly total to the average monthly total (accounts for summer holiday seasonality)",
+      "value": 0.92,
+      "low": 0.85,
+      "high": 1.0,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August typically sees lower insolvency counts due to holidays and court recess."
+      }
+     },
+     {
+      "name": "companies_register",
+      "description": "Number of companies on the Companies House register in 2026",
+      "value": 5400000.0,
+      "low": 5000000.0,
+      "high": 5800000.0,
+      "unit": "companies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Register has grown to roughly 5.4 million companies."
+      }
+     },
+     {
+      "name": "annual_insolvency_rate",
+      "description": "Annual insolvency rate per company on the register",
+      "value": 0.0043,
+      "low": 0.0035,
+      "high": 0.0052,
+      "unit": "insolvencies/company/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by ~23k insolvencies against ~5.4m companies."
+      }
+     },
+     {
+      "name": "monthly_share_of_annual",
+      "description": "Share of annual insolvencies occurring in August",
+      "value": 0.076,
+      "low": 0.07,
+      "high": 0.083,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is slightly below 1/12 of the year; 0.92/12 ≈ 0.0767."
+      }
+     },
+     {
+      "name": "uk_gdp",
+      "description": "UK nominal GDP in 2026",
+      "value": 2900000000000.0,
+      "low": 2700000000000.0,
+      "high": 3100000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "UK GDP is roughly 2.8-3.0 trillion USD."
+      }
+     },
+     {
+      "name": "insolvency_gdp_share",
+      "description": "Annual insolvency count per unit of nominal GDP",
+      "value": 7.9e-09,
+      "low": 6.5e-09,
+      "high": 9.5e-09,
+      "unit": "insolvencies/USD/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calibrated so that ~23k insolvencies correspond to ~2.9e12 USD GDP."
+      }
+     },
+     {
+      "name": "august_gdp_share",
+      "description": "Share of annual GDP generated in August",
+      "value": 0.08,
+      "low": 0.075,
+      "high": 0.085,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is a full month, roughly 1/12 of annual output with minor holiday effect."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale last year's annual total by growth and allocate to August using seasonal share.",
+      "formula": "annual_insolvencies_2025 * annual_growth_factor * august_seasonal_factor / months_per_year",
+      "output_unit": "insolvencies"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Multiply the company register by the annual insolvency rate and the August share of the year.",
+      "formula": "companies_register * annual_insolvency_rate * monthly_share_of_annual",
+      "output_unit": "insolvencies"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Use nominal GDP as a proxy for economic activity and apply an insolvency intensity per unit of GDP.",
+      "formula": "uk_gdp * insolvency_gdp_share * august_gdp_share",
+      "output_unit": "insolvencies"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p1: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: months_per_year ('months'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "path p2: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: annual_insolvency_rate ('insolvencies/company/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it.",
+    "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: insolvency_gdp_share ('insolvencies/USD/year'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Number of registered company insolvencies in England and Wales in August 2026 as first reported in the Insolvency Service's monthly Company Insolvency Statistics release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_insolvencies_2025",
+      "description": "Total registered company insolvencies in England and Wales in calendar year 2025",
+      "value": 23000,
+      "low": 21000,
+      "high": 25000,
+      "unit": "insolvencies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual totals have run around 23-25k; 2025 assumed slightly below the 2023-24 peak."
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Factor by which the annual insolvency rate changes from 2025 to 2026",
+      "value": 1.03,
+      "low": 0.9,
+      "high": 1.15,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Insolvencies have been broadly flat to slightly rising; wide interval reflects macro uncertainty."
+      }
+     },
+     {
+      "name": "august_seasonal_factor",
+      "description": "Ratio of the August monthly total to the average monthly total (accounts for summer holiday seasonality)",
+      "value": 0.92,
+      "low": 0.85,
+      "high": 1.0,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August typically sees lower insolvency counts due to holidays and court recess."
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Number of months in a year",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calendar definition."
+      }
+     },
+     {
+      "name": "companies_register",
+      "description": "Number of companies on the Companies House register in 2026",
+      "value": 5400000.0,
+      "low": 5000000.0,
+      "high": 5800000.0,
+      "unit": "companies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Register has grown to roughly 5.4 million companies."
+      }
+     },
+     {
+      "name": "annual_insolvency_rate",
+      "description": "Annual insolvency rate per company on the register",
+      "value": 0.0043,
+      "low": 0.0035,
+      "high": 0.0052,
+      "unit": "insolvencies/company/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by ~23k insolvencies against ~5.4m companies."
+      }
+     },
+     {
+      "name": "monthly_share_of_annual",
+      "description": "Share of annual insolvencies occurring in August",
+      "value": 0.076,
+      "low": 0.07,
+      "high": 0.083,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is slightly below 1/12 of the year; 0.92/12 ≈ 0.0767."
+      }
+     },
+     {
+      "name": "period_length",
+      "description": "Length of the reporting period (one year) used to cancel the per-year rate",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The annual rate is applied over a one-year period."
+      }
+     },
+     {
+      "name": "uk_gdp",
+      "description": "UK nominal GDP in 2026",
+      "value": 2900000000000.0,
+      "low": 2700000000000.0,
+      "high": 3100000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "UK GDP is roughly 2.8-3.0 trillion USD."
+      }
+     },
+     {
+      "name": "insolvency_gdp_share",
+      "description": "Annual insolvency count per unit of nominal GDP",
+      "value": 7.9e-09,
+      "low": 6.5e-09,
+      "high": 9.5e-09,
+      "unit": "insolvencies/USD/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calibrated so that ~23k insolvencies correspond to ~2.9e12 USD GDP."
+      }
+     },
+     {
+      "name": "august_gdp_share",
+      "description": "Share of annual GDP generated in August",
+      "value": 0.08,
+      "low": 0.075,
+      "high": 0.085,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "August is a full month, roughly 1/12 of annual output with minor holiday effect."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Scale last year's annual total by growth and allocate to August using seasonal share.",
+      "formula": "annual_insolvencies_2025 * annual_growth_factor * august_seasonal_factor / months_per_year",
+      "output_unit": "insolvencies"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Multiply the company register by the annual insolvency rate over one year and the August share of the year.",
+      "formula": "companies_register * annual_insolvency_rate * period_length * monthly_share_of_annual",
+      "output_unit": "insolvencies"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Use nominal GDP as a proxy for economic activity and apply an insolvency intensity per unit of GDP over one year.",
+      "formula": "uk_gdp * insolvency_gdp_share * period_length * august_gdp_share",
+      "output_unit": "insolvencies"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2,
+ "thinking_by_role": {}
+}

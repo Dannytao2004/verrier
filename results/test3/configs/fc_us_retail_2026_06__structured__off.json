@@ -1,0 +1,15 @@
+{
+ "cid": "fc_us_retail_2026_06__structured__off",
+ "qid": "fc_us_retail_2026_06",
+ "arm": "structured",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "started_at": "2026-10-23T23:15:11+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\structured_off\\fc_us_retail_2026_06.json",
+ "usd": 0.001379,
+ "attempts_in_arm": 2,
+ "outcome": "done",
+ "wall_s": 8.6,
+ "finished_at": "2026-10-23T23:15:20+00:00"
+}

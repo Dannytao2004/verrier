@@ -1,0 +1,287 @@
+{
+ "qid": "fc_us_retail_2026_06",
+ "arm": "structured",
+ "target_unit": "USD",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total U.S. retail and food services sales for June 2026, seasonally adjusted, as first reported in the Census Bureau's advance estimate, in US dollars.",
+     "unit": "USD"
+    },
+    "inputs": [
+     {
+      "name": "annual_retail_sales_2025",
+      "description": "Total U.S. retail and food services sales for calendar year 2025, seasonally adjusted, in USD",
+      "value": 7350000000000.0,
+      "low": 7200000000000.0,
+      "high": 7500000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "2024 sales were about $7.1T; ~3-4% nominal growth gives ~$7.35T for 2025"
+      }
+     },
+     {
+      "name": "monthly_share_of_year",
+      "description": "Fraction of annual sales occurring in an average month (1/12)",
+      "value": 0.08333,
+      "low": 0.08333,
+      "high": 0.08333,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Monthly sales are roughly 1/12 of annual total"
+      }
+     },
+     {
+      "name": "june_seasonal_factor",
+      "description": "Ratio of June seasonally adjusted sales to an average month",
+      "value": 1.0,
+      "low": 0.98,
+      "high": 1.02,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Seasonal adjustment removes month effects, so June is near average"
+      }
+     },
+     {
+      "name": "yoy_growth_factor_2026",
+      "description": "Nominal year-over-year growth factor from mid-2025 to mid-2026",
+      "value": 1.035,
+      "low": 1.01,
+      "high": 1.06,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent nominal retail sales growth has run ~3-4% per year"
+      }
+     },
+     {
+      "name": "monthly_sales_per_capita",
+      "description": "Average monthly retail and food services sales per U.S. resident",
+      "value": 1800,
+      "low": 1700,
+      "high": 1900,
+      "unit": "USD/person",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual per-capita retail sales ~$21-22k, divided by 12"
+      }
+     },
+     {
+      "name": "us_population",
+      "description": "U.S. resident population in mid-2026",
+      "value": 342000000.0,
+      "low": 338000000.0,
+      "high": 346000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "U.S. population growing ~0.5%/yr from ~340M in 2025"
+      }
+     },
+     {
+      "name": "june_2025_monthly_sales",
+      "description": "Advance estimate of total retail and food services sales for June 2025, seasonally adjusted",
+      "value": 720000000000.0,
+      "low": 700000000000.0,
+      "high": 740000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Monthly sales in mid-2025 were roughly $720B"
+      }
+     },
+     {
+      "name": "months_between",
+      "description": "Number of months from June 2025 to June 2026",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Exactly one year apart"
+      }
+     },
+     {
+      "name": "monthly_growth_factor",
+      "description": "Average month-over-month nominal growth factor in retail sales",
+      "value": 1.0029,
+      "low": 1.0008,
+      "high": 1.005,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "~3.5% annual growth compounds to ~0.29% per month"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Annual 2025 sales allocated to June 2026 via monthly share, seasonal factor, and YoY growth",
+      "formula": "annual_retail_sales_2025 * monthly_share_of_year * june_seasonal_factor * yoy_growth_factor_2026",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Population times per-capita monthly sales",
+      "formula": "us_population * monthly_sales_per_capita",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "June 2025 advance sales grown forward by monthly growth factor over 12 months",
+      "formula": "june_2025_monthly_sales * monthly_growth_factor ** months_between",
+      "output_unit": "USD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p3: formula: exponent must be a plain number"
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Total U.S. retail and food services sales for June 2026, seasonally adjusted, as first reported in the Census Bureau's advance estimate, in US dollars.",
+     "unit": "USD"
+    },
+    "inputs": [
+     {
+      "name": "annual_retail_sales_2025",
+      "description": "Total U.S. retail and food services sales for calendar year 2025, seasonally adjusted, in USD",
+      "value": 7350000000000.0,
+      "low": 7200000000000.0,
+      "high": 7500000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "2024 sales were about $7.1T; ~3-4% nominal growth gives ~$7.35T for 2025"
+      }
+     },
+     {
+      "name": "monthly_share_of_year",
+      "description": "Fraction of annual sales occurring in an average month (1/12)",
+      "value": 0.08333,
+      "low": 0.08333,
+      "high": 0.08333,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Monthly sales are roughly 1/12 of annual total"
+      }
+     },
+     {
+      "name": "june_seasonal_factor",
+      "description": "Ratio of June seasonally adjusted sales to an average month",
+      "value": 1.0,
+      "low": 0.98,
+      "high": 1.02,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Seasonal adjustment removes month effects, so June is near average"
+      }
+     },
+     {
+      "name": "yoy_growth_factor_2026",
+      "description": "Nominal year-over-year growth factor from mid-2025 to mid-2026",
+      "value": 1.035,
+      "low": 1.01,
+      "high": 1.06,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent nominal retail sales growth has run ~3-4% per year"
+      }
+     },
+     {
+      "name": "monthly_sales_per_capita",
+      "description": "Average monthly retail and food services sales per U.S. resident",
+      "value": 1800,
+      "low": 1700,
+      "high": 1900,
+      "unit": "USD/person",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual per-capita retail sales ~$21-22k, divided by 12"
+      }
+     },
+     {
+      "name": "us_population",
+      "description": "U.S. resident population in mid-2026",
+      "value": 342000000.0,
+      "low": 338000000.0,
+      "high": 346000000.0,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "U.S. population growing ~0.5%/yr from ~340M in 2025"
+      }
+     },
+     {
+      "name": "june_2025_monthly_sales",
+      "description": "Advance estimate of total retail and food services sales for June 2025, seasonally adjusted",
+      "value": 720000000000.0,
+      "low": 700000000000.0,
+      "high": 740000000000.0,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Monthly sales in mid-2025 were roughly $720B"
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Nominal growth factor over the 12 months from June 2025 to June 2026",
+      "value": 1.035,
+      "low": 1.01,
+      "high": 1.06,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "~3.5% annual nominal growth in retail sales"
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Annual 2025 sales allocated to June 2026 via monthly share, seasonal factor, and YoY growth",
+      "formula": "annual_retail_sales_2025 * monthly_share_of_year * june_seasonal_factor * yoy_growth_factor_2026",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Population times per-capita monthly sales",
+      "formula": "us_population * monthly_sales_per_capita",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "June 2025 advance sales grown forward by the annual growth factor",
+      "formula": "june_2025_monthly_sales * annual_growth_factor",
+      "output_unit": "USD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 2,
+ "thinking_by_role": {}
+}

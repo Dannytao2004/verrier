@@ -1,0 +1,15 @@
+{
+ "cid": "fc_uk_insolv_2026_08__naive__off",
+ "qid": "fc_uk_insolv_2026_08",
+ "arm": "naive",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "started_at": "2026-10-23T23:14:39+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\naive_off\\fc_uk_insolv_2026_08.json",
+ "usd": 4.5e-05,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 1.0,
+ "finished_at": "2026-10-23T23:14:40+00:00"
+}

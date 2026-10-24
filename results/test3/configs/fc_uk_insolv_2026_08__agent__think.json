@@ -1,0 +1,31 @@
+{
+ "cid": "fc_uk_insolv_2026_08__agent__think",
+ "qid": "fc_uk_insolv_2026_08",
+ "arm": "agent",
+ "thinking": "think",
+ "thinking_by_role": {
+  "plan": "high",
+  "judge": "high",
+  "repair": "high",
+  "audit": "low",
+  "unit_arbiter": "low"
+ },
+ "started_at": "2026-10-23T23:48:13+00:00",
+ "attempts": [],
+ "state": ".\\results\\agent\\fc_uk_insolv_2026_08\\test3_think\\state.json",
+ "usd": 0.4951,
+ "usd_tokens": 0.1151,
+ "settings_thinking": {
+  "by_role": {
+   "plan": "high",
+   "judge": "high",
+   "repair": "high",
+   "audit": "low",
+   "unit_arbiter": "low"
+  },
+  "extra_max_tokens": 24000
+ },
+ "outcome": "done",
+ "wall_s": 1106.1,
+ "finished_at": "2026-10-24T00:06:39+00:00"
+}

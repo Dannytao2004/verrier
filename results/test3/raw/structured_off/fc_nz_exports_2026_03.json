@@ -1,0 +1,325 @@
+{
+ "qid": "fc_nz_exports_2026_03",
+ "arm": "structured",
+ "target_unit": "NZD",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total value of New Zealand's goods exports in March 2026, actual monthly value not seasonally adjusted, as first reported in Stats NZ's Overseas merchandise trade release.",
+     "unit": "NZD"
+    },
+    "inputs": [
+     {
+      "name": "annual_goods_exports_nzd",
+      "description": "Total NZ annual goods exports value in the year to March 2026",
+      "value": 72000000000.0,
+      "low": 65000000000.0,
+      "high": 80000000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent NZ annual goods exports have run roughly NZD 70-75b; dairy, meat, logs and fruit dominate."
+      }
+     },
+     {
+      "name": "march_share_of_annual",
+      "description": "Share of annual goods exports falling in March, reflecting March seasonality (dairy peak tail, fruit, logs)",
+      "value": 0.088,
+      "low": 0.078,
+      "high": 0.098,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "March is typically a strong month, slightly above the 1/12 = 8.3% average."
+      }
+     },
+     {
+      "name": "monthly_export_value_nzd",
+      "description": "Typical recent monthly goods export value (average month)",
+      "value": 6000000000.0,
+      "low": 5400000000.0,
+      "high": 6700000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual ~72b divided by 12 gives ~6b per month."
+      }
+     },
+     {
+      "name": "march_seasonal_factor",
+      "description": "Ratio of March exports to an average month",
+      "value": 1.06,
+      "low": 0.94,
+      "high": 1.18,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "March tends to be modestly above average due to dairy and horticulture timing."
+      }
+     },
+     {
+      "name": "dairy_export_value_nzd",
+      "description": "NZ dairy goods export value in March 2026",
+      "value": 1900000000.0,
+      "low": 1500000000.0,
+      "high": 2300000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Dairy is roughly a third of goods exports; March is near the seasonal peak of dairy product shipments."
+      }
+     },
+     {
+      "name": "meat_export_value_nzd",
+      "description": "NZ meat and edible offal export value in March 2026",
+      "value": 1000000000.0,
+      "low": 800000000.0,
+      "high": 1200000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Meat is ~15% of goods exports; March is a solid processing/shipping month."
+      }
+     },
+     {
+      "name": "other_exports_value_nzd",
+      "description": "All other goods exports (logs, fruit, machinery, seafood, aluminium, etc.) in March 2026",
+      "value": 3300000000.0,
+      "low": 2700000000.0,
+      "high": 3900000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Remainder of monthly exports after dairy and meat, including forestry and horticulture."
+      }
+     },
+     {
+      "name": "nz_gdp_nzd",
+      "description": "NZ annual nominal GDP",
+      "value": 420000000000.0,
+      "low": 390000000000.0,
+      "high": 450000000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "NZ nominal GDP is around NZD 400-430b."
+      }
+     },
+     {
+      "name": "exports_share_of_gdp",
+      "description": "Goods exports as a share of nominal GDP",
+      "value": 0.17,
+      "low": 0.15,
+      "high": 0.19,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Goods exports have recently been about 16-18% of GDP."
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Number of months in a year",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Calendar constant."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate annual goods exports to March using March's seasonal share",
+      "formula": "annual_goods_exports_nzd * march_share_of_annual",
+      "output_unit": "NZD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Sum major commodity groups' March export values",
+      "formula": "dairy_export_value_nzd + meat_export_value_nzd + other_exports_value_nzd",
+      "output_unit": "NZD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale GDP by exports share and apply March seasonal factor",
+      "formula": "nz_gdp_nzd * exports_share_of_gdp / months_per_year * march_seasonal_factor",
+      "output_unit": "NZD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p3: dimension mismatch: the formula gives count per time (s**-1), but the target needs a pure number, a count or a share (dimensionless). The formula has one 'per time' more than the target; inputs with a time unit in this path: months_per_year ('months'). If the target is a total over a period, multiply by an input whose unit is a length of time: the period itself (for example days_in_period with unit 'day'), or period_length = 1 with unit 'year' when a share of the year then picks the part you need. A share, or a ratio such as 'days/year', has no time unit and does not cancel it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "reply": {
+    "target": {
+     "definition": "Total value of New Zealand's goods exports in March 2026, actual monthly value not seasonally adjusted, as first reported in Stats NZ's Overseas merchandise trade release.",
+     "unit": "NZD"
+    },
+    "inputs": [
+     {
+      "name": "annual_goods_exports_nzd",
+      "description": "Total NZ annual goods exports value in the year to March 2026",
+      "value": 72000000000.0,
+      "low": 65000000000.0,
+      "high": 80000000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent NZ annual goods exports have run roughly NZD 70-75b; dairy, meat, logs and fruit dominate."
+      }
+     },
+     {
+      "name": "march_share_of_annual",
+      "description": "Share of annual goods exports falling in March, reflecting March seasonality (dairy peak tail, fruit, logs)",
+      "value": 0.088,
+      "low": 0.078,
+      "high": 0.098,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "March is typically a strong month, slightly above the 1/12 = 8.3% average."
+      }
+     },
+     {
+      "name": "monthly_export_value_nzd",
+      "description": "Typical recent monthly goods export value (average month)",
+      "value": 6000000000.0,
+      "low": 5400000000.0,
+      "high": 6700000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Annual ~72b divided by 12 gives ~6b per month."
+      }
+     },
+     {
+      "name": "march_seasonal_factor",
+      "description": "Ratio of March exports to an average month",
+      "value": 1.06,
+      "low": 0.94,
+      "high": 1.18,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "March tends to be modestly above average due to dairy and horticulture timing."
+      }
+     },
+     {
+      "name": "dairy_export_value_nzd",
+      "description": "NZ dairy goods export value in March 2026",
+      "value": 1900000000.0,
+      "low": 1500000000.0,
+      "high": 2300000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Dairy is roughly a third of goods exports; March is near the seasonal peak of dairy product shipments."
+      }
+     },
+     {
+      "name": "meat_export_value_nzd",
+      "description": "NZ meat and edible offal export value in March 2026",
+      "value": 1000000000.0,
+      "low": 800000000.0,
+      "high": 1200000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Meat is ~15% of goods exports; March is a solid processing/shipping month."
+      }
+     },
+     {
+      "name": "other_exports_value_nzd",
+      "description": "All other goods exports (logs, fruit, machinery, seafood, aluminium, etc.) in March 2026",
+      "value": 3300000000.0,
+      "low": 2700000000.0,
+      "high": 3900000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Remainder of monthly exports after dairy and meat, including forestry and horticulture."
+      }
+     },
+     {
+      "name": "nz_gdp_nzd",
+      "description": "NZ annual nominal GDP",
+      "value": 420000000000.0,
+      "low": 390000000000.0,
+      "high": 450000000000.0,
+      "unit": "NZD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "NZ nominal GDP is around NZD 400-430b."
+      }
+     },
+     {
+      "name": "exports_share_of_gdp",
+      "description": "Goods exports as a share of nominal GDP",
+      "value": 0.17,
+      "low": 0.15,
+      "high": 0.19,
+      "unit": "%",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Goods exports have recently been about 16-18% of GDP."
+      }
+     },
+     {
+      "name": "period_length",
+      "description": "Length of the reporting period (one month) expressed as a fraction of a year",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The target is a single month; this carries the time dimension so the annual share cancels."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate annual goods exports to March using March's seasonal share",
+      "formula": "annual_goods_exports_nzd * march_share_of_annual",
+      "output_unit": "NZD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Sum major commodity groups' March export values",
+      "formula": "dairy_export_value_nzd + meat_export_value_nzd + other_exports_value_nzd",
+      "output_unit": "NZD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale GDP by exports share, prorate to one month, apply March seasonal factor",
+      "formula": "nz_gdp_nzd * exports_share_of_gdp * period_length / (12 * 1 year) * march_seasonal_factor",
+      "output_unit": "NZD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": [
+    "path p3: formula: syntax error: invalid syntax. Perhaps you forgot a comma?"
+   ]
+  }
+ ],
+ "final_attempt": 2,
+ "thinking_by_role": {}
+}

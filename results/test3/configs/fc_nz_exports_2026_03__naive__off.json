@@ -1,0 +1,15 @@
+{
+ "cid": "fc_nz_exports_2026_03__naive__off",
+ "qid": "fc_nz_exports_2026_03",
+ "arm": "naive",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "started_at": "2026-10-23T23:14:44+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\naive_off\\fc_nz_exports_2026_03.json",
+ "usd": 4.3e-05,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 0.8,
+ "finished_at": "2026-10-23T23:14:45+00:00"
+}

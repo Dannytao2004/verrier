@@ -1,0 +1,31 @@
+{
+ "cid": "fc_cn_retail_2026_04__agent__think",
+ "qid": "fc_cn_retail_2026_04",
+ "arm": "agent",
+ "thinking": "think",
+ "thinking_by_role": {
+  "plan": "high",
+  "judge": "high",
+  "repair": "high",
+  "audit": "low",
+  "unit_arbiter": "low"
+ },
+ "started_at": "2026-10-23T23:31:57+00:00",
+ "attempts": [],
+ "state": ".\\results\\agent\\fc_cn_retail_2026_04\\test3_think\\state.json",
+ "usd": 0.4179,
+ "usd_tokens": 0.0579,
+ "settings_thinking": {
+  "by_role": {
+   "plan": "high",
+   "judge": "high",
+   "repair": "high",
+   "audit": "low",
+   "unit_arbiter": "low"
+  },
+  "extra_max_tokens": 24000
+ },
+ "outcome": "done",
+ "wall_s": 289.8,
+ "finished_at": "2026-10-23T23:36:46+00:00"
+}

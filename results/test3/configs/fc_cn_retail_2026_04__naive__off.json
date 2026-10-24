@@ -1,0 +1,15 @@
+{
+ "cid": "fc_cn_retail_2026_04__naive__off",
+ "qid": "fc_cn_retail_2026_04",
+ "arm": "naive",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "started_at": "2026-10-23T23:14:13+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\naive_off\\fc_cn_retail_2026_04.json",
+ "usd": 4.8e-05,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 4.6,
+ "finished_at": "2026-10-23T23:14:18+00:00"
+}

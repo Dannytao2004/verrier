@@ -1,0 +1,179 @@
+{
+ "qid": "fc_uk_insolv_2026_08",
+ "arm": "structured",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "The headline monthly total of registered company insolvencies in England and Wales for August 2026 (compulsory liquidations, creditors' voluntary liquidations, administrations, company voluntary arrangements and receivership appointments, with the first three seasonally adjusted), as first reported in the Insolvency Service's monthly Company Insolvency Statistics release.",
+     "unit": ""
+    },
+    "inputs": [
+     {
+      "name": "annual_company_insolvencies_2026",
+      "description": "Total registered company insolvencies in England and Wales during calendar year 2026",
+      "value": 24000,
+      "low": 20000,
+      "high": 28000,
+      "unit": "insolvencies/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent annual totals were about 25,000 in 2023 and roughly 23,000-24,000 in 2024-25; a mild easing is assumed for 2026."
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Number of months in a year, used to convert an annual total to a monthly average",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "months/year",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Fixed calendar conversion."
+      }
+     },
+     {
+      "name": "august_length",
+      "description": "Length of the reporting month, converting a monthly average rate into a count for August",
+      "value": 1,
+      "low": 1,
+      "high": 1,
+      "unit": "month",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The month is exactly one month long."
+      }
+     },
+     {
+      "name": "august_seasonal_factor",
+      "description": "Factor by which August's seasonally adjusted headline total differs from the annual monthly average",
+      "value": 1.0,
+      "low": 0.93,
+      "high": 1.07,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "The main components are seasonally adjusted, so the August headline should sit close to the average monthly level, with modest residual variation."
+      }
+     },
+     {
+      "name": "cvl_count_august",
+      "description": "Creditors' voluntary liquidations in England and Wales in August 2026, seasonally adjusted as in the headline",
+      "value": 1550,
+      "low": 1300,
+      "high": 1820,
+      "unit": "insolvencies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "CVLs have run at roughly 1,500-1,700 per month in recent years and are expected to soften slightly."
+      }
+     },
+     {
+      "name": "compulsory_count_august",
+      "description": "Compulsory liquidations in England and Wales in August 2026, seasonally adjusted as in the headline",
+      "value": 300,
+      "low": 230,
+      "high": 390,
+      "unit": "insolvencies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Compulsory liquidations recovered toward about 250-350 per month after HMRC petition activity resumed."
+      }
+     },
+     {
+      "name": "admin_count_august",
+      "description": "Administrations in England and Wales in August 2026, seasonally adjusted as in the headline",
+      "value": 130,
+      "low": 95,
+      "high": 175,
+      "unit": "insolvencies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Administrations have averaged roughly 110-150 per month recently."
+      }
+     },
+     {
+      "name": "cva_count_august",
+      "description": "Company voluntary arrangements in England and Wales in August 2026, unadjusted as in the headline",
+      "value": 15,
+      "low": 7,
+      "high": 28,
+      "unit": "insolvencies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "CVAs are a small residual category, typically around 10-20 per month."
+      }
+     },
+     {
+      "name": "receivership_count_august",
+      "description": "Receivership appointments in England and Wales in August 2026, unadjusted as in the headline",
+      "value": 5,
+      "low": 2,
+      "high": 12,
+      "unit": "insolvencies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Receiverships are a very small residual category, typically a handful per month."
+      }
+     },
+     {
+      "name": "august_2025_total",
+      "description": "Headline total company insolvencies reported for August 2025",
+      "value": 1980,
+      "low": 1750,
+      "high": 2200,
+      "unit": "insolvencies",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Monthly headline totals through 2024-25 sat mostly in the 1,800-2,200 range; August 2025 is placed near 2,000."
+      }
+     },
+     {
+      "name": "annual_growth_factor",
+      "description": "Factor by which the August 2026 headline total grows relative to August 2025",
+      "value": 0.99,
+      "low": 0.88,
+      "high": 1.12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Insolvency numbers are expected to be broadly flat to slightly lower as financing conditions ease, but with wide uncertainty."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Estimate the 2026 annual company insolvency total, divide by twelve months, and adjust for August seasonality",
+      "formula": "annual_company_insolvencies_2026 / months_per_year * august_length * august_seasonal_factor",
+      "output_unit": "insolvencies"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Sum the five headline component counts expected for August 2026",
+      "formula": "cvl_count_august + compulsory_count_august + admin_count_august + cva_count_august + receivership_count_august",
+      "output_unit": "insolvencies"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale the August 2025 headline total forward by an assumed year-on-year growth factor",
+      "formula": "august_2025_total * annual_growth_factor",
+      "output_unit": "insolvencies"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1,
+ "thinking_by_role": {
+  "structured": "high"
+ }
+}

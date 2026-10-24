@@ -1,0 +1,119 @@
+{
+ "qid": "fc_us_retail_2026_06",
+ "arm": "structured",
+ "target_unit": "USD",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "target": {
+     "definition": "Total U.S. retail and food services sales for June 2026, seasonally adjusted and adjusted for holiday and trading-day differences but not for price changes, as first reported in the Census Bureau's advance release.",
+     "unit": "USD"
+    },
+    "inputs": [
+     {
+      "name": "annual_retail_sales_2026",
+      "description": "Annual total U.S. retail and food services sales in 2026 nominal dollars, seasonally adjusted concept.",
+      "value": 8900000000000,
+      "low": 8000000000000,
+      "high": 9800000000000,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Extrapolates recent Census retail and food services sales levels to 2026 nominal dollars."
+      }
+     },
+     {
+      "name": "months_per_year",
+      "description": "Number of months in a year, used to convert an annual total to a monthly total.",
+      "value": 12,
+      "low": 12,
+      "high": 12,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Definitional conversion factor."
+      }
+     },
+     {
+      "name": "us_population_2026",
+      "description": "U.S. resident population in 2026.",
+      "value": 342000000,
+      "low": 335000000,
+      "high": 350000000,
+      "unit": "people",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Extrapolates recent U.S. population growth trends."
+      }
+     },
+     {
+      "name": "monthly_retail_spend_per_capita",
+      "description": "Average retail and food services spending per person during a month.",
+      "value": 2200,
+      "low": 1900,
+      "high": 2500,
+      "unit": "USD/person",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Implied by recent monthly retail totals divided by U.S. population."
+      }
+     },
+     {
+      "name": "nominal_gdp_2026",
+      "description": "U.S. nominal GDP for 2026, annual total.",
+      "value": 31500000000000,
+      "low": 29500000000000,
+      "high": 33500000000000,
+      "unit": "USD",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Extrapolates recent nominal GDP levels to 2026."
+      }
+     },
+     {
+      "name": "retail_share_of_gdp",
+      "description": "Share of nominal GDP represented by retail and food services sales.",
+      "value": 0.28,
+      "low": 0.24,
+      "high": 0.31,
+      "unit": "dimensionless",
+      "provenance": {
+       "type": "assumption",
+       "rationale": "Recent retail and food services sales are roughly a quarter to three tenths of nominal GDP."
+      }
+     }
+    ],
+    "paths": [
+     {
+      "id": "p1",
+      "method": "top_down",
+      "description": "Allocate annual retail and food services sales to a single month.",
+      "formula": "annual_retail_sales_2026 / months_per_year",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p2",
+      "method": "bottom_up",
+      "description": "Multiply U.S. population by average monthly retail spending per person.",
+      "formula": "us_population_2026 * monthly_retail_spend_per_capita",
+      "output_unit": "USD"
+     },
+     {
+      "id": "p3",
+      "method": "proxy",
+      "description": "Scale nominal GDP by the retail and food services share, then divide into months.",
+      "formula": "nominal_gdp_2026 * retail_share_of_gdp / months_per_year",
+      "output_unit": "USD"
+     }
+    ]
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1,
+ "thinking_by_role": {
+  "structured": "high"
+ }
+}

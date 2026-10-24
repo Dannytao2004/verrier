@@ -1,0 +1,1 @@
+{"arm": "naive", "qid": "fc_nz_exports_2026_03", "attempt": 1, "model": "deepseek-flash", "thinking": "high", "http": 200, "http_try": 1, "latency_s": 3.72, "at": "2026-10-23T23:14:45+00:00", "finish_reason": "stop", "prompt_tokens": 242, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 242, "completion_tokens": 453, "usd": 0.000308, "reasoning_tokens": 435, "ok": true}

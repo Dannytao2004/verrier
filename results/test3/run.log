@@ -1,0 +1,72 @@
+{"at": "2026-10-23T23:14:13+00:00", "event": "start", "cid": "fc_cn_retail_2026_04__naive__off", "thinking": {}}
+{"at": "2026-10-23T23:14:18+00:00", "event": "end", "cid": "fc_cn_retail_2026_04__naive__off", "outcome": "done", "wall_s": 4.6, "usd": 4.8e-05, "error": null}
+{"at": "2026-10-23T23:14:18+00:00", "event": "cost", "cid": "fc_cn_retail_2026_04__naive__off", "usd": 4.8e-05, "cumulative_usd": 4.8e-05}
+{"at": "2026-10-23T23:14:18+00:00", "event": "start", "cid": "fc_cn_retail_2026_04__naive__think", "thinking": {"naive": "high"}}
+{"at": "2026-10-23T23:14:27+00:00", "event": "end", "cid": "fc_cn_retail_2026_04__naive__think", "outcome": "done", "wall_s": 9.1, "usd": 0.000941, "error": null}
+{"at": "2026-10-23T23:14:27+00:00", "event": "cost", "cid": "fc_cn_retail_2026_04__naive__think", "usd": 0.000941, "cumulative_usd": 0.000989}
+{"at": "2026-10-23T23:14:27+00:00", "event": "start", "cid": "fc_us_retail_2026_06__naive__off", "thinking": {}}
+{"at": "2026-10-23T23:14:28+00:00", "event": "end", "cid": "fc_us_retail_2026_06__naive__off", "outcome": "done", "wall_s": 0.7, "usd": 4.7e-05, "error": null}
+{"at": "2026-10-23T23:14:28+00:00", "event": "cost", "cid": "fc_us_retail_2026_06__naive__off", "usd": 4.7e-05, "cumulative_usd": 0.001036}
+{"at": "2026-10-23T23:14:28+00:00", "event": "start", "cid": "fc_us_retail_2026_06__naive__think", "thinking": {"naive": "high"}}
+{"at": "2026-10-23T23:14:39+00:00", "event": "end", "cid": "fc_us_retail_2026_06__naive__think", "outcome": "done", "wall_s": 11.6, "usd": 0.001159, "error": null}
+{"at": "2026-10-23T23:14:39+00:00", "event": "cost", "cid": "fc_us_retail_2026_06__naive__think", "usd": 0.001159, "cumulative_usd": 0.002195}
+{"at": "2026-10-23T23:14:39+00:00", "event": "start", "cid": "fc_uk_insolv_2026_08__naive__off", "thinking": {}}
+{"at": "2026-10-23T23:14:40+00:00", "event": "end", "cid": "fc_uk_insolv_2026_08__naive__off", "outcome": "done", "wall_s": 1.0, "usd": 4.5e-05, "error": null}
+{"at": "2026-10-23T23:14:40+00:00", "event": "cost", "cid": "fc_uk_insolv_2026_08__naive__off", "usd": 4.5e-05, "cumulative_usd": 0.00224}
+{"at": "2026-10-23T23:14:40+00:00", "event": "start", "cid": "fc_uk_insolv_2026_08__naive__think", "thinking": {"naive": "high"}}
+{"at": "2026-10-23T23:14:44+00:00", "event": "end", "cid": "fc_uk_insolv_2026_08__naive__think", "outcome": "done", "wall_s": 3.5, "usd": 0.000367, "error": null}
+{"at": "2026-10-23T23:14:44+00:00", "event": "cost", "cid": "fc_uk_insolv_2026_08__naive__think", "usd": 0.000367, "cumulative_usd": 0.002607}
+{"at": "2026-10-23T23:14:44+00:00", "event": "start", "cid": "fc_nz_exports_2026_03__naive__off", "thinking": {}}
+{"at": "2026-10-23T23:14:45+00:00", "event": "end", "cid": "fc_nz_exports_2026_03__naive__off", "outcome": "done", "wall_s": 0.8, "usd": 4.3e-05, "error": null}
+{"at": "2026-10-23T23:14:45+00:00", "event": "cost", "cid": "fc_nz_exports_2026_03__naive__off", "usd": 4.3e-05, "cumulative_usd": 0.00265}
+{"at": "2026-10-23T23:14:45+00:00", "event": "start", "cid": "fc_nz_exports_2026_03__naive__think", "thinking": {"naive": "high"}}
+{"at": "2026-10-23T23:14:48+00:00", "event": "end", "cid": "fc_nz_exports_2026_03__naive__think", "outcome": "done", "wall_s": 3.7, "usd": 0.000308, "error": null}
+{"at": "2026-10-23T23:14:48+00:00", "event": "cost", "cid": "fc_nz_exports_2026_03__naive__think", "usd": 0.000308, "cumulative_usd": 0.002958}
+{"at": "2026-10-23T23:14:48+00:00", "event": "start", "cid": "fc_cn_retail_2026_04__structured__off", "thinking": {}}
+{"at": "2026-10-23T23:14:54+00:00", "event": "end", "cid": "fc_cn_retail_2026_04__structured__off", "outcome": "done", "wall_s": 5.9, "usd": 0.000864, "error": null}
+{"at": "2026-10-23T23:14:54+00:00", "event": "cost", "cid": "fc_cn_retail_2026_04__structured__off", "usd": 0.000864, "cumulative_usd": 0.003822}
+{"at": "2026-10-23T23:14:54+00:00", "event": "start", "cid": "fc_cn_retail_2026_04__structured__think", "thinking": {"structured": "high"}}
+{"at": "2026-10-23T23:15:11+00:00", "event": "end", "cid": "fc_cn_retail_2026_04__structured__think", "outcome": "done", "wall_s": 17.1, "usd": 0.002665, "error": null}
+{"at": "2026-10-23T23:15:11+00:00", "event": "cost", "cid": "fc_cn_retail_2026_04__structured__think", "usd": 0.002665, "cumulative_usd": 0.006487}
+{"at": "2026-10-23T23:15:11+00:00", "event": "start", "cid": "fc_us_retail_2026_06__structured__off", "thinking": {}}
+{"at": "2026-10-23T23:15:20+00:00", "event": "end", "cid": "fc_us_retail_2026_06__structured__off", "outcome": "done", "wall_s": 8.6, "usd": 0.001379, "error": null}
+{"at": "2026-10-23T23:15:20+00:00", "event": "cost", "cid": "fc_us_retail_2026_06__structured__off", "usd": 0.001379, "cumulative_usd": 0.007866}
+{"at": "2026-10-23T23:15:20+00:00", "event": "start", "cid": "fc_us_retail_2026_06__structured__think", "thinking": {"structured": "high"}}
+{"at": "2026-10-23T23:15:50+00:00", "event": "end", "cid": "fc_us_retail_2026_06__structured__think", "outcome": "done", "wall_s": 29.8, "usd": 0.003371, "error": null}
+{"at": "2026-10-23T23:15:50+00:00", "event": "cost", "cid": "fc_us_retail_2026_06__structured__think", "usd": 0.003371, "cumulative_usd": 0.011237}
+{"at": "2026-10-23T23:15:50+00:00", "event": "start", "cid": "fc_uk_insolv_2026_08__structured__off", "thinking": {}}
+{"at": "2026-10-23T23:16:00+00:00", "event": "end", "cid": "fc_uk_insolv_2026_08__structured__off", "outcome": "done", "wall_s": 10.1, "usd": 0.001682, "error": null}
+{"at": "2026-10-23T23:16:00+00:00", "event": "cost", "cid": "fc_uk_insolv_2026_08__structured__off", "usd": 0.001682, "cumulative_usd": 0.012919}
+{"at": "2026-10-23T23:16:00+00:00", "event": "start", "cid": "fc_uk_insolv_2026_08__structured__think", "thinking": {"structured": "high"}}
+{"at": "2026-10-23T23:16:19+00:00", "event": "end", "cid": "fc_uk_insolv_2026_08__structured__think", "outcome": "done", "wall_s": 19.3, "usd": 0.002478, "error": null}
+{"at": "2026-10-23T23:16:19+00:00", "event": "cost", "cid": "fc_uk_insolv_2026_08__structured__think", "usd": 0.002478, "cumulative_usd": 0.015397}
+{"at": "2026-10-23T23:16:19+00:00", "event": "start", "cid": "fc_nz_exports_2026_03__structured__off", "thinking": {}}
+{"at": "2026-10-23T23:16:29+00:00", "event": "end", "cid": "fc_nz_exports_2026_03__structured__off", "outcome": "done", "wall_s": 9.8, "usd": 0.001541, "error": null}
+{"at": "2026-10-23T23:16:29+00:00", "event": "cost", "cid": "fc_nz_exports_2026_03__structured__off", "usd": 0.001541, "cumulative_usd": 0.016938}
+{"at": "2026-10-23T23:16:29+00:00", "event": "start", "cid": "fc_nz_exports_2026_03__structured__think", "thinking": {"structured": "high"}}
+{"at": "2026-10-23T23:16:48+00:00", "event": "end", "cid": "fc_nz_exports_2026_03__structured__think", "outcome": "done", "wall_s": 18.5, "usd": 0.00219, "error": null}
+{"at": "2026-10-23T23:16:48+00:00", "event": "cost", "cid": "fc_nz_exports_2026_03__structured__think", "usd": 0.00219, "cumulative_usd": 0.019128}
+{"at": "2026-10-23T23:16:48+00:00", "event": "start", "cid": "fc_cn_retail_2026_04__agent__off", "thinking": {}}
+{"at": "2026-10-23T23:22:14+00:00", "event": "end", "cid": "fc_cn_retail_2026_04__agent__off", "outcome": "done", "wall_s": 326.5, "usd": 0.51, "error": null}
+{"at": "2026-10-23T23:22:14+00:00", "event": "cost", "cid": "fc_cn_retail_2026_04__agent__off", "usd": 0.51, "cumulative_usd": 0.529128}
+{"at": "2026-10-23T23:22:14+00:00", "event": "start", "cid": "fc_us_retail_2026_06__agent__off", "thinking": {}}
+{"at": "2026-10-23T23:25:31+00:00", "event": "end", "cid": "fc_us_retail_2026_06__agent__off", "outcome": "done", "wall_s": 197.2, "usd": 0.421, "error": null}
+{"at": "2026-10-23T23:25:31+00:00", "event": "cost", "cid": "fc_us_retail_2026_06__agent__off", "usd": 0.421, "cumulative_usd": 0.950128}
+{"at": "2026-10-23T23:25:31+00:00", "event": "start", "cid": "fc_uk_insolv_2026_08__agent__off", "thinking": {}}
+{"at": "2026-10-23T23:28:34+00:00", "event": "end", "cid": "fc_uk_insolv_2026_08__agent__off", "outcome": "done", "wall_s": 182.7, "usd": 0.4715, "error": null}
+{"at": "2026-10-23T23:28:34+00:00", "event": "cost", "cid": "fc_uk_insolv_2026_08__agent__off", "usd": 0.4715, "cumulative_usd": 1.421628}
+{"at": "2026-10-23T23:28:34+00:00", "event": "start", "cid": "fc_nz_exports_2026_03__agent__off", "thinking": {}}
+{"at": "2026-10-23T23:31:57+00:00", "event": "end", "cid": "fc_nz_exports_2026_03__agent__off", "outcome": "done", "wall_s": 202.3, "usd": 0.4453, "error": null}
+{"at": "2026-10-23T23:31:57+00:00", "event": "cost", "cid": "fc_nz_exports_2026_03__agent__off", "usd": 0.4453, "cumulative_usd": 1.866928}
+{"at": "2026-10-23T23:31:57+00:00", "event": "start", "cid": "fc_cn_retail_2026_04__agent__think", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+{"at": "2026-10-23T23:36:46+00:00", "event": "end", "cid": "fc_cn_retail_2026_04__agent__think", "outcome": "done", "wall_s": 289.8, "usd": 0.4179, "error": null}
+{"at": "2026-10-23T23:36:46+00:00", "event": "cost", "cid": "fc_cn_retail_2026_04__agent__think", "usd": 0.4179, "cumulative_usd": 2.284828}
+{"at": "2026-10-23T23:36:46+00:00", "event": "start", "cid": "fc_us_retail_2026_06__agent__think", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+{"at": "2026-10-23T23:48:13+00:00", "event": "end", "cid": "fc_us_retail_2026_06__agent__think", "outcome": "done", "wall_s": 686.4, "usd": 0.5893, "error": null}
+{"at": "2026-10-23T23:48:13+00:00", "event": "cost", "cid": "fc_us_retail_2026_06__agent__think", "usd": 0.5893, "cumulative_usd": 2.874128}
+{"at": "2026-10-23T23:48:13+00:00", "event": "start", "cid": "fc_uk_insolv_2026_08__agent__think", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+{"at": "2026-10-24T00:06:39+00:00", "event": "end", "cid": "fc_uk_insolv_2026_08__agent__think", "outcome": "done", "wall_s": 1106.1, "usd": 0.4951, "error": null}
+{"at": "2026-10-24T00:06:39+00:00", "event": "cost", "cid": "fc_uk_insolv_2026_08__agent__think", "usd": 0.4951, "cumulative_usd": 3.369228}
+{"at": "2026-10-24T00:06:39+00:00", "event": "start", "cid": "fc_nz_exports_2026_03__agent__think", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+{"at": "2026-10-24T00:15:03+00:00", "event": "end", "cid": "fc_nz_exports_2026_03__agent__think", "outcome": "done", "wall_s": 504.3, "usd": 0.4943, "error": null}
+{"at": "2026-10-24T00:15:03+00:00", "event": "cost", "cid": "fc_nz_exports_2026_03__agent__think", "usd": 0.4943, "cumulative_usd": 3.863528}

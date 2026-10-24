@@ -1,0 +1,16 @@
+{
+ "cid": "fc_us_retail_2026_06__agent__off",
+ "qid": "fc_us_retail_2026_06",
+ "arm": "agent",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "started_at": "2026-10-23T23:22:14+00:00",
+ "attempts": [],
+ "state": ".\\results\\agent\\fc_us_retail_2026_06\\test3\\state.json",
+ "usd": 0.421,
+ "usd_tokens": 0.061,
+ "settings_thinking": null,
+ "outcome": "done",
+ "wall_s": 197.2,
+ "finished_at": "2026-10-23T23:25:31+00:00"
+}

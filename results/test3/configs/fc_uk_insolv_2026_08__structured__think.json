@@ -1,0 +1,17 @@
+{
+ "cid": "fc_uk_insolv_2026_08__structured__think",
+ "qid": "fc_uk_insolv_2026_08",
+ "arm": "structured",
+ "thinking": "think",
+ "thinking_by_role": {
+  "structured": "high"
+ },
+ "started_at": "2026-10-23T23:16:00+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\structured_think\\fc_uk_insolv_2026_08.json",
+ "usd": 0.002478,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 19.3,
+ "finished_at": "2026-10-23T23:16:19+00:00"
+}

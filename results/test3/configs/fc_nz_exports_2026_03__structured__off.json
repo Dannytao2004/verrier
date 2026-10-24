@@ -1,0 +1,15 @@
+{
+ "cid": "fc_nz_exports_2026_03__structured__off",
+ "qid": "fc_nz_exports_2026_03",
+ "arm": "structured",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "started_at": "2026-10-23T23:16:19+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\structured_off\\fc_nz_exports_2026_03.json",
+ "usd": 0.001541,
+ "attempts_in_arm": 2,
+ "outcome": "done",
+ "wall_s": 9.8,
+ "finished_at": "2026-10-23T23:16:29+00:00"
+}

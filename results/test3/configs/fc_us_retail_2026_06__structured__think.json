@@ -1,0 +1,17 @@
+{
+ "cid": "fc_us_retail_2026_06__structured__think",
+ "qid": "fc_us_retail_2026_06",
+ "arm": "structured",
+ "thinking": "think",
+ "thinking_by_role": {
+  "structured": "high"
+ },
+ "started_at": "2026-10-23T23:15:20+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test3\\raw\\structured_think\\fc_us_retail_2026_06.json",
+ "usd": 0.003371,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 29.8,
+ "finished_at": "2026-10-23T23:15:50+00:00"
+}
