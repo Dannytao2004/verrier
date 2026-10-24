@@ -4,6 +4,10 @@
 system = arm (1) 的 NAIVE_SYSTEM 加一句；user = arm (1) 的同一条 user 消息。数字由代码用 arm (1) 的 check_naive 从
 最后一段文字里的 JSON 取，不做别的处理。输出不合格时带错误清单重试一次（重试不带工具）。
 搜索不能限定日期，所以只跑未公布题（forecast.py 里 set = live 的题）。标准库实现。
+v2.12e（留出测试 4）：run_search_direct(control_thinking=True) 按角色开关思考，机制同另两个臂（llm.LLM.effort_and_tokens）：
+角色 = arm 名 search_direct（config.thinking_role），档位取 config.THINKING；关 = 显式 thinking disabled，开 = thinking enabled +
+output_config.effort，max_tokens 多 THINKING_EXTRA_TOKENS；两次尝试都带。默认（control_thinking=False，forecast.run_search 和
+probes/search_direct_supp.py）请求体和以前逐字节相同：不带 thinking 字段，服务端默认开思考（文档：默认 high）。
 """
 import json
 import time
@@ -32,6 +36,8 @@ class DirectClient(Searcher):
         3xx 跳转不跟随、不重试，直接抛 TransportError（D9，同 llm.LLM.json_call）。"""
         data = json.dumps(body).encode("utf-8")
         rec = {"arm": ARM, "qid": qid, "attempt": attempt, "model": self.model, "kind": "search_direct"}
+        if "thinking" in body:   # v2.12e：只有 control_thinking 的请求带这个字段；默认请求的日志行不变
+            rec["thinking"] = (body.get("output_config") or {}).get("effort") or body["thinking"]["type"]
         for http_try in range(1, 4):
             started = datetime.now(timezone.utc)
             t0 = time.time()
@@ -136,16 +142,34 @@ def audit(d: dict) -> dict:
     return {"queries": queries, "results": results, "n_search_errors": n_err, "texts": texts, "n_thinking_blocks": n_think}
 
 
-def run_search_direct(client, q: dict, max_tokens: int = MAX_TOKENS) -> dict:
+def thinking_fields(effort) -> dict:
+    """v2.12e：Anthropic 格式的思考开关和深度。DeepSeek Thinking Mode 文档的表格：开关 {"thinking": {"type": "enabled/disabled"}}
+    这一格横跨 OpenAI / Anthropic 两列（colspan=2），Anthropic 格式的深度是 {"output_config": {"effort": "low/high/max"}}；
+    Anthropic API 页：thinking「Supported (budget_tokens is ignored)」、output_config「Only effort is supported」（2026-10-23 用
+    probes/deepseek_thinking_doc_probe.py 和 WebFetch 复核）。服务端实际是否照办没有用真 key 测过：看记录里的 n_thinking_blocks。"""
+    if effort:
+        return {"thinking": {"type": "enabled"}, "output_config": {"effort": effort}}
+    return {"thinking": {"type": "disabled"}}
+
+
+def run_search_direct(client, q: dict, max_tokens: int = MAX_TOKENS, control_thinking: bool = False) -> dict:
     """一题：首次调用（带 web_search）+ 输出不合格时重试一次（不带工具）。返回要保存的记录。
-    max_tokens 只给补充运行用（probes/search_direct_supp.py）；正式运行用默认值。"""
+    max_tokens 只给补充运行用（probes/search_direct_supp.py）；正式运行用默认值。
+    control_thinking（v2.12e，留出测试 4）：按 config.THINKING 的 search_direct 档位显式开 / 关思考（见模块说明）；
+    记录里多一个 thinking（档位或 "disabled"），max_tokens 记实际发出的值。"""
+    effort = config.THINKING.get(config.thinking_role(ARM)) if control_thinking else None
+    out_tokens = max_tokens + (config.THINKING_EXTRA_TOKENS if effort else 0)
     user = _messages(SYSTEM, q)[1]["content"]
     msgs = [{"role": "user", "content": user}]
     strict = q.get("strict", True)
     record = {"qid": q["id"], "arm": ARM, "model": client.model, "target_unit": q["answer_unit"], "as_of": q["as_of"],
-              "system": SYSTEM, "user": user, "max_uses": MAX_USES, "max_tokens": max_tokens, "attempts": []}
+              "system": SYSTEM, "user": user, "max_uses": MAX_USES, "max_tokens": out_tokens, "attempts": []}
+    if control_thinking:
+        record["thinking"] = effort or "disabled"
     for attempt in (1, 2):
-        body = {"model": client.model, "max_tokens": max_tokens, "system": SYSTEM, "messages": msgs}
+        body = {"model": client.model, "max_tokens": out_tokens, "system": SYSTEM, "messages": msgs}
+        if control_thinking:
+            body.update(thinking_fields(effort))
         if attempt == 1:
             body["tools"] = [{"type": "web_search_20250305", "name": "web_search", "max_uses": MAX_USES}]
         d = client.call(body, qid=q["id"], attempt=attempt)

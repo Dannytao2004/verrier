@@ -313,11 +313,59 @@ QUESTIONS += [
      "answer_unit": "NZD", "unit_hint": "an amount of money in NZD",
      "leak_values": [7943894499, 7245909283, 8620109942, 8876680404, 8092970496, 7391317405, 6655897873, 6466753919]},
 ]
+# 留出测试 4（前瞻，2026-10-23 登记，在任何模型调用之前；只由 probes/run_test4.py 跑和打分，下面的 run / report 跳过它）。
+# 选题和复查：test4 候选题表（TEST4_QUESTIONS_ZH.md 的第 1、2 题；
+# 日历页和两个数值页复查者 10-23 重新打开核过）。真实使用：没有真值；as_of = 实际跑的那天，由 run_test4 在每个配置开跑时用
+# with_as_of() 填进 question_template，所以这里 as_of、question 都是 None（不经 run_test4 直接拿去跑会报错，不会带着旧日期跑）。
+# released_at = 首发时刻（带时区）：到了这个时刻答案可能已公开，run_test4 拒跑（跑不完的也拒）。leak_values 先空着
+# （真实使用没有登记值）。公布后把首发值填进下面的 TEST4_OFFICIAL，再 probes/run_test4.py --score。
+_ASOF_T = "Assume today is {as_of}. You know nothing published after this date. "
+QUESTIONS += [
+    # 国家统计局发布日程表「工业经济效益月度报告」10 月一栏 27/二 9:30（北京）= 美国中部时间 2026-10-26 20:30 CDT。
+    # 去年同期 2025 年 1-9 月 53732.0亿元（t20251027_1961695）；最近一期 2026 年 1-8 月 52719.8亿元（t20260928_1965425，可比口径
+    # +15.7%）。各年公布的累计水平不可比（附注二：每年调查范围重置），去年值只是弱基准。
+    {"id": "fc_cn_profits_2026_09", "set": "test4", "as_of": None, "question": None,
+     "released_at": "2026-10-27T09:30:00+08:00", "last_year": 5373200000000,
+     "last_year_source": "https://www.stats.gov.cn/sj/zxfbhjd/202510/t20251027_1961695.html",
+     "source": "https://www.stats.gov.cn/sj/fbrc/bnxxfb/",
+     "question_template": _ASOF_T + "Estimate the total profits of China's industrial enterprises above designated size "
+                          "(规模以上工业企业利润总额) for January-September 2026 (the cumulative total, not the single month of "
+                          "September), in Chinese yuan (CNY; the release states it in 亿元, i.e. units of 100 million yuan), as it "
+                          "will be first reported in the National Bureau of Statistics of China's monthly release on profits of "
+                          "industrial enterprises.",
+     "answer_unit": "CNY", "unit_hint": "an amount of money in CNY", "leak_values": []},
+    # 国家统计发布行事历：交通部「來臺旅客及國人出國人數」10 月 27 日 16:20（台北）= 美国中部时间 2026-10-27 03:20 CDT（条目注记：
+    # 115年9月资料由 11月10日前改为 10月27日）。去年同期 2025 年 9 月 601,339、最近一期 2026 年 8 月 662,735，都取自主计总处
+    # 重要指标页的镜像（交通部首发页没打开，镜像是不是首发值未核实）；同一 JSON 里的出国人数别混用。
+    {"id": "fc_tw_visitors_2026_09", "set": "test4", "as_of": None, "question": None,
+     "released_at": "2026-10-27T16:20:00+08:00", "last_year": 601339,
+     "last_year_source": "https://www.stat.gov.tw/Point.aspx?sid=t.12&n=3591&sms=11480",
+     "source": "https://www.stat.gov.tw/News_NoticeCalendar.aspx?n=3717&sms=11505&IsControl=0&Dept=all&_Hide=1",
+     "question_template": _ASOF_T + "Estimate the number of visitor arrivals to Taiwan (來臺旅客人次) in September 2026, as it "
+                          "will be first reported in the Ministry of Transportation and Communications' (Tourism Administration) "
+                          "monthly statistics on visitor arrivals and outbound departures (來臺旅客及國人出國人數).",
+     "answer_unit": "", "unit_hint": "a count of visitor arrivals", "leak_values": []},
+]
+# 留出测试 4 的官方首发值：公布后填，填之前 run_test4 --score 只列估计、不算误差。填法（数用计分单位：元、人次）：
+#   "fc_cn_profits_2026_09": {"value": 5.9e12, "source": "<首发页 URL>", "quote": "<原文那一句>", "checked": "2026-10-27"},
+TEST4_OFFICIAL = {
+    "fc_cn_profits_2026_09": None,
+    "fc_tw_visitors_2026_09": None,
+}
+
+
+def with_as_of(q: dict, as_of: str) -> dict:
+    """留出测试 4：题目在跑的那天才定 as_of（真实使用）。返回填好 as_of 和 question 的副本（不改题库里的这一条）。"""
+    if not q.get("question_template"):
+        raise ValueError(f"{q['id']} has no question_template")
+    return {**q, "as_of": as_of, "question": q["question_template"].format(as_of=as_of)}
+
+
 for _q in QUESTIONS:
-    if _q.get("set") in ("test2", "test2_live", "test3"):
+    if _q.get("set") in ("test2", "test2_live", "test3", "test4"):
         _q["strict"] = False
 FNS = {"naive": run_naive, "structured": run_structured}
-OWN_RUNNER = ("test3",)   # 这些题集由自己的脚本跑和打分（probes/run_test3.py），run / report 不碰
+OWN_RUNNER = ("test3", "test4")   # 这些题集由自己的脚本跑和打分（probes/run_test3.py、run_test4.py），run / report 不碰
 
 
 def _raw(arm, qid):

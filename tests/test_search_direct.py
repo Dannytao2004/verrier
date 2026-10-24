@@ -97,6 +97,50 @@ class TestSearchDirect(unittest.TestCase):
         self.assertEqual(r["usd_search_fee_assumed"], 0.04)
 
 
+class TestThinkingControl(unittest.TestCase):
+    """v2.12e：control_thinking=True 时按 config.THINKING 的 search_direct 档位显式开 / 关思考（同另两个臂的按角色机制）；
+    默认调用的请求体不变（不带 thinking 字段）。"""
+
+    def run_with(self, settings, **kw):
+        from triangulate import config
+        c = Fake(resp("no idea"), resp('{"estimate": 3000000, "unit": ""}'))
+        with mock.patch.dict(config.THINKING, settings, clear=True):
+            r = SD.run_search_direct(c, Q, **kw)
+        return r, c.bodies
+
+    def test_default_request_unchanged(self):
+        r, bodies = self.run_with({"search_direct": "high"})   # 默认调用不看档位
+        self.assertEqual([list(b) for b in bodies], [["model", "max_tokens", "system", "messages", "tools"],
+                                                     ["model", "max_tokens", "system", "messages"]])
+        self.assertEqual([b["max_tokens"] for b in bodies], [4096, 4096])
+        self.assertNotIn("thinking", r)
+
+    def test_off_sends_disabled_on_both_attempts(self):
+        r, bodies = self.run_with({}, control_thinking=True)
+        self.assertEqual([b["thinking"] for b in bodies], [{"type": "disabled"}] * 2)
+        self.assertTrue(all("output_config" not in b for b in bodies))
+        self.assertEqual(([b["max_tokens"] for b in bodies], r["max_tokens"], r["thinking"]), ([4096, 4096], 4096, "disabled"))
+        self.assertEqual(list(bodies[0]), ["model", "max_tokens", "system", "messages", "thinking", "tools"])
+
+    def test_on_sends_effort_and_extra_tokens(self):
+        from triangulate import config
+        r, bodies = self.run_with({"search_direct": "high", "naive": "low"}, control_thinking=True)
+        want = 4096 + config.THINKING_EXTRA_TOKENS
+        for b in bodies:
+            self.assertEqual((b["thinking"], b["output_config"], b["max_tokens"]), ({"type": "enabled"}, {"effort": "high"}, want))
+        self.assertEqual((r["max_tokens"], r["thinking"], r["estimate"]), (want, "high", 3000000.0))
+        r, bodies = self.run_with({"naive": "high"}, control_thinking=True)   # 别的角色开了，这个臂照旧关
+        self.assertEqual(bodies[0]["thinking"], {"type": "disabled"})
+
+    def test_same_endpoint_and_tool_as_the_agent_searcher(self):
+        from triangulate import providers
+        from triangulate.agent import search as S
+        self.assertEqual(SD.SEARCH_URL, S.SEARCH_URL)
+        _, payload = providers.DEEPSEEK.search_request("deepseek-flash", "k", "p", max_tokens=1, max_uses=SD.MAX_USES)
+        _, bodies = self.run_with({}, control_thinking=True)
+        self.assertEqual(bodies[0]["tools"], payload["tools"])
+
+
 class TestDirectClient(unittest.TestCase):
     def test_transport_failure_resends_three_times_then_raises(self):
         logs = []

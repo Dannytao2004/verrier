@@ -153,10 +153,14 @@ class TestGate(unittest.TestCase):
     def test_only_live_questions_are_checked(self):
         from triangulate.agent.run import checks_published
         from triangulate.forecast import QUESTIONS
+        from triangulate.forecast import with_as_of as forecast_with_as_of
         today = date(2026, 10, 16)
         self.assertTrue(QUESTIONS)
-        live = ("live", "test2_live")   # 未公布题：展示集的 live 和留出测试 2 的 test2_live（2026-10-19 加入）
+        live = ("live", "test2_live", "test4")   # 未公布题：展示集的 live、留出测试 2 的 test2_live、留出测试 4（10-23 加入）
         for q in QUESTIONS:   # 回测 / 留出 / 展示的已公布题：有真值、as_of 早于今天；未公布题：真实使用
+            if q.get("set") == "test4":   # as_of 在跑的那天才填（forecast.with_as_of）
+                self.assertIsNone(q["as_of"], q["id"])
+                q = forecast_with_as_of(q, today.isoformat())
             self.assertEqual(checks_published(q, today), q.get("set") in live, q["id"])
             self.assertEqual(q.get("answer_value") is None, q.get("set") in live, q["id"])
         self.assertTrue(checks_published({"as_of": "2026-10-16"}, today))
