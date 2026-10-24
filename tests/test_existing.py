@@ -37,9 +37,11 @@ PRE_ROLES = ("existing:search", "extract:existing", "existing:published", "exist
 # 终稿和终稿 prompt 的方法细节多写了同比对的值、逐月的点和校准表 id；数字、existing 步骤都没变（逐键比较：probes/out/v212d_existing_sha_diff.txt，只在本机）。
 # v2.12c 工作区上的值是 live_auto 95447ed8…、backtest d706917c…；live_early_stop 没有方法，不变
 HEAD_KEYS = ("plan", "directions", "approval", "points", "judge_rounds", "compute", "published", "final")
-HEAD_SHA = {"live_auto": "9f789faa9b2984bc5dfb08a1d41ba4483a925667025fc93057cfc100096dc054",
-            "backtest": "829af9c9fd332bb61dc137da18d6d5f15dffc4cf000bf9fd88d104cb11349e39",
-            "live_early_stop": "a4dc822dec1087cb5951fba1eff04f370ba1d561c8ea6eaddbc815299c4a539a"}
+# v2.12e（抽取 prompt 的 unit 一条加了「韩文单位译成英文」一句；c / d 两个编号上面已用过）再登记：进程内把这一句去掉，三条都等于上一版的值
+# live_auto 9f789faa…、backtest 829af9c9…、live_early_stop a4dc822d…，所以只有这一句变了
+HEAD_SHA = {"live_auto": "912231225a25b93775d40f86be683b49187743e015690ccf5aa4f65d4e38196d",
+            "backtest": "5ffb4c9dd76373def6b426d21632570cc969a90e5325f4637c6c4df58be537db",
+            "live_early_stop": "d6af7b62c85a90a5b74b8a64feeb2b48798bdf00ca8f2eece9629e4b35bea7bd"}
 
 
 class Harness:
