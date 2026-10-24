@@ -409,6 +409,35 @@ class TestFakeEndToEnd(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE_DEPS, "langgraph / statsforecast not installed (use .venv)")
+class TestRound(unittest.TestCase):
+    def test_new_round_leaves_the_previous_round_alone(self):
+        """--round：同一批 agent 配置改完代码再测一轮，结果写进新目录，上一轮的状态和 agent 结果逐字节不变。"""
+        from tests import fake_test4 as W
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
+        cs = [c for c in RT.configs() if c["arm"] == "agent"]
+        kw = dict(now=lambda: W.NOW, sleep=lambda s: None, log=lambda s: None, tz=W.LOCAL_TZ)
+        with W.fake_world(tmp / "agent") as (net, guard):
+            net.script = {k: list(v) for k, v in SCRIPT.items()}
+            first = RT.Runner(root=tmp / "test4", on_start=lambda c: setattr(net, "cid", c["cid"]), **kw)
+            self.assertEqual(len(first.run(cs)["ran"]), 4)
+            before = {p: p.read_bytes() for p in (tmp / "agent").rglob("*") if p.is_file()}
+            before.update({p: p.read_bytes() for p in (tmp / "test4").rglob("*") if p.is_file()})
+            net.script = {k: list(v) for k, v in SCRIPT.items()}
+            second = RT.Runner(root=tmp / "test4" / "rounds" / "r2", on_start=lambda c: setattr(net, "cid", c["cid"]),
+                               round_name="r2", **kw)
+            res = second.run(cs)
+            dirs = [second.agent_dir(c) for c in cs[:2]]
+        self.assertEqual(len(res["ran"]), 4)                                  # 上一轮跑过，新一轮照样跑
+        self.assertEqual({p: p.read_bytes() for p in before}, before)       # 上一轮的文件一个字节都没变
+        self.assertEqual(dirs, [tmp / "agent" / CN / "test4_r2", tmp / "agent" / CN / "test4_think_r2"])
+        self.assertTrue((tmp / "agent" / CN / "test4_r2" / "state.json").exists())
+        self.assertEqual(second.status(cs[0])["outcome"], "done")
+        self.assertEqual(guard.attempts, [])
+        with mock.patch("sys.stderr"), self.assertRaises(SystemExit):
+            RT.main(["--plan", "--round", "R-2"])                         # 轮次名只许小写字母和数字（它会进目录名和 tag）
+
+
 class TestStops(unittest.TestCase):
     def test_balance_in_search_direct_stops_the_batch(self):
         """search_direct 撞上 402：DirectClient 报 TransportError（http_402），runner 记 stopped、后面的配置不跑。"""

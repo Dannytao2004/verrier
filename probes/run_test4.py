@@ -30,6 +30,8 @@ x 3 个臂 x 思考关 / 开 = 12 个配置，每个配置只跑一次，然后�
 - agent：results/agent/<qid>/test4/ 和 results/agent/<qid>/test4_think/（标准位置，网页和 agent-score 照样能读）；
 - 每个配置的状态：results/test4/configs/<配置>.json；运行日志（含拒跑原因、费用）：results/test4/run.log；
 - 打分：results/test4/summary.json、results/test4/summary.md。
+- --round R（v2.12e 起）：改了代码以后同一批配置再测一轮，不动上一轮的结果：配置状态、日志、打分在 results/test4/rounds/R/，
+  agent 在 results/agent/<qid>/test4_R/ 和 test4_think_R/。门照查，一轮里一个配置也只跑一次。
 
 用法（解释器 .venv/Scripts/python.exe，PYTHONIOENCODING=utf-8）：
   probes/run_test4.py --plan [--question QID]                 列出配置、门的检查结果、预计时长和费用；不调模型
@@ -37,6 +39,7 @@ x 3 个臂 x 思考关 / 开 = 12 个配置，每个配置只跑一次，然后�
   probes/run_test4.py --run --config <配置> [--config ...]    只跑这几个配置（--plan 也认 --config）
   probes/run_test4.py --rerun <配置> --reason R               基础设施故障的配置重跑一次（门照查）
   probes/run_test4.py --score                                 只离线打分
+  以上都可以加 --round R（见上）
 """
 import argparse
 import importlib.util
@@ -205,14 +208,15 @@ class Runner(T3.Runner):
     的客户端，测试换成走假服务的客户端也行，默认是真的 DirectClient + 写调用记录）。"""
 
     def __init__(self, root: Path = OUT, now=None, sleep=time.sleep, wait: bool = False, log=print, llm_factory=None,
-                 on_start=None, tz=None, direct_factory=None):
+                 on_start=None, tz=None, direct_factory=None, round_name: str = ""):
         super().__init__(root=root, now=now, sleep=sleep, wait=wait, log=log, llm_factory=llm_factory, on_start=on_start)
         self.tz = tz
+        self.tags = {m: f"{t}_{round_name}" for m, t in AGENT_TAG.items()} if round_name else dict(AGENT_TAG)
         self.direct_factory = direct_factory or (lambda calls: DirectClient(_jsonl_log(calls)))
 
     def agent_dir(self, c):
         from triangulate.agent import run as agent_run
-        return agent_run.RES / c["qid"] / AGENT_TAG[c["mode"]]
+        return agent_run.RES / c["qid"] / self.tags[c["mode"]]
 
     def as_of(self) -> str:
         return local(self.now(), self.tz).date().isoformat()
@@ -337,7 +341,7 @@ class Runner(T3.Runner):
 
     def _agent(self, c, q) -> dict:
         from triangulate.agent import run as agent_run
-        state = agent_run.run_question(q, True, AGENT_TAG[c["mode"]])
+        state = agent_run.run_question(q, True, self.tags[c["mode"]])
         b, lk = state.get("budget") or {}, state.get("leakage") or {}
         out = {"state": str(self.agent_dir(c) / "state.json"), "usd": b.get("usd_total_assumed"),
                "usd_tokens": b.get("usd_tokens"), "settings_thinking": (state.get("settings") or {}).get("thinking"),
@@ -559,8 +563,11 @@ def main(argv=None) -> int:
     ap.add_argument("--config", action="append", default=[], help="with --run / --plan: only these configurations (repeatable)")
     ap.add_argument("--wait", action="store_true", help="wait for an off-peak window that is long enough instead of refusing")
     ap.add_argument("--reason", default="", help="why --rerun is an infrastructure failure (required with --rerun)")
+    ap.add_argument("--round", default="", help="a new round of the same configurations after a code change (results/test4/rounds/R)")
     a = ap.parse_args(argv)
-    runner = Runner(wait=a.wait)
+    if a.round and not re.fullmatch(r"[a-z0-9]+", a.round):
+        ap.error("--round: lowercase letters and digits only")
+    runner = Runner(root=OUT / "rounds" / a.round if a.round else OUT, wait=a.wait, round_name=a.round)
     try:
         qs = questions(a.question)
     except ValueError as e:
