@@ -1,0 +1,21 @@
+{
+ "qid": "fc_tw_visitors_2026_09",
+ "arm": "naive",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 740000,
+    "unit": ""
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1,
+ "thinking_by_role": {
+  "naive": "high"
+ },
+ "as_of": "2026-10-24"
+}

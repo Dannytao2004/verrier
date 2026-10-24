@@ -1,0 +1,18 @@
+{
+ "cid": "fc_tw_visitors_2026_09__naive__off",
+ "qid": "fc_tw_visitors_2026_09",
+ "arm": "naive",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "as_of": "2026-10-24",
+ "question": "Assume today is 2026-10-24. You know nothing published after this date. Estimate the number of visitor arrivals to Taiwan (來臺旅客人次) in September 2026, as it will be first reported in the Ministry of Transportation and Communications' (Tourism Administration) monthly statistics on visitor arrivals and outbound departures (來臺旅客及國人出國人數).",
+ "released_at": "2026-10-27T16:20:00+08:00",
+ "started_at": "2026-10-24T05:11:12+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test4\\raw\\naive_off\\fc_tw_visitors_2026_09.json",
+ "usd": 4.3e-05,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 1.2,
+ "finished_at": "2026-10-24T05:11:13+00:00"
+}

@@ -1,0 +1,21 @@
+{
+ "qid": "fc_cn_profits_2026_09",
+ "arm": "naive",
+ "target_unit": "CNY",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 5600000000000.0,
+    "unit": "CNY"
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1,
+ "thinking_by_role": {
+  "naive": "high"
+ },
+ "as_of": "2026-10-24"
+}

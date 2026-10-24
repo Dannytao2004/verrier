@@ -1,0 +1,1 @@
+{"arm": "naive", "qid": "fc_tw_visitors_2026_09", "attempt": 1, "model": "deepseek-flash", "thinking": "high", "http": 200, "http_try": 1, "latency_s": 2.41, "at": "2026-10-24T05:11:13+00:00", "finish_reason": "stop", "prompt_tokens": 262, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 262, "completion_tokens": 282, "usd": 0.000208, "reasoning_tokens": 269, "ok": true}

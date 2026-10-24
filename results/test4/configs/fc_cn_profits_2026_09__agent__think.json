@@ -1,0 +1,40 @@
+{
+ "cid": "fc_cn_profits_2026_09__agent__think",
+ "qid": "fc_cn_profits_2026_09",
+ "arm": "agent",
+ "thinking": "think",
+ "thinking_by_role": {
+  "plan": "high",
+  "judge": "high",
+  "repair": "high",
+  "audit": "low",
+  "unit_arbiter": "low"
+ },
+ "as_of": "2026-10-24",
+ "question": "Assume today is 2026-10-24. You know nothing published after this date. Estimate the total profits of China's industrial enterprises above designated size (规模以上工业企业利润总额) for January-September 2026 (the cumulative total, not the single month of September), in Chinese yuan (CNY; the release states it in 亿元, i.e. units of 100 million yuan), as it will be first reported in the National Bureau of Statistics of China's monthly release on profits of industrial enterprises.",
+ "released_at": "2026-10-27T09:30:00+08:00",
+ "started_at": "2026-10-24T05:06:06+00:00",
+ "attempts": [],
+ "state": ".\\results\\agent\\fc_cn_profits_2026_09\\test4_think\\state.json",
+ "usd": 0.3705,
+ "usd_tokens": 0.0905,
+ "settings_thinking": {
+  "by_role": {
+   "plan": "high",
+   "judge": "high",
+   "repair": "high",
+   "audit": "low",
+   "unit_arbiter": "low"
+  },
+  "extra_max_tokens": 24000
+ },
+ "real_use": {
+  "pages_live_dated": 26,
+  "pages_snapshot": 0,
+  "published_check": "no_candidates",
+  "published_early": "not_confirmed"
+ },
+ "outcome": "done",
+ "wall_s": 305.5,
+ "finished_at": "2026-10-24T05:11:12+00:00"
+}

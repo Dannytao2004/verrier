@@ -1,0 +1,18 @@
+{
+ "cid": "fc_cn_profits_2026_09__naive__off",
+ "qid": "fc_cn_profits_2026_09",
+ "arm": "naive",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "as_of": "2026-10-24",
+ "question": "Assume today is 2026-10-24. You know nothing published after this date. Estimate the total profits of China's industrial enterprises above designated size (规模以上工业企业利润总额) for January-September 2026 (the cumulative total, not the single month of September), in Chinese yuan (CNY; the release states it in 亿元, i.e. units of 100 million yuan), as it will be first reported in the National Bureau of Statistics of China's monthly release on profits of industrial enterprises.",
+ "released_at": "2026-10-27T09:30:00+08:00",
+ "started_at": "2026-10-24T05:00:01+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test4\\raw\\naive_off\\fc_cn_profits_2026_09.json",
+ "usd": 4.8e-05,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 1.3,
+ "finished_at": "2026-10-24T05:00:02+00:00"
+}
