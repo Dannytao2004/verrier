@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ..config import MAX_TOKENS
 from . import qty as Q
-from .evidence import PERCENT, norm, parse_date, period_text, split_multiplier, unit_multipliers
+from .evidence import PERCENT, norm, parse_date, period_text, split_multiplier
 from .pipeline import BudgetExceeded, dumps
 from .prompts import (UNIT_ARBITER_RETRY, UNIT_ARBITER_SYSTEM, UNIT_ARBITER_USER, UNIT_CHECK_SYSTEM, UNIT_CHECK_USER,
                       UNIT_RULES)
@@ -60,42 +60,6 @@ def _doubled(out: dict, mults: dict) -> str:
     return ""
 
 
-def _named_multiplier(p: dict) -> float:
-    """v2.12b（BUGS S66）：数据点的单位里写着代码认得的倍数（「millions of USD」「亿元 (100 million CNY)」），而代码没有乘过
-    （原文这一行附近找不到倍数的依据，pipeline._pair_unit 没挪）：返回这个倍数；几处写法给出的倍数不一致、或代码已乘过，返回 1。"""
-    if _multiplier(p) != 1:
-        return 1.0
-    fs = {f for _, f in unit_multipliers(str(p.get("unit") or ""))}
-    return fs.pop() if len(fs) == 1 else 1.0
-
-
-def _scaled(text: str) -> bool:
-    """单位写法本身带倍数：有数字（'1e8 CNY'）、SI 前缀（'TWh'、'Mt'、'kbbl/day'），或倍数词（'million cubic feet'）。"""
-    q, _ = Q.parse_unit(text)
-    if q is not None and (not math.isclose(float(q.magnitude), 1.0, rel_tol=1e-9)
-                          or any((Q.UREG.parse_unit_name(n) or (("",),))[0][0] for n, _ in q.unit_items())):
-        return True
-    return bool(unit_multipliers(text))
-
-
-def _dropped(out: dict, named: dict) -> str:
-    """v2.12b（BUGS S66）：_doubled 的反方向。单位里写着倍数 F、代码没乘过的数据点，裁定给的单位完全不带倍数（'CNY'、'USD/year'）
-    就是漏乘（美国零售 test3：763,705 millions of USD 判成 USD，终稿 766,401 美元）。带了数字、前缀或倍数词的不拦：4,408 billion kWh
-    判成 'TWh' 是对的（v211g_reg）；'million cubic feet' 乘 'GWh/(million cubic feet)' 倍数约掉也是对的（test2_think）。
-    返回交给裁定重试的问题，没有就是空串。"""
-    for x in out.get("inputs") or []:
-        if not isinstance(x, dict) or x.get("name") not in named:
-            continue
-        f = named[x["name"]]
-        if not _scaled(str(x.get("unit") or "")):
-            return (f"input {x['name']}: its unit_as_recorded names the multiplier {f:,.0f} and code did NOT multiply its value, "
-                    f"so value_used is in units of {f:,.0f}; its unit must carry that factor in pint notation, as a number "
-                    f"(for example '{f:.0f} CNY' or '{f:.0f} USD/year') or an equivalent SI prefix, not '{x.get('unit')}'. "
-                    "Correct that input's unit, then recheck the result unit: it changes unless the factor cancels against another "
-                    "input's unit")
-    return ""
-
-
 def input_lines(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
     """给核对和裁定看的输入，每个一行 JSON；值、记录的单位、描述分开写。"""
     roles = {n: (s.get("role", "") if isinstance(s, dict) else "") for n, s in ((m_in.get("params") or {}).get("inputs") or {}).items()}
@@ -127,11 +91,6 @@ def input_lines(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
                 sw = f" with multiplier {p.get('scale_word')}" if p.get("scale_word") else ""
                 note = (f"written as {p.get('value_as_written')}{sw}; code already multiplied it by {mult:,.0f}, so value_used "
                         f"{_sig(v)} is in base units (not in units of {mult:,.0f}), even if unit_as_recorded names the multiplier")
-                x["note"] = f"{x['note']}; {note}" if x.get("note") else note
-            named = _named_multiplier(p)
-            if named != 1:   # v2.12b：单位里写着倍数、代码没乘；没有这种倍数的点这一行和以前逐字相同
-                note = (f"unit_as_recorded names the multiplier {named:,.0f} and code did NOT multiply, so value_used {_sig(v)} "
-                        f"is in units of {named:,.0f}; the unit you give this input must carry the factor {named:.0f}")
                 x["note"] = f"{x['note']}; {note}" if x.get("note") else note
         x["role"] = roles.get(d["name"], "")
         rows.append(dumps(x))
@@ -210,7 +169,6 @@ def review_method(llm, qid: str, mid: str, m_in: dict, m_out: dict, by_id: dict,
     arb_user = sub(UNIT_ARBITER_USER, {"__ANSWERS__": "\n".join(answers)})
     rec = {"method": mid, "label": m_out.get("label"), "judge_unit": declared, "checkers": checkers, "arbiter": []}
     mults = {d["name"]: m for d in m_out.get("inputs_detail") or [] if d["kind"] == "point" and (m := _multiplier(by_id[d["id"]])) != 1}
-    named = {d["name"]: m for d in m_out.get("inputs_detail") or [] if d["kind"] == "point" and (m := _named_multiplier(by_id[d["id"]])) != 1}
     user = arb_user
     for t in range(ARBITER_TRIES):
         out, err = _ask(llm, UNIT_ARBITER_SYSTEM, user, f"unit_arbiter:{mid}:{t + 1}", qid, "unit_arbiter")
@@ -221,8 +179,6 @@ def review_method(llm, qid: str, mid: str, m_in: dict, m_out: dict, by_id: dict,
         f, problem = None, ""
         if dbl := _doubled(out, mults):   # v2.8q：倍数乘两次
             problem = dbl
-        elif drp := _dropped(out, named):   # v2.12b：单位里的倍数漏乘
-            problem = drp
         elif out.get("fits_target") is not True:
             problem = f"you judged that it does not fit the target unit '{tu}': {out.get('fit_reason', '')}"
         elif not ru:
