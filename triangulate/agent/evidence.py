@@ -536,16 +536,20 @@ _UNIT_ABBR = ("mn", "mln", "bn")
 _UNIT_MULT = re.compile(
     rf"(?P<cjk>{_alt(_UNIT_CJK)})"
     r"|(?<![\w,.])(?P<num>100,000,000|100 million|10,000|10000)(?![\d,.])(?!\s*(?:ml|g|kg|km|l|cc)\b)"
+    r"|(?<![\w,.])(?P<numword>(?:1|10|100) (?:thousand|million|billion|trillion))\b"   # v2.12b：「(10 thousand tonnes)」是一个倍数 1e4
     rf"|\b(?P<word>(?:{_alt(EN_STACKED).replace(r'[\s-]+', '[- ]')}|{_alt(_UNIT_WORDS)})s?|{_alt(_UNIT_ABBR)})\b"
     r"|(?P<k>'000s?|\b000s\b)", re.I)
 _UNIT_MULT_FACTOR = {"100,000,000": 1e8, "100 million": 1e8, "10,000": 1e4, "10000": 1e4,
                      **{w: f for k, f in EN_STACKED.items() for w in (k, k.replace(" ", "-"))}, **_UNIT_WORDS,
                      **{a: EN_ABBR[a] for a in _UNIT_ABBR}, "'000": 1e3, "000": 1e3}
 # 倍数只写在 unit 里时挪到数上用的写法（pipeline._pair_unit）：每个倍数一个写法；v2.8r 已有的 8 个不变，v2.11a 只给新增的倍数
-# （1e13–1e16、1e18）各补一个。1e10 / 1e11（百亿、千亿）v2.8r 起单位里认得出、但没有写法，照旧不挪（不改已有行为）
+# （1e13–1e16、1e18）各补一个。1e10 / 1e11（百亿、千亿）没有写法，v2.12b 起 _pair_unit 用 unit 里的原词挪
 _UNIT_SPELLING = ("thousand", "万", "十万", "million", "千万", "亿", "billion", "trillion",
                   "十万亿", "百万亿", "quadrillion", "亿亿", "quintillion")
 SCALE_FOR_FACTOR = {SCALES[w]: w for w in _UNIT_SPELLING}
+
+
+_HANGUL_NUMERALS = "일이삼사오육칠팔구십백천만억조경"
 
 
 def unit_multipliers(unit: str) -> list:
@@ -555,7 +559,13 @@ def unit_multipliers(unit: str) -> list:
         if re.search(r"(?:\bper|每|/)\s*$", unit[:m.start()], re.I):
             continue
         t = m.group(0).lower()
-        if m.group("cjk"):
+        # v2.12b：韩文倍数字紧跟在不是数词的音节后面，是单词的一截（분만 = 分娩、만족），不是倍数；천만、십만 是整个匹配，不受影响
+        if m.group("cjk") and m.start() and "가" <= unit[m.start() - 1] <= "힣" and unit[m.start() - 1] not in _HANGUL_NUMERALS:
+            continue
+        if m.group("numword"):
+            n, w = t.split()
+            f = float(n) * _UNIT_MULT_FACTOR[w]
+        elif m.group("cjk"):
             f = SCALES[t]
         else:
             t = re.sub(r"s$", "", t.strip("'")) if m.group("word") or m.group("k") else t
@@ -567,7 +577,7 @@ def unit_multipliers(unit: str) -> list:
 
 def strip_unit_multiplier(unit: str, factor: float) -> tuple:
     """去掉 unit 里倍数为 factor 的写法，返回 (新 unit, 原因)。unit 里还有别的倍数（scale_word 是万、unit 写亿元）：原因非空，调用方丢点。
-    去掉后清理空括号和多余的标点、空格：「万元 (10,000 CNY)」->「元 (CNY)」，「USD million」->「USD」，「CNY yuan (100 million)」->「CNY yuan」。"""
+    去掉后清理空括号和多余的标点、空格：「万元 (10,000 CNY)」->「元 (CNY)」，「USD million」->「USD」，「CNY yuan (100 million)」->「CNY yuan」，「millions of USD」->「USD」。"""
     hits = unit_multipliers(unit)
     other = [m.group(0) for m, f in hits if not math.isclose(f, factor)]
     if other:
@@ -575,7 +585,8 @@ def strip_unit_multiplier(unit: str, factor: float) -> tuple:
     s = unit
     for m, _ in sorted(hits, key=lambda x: -x[0].start()):
         s = s[:m.start()] + s[m.end():]
-    s = re.sub(r"\(\s*[,;=]?\s*\)", "", s)
+    s = re.sub(r"^\s*of\s+", "", s)                    # v2.12b：「millions of USD」->「USD」
+    s = re.sub(r"\(\s*(?:in)?\s*[,;=]?\s*\)", "", s)   # v2.12b：「(in thousands) persons」->「persons」
     s = re.sub(r"\(\s*[,;]\s*", "(", re.sub(r"\s*[,;]\s*\)", ")", s))
     s = re.sub(r"\(\s+", "(", re.sub(r"\s+\)", ")", s))
     s = re.sub(r"\s{2,}", " ", s).strip(" ,;")

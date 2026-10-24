@@ -302,20 +302,19 @@ class TestUnitMultipliers(unittest.TestCase):
         self.assertEqual((why, p["value"], p["unit"], p["unit_as_written"]), ("", 3e11, "원", "천억 원"))
         p, why = vp("올해 매출은 3억 원", "3", "억", "천억 원")
         self.assertIn("unit: unit '천억 원' names a different multiplier", why)
-        # 倍数只写在 unit 里：1e11 没有挪到数上用的写法（v2.8r 起就没有，SCALE_FOR_FACTOR），不挪（数和单位照旧成对；
-        # 就算有写法，_pair_unit 也只试一个，见 BUGS S29）
+        # 倍数只写在 unit 里：1e11 没有 SCALE_FOR_FACTOR 写法，v2.12b 起用 unit 里的原词「천억」挪到数上（以前不挪，BUGS S29 / S66）
         p, why = vp("올해 매출은 3천억 원", "3", "", "천억 원")
-        self.assertEqual((why, p["value"], p["unit"], p["scale_word"]), ("", 3.0, "천억 원", ""))
+        self.assertEqual((why, p["value"], p["unit"], p["scale_word"]), ("", 3e11, "원", "천억"))
 
     def test_scale_for_factor(self):
         old = {1e3: "thousand", 1e4: "万", 1e5: "十万", 1e6: "million", 1e7: "千万", 1e8: "亿", 1e9: "billion", 1e12: "trillion"}
         self.assertEqual({f: w for f, w in ev.SCALE_FOR_FACTOR.items() if f in old}, old)   # v2.8r 的写法不变
         produced = {f for w in [*ev._UNIT_CJK, *ev._UNIT_WORDS, *ev.EN_STACKED] for _, f in ev.unit_multipliers(w)}
-        # 单位里认得出的倍数都有挪到数上的写法；1e10 / 1e11（百亿、千亿）例外：v2.8r 起认得出、没有写法，照旧不挪
+        # 单位里认得出的倍数都有 SCALE_FOR_FACTOR 写法；1e10 / 1e11（百亿、千亿）例外，v2.12b 起用 unit 里的原词挪到数上（以前不挪）
         self.assertLessEqual(produced - {1e10, 1e11}, set(ev.SCALE_FOR_FACTOR))
         self.assertFalse({1e10, 1e11} & set(ev.SCALE_FOR_FACTOR))
         p, why = vp("公司营收3.5千亿元", "3.5", "", "千亿元")
-        self.assertEqual((why, p["value"], p["unit"], p["scale_basis"]), ("", 3.5, "千亿元", "none_needed"))
+        self.assertEqual((why, p["value"], p["unit"], p["scale_word"], p["scale_basis"]), ("", 3.5e11, "元", "千亿", "quote"))
 
 
 class TestOneTable(unittest.TestCase):

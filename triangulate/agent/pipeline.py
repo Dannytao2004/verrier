@@ -2,6 +2,7 @@
 v2.5 真实使用（ctx.live_fetch）：一个方向的几个 URL 同时直接抓 live 页（fetch_live，不查 Wayback），按 URL 顺序抽取；
 每页核对完的点交给 ctx.early（published.EarlyWatch），确认了已公布的目标值就停下其余子 agent。回测的流程没有改。"""
 import json
+import math
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -443,7 +444,7 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, page_published,
             return None, f"unit: {paired}"
         if paired:
             unit_as_written, unit, g, sw2, b2 = unit, *paired
-            if g != 1:   # 倍数只写在 unit 里、原文有依据：挪到数上
+            if g != 1:   # 倍数只写在 unit 里：挪到数上（v2.12b 起不看依据）
                 value, sw, basis = value * g, sw2, b2
                 lo_v, hi_v = (lo_v * g, hi_v * g) if lo_v is not None else (None, None)
     unit = unit[:60]
@@ -466,7 +467,11 @@ def _pair_unit(unit: str, vw: str, sw: str, q: str, header: str):
     """v2.8r：一个点的数和单位必须成对（XBRL：金额以元为单位；SDMX：UNIT_MEASURE 不含倍数）。
     - 代码已乘过倍数 f（scale_word 或写法末尾的 万 / million）：unit 里同一个倍数去掉（「万元 (10,000 CNY)」->「元 (CNY)」）；
       unit 写的是别的倍数就返回原因（调用方丢点）。恒顺 v2.8p 因为没去掉，单位核对又乘了 10^4。
-    - 代码没乘、倍数只写在 unit 里（「万元」「£ million」）：倍数在 quote 或表头有依据（scale_supported）就挪到数上，没依据照旧。
+    - 代码没乘、倍数只写在 unit 里（「万元」「£ million」「millions of USD」）：v2.12b 起一律挪到数上，算的数不带倍数。
+      依据（scale_supported：quote / page_header，都没有记 unit）只记这个倍数从哪来，不决定挪不挪：原文那一栏
+      （value_as_written、quote、unit_as_written）和计算那一栏（value、unit）是点里同一行的两栏。以前没依据就不挪，
+      表格行里的数（「| 总计 | ... | 52719.8 |」，单位在表头外）带着「亿元」进了公式，单位核对读成 CNY（BUGS S66）。
+      unit 里几处写法的倍数不一致、或倍数写不成 scale_word：返回原因（调用方丢点）。
     返回 None（不用改）、(新 unit, 要乘的倍数, 新 scale_word, 新 scale_basis) 或原因字符串。比率分母（per 1,000 women、每万人）不动。"""
     hits = ev.unit_multipliers(unit)
     if not hits:
@@ -479,12 +484,23 @@ def _pair_unit(unit: str, vw: str, sw: str, q: str, header: str):
         new, why = ev.strip_unit_multiplier(unit, f)
         return why or (new, 1.0, sw, None)
     gs = {g for _, g in hits}
-    word = ev.SCALE_FOR_FACTOR.get(gs.pop()) if len(gs) == 1 else None
-    b = ev.scale_supported(word, q, header, vw) if word else ""
-    if not b:
-        return None
-    new, _ = ev.strip_unit_multiplier(unit, ev.SCALES[ev._cjk_scale_word(word)])
-    return new, ev.SCALES[ev._cjk_scale_word(word)], word, b
+    if len(gs) != 1:
+        return f"unit {unit!r} names more than one multiplier ({', '.join(m.group(0) for m, _ in hits)})"
+    g = gs.pop()
+    # scale_word 要让 split_multiplier 读回同一个倍数（unit_review._multiplier 靠它）：先用 SCALE_FOR_FACTOR 的写法，
+    # 没有（百亿、천억）就用 unit 里的原词
+    word = next((w for w in [ev.SCALE_FOR_FACTOR.get(g), *(m.group(0) for m, _ in hits)] if w and _reads_as(vw, w, g)), None)
+    if word is None:
+        return f"unit {unit!r} names a multiplier ({g:g}) that code cannot pair with the number {vw!r}"
+    new, why = ev.strip_unit_multiplier(unit, g)
+    return why or (new, g, word, ev.scale_supported(word, q, header, vw) or "unit")
+
+
+def _reads_as(vw: str, word: str, g: float) -> bool:
+    try:
+        return math.isclose(ev.split_multiplier(vw, word)[1], g)
+    except ValueError:
+        return False
 
 
 def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict, text, out: dict) -> list:

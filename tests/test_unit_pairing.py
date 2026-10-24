@@ -1,5 +1,5 @@
 """v2.8r：一个点的数和单位必须成对（XBRL「金额以元为单位」、SDMX UNIT_MEASURE 不含倍数）：代码乘过倍数，unit 里就不能再有；
-倍数只写在 unit 里、原文有依据时挪到数上。unit 写法来自已存运行的普查（results/agent/*/*/state.json）。"""
+倍数只写在 unit 里时挪到数上（v2.12b 起不看依据，依据只记在 scale_basis）。unit 写法来自已存运行的普查（results/agent/*/*/state.json）。"""
 import unittest
 from datetime import date
 
@@ -39,6 +39,14 @@ class TestStripUnitMultiplier(unittest.TestCase):
             self.assertEqual(ev.unit_multipliers(u), [], u)
         self.assertEqual([f for _, f in ev.unit_multipliers("£ million")], [1e6])
         self.assertEqual([f for _, f in ev.unit_multipliers("ten thousand USD (万美元)")], [1e4, 1e4])
+        # v2.12b 回放查出的两处：韩文单词里的「만」（분만 = 分娩）不是倍数；「10 thousand」是一个倍数 1e4，不是 thousand
+        self.assertEqual(ev.unit_multipliers("% (출생아 / 분만 예정자)"), [])
+        self.assertEqual([f for _, f in ev.unit_multipliers("천만 원")], [1e7])
+        self.assertEqual([f for _, f in ev.unit_multipliers("십만 명")], [1e5])
+        self.assertEqual(ev.strip_unit_multiplier("万吨 (10 thousand tonnes)", 1e4), ("吨 (tonnes)", ""))
+        self.assertEqual(ev.strip_unit_multiplier("millions of USD", 1e6), ("USD", ""))
+        self.assertEqual(ev.strip_unit_multiplier("(in thousands) persons", 1e3), ("persons", ""))
+        self.assertEqual(ev.unit_multipliers("births per 10 thousand people"), [])
 
 
 class TestVerifyPointPairing(unittest.TestCase):
@@ -57,11 +65,26 @@ class TestVerifyPointPairing(unittest.TestCase):
         p, _ = vp("5.2", "2024 turnover reached £5.2 million.", "£ million")
         self.assertEqual((p["value"], p["unit"], p["scale_word"]), (5.2e6, "£", "million"))
 
-    def test_unsupported_unit_multiplier_is_left_alone(self):
-        # 原文和表头都没有「万」：不挪，照旧（数和单位本身是一对）
+    def test_unsupported_unit_multiplier_still_moves(self):
+        # v2.12b：原文和表头都没有「万」也挪；依据记 unit（倍数来自抽取的单位），原文那一栏照旧留着
         p, _ = vp("36", "2024 exports were 36 in the table.", "ten thousand USD", page=PLAIN)
-        self.assertEqual((p["value"], p["unit"]), (36.0, "ten thousand USD"))
-        self.assertNotIn("unit_as_written", p)
+        self.assertEqual((p["value"], p["unit"], p["scale_word"], p["scale_basis"], p["unit_as_written"], p["value_as_written"]),
+                         (360000.0, "USD", "万", "unit", "ten thousand USD", "36"))
+
+    def test_real_table_rows(self):
+        # BUGS S66 的两个真实点（数在表格行里，单位写在表格外）：以前没挪，单位核对读成 CNY / USD，差 1e8 / 1e6
+        cn = "| 总计 | 930851.2 | 6.6 | 791893.6 | 6.1 | 52719.8 | 15.7 |"
+        p, why = vp("52719.8", cn, "亿元 (100 million CNY)", page=ev.norm("2024 " + cn))
+        self.assertEqual((why, p["value"], p["unit"], p["scale_word"], p["scale_basis"]), ("", 5.27198e12, "元 (CNY)", "亿", "unit"))
+        us = "total ......... 3,639,171 4.3 792,825 754,755 761,135 753,313 722,319 763,705 757,036"
+        p, why = vp("763,705", us, "millions of USD", page=ev.norm("2024 " + us))
+        self.assertEqual((why, p["value"], p["unit"], p["scale_word"], p["scale_basis"]), ("", 7.63705e11, "USD", "million", "unit"))
+        p, why = vp("3.5", "2024 收入 3.5", "百亿元", page=ev.norm("2024 收入 3.5"))   # 百亿没有 SCALE_FOR_FACTOR 写法：用 unit 里的原词
+        self.assertEqual((why, p["value"], p["unit"], p["scale_word"]), ("", 3.5e10, "元", "百亿"))
+
+    def test_unit_with_two_multipliers_drops_the_point(self):
+        _, why = vp("36", "2024 exports were 36 in the table.", "thousand USD (millions)", page=PLAIN)
+        self.assertIn("names more than one multiplier", why)
 
     def test_conflicting_multipliers_drop_the_point(self):
         _, why = vp("4,774.13", self.Q, "亿元", sw="万")
