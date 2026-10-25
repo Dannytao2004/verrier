@@ -26,6 +26,15 @@ class TestSearcherParsing(unittest.TestCase):
         self.assertEqual(parse_urls(text), ["https://example.gov/data/2025.htm", "https://news.example.com/a?b=1",
                                             "http://x.org/p"])
 
+    def test_parentheses_inside_urls(self):
+        # v2.12g：smoke_pizza/v212f 的 b1 选中了这篇，以前截成 .../S2161-8313(22，取页 403
+        doi = "https://advances.nutrition.org/article/S2161-8313(22)00010-1/fulltext"
+        self.assertEqual(parse_urls(f"Sources: {doi}, and more."), [doi])
+        self.assertEqual(parse_urls(f"[paper]({doi})"), [doi])
+        self.assertEqual(parse_urls(f"(see {doi})."), [doi])
+        self.assertEqual(parse_urls("https://en.wikipedia.org/wiki/Pizza_(disambiguation) and (https://a.org/b)"),
+                         ["https://en.wikipedia.org/wiki/Pizza_(disambiguation)", "https://a.org/b"])
+
     def test_cap(self):
         text = " ".join(f"https://a{i}.example.com/x" for i in range(9))
         self.assertEqual(len(parse_urls(text, cap=5)), 5)

@@ -39,15 +39,25 @@ SEARCH_URL = "https://api.deepseek.com/anthropic/v1/messages"
 # DeepSeek 价格页没有单列 Anthropic 兼容接口里 web search 的单价。预算里按 Anthropic 公开价 $10 / 1000 次 记账，
 # 这是保守假设，报告里单列，不和 token 成本混在一起（说明见 providers.DEEPSEEK_SEARCH_FEE_ASSUMED_USD）。
 SEARCH_FEE_ASSUMED_USD = DEEPSEEK_SEARCH_FEE_ASSUMED_USD
-URL_RE = re.compile(r"https?://[^\s<>\"'`\)\]\}|]+")
+# v2.12g：URL 里可以有括号（advances.nutrition.org/article/S2161-8313(22)00010-1/fulltext 以前截成 S2161-8313(22，取页 403）。
+# 正则不再排除右括号，尾部的右括号只在没有配对时去掉（同 GitHub 自动链接的规则），所以 [文字](url) 和「(见 url)」照旧去掉那个括号
+URL_RE = re.compile(r"https?://[^\s<>\"'`\]\}|]+")
 _TRAIL = ".,;:!?*'\")]}>"
 
 
+def _trim(u: str) -> str:
+    while u and u[-1] in _TRAIL:
+        if u[-1] == ")" and u.count("(") >= u.count(")"):
+            break
+        u = u[:-1]
+    return u
+
+
 def parse_urls(text: str, cap: int = 5) -> list:
-    """从任意文字里只取 URL：去尾部标点、去 #fragment、去重保序，最多 cap 个。"""
+    """从任意文字里只取 URL：去尾部标点（右括号只去没配对的）、去 #fragment、去重保序，最多 cap 个。"""
     out = []
     for m in URL_RE.finditer(text or ""):
-        u = m.group(0).rstrip(_TRAIL).split("#", 1)[0]
+        u = _trim(m.group(0)).split("#", 1)[0]
         if len(u) > 12 and u not in out:
             out.append(u)
         if len(out) >= cap:
