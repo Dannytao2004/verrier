@@ -139,7 +139,8 @@ class TestDateFilter(unittest.TestCase):
     def test_check(self):
         ok = {"period_start": "2026-07-01", "period_end": "2026-07-31", "published_at_if_visible": "2026-08-12"}
         self.assertEqual(ev.date_check(ok, self.A, date(2026, 8, 14)), "")
-        self.assertIn("period_end", ev.date_check({**ok, "period_end": "2026-08-31"}, self.A, None))
+        # v2.12f：期间晚于 as_of（预测、计划）不再丢；发布时间晚于 as_of 才丢
+        self.assertEqual(ev.date_check({**ok, "period_end": "2026-08-31"}, self.A, None), "")
         self.assertIn("published", ev.date_check({**ok, "published_at_if_visible": "2026-09-15"}, self.A, None))
         self.assertIn("page date", ev.date_check(ok, self.A, date(2026, 8, 16)))
         self.assertIn("missing", ev.date_check({"period_end": ""}, self.A, None))
@@ -489,7 +490,8 @@ class TestDirectionsAndGenericEntry(unittest.TestCase):
                          {"id": "p3", "period_end": "2026-08-31", "published_at_if_visible": "2026-09-15"}],
               "results": [{"search": {"queries": ["visits 856,467 report"]}, "pages": []}]}
         a = run.leakage_audit(st, "2026-09-06", [856467])
-        self.assertEqual(a["points_dated_after_as_of"], ["p1", "p3"])  # '2026-09' 按月末算，晚于 as_of
+        # v2.12f：只按发布时间算；p1 的期间 2026-09 晚于 as_of 是预测，不算泄漏，p3 的发布日期晚于 as_of 才算
+        self.assertEqual(a["points_dated_after_as_of"], ["p3"])
         self.assertEqual(a["searcher_queries_containing_registered_values"], ["visits 856,467 report"])
 
 

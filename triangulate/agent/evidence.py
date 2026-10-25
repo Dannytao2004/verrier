@@ -854,14 +854,15 @@ def late_dates(text: str, as_of: date, until: date) -> list:
 
 
 def date_check(point: dict, as_of: date, page_date) -> str:
-    """返回丢弃原因；空串 = 通过。period_end、文中可见的发布日期、页面日期都必须 <= as_of。
+    """返回丢弃原因；空串 = 通过。period_end 必须能解析；文中可见的发布日期、页面日期必须 <= as_of。
     v2.11d：不再给 base_rates 方向豁免期间（用户：完全没有日期不太可以）；引文没写期间的点由 pipeline.verify_point
-    先用页面日期补上 period_end，补不上照旧在这里丢，原因串不变。"""
+    先用页面日期补上 period_end，补不上照旧在这里丢，原因串不变。
+    v2.12f（用户 10-24）：期间晚于 as_of 不再丢。防泄漏是回测那套页面层检查的事（快照 <= as_of、哨兵），只看发布时间；
+    期间在 as_of 之后、as_of 之前发布的数是当时就能拿到的预测、计划或年度参数（抽取 prompt 本来就让它们进来）。
+    以前这一条挡掉了 2,667 个点（存档回放，BUGS S70）。"""
     pe = parse_date(point.get("period_end"), end=True)
     if pe is None:
         return "period_end missing or unparseable"
-    if pe > as_of:
-        return f"period_end {pe} after as_of"
     ps = parse_date(point.get("period_start"))
     if ps is not None and ps > pe:
         return "period_start after period_end"

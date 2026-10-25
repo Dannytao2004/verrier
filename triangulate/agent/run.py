@@ -68,9 +68,9 @@ def leakage_audit(state: dict, as_of: str, leak_values=None, answer=None) -> dic
     a = date.fromisoformat(as_of)
     pages = [pg for r in state.get("results") or [] for pg in r.get("pages") or []]
     sent = [pg for pg in pages if pg.get("chars_sent")]
+    # v2.12f：只按发布时间算（文中发布日期、页面日期）；期间晚于 as_of 的点是预测 / 计划，不算泄漏
     late_points = [p["id"] for p in state.get("points") or []
-                   if _after(p.get("period_end"), a, True) or _after(p.get("published_at_if_visible"), a, False)
-                   or _after(p.get("page_date"), a, False)]
+                   if _after(p.get("published_at_if_visible"), a, False) or _after(p.get("page_date"), a, False)]
     late_snaps = [pg["url"] for pg in pages if pg.get("snapshot_ts") and pg["snapshot_ts"][:8] > a.strftime("%Y%m%d")]
     pats = ev.leak_patterns(leak_values, answer=answer) if leak_values else []   # v2.12d：answer 同 Context.leak_answer
     queries = [q for r in state.get("results") or [] for q in (r.get("search") or {}).get("queries") or []]

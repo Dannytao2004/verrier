@@ -76,7 +76,7 @@ class TestVerifyPoint(unittest.TestCase):
         self.assertIsNotNone(vp(period_end="2026-05-25", url="https://x.org/2026/report")[0])
 
     def test_other_date_gates_still_apply(self):
-        self.assertEqual(vp(pub=date(2026, 10, 25)), (None, "period_end 2026-10-25 after as_of"))
+        self.assertEqual(vp(pub=date(2026, 10, 25)), (None, "page date 2026-10-25 after as_of"))   # v2.12f：原因串改了，照旧丢
         self.assertEqual(vp(published_at_if_visible="2026-11-02"), (None, "published 2026-11-02 after as_of"))
         p, why = P.verify_point(RAW, PAGE, AS_OF, date(2026, 10, 30), PUB)
         self.assertEqual((p, why), (None, "page date 2026-10-30 after as_of"))

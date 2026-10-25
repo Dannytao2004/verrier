@@ -423,6 +423,8 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, page_published,
     # v2.11d：引文没写期间（期初、期末去掉空白后都为空）时用页面日期兜底，只这一层；写了但解析不了的（2025-Q3）照旧丢
     page_dated = not str(raw.get("period_start") or "").strip() and not str(raw.get("period_end") or "").strip()
     if page_dated and page_published is not None:
+        if page_published > as_of:   # v2.12f：页面自己写的发布日期晚于 as_of 就是 as_of 之后写的页（以前由 date_check 的期间分支顺带挡）
+            return None, f"page date {page_published} after as_of"
         raw = {**raw, "period_start": "", "period_end": page_published.isoformat()}
     why = ev.date_check(raw, as_of, page_date)
     if why:
