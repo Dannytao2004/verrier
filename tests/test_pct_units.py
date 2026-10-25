@@ -1,5 +1,5 @@
-"""v2.5.4（N17）：假设的 unit 里带 % 的都按百分数换算（assumptions.is_pct），百分点 / 基点不换算；unit 原文保留用于显示；
-compute.restated_point 的假设一侧用同一个判断（点一侧不变）。例子取自韩国 8 月出生题（fc_kr_births_2026_08/showcase1）第 2 轮的 a2：
+"""v2.5.4（N17）：假设的 unit 里带 % 的都按百分数换算（assumptions.is_pct），百分点 / 基点不换算；unit 原文保留用于显示。
+例子取自韩国 8 月出生题（fc_kr_births_2026_08/showcase1）第 2 轮的 a2：
 unit 是 "% of annual live births"，以前不是精确的 "%"，没有除以 100（p10_used / p90_used = 5.93 / 11.87，大 100 倍）。
 不调模型、不联网。"""
 import math
@@ -103,52 +103,6 @@ class TestValidatePercent(unittest.TestCase):
         self.assertLess(a_in["p90"], 1)
 
 
-class TestRestatedPoint(unittest.TestCase):
-    def test_percent_assumption_vs_percent_point(self):
-        # 假设一侧用 is_pct：「% of annual live births」和 unit 为 "%" 的点同值就是复述（以前 a 不是 "%"，对不上）
-        self.assertEqual(C.restated_point(A(), {"p73": _pt("p73", 8.4, "%")}), "p73")
-        self.assertEqual(C.restated_point(A(unit="%"), {"p73": _pt("p73", 8.4, "%")}), "p73")
-
-    def test_point_side_rule_unchanged(self):
-        # 点一侧的 % 分支仍是 unit == "%"；不是 "%" 的点走词干分支（v2.11b 起还要求两边 is_pct 相同、先去通用词）
-        self.assertEqual(C.restated_point(A(), {"p73": _pt("p73", 8.4, "percent of annual live births")}), "p73")
-        self.assertEqual(C.restated_point(A(), {"p1": _pt("p1", 8.4, "percentage points")}), "")
-        self.assertEqual(C.restated_point(A(unit="percentage points"), {"p1": _pt("p1", 8.4, "%")}), "")
-        # discrete7：a2「降息概率」2 %，p31「核心 CPI 三个月年化」2.0 percent，不是复述（点也用 is_pct 就会误判）
-        cut = A(name="Probability the next meeting cuts the target range", unit="%", value=2, low=1, high=4)
-        self.assertEqual(C.restated_point(cut, {"p31": _pt("p31", 2.0, "percent")}), "")
-
-    def test_non_percent_rules_unchanged(self):
-        r = A(name="August-to-July ratio", unit="ratio", value=1.0, low=0.9, high=1.1)
-        self.assertEqual(C.restated_point(r, {"p1": _pt("p1", 1.0, "day of month")}), "")
-        # v2.11b（R14）：两边都只剩通用词（ratio）时不再算复述（已知漏检，记在 BUGS）
-        self.assertEqual(C.restated_point(r, {"p1": _pt("p1", 1.0, "ratio")}), "")
-        self.assertEqual(C.restated_point(r, {"p1": _pt("p1", 1.0, "ratio", keep=False)}), "")
-
-    def test_r14_generic_words_and_pct_parity(self):
-        # token 题 v1（ask_02c360ec/web_20261021T224831Z）第 2 轮：a11 = 7 和 p151 = 7 只有 ratio 相同，以前误判，m4 被拒
-        a11 = A(id="a11", name="Microsoft 2025 full-year tokens divided by its FY25 Q3 (Jan-Mar 2025) quarterly tokens",
-                unit="ratio (annual / Q1-2025 quarter)", value=7, low=5, high=9)
-        self.assertEqual(C.restated_point(a11, {"p151": _pt("p151", 7.0, "ratio")}), "")
-        # S2.md 第 6.3 节：百分数的假设和不是百分数的点（is_pct 不同）不再比词干
-        self.assertEqual(C.restated_point(A(), {"p1": _pt("p1", 8.4, "live births (persons)")}), "")
-        # 按整词去通用词：factories（词干 facto 同 factor）照旧比；index 不去
-        f = A(name="factories in the region", unit="factories", value=120, low=100, high=140)
-        self.assertEqual(C.restated_point(f, {"p1": _pt("p1", 120, "factories")}), "p1")
-        # 两边都要先去通用词：factor（通用词）和 factory（实词）的 5 字母词干都是 facto，只去一边就会误判
-        fo = A(name="regional factory output", unit="factory output", value=2.0, low=1.5, high=2.5)
-        self.assertEqual(C.restated_point(fo, {"p1": _pt("p1", 2.0, "factor")}), "")
-        fa = A(name="growth factor", unit="factor", value=2.0, low=1.5, high=2.5)
-        self.assertEqual(C.restated_point(fa, {"p1": _pt("p1", 2.0, "factory output")}), "")
-        ix = A(name="price index", unit="index (2020=100)", value=105.2, low=100, high=110)
-        self.assertEqual(C.restated_point(ix, {"p1": _pt("p1", 105.2, "index (2020=100)")}), "p1")
-        # 两边都是 % 的分支不变（决定 16）：FedWatch（ask_0e2d5021/discrete5 第 1 轮）a1 43.7 % 对 p78 43.7 %
-        hike = A(id="a1", name="Probability of a 25bp hike at the October 2026 FOMC meeting", unit="%", value=43.7,
-                 low=35, high=50)
-        self.assertEqual(C.restated_point(hike, {"p78": _pt("p78", 43.7, "%")}), "p78")
-
-
-@unittest.skipUnless(HAVE_LG, "langgraph not installed (use .venv)")
 class TestDisplayKeepsUnitText(unittest.TestCase):
     """终稿的 Key assumptions：is_pct 只决定换算，unit 原文照写；精确 "%" 的显示不变。"""
 

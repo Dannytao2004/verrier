@@ -9,7 +9,6 @@ import re
 import statistics
 from datetime import timedelta
 
-from . import ablation as AB
 from . import assumptions as A
 from . import methods as M
 from . import qty as Q
@@ -27,42 +26,6 @@ RATIO_UNIT = re.compile(r"^\s*$|%|\b(?:ratio|ratios|share|shares|fraction|factor
 def is_ratio_unit(unit: str) -> bool:
     """单位是纯比率 / 百分比（没有「量」）。空单位也算：说不清是什么量的输入不能当作量。"""
     return bool(RATIO_UNIT.search(unit or ""))
-
-
-# v2.11b（R14）：restated_point 比单位词干之前按整词去掉的通用词：它们只说明是比率 / 倍数，不指认是哪个量。
-# 按整词去、不按 5 字母词干去：factories、proposals、rations、dimensions 是真实的量；index 不去（index (2020=100) 要照旧抓）
-RESTATE_GENERIC = {"ratio", "ratios", "share", "shares", "fraction", "fractions", "factor", "factors", "multiplier",
-                   "multiple", "multiples", "proportion", "proportions", "percent", "percentage", "pct", "dimensionless",
-                   "times", "fold"}
-
-
-def _restate_stems(unit) -> set:
-    """同 ablation.stems，只是先按整词去掉 RESTATE_GENERIC。"""
-    return {AB.stem(t) for t in AB._tokens(str(unit or ""))
-            if t.lower() not in AB.STOP and t.lower() not in RESTATE_GENERIC and len(t) >= 2}
-
-
-def restated_point(a: dict, pts: dict, rel_tol: float = 0.005) -> str:
-    """假设的值和某个保留观测点的值相同（相对差 <= 0.5%）、单位也对得上（都是 %，或点不是 % 且单位词干有交集）时，返回那个点的 id。
-    只比数值会误伤：黄石 9 月的「变化倍数 1.0（ratio）」撞上了「道路开放日 1（day of month）」。
-    v2.5.4（N17）：假设是不是百分数用 assumptions.is_pct（「% of annual live births」也算）；点仍按 compute 对点的规则
-    （unit == "%"，同 formula_mc 的点）。点也改用 is_pct 会误伤：discrete7 的 a2「降息概率 2 %」撞上 p31「核心 CPI 2.0 percent」。
-    以前第二个条件还要求假设不是 %：unit 为 "%" 时词干本来就是空的，去掉不改变结果，「% of ...」的假设照旧按词干比。
-    v2.11b（R14）：词干分支再要求两边的 is_pct 相同，词干先去掉 RESTATE_GENERIC 再求交集。以前的误判：token 题 v1 的
-    a11「ratio (annual / Q1-2025 quarter)」= 7 撞上 p151「ratio」= 7（只有 ratio 相同）；「% of annual live births」8.4
-    撞上「live births (persons)」8.4。两边都是 % 的分支不变（v2.11 方案决定 16，BUGS S35）。任何一边的单位只剩通用词时词干交集为空，不再算复述（漏检，BUGS S37）。"""
-    v = a.get("value")
-    if not v:
-        return ""
-    a_pct, a_st = A.is_pct(a.get("unit")), _restate_stems(a.get("unit"))
-    for p in pts.values():
-        pv = p.get("value")
-        if not (p.get("keep", True) and pv and abs(pv - v) <= rel_tol * abs(v)):
-            continue
-        p_pct = p.get("unit") == "%"
-        if (a_pct and p_pct) or (not p_pct and a_pct == A.is_pct(p.get("unit")) and a_st & _restate_stems(p.get("unit"))):
-            return p["id"]
-    return ""
 
 
 # 单位换算常数（v2.2）：和日历常数一样由代码给。FOMC 题里裁判只能把「25 基点 = 0.25 个百分点」写成假设或常数 1 的组合
@@ -404,10 +367,6 @@ def run(methods: list, pts: dict, target: dict, assumptions=None, only_methods=N
                         kind = "constant"
                     elif iid in kept_a:
                         a = kept_a[iid]
-                        dup = restated_point(a, pts)
-                        if dup:  # 假设的值就是某个保留的观测点：应该直接用观测点（FOMC 题：FedWatch 概率被写成了假设）
-                            raise M.MethodError(f"input {name}: assumption {iid} restates kept data point {dup} "
-                                                f"(same value and unit); reference {dup} instead")
                         lo, hi = a["p10_used"], a["p90_used"]
                         used_a.append(iid)
                         kind = "assumption"

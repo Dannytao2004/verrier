@@ -53,7 +53,7 @@
 <ul>
   <li><b>The model proposes, code decides.</b> The model plans routes (total &times; share, last year &times; change factor, capacity &times; utilisation) and picks methods; every number is parsed, converted and combined by Python.</li>
   <li><b>Every observed number is verifiable.</b> Extractors must quote the source verbatim; code checks the quote against the page, parses the number and scale word, and rejects points whose year does not appear on the page.</li>
-  <li><b>Assumptions are first-class and labelled.</b> When a coefficient has no source, the judge may declare it with a range, a rationale and what would falsify it. Code rejects assumptions that restate observed data or disguise the target itself, widens ranges that are too narrow, and shows how much of the final uncertainty comes from assumptions rather than evidence.</li>
+  <li><b>Assumptions are first-class and labelled.</b> When a coefficient has no source, the judge may declare it with a range, a rationale and what would falsify it. Code rejects assumptions that disguise the target itself, widens ranges that are too narrow, and shows how much of the final uncertainty comes from assumptions rather than evidence.</li>
   <li><b>Errors are caught in a loop, not in one pass.</b> Code dry-runs the judge's methods; a separate model call audits whether each input really denotes what the formula needs (it catches "a growth figure used as a level" or "a neighbouring park's total used as this park's"); failures, or routes that disagree by more than 3&times;, go back to the judge once.</li>
   <li><b>Backtests cannot peek.</b> In a backtest the agent only reads Wayback snapshots dated before the cutoff, and a sentinel scans everything the analysts see for the true value.</li>
 </ul>

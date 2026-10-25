@@ -193,15 +193,11 @@ def accept_outcomes(reply: dict, current, rnd: int, kept_ids) -> tuple:
 
 
 def _probability(label: str, spec, pts: dict, kept_a: dict, rejected_a: dict) -> dict:
-    """一个结果的概率输入 -> 明细（含 prob）。引用规则和 formula_mc 一样：保留的点或通过校验的假设，假设不许复述保留的点。"""
+    """一个结果的概率输入 -> 明细（含 prob）。引用规则和 formula_mc 一样：保留的点或通过校验的假设。"""
     spec = spec if isinstance(spec, dict) else {"id": spec}
     iid = str(spec.get("id"))
     if iid in kept_a:
         a = kept_a[iid]
-        dup = C.restated_point(a, pts)
-        if dup:
-            raise MethodError(f"outcome {label!r}: assumption {iid} restates kept data point {dup} (same value and unit); "
-                              f"reference {dup} instead")
         v, unit, kind = a["value"], a.get("unit") or "", "assumption"
         pct = bool(a.get("is_pct")) or bool(PCT_UNIT.search(unit))
     elif iid in rejected_a:

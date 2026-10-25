@@ -155,9 +155,6 @@ class TestOutcomeProbs(unittest.TestCase):
         raw["p7"] = _pt("p7", 56.4, unit="probability")
         m = C.run([{"method": "outcome_probs", "params": {"probs": {HOLD: {"id": "p7"}}, "remainder": HIKE}}], raw, TARGET)
         self.assertIn("not a probability in [0, 1]", m["methods"][0]["error"])
-        restated = _run({HOLD: {"id": "a1"}, HIKE: {"id": "p2"}}, remainder=CUT,
-                        assumptions=[_a(name="probability unchanged", value=56.4, low=50, high=60)])["methods"][0]
-        self.assertIn("restates kept data point p1", restated["error"])
         rej = _run({HOLD: {"id": "a1"}, HIKE: {"id": "p2"}}, remainder=CUT, assumptions=[_a(low=5)])["methods"][0]
         self.assertIn("was rejected", rej["error"])
         # 一个方法的全部问题一次报出（修正轮要一次看到）：被拒的假设和漏掉的结果
