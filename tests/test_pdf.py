@@ -118,7 +118,7 @@ class TestFetchPdf(NetCase):
         rec = got["/stats/report.pdf"]
         self.assertEqual(rec["text"], F.pdf_to_text(THREE)[0])
         self.assertEqual((self.tmp / "t" / rec["raw_path"].split("/")[-1]).read_bytes(), THREE)
-        self.assertEqual(F.fetch_live("https://a.example.org/r.xlsx", AS_OF, "t", today=AS_OF)["reason"],
+        self.assertEqual(F.fetch_live("https://a.example.org/r.zip", AS_OF, "t", today=AS_OF)["reason"],   # v2.12h：xlsx 改成收
                          "binary file type not supported in MVP")
 
     def test_snapshot_pdf(self):

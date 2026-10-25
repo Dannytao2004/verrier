@@ -16,13 +16,20 @@ v2.8b：PDF（Content-Type application/pdf，或正文以 %PDF 开头）用 pypd
 URL 里没有再用 PDF 元数据的 CreationDate / ModDate。
 v2.11d：收下的页另存 page_published（页面自己声明的发布日期，page_published()），只给引文没写期间的点兜底；
 page_date、live_dates 和收不收页面都不变。
+v2.12h：Office 表格和文档（xlsx、xls、docx）转成文字：xlsx 用 openpyxl、xls 用 xlrd，每张表写成「## 表名」加逐行
+「| 单元格 | ... |」；docx 用 mammoth 转 HTML 再走 html_to_text。没用 MarkItDown：它多装 18 个包（onnxruntime、magika 等），
+读这三种格式用的就是这几个库。live 文件的日期先用 URL 里的，没有再用 docProps/core.xml 的 created / modified（xls 只认 URL）。
+zip、pptx、老式 .doc / .ppt 照旧不收（存档里没出现过 pptx，zip 可能是整包数据集）。
 """
 import hashlib
+import io
 import json
 import re
 import threading
 import urllib.parse
+import zipfile
 from datetime import date, datetime
+from itertools import islice
 
 from ..config import DATA
 from . import net
@@ -39,6 +46,14 @@ FFFD_MAX = 0.01   # U+FFFD 超过全文 1% 判 undecodable（_to_text）
 # 对它的调用（打开、取文字、关闭）一律在这把锁里做
 _PDFIUM_LOCK = threading.Lock()
 PDF_DATE = re.compile(r"(?:D:)?((?:19|20)\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])")   # PDF 元数据日期 D:YYYYMMDDHHmmSS…
+# v2.12h：Office 文件
+OFFICE_TYPES = {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+                "application/vnd.ms-excel": "xls",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx"}
+OFFICE_PART = {"xlsx": "xl/workbook.xml", "docx": "word/document.xml"}   # zip 包里证明是这种文件的那一项
+OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"   # xls（老式 Excel）的文件头
+OFFICE_MAX_ROWS = 5000   # 每张表最多取的行数 [人为约定：再长的表反正会被 pipeline.MAX_CHARS_TO_EXTRACTOR 截掉]
+CORE_DATE = re.compile(r"<dcterms:(created|modified)[^>]*>\s*((?:19|20)\d{2})-(\d{2})-(\d{2})")
 
 
 def _key(s: str) -> str:
@@ -183,6 +198,118 @@ def pdf_dates(url: str, body: bytes) -> list:
     return out
 
 
+def office_kind(body: bytes, headers: dict, url: str = "") -> str:
+    """xlsx / xls / docx，或空串：Content-Type 或 URL 后缀给出种类，再核对文件头（xlsx、docx 是 zip 包且有对应的那一项，
+    xls 是 OLE2）；两样都没有时，zip 包里有 xl/workbook.xml / word/document.xml 也认。核对不上就不当 Office 文件。"""
+    ct = (headers.get("Content-Type") or "").lower().split(";")[0].strip()
+    path = urllib.parse.urlsplit(url or "").path.lower()
+    kind = OFFICE_TYPES.get(ct) or next((k for k in ("xlsx", "xls", "docx") if path.endswith("." + k)), "")
+    if kind == "xls":
+        return kind if body.startswith(OLE_MAGIC) else ""
+    if not body.startswith(b"PK\x03\x04"):
+        return ""
+    try:
+        names = set(zipfile.ZipFile(io.BytesIO(body)).namelist())
+    except zipfile.BadZipFile:
+        return ""
+    if kind:
+        return kind if OFFICE_PART[kind] in names else ""
+    return next((k for k, part in OFFICE_PART.items() if part in names), "")
+
+
+def _cell(v) -> str:
+    if v is None:
+        return ""
+    if isinstance(v, bool):
+        return str(v)
+    if isinstance(v, float):
+        return str(int(v)) if v.is_integer() else f"{v:.15g}"
+    if isinstance(v, datetime):
+        return v.date().isoformat() if (v.hour, v.minute, v.second) == (0, 0, 0) else v.isoformat(sep=" ")
+    if isinstance(v, date):
+        return v.isoformat()
+    return " ".join(str(v).split())
+
+
+def _sheet_text(name: str, rows) -> str:
+    out = [f"## {name}"]
+    for r in rows:
+        cells = [_cell(v) for v in r]
+        while cells and not cells[-1]:
+            cells.pop()
+        if any(cells):
+            out.append("| " + " | ".join(cells) + " |")
+    return "\n".join(out) if len(out) > 1 else ""
+
+
+def _xls_value(c, book):
+    import xlrd
+    if c.ctype == xlrd.XL_CELL_DATE:
+        try:
+            return xlrd.xldate_as_datetime(c.value, book.datemode)
+        except (ValueError, OverflowError, xlrd.XLDateError):
+            return c.value
+    return None if c.ctype in (xlrd.XL_CELL_EMPTY, xlrd.XL_CELL_BLANK, xlrd.XL_CELL_ERROR) else c.value
+
+
+def office_to_text(body: bytes, kind: str) -> tuple:
+    """Office 文件字节 -> (文字, "")；打不开或没有文字 -> (None, 原因)。数字原样写出（整数不带 .0，小数最多 15 位有效数字），
+    日期写成 ISO。"""
+    try:
+        if kind == "xlsx":
+            import openpyxl
+            wb = openpyxl.load_workbook(io.BytesIO(body), read_only=True, data_only=True)
+            try:
+                parts = [_sheet_text(ws.title, islice(ws.iter_rows(values_only=True), OFFICE_MAX_ROWS))
+                         for ws in wb.worksheets if hasattr(ws, "iter_rows")]
+            finally:
+                wb.close()
+        elif kind == "xls":
+            import xlrd
+            book = xlrd.open_workbook(file_contents=body)
+            parts = [_sheet_text(sh.name, ([_xls_value(c, book) for c in sh.row(i)] for i in range(min(sh.nrows, OFFICE_MAX_ROWS))))
+                     for sh in book.sheets()]
+        else:
+            import mammoth
+            parts = [html_to_text(mammoth.convert_to_html(io.BytesIO(body)).value or "")]
+    except Exception as e:  # noqa: BLE001  各个库的异常类型很多，统一写成原因
+        return None, f"unreadable {kind}: {type(e).__name__}"
+    text = "\n\n".join(p for p in parts if p.strip())
+    if not text.strip():
+        return None, f"{kind} has no text"
+    return text, ""
+
+
+def _last_modified(headers):
+    from email.utils import parsedate_to_datetime
+    v = (headers or {}).get("Last-Modified")
+    try:
+        return parsedate_to_datetime(v).date() if v else None
+    except (TypeError, ValueError):
+        return None
+
+
+def office_dates(url: str, body: bytes, kind: str, headers=None) -> list:
+    """live Office 文件的日期：URL 里的日期；没有再用 docProps/core.xml 的 created / modified（xlsx、docx）；都没有再用
+    HTTP 头的 Last-Modified（文件型资源的最后修改时间；香港运输署 table82.xls 没有别的日期，Last-Modified 是 9 月发布那天。
+    HTML 页不用它：动态页常给当天）。"""
+    out = _url_dates(url)
+    if out:
+        return out
+    if kind in OFFICE_PART:
+        try:
+            core = zipfile.ZipFile(io.BytesIO(body)).read("docProps/core.xml").decode("utf-8", "replace")
+        except (KeyError, zipfile.BadZipFile):
+            core = ""
+        for _, y, m, d in CORE_DATE.findall(core):
+            try:
+                out.append(date(int(y), int(m), int(d)))
+            except ValueError:
+                pass
+    lm = None if out else _last_modified(headers)
+    return [lm] if lm else out
+
+
 def page_published(url: str, body: bytes, headers: dict, cap: date):
     """v2.11d：页面自己声明的发布日期（pipeline.verify_point 给引文没写期间的点兜底用），只取一层、返回 date 或 None：
     URL 路径里的日期（有几个取最晚的）；否则 HTML 用 htmldate 的结构化原始日期（original_date=True、extensive_search=False，
@@ -202,6 +329,13 @@ def page_published(url: str, body: bytes, headers: dict, cap: date):
                     pdf.close()
             m = PDF_DATE.match((meta.get("CreationDate") or "").strip())
             return date(int(m.group(1)), int(m.group(2)), int(m.group(3))) if m else None
+        kind = office_kind(body, headers, url)
+        if kind:   # v2.12h：Office 文件用 core.xml 的 created（同 PDF 的 CreationDate）；xls 用 HTTP 头的 Last-Modified
+            if kind not in OFFICE_PART:
+                return _last_modified(headers)
+            core = zipfile.ZipFile(io.BytesIO(body)).read("docProps/core.xml").decode("utf-8", "replace")
+            hit = next((g for g in CORE_DATE.findall(core) if g[0] == "created"), None)
+            return date(int(hit[1]), int(hit[2]), int(hit[3])) if hit else None
         from htmldate import find_date
         # max_date 要给 datetime（给 date 对象 htmldate 会静默换成今天）；取 cap 当天的最后一刻，cap 当天的日期也认
         d = find_date(_decode(body, headers), original_date=True, extensive_search=False, outputformat="%Y-%m-%d",
@@ -245,9 +379,12 @@ def _decode(body: bytes, headers: dict) -> str:
     return text
 
 
-def _to_text(body: bytes, headers: dict) -> tuple:
+def _to_text(body: bytes, headers: dict, url: str = "") -> tuple:
     if _is_pdf(body, headers):
         return pdf_to_text(body)
+    kind = office_kind(body, headers, url)   # v2.12h
+    if kind:
+        return office_to_text(body, kind)
     ct = (headers.get("Content-Type", "") or "").lower()
     if ct and not ct.startswith(TEXT_TYPES):
         return None, f"unsupported content type {ct.split(';')[0]}"
@@ -304,7 +441,7 @@ def fetch_page(url: str, as_of: date, qid: str, allow_live=None, today=None) -> 
             return rec
         real_ts = m.group(1) if m else ts
         if status == 200 and ts_date(real_ts) <= as_of:
-            text, why = _to_text(body, headers)
+            text, why = _to_text(body, headers, orig)
             if text is None:
                 rec["reason"] = why
                 return rec
@@ -341,7 +478,7 @@ def fetch_live(url: str, as_of: date, qid: str, today=None) -> dict:
 def _unsupported(url: str) -> str:
     if not url.startswith(("http://", "https://")):
         return "not an http url"
-    if url.lower().split("?")[0].endswith((".xls", ".xlsx", ".zip", ".doc", ".docx", ".ppt", ".pptx")):
+    if url.lower().split("?")[0].endswith((".zip", ".doc", ".ppt", ".pptx")):   # v2.12h：xls / xlsx / docx 改成收（office_to_text）
         return "binary file type not supported in MVP"
     return ""
 
@@ -362,11 +499,13 @@ def _live(rec: dict, out_dir, url: str, as_of: date, today: date, pre: str, get)
     if status != 200:
         rec["reason"] = why(f"live http {status}")
         return rec
-    text, w = _to_text(body, headers)
+    text, w = _to_text(body, headers, final)
     if text is None:
         rec["reason"] = why(w)
         return rec
-    dates = pdf_dates(final, body) if _is_pdf(body, headers) else page_dates(final, _decode(body, headers))
+    kind = "" if _is_pdf(body, headers) else office_kind(body, headers, final)
+    dates = (pdf_dates(final, body) if _is_pdf(body, headers) else office_dates(final, body, kind, headers) if kind
+             else page_dates(final, _decode(body, headers)))
     if not dates:
         rec["reason"] = why("live page has no readable date")
         return rec
