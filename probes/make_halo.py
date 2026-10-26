@@ -34,9 +34,11 @@ rep("""  仅限非商业用途，严格禁止任何商业用途。转载或二�
   (full text: /static/haloflux_LICENSE.txt)
 
   Verrier HALO: a noncommercial derivative of HALOFLUX by Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT),
-  lab.html at commit 5c1992a (2026-10-26). Changes: the header, panels, ring-card text and callouts show the data of one
-  saved Verrier run (GET /api/saved, /api/result) instead of HALOFLUX's demo data; an estimate overlay, a run selector and
-  a credit line were added; the background music was removed. The ring, beams, web and motion design are HALOFLUX's.
+  lab.html at commit 5c1992a (2026-10-26). Changes: the header, panels, ring-card text and callouts show Verrier data
+  instead of HALOFLUX's demo data: the question form, the live progress of a run (GET /api/runs/{id}), the approval gate
+  and the saved result (GET /api/saved, /api/result), driven by Verrier's own script /static/verrier_halo_flow.js;
+  an estimate overlay, a run selector and a credit line were added; the background music was removed.
+  The ring, beams, web and motion design are HALOFLUX's.
 -->""")
 rep("<title>Paper Lab Console</title>", "<title>Verrier · HALO</title>")
 
@@ -74,14 +76,14 @@ rep("""    <div class="brand"><h1>RYDER CODE / Ms MAIKEBAIs CAT</h1><p>RESEARCH 
 
 # ---------- 舞台：去掉背景音乐，加估计值浮层和运行选择框 ----------
 cut('    <div class="ov music" id="bgm">', '<audio id="bgmAudio" data-src="audio/sw421k.mp3" loop preload="auto" playsinline></audio>\n')
-rep("""    <div class="ov chk" id="chk">""", """    <div class="ov est" id="est"><div class="q" id="estQ">loading saved run…</div><div class="num" id="estNum">—</div>
+rep("""    <div class="ov chk" id="chk">""", """    <div class="ov est" id="est"><div class="q" id="estQ">loading…</div><div class="num" id="estNum">—</div>
       <div class="iv" id="estIv"></div><div class="meta" id="estMeta"></div></div>
     <div class="ov runsel"><select id="runSel" title="saved Verrier runs"></select></div>
     <div class="ov chk" id="chk">""")
 rep("""<div class="ov chk" id="chk"><b id="chkK">STABILITY CHECK</b><span id="chkV">CFL = |u| Δt / Δx</span></div>""",
-    """<div class="ov chk" id="chk"><b id="chkK">VERRIER</b><span id="chkV">loading run…</span></div>""")
+    """<div class="ov chk" id="chk"><b id="chkK">VERRIER</b><span id="chkV">loading…</span></div>""")
 rep("""<div class="ov status"><div class="big" id="stBig">7 / 11 METHODS · 4 PENDING</div><div class="sm">independent runs · shared event bus</div></div>""",
-    """<div class="ov status"><div class="big" id="stBig">loading saved run…</div><div class="sm" id="stSm"></div></div>""")
+    """<div class="ov status"><div class="big" id="stBig">loading…</div><div class="sm" id="stSm"></div></div>""")
 
 # ---------- 底部面板：标题、说明，加署名行 ----------
 rep("""<h3>ADVECTION / PARTICLE SOLVER</h3><canvas id="cAdv"></canvas>
@@ -107,9 +109,8 @@ rep("""<h3>METHOD / REFERENCE INDEX</h3><canvas id="cIdx"></canvas><div class="c
 # ---------- 脚本：数据读到之前只显示占位，不出现原作的演示数据 ----------
 rep("const TAU = Math.PI * 2, rnd = Math.random;",
     "const TAU = Math.PI * 2, rnd = Math.random;\n"
-    "// Verrier：运行数据（vBind 写入）。读到之前面板只显示占位\n"
-    "const V = { ready: false, feed: [], feedI: 0 };\n"
-    "const VLAB = { seek: 'read', keep: 'keep', drop: 'drop', calc: 'calc' };")
+    "// Verrier：流程数据（verrier_halo_flow.js 写入）。写入之前面板只显示占位\n"
+    "const V = { ready: false, feed: [], feedI: 0, push: () => {} };")
 rep("const HEAD = ['SOLVER/02',", "const HEAD = ['VERRIER'], HEAD_DEMO = ['SOLVER/02',")
 rep("const KEYS = ['dt',", "const KEYS = ['…'], KEYS_DEMO = ['dt',")
 rep("const CODE_T = ['load()',", "const CODE_T = ['…'], CODE_T_DEMO = ['load()',")
@@ -121,11 +122,8 @@ rep("""function kpiTick() {
   if (true) return;""")
 rep("""function feedPush() {
   const v = pick(VERBS), d = document.createElement('div');""", """function feedPush() {
-  if (!V.feed.length) return;   // Verrier：只放这次运行的真实记录
-  const [vv, tt] = V.feed[V.feedI++ % V.feed.length], dv = document.createElement('div');
-  dv.innerHTML = `<span class="n">${String(feedN++).padStart(3, '0')}</span><span class="vb ${vv}">${VLAB[vv]}</span>${esc(tt)}`;
-  feed.appendChild(dv);
-  while (feed.children.length > 14) feed.removeChild(feed.firstChild);
+  if (!V.feed.length) return;   // Verrier：只放这次运行的真实记录（V.push 在 verrier_halo_flow.js 里）
+  V.push(...V.feed[V.feedI++ % V.feed.length]);
   if (true) return;
   const v = pick(VERBS), d = document.createElement('div');""")
 rep("""const CODE = [['papers', 'load_collection', '()'],""", """const CODE = [['', 'load_run', '()']], CODE_DEMO = [['papers', 'load_collection', '()'],""")
@@ -144,9 +142,8 @@ rep("""  drawAdv(dt); drawDiff(); drawVal(); drawIdx(); agentsTick(dt);""",
 # ---------- 去掉背景音乐 ----------
 cut("/* =========================================================\n   BGM — background music", "  if (st.on) play();\n})();\n")
 
-# ---------- 绑定一次已保存的运行 ----------
-BIND = (pathlib.Path(__file__).parent / "halo_bind.js").read_text(encoding="utf-8")
-rep("</script>\n</body>", BIND + "</script>\n</body>")
+# ---------- 流程：Verrier 自己的脚本（提问、进度、人工确认、结果），单独一个文件，不并进派生页 ----------
+rep("</script>\n</body>", '</script>\n<script src="/static/verrier_halo_flow.js"></script>\n</body>')
 
 out = STATIC / "verrier_halo.html"
 out.write_text(s, encoding="utf-8")

@@ -102,8 +102,8 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
     @app.get("/verrier/halo")
     def verrier_halo():
         # 第五版并列界面：HALOFLUX（Ryder191，PolyForm Noncommercial 1.0.0，仅限非商业用途）的派生版，
-        # 显示一次已保存运行的真实数据（/api/saved、/api/result）。署名和条款在页面里和 static/haloflux_LICENSE.txt；
-        # 项目若转向商用，删掉这个路由和这两个静态文件
+        # 整套流程（提问 → 人工确认 → 进度 → 结果）由我们自己的 static/verrier_halo_flow.js 驱动，同一套 API。
+        # 署名和条款在页面里和 static/haloflux_LICENSE.txt；项目若转向商用，删掉这个路由和 verrier_halo.html、haloflux_LICENSE.txt
         return FileResponse(STATIC / "verrier_halo.html", media_type="text/html; charset=utf-8")
 
     # ---------- 模型、key ----------

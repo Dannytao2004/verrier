@@ -522,9 +522,15 @@ class TestApiSaved(unittest.TestCase):
         for notice in ("Required Notice: Copyright (c) 2026 Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT) - https://github.com/Ryder191/haloflux",
                        "Required Notice: Noncommercial use only.", "by Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT)</a>",
                        "/static/haloflux_LICENSE.txt",
-                       "/api/saved", "/api/result"):
+                       "/api/saved", "/api/result", '<script src="/static/verrier_halo_flow.js"></script>'):
             self.assertIn(notice, halo.text)
         self.assertNotIn("bgmAudio", halo.text)
+        # 流程脚本是我们自己的单独文件：提问（自带 key）→ 人工确认（选方向 / 选用现成数据）→ 轮询进度 → 结果
+        flow = self.c.get("/static/verrier_halo_flow.js")
+        self.assertEqual(flow.status_code, 200)
+        for s in ('post("/api/runs"', "/approve", "/cancel", "keep_direction_ids", "use_existing", "/api/key/check", "/api/providers",
+                  "verrier-run-cfg", "#result/", "run/"):
+            self.assertIn(s, flow.text)
         self.assertIn("PolyForm Noncommercial License 1.0.0", self.c.get("/static/haloflux_LICENSE.txt").text)
         runs = self.c.get("/api/saved").json()["runs"]
         self.assertIn(("fc_jp_births_2026_07", "test1"), {(r["qid"], r["tag"]) for r in runs})
