@@ -516,6 +516,16 @@ class TestApiSaved(unittest.TestCase):
             self.assertEqual(page.status_code, 200, route)
             for js in ("/static/verrier_evidence.js", "/static/verrier_graph.js", "/static/verrier_console.js"):
                 self.assertIn(js, page.text)
+        # 第五版 /verrier/halo：HALOFLUX 的非商业派生版，必须带着原作的版权声明、Required Notice 和条款全文；背景音乐已去掉
+        halo = self.c.get("/verrier/halo")
+        self.assertEqual(halo.status_code, 200)
+        for notice in ("Required Notice: Copyright (c) 2026 Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT) - https://github.com/Ryder191/haloflux",
+                       "Required Notice: Noncommercial use only.", "by Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT)</a>",
+                       "/static/haloflux_LICENSE.txt",
+                       "/api/saved", "/api/result"):
+            self.assertIn(notice, halo.text)
+        self.assertNotIn("bgmAudio", halo.text)
+        self.assertIn("PolyForm Noncommercial License 1.0.0", self.c.get("/static/haloflux_LICENSE.txt").text)
         runs = self.c.get("/api/saved").json()["runs"]
         self.assertIn(("fc_jp_births_2026_07", "test1"), {(r["qid"], r["tag"]) for r in runs})
         v = self.c.get("/api/result", params={"qid": "fc_jp_births_2026_07", "tag": "test1"}).json()

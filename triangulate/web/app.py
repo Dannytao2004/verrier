@@ -99,6 +99,13 @@ def create_app(registry: Registry | None = None, res: Path = RES, allowed_hosts=
         # 第四版并列界面（欧洲古典天文学手稿风草稿）：同一套 API 和共享 JS；首屏账页实时读 /api/result，读不到用页面里的快照
         return FileResponse(STATIC / "verrier_manuscript.html", media_type="text/html; charset=utf-8")
 
+    @app.get("/verrier/halo")
+    def verrier_halo():
+        # 第五版并列界面：HALOFLUX（Ryder191，PolyForm Noncommercial 1.0.0，仅限非商业用途）的派生版，
+        # 显示一次已保存运行的真实数据（/api/saved、/api/result）。署名和条款在页面里和 static/haloflux_LICENSE.txt；
+        # 项目若转向商用，删掉这个路由和这两个静态文件
+        return FileResponse(STATIC / "verrier_halo.html", media_type="text/html; charset=utf-8")
+
     # ---------- 模型、key ----------
     @app.get("/api/providers")
     def providers(usd_cap: float | None = Query(None)):
