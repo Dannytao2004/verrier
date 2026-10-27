@@ -149,6 +149,30 @@ class TestQtySecondReview(unittest.TestCase):
             self.assertTrue(q is not None or err)
 
 
+class TestThirdReview(unittest.TestCase):
+    """v2.13g：第三轮审查查出的静默错倍数（多数 v2.13c 之前就有）和 v2.13f 拆掉的 dt。"""
+
+    def test_qty_silent_factors_fixed(self):
+        got = _in_fresh_process([("USD/mt", "USD/t"), ("MT", "t"), ("Mt", "t"), ("Cal/day", "kcal/day"), ("Calorie", "kcal"),
+                                 ("cal", "J"), ("kmph", "km/h"), ("dwt", "t"), ("DWT", "t"), ("dt/ha", "t/ha"), ("mcgs", "ug"),
+                                 ("Bbbl", "bbl"), ("Bscf", "Mcf"), ("kcfs", "cfs"), ("TBtu", "Btu")])
+        for g, want in zip(got, [1.0, 1.0, 1e6, 1.0, 1.0, 4.184, 1.0, 1.0, 1.0, 0.1, 1.0, 1e9, 1e6, 1e3, 1e12]):
+            self.assertAlmostEqual(g / want, 1.0, places=9)
+        self.assertAlmostEqual(Q.convert_factor("pennyweight", "g")[0], 1.55517384, places=6)   # pint 的 dwt 按名字还能用
+        self.assertEqual(_in_fresh_process([("DT", "kg"), ("NT", "t"), ("US dollars", "dollar")]), [None, None, None])
+
+    def test_units_silent_factors_fixed(self):
+        for src, dst, f in (("MM boe/d", "boe/d", 1e6), ("PCT", "%", 1.0), ("Pct", "%", 1.0), ("pp", "%", 1.0), ("bp", "%", 0.01),
+                            ("ppb", "1", 1e-9), ("PPM", "ppm", 1.0), ("kBtu", "Btu", 1e3), ("TBtu", "Btu", 1e12), ("Gtoe", "toe", 1e9),
+                            ("Bbbl", "bbl", 1e9), ("Bscf", "Mcf", 1e6), ("kcfs", "cfs", 1e3), ("kmph", "kph", 1.0), ("dwt", "t", 1.0),
+                            ("Boe./d", "boe/d", 1.0)):
+            with self.subTest(src=src):
+                self.assertAlmostEqual(U.convert(1.0, U.parse_unit(src), U.parse_unit(dst)) / f, 1.0, places=9)
+        for src in ("bps", "MMscfe/d", "MMBO/d", "MMb/d"):   # 有歧义 / 认不出的油气写法：报错
+            with self.subTest(src=src), self.assertRaises(U.UnitError):
+                U.parse_unit(src)
+
+
 class TestUnitsOilGas(unittest.TestCase):
     def test_industry_multipliers(self):
         for src, dst, f in SAME_IN_BOTH:
@@ -168,8 +192,8 @@ class TestUnitsOilGas(unittest.TestCase):
             U.parse_unit("MMcfe/d")
 
     def test_unknown_oil_gas_spellings_are_errors(self):
-        # v2.13f：长得像油气单位、表里没有的写法报错，不当计数名词按 1 换成 boe
-        for src in ("kcf/d", "Gboe/d", "kBtu", "MMcfe/d"):
+        # v2.13f：长得像油气单位、表里没有的写法报错，不当计数名词按 1 换成 boe（v2.13g：kBtu 收进表里了，换成有歧义的 MBtu）
+        for src in ("kcf/d", "Gboe/d", "MBtu", "MMcfe/d"):
             with self.subTest(src=src), self.assertRaises(U.UnitError):
                 U.parse_unit(src)
 

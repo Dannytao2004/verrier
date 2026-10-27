@@ -27,8 +27,8 @@ PINT_NO_PREFIX = {"nit", "barn", "pi", "carat", "parsec", "boltzmann_constant", 
                   "molar", "elementary_charge", "point", "dram", "peck", "cup", "entropy_unit", "are"}
 # 前缀本身常用、只有这几种组合是误读的：as（(as recorded)）= atto-second、kilos = kilo-second、pm = pico-meter、fl = femto-liter、
 # dt / nt = deci- / nano-tonne、EV / TV = exa- / tera-volt
-BAD_PREFIX = {("atto", "second"), ("kilo", "second"), ("pico", "meter"), ("femto", "liter"), ("deci", "metric_ton"),
-              ("nano", "metric_ton"), ("exa", "volt"), ("tera", "volt")}
+BAD_PREFIX = {("atto", "second"), ("kilo", "second"), ("pico", "meter"), ("femto", "liter"), ("exa", "volt"), ("tera", "volt")}
+# v2.13g（第三轮审查）：v2.13f 也拦了 deci- / nano-tonne，把正当的 dt（分吨，dt/ha）拆掉了；大写的 DT、NT 本来就由 _alias_ok 拦住
 
 
 class _Registry(pint.UnitRegistry):
@@ -67,6 +67,8 @@ _level = _pint_log.level
 _pint_log.setLevel(logging.ERROR)   # 重定义 barrel 时 pint 会打一条 Redefining 警告
 try:
     UREG.define("barrel = oil_barrel = bbl")
+    # v2.13g：航运的 dwt（载重吨）按公吨计；pint 的 dwt 是英钱衡（pennyweight，1.555 克），按名字 pennyweight 还能用
+    UREG.define("deadweight_tonne = metric_ton = dwt = DWT")
 finally:
     _pint_log.setLevel(_level)
 OIL_GAS = ("boe = [boe] = _ = BOE = barrel_of_oil_equivalent = barrel_oil_equivalent",   # _ = 短写就用名字本身
@@ -78,7 +80,11 @@ OIL_GAS = ("boe = [boe] = _ = BOE = barrel_of_oil_equivalent = barrel_oil_equiva
            "Bcf = 1e9 * cf = _ = bcf = BCF", "Tcf = 1e12 * cf = _ = tcf = TCF", "bcm = 1e9 * meter ** 3 = _ = BCM",
            "MMBtu = 1e6 * Btu = _ = mmbtu = MMBTU = MMbtu",
            # v2.13f（第二轮审查）：小写 mtoe 被 pint 读成 milli-toe；能源统计里 mtoe / MTOE 都指百万吨油当量（Mtoe 照 pint 读成 mega）
-           "mtoe = 1e6 * tonne_of_oil_equivalent = _ = MTOE")
+           "mtoe = 1e6 * tonne_of_oil_equivalent = _ = MTOE",
+           # v2.13g（第三轮审查，以前就有、都是静默错倍数）：大宗商品的 mt / MT 是公吨（pint 读成 milli-tonne / mega-tesla）；
+           # 营养标签的 Cal / Calorie 是大卡（pint 不认大写，被别名成小卡）；kmph = km/h（pint 读成 kilo-mph）；Bbbl、Bscf、kcfs
+           "mt = metric_ton = _ = MT", "Cal = kilocalorie = _ = Calorie", "kmph = kilometer / hour = _ = KMPH",
+           "Bbbl = 1e9 * bbl = _ = bbbl", "Bscf = 1e9 * cf = _ = bscf", "kcfs = 1e3 * cfs = _ = KCFS")
 for _d in OIL_GAS:
     UREG.define(_d)
 # pi：pint 的常数 π，前缀接上去就把 API、CPI、KPI 读成 atto-π、centi-π、kilo-π（第二轮审查）
@@ -121,6 +127,8 @@ def _alias_ok(word: str, base: str) -> bool:
         return False
     if not c or any(not p for p, _, _ in c):
         return bool(c)
+    if word == word.lower():   # v2.13g：全小写，只是去了复数（mcgs -> mcg），大小写没改前缀的意思
+        return True
     p = c[0][0]
     return base.startswith(p) or (word[:1] == "K" and p == "kilo")
 

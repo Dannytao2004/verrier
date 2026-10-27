@@ -80,6 +80,14 @@ UNITS = {
     # v2.13f（第二轮审查）：吨油当量（41.868 GJ）；Mtoe / mtoe / MTOE 都是百万吨（4 个字符以上按小写查到 mtoe）
     "toe": (41.868e9, _d(kg=1, m=2, s=-2)), "TOE": (41.868e9, _d(kg=1, m=2, s=-2)),
     "ktoe": (1e3 * 41.868e9, _d(kg=1, m=2, s=-2)), "mtoe": (1e6 * 41.868e9, _d(kg=1, m=2, s=-2)),
+    # v2.13g（第三轮审查）：EIA / Energy Star 的 kBtu、TBtu，十亿吨油当量 Gtoe，十亿桶 Bbbl、十亿标准立方英尺 Bscf，千 cfs
+    "kbtu": (1e3 * 1055.05585262, _d(kg=1, m=2, s=-2)), "tbtu": (1e12 * 1055.05585262, _d(kg=1, m=2, s=-2)),
+    "gtoe": (1e9 * 41.868e9, _d(kg=1, m=2, s=-2)), "bbbl": (1e9 * 0.158987294928, _d(m=3)),
+    "bscf": (1e9 * 0.028316846592, _d(m=3)), "kcfs": (1e3 * 0.028316846592, _d(m=3, s=-1)),
+    # v2.13g（第三轮审查）：这几个以前是计数名词（系数 1），换成 % 或 1 时静默差 100 到 10^9 倍；MM boe/d 的 MM = 百万（油气 / 金融写法）
+    "PCT": (0.01, DIMLESS), "Pct": (0.01, DIMLESS), "pp": (0.01, DIMLESS), "bp": (1e-4, DIMLESS), "ppb": (1e-9, DIMLESS),
+    "PPM": (1e-6, DIMLESS), "PPB": (1e-9, DIMLESS), "MM": (1e6, DIMLESS),
+    "kmph": (1000 / 3600, _d(m=1, s=-1)), "dwt": (1e3, M), "DWT": (1e3, M),   # 载重吨按公吨计
     # 能量 / 功率 / 力 / 压强 / 频率
     "J": (1.0, _d(kg=1, m=2, s=-2)), "joule": (1.0, _d(kg=1, m=2, s=-2)),
     "Wh": (3600.0, _d(kg=1, m=2, s=-2)),
@@ -109,7 +117,7 @@ UNITS = {
 # （kcf、Gboe、kBtu……）：报错，不当计数名词按 1 换算
 OIL_GAS_CI = {k.lower(): v for k, v in UNITS.items()
               if re.fullmatch(r"(?i)(?:[kmbt]|mm)?(?:s?cf|cfs|boe|bbl|bpd|bcm|btu|toe)|ccf", k)}
-OIL_GAS_LIKE = re.compile(r"(?i)(?:[kmgbt]|mm)?(?:s?cf|boe|bbl|bpd|btu|toe|cfe)s?")
+OIL_GAS_LIKE = re.compile(r"(?i)(?:[kmgbt]|mm)?(?:s?cfe?|boe|bo|bbl|bbloe|bpd|btu|toe)s?|mmb")   # v2.13g：+ MMscfe、MMBO、MMb
 
 # 有量纲、但不在本表维度里的单位：报错，不能当计数名词吞掉
 UNSUPPORTED = {"degree", "degrees", "deg", "celsius", "fahrenheit", "kelvin", "rad", "radian", "radians", "sr",
@@ -117,7 +125,8 @@ UNSUPPORTED = {"degree", "degrees", "deg", "celsius", "fahrenheit", "kelvin", "r
                "volt", "volts", "ah", "mah", "lux", "lumen", "lumens", "candela", "tesla", "gauss", "ohm", "ohms",
                "coulomb", "farad", "henry", "sievert", "gray", "becquerel", "curie", "rem", "dpi",
                # v2.13e：立方英尺当量（气换成油的折算各公司不同），不能当计数名词、按 1 换成 boe
-               "cfe", "mcfe", "mmcfe", "bcfe", "tcfe"}
+               "cfe", "mcfe", "mmcfe", "bcfe", "tcfe",
+               "bps"}   # v2.13g：bps 既可能是基点、也可能是比特 / 秒，不猜
 
 # 可加 SI 前缀的符号与长名
 PREFIX = {"k": 1e3, "M": 1e6, "G": 1e9, "T": 1e12, "P": 1e15, "c": 1e-2, "m": 1e-3, "u": 1e-6, "µ": 1e-6, "μ": 1e-6, "n": 1e-9}
@@ -173,9 +182,11 @@ def _lookup(name: str):
     """返回 (factor, dims) 或 None。"""
     if name in UNITS:
         return UNITS[name]
-    if name.lower() in OIL_GAS_CI:   # v2.13f：油气写法不分大小写（Scf、MCf、BCf）；小写时 M = 千，和 SPE 惯例一致
-        return OIL_GAS_CI[name.lower()]
     n = name.rstrip(".")
+    if n.lower() == "bps":   # v2.13g：基点还是比特 / 秒，不猜（不走下面的复数规则读成 bp）；在 UNSUPPORTED 里报错
+        return None
+    if n.lower() in OIL_GAS_CI:   # v2.13f：油气写法不分大小写（Scf、MCf、BCf）；小写时 M = 千，和 SPE 惯例一致（v2.13g：去掉末尾的点再查）
+        return OIL_GAS_CI[n.lower()]
     if n in UNITS:
         return UNITS[n]
     candidates = [n]
