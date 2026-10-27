@@ -52,6 +52,23 @@ def unit_text(target) -> str:
     return str(t.get("unit_canonical") or t.get("unit") or "").strip()
 
 
+def unit_full(target) -> str:
+    """v2.13a（用户 10-26：「答案的单位也要写清楚」）：答案的单位写全：代码换算用的单位、它数的是什么、哪段期间。
+    单位里带时间（t/day）：这段期间里的平均速率；不带时间：这段期间的总数；期初期末是同一天：那一天的量。"""
+    t = target or {}
+    u, desc = unit_text(t), str(t.get("unit") or "").strip()
+    if not u:
+        return ""
+    s, e = str(t.get("period_start") or ""), str(t.get("period_end") or "")
+    from . import qty as Q   # 这里才 import：outputs 被很多模块引用，单位解析只在这一处用
+    q, _ = Q.parse_unit(str(t.get("unit_canonical") or ""))
+    rate = q is not None and bool(q.dimensionality.get("[time]", 0))
+    when = ("" if not e else f"on {e}" if s in ("", e) else f"for {s} to {e}" if q is None else
+            f"average over {s} to {e}" if rate else f"total for {s} to {e}")   # 单位没钉住（解析不了）时不说总数还是平均
+    what = "; ".join(x for x in (desc if desc and desc != u else "", when) if x)
+    return f"{u} ({what})" if what else u
+
+
 def _num(v):
     return "n/a" if v is None else (f"{v:,.0f}" if abs(v) >= 100 else f"{v:.4g}")
 
@@ -483,6 +500,8 @@ def ledger(state: dict, score: dict | None = None) -> str:
         u = f" {_md(unit_text(t))}" if unit_text(t) else ""
         L += ["", f"Result: central **{_num(r.get('central'))}**{u}, 80% interval [{_num(r.get('p10'))}, {_num(r.get('p90'))}]{u}, "
                   f"basis {r.get('basis')}" + (f" ({bt})" if bt else "") + f", weight rule {r.get('weight_rule')}{tail}"]
+        if unit_full(t):   # v2.13a：单位写全（数的是什么、哪段期间）
+            L += ["", f"Unit of the estimate: {_md(unit_full(t))}"]
     L += [""] + published_md(state)
     L += ["", "## Final answer", "", (state.get("final") or {}).get("text", ""), ""]
     return "\n".join(L)

@@ -458,6 +458,9 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, page_published,
              "quote": q[lo:lo + QUOTE_STORE_CHARS]}
     if unit_as_written is not None:
         point["unit_as_written"] = unit_as_written[:120]
+    uc = str(raw.get("unit_calc") or "").strip()   # v2.13a：计算用的单位（带期间），给裁判和单位核对
+    if uc:
+        point["unit_calc"] = uc[:80]
     if reading is not None:
         point.update(reading=reading, value_check="pending")
         if lo_v is not None:

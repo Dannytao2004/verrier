@@ -7,11 +7,15 @@
    （原因交给修正轮）。
 定下的单位写回裁判方法的 "unit"（裁判原来写的放进 "unit_from_judge"），compute 照它换算；全部回答存进这一轮的
 judge_rounds[...]["unit_reviews"]。核对调用本身失败（出错、超预算）时不拦方法，照裁判写的单位算（同输入核对）。"""
+import ast
 import calendar
 import math
 from concurrent.futures import ThreadPoolExecutor
 
+import pint
+
 from ..config import MAX_TOKENS
+from ..expr import Formula, FormulaError
 from . import qty as Q
 from .evidence import PERCENT, norm, parse_date, period_text, split_multiplier
 from .pipeline import BudgetExceeded, dumps
@@ -30,6 +34,88 @@ CONSTANTS = {"k_days_target": ("day", "days in the target period"),
              "k_months_per_year": ("month/year", "months per year"),
              "k_bp_per_pct_point": ("bp/pp", "basis points per percentage point"),
              "k_percent_per_unit": ("percent", "percent per whole (100 percent = 1)")}
+
+
+class ScaleError(ValueError):
+    pass
+
+
+def _same_scale(a, b):
+    """加、减、mean、min、max 的各项：公式里是直接拿数相加，所以各项必须是同一个单位、同一个尺度（一年的数加一个月的数不行）。"""
+    if a.dimensionality != b.dimensionality:
+        raise pint.DimensionalityError(a.units, b.units)
+    if not math.isclose(a.to(b.units).magnitude, b.magnitude, rel_tol=1e-9):
+        raise ScaleError(f"it adds or compares a quantity in {a.magnitude:g} {a.units} with one in {b.magnitude:g} {b.units}, "
+                         "which are on different scales; convert one of them first")
+
+
+def _qeval(node, env):
+    """公式的语法树按 pint 的量求值（加减要求同类量，pint 不同类就报 DimensionalityError）。"""
+    if isinstance(node, ast.BinOp):
+        a = _qeval(node.left, env)
+        if isinstance(node.op, ast.Pow):
+            return a ** int(node.right.value if isinstance(node.right, ast.Constant) else -node.right.operand.value)
+        b = _qeval(node.right, env)
+        if isinstance(node.op, (ast.Add, ast.Sub)):   # 这里只推单位和尺度，数由代码另算：同尺度的两项相加，尺度不变
+            _same_scale(a, b)
+            return a
+        return a * b if isinstance(node.op, ast.Mult) else a / b
+    if isinstance(node, ast.UnaryOp):
+        v = _qeval(node.operand, env)
+        return -v if isinstance(node.op, ast.USub) else v
+    if isinstance(node, ast.Name):
+        return env[node.id]
+    if isinstance(node, ast.Constant):
+        return Q.UREG.Quantity(float(node.value), "dimensionless")
+    if isinstance(node, ast.Call):
+        args = [_qeval(x, env) for x in node.args]
+        if node.func.id == "sqrt":
+            return args[0] ** 0.5
+        for x in args[1:]:
+            _same_scale(args[0], x)
+        return args[0]   # mean / min / max：各项同一尺度（上面查过），结果也是这个尺度
+    raise FormulaError(f"cannot work out units of {type(node).__name__}")
+
+
+def _same_unit(a: str, b: str) -> bool:
+    """两个单位串是不是同一个量、同一个尺度（解析不了的当作不同）。"""
+    f, err = Q.convert_factor(a, b) if a and b else (None, "empty")
+    return not err and f is not None and math.isclose(f, 1.0, rel_tol=1e-9)
+
+
+def derive_unit(formula: str, units: dict) -> tuple:
+    """v2.13a：按定下的各输入单位，由代码（pint）推出公式结果的单位。返回 (单位串, 错误)。
+    单位代数是确定的算术，交给代码；模型只判断每个输入是什么、按什么算（德国新车的探针里，裁定把
+    p75 * k * a2 / k 的推导写漏了一个 / k，结果单位错了，换算出 19,735）。"""
+    try:
+        f = Formula(formula)
+    except FormulaError as e:
+        return "", str(e)
+    env = {}
+    for n in sorted(f.names):
+        u = units.get(n)
+        if not u:
+            return "", f"no unit was decided for input {n}"
+        q, err = Q.parse_unit(u)
+        if q is None:
+            return "", err
+        env[n] = q
+    try:
+        with Q._LOCK:
+            r = _qeval(f.root, env)
+    except pint.DimensionalityError as e:
+        return "", f"the formula adds or compares quantities of different kinds ({e})"
+    except ScaleError as e:
+        return "", str(e)
+    except (FormulaError, ZeroDivisionError, TypeError, ValueError, AttributeError) as e:
+        return "", f"units could not be worked out ({type(e).__name__}: {e})"
+    if not isinstance(r, pint.Quantity):
+        r = Q.UREG.Quantity(r, "dimensionless")
+    if r.dimensionless:   # 纯数（year/month 这种也化成 12）：单位写 1，倍数写成数
+        r = r.to("dimensionless")
+        return f"{r.magnitude:.10g}", ""
+    unit = f"{r.units:C}"
+    return (unit if r.magnitude == 1 else f"{r.magnitude:.10g} {unit}"), ""
 
 
 def _sig(v):
@@ -80,7 +166,8 @@ def input_lines(m_in: dict, m_out: dict, by_id: dict, kept_a: dict) -> list:
             p = by_id[d["id"]]
             # 观测点按 v / 1.2 .. v * 1.2 采样，v 就是代码用的值（百分数已除以 100）；v2.8o 区间点的 v 是区间中点（detail 里记着）
             v = d["value"] if "value" in d else math.sqrt(d["p10"] * d["p90"])
-            x.update(kind="data point", value_used=_sig(v), unit_as_recorded=p.get("unit", ""), description=p.get("name", ""),
+            x.update(kind="data point", value_used=_sig(v), unit_as_recorded=p.get("unit", ""),
+                     **({"unit_at_extraction": p["unit_calc"]} if p.get("unit_calc") else {}), description=p.get("name", ""),
                      period=period_text(p), quote=str(p.get("quote", ""))[:300])
             if "low" in d:
                 x["range_used"] = f"{_sig(d['low'])}..{_sig(d['high'])}"
@@ -177,17 +264,23 @@ def review_method(llm, qid: str, mid: str, m_in: dict, m_out: dict, by_id: dict,
             return rec
         ru = str(out.get("result_unit") or "").strip()
         f, problem = None, ""
+        # v2.13a：结果单位由代码按裁定的各输入单位推出来（代码给的常数用代码自己的单位），不用裁定自己写的推导
+        decided = {str(x.get("name")): str(x.get("unit") or "") for x in out.get("inputs") or [] if isinstance(x, dict)}
+        decided.update({d["name"]: CONSTANTS[d["id"]][0] for d in m_out.get("inputs_detail") or []
+                        if d["kind"] == "constant" and d["id"] in CONSTANTS})
+        derived, derr = derive_unit(str((m_in.get("params") or {}).get("formula", "")), decided)
         if dbl := _doubled(out, mults):   # v2.8q：倍数乘两次
             problem = dbl
-        elif out.get("fits_target") is not True:
+        elif derr:
+            problem = f"code could not work out the result unit from your input units: {derr}"
+        elif out.get("fits_target") is not True and _same_unit(ru, derived):
+            # v2.13a：裁定说「不符」只在它自己写的结果单位和代码推出来的一致时才算（推导写错了，它的判断是对着错单位下的）
             problem = f"you judged that it does not fit the target unit '{tu}': {out.get('fit_reason', '')}"
-        elif not ru:
-            problem = "result_unit is empty"
         else:
-            ru, f, cerr = to_target(ru, tu, target)
+            ru, f, cerr = to_target(derived, tu, target)
             if cerr:
-                problem = f"code cannot convert '{ru}' to the target unit '{tu}': {cerr}"
-        rec["arbiter"].append({"reply": out, "problem": problem})
+                problem = f"code cannot convert '{ru}' (worked out by code from your input units) to the target unit '{tu}': {cerr}"
+        rec["arbiter"].append({"reply": out, "problem": problem, **({"derived_unit": derived} if derived else {})})
         if not problem:
             rec.update(unit=ru, factor=f)
             return rec

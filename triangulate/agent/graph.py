@@ -34,7 +34,7 @@ from . import unit_review as UR
 from . import value_check as VC
 from .evidence import period_text
 from .markets import search_markets
-from .outputs import basis_text, combination_details, method_details, unit_text
+from .outputs import basis_text, combination_details, method_details, unit_full, unit_text
 from .pipeline import BudgetExceeded, Context, dumps, run_direction
 from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
                       DISCRETE_OUTCOMES_GIVEN, DISCRETE_REVISE, DISCRETE_REVISE_DONE, EXTRA_RULE_R1, EXTRA_RULE_R2,
@@ -142,12 +142,12 @@ def _fmt_point(p: dict) -> str:
 
 
 def _table(points: list) -> str:
-    rows = ["id | dir | name | value | unit | period | published | source | via | quote"]
+    rows = ["id | dir | name | value | unit | unit for computation | period | published | source | via | quote"]
     for p in points:
         dom = urllib.parse.urlsplit(p.get("source_url", "")).netloc
         via = f"snapshot {p['page_date']}" if p.get("via") == "snapshot" else f"{p.get('via')} {p.get('page_date') or ''}"
         rows.append(" | ".join([p["id"], p["direction_id"], p["name"][:90], _fmt_point(p), p.get("unit", "")[:25],
-                                period_text(p),
+                                p.get("unit_calc", "")[:40], period_text(p),
                                 p.get("published_at_if_visible") or "", dom, via.strip(), p.get("quote", "")[:150]]))
     return "\n".join(rows)
 
@@ -996,7 +996,10 @@ def build(ctx: Context):
         text = "".join(p if i % 2 == 0 else f"[[{p}]]" for i, p in enumerate(parts))
         if r.get("central") is not None:  # 代码生成的假设清单：数字只走占位符，模型写的名字和理由里的数字同样替换掉
             # v2.12（决定 8）：再接代码生成的方法细节和合并结构（数字只走占位符；文字全是代码写的）
-            extra = "\n\n" + key_assumptions_template(used_a, year, mids) + method_details_template(comp, r, ph)
+            # v2.13a：先写清答案的单位（数的是什么、哪段期间），再接假设清单和方法细节
+            ph["unit_full"] = unit_full(state["plan"]["target"])
+            head = "\n\nUnit of the estimate: [[unit_full]]." if ph["unit_full"] else ""
+            extra = head + "\n\n" + key_assumptions_template(used_a, year, mids) + method_details_template(comp, r, ph)
             text += extra
             eparts = PLACEHOLDER.split(extra)  # 只切新加的这段，前面已经切好的片段不重新找占位符
             parts[-1] += eparts[0]

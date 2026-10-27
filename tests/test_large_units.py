@@ -497,9 +497,14 @@ if __name__ == "__main__":
 
 
 class TestUnitRuleShareOfPeriod(unittest.TestCase):
-    """v2.11g（BUGS S60）：「全年总量 × 某月份额」是个数，不是速率；G2 的探针不经过单位核对，这里钉住规则原文。"""
+    """v2.11g（BUGS S60）的「全年总量 × 某月份额是个数」一条，v2.13a 换成「单位带期间」：总数按自己的期间写、份额写成
+    (长期间)/(短期间)，代码换算。G2 的探针不经过单位核对，这里钉住规则原文；抽取也用同一份规则。"""
 
     def test_rule_text(self):
         from triangulate.agent import prompts as PR
-        self.assertIn("is a count (person), not a rate (person/year): the share has already turned the year into the target "
-                      "period", PR.UNIT_RULES)
+        self.assertIn("A total for a stated period is per that period, with the period's length written in the unit",
+                      PR.UNIT_RULES)
+        self.assertIn("has the unit (longer period)/(shorter period), such as year/month", PR.UNIT_RULES)
+        self.assertNotIn("is a count (person), not a rate", PR.UNIT_RULES)
+        self.assertIn(PR.UNIT_RULES, PR.EXTRACT_USER)
+        self.assertIn('"unit_calc": "..."', PR.EXTRACT_USER)

@@ -219,9 +219,9 @@ class TestDisplay(unittest.TestCase):
         from triangulate.agent import unit_review as UR
         d, n = {**DATED, "id": "p4", "direction_id": "d2"}, {**NORMAL, "id": "p1", "direction_id": "d2"}
         rows = G._table([n, d]).splitlines()
-        self.assertEqual(rows[1], "p1 | d2 | x | 5,000,000,000 | tokens/second | 2025-06-01..2025-06-30 |  | epoch.ai | "
+        self.assertEqual(rows[1], "p1 | d2 | x | 5,000,000,000 | tokens/second |  | 2025-06-01..2025-06-30 |  | epoch.ai | "
                                   "live_dated 2026-05-25 | around 5 billion tokens per second")
-        self.assertEqual(rows[2], "p4 | d2 | x | 5,000,000,000 | tokens/second | not stated (page dated 2026-05-25) |  | "
+        self.assertEqual(rows[2], "p4 | d2 | x | 5,000,000,000 | tokens/second |  | not stated (page dated 2026-05-25) |  | "
                                   "epoch.ai | live_dated 2026-05-25 | around 5 billion tokens per second")
         self.assertEqual(G._evidence("p4", {"p4": d}, {}), 'data point p4: "x" = 5,000,000,000 tokens/second, period '
                                                            'not stated (page dated 2026-05-25), source epoch.ai')
@@ -336,9 +336,9 @@ class TestPinnedJudgePrompt(unittest.TestCase):
         self.assertEqual(drops, [("d1", "https://a.org/undated", MISSING), ("d2", "https://a.org/undated", MISSING)])
         judge = next(u for r, u in log if r == "judge:r1")
         pid = dated[0]["id"]
-        self.assertIn(f"\n{pid} | d1 | widgets sold per day across all shops | 5,000,000,000 | widgets/day | "
+        self.assertIn(f"\n{pid} | d1 | widgets sold per day across all shops | 5,000,000,000 | widgets/day |  | "
                       "not stated (page dated 2026-05-25) |  | a.org | snapshot 2026-06-01 | around 5 billion widgets per day\n", judge)
-        self.assertIn("\np1 | d1 | widgets June 2023 | 1,000 | widgets | 2023-06-01..2023-06-30 |  | a.org | snapshot 2026-06-01 | "
+        self.assertIn("\np1 | d1 | widgets June 2023 | 1,000 | widgets |  | 2023-06-01..2023-06-30 |  | a.org | snapshot 2026-06-01 | "
                       "June 2023: 1,000 widgets\n", judge)
         m1 = next(m for m in st["compute"]["methods"] if m["id"] == "m1")
         self.assertEqual(m1["estimate"], 1210.0)

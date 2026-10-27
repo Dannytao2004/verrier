@@ -39,9 +39,12 @@ PRE_ROLES = ("existing:search", "extract:existing", "existing:published", "exist
 HEAD_KEYS = ("plan", "directions", "approval", "points", "judge_rounds", "compute", "published", "final")
 # v2.12e（抽取 prompt 的 unit 一条加了「韩文单位译成英文」一句；c / d 两个编号上面已用过）再登记：进程内把这一句去掉，三条都等于上一版的值
 # live_auto 9f789faa…、backtest 829af9c9…、live_early_stop a4dc822d…，所以只有这一句变了
-HEAD_SHA = {"live_auto": "912231225a25b93775d40f86be683b49187743e015690ccf5aa4f65d4e38196d",
-            "backtest": "5ffb4c9dd76373def6b426d21632570cc969a90e5325f4637c6c4df58be537db",
-            "live_early_stop": "d6af7b62c85a90a5b74b8a64feeb2b48798bdf00ca8f2eece9629e4b35bea7bd"}
+# v2.13a（单位带期间：抽取 prompt 多 unit_calc 和单位规则、裁判表格多一列、单位核对规则改写；终稿先写答案的单位）再登记。
+# 逐键比较三条路径的状态（probes/out/_st_head.json 对 _st_new.json，只在本机）：数字全同，只有终稿多了「Unit of the estimate」
+# 一行和 unit_full 占位符；其余差别都在发出去的 prompt 里。上一版 live_auto 91223122…、backtest 5ffb4c9d…、live_early_stop d6af7b62…
+HEAD_SHA = {"live_auto": "980cf6d6149839a9c6cd12495e8ff7e2542b2beb03d0853fa0f59636b33768b8",
+            "backtest": "d20e30adecae17395ce8c1592f1db4a422fe5b65c683eaa8160aa1ba74938f53",
+            "live_early_stop": "f3cde67fad0e808c441992428b2fd2105b068273bd0b8d8ee2a5328d90307002"}
 
 
 class Harness:

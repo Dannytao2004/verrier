@@ -70,7 +70,7 @@ class TestUnitReview(unittest.TestCase):
         llm = FakeLLM(CHECK, [arb("100 g/day")])
         self.assertEqual(review(llm, jr), {})
         m = jr["methods"][0]
-        self.assertEqual((m["unit"], m["unit_from_judge"]), ("100 g/day", "t/day"))
+        self.assertEqual((m["unit"], m["unit_from_judge"]), ("100 gram/day", "t/day"))   # v2.13a：由代码按输入单位推出
         after = trial(jr["methods"])[0]["methods"][0]["estimate"]
         self.assertAlmostEqual(after / before, 1e-4, places=9)   # 30 万人 × 700 kcal ÷ 250 kcal/100 g = 84 t/day
         self.assertAlmostEqual(after, 84.0, delta=84 * 0.05)
@@ -91,16 +91,42 @@ class TestUnitReview(unittest.TestCase):
         self.assertIn("Result unit written by the analyst: t/day", user)
 
     def test_unconvertible_unit_is_retried_with_the_reason(self):
+        # v2.13a：结果单位由代码按裁定的输入单位推出；输入 a 漏了 per day，推出来是 100 gram，换不到 t/day，重来
+        no_day = [dict(RIGHT[0], unit="person")] + RIGHT[1:]
         jr = {"methods": [method()]}
-        llm = FakeLLM(CHECK, [arb("100 g"), arb("100 g/day")])   # 漏了 per day：100 g 换不到 t/day，重来
+        llm = FakeLLM(CHECK, [arb("100 g", inputs=no_day), arb("100 g/day")])
         self.assertEqual(review(llm, jr), {})
         rec = jr["unit_reviews"][0]["methods"][0]
-        self.assertIn("code cannot convert '100 g' to the target unit 't/day'", rec["arbiter"][0]["problem"])
+        self.assertIn("code cannot convert '100 gram' (worked out by code from your input units) to the target unit 't/day'",
+                      rec["arbiter"][0]["problem"])
         self.assertEqual(rec["arbiter"][1]["problem"], "")
         retry = [u for r, u in llm.calls if r == "unit_arbiter:m1:2"][0]
         self.assertIn("Your previous answer:", retry)
         self.assertIn('"result_unit": "100 g"', retry)
-        self.assertEqual(jr["methods"][0]["unit"], "100 g/day")
+        self.assertEqual(jr["methods"][0]["unit"], "100 gram/day")
+
+    def test_result_unit_is_worked_out_by_code_not_taken_from_the_arbiter(self):
+        # v2.13a（德国新车探针）：裁定的推导漏了一个除数、result_unit 写错，代码按它自己定的输入单位重新推
+        jr = {"methods": [method()]}
+        llm = FakeLLM(CHECK, [arb("100 g/year")])   # 输入单位推出来是 100 g/day
+        self.assertEqual(review(llm, jr), {})
+        self.assertEqual(jr["methods"][0]["unit"], "100 gram/day")
+        self.assertEqual(jr["unit_reviews"][0]["methods"][0]["arbiter"][0]["derived_unit"], "100 gram/day")
+
+    def test_inputs_on_different_scales_cannot_be_added(self):
+        d, err = UR.derive_unit("a + b", {"a": "person/year", "b": "person/month"})
+        self.assertEqual(d, "")
+        self.assertIn("different scales", err)
+        self.assertEqual(UR.derive_unit("(a + b) * c", {"a": "person/year", "b": "person/year", "c": "year/month"})[0],
+                         "person/month")
+        self.assertIn("different kinds", UR.derive_unit("a + b", {"a": "person", "b": "kg"})[1])
+
+    def test_period_units(self):   # v2.13a：总数带期间，份额是 (长期间)/(短期间)，代码换算
+        sep = {"period_start": "2026-09-01", "period_end": "2026-09-30"}
+        d = UR.derive_unit("p * k * a / k", {"p": "vehicle/(4 month)", "k": "month/year", "a": "year/month"})[0]
+        self.assertEqual(UR.to_target(d, "vehicle", sep)[1], 3.0)   # 约掉的 k 不影响：1-4 月的数 x 3 x 份额
+        d = UR.derive_unit("p * a", {"p": "person/year", "a": "year/month"})[0]
+        self.assertEqual(UR.to_target(d, "person", sep)[1], 1.0)   # 全年总数 x 月份额 = 当月个数（S60 不再多除 12）
 
     def test_no_fit_after_all_tries_fails_the_method(self):
         jr = {"methods": [method()]}
@@ -127,8 +153,9 @@ class TestUnitReview(unittest.TestCase):
         # v2.8j（恒顺题）：目标锁成 bottle（一年的瓶数），裁定给 1000 bottle/year：乘上 1 year 换算，不再判失败
         t = dict(TARGET, unit="bottles in 2024", unit_canonical="kg", period_start="2024-01-01", period_end="2024-12-31")
         jr = {"methods": [method("kg")]}
-        self.assertEqual(review(FakeLLM(CHECK, [arb("100 g/year")]), jr, t), {})
-        self.assertEqual(jr["methods"][0]["unit"], "(100 g/year) * 1 year")
+        per_year = [dict(RIGHT[0], unit="person/year")] + RIGHT[1:]   # v2.13a：结果单位由输入单位推出
+        self.assertEqual(review(FakeLLM(CHECK, [arb("100 g/year", inputs=per_year)]), jr, t), {})
+        self.assertEqual(jr["methods"][0]["unit"], "(100 gram/year) * 1 year")
         yearly = {"unit_canonical": "bottle", "period_start": "2024-01-01", "period_end": "2024-12-31"}
         self.assertEqual(UR.to_target("1000 bottle/year", "bottle", yearly)[:2], ("(1000 bottle/year) * 1 year", 1000.0))
         monthly = {"period_start": "2026-07-01", "period_end": "2026-07-31"}

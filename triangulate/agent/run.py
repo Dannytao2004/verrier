@@ -22,7 +22,7 @@ from . import methods as M
 from . import published as PB
 from .evidence import parse_date
 from .graph import build
-from .outputs import basis_text, ledger, outcome_table_html, render_graph, unit_text
+from .outputs import basis_text, ledger, outcome_table_html, render_graph, unit_full, unit_text
 from .pipeline import Budget, Context
 
 RES = RESULTS / "agent"
@@ -264,6 +264,9 @@ def _save_run(h: dict, approvals: list) -> dict:
         meta = (f"as_of <b>{q['as_of']}</b> &middot; estimate <b>{_n(r.get('central'))}</b>{u} &middot; 80% [{_n(r.get('p10'))}, "
                 f"{_n(r.get('p90'))}]{u} ({r.get('basis')}" + (f": {html.escape(bt)}" if bt else "") + ")")
         est = f"estimate {_n(r.get('central'))}"
+        uf = unit_full((state.get("plan") or {}).get("target"))   # v2.13a：单位写全（数的是什么、哪段期间）
+        if uf and uf != ut:
+            meta += f" &middot; unit: {html.escape(uf)}"
     if q.get("answer_value") is not None:
         meta += f" &middot; official value (scoring only) <b>{q['answer_value']:,}</b>"
     (out_dir / "graph.html").write_text(scrub(render_graph(state, f"Agent: {q['id']}", meta)), encoding="utf-8")

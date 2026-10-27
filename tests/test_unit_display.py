@@ -120,7 +120,9 @@ class TestGraphRuns(unittest.TestCase):
         f = st["final"]
         self.assertTrue(unit_notes(st)[0].startswith("unit not pinned: "))
         self.assertEqual(f["placeholders"]["unit"], "widgets")
-        self.assertTrue(f["text"].startswith("About 1,210 widgets.\n\nKey assumptions: none"), f["text"])
+        # v2.13a：代码在模型的话后面先写清答案的单位（数的是什么、哪段期间），再接假设清单
+        self.assertTrue(f["text"].startswith("About 1,210 widgets.\n\nUnit of the estimate: widgets (for "), f["text"])
+        self.assertIn(").\n\nKey assumptions: none", f["text"])
         self.assertTrue(f["text"].endswith("\n\n" + UNIT_NOT_PINNED))
         self.assertTrue(f["template"].endswith("\n\n" + UNIT_NOT_PINNED))
 

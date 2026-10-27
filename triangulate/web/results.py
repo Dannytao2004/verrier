@@ -10,7 +10,7 @@ from pathlib import Path
 
 from ..agent.evidence import period_text
 from ..agent.graph import SERIES_METHODS, operator_inputs
-from ..agent.outputs import basis_text, combination_details, method_details, unit_text
+from ..agent.outputs import basis_text, combination_details, method_details, unit_full, unit_text
 from ..agent.run import RES, score_one
 from ..forecast import QUESTIONS
 from ..mc import Z90
@@ -332,7 +332,8 @@ def result_view(st: dict, qid: str, tag: str = "") -> dict:
                                               "interval", "baseline")}
                        | {"basis_text": basis_text(r.get("basis")),   # v2.6d：区间依据的说明（outputs.BASIS_TEXT）
                           "combination_text": combination_details(est),   # v2.12（决定 8）：块结构、区间规则、季节朴素对照
-                          "unit": unit_text((st.get("plan") or {}).get("target"))},   # v2.7e：估计值和区间的单位
+                          "unit": unit_text((st.get("plan") or {}).get("target")),   # v2.7e：估计值和区间的单位
+                          "unit_full": unit_full((st.get("plan") or {}).get("target"))},   # v2.13a：单位写全（数的是什么、哪段期间）
            "mode": r.get("mode") or "continuous", "discrete": discrete_view(st),
            "final_text": (st.get("final") or {}).get("text", ""), "methods": methods,
            "repairs": [x for x in (_repair_view(j) for j in st.get("judge_rounds") or []) if x],

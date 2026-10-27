@@ -86,7 +86,7 @@ def continuous_run(r1_decisions, r2_decisions):
 
 def table_ids(user: str) -> list:
     """prompt 里完整表格各行的 id（表头之后、第一个空行之前）。"""
-    head = "id | dir | name | value | unit | period | published | source | via | quote\n"
+    head = "id | dir | name | value | unit | unit for computation | period | published | source | via | quote\n"   # v2.13a 多一列
     body = user[user.index(head) + len(head):].split("\n\n")[0]
     return [r.split(" | ")[0] for r in body.split("\n")]
 
