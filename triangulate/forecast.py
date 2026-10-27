@@ -346,11 +346,74 @@ QUESTIONS += [
                           "monthly statistics on visitor arrivals and outbound departures (來臺旅客及國人出國人數).",
      "answer_unit": "", "unit_hint": "a count of visitor arrivals", "leak_values": []},
 ]
+# 第 3-7 题（2026-10-27 登记，在这几题的任何模型调用之前）：test4_candidates.json 里 selection = final、按首发时刻排在第 3-7 的题
+# （用户 10-27：先跑最近会公布的 5 个）。日历、去年同期、最近一期都是 10-23 复查者打开核过的；题干 = 候选题的 question 去掉开头
+# 那句 as_of。10-27 又让核验 agent 重开了一次日历页（结果见 NEXT.md）。
+QUESTIONS += [
+    # Equinor 3Q26 quarterly update PDF：「The 3Q results will be reported 28 October 2026 at 07:00 CEST」（10-28 挪威已是 CET，
+    # 按当地 07:00 = 06:00 UTC）。去年同期 3Q25 表 2,130 mboe/d；最近一期 2Q26 2,165。报告写 mboe/d（千），计分单位 boe/d。
+    {"id": "fc_eqnr_prod_2026_q3", "set": "test4", "as_of": None, "question": None,
+     "released_at": "2026-10-28T07:00:00+01:00", "last_year": 2130000,
+     "last_year_source": "https://cdn.sanity.io/files/h61q9gi9/global/1076ae946124491794687a843c115299662e71e0.pdf",
+     "source": "https://cdn.sanity.io/files/h61q9gi9/global/ca519bd03b29c8b67260a968087d54ec89aee0f8.pdf",
+     "question_template": _ASOF_T + "Estimate Equinor's total equity liquids and gas production in the third quarter of 2026, "
+                          "in barrels of oil equivalent per day (the report states it in thousand boe per day, mboe/d), as it "
+                          "will be first reported in Equinor's third quarter 2026 financial statements and review.",
+     "answer_unit": "boe/d", "unit_hint": "a rate of production in barrels of oil equivalent per day", "leak_values": []},
+    # SMMT Key Press Dates（制造）：September 2026 Thursday 29 October，00:01 embargo（英国已是 GMT = UTC）。去年同期 2025 年 9 月
+    # 51,090（JLR 网络攻击停产压低）；最近一期 2026 年 8 月 39,328。只算轿车，不含商用车。
+    {"id": "fc_uk_carprod_2026_09", "set": "test4", "as_of": None, "question": None,
+     "released_at": "2026-10-29T00:01:00+00:00", "last_year": 51090,
+     "last_year_source": "https://www.smmt.co.uk/cyber-attack-hits-vehicle-output-with-new-risk-arising-from-tax-charge-on-auto-workers/",
+     "source": "https://www.smmt.co.uk/key-press-dates/",
+     "question_template": _ASOF_T + "Estimate the number of cars manufactured in the United Kingdom in September 2026 (total car "
+                          "production for home and export markets, excluding commercial vehicles), as it will be first reported "
+                          "in the Society of Motor Manufacturers and Traders' (SMMT) monthly UK car manufacturing release.",
+     "answer_unit": "", "unit_hint": "a count of cars produced", "leak_values": []},
+    # 英格兰银行「Money and Credit - September 2026 (to be published at 9.30am)」，29 October 2026（GMT）。去年同期 2025 年 9 月
+    # 65,900；最近一期 2026 年 8 月 54,900。季调；正文取整到百位。
+    {"id": "fc_uk_mortgages_2026_09", "set": "test4", "as_of": None, "question": None,
+     "released_at": "2026-10-29T09:30:00+00:00", "last_year": 65900,
+     "last_year_source": "https://www.bankofengland.co.uk/statistics/money-and-credit/2025/september-2025",
+     "source": "https://www.bankofengland.co.uk/statistics/money-and-credit/2026/september-2026",
+     "question_template": _ASOF_T + "Estimate the number of net mortgage approvals for house purchase in the United Kingdom in "
+                          "September 2026 (seasonally adjusted), as it will be first reported in the Bank of England's monthly "
+                          "Money and Credit statistical release.",
+     "answer_unit": "", "unit_hint": "a count of mortgage approvals", "leak_values": []},
+    # 比亚迪 HKEX 公告 2026-10-14：董事会 2026-10-29（周四）审议未经审计的第三季度业绩。发布时刻没公布（2025 年是董事会当天
+    # 19:32 HKT 上网），这里取当天 00:00 HKT（保守，宁早不晚）。去年同期 3Q25 单季营业收入 194,984,598,000 元。
+    {"id": "fc_byd_rev_2026_q3", "set": "test4", "as_of": None, "question": None,
+     "released_at": "2026-10-29T00:00:00+08:00", "last_year": 194984598000,
+     "last_year_source": "https://www1.hkexnews.hk/listedco/listconews/sehk/2025/1030/2025103001667.pdf",
+     "source": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/1014/2026101400381.pdf",
+     "question_template": _ASOF_T + "Estimate BYD Company Limited's operating revenue for the three months July-September 2026 "
+                          "(the third quarter alone, not January-September), in Chinese yuan (CNY), as it will be first reported "
+                          "in BYD's unaudited third quarterly report (key accounting data table, 'The Reporting Period' column).",
+     "answer_unit": "CNY", "unit_hint": "an amount of money in CNY", "leak_values": []},
+    # GOV.UK 公告「Release date: 30 October 2026 9:30am (provisional)」，HMRC 评述「The next release will be published 09:30am
+    # 30 October 2026」（GMT）。去年同期 2025 年 9 月季调临时数 95,980；最近一期 2026 年 8 月 95,220。季调，别和非季调混。
+    {"id": "fc_uk_homesales_2026_09", "set": "test4", "as_of": None, "question": None,
+     "released_at": "2026-10-30T09:30:00+00:00", "last_year": 95980,
+     "last_year_source": "http://web.archive.org/web/20251031155447/https://www.gov.uk/government/statistics/monthly-property-"
+                         "transactions-completed-in-the-uk-with-value-40000-or-above/uk-monthly-property-transactions-commentary--2",
+     "source": "https://www.gov.uk/government/statistics/announcements/monthly-property-transactions-completed-in-the-uk-with-"
+               "the-value-of-40000-or-above--31",
+     "question_template": _ASOF_T + "Estimate the number of UK residential property transactions (with a value of £40,000 or "
+                          "above) in September 2026, seasonally adjusted, as it will be first reported (provisional estimate) "
+                          "in HM Revenue & Customs' monthly release 'Monthly property transactions completed in the UK with value "
+                          "of £40,000 or above'.",
+     "answer_unit": "", "unit_hint": "a count of residential property transactions", "leak_values": []},
+]
 # 留出测试 4 的官方首发值：公布后填，填之前 run_test4 --score 只列估计、不算误差。填法（数用计分单位：元、人次）：
 #   "fc_cn_profits_2026_09": {"value": 5.9e12, "source": "<首发页 URL>", "quote": "<原文那一句>", "checked": "2026-10-27"},
 TEST4_OFFICIAL = {
     "fc_cn_profits_2026_09": None,
     "fc_tw_visitors_2026_09": None,
+    "fc_eqnr_prod_2026_q3": None,
+    "fc_uk_carprod_2026_09": None,
+    "fc_uk_mortgages_2026_09": None,
+    "fc_byd_rev_2026_q3": None,
+    "fc_uk_homesales_2026_09": None,
 }
 
 

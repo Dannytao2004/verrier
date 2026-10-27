@@ -35,6 +35,42 @@ FRI_2350 = datetime(2026, 10, 24, 4, 50, tzinfo=timezone.utc)     # 周五美国
 MON_1950 = datetime(2026, 10, 27, 0, 50, tzinfo=timezone.utc)     # 周一美国中部时间 19:50：10 分钟后高峰，40 分钟后 CN 首发
 MON_2020 = datetime(2026, 10, 27, 1, 20, tzinfo=timezone.utc)     # 周一美国中部时间 20:20：高峰，10 分钟后 CN 首发
 CN_RELEASE = datetime(2026, 10, 27, 1, 30, tzinfo=timezone.utc)
+# 10-27 起 test4 登记了更多题（第 3-7 题），假数据世界只有最早的 2 道：本模块的测试把 test4 题库固定成这 2 道、首发值都没填；
+# 真实题库的登记规则由 TestRegistry 检查
+REAL_QUESTIONS, REAL_OFFICIAL = forecast.QUESTIONS, forecast.TEST4_OFFICIAL
+_PATCHES = [mock.patch.object(forecast, "QUESTIONS", [q for q in forecast.QUESTIONS
+                                                      if q.get("set") != "test4" or q["id"] in (CN, TW)]),
+            mock.patch.object(forecast, "TEST4_OFFICIAL", {CN: None, TW: None})]
+
+
+def setUpModule():
+    for p in _PATCHES:
+        p.start()
+
+
+def tearDownModule():
+    for p in _PATCHES:
+        p.stop()
+
+
+class TestRegistry(unittest.TestCase):
+    def test_every_registered_question(self):
+        qs = sorted((q for q in REAL_QUESTIONS if q.get("set") == "test4"), key=RT.release)
+        self.assertEqual([q["id"] for q in qs][:2], [CN, TW])
+        self.assertEqual(sorted(q["id"] for q in qs), sorted(REAL_OFFICIAL))
+        self.assertEqual(len({q["id"] for q in qs}), len(qs))
+        for q in qs:
+            self.assertIsNotNone(datetime.fromisoformat(q["released_at"]).tzinfo, q["id"])
+            self.assertNotIn("answer_value", q)
+            self.assertEqual((q["as_of"], q["question"], q["leak_values"], q["strict"]), (None, None, [], False), q["id"])
+            self.assertTrue(q["source"].startswith("http") and q["last_year_source"].startswith("http"), q["id"])
+            self.assertTrue(q["question_template"].startswith("Assume today is {as_of}. You know nothing published after this date. "))
+            self.assertEqual(q["question_template"].count("{"), 1, q["id"])   # 只有 {as_of}：with_as_of 的 format 不会出错
+            self.assertGreater(q["last_year"], 0)
+            off = REAL_OFFICIAL[q["id"]]
+            if off is not None:   # 公布后填的首发值
+                self.assertGreater(off["value"], 0)
+                self.assertTrue(off["source"].startswith("https://") and off["quote"] and off["checked"], q["id"])
 
 
 def _log(root):
