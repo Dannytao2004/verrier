@@ -406,9 +406,15 @@ QUESTIONS += [
 ]
 # 留出测试 4 的官方首发值：公布后填，填之前 run_test4 --score 只列估计、不算误差。填法（数用计分单位：元、人次）：
 #   "fc_cn_profits_2026_09": {"value": 5.9e12, "source": "<首发页 URL>", "quote": "<原文那一句>", "checked": "2026-10-27"},
+# Q1、Q2 的首发值 10-27 核过三遍：定时任务（probes/out/test4_official_Q1.md、Q2.md）+ 每题两个独立核验 agent，数都一致。
+# Q2 的出处用观光署企划组「115年9月觀光市場概況摘要」（发布日期 115-10-27，附月表 1-2 总计 611755）；交通部统计库
+# （statis.motc.gov.tw Seq=309、statchart api_proxy Seq=1185）同值。
 TEST4_OFFICIAL = {
-    "fc_cn_profits_2026_09": None,
-    "fc_tw_visitors_2026_09": None,
+    "fc_cn_profits_2026_09": {"value": 6033740000000, "source": "https://www.stats.gov.cn/sj/zxfb/202610/t20261027_1965697.html",
+                              "quote": "1—9月份，全国规模以上工业企业实现利润总额60337.4亿元，同比增长15.5%（按可比口径计算，详见附注二）。",
+                              "checked": "2026-10-27"},
+    "fc_tw_visitors_2026_09": {"value": 611755, "source": "https://admin.taiwan.net.tw/BusinessInfo/News?a=119&id=36492",
+                               "quote": "115年9月來臺旅客為611,755人次，與去（114）年同期相較，成長1.73%。", "checked": "2026-10-27"},
     "fc_eqnr_prod_2026_q3": None,
     "fc_uk_carprod_2026_09": None,
     "fc_uk_mortgages_2026_09": None,
