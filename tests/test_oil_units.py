@@ -107,6 +107,48 @@ class TestQtyReviewFindings(unittest.TestCase):
         self.assertEqual(_in_fresh_process([("all/calls", "1"), ("air*pairs", "air**2")]), [None, None])
 
 
+class TestQtySecondReview(unittest.TestCase):
+    """v2.13f：第二轮审查和存档语料扫描查出的误读：都改成报错或读成名词，不再静默乘一个假倍数。"""
+
+    def test_uppercase_acronyms_are_not_prefixed_units(self):
+        # API 的小写 api = atto-π、CPI = centi-π、KPI = kilo-π、US = 微秒、MCal = milli-calorie
+        got = _in_fresh_process([("API tokens per minute", "tokens per minute"), ("index (CPI)", "index"), ("KPI", "percent"),
+                                 ("US dollars per hour", "dollars"), ("MCal", "kcal"), ("api", "1"), ("cpi", "1")])
+        self.assertEqual(got, [None] * 7)
+
+    def test_toe_family(self):
+        got = _in_fresh_process([("mtoe", "Mtoe"), ("MTOE", "Mtoe"), ("mtoe/year", "TWh/year"), ("ktoe", "toe")])
+        self.assertEqual(got[:2], [1.0, 1.0])
+        self.assertAlmostEqual(got[2], 11.63, places=9)
+        self.assertAlmostEqual(got[3], 1000.0, places=9)
+
+    def test_common_words_are_not_prefix_plus_obscure_unit(self):
+        # unit = micro-nit、pct = pico-carat、as = atto-second、TV = tera-volt、KB = kilo-barn、exams = exa-m、kilos = kilo-s
+        self.assertEqual(_in_fresh_process([("housing units", "housing unit"), ("pct", "percent"), ("units (as recorded)", "unit"),
+                                            ("TV", "V"), ("KB", "kB"), ("exams", "m"), ("kilos", "s")]),
+                         [1.0, 1.0, None, None, None, None, None])
+
+    def test_legit_prefixes_untouched(self):
+        got = _in_fresh_process([("kWh", "J"), ("MW", "W"), ("GB", "MB"), ("mL", "L"), ("ms", "s"), ("kV", "V"), ("MHz", "Hz"),
+                                 ("Mt", "t"), ("kPa", "Pa"), ("kilometers", "m"), ("exabytes", "B"), ("Gigabytes", "GB")])
+        for g, want in zip(got, [3.6e6, 1e6, 1e3, 1e-3, 1e-3, 1e3, 1e6, 1e6, 1e3, 1e3, 1e18, 1.0]):
+            self.assertAlmostEqual(g / want, 1.0, places=9)
+
+    def test_acronym_plurals_either_order(self):
+        self.assertEqual(_in_fresh_process([("VM", "VM"), ("VMs", "VM")]), [1.0, 1.0])
+        self.assertEqual(_in_fresh_process([("VMs", "VMs"), ("VM", "VM"), ("VMs", "VM")]), [1.0, 1.0, 1.0])
+
+    def test_unit_is_a_count_not_luminance(self):
+        # v2.13e 以前 unit / units 被 pint 读成 micro-nit（亮度），两边都是 units 时换算还是 1，所以要直接看量纲
+        for w in ("units", "housing units", "USD per unit"):
+            self.assertNotIn("[luminosity]", str(Q.parse_unit(w)[0].dimensionality), w)
+
+    def test_offset_unit_variants_do_not_raise(self):
+        for w in ("Kfahrenheit", "KDECADE", "Cdecade"):
+            q, err = Q.parse_unit(w)   # 公开函数不抛异常
+            self.assertTrue(q is not None or err)
+
+
 class TestUnitsOilGas(unittest.TestCase):
     def test_industry_multipliers(self):
         for src, dst, f in SAME_IN_BOTH:
@@ -118,11 +160,23 @@ class TestUnitsOilGas(unittest.TestCase):
 
     def test_gas_is_not_a_count(self):
         # 以前 MMcf 是计数名词，MMcf/d 会按 1 换成 boe/d；v2.13e：4 个字符以下的大写写法也一样
-        for src in ("MMcf/d", "MCF/d", "BCF/d", "TCF", "CF", "SCF"):
+        # v2.13f（第二轮审查）：要带 /d：不带的写法和 boe/d 本来就量纲不同，查不查得到都会报错，测不出东西
+        for src in ("MMcf/d", "MCF/d", "BCF/d", "TCF/d", "CF/d", "SCF/d", "Scf/d", "Cf/d", "MCf/d", "BCf/d", "TCf/d"):
             with self.subTest(src=src), self.assertRaises(U.UnitMismatch):
                 U.convert(1.0, U.parse_unit(src), U.parse_unit("boe/d"))
         with self.assertRaises(U.UnitError):   # 立方英尺当量：气换油的折算各公司不同，不能按 1 换
             U.parse_unit("MMcfe/d")
+
+    def test_unknown_oil_gas_spellings_are_errors(self):
+        # v2.13f：长得像油气单位、表里没有的写法报错，不当计数名词按 1 换成 boe
+        for src in ("kcf/d", "Gboe/d", "kBtu", "MMcfe/d"):
+            with self.subTest(src=src), self.assertRaises(U.UnitError):
+                U.parse_unit(src)
+
+    def test_toe(self):
+        for src, f in (("toe", 41.868e9), ("Mtoe", 41.868e15), ("mtoe", 41.868e15), ("MTOE", 41.868e15), ("ktoe", 41.868e12)):
+            with self.subTest(src=src):
+                self.assertAlmostEqual(U.convert(1.0, U.parse_unit(src), U.parse_unit("J")) / f, 1.0, places=9)
 
     def test_short_uppercase_spellings(self):
         for src, dst, f in (("MCF", "cf", 1e3), ("BCF", "Mcf", 1e6), ("BPD", "bbl/d", 1.0), ("BBL", "gallon", 42.0),

@@ -77,6 +77,9 @@ UNITS = {
     "mmbpd": (1e6 * 0.158987294928 / 86400, _d(m=3, s=-1)),
     "ccf": (100 * 0.028316846592, _d(m=3)), "Ccf": (100 * 0.028316846592, _d(m=3)), "CCF": (100 * 0.028316846592, _d(m=3)),
     "cfs": (0.028316846592, _d(m=3, s=-1)), "CFS": (0.028316846592, _d(m=3, s=-1)),
+    # v2.13f（第二轮审查）：吨油当量（41.868 GJ）；Mtoe / mtoe / MTOE 都是百万吨（4 个字符以上按小写查到 mtoe）
+    "toe": (41.868e9, _d(kg=1, m=2, s=-2)), "TOE": (41.868e9, _d(kg=1, m=2, s=-2)),
+    "ktoe": (1e3 * 41.868e9, _d(kg=1, m=2, s=-2)), "mtoe": (1e6 * 41.868e9, _d(kg=1, m=2, s=-2)),
     # 能量 / 功率 / 力 / 压强 / 频率
     "J": (1.0, _d(kg=1, m=2, s=-2)), "joule": (1.0, _d(kg=1, m=2, s=-2)),
     "Wh": (3600.0, _d(kg=1, m=2, s=-2)),
@@ -101,6 +104,12 @@ UNITS = {
     "mt": (1e3, M), "MT": (1e3, M), "bn": (1e9, DIMLESS), "mn": (1e6, DIMLESS), "mln": (1e6, DIMLESS),
     "century": (100 * YEAR, T), "centuries": (100 * YEAR, T),
 }
+
+# v2.13f（第二轮审查）：油气单位按小写查的表（键都按 SPE 惯例：mcf = 千、mmcf = 百万）；OIL_GAS_LIKE = 长得像油气单位、表里又没有的写法
+# （kcf、Gboe、kBtu……）：报错，不当计数名词按 1 换算
+OIL_GAS_CI = {k.lower(): v for k, v in UNITS.items()
+              if re.fullmatch(r"(?i)(?:[kmbt]|mm)?(?:s?cf|cfs|boe|bbl|bpd|bcm|btu|toe)|ccf", k)}
+OIL_GAS_LIKE = re.compile(r"(?i)(?:[kmgbt]|mm)?(?:s?cf|boe|bbl|bpd|btu|toe|cfe)s?")
 
 # 有量纲、但不在本表维度里的单位：报错，不能当计数名词吞掉
 UNSUPPORTED = {"degree", "degrees", "deg", "celsius", "fahrenheit", "kelvin", "rad", "radian", "radians", "sr",
@@ -164,6 +173,8 @@ def _lookup(name: str):
     """返回 (factor, dims) 或 None。"""
     if name in UNITS:
         return UNITS[name]
+    if name.lower() in OIL_GAS_CI:   # v2.13f：油气写法不分大小写（Scf、MCf、BCf）；小写时 M = 千，和 SPE 惯例一致
+        return OIL_GAS_CI[name.lower()]
     n = name.rstrip(".")
     if n in UNITS:
         return UNITS[n]
@@ -267,6 +278,8 @@ def parse_unit(text, strict: bool = False) -> Unit:
             if hit is None:
                 if name.rstrip(".").lower() in UNSUPPORTED:
                     raise UnitError(f"unsupported unit {name!r} in {text!r} (dimension not in table)")
+                if OIL_GAS_LIKE.fullmatch(name.rstrip(".")):   # v2.13f
+                    raise UnitError(f"unrecognised oil / gas unit {name!r} in {text!r}")
                 if len(name.rstrip(".")) < 2:
                     raise UnitError(f"ambiguous one-letter unit {name!r} in {text!r}")
                 if strict and name.lower() not in TARGET_COUNT_NOUNS:

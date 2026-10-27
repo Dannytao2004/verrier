@@ -21,6 +21,14 @@ IRREGULAR = {"people": "person", "persons": "person", "children": "child", "men"
 # v2.13c / e：SI 前缀不接在这些名字上：油气单位（mboe 不是 milli-boe、Mmcf 不是 mega-mcf）、自动定义的计数名词和它们的
 # 大小写 / 复数别名（先定义了 all，calls 也不读成 centi-all；MBoe 之后的 MMBoe 不是 mega-MBoe）。pint 自带单位的前缀不受影响（km、kWh）
 NO_PREFIX = set()
+# v2.13f（存档语料扫描）：pint 自带单位里，接上 SI 前缀只会凑出普通单词的误读、本项目用不到前缀的（unit = micro-nit、pct = pico-carat、
+# KB 的小写 kb = kilo-barn、uk = micro-k_B、api = atto-π、rpt = ronto-pint、feu = femto-entropy_unit……）：整个不准加前缀
+PINT_NO_PREFIX = {"nit", "barn", "pi", "carat", "parsec", "boltzmann_constant", "technical_atmosphere", "standard_atmosphere", "pint",
+                  "molar", "elementary_charge", "point", "dram", "peck", "cup", "entropy_unit", "are"}
+# 前缀本身常用、只有这几种组合是误读的：as（(as recorded)）= atto-second、kilos = kilo-second、pm = pico-meter、fl = femto-liter、
+# dt / nt = deci- / nano-tonne、EV / TV = exa- / tera-volt
+BAD_PREFIX = {("atto", "second"), ("kilo", "second"), ("pico", "meter"), ("femto", "liter"), ("deci", "metric_ton"),
+              ("nano", "metric_ton"), ("exa", "volt"), ("tera", "volt")}
 
 
 class _Registry(pint.UnitRegistry):
@@ -29,7 +37,15 @@ class _Registry(pint.UnitRegistry):
     读法，exaflops 读成 exa + flops、millions 读成 milli + ons）。拿掉以后没有读法的词照旧交给 _define_noun。"""
 
     def _dedup_candidates(self, candidates):
-        return pint.UnitRegistry._dedup_candidates([c for c in candidates if not (c[0] and c[1] in NO_PREFIX)])
+        return pint.UnitRegistry._dedup_candidates([c for c in candidates
+                                                     if not (c[0] and (c[1] in NO_PREFIX or (c[0], c[1]) in BAD_PREFIX))])
+
+    def parse_unit_name(self, unit_name, case_sensitive=None):
+        """v2.13f：拼全的前缀名后面只剩一两个字母（单位的符号）的读法也拿掉：exams = exa + m + s（艾米）、kilos = kilo + s（千秒）。
+        真要用长前缀名时，单位也写全名（kilometers、megawatts）。"""
+        return tuple(c for c in super().parse_unit_name(unit_name, case_sensitive)
+                     if not (c[0] and len(c[0]) > 2 and unit_name.lower().startswith(c[0])
+                             and len(unit_name[len(c[0]):].rstrip("s")) <= 2))
 
 
 UREG = _Registry()
@@ -60,10 +76,14 @@ OIL_GAS = ("boe = [boe] = _ = BOE = barrel_of_oil_equivalent = barrel_oil_equiva
            "cf = foot ** 3 = _ = scf = CF", "cfs = cf / second = _ = CFS", "ccf = 100 * cf = _ = Ccf = CCF",
            "Mcf = 1e3 * cf = _ = mcf = MCF = Mscf = mscf", "MMcf = 1e6 * cf = _ = mmcf = MMCF = MMscf = mmscf",
            "Bcf = 1e9 * cf = _ = bcf = BCF", "Tcf = 1e12 * cf = _ = tcf = TCF", "bcm = 1e9 * meter ** 3 = _ = BCM",
-           "MMBtu = 1e6 * Btu = _ = mmbtu = MMBTU = MMbtu")
+           "MMBtu = 1e6 * Btu = _ = mmbtu = MMBTU = MMbtu",
+           # v2.13f（第二轮审查）：小写 mtoe 被 pint 读成 milli-toe；能源统计里 mtoe / MTOE 都指百万吨油当量（Mtoe 照 pint 读成 mega）
+           "mtoe = 1e6 * tonne_of_oil_equivalent = _ = MTOE")
 for _d in OIL_GAS:
     UREG.define(_d)
-NO_PREFIX.update({d.split("=")[0].strip() for d in OIL_GAS} | {"barrel", "oil_barrel"})
+# pi：pint 的常数 π，前缀接上去就把 API、CPI、KPI 读成 atto-π、centi-π、kilo-π（第二轮审查）
+NO_PREFIX.update({d.split("=")[0].strip() for d in OIL_GAS} | {"barrel", "oil_barrel"} | PINT_NO_PREFIX)
+UREG.define("pct = percent")   # v2.13f：基线的 units.py 也这样读；不定义时 pct 被读成 pico-carat
 # 中文的时间单位换成英文再解析（只换时间词；中文名词照旧解析不了，交给报错）
 CJK_TIME = (("个月", " month "), ("月份", " month "), ("月度", " month "), ("季度", " (3 month) "), ("年度", " year "),
             ("星期", " week "), ("月", " month "), ("年", " year "), ("周", " week "), ("天", " day "), ("日", " day "))
@@ -71,6 +91,8 @@ _LOCK = threading.Lock()   # 注册表是模块级的，会自动加名词；网
 
 
 def _singular(w: str) -> str:
+    if re.fullmatch(r"[A-Z]{2,}s", w):   # v2.13f：大写缩写的复数（VMs、IPs），不受下面长度 > 3 的限制
+        return w[:-1].lower()
     lw = w.lower()
     if lw in IRREGULAR:
         return IRREGULAR[lw]
@@ -81,6 +103,28 @@ def _singular(w: str) -> str:
     return lw
 
 
+def _known(name: str) -> bool:
+    """name 在 pint 里有读法。pint 对「前缀 + 偏移 / 对数单位」（Kfahrenheit 的小写 kfahrenheit）会抛异常：当成没有读法。"""
+    try:
+        return name in UREG
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _alias_ok(word: str, base: str) -> bool:
+    """v2.13f（第二轮审查）：word 的小写 base 在 pint 里有读法时，能不能把 word 当成它的别名。base 本身就是单位（Mile -> mile）可以；
+    base 只能读成「前缀 + 单位」时，只有大小写没改前缀意思的才行：大写 K -> kilo（Kg、KM、Kcal；大写 K 不是前缀），或者前缀名拼全了
+    （Megatonnes -> megatonne）。其余的（API -> atto-π、MTOE -> milli-toe、US -> 微秒、MCal -> milli-calorie）大小写一改，前缀就变了。"""
+    try:
+        c = UREG.parse_unit_name(base)
+    except Exception:  # noqa: BLE001
+        return False
+    if not c or any(not p for p, _, _ in c):
+        return bool(c)
+    p = c[0][0]
+    return base.startswith(p) or (word[:1] == "K" and p == "kilo")
+
+
 def _define_noun(word: str) -> bool:
     """把 pint 不认识的英文单词定义成计数单位（复数归到单数）。不是纯字母单词就不定义（交给错误）。
     v2.13c / e：新名词和别名进 NO_PREFIX（之后不会被读成「前缀 + 它」）。已经是单位的名字不重定义（v2.13c 一度改成「名字本身是
@@ -88,10 +132,19 @@ def _define_noun(word: str) -> bool:
     if not re.fullmatch(r"[A-Za-z]+", word):
         return False
     base = _singular(word)
-    if base not in UREG:
+    if not _known(base):
         UREG.define(f"{base} = [{base}]")
         NO_PREFIX.add(base)
-    if word != base and word not in UREG:
+    elif not _alias_ok(word, base):   # base 只能读成「前缀 + 单位」，而大小写改了前缀的意思：word 自己做名词
+        own = word[:-1] if re.fullmatch(r"[A-Z]{2,}s", word) else word   # 大写缩写的复数归到单数（RPTs -> RPT），和先见到 RPT 时一样
+        if not _known(own):
+            UREG.define(f"{own} = [{own}]")
+            NO_PREFIX.add(own)
+        if word != own and not _known(word):
+            UREG.define(f"{word} = {own}")
+            NO_PREFIX.add(word)
+        return True
+    if word != base and not _known(word):
         UREG.define(f"{word} = {base}")
         NO_PREFIX.add(word)
     return True
