@@ -57,5 +57,39 @@ class TestAnswerUnit(unittest.TestCase):
         self.assertEqual(O.unit_full({}), "")
 
 
+
+
+class TestSameThingSameUnit(unittest.TestCase):
+    """v2.13a（用户 10-26：「月」和「月份」应该是同一个东西，别区分开）：复数、缩写、中文时间词都归到同一个单位。"""
+
+    def test_aliases(self):
+        from triangulate.agent import qty as Q
+        same = [("months", "month"), ("persons", "person"), ("people", "person"), ("visit/mo", "visit/month"),
+                ("person/annum", "person/year"), ("wk", "week"), ("vehicle/月", "vehicle/month"), ("person/月份", "person/month"),
+                ("vehicle/(4 个月)", "vehicle/(4 month)"), ("person/年", "person/year"), ("t/天", "t/day")]
+        for a, b in same:
+            self.assertEqual(Q.convert_factor(a, b), (1.0, ""), a)
+        self.assertEqual(Q.convert_factor("USD/quarter", "USD/year")[0], 4.0)   # 季度 = 3 个月（pint 的 quarter 是重量）
+        self.assertEqual(Q.convert_factor("person/季度", "person/month")[0], 1 / 3)
+        self.assertEqual(Q.convert_factor("headquarters", "headquarters"), (1.0, ""))   # 整词才换
+
+
+class TestMergeSearches(unittest.TestCase):
+    """v2.13b：一个方向几个搜索 agent 各搜各的，网址合并：被几次搜索找到的排前面。"""
+
+    def test_votes_then_first_seen(self):
+        from triangulate.agent.pipeline import merge_searches
+        runs = [{"queries": ["q1"], "urls": ["a", "b", "c"], "web_search_requests": 2, "usd": 0.01, "usd_search_fee_assumed": 0.02},
+                {"queries": ["q2"], "urls": ["c", "d", "a"], "web_search_requests": 3, "usd": 0.02, "usd_search_fee_assumed": 0.03},
+                {"queries": [], "urls": [], "error": "http 500", "web_search_requests": 0}]
+        m = merge_searches(runs, cap=3)
+        self.assertEqual(m["urls"], ["a", "c", "b"])   # a、c 各 2 票（a 先出现），b 1 票先于 d
+        self.assertEqual(m["url_votes"], {"a": 2, "c": 2, "b": 1, "d": 1})
+        self.assertEqual((m["queries"], m["web_search_requests"], m["n_searches"]), (["q1", "q2"], 5, 3))
+        self.assertAlmostEqual(m["usd"], 0.03)
+        self.assertNotIn("error", m)   # 只有一次失败：不算整个方向失败
+        self.assertEqual(merge_searches([{"urls": [], "error": "x"}] * 2, 4)["error"], "x")
+
+
 if __name__ == "__main__":
     unittest.main()

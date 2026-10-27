@@ -131,7 +131,8 @@ class TestGraphRoles(unittest.TestCase):
         self.assertEqual(saved["settings"]["max_tokens"], DISTINCT)        # 记的是运行时的表
         self.assertEqual(saved["settings"]["budget_defaults"],
                          {"usd": 1.0, "pages": 48, "round1_pages": 40, "llm_concurrency": 8, "extra_directions": 3,
-                          "urls_per_direction": 4, "search_max_uses": 3, "max_directions_hard": 16})
+                          "urls_per_direction": 4, "search_max_uses": 3, "max_directions_hard": 16,
+                          "searches_per_direction": 1})
         self.assertEqual(saved["settings"]["interval"], {"MIN_WIDTH": 2.0, "MIN_WIDTH_CHANGE": 1.25, "FALLBACK_SIGMA": 0.25,
                                                          "DEFAULT_REL_U": 0.2, "EPS": 0.01})
         for k in ("budget", "leakage", "model", "tag", "compute", "final", "published"):   # 原有的键都还在

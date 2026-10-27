@@ -344,7 +344,7 @@ class TestKimiCost(unittest.TestCase):
         self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "kimi-k3"), (100_000 * 3 + 1000 * 15) / 1e6)
         self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "kimi-k3@cn"), (100_000 * 20 + 1000 * 100) / 1e6 / FX)
         ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec(thinking="high", region="cn"))
-        self.assertEqual((ctx.budget.model, ctx.budget.usd_cap), ("kimi-k3@cn", 2.0))
+        self.assertEqual((ctx.budget.model, ctx.budget.usd_cap), ("kimi-k3@cn", 3.0))   # v2.13b：默认上限 $3
         self.assertEqual((ctx.budget.search_tokens, ctx.budget.search_input_tokens), (SEARCH_OUT, 72_000))
         self.assertAlmostEqual(ctx.budget.search_reserve(), (72_000 * 20 + SEARCH_OUT * 100) / 1e6 / FX + 8 * 0.01)
         ctx2 = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec())
@@ -586,7 +586,7 @@ class TestModelSpecKimi(unittest.TestCase):
                                        "fx": {"cny_per_usd": 6.7192, "source": config.CNY_PER_USD_SOURCE, "date": "2026-10-21"}})
         self.assertEqual(spec().public(), {"provider": "kimi", "model": "kimi-k3", "region": "global", "thinking": "low",
                                            "thinking_by_role": {"plan": "low", "judge": "low", "repair": "low", "*": "low"},
-                                           "usd_cap": 2.0, "byok": True})
+                                           "usd_cap": 3.0, "byok": True})
         self.assertNotIn(KEY, repr(sp))
         for bad in (lambda: spec(region="us"), lambda: PV.ModelSpec("kimi", "gpt-6-luna", KEY),
                     lambda: PV.ModelSpec("moonshot", "kimi-k3", KEY, thinking="low"),

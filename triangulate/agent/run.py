@@ -23,7 +23,7 @@ from . import published as PB
 from .evidence import parse_date
 from .graph import build
 from .outputs import basis_text, ledger, outcome_table_html, render_graph, unit_full, unit_text
-from .pipeline import Budget, Context
+from .pipeline import RUN_BUDGET, RUN_USD_CAP, Budget, Context, run_budget
 
 RES = RESULTS / "agent"
 RESIDUAL_RISKS = [
@@ -146,7 +146,7 @@ def prepare_run(q: dict, tag: str = "", ablate_own_history: bool = False, spec=N
         calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
     leak_values = q.get("leak_values") or ([q["answer_value"]] if q.get("answer_value") is not None else None)
     ctx = Context(q["id"], q["question"], q["as_of"], calls, leak_value=leak_values, ablate_own_history=ablate_own_history,
-                  spec=spec, leak_answer=q.get("answer_value"))
+                  spec=spec, leak_answer=q.get("answer_value"), budget=run_budget(spec))   # v2.13b：真实运行的预算设置
     # 有真值的题（回测 / 留出测试，--auto-approve 没人把关）只在题目明确标了 outcome_type = discrete 时才接受离散目标
     ctx.allow_discrete = q.get("answer_value") is None or q.get("outcome_type") == "discrete"
     ctx.check_published = checks_published(q)
@@ -185,6 +185,7 @@ def run_settings(spec=None) -> dict:
     budget = {k: p.default for k, p in inspect.signature(Budget.__init__).parameters.items()
               if p.default is not inspect.Parameter.empty}
     out = {"max_tokens": dict(MAX_TOKENS), "budget_defaults": budget,
+           "budget_run": {"usd": RUN_USD_CAP if spec is None else spec.usd_cap, **RUN_BUDGET},   # v2.13b：真实运行实际用的设置
            "interval": {"MIN_WIDTH": AS.MIN_WIDTH, "MIN_WIDTH_CHANGE": AS.MIN_WIDTH_CHANGE,
                         "FALLBACK_SIGMA": M.FALLBACK_SIGMA, "DEFAULT_REL_U": M.DEFAULT_REL_U, "EPS": M.EPS}}
     if spec is not None:

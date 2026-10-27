@@ -389,8 +389,8 @@ class TestStopsAreVisible(_E2E):
                 self.assertEqual(state["budget"]["aborted"], state["aborted"])
                 self.assertTrue(state["final"]["text"].startswith("No estimate: the run was stopped before an estimate could be made "
                                                                   f"({want}"), state["final"]["text"])
-                # 不重试：3 个方向同时开搜，每个方向最多发出一个搜索请求（第一个 402 / 429 回来以后，之后的预扣全部拒绝）
-                self.assertLessEqual(len([x for x in self.srv.seen if x["role"] == "search"]), 3)
+                # 不重试：3 个方向同时开搜，v2.13b 起每个方向同时 3 个搜索 agent，最多 9 个请求在途；第一个 402 / 429 回来以后，之后的预扣全部拒绝
+                self.assertLessEqual(len([x for x in self.srv.seen if x["role"] == "search"]), 9)
                 self.assertNotIn("judge:r1", {x["role"] for x in self.srv.seen})
                 self.assertNoKey(self.texts(st), key)
 
@@ -421,16 +421,18 @@ class TestStopsAreVisible(_E2E):
 
     def test_expensive_model_queues_instead_of_aborting(self):
         """审查发现：Opus 5.5 在第一轮同时在途的搜索预扣放不下时整次运行中止。现在预扣只是因为在途的调用放不下时等：
-        6 个方向、每次搜索预扣约 $1.01、上限 $5：最多 4 个同时在途，其余排队，跑完、不中止。"""
+        每次搜索预扣约 $1.01、上限 $7（v2.13b：一个方向 3 次搜索，最小运行要 $6.04）：同时在途的放不下就排队，跑完、不中止。"""
         _State.n_directions, _State.search_delay = 6, 0.3
-        key, r, st = self.start(33, "claude", "claude-opus-5-5", "global", "low", 5.0)
+        key, r, st = self.start(33, "claude", "claude-opus-5-5", "global", "low", 7.0)
         self.assertEqual(r.status_code, 200, r.text)
         self.assertEqual(st["status"], "done", st.get("error"))
         state = self.state(st)
         self.assertEqual(state["budget"]["aborted"], "")
-        self.assertEqual(len(state["directions"]), 6)
+        from triangulate.agent.pipeline import RUN_BUDGET, Budget
+        n_dirs = Budget.for_model("claude-opus-5-5", usd=7.0, **RUN_BUDGET).directions   # v2.13b：方向花费 x 3，$7 放得下 4 个
+        self.assertEqual(len(state["directions"]), n_dirs)
         self.assertGreater(state["budget"]["waited_for_room"], 0)
-        self.assertEqual(sum(1 for x in self.srv.seen if x["role"] == "search"), 6)
+        self.assertEqual(sum(1 for x in self.srv.seen if x["role"] == "search"), 3 * n_dirs)   # 每个方向 3 个搜索 agent
         self.assertAlmostEqual(st["compute"]["central"], 1210.0)
 
     def test_server_message_quoting_the_key_leaves_no_fragment(self):

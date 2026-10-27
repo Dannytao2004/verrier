@@ -73,7 +73,7 @@ class TestProvidersApi(_Client):
         with mock.patch("triangulate.config.read_key", no_key_file):
             v = self.c.get("/api/providers").json()
         self.assertEqual([p["id"] for p in v["providers"]], list(PV.PROVIDERS))
-        self.assertEqual((v["default_provider"], v["default_usd_cap"], v["usd_cap"]), ("deepseek", 2.0, 2.0))
+        self.assertEqual((v["default_provider"], v["default_usd_cap"], v["usd_cap"]), ("deepseek", 3.0, 3.0))   # v2.13b
         self.assertEqual(v["thinking_levels"], ["off", "low", "medium", "high"])
         self.assertEqual(v["reasoning_roles"], ["plan", "judge", "repair"])
         for p in v["providers"]:
@@ -127,7 +127,7 @@ class TestProvidersApi(_Client):
         """方向数 = Budget.for_model(price_id, usd=cap).directions；估计 = RUN_PROFILE 按官方价。v2.10f：「会中止」= 一次最小运行
         （规划 + 一次搜索 + 抽取一页 + 裁判）最坏情况的预扣合计放不下上限（网页拒跑），给最小上限；第一轮同时在途的搜索预扣超过上限
         只是排队（round1_queues），不再算中止。"""
-        from triangulate.agent.pipeline import Budget
+        from triangulate.agent.pipeline import RUN_BUDGET, Budget
         from triangulate.web import catalog as C
 
         def est(cap, model, region="global", level=None):
@@ -135,12 +135,16 @@ class TestProvidersApi(_Client):
             m = next(x for p in v["providers"] for x in p["models"] if x["id"] == model)
             return m["by_region"][region]["by_thinking"][level or m["thinking"]["default"]]
         flash = est(2, "deepseek-flash")
-        self.assertEqual(flash["directions"], Budget.for_model("deepseek-flash", usd=2.0).directions)
+        # v2.13b：网页估计按真实运行的预算设置（每个方向 3 次搜索、12 个网址）
+        self.assertEqual(flash["directions"], Budget.for_model("deepseek-flash", usd=2.0, **RUN_BUDGET).directions)
         rp = C.RUN_PROFILE
-        want = (rp["directions_per_round1_max"] * 10 * Budget.profile_usd("deepseek-flash", Budget.DIRECTION_PROFILE)
+        b = Budget.for_model("deepseek-flash", usd=2.0, **RUN_BUDGET)
+        self.assertEqual((b.directions, b.direction_scale()), (6, 3.0))   # v2.13b：方向花费 x 3，$2 只放得下 6 个方向
+        want = (rp["directions_per_round1_max"] * b.directions * Budget.profile_usd("deepseek-flash", Budget.DIRECTION_PROFILE)
+                * b.direction_scale()
                 + Budget.profile_usd("deepseek-flash", rp["reasoning"]) + Budget.profile_usd("deepseek-flash", rp["other"]))
         self.assertAlmostEqual(flash["est_usd"], round(want, 2))
-        self.assertTrue(0.4 < flash["est_usd"] < 0.9, flash)   # 实测 50 次运行平均 $0.52（峰时价估计偏高一点）
+        self.assertTrue(0.9 < flash["est_usd"] < 1.4, flash)   # v2.13b 之前实测 50 次运行平均 $0.52；三倍搜索后没有实测，只有这个估计
         self.assertFalse(flash["stops_early"])
         self.assertGreater(est(2, "deepseek-flash", level="high")["est_usd"], flash["est_usd"])   # 思考 token 按输出价另计
         self.assertEqual(flash["run_floor_usd"], round(sum(flash["run_floor"].values()), 2))
@@ -148,34 +152,34 @@ class TestProvidersApi(_Client):
         # Opus 5.5（low，关不掉思考：每次调用 +24,000 输出 token）：输入按 1 字符 1 token、$4 / $20
         want = {"plan": (20_000 * 4 + (6000 + 24_000) * 20) / 1e6, "extract": (40_000 * 4 + (16_000 + 24_000) * 20) / 1e6,
                 "judge": (100_000 * 4 + (24_000 + 24_000) * 20) / 1e6,   # v2.11d：judge 12000 -> 24000
-                "search": (72_000 * 4 + (8192 + 24_000) * 20) / 1e6 + 8 * 0.01}
+                "search": 3 * ((72_000 * 4 + (8192 + 24_000) * 20) / 1e6 + 8 * 0.01)}   # v2.13b：一个方向同时 3 次搜索
         for k, v in want.items():
             self.assertAlmostEqual(opus["run_floor"][k], round(v, 4), places=4)
         self.assertEqual((opus["directions"], opus["stops_early"], opus["run_floor_usd"], opus["min_cap_usd"]),
-                         (3, True, round(sum(want.values()), 2), 4.5))   # v2.11d：judge 上限 24000，最小上限 4.0 -> 4.5
-        self.assertAlmostEqual(opus["round1_search_hold_usd"], round(3 * want["search"], 2))
-        self.assertTrue(opus["round1_queues"])   # 3 个搜索同时在途放不下：排队，不中止
+                         (1, True, round(sum(want.values()), 2), 6.5))   # v2.13b：最小上限 4.5 -> 6.5
+        self.assertAlmostEqual(opus["round1_search_hold_usd"], round(want["search"], 2))   # 1 个方向 x 3 次搜索同时在途
+        self.assertTrue(opus["round1_queues"])   # 同时在途放不下：排队，不中止
         self.assertTrue(opus["over_cap"])
-        self.assertFalse(est(4.5, "claude-opus-5-5")["stops_early"])   # v2.11d：最坏预扣 3.77 -> 4.01
-        self.assertTrue(est(4, "claude-opus-5-5")["stops_early"])     # 4.01 > 4
+        self.assertFalse(est(6.5, "claude-opus-5-5")["stops_early"])   # v2.13b：最坏预扣 6.04
+        self.assertTrue(est(6, "claude-opus-5-5")["stops_early"])     # 6.04 > 6
         fable = est(2, "claude-fable-5-1")
         self.assertEqual(fable["directions"], 1)
         self.assertTrue(fable["stops_early"])
         self.assertGreaterEqual(fable["min_cap_usd"], fable["run_floor_usd"])
         self.assertLess(fable["min_cap_usd"] - fable["run_floor_usd"], C.MIN_CAP_STEP)
-        sonnet = est(2, "claude-sonnet-5-5")   # 新的默认：$2 放得下
+        sonnet = est(3, "claude-sonnet-5-5")   # v2.13b：默认上限 $3 放得下（$2 放不下了：3 次搜索）
         self.assertFalse(sonnet["stops_early"])
         self.assertNotIn("min_cap_usd", sonnet)
         cn = est(2, "kimi-k3", "cn")
         self.assertEqual(cn["price_id"], "kimi-k3@cn")
-        # 每家的默认模型 + 默认档位在 $2 下都放得下（网页的默认组合不会被拒）。v2.10h 例外：Kimi 只剩 K3（K2.6 删掉：没有自带的搜索），
-        # K3 关不掉思考，$2 放不下一次最小运行：网页照样拒跑并给出最小上限 $3.50（v2.11d 前是 $3.00）
+        # 每家的默认模型 + 默认档位在默认上限（v2.13b：$3）下都放得下（网页的默认组合不会被拒）。v2.10h 例外：Kimi 只剩 K3（K2.6 删掉：
+        # 没有自带的搜索），K3 关不掉思考，放不下一次最小运行：网页照样拒跑并给出最小上限 $5.00（v2.13b 前是 $3.50）
         v = self.c.get("/api/providers").json()
         for p in v["providers"]:
             m = next(x for x in p["models"] if x["id"] == p["default_model"])
             e = m["by_region"][p["default_region"]]["by_thinking"][m["thinking"]["default"]]
             if p["id"] == "kimi":
-                self.assertEqual((m["id"], e["stops_early"], e["min_cap_usd"]), ("kimi-k3", True, 3.5))   # v2.11d：judge 上限 24000，3.00 -> 3.50
+                self.assertEqual((m["id"], e["stops_early"], e["min_cap_usd"]), ("kimi-k3", True, 5.0))   # v2.13b：3.50 -> 5.00
             else:
                 self.assertFalse(e["stops_early"], (p["id"], e))
 
@@ -294,13 +298,13 @@ class TestRunsByok(_Client):
         self.assertEqual(self.reg.runs, {})
 
     def test_defaults_and_settings_reach_the_run(self):
-        r = self.c.post("/api/runs", json=self.body(provider="kimi", region="cn", model="kimi-k3", thinking="high", usd_cap=3.5))
+        r = self.c.post("/api/runs", json=self.body(provider="kimi", region="cn", model="kimi-k3", thinking="high", usd_cap=5.0))   # v2.13b：一个方向同时 3 次搜索，K3 high 的最小运行要 $5
         self.assertEqual(r.status_code, 200, r.text)
         st = self.TW.wait_for(self.c, r.json()["id"], ("awaiting_approval", "failed"))
         sp = st["run_spec"]
         self.assertEqual((sp["provider"], sp["model"], sp["region"], sp["thinking"], sp["usd_cap"], sp["price_id"]),
-                         ("kimi", "kimi-k3", "cn", "high", 3.5, "kimi-k3@cn"))
-        self.assertEqual(st["usd_cap"], 3.5)          # 预算用这次运行的上限
+                         ("kimi", "kimi-k3", "cn", "high", 5.0, "kimi-k3@cn"))
+        self.assertEqual(st["usd_cap"], 5.0)          # 预算用这次运行的上限
         self.assertTrue(st["key_in_memory"])          # 停在人工确认：批准后还要用，key 还在
         self.assertNoKey(json.dumps(st))
         self.c.post(f"/api/runs/{st['id']}/cancel")
@@ -308,7 +312,7 @@ class TestRunsByok(_Client):
         r = self.c.post("/api/runs", json={"question": "q", "as_of": "2026-06-20", "api_key": KEY})   # 什么都不选：DeepSeek 默认
         sp = r.json()["run_spec"]
         self.assertEqual((sp["provider"], sp["model"], sp["region"], sp["thinking"], sp["usd_cap"]),
-                         ("deepseek", "deepseek-flash", "global", "off", 2.0))
+                         ("deepseek", "deepseek-flash", "global", "off", 3.0))   # v2.13b：默认上限 $3
 
     def test_full_run_drops_key_and_writes_no_key(self):
         rid = self.c.post("/api/runs", json=self.body(provider="claude", model="claude-sonnet-5-5", thinking="medium")).json()["id"]
@@ -325,7 +329,7 @@ class TestRunsByok(_Client):
         state = json.loads((out / "state.json").read_text(encoding="utf-8"))
         self.assertEqual(state["provider"], "claude")
         self.assertEqual({k: state["settings"]["run_spec"][k] for k in ("provider", "model", "region", "thinking", "usd_cap")},
-                         {"provider": "claude", "model": "claude-sonnet-5-5", "region": "global", "thinking": "medium", "usd_cap": 2.0})
+                         {"provider": "claude", "model": "claude-sonnet-5-5", "region": "global", "thinking": "medium", "usd_cap": 3.0})
         self.assertNotIn("api_key", json.dumps(state))
         for f in self.tmp.rglob("*"):
             if f.is_file():

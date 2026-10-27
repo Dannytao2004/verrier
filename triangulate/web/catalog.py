@@ -11,7 +11,7 @@ import inspect
 import math
 
 from .. import providers as PV
-from ..agent.pipeline import Budget, configure_byok
+from ..agent.pipeline import RUN_BUDGET, Budget, configure_byok
 from ..config import MAX_TOKENS, PRICES
 
 # 一次运行的 token 构成（只用来估花费）。来源：results/agent/**/calls.jsonl 里 2026-10-18 起的 deepseek-flash 运行（同 frozen-v2.8r 的代码），
@@ -156,12 +156,12 @@ def sends(model: str, effort) -> dict:
 
 def _budget(pid: str, model: str, level: str, cap: float) -> Budget:
     """和真正运行的预算同样设置（pipeline.Context -> configure_byok：搜索按实际发出的 max_tokens 和 p99 的输入预扣）。"""
-    return configure_byok(Budget.for_model(pid, usd=cap), model, level)
+    return configure_byok(Budget.for_model(pid, usd=cap, **RUN_BUDGET), model, level)   # v2.13b：和真实运行同样的设置
 
 
 def _round1_hold(b: Budget) -> float:
     """第一轮各方向同时搜索时的预扣合计（最多 LLM_CONCURRENCY 个在途）。v2.10f：超过上限时搜索排队（等在途的结束），不再中止运行。"""
-    return min(b.directions, LLM_CONCURRENCY) * b.search_reserve()
+    return min(b.directions * b.searches_per_direction, LLM_CONCURRENCY) * b.search_reserve()
 
 
 def _call_hold(pid: str, model: str, level: str, role: str, chars: int) -> float:
@@ -181,7 +181,7 @@ def run_floor(model: str, region: str, level: str) -> dict:
     ad = PV.ADAPTERS[PV.MODELS[model]["provider"]]
     pid = PV.price_id(model, region, ad)
     parts = {"plan": _call_hold(pid, model, level, "plan", PLAN_PROMPT_CHARS),
-             "search": _budget(pid, model, level, 1.0).search_reserve(),
+             "search": _budget(pid, model, level, 1.0).search_reserve() * RUN_BUDGET["searches_per_direction"],   # 同时发出
              "extract": _extract_hold(pid, model, level),
              "judge": _call_hold(pid, model, level, "judge", JUDGE_PROMPT_CHARS)}
     return {"parts": {k: round(v, 4) for k, v in parts.items()}, "usd": sum(parts.values())}
@@ -201,7 +201,7 @@ def estimate(model: str, region: str, level: str, cap: float) -> dict:
     b = _budget(pid, model, level, cap)
     rp = RUN_PROFILE
     n_dirs = rp["directions_per_round1_max"] * b.directions
-    usd = (n_dirs * Budget.profile_usd(pid, Budget.DIRECTION_PROFILE) + Budget.profile_usd(pid, rp["reasoning"])
+    usd = (n_dirs * Budget.profile_usd(pid, Budget.DIRECTION_PROFILE) * b.direction_scale() + Budget.profile_usd(pid, rp["reasoning"])
            + Budget.profile_usd(pid, rp["other"]))
     think = 0.0
     if PV.effort_for(model, level, "plan"):

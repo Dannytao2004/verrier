@@ -27,7 +27,7 @@ from .config import (CLAUDE_US_GEO_MULTIPLIER, KIMI_WEB_SEARCH_FEE_ASSUMED_USD, 
 
 THINKING_UI = ("off", "low", "medium", "high")   # 网页上的一个总档位
 REASONING_ROLES = ("plan", "judge", "repair")    # 档位只作用于这三个角色（config.thinking_role 的取值）；其余角色能关就关
-DEFAULT_USD_CAP = 2.00
+DEFAULT_USD_CAP = 3.00   # v2.13b：第一轮每个方向 3 个搜索 agent 以后，$2 只放得下 6 个方向（按假设单价的搜索费），$3 放得下 10 个
 KEY_MIN_CHARS, KEY_MAX_CHARS = 8, 512
 # v2.10f：key 只收这些字符（各家真实的 key：sk-... 的 base64url、GLM 的 hex.secret 都在里面）。不收 " \ & < > ' 等：
 # 兜底的 redact 是在序列化之后的文字上找 key，JSON 转义（\" \\）和 HTML 转义（&amp; 等）会让它找不到

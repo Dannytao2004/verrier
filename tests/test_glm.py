@@ -424,7 +424,7 @@ class TestGLMCost(unittest.TestCase):
         self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "glm-5.3"), (100_000 * 1.4 + 1000 * 4.4) / 1e6)
         self.assertAlmostEqual(P.Budget.llm_reserve(100_000, 1000, "glm-5.3@cn"), (100_000 * 8 + 1000 * 28) / 1e6 / FX)
         ctx = P.Context("t", "q", "2026-06-20", Path(tempfile.mkdtemp()) / "c.jsonl", spec=spec("glm-5.3", "high", region="cn"))
-        self.assertEqual((ctx.budget.model, ctx.budget.usd_cap), ("glm-5.3@cn", 2.0))
+        self.assertEqual((ctx.budget.model, ctx.budget.usd_cap), ("glm-5.3@cn", 3.0))   # v2.13b：默认上限 $3
         self.assertEqual((ctx.budget.search_tokens, ctx.budget.search_input_tokens), (SEARCH_MAX + EXTRA, 72_000))
         self.assertAlmostEqual(ctx.budget.search_reserve(),
                                (72_000 * 8 + ctx.budget.search_tokens * 28) / 1e6 / FX + 8 * 0.01 / FX)
@@ -637,7 +637,7 @@ class TestModelSpecGLM(unittest.TestCase):
                                        "usd_cap": 5.0, "byok": True, "price_id": "glm-5.3@cn",
                                        "fx": {"cny_per_usd": 6.7192, "source": config.CNY_PER_USD_SOURCE, "date": "2026-10-21"}})
         self.assertEqual(spec().public(), {"provider": "glm", "model": "glm-5.2", "region": "global", "thinking": "off",
-                                           "thinking_by_role": {}, "usd_cap": 2.0, "byok": True})
+                                           "thinking_by_role": {}, "usd_cap": 3.0, "byok": True})
         self.assertNotIn(KEY, repr(sp))
         with self.assertRaises(PV.SpecError):
             spec(region="coding")

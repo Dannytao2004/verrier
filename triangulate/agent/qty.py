@@ -22,6 +22,13 @@ for _c in CURRENCIES:
     UREG.define(f"{_c} = [currency_{_c}]")
 UREG.define("percentage_point = 0.01 = pp")
 UREG.define("basis_point = 0.0001 = bp")
+# v2.13a（用户 10-26：「月」和「月份」这种应该是同一个东西，别区分开）：pint 不认的时间写法补成别名，
+# 否则会被当成新的计数名词（visit/mo 换不到 visit/month，方法被误拦）
+for _alias in ("mo = month", "mth = month", "wk = week", "annum = year"):
+    UREG.define(_alias)
+# 中文的时间单位换成英文再解析（只换时间词；中文名词照旧解析不了，交给报错）
+CJK_TIME = (("个月", " month "), ("月份", " month "), ("月度", " month "), ("季度", " (3 month) "), ("年度", " year "),
+            ("星期", " week "), ("月", " month "), ("年", " year "), ("周", " week "), ("天", " day "), ("日", " day "))
 _LOCK = threading.Lock()   # 注册表是模块级的，会自动加名词；网页里几个运行可能同时解析
 
 
@@ -52,6 +59,9 @@ def parse_unit(text) -> tuple:
     if not isinstance(text, str) or not text.strip():
         return None, "unit is empty"
     s = text.strip().replace("%", " percent ")
+    for cjk, en in CJK_TIME:
+        s = s.replace(cjk, en)
+    s = re.sub(r"\bquarters?\b", "(3 month)", s)   # pint 的 quarter 是重量单位；单位里写的季度是 3 个月
     m = re.search(r"[,;]|\b(?:or|and|vs|versus)\b", s, re.I)   # 'kg or lbs'、'kg, lb'：给了几个候选，不是一个单位
     if m:
         return None, f"unit '{text}': {m.group(0).lower()!r} gives alternatives; pin exactly one unit"

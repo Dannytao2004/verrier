@@ -52,6 +52,9 @@ class Budget:
     # 搜索次数），只用来算两个模型的价格比例，不用来记账
     DIRECTION_PROFILE = {"hit": 13_600, "miss": 25_700, "out": 3_600, "searches": 4}
     ROUND1_USD_SHARE = 0.6   # 第一轮方向最多用掉上限的 60%，其余留给 base-rate 方向、裁判、终稿
+    # v2.13b：TYPICAL_DIRECTION_USD 是「1 次搜索 + 4 个网址」的方向；其中约 85% 是搜索（按假设单价记的搜索费 + 搜索 token），
+    # 10-27 实验（probes/search_overlap_probe.py，sponsor 题 7 个方向）：1 x 4 每个方向约 $0.050，3 x 12 约 $0.149
+    SEARCH_COST_SHARE = 0.85
     model = None   # v2.10a：计价用的模型；None = config.MODEL（命令行、回测）。Budget.for_model 设
     search_tokens = None   # v2.10b：一次搜索发出的 max_tokens；None = MAX_TOKENS["search"]（有 ModelSpec 时 Context 设成实际发出的值）
     # 一次搜索请求预扣的输入 token。命令行（没有 spec）照旧 30,000；v2.10f 自带 key 的运行（模型自己搜的 provider）按已存 1,262 次
@@ -65,10 +68,12 @@ class Budget:
 
     def __init__(self, usd: float = 1.00, pages: int = 48, round1_pages: int = 40, llm_concurrency: int = 8,
                  extra_directions: int = 3, urls_per_direction: int = 4, search_max_uses: int = 3,
-                 max_directions_hard: int = 16):
+                 max_directions_hard: int = 16, searches_per_direction: int = 1):
         self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages
         self.extra_directions = extra_directions
         self.urls_per_direction, self.search_max_uses = urls_per_direction, search_max_uses
+        # v2.13b（用户 10-26：第一轮多派搜索 agent，扩大数据面、降低每次运行的随机性）：一个方向同时搜几次，网址合并
+        self.searches_per_direction = max(1, int(searches_per_direction))
         self.max_directions_hard = max_directions_hard
         self.directions = self._max_directions()
         self.usd_tokens = 0.0
@@ -117,9 +122,15 @@ class Budget:
         return ((profile["hit"] * hit + profile["miss"] * miss + profile["out"] * out) / 1e6
                 + profile.get("searches", 0) * search_fee_usd(model))
 
+    def direction_scale(self) -> float:
+        """v2.13b：一个方向的典型花费相对「1 次搜索 + 4 个网址」放大几倍（搜索次数、每方向网址数都按线性算）。类默认值时正好是 1。"""
+        return (1 + self.SEARCH_COST_SHARE * (self.searches_per_direction - 1)
+                + (1 - self.SEARCH_COST_SHARE) * (self.urls_per_direction - 4) / 4)
+
     def _max_directions(self) -> int:
         return max(1, min(self.max_directions_hard, self.round1_pages // self.urls_per_direction,
-                          int(self.ROUND1_USD_SHARE * self.usd_cap / self.typical_direction_usd(self.model or MODEL))))
+                          int(self.ROUND1_USD_SHARE * self.usd_cap
+                              / (self.typical_direction_usd(self.model or MODEL) * self.direction_scale()))))
 
     def halt(self, reason: str) -> str:
         """v2.10a：立刻停下整次运行（余额不足）。之后每次预扣都抛 BudgetExceeded，各节点按预算中止的路径干净收尾
@@ -279,6 +290,7 @@ class Budget:
                "usd_search_fee_assumed": round(self.usd_search_fee, 4), "usd_cap": self.usd_cap,
                "pages_used": self.pages_used, "pages_cap": self.pages_cap, "round1_pages": self.round1_pages,
                "max_directions": self.directions, "urls_per_direction": self.urls_per_direction,
+               **({"searches_per_direction": self.searches_per_direction} if self.searches_per_direction > 1 else {}),
                "n_calls_logged": self.n_calls, "aborted": self.aborted}
         if self.wait_for_room:   # v2.10f：只有自带 key 的运行记（命令行的 state.json 不变）
             out.update(waited_for_room=self.n_waits, wait_s=round(self.wait_s, 1),
@@ -626,12 +638,19 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
                                     hints="; ".join(map(str, d.get("search_hints") or []))[:400],
                                     **{k: target.get(k, "") for k in ("what", "unit", "period_start", "period_end", "publisher")},
                                     **{k: str(d.get(k, ""))[:600] for k in ("category", "perspective", "hypothesis", "data_to_find")})
-        with b.sem, b.hold(b.search_reserve()):
-            try:
-                s = ctx.searcher.search(prompt, role=f"search:{d['id']}", qid=ctx.qid, max_uses=b.search_max_uses,
-                                        cap=b.urls_per_direction)
-            except BalanceExhausted as e:   # v2.10a：余额不足 -> 整次运行停下
-                raise BudgetExceeded(b.halt(str(e))) from None
+        def one(j):
+            role = f"search:{d['id']}" + (f":{j + 1}" if b.searches_per_direction > 1 else "")
+            with b.sem, b.hold(b.search_reserve()):
+                try:
+                    return ctx.searcher.search(prompt, role=role, qid=ctx.qid, max_uses=b.search_max_uses,
+                                               cap=b.urls_per_direction)
+                except BalanceExhausted as e:   # v2.10a：余额不足 -> 整次运行停下
+                    raise BudgetExceeded(b.halt(str(e))) from None
+        if b.searches_per_direction == 1:
+            s = one(0)
+        else:   # v2.13b：几个搜索 agent 各搜各的（同一个 prompt、默认温度），网址合并后按票数排
+            with ThreadPoolExecutor(b.searches_per_direction) as ex:
+                s = merge_searches(list(ex.map(one, range(b.searches_per_direction))), b.urls_per_direction)
         out["search"] = s
         _emit(ctx, kind="searched", direction_id=d["id"], n_urls=len(s.get("urls", [])[: b.urls_per_direction]))
         urls = s.get("urls", [])[: b.urls_per_direction]
@@ -660,6 +679,43 @@ def run_direction(ctx: Context, target: dict, d: dict, round_no: int) -> dict:
     out["wall_s"] = round(time.time() - t0, 1)
     _emit(ctx, kind="direction_done", direction_id=d["id"], round=round_no, n_points=len(out["points"]),
           stopped=out.get("error") or out.get("aborted") or out.get("stopped"))
+    return out
+
+
+# v2.13b（用户 10-26 要第一轮多派搜索 agent、扩大数据面；10-27 实验定的档位）：真实运行（命令行、回测、网页）的预算设置。
+# 每个方向 3 个搜索 agent 各搜各的、合并后取 12 个网址：sponsor 题两次运行之间数据点重合 53% -> 约 73%，页面重合 12% -> 30%，
+# 再往上（14、16）不再涨。Budget() 的类默认值不变（单元测试、金标准路径照旧）
+RUN_BUDGET = {"pages": 156, "round1_pages": 120, "urls_per_direction": 12, "searches_per_direction": 3}
+RUN_USD_CAP = 3.00   # 命令行 / 回测的上限（网页运行用自带 key 的 usd_cap，默认 providers.DEFAULT_USD_CAP）
+
+
+def run_budget(spec=None) -> Budget:
+    """真实运行的预算：RUN_BUDGET 的设置；自带 key 的运行按它的模型计价、上限是它的 usd_cap。"""
+    if spec is None:
+        return Budget(usd=RUN_USD_CAP, **RUN_BUDGET)
+    return Budget.for_model(spec.price_id, usd=spec.usd_cap, **RUN_BUDGET)
+
+
+def merge_searches(runs: list, cap: int) -> dict:
+    """v2.13b：同一个方向的几次独立搜索合并成一份。网址按被几次搜索找到排（票多的在前，同票按第一次出现的先后），取前 cap 个；
+    查询词、请求次数、费用都合起来，每次搜索各自的结果留在 runs 里（只进 state.json 审计）。"""
+    votes, first = {}, {}
+    for r in runs:
+        for u in dict.fromkeys(r.get("urls") or []):   # 一次搜索之内先去重
+            votes[u] = votes.get(u, 0) + 1
+            first.setdefault(u, len(first))
+    ranked = sorted(votes, key=lambda u: (-votes[u], first[u]))
+    out = {"queries": [q for r in runs for q in r.get("queries") or []], "urls": ranked[:cap],
+           "url_votes": {u: votes[u] for u in ranked}, "n_searches": len(runs),
+           "web_search_requests": sum(int(r.get("web_search_requests") or 0) for r in runs),
+           "usd": sum(float(r.get("usd") or 0) for r in runs),
+           "usd_search_fee_assumed": sum(float(r.get("usd_search_fee_assumed") or 0) for r in runs),
+           "runs": [{k: r.get(k) for k in ("queries", "urls", "error", "web_search_requests") if k in r} for r in runs]}
+    errs = [r["error"] for r in runs if r.get("error")]
+    if errs and len(errs) == len(runs):
+        out["error"] = errs[0]
+    if any(r.get("queries_reported") is False for r in runs):
+        out["queries_reported"] = False
     return out
 
 

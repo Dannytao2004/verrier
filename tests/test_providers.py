@@ -159,10 +159,10 @@ class TestModelSpec(unittest.TestCase):
     def test_defaults_and_public_view(self):
         sp = spec()
         self.assertEqual((sp.provider, sp.model, sp.region, sp.thinking, sp.usd_cap), ("deepseek", "deepseek-flash",
-                                                                                       "global", "off", 2.0))
+                                                                                       "global", "off", 3.0))   # v2.13b
         pub = sp.public()
         self.assertEqual(pub, {"provider": "deepseek", "model": "deepseek-flash", "region": "global", "thinking": "off",
-                               "thinking_by_role": {}, "usd_cap": 2.0, "byok": True})
+                               "thinking_by_role": {}, "usd_cap": 3.0, "byok": True})   # v2.13b：默认上限 $3
         self.assertEqual(spec(thinking="High").public()["thinking_by_role"], {"plan": "high", "judge": "high", "repair": "high"})
         for text in (repr(sp), str(sp), json.dumps(pub), f"{sp}"):
             self.assertNotIn(KEY, text)
@@ -417,8 +417,8 @@ class TestRunWithSpec(unittest.TestCase):
         from triangulate.agent import run as R
         s = R.run_settings()
         self.assertNotIn("run_spec", s)
-        self.assertEqual(set(s), {"max_tokens", "budget_defaults", "interval"} | ({"thinking"} if config.THINKING else set()))
-        self.assertEqual(set(R.run_settings(spec())), {"max_tokens", "budget_defaults", "interval", "run_spec"})
+        self.assertEqual(set(s), {"max_tokens", "budget_defaults", "budget_run", "interval"} | ({"thinking"} if config.THINKING else set()))
+        self.assertEqual(set(R.run_settings(spec())), {"max_tokens", "budget_defaults", "budget_run", "interval", "run_spec"})
 
 
 class TestJevDisabledInByokRuns(unittest.TestCase):
