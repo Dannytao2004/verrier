@@ -1,0 +1,18 @@
+{
+ "cid": "fc_uk_carprod_2026_09__naive__off",
+ "qid": "fc_uk_carprod_2026_09",
+ "arm": "naive",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "as_of": "2026-10-27",
+ "question": "Assume today is 2026-10-27. You know nothing published after this date. Estimate the number of cars manufactured in the United Kingdom in September 2026 (total car production for home and export markets, excluding commercial vehicles), as it will be first reported in the Society of Motor Manufacturers and Traders' (SMMT) monthly UK car manufacturing release.",
+ "released_at": "2026-10-29T00:01:00+00:00",
+ "started_at": "2026-10-27T10:55:16+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test4\\raw\\naive_off\\fc_uk_carprod_2026_09.json",
+ "usd": 4.2e-05,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 0.9,
+ "finished_at": "2026-10-27T10:55:17+00:00"
+}

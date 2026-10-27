@@ -1,0 +1,40 @@
+{
+ "cid": "fc_uk_homesales_2026_09__search_direct__off",
+ "qid": "fc_uk_homesales_2026_09",
+ "arm": "search_direct",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "as_of": "2026-10-27",
+ "question": "Assume today is 2026-10-27. You know nothing published after this date. Estimate the number of UK residential property transactions (with a value of £40,000 or above) in September 2026, seasonally adjusted, as it will be first reported (provisional estimate) in HM Revenue & Customs' monthly release 'Monthly property transactions completed in the UK with value of £40,000 or above'.",
+ "released_at": "2026-10-30T09:30:00+00:00",
+ "started_at": "2026-10-27T11:34:17+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test4\\raw\\search_direct_off\\fc_uk_homesales_2026_09.json",
+ "usd": 0.020606,
+ "attempts_in_arm": 1,
+ "arm_status": "ok",
+ "estimate": 97000.0,
+ "web_search_requests": 2,
+ "n_result_urls": 11,
+ "result_urls": [
+  "https://start.duckduckgo.com/html/?q=monthly%20property%20transactions%20%2Dsite%3Adata.gov.sg%20%2Dsite%3Awww.statista.com%20%2Dsite%3Ainsideconveyancing.co.uk",
+  "https://www.gov.uk/government/statistics/monthly-property-transactions-completed-in-the-uk-with-value-40000-or-above/uk-monthly-property-transactions-commentary--2?page=4&page=1&page=1&page=6&page=4&&m2?utm_source=vebra&page=6&q=moore&s=lettings#1",
+  "https://www.propertywire.com/news/uk/uk-property-transactions-decline-2-in-july-2026/",
+  "https://www.propertywire.com/news/uk-property-transactions-fall-3-in-april-amid-uncertainty/",
+  "https://www.mpamag.com/uk/mortgage-types/residential/residential-property-transactions-edge-up-amid-calls-for-policy-certainty/584495#1",
+  "https://www.propertywire.com/news/uk-property-transactions-drop-41-following-stamp-duty-changes/",
+  "https://www.mortgagestrategy.co.uk/news/property-transactions-down-3-in-april-says-hmrc/",
+  "https://www.mortgagestrategy.co.uk/news/property-transactions-up-1-in-march-says-hmrc/",
+  "https://www.mortgagefinancegazette.com/industry-insight/property-deals-fall-3-in-april-says-hmrc-29-05-2026/",
+  "https://www.mortgagestrategy.co.uk/news/resi-property-transactions-up-6-in-february-hmrc/",
+  "https://www.mpamag.com/uk/mortgage-types/residential/uk-home-sales-slip-in-july-but-market-direction-remains-positive/587835#1"
+ ],
+ "n_thinking_blocks": [
+  0
+ ],
+ "max_tokens": 4096,
+ "thinking_requested": "disabled",
+ "outcome": "done",
+ "wall_s": 2.8,
+ "finished_at": "2026-10-27T11:34:20+00:00"
+}

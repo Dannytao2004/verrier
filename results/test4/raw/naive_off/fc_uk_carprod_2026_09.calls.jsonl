@@ -1,0 +1,1 @@
+{"arm": "naive", "qid": "fc_uk_carprod_2026_09", "attempt": 1, "model": "deepseek-flash", "http": 200, "http_try": 1, "latency_s": 0.89, "at": "2026-10-27T10:55:16+00:00", "finish_reason": "stop", "prompt_tokens": 232, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 232, "completion_tokens": 12, "usd": 4.2e-05, "ok": true}

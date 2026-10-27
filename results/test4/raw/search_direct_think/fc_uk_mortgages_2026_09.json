@@ -1,0 +1,308 @@
+{
+ "qid": "fc_uk_mortgages_2026_09",
+ "arm": "search_direct",
+ "model": "deepseek-flash",
+ "target_unit": "",
+ "as_of": "2026-10-27",
+ "system": "You answer Fermi estimation questions with a single best estimate.\nReply with one JSON object and nothing else:\n{\"estimate\": <number>, \"unit\": \"<unit>\"}\nRules:\n- \"estimate\" is a plain JSON number (for example 3.2e9). No words, no ranges, no arithmetic expressions.\n- Express the estimate in the target unit given by the user and copy that unit string into \"unit\".\n- If the target unit is \"\" the answer is a pure number (a count or a ratio) and \"unit\" must be \"\".\nYou can use the web_search tool before you answer. Your final message must contain only the JSON object.",
+ "user": "Question: Assume today is 2026-10-27. You know nothing published after this date. Estimate the number of net mortgage approvals for house purchase in the United Kingdom in September 2026 (seasonally adjusted), as it will be first reported in the Bank of England's monthly Money and Credit statistical release.\nTarget unit: \"\" (a pure number: a count of mortgage approvals)",
+ "max_uses": 5,
+ "max_tokens": 28096,
+ "attempts": [
+  {
+   "attempt": 1,
+   "with_tools": true,
+   "at": "2026-10-27T11:14:32+00:00",
+   "latency_s": 18.74,
+   "stop_reason": "end_turn",
+   "final_text": "{\"estimate\": 57000, \"unit\": \"\"}",
+   "reply": {
+    "estimate": 57000,
+    "unit": ""
+   },
+   "problems": [],
+   "input_tokens": 25064,
+   "cache_read_input_tokens": 32768,
+   "cache_creation_input_tokens": 0,
+   "output_tokens": 2269,
+   "web_search_requests": 7,
+   "usd": 0.005219,
+   "usd_search_fee_assumed": 0.07,
+   "queries": [
+    "Bank of England mortgage approvals September 2025 seasonally adjusted",
+    "UK net mortgage approvals house purchase monthly 2024 2025 average",
+    "UK mortgage approvals September 2026 forecast consensus",
+    "Bank of England Money and Credit October 2026 preview mortgage approvals September",
+    "\"September\" \"2026\" \"mortgage approvals\" \"57.0\" UK",
+    "UK mortgage approvals September 2026 expected 57,000 October 2026",
+    "\"Money and Credit\" \"September 2026\" mortgage approvals preview"
+   ],
+   "results": [
+    {
+     "url": "https://www.bankofengland.co.uk/statistics/money-and-credit/2025/september-2025?utm_term=5439473#1",
+     "title": "Money and Credit - September 2025 - Published on 29 October 2025",
+     "page_age": null
+    },
+    {
+     "url": "https://wwwtest.bankofengland.co.uk/statistics/money-and-credit/2025/september-2025",
+     "title": "Money and Credit - September 2025",
+     "page_age": null
+    },
+    {
+     "url": "https://moneyfactscompare.co.uk/news/mortgages/september-mortgage-approvals-at-highest-level-in-2025/#1",
+     "title": "September Sees Highest Number of Mortgage Approvals This Year - Published: 29/10/2025",
+     "page_age": null
+    },
+    {
+     "url": "https://theintermediary.co.uk/2025/10/mortgage-borrowing-hits-six-month-high-as-approvals-edge-up-boe-data-shows/#astor-content",
+     "title": "Mortgage borrowing hits six-month high as approvals edge up, BoE data shows",
+     "page_age": null
+    },
+    {
+     "url": "https://www.mpamag.com/uk/mortgage-industry/market-trends/mortgage-approvals-up-as-lending-activity-picks-up/554689?hsmemberId=536570&tu=3c3211f9-fd1e-4255-b653-1600aa7aa708&utm_campaign=&utm_medium=20251029&_hsenc=p2ANqtz--5nZedAitjM34wssMIQ7VZ7TejFplaDF3ah4JNKUmmonHRCYotpQighjNtozc6s_BUYufsIzCdn3SKJJ63vbiqR6jZWV7gqPyKQ_OuqPfKcXsx424&_hsmi=387394846&utm_content=3c3211f9-fd1e-4255-b653-1600aa7aa708&utm_source=#1",
+     "title": "Mortgage approvals up as lending activity picks up - Mortgage approvals up as lending activity picks up",
+     "page_age": null
+    },
+    {
+     "url": "https://www.independent.co.uk/money/rachel-reeves-budget-chancellor-hargreaves-lansdown-b2854387.html#1",
+     "title": "Mortgage approvals hit nine-month high as borrowing costs ease further - Stay up to date with notifications from The Independent",
+     "page_age": null
+    },
+    {
+     "url": "https://bridgingandcommercial.co.uk/net-mortgage-debt-and-net-mortgage-approvals-for-house-purchases-increase-for-september-boe",
+     "title": "Net mortgage debt and net mortgage approvals for house purchases increase for September, BoE",
+     "page_age": null
+    },
+    {
+     "url": "https://www.standard.co.uk/business/money/rachel-reeves-budget-hargreaves-lansdown-b1255401.html#1",
+     "title": "Mortgage approvals hit nine-month high as borrowing costs ease further - Allow Google Search",
+     "page_age": null
+    },
+    {
+     "url": "https://www.sharesmagazine.co.uk/news/market/1761731516361949900/uk-mortgage-borrowing-hits-six-month-high-in-september-boe-says",
+     "title": "UK mortgage borrowing hits six-month high in September, BoE says",
+     "page_age": null
+    },
+    {
+     "url": "https://www.finmarket.ru/news/6501418#1",
+     "title": "Число одобренных ипотечных кредитов в Британии в сентябре достигло максимумума с конца 2024 года - .\n\n.\n\nСЕГОДНЯ:\n\n.\n\n.\n\n.\n\nНОВОСТИ\n\nГлавная / Все новости / Число одобренных ипотечных кредитов в Брита",
+     "page_age": null
+    },
+    {
+     "url": "https://www.estateagenttoday.co.uk/breaking-news/2025/05/mortgage-approvals-at-three-year-high-as-market-recovers/?email=cedb536d9a19859385463f5341810f5a9d29d66379ec990feb8cdeed6cca1a29",
+     "title": "Mortgage approvals at four year high as market recovers - Estate Agent Today",
+     "page_age": null
+    },
+    {
+     "url": "https://www.moneycontrol.com/economic-calendar/united-kingdom-mortgage-approvals/1864859#1",
+     "title": "United Kingdom Kingdom Mortgage Approvals | Historical Dates 1986-2026 Data| Moneycontrol - In App",
+     "page_age": null
+    },
+    {
+     "url": "https://estateagentnetworking.co.uk/mortgage-market-activity-forecast-to-climb/#1",
+     "title": "Mortgage market activity forecast to climb - ADVERTISE TO 300,000 PROPERTY PROFESSIONALS",
+     "page_age": null
+    },
+    {
+     "url": "https://www.moneycontrol.com/economic-calendar/gbr-mortgage-approvals/1864859#1",
+     "title": "United Kingdom Mortgage Approvals | Historical Dates 1986-2026 Data| Moneycontrol - In App",
+     "page_age": null
+    },
+    {
+     "url": "https://edwardsandplumbproperty.com/news/uk-property-transactions-and-mortgage-activity-hit-three-year-high/#main",
+     "title": "UK property transactions and mortgage activity hit three-year high | Edwards & Plumb",
+     "page_age": null
+    },
+    {
+     "url": "https://www.mpamag.com/uk/mortgage-industry/market-trends/mortgage-approvals-projected-to-top-780000-this-year/537233#1",
+     "title": "Mortgage approvals projected to top 780,000 this year - Mortgage approvals projected to top 780,000 this year",
+     "page_age": null
+    },
+    {
+     "url": "https://www.mortgagestrategy.co.uk/news/mortgage-approvals-to-top-780000-in-2025-alexander-hall/#content",
+     "title": "Mortgage approvals to top 780,000 in 2025: Alexander Hall",
+     "page_age": null
+    },
+    {
+     "url": "https://theintermediary.co.uk/2025/05/mortgage-approvals-set-to-exceed-780000-in-2025-alexander-hall/#astor-content",
+     "title": "Mortgage approvals set to exceed 780,000 in 2025 - Alexander Hall",
+     "page_age": null
+    },
+    {
+     "url": "https://todaysconveyancer.co.uk/mortgage-figures-show-strong-2025-slow-start-2026/#elementor-action%3Aaction%3Dpopup%3Aopen%26settings%3DeyJpZCI6IjkwODI1IiwidG9nZ2xlIjpmYWxzZX0%3D",
+     "title": "Mortgage figures show a strong 2025 but slow start to 2026 | Today's Conveyancer",
+     "page_age": null
+    },
+    {
+     "url": "https://pl.tradingeconomics.com/united-kingdom/mortgage-approvals",
+     "title": "Zatwierdzenia kredytów hipotecznych w Wielkiej Brytanii1986-2025 Dane",
+     "page_age": null
+    },
+    {
+     "url": "https://www.fxblue.com:443/calendar/item/a4e6c236-c51b-4316-a6f8-e8598980e76a/a8539214-6fe2-4a6c-aace-856d6326bb72",
+     "title": "FX Blue - Mortgage Approvals (GBP)",
+     "page_age": null
+    },
+    {
+     "url": "https://www.fxblue.com/calendar/item/a4e6c236-c51b-4316-a6f8-e8598980e76a/d6221c82-77e5-4954-b0d0-c6132183f62f",
+     "title": "Mortgage Approvals (GBP) | FX Blue",
+     "page_age": null
+    },
+    {
+     "url": "https://www.fxblue.com/calendar/item/a4e6c236-c51b-4316-a6f8-e8598980e76a/a4862c78-d1ab-402e-935e-fc67fbfd8c79",
+     "title": "FX Blue",
+     "page_age": null
+    },
+    {
+     "url": "https://tradingeconomics.com/united-kingdom/mortgage-approvals#1",
+     "title": "United Kingdom Mortgage Approvals - Net mortgage approvals for UK house purchases, a key indicator of future borrowing, fell to 54,900 in August 2026, down from a r...",
+     "page_age": null
+    },
+    {
+     "url": "https://www.moneycontrol.com/economic-calendar/united-kingdom-mortgage-approvals/1864859#1",
+     "title": "United Kingdom Kingdom Mortgage Approvals | Historical Dates 1986-2026 Data| Moneycontrol - In App",
+     "page_age": null
+    },
+    {
+     "url": "https://m.cngold.org/calendar/wechat/c704211.html",
+     "title": "历史数据",
+     "page_age": null
+    },
+    {
+     "url": "https://en.savills.it/research_articles/258706/395365-0",
+     "title": "UK Housing Market Update - October 2026",
+     "page_age": null
+    },
+    {
+     "url": "https://www.savills.us/research_articles/256536/393967-0",
+     "title": "UK Housing Market Update - September 2026",
+     "page_age": null
+    },
+    {
+     "url": "https://www.metatrader.com/de/economic-calendar/united-kingdom/boe-mortgage-approvals?period=all-time",
+     "title": "BoE Hypothekengenehmigungen 2026 - wirtschaftsindex des Vereinigten Königreichs",
+     "page_age": null
+    },
+    {
+     "url": "https://sigmanomics.com/uk/mortgage-approvals",
+     "title": "Mortgage Approvals: 54.92K (Sep 2026) — United Kingdom | Sigmanomics",
+     "page_age": null
+    },
+    {
+     "url": "https://www.surveymerchant.com/blog/mortgage-approvals-slide-54900-buyers-wait-budget-order-survey-now-october-2026-261026",
+     "title": "Mortgage Approvals Fall to 54,900 Before Budget (Oct 2026)",
+     "page_age": null
+    },
+    {
+     "url": "https://tradingeconomics.com/united-kingdom/mortgage-approvals#1",
+     "title": "United Kingdom Mortgage Approvals - Net mortgage approvals for UK house purchases, a key indicator of future borrowing, fell to 54,900 in August 2026, down from a r...",
+     "page_age": null
+    },
+    {
+     "url": "https://www.vtmarkets-fa.com/live-updates/%d8%a8%d8%a7%d9%86%da%a9-%d8%a7%d9%86%da%af%d9%84%d8%b3%d8%aa%d8%a7%d9%86-%d8%a8%d8%a7-%d8%aa%d8%af%d8%a7%d9%88%d9%85-%d9%86%d8%b1%d8%ae%d9%87%d8%a7%db%8c-%d8%a8%d9%87%d8%b1%d9%87-%d8%a8/",
+     "title": "بانک انگلستان با تداوم نرخهای بهره بالا برای مدت طولانیتر روبهروست؛ همزمان با افت تأیید وامهای مسکن و بازگشت تورمِ ناشی از انرژی - VT Markets",
+     "page_age": null
+    },
+    {
+     "url": "https://www.vtmarkets.com/kr-asia/live-updates/%e8%8b%b1-%ec%a4%91%ec%95%99%ec%9d%80%ed%96%89-%ec%a3%bc%ed%83%9d%eb%8b%b4%eb%b3%b4%eb%8c%80%ec%b6%9c-%ec%8a%b9%ec%9d%b8-%ea%b0%90%ec%86%8c%c2%b7%ec%97%90%eb%84%88%ec%a7%80%eb%b0%9c-%ec%9d%b8/#1",
+     "title": "英 중앙은행, 주택담보대출 승인 감소·에너지발 인플레 재확산에 ‘고금리 장기화’ 직면 - VT Markets - This website is for a different region.",
+     "page_age": null
+    },
+    {
+     "url": "https://www.cherryplc.co.uk/industry/pressreleases/details/24673",
+     "title": "Just Mortgages comments on BoE Money and Credit",
+     "page_age": null
+    },
+    {
+     "url": "https://www.vtmarkets.com/fr-ca/live-updates/la-banque-dangleterre-confrontee-a-des-taux-plus-eleves-plus-longtemps-alors-que-les-approbations-de-prets-hypothecaires-reculent-et-que-linflation-alimentee-par-lenergie-r/#respond#1",
+     "title": "La Banque d’Angleterre confrontée à des taux plus élevés plus longtemps, alors que les approbations de prêts hypothécaires reculent et que l’inflation alimentée par l’énergie refait surface - VT Marke",
+     "page_age": null
+    },
+    {
+     "url": "https://at.marketscreener.com/boerse-nachrichten/britische-kreditgeber-schraenken-hypothekenangebot-erstmals-seit-drei-jahren-ein-ce785dded18efe24",
+     "title": "Britische Kreditgeber schränken Hypothekenangebot erstmals seit drei Jahren ein",
+     "page_age": null
+    },
+    {
+     "url": "https://www.vtmarkets.com/jp-asia/live-updates/%e8%8b%b1%e4%b8%ad%e9%8a%80%e3%80%81%e4%bd%8f%e5%ae%85%e3%83%ad%e3%83%bc%e3%83%b3%e6%89%bf%e8%aa%8d%e6%b8%9b%e9%80%9f%e3%81%a8%e3%82%a8%e3%83%8d%e3%83%ab%e3%82%ae%e3%83%bc%e4%b8%bb%e5%b0%8e%e3%81%ae/",
+     "title": "英中銀、住宅ローン承認減速とエネルギー主導のインフレ再燃で「高金利の長期化」局面に直面 - VT Markets",
+     "page_age": null
+    },
+    {
+     "url": "https://www.mortgagelens.co.uk/guide/mortgage-rates-near-6-percent-october-2026",
+     "title": "Fixed Mortgage Rates Near 6% as House Prices Stall (October 2026) | MortgageLens",
+     "page_age": null
+    },
+    {
+     "url": "https://ch.zonebourse.com/actualite-bourse/les-preteurs-britanniques-reduisent-leur-offre-de-prets-immobiliers-pour-la-premiere-fois-en-trois-a-ce785dded18efe24",
+     "title": "Les prêteurs britanniques réduisent leur offre de prêts immobiliers pour la première fois en trois ans",
+     "page_age": null
+    },
+    {
+     "url": "https://www.fxblue.com/calendar/item/a4e6c236-c51b-4316-a6f8-e8598980e76a/a4862c78-d1ab-402e-935e-fc67fbfd8c79",
+     "title": "FX Blue",
+     "page_age": null
+    },
+    {
+     "url": "https://www.fxblue.com:443/calendar/item/a4e6c236-c51b-4316-a6f8-e8598980e76a/a8539214-6fe2-4a6c-aace-856d6326bb72",
+     "title": "FX Blue - Mortgage Approvals (GBP)",
+     "page_age": null
+    },
+    {
+     "url": "https://uk.investing.com/economic-calendar/mortgage-approvals-211?catPage=news#1",
+     "title": "United Kingdom Mortgage Approvals - U.K. Mortgage Approvals",
+     "page_age": null
+    },
+    {
+     "url": "https://www.fxblue.com/calendar/item/a4e6c236-c51b-4316-a6f8-e8598980e76a/d6221c82-77e5-4954-b0d0-c6132183f62f",
+     "title": "Mortgage Approvals (GBP) | FX Blue",
+     "page_age": null
+    },
+    {
+     "url": "https://www.grouphfm.com/ar/trading-tools/event?id=a4e6c236-c51b-4316-a6f8-e8598980e76a",
+     "title": "HFM | الحدث",
+     "page_age": null
+    },
+    {
+     "url": "https://www.grouphfm.com/fr/trading-tools/event?id=a4e6c236-c51b-4316-a6f8-e8598980e76a",
+     "title": "HFM | Event",
+     "page_age": null
+    },
+    {
+     "url": "https://sigmanomics.com/uk/mortgage-approvals",
+     "title": "Mortgage Approvals: 54.92K (Sep 2026) — United Kingdom | Sigmanomics",
+     "page_age": null
+    },
+    {
+     "url": "https://www.finlogix.com/calendar/gb/mortgage-approvals?tz=America/Los_Angeles",
+     "title": "United Kingdom Mortgage Approvals",
+     "page_age": null
+    },
+    {
+     "url": "https://kingstonsurveyors.com/2026/09/26/",
+     "title": "September 26, 2026 - Kingston Surveyors",
+     "page_age": null
+    },
+    {
+     "url": "https://www.moneycontrol.com/economic-calendar/united-kingdom-mortgage-approvals/1864859#1",
+     "title": "United Kingdom Kingdom Mortgage Approvals | Historical Dates 1986-2026 Data| Moneycontrol - In App",
+     "page_age": null
+    }
+   ],
+   "n_search_errors": 0,
+   "texts": [
+    "{\"estimate\": 57000, \"unit\": \"\"}"
+   ],
+   "n_thinking_blocks": 4
+  }
+ ],
+ "thinking": "high",
+ "final_attempt": 1,
+ "status": "ok",
+ "estimate": 57000.0,
+ "usd": 0.005219,
+ "usd_search_fee_assumed": 0.07,
+ "thinking_by_role": {
+  "search_direct": "high"
+ }
+}

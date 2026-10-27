@@ -1,0 +1,19 @@
+{
+ "qid": "fc_uk_homesales_2026_09",
+ "arm": "naive",
+ "target_unit": "",
+ "attempts": [
+  {
+   "attempt": 1,
+   "reply": {
+    "estimate": 92000,
+    "unit": ""
+   },
+   "unparsed_text": null,
+   "problems": []
+  }
+ ],
+ "final_attempt": 1,
+ "thinking_by_role": {},
+ "as_of": "2026-10-27"
+}

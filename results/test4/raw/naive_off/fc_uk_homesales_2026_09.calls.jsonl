@@ -1,0 +1,1 @@
+{"arm": "naive", "qid": "fc_uk_homesales_2026_09", "attempt": 1, "model": "deepseek-flash", "http": 200, "http_try": 1, "latency_s": 1.08, "at": "2026-10-27T11:34:10+00:00", "finish_reason": "stop", "prompt_tokens": 245, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 245, "completion_tokens": 12, "usd": 4.4e-05, "ok": true}

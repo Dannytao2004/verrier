@@ -1,0 +1,1 @@
+{"arm": "naive", "qid": "fc_eqnr_prod_2026_q3", "attempt": 1, "model": "deepseek-flash", "http": 200, "http_try": 1, "latency_s": 1.25, "at": "2026-10-27T10:00:04+00:00", "finish_reason": "stop", "prompt_tokens": 234, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 234, "completion_tokens": 16, "usd": 4.5e-05, "ok": true}

@@ -1,0 +1,25 @@
+{
+ "cid": "fc_byd_rev_2026_q3__agent__off",
+ "qid": "fc_byd_rev_2026_q3",
+ "arm": "agent",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "as_of": "2026-10-27",
+ "question": "Assume today is 2026-10-27. You know nothing published after this date. Estimate BYD Company Limited's operating revenue for the three months July-September 2026 (the third quarter alone, not January-September), in Chinese yuan (CNY), as it will be first reported in BYD's unaudited third quarterly report (key accounting data table, 'The Reporting Period' column).",
+ "released_at": "2026-10-29T00:00:00+08:00",
+ "started_at": "2026-10-27T10:40:31+00:00",
+ "attempts": [],
+ "state": ".\\results\\agent\\fc_byd_rev_2026_q3\\test4\\state.json",
+ "usd": 1.403,
+ "usd_tokens": 0.203,
+ "settings_thinking": null,
+ "real_use": {
+  "pages_live_dated": 81,
+  "pages_snapshot": 0,
+  "published_check": "no_candidates",
+  "published_early": null
+ },
+ "outcome": "done",
+ "wall_s": 310.6,
+ "finished_at": "2026-10-27T10:45:42+00:00"
+}

@@ -1,0 +1,18 @@
+{
+ "cid": "fc_uk_mortgages_2026_09__naive__off",
+ "qid": "fc_uk_mortgages_2026_09",
+ "arm": "naive",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "as_of": "2026-10-27",
+ "question": "Assume today is 2026-10-27. You know nothing published after this date. Estimate the number of net mortgage approvals for house purchase in the United Kingdom in September 2026 (seasonally adjusted), as it will be first reported in the Bank of England's monthly Money and Credit statistical release.",
+ "released_at": "2026-10-29T09:30:00+00:00",
+ "started_at": "2026-10-27T11:14:25+00:00",
+ "attempts": [],
+ "raw": ".\\results\\test4\\raw\\naive_off\\fc_uk_mortgages_2026_09.json",
+ "usd": 4e-05,
+ "attempts_in_arm": 1,
+ "outcome": "done",
+ "wall_s": 1.1,
+ "finished_at": "2026-10-27T11:14:26+00:00"
+}
