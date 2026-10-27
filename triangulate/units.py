@@ -68,6 +68,15 @@ UNITS = {
     "Bcf": (1e9 * 0.028316846592, _d(m=3)), "bcf": (1e9 * 0.028316846592, _d(m=3)),
     "Tcf": (1e12 * 0.028316846592, _d(m=3)), "tcf": (1e12 * 0.028316846592, _d(m=3)),
     "bcm": (1e9, _d(m=3)), "BCM": (1e9, _d(m=3)), "mmbtu": (1.05505585262e9, _d(kg=1, m=2, s=-2)),
+    # v2.13e（审查发现）：4 个字符以下的名字查表时不按小写查，大写 / 首字母大写的写法要单列（否则 MCF/d 还是计数名词、按 1 换成 boe/d）；
+    # 补上 bpd 系列、ccf（= 100 cf）、cfs（立方英尺/秒，不是 cf 的复数）
+    "CF": (0.028316846592, _d(m=3)), "SCF": (0.028316846592, _d(m=3)), "MCF": (1e3 * 0.028316846592, _d(m=3)),
+    "BCF": (1e9 * 0.028316846592, _d(m=3)), "TCF": (1e12 * 0.028316846592, _d(m=3)), "Bcm": (1e9, _d(m=3)),
+    "BBL": (0.158987294928, _d(m=3)), "Bbl": (0.158987294928, _d(m=3)), "BPD": (0.158987294928 / 86400, _d(m=3, s=-1)),
+    "mbpd": (1e3 * 0.158987294928 / 86400, _d(m=3, s=-1)), "kbpd": (1e3 * 0.158987294928 / 86400, _d(m=3, s=-1)),
+    "mmbpd": (1e6 * 0.158987294928 / 86400, _d(m=3, s=-1)),
+    "ccf": (100 * 0.028316846592, _d(m=3)), "Ccf": (100 * 0.028316846592, _d(m=3)), "CCF": (100 * 0.028316846592, _d(m=3)),
+    "cfs": (0.028316846592, _d(m=3, s=-1)), "CFS": (0.028316846592, _d(m=3, s=-1)),
     # 能量 / 功率 / 力 / 压强 / 频率
     "J": (1.0, _d(kg=1, m=2, s=-2)), "joule": (1.0, _d(kg=1, m=2, s=-2)),
     "Wh": (3600.0, _d(kg=1, m=2, s=-2)),
@@ -97,7 +106,9 @@ UNITS = {
 UNSUPPORTED = {"degree", "degrees", "deg", "celsius", "fahrenheit", "kelvin", "rad", "radian", "radians", "sr",
                "db", "decibel", "decibels", "amp", "amps", "ampere", "amperes", "mol", "mole", "moles",
                "volt", "volts", "ah", "mah", "lux", "lumen", "lumens", "candela", "tesla", "gauss", "ohm", "ohms",
-               "coulomb", "farad", "henry", "sievert", "gray", "becquerel", "curie", "rem", "dpi"}
+               "coulomb", "farad", "henry", "sievert", "gray", "becquerel", "curie", "rem", "dpi",
+               # v2.13e：立方英尺当量（气换成油的折算各公司不同），不能当计数名词、按 1 换成 boe
+               "cfe", "mcfe", "mmcfe", "bcfe", "tcfe"}
 
 # 可加 SI 前缀的符号与长名
 PREFIX = {"k": 1e3, "M": 1e6, "G": 1e9, "T": 1e12, "P": 1e15, "c": 1e-2, "m": 1e-3, "u": 1e-6, "µ": 1e-6, "μ": 1e-6, "n": 1e-9}

@@ -36,6 +36,32 @@ class TestRoleMaxTokens(unittest.TestCase):
         self.assertEqual(PV.tokens_for_model("deepseek-flash", "high", "judge", config.MAX_TOKENS["judge"]),
                          ("high", 96000 + config.THINKING_EXTRA_TOKENS))
 
+    def test_cli_reservation_matches_what_is_sent(self):
+        """v2.13e（审查发现：这条没有测试守着）：没有 ModelSpec 的命令行路径，预扣按发出去的上限（DeepSeek 自己的默认值）算。"""
+        import tempfile
+        from contextlib import contextmanager
+        from pathlib import Path
+        from unittest import mock
+
+        from triangulate.agent import pipeline as P
+        seen = []
+
+        class B(P.Budget):
+            @contextmanager
+            def hold(self, amount):
+                seen.append(amount)
+                yield
+
+        from triangulate import llm as L
+        with mock.patch.object(L, "read_key", return_value="sk-test-FAKE-0123456789abcdef"):   # 不读 key 文件
+            a = P.AgentLLM(Path(tempfile.mkdtemp()) / "c.jsonl", B(usd=3.0))
+        with mock.patch.object(P.AgentLLM, "json_call", return_value=({"a": 1}, "", None)):
+            a.ask("s", "u", role="judge:r1", qid="t", max_tokens=config.MAX_TOKENS["judge"])
+            a.ask("s", "u", role="extract:d1", qid="t", max_tokens=config.MAX_TOKENS["extract"])
+            a.ask("s", "u", role="plan", qid="t", max_tokens=config.MAX_TOKENS["plan"])
+        self.assertEqual(seen, [P.Budget.llm_reserve(2, 96000, a.budget.model), P.Budget.llm_reserve(2, 64000, a.budget.model),
+                                P.Budget.llm_reserve(2, config.MAX_TOKENS["plan"], a.budget.model)])
+
     def test_fits_the_request_time_limit(self):
         """存档里 DeepSeek 最慢 157 token/秒；最长的一次（裁判 + 思考余量）要在整次请求 1200 秒内写完。"""
         longest = max(PV.DEEPSEEK_MAX_TOKENS.values()) + config.THINKING_EXTRA_TOKENS

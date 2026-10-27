@@ -68,6 +68,45 @@ class TestQtyPrefixOnAutoNoun(unittest.TestCase):
         self.assertAlmostEqual(Q.convert_factor("mg/day", "g/day")[0], 1e-3)
 
 
+def _in_fresh_process(steps):
+    """新进程里按顺序跑 qty.convert_factor：steps = [(src, dst), ...]，返回每一步的倍数（换不了是 None）。"""
+    code = ("import sys, json; sys.path.insert(0, {root!r}); from triangulate.agent import qty as Q; "
+            "print(json.dumps([Q.convert_factor(a, b)[0] for a, b in {steps!r}]))")
+    r = subprocess.run([sys.executable, "-c", code.format(root=str(ROOT), steps=steps)], capture_output=True, text=True,
+                       timeout=120)
+    if r.returncode:
+        raise AssertionError(r.stderr)
+    import json
+    return json.loads(r.stdout)
+
+
+class TestQtyReviewFindings(unittest.TestCase):
+    """v2.13e：v2.13c 审查发现的问题（同一进程里先解析的写法会改掉后面的读法）。"""
+
+    def test_case_variants_do_not_break_pint_units(self):
+        # v2.13c 回归：Kg 的单数 kg 被重定义成计数名词，之后整个进程的 kg 都换不了 t
+        got = _in_fresh_process([("Kg", "g"), ("kg/day", "t/day"), ("USD/kg", "USD/t"), ("KM", "m"), ("km", "m"),
+                                 ("Megatonnes/year", "Mt/year"), ("megatonne", "t"), ("Kcal", "J"), ("kcal", "J")])
+        self.assertEqual(got, [1000.0, 0.001, 1000.0, 1000.0, 1000.0, 1.0, 1e6, 4184.0, 4184.0])
+
+    def test_no_prefix_on_case_aliases(self):
+        # MBoe 之后的 MMBoe 不是 mega-MBoe；Bbl 之后的 MBbl 不是 mega-Bbl
+        self.assertEqual(_in_fresh_process([("MBoe", "boe"), ("MMBoe", "boe"), ("Boe", "boe"), ("Bbl/d", "bbl/d"),
+                                            ("MBbl/d", "bbl/d"), ("MMBbl", "bbl"), ("Bbls", "bbl"), ("MBbls", "bbl")]),
+                         [1e3, 1e6, 1.0, 1.0, 1e3, 1e6, 1.0, 1e3])
+
+    def test_more_industry_spellings(self):
+        got = _in_fresh_process([("MBPD", "bbl/d"), ("mbpd", "bbl/d"), ("Mbpd", "bbl/d"), ("MMbpd", "bbl/d"), ("mscf", "cf"),
+                                 ("Mmcf", "cf"), ("Mmbbl", "bbl"), ("Mmboe", "boe"), ("ccf", "cf"), ("USD/ccf", "USD/Mcf"),
+                                 ("cfs", "ft**3/s"), ("cfs", "m**3"), ("kcf", "cf")])
+        for g, want in zip(got, [1e3, 1e3, 1e3, 1e6, 1e3, 1e6, 1e6, 1e6, 100.0, 10.0, 1.0, None, None]):
+            self.assertTrue(g == want if want is None else abs(g / want - 1) < 1e-9, (got, want))
+
+    def test_order_inside_one_string(self):
+        # 同一串里先定义的 all 不能让后面的 calls 读成 centi-all
+        self.assertEqual(_in_fresh_process([("all/calls", "1"), ("air*pairs", "air**2")]), [None, None])
+
+
 class TestUnitsOilGas(unittest.TestCase):
     def test_industry_multipliers(self):
         for src, dst, f in SAME_IN_BOTH:
@@ -78,9 +117,19 @@ class TestUnitsOilGas(unittest.TestCase):
         self.assertAlmostEqual(U.convert(1.0, U.parse_unit("barrels of oil equivalent per day"), U.parse_unit("boe/d")), 1.0)
 
     def test_gas_is_not_a_count(self):
-        # 以前 MMcf 是计数名词，MMcf/d 会按 1 换成 boe/d
-        with self.assertRaises(U.UnitMismatch):
-            U.convert(1.0, U.parse_unit("MMcf/d"), U.parse_unit("boe/d"))
+        # 以前 MMcf 是计数名词，MMcf/d 会按 1 换成 boe/d；v2.13e：4 个字符以下的大写写法也一样
+        for src in ("MMcf/d", "MCF/d", "BCF/d", "TCF", "CF", "SCF"):
+            with self.subTest(src=src), self.assertRaises(U.UnitMismatch):
+                U.convert(1.0, U.parse_unit(src), U.parse_unit("boe/d"))
+        with self.assertRaises(U.UnitError):   # 立方英尺当量：气换油的折算各公司不同，不能按 1 换
+            U.parse_unit("MMcfe/d")
+
+    def test_short_uppercase_spellings(self):
+        for src, dst, f in (("MCF", "cf", 1e3), ("BCF", "Mcf", 1e6), ("BPD", "bbl/d", 1.0), ("BBL", "gallon", 42.0),
+                            ("Bcm", "m**3", 1e9), ("MBPD", "bbl/d", 1e3), ("MMBPD", "bbl/d", 1e6), ("Ccf", "cf", 100.0),
+                            ("cfs", "ft**3/s", 1.0)):
+            with self.subTest(src=src):
+                self.assertAlmostEqual(U.convert(1.0, U.parse_unit(src), U.parse_unit(dst)) / f, 1.0, places=9)
 
 
 if __name__ == "__main__":
