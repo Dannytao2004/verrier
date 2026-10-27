@@ -23,7 +23,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 from .config import API_URL, CALLS, MODEL, THINKING, THINKING_EXTRA_TOKENS, read_key, require_deepseek, thinking_role
-from .providers import DEEPSEEK, stop_prefix
+from .providers import DEEPSEEK, role_max_tokens, stop_prefix
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
 TOTAL_TIMEOUT_S = 1200
@@ -263,7 +263,8 @@ class LLM:
         if self.spec is not None:
             return self.spec.tokens_for(role, max_tokens)
         effort = THINKING.get(role)
-        return effort, max_tokens + (THINKING_EXTRA_TOKENS if effort else 0)
+        model = getattr(self, "model", MODEL)   # 测试里的假 LLM 可能没设 model
+        return effort, role_max_tokens(model, role, max_tokens) + (THINKING_EXTRA_TOKENS if effort else 0)   # v2.13d
 
     def json_call(self, messages: list, *, arm: str, qid: str, attempt: int, max_tokens: int = 4000):
         """返回 (parsed_dict_or_None, raw_text, error_or_None)，error 只表示模型输出本身的问题。

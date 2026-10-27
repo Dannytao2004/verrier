@@ -290,7 +290,8 @@ class TestPricing(unittest.TestCase):
             a.ask("s", "u", role="judge:r1", qid="t", max_tokens=12000)
             a.ask("s", "u", role="extract:d1", qid="t", max_tokens=16000)
         self.assertAlmostEqual(seen[0], P.Budget.llm_reserve(2, 12000 + config.THINKING_EXTRA_TOKENS, "deepseek-v4-pro"))
-        self.assertAlmostEqual(seen[1], P.Budget.llm_reserve(2, 16000, "deepseek-v4-pro"))
+        self.assertAlmostEqual(seen[1], P.Budget.llm_reserve(2, 64000, "deepseek-v4-pro"))   # v2.13d：抽取的默认 16000 -> DeepSeek 64000
+        self.assertEqual(seen[0], P.Budget.llm_reserve(2, 12000 + config.THINKING_EXTRA_TOKENS, "deepseek-v4-pro"))   # 显式传的照原样
 
     def test_context_budget_follows_the_spec(self):
         with mock.patch.object(llm, "read_key", return_value=KEY), mock.patch.object(S, "read_key", return_value=KEY):
@@ -417,8 +418,12 @@ class TestRunWithSpec(unittest.TestCase):
         from triangulate.agent import run as R
         s = R.run_settings()
         self.assertNotIn("run_spec", s)
-        self.assertEqual(set(s), {"max_tokens", "budget_defaults", "budget_run", "interval"} | ({"thinking"} if config.THINKING else set()))
-        self.assertEqual(set(R.run_settings(spec())), {"max_tokens", "budget_defaults", "budget_run", "interval", "run_spec"})
+        # v2.13d：DeepSeek 自己的角色上限另记 max_tokens_model
+        self.assertEqual(set(s), {"max_tokens", "max_tokens_model", "budget_defaults", "budget_run", "interval"}
+                         | ({"thinking"} if config.THINKING else set()))
+        self.assertEqual(s["max_tokens_model"], {"judge": 96000, "repair": 96000, "extract": 64000})
+        self.assertEqual(set(R.run_settings(spec())), {"max_tokens", "max_tokens_model", "budget_defaults", "budget_run", "interval",
+                                                       "run_spec"})
 
 
 class TestJevDisabledInByokRuns(unittest.TestCase):

@@ -13,7 +13,8 @@ from datetime import date, datetime, timezone
 
 from langgraph.types import Command
 
-from ..config import MAX_TOKENS, RESULTS, THINKING, THINKING_EXTRA_TOKENS
+from ..config import MAX_TOKENS, MODEL, RESULTS, THINKING, THINKING_EXTRA_TOKENS
+from ..providers import MODELS as PROVIDER_MODELS
 from . import ablation as AB
 from . import assumptions as AS
 from . import discrete as D
@@ -188,6 +189,9 @@ def run_settings(spec=None) -> dict:
            "budget_run": {"usd": RUN_USD_CAP if spec is None else spec.usd_cap, **RUN_BUDGET},   # v2.13b：真实运行实际用的设置
            "interval": {"MIN_WIDTH": AS.MIN_WIDTH, "MIN_WIDTH_CHANGE": AS.MIN_WIDTH_CHANGE,
                         "FALLBACK_SIGMA": M.FALLBACK_SIGMA, "DEFAULT_REL_U": M.DEFAULT_REL_U, "EPS": M.EPS}}
+    model_max = (PROVIDER_MODELS.get(MODEL if spec is None else spec.model) or {}).get("max_tokens")
+    if model_max:   # v2.13d：这个模型自己的角色上限（覆盖上面 max_tokens 里的同名项）
+        out["max_tokens_model"] = dict(model_max)
     if spec is not None:
         out["run_spec"] = spec.public()
         # v2.10h：v2.10d / e 给 Kimi、GLM 记的 search_queries（生成查询词 + 搜索接口的设置）删掉：五家都用自带的搜索，同 DeepSeek /

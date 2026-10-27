@@ -397,9 +397,10 @@ class TestStopsAreVisible(_E2E):
     def test_spending_past_the_cap_mid_run_is_failed(self):
         """服务端报的用量很大（一次搜索 300 万输入 token）：记账后超过上限，之后的预扣都拒绝，没有估计：failed，error 写原因。"""
         _State.mode = "huge_usage"
-        key, r, st = self.start(30, "deepseek", "deepseek-flash", "global", "off", 0.5)
+        # v2.13d：DeepSeek 裁判 / 抽取的默认上限放宽，最小运行的最坏预扣 0.41 -> 0.56，上限 0.5 开不起来了：改 0.6
+        key, r, st = self.start(30, "deepseek", "deepseek-flash", "global", "off", 0.6)
         self.assertEqual(st["status"], "failed", st)
-        self.assertTrue(st["error"].startswith("usd cap 0.5 exceeded"), st["error"])
+        self.assertTrue(st["error"].startswith("usd cap 0.6 exceeded"), st["error"])
         self.assertTrue(self.state(st)["final"]["text"].startswith("No estimate: the run was stopped"))
 
     def test_cap_that_cannot_cover_a_minimal_run_is_refused(self):

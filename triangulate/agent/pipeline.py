@@ -9,9 +9,9 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
 
-from ..config import MAX_TOKENS, MODEL, price
+from ..config import MAX_TOKENS, MODEL, price, thinking_role
 from ..llm import LLM, BalanceExhausted, TransportError
-from ..providers import reserve_chars_per_token, search_fee_usd, tokens_for_model
+from ..providers import reserve_chars_per_token, role_max_tokens, search_fee_usd, tokens_for_model
 from . import evidence as ev
 from .fetch import fetch_live, fetch_page
 from .prompts import EXTRACT_SYSTEM, EXTRACT_USER, SEARCH_USER
@@ -324,8 +324,10 @@ class AgentLLM(LLM):
         """返回 (dict|None, error)。输出无效时带着错误信息重试一次。"""
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         err = None
-        # 预扣按发出去的 max_tokens 算：有 ModelSpec 时含思考余量；没有时照旧只按 max_tokens（和 v2.9b 相同）
-        reserve_tokens = max_tokens if self.spec is None else self.effort_and_tokens(role, max_tokens)[1]
+        # 预扣按发出去的 max_tokens 算：有 ModelSpec 时含思考余量；没有时照旧不含思考余量（和 v2.9b 相同），
+        # v2.13d 起按这个模型自己的角色上限（role_max_tokens）
+        reserve_tokens = (role_max_tokens(getattr(self, "model", MODEL), thinking_role(role), max_tokens) if self.spec is None
+                          else self.effort_and_tokens(role, max_tokens)[1])
         for attempt in range(1, tries + 1):
             need = Budget.llm_reserve(sum(len(m["content"]) for m in msgs), reserve_tokens, self.budget.model)
             with self.budget.sem, self.budget.hold(need):

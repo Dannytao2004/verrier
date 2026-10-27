@@ -7,6 +7,8 @@ capture() 用假 urlopen 跑一组固定输入（json_call、AgentLLM.ask、Sear
   git archive ec3e929 triangulate | tar -x -C probes/out/_old_v2_9b
   .venv/Scripts/python.exe tests/golden_deepseek.py probes/out/_old_v2_9b tests/golden/deepseek_requests_head.json
 tests/test_provider_golden.py 在现在的代码上再跑一次 capture()，和这份文件逐字节比较。
+v2.13d：DeepSeek 的裁判 / 修正 / 抽取默认上限放宽（providers.DEEPSEEK_MAX_TOKENS）以后，这份文件里只有 json_extract_off_while_thinking
+的请求体按默认上限发（16000 -> 64000），只改了这一处；其余用例显式传上限，照原样（和 v2.13c 的 capture 逐行比过）。
 """
 import io
 import json

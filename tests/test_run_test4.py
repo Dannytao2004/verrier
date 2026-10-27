@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest import mock
 
 from triangulate import config, forecast
+from triangulate.providers import role_max_tokens
 
 try:
     import langgraph  # noqa: F401
@@ -377,7 +378,9 @@ class TestFakeEndToEnd(unittest.TestCase):
             base = config.thinking_role(role)
             want = RT.THINKING_ON[arm].get(base) if mode == "think" else None
             self.assertEqual((kind, effort), ("enabled" if want else "disabled", want), (cid, role))
-            self.assertEqual(mt, config.MAX_TOKENS[base] + (config.THINKING_EXTRA_TOKENS if want else 0), (cid, role))
+            # v2.13d：DeepSeek 的裁判 / 修正 / 抽取用模型自己的默认上限（providers.role_max_tokens）
+            self.assertEqual(mt, role_max_tokens(config.MODEL, base, config.MAX_TOKENS[base])
+                             + (config.THINKING_EXTRA_TOKENS if want else 0), (cid, role))
             seen.setdefault((arm, mode), set()).add(base)
         self.assertTrue({"plan", "extract", "judge", "audit", "unit_check", "unit_arbiter", "final"} <= seen[("agent", "off")])
         self.assertTrue({"plan", "judge", "audit", "unit_arbiter"} <= seen[("agent", "think")])

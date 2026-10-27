@@ -22,7 +22,8 @@ JSON 解析、日志、预算这些外层循环留在 llm.LLM.json_call 和 agen
 import json
 import math
 
-from .config import (CLAUDE_US_GEO_MULTIPLIER, KIMI_WEB_SEARCH_FEE_ASSUMED_USD, MODEL, PRICES, THINKING_EXTRA_TOKENS, UnknownModel,
+from .config import (CLAUDE_US_GEO_MULTIPLIER, KIMI_WEB_SEARCH_FEE_ASSUMED_USD, MAX_TOKENS, MODEL, PRICES, THINKING_EXTRA_TOKENS,
+                     UnknownModel,
                      price, usd_cost)
 
 THINKING_UI = ("off", "low", "medium", "high")   # 网页上的一个总档位
@@ -1251,13 +1252,20 @@ ADAPTERS = {"deepseek": DEEPSEEK, "claude": CLAUDE, "gpt": OPENAI, "kimi": KIMI,
 # 网页上可选的模型（2026-10-21 按官方 Models & Pricing 页）。max_output = 官方写的最大输出 token 数；思考 token 计入输出上限，
 # 开思考的调用多给的余量（config.THINKING_EXTRA_TOKENS）不超过它。efforts：网页档位 -> 这家 API 的取值；
 # thinking_off = 这个模型能不能关掉思考（不能关的模型网页上不给 off，其余角色用最低一档）
+# v2.13d（用户 10-27：DeepSeek 的 token 限制放宽，付得起）：max_tokens = 这个模型自己的角色上限，覆盖 config.MAX_TOKENS
+# （role_max_tokens）。只有 DeepSeek 有，只放宽存档里截断过的角色：8,450 次 DeepSeek 调用里 finish_reason=length 的 11 次是裁判
+# 8 次（24000 / 12000 / 6000 处）、抽取 3 次（16000 处），其余角色一次没有。按存档最慢的 157 token/秒，裁判 96000 + 思考余量 24000
+# 约 13 分钟，在整次请求 1200 秒以内。别家照旧：output 贵，最坏情况的预扣会跟着涨
+DEEPSEEK_MAX_TOKENS = {"judge": 96_000, "repair": 96_000, "extract": 64_000}
 MODELS = {
     # DeepSeek Thinking Mode 文档：reasoning_effort 只有 low / high / max，medium 按 high 处理；默认开思考（high），
     # 请求里写 thinking.type = disabled 就关掉
     "deepseek-flash": {"provider": "deepseek", "label": "DeepSeek Flash (DeepSeek-V4.1-Flash-1017)", "max_output": 384_000,
-                       "thinking_off": True, "efforts": {"low": "low", "medium": "high", "high": "high"}},
+                       "thinking_off": True, "efforts": {"low": "low", "medium": "high", "high": "high"},
+                       "max_tokens": DEEPSEEK_MAX_TOKENS},
     "deepseek-v4-pro": {"provider": "deepseek", "label": "DeepSeek V4 Pro (DeepSeek-V4-Pro-0813)", "max_output": 384_000,
-                        "thinking_off": True, "efforts": {"low": "low", "medium": "high", "high": "high"}},
+                        "thinking_off": True, "efforts": {"low": "low", "medium": "high", "high": "high"},
+                        "max_tokens": DEEPSEEK_MAX_TOKENS},
     # v2.10b Claude（官方 Models overview / Effort / Errors 页，2026-10-21）：四个模型都是 1M 上下文、最大输出 128K（同步请求）；
     # 思考是 adaptive，深度用 output_config.effort（low / medium / high / xhigh / max，这里只用前三档、同名）。
     # off = 关思考的写法：Haiku 5.5 {"type": "disabled"}、Sonnet 5.5 {"type": "between_tools"}（disabled 会 400），两种都只在
@@ -1377,10 +1385,18 @@ def effort_for(model: str, level: str, role: str):
     return m["efforts"][next(x for x in THINKING_UI if x in m["efforts"])]   # 关不掉思考的模型：最低一档
 
 
+def role_max_tokens(model: str, role: str, max_tokens: int) -> int:
+    """v2.13d：这个角色的输出上限。调用方用的是 config.MAX_TOKENS 里这个角色的默认值、而这个模型有自己的角色上限
+    （MODELS[model]["max_tokens"]，只有 DeepSeek）时换成模型的；显式传了别的值就照原样（测试和个别调用会传小的上限）。不含思考余量。"""
+    own = (MODELS.get(model) or {}).get("max_tokens", {})
+    return own[role] if role in own and max_tokens == MAX_TOKENS.get(role) else max_tokens
+
+
 def tokens_for_model(model: str, level: str, role: str, max_tokens: int):
     """(这个角色的思考档位或 None, 实际发出的 max_tokens)：开了思考的调用多给 THINKING_EXTRA_TOKENS（思考 token 计入输出上限），
-    不超过模型的最大输出。"""
+    不超过模型的最大输出。v2.13d：先按 role_max_tokens 换成模型自己的角色上限。"""
     effort = effort_for(model, level, role)
+    max_tokens = role_max_tokens(model, role, max_tokens)
     return effort, min(max_tokens + (THINKING_EXTRA_TOKENS if effort else 0), MODELS[model]["max_output"])
 
 
