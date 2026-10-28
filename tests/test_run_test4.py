@@ -68,6 +68,9 @@ class TestRegistry(unittest.TestCase):
             self.assertTrue(q["question_template"].startswith("Assume today is {as_of}. You know nothing published after this date. "))
             self.assertEqual(q["question_template"].count("{"), 1, q["id"])   # 只有 {as_of}：with_as_of 的 format 不会出错
             self.assertGreater(q["last_year"], 0)
+            sn = forecast.TEST4_SCORING_NOTES.get(q["id"])
+            if sn is not None:   # 打分说明：登记的臂都存在、有原文
+                self.assertTrue(set(sn["arms"]) <= set(RT.ARMS) and sn["note"], q["id"])
             off = REAL_OFFICIAL[q["id"]]
             if off is not None:   # 公布后填的首发值
                 self.assertGreater(off["value"], 0)

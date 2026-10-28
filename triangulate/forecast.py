@@ -423,6 +423,16 @@ TEST4_OFFICIAL = {
 }
 
 
+# 留出测试 4 的打分说明（run_test4 --score 写进 summary.md 的「打分说明」一节，并在对应配置的说明栏标出）：题 -> 适用的臂、说明原文
+TEST4_SCORING_NOTES = {
+    "fc_eqnr_prod_2026_q3": {
+        "arms": ["agent"],
+        "note": "agent 两个配置的输出单位是 mboe/d（千桶油当量/日，Equinor 报告的写法），终稿 2,195 / 2,149 mboe/d。跑的时候（v2.13b）"
+                "单位库不认识 mboe，打分换不到计分单位 boe/d，记过「unit not convertible」（BUGS S75）。v2.13c 起单位库按 SPE 惯例读 "
+                "mboe = 1000 boe，同一份输出按 x1000 换算打分。用户 2026-10-27 定：算。这是打分环节的修正：agent 没有重跑，输出没改。"},
+}
+
+
 def with_as_of(q: dict, as_of: str) -> dict:
     """留出测试 4：题目在跑的那天才定 as_of（真实使用）。返回填好 as_of 和 question 的副本（不改题库里的这一条）。"""
     if not q.get("question_template"):

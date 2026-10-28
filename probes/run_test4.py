@@ -425,6 +425,9 @@ def score_config(c: dict, q: dict, runner: Runner) -> dict:
             else:
                 row["arm_status"] = "no estimate"
                 row["detail"] = row["detail"] or str(state.get("aborted") or (state.get("compute") or {}).get("error") or "")[:200]
+    sn = FC.TEST4_SCORING_NOTES.get(c["qid"])
+    if sn and c["arm"] in sn["arms"]:
+        row["scoring_note"] = sn["note"]
     est = row["estimate"]
     if ans is not None and est is not None and est > 0:
         row.update(pct_err=est / ans - 1, abs_log10_err=abs(math.log10(est / ans)))
@@ -481,10 +484,15 @@ def render_md(rows: list, agg: list, qs: list) -> str:
         if r["arm"] == "agent" and r.get("published_check"):
             note = (f"已公布检查 {r['published_check']}、live 页 {r.get('pages_live_dated')}、快照 {r.get('pages_snapshot')}"
                     + (f"；{note}" if note else ""))
+        if r.get("scoring_note"):
+            note = "见下方打分说明；" + note
         L.append(f"| {r['qid']} | {r['arm']} | {r['thinking']} | {r.get('as_of') or '—'} | "
                  f"{r['outcome']}{' / ' + r['arm_status'] if r.get('arm_status') else ''} | {f(r['estimate'], 'n')} | "
                  f"{f(r.get('pct_err'), 'pct')} | {f(r.get('abs_log10_err'), 'log')} | {f(r['p10'], 'n')} | {f(r['p90'], 'n')} | "
                  f"{cov} | {f(r.get('usd'), 'usd')} | {note.replace('|', '/')[:160]} |")
+    notes = {r["qid"]: r["scoring_note"] for r in rows if r.get("scoring_note")}
+    if notes:
+        L += ["", "## 打分说明", ""] + [f"- **{qid}**：{n}" for qid, n in notes.items()]
     L += ["", "## 首发值和参照（去年同期的登记值，不是对照臂）", "", "| 题 | 首发时刻 | 首发值 | 去年同期 | 去年同期的误差 |",
           "|---|---|---|---|---|"]
     for q in qs:
