@@ -1,0 +1,21 @@
+[sponsor_strict_2026] plan: 8 directions -> approved=True
+[sponsor_strict_2026] done in 798.2s; estimate 361,135; usd 1.8272
+The best computed estimate is 361,135 posting (80% model-based interval 112,672 to 1,157,498 posting) for distinct US job postings published in calendar year 2026 covering new-graduate roles (summer internships plus full-time entry-level positions for new bachelor's or master's graduates with [n]–[n] years of experience) in professional white-collar occupations whose posting text explicitly states visa sponsorship.
+
+The only retained route (m2, weight 100%) multiplies the observed FY[n] initial-employment H-[n]B approvals, 114,806 distinct job posting, by an assumed 3 sponsorship-mentioning postings per approval (range 1 to 10). The approvals figure is observed; the postings-per-approval ratio is an analyst assumption, not measured. Other routes were discarded for missing inputs, so the estimate rests on a single block.
+
+Main risk: FY[n] approvals are a lagged proxy, and the assumed ratio is unverified. Better evidence would be a direct count of deduplicated sponsorship-mentioning new-grad postings, or a measured postings-per-approval ratio.
+
+Unit of the estimate: posting (distinct job posting; total for 2026-01-01 to 2026-12-31).
+
+Key assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):
+- a3 Sponsorship-mentioning postings per initial-employment H-[n]B approval: 3 posting per approval, range 1 to 10; used by m2. Overturned by: Evidence that sponsorship-mentioning postings per approval are below [n] or above [n].
+
+Method details (computed by code):
+- m2 formula_mc: p159 * a3; Monte Carlo P10 to P90 112,759 to 1,158,383; result unit (posting/year) * 1 year converted to posting; own 80% width x/÷3.21 (Monte Carlo of the formula inputs)
+- Combination: 1 block(s), equal weight per block (methods whose inputs overlap by at least half form one block; backtest errors set widths, not weights): B1 = m2: 361,135 (width x/÷3.21, Monte Carlo of the formula inputs). Estimate = the only block.
+- Interval: one block, so the interval is that block's own width (x/÷3.21).
+
+Input audit disputed: no method passed every check after the repair rounds, so this estimate uses methods that code could compute but the input audit questioned. The audit's objections: m2: input audit: p159: H-1B initial-employment approvals are a count of visa petitions/approvals, not distinct new-graduate job postings; the role treats it as a posting total to be converted, but the evidence is a di; a3: The conversion factor bridges approvals to sponsorship-mentioning postings, but the target requires distinct new-graduate postings in professional white-collar occupations; a sponsorship-mentionin
+
+--- stderr ---

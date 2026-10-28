@@ -1,0 +1,25 @@
+{
+ "cid": "fc_uk_homesales_2026_09__agent__off",
+ "qid": "fc_uk_homesales_2026_09",
+ "arm": "agent",
+ "thinking": "off",
+ "thinking_by_role": {},
+ "as_of": "2026-10-28",
+ "question": "Assume today is 2026-10-28. You know nothing published after this date. Estimate the number of UK residential property transactions (with a value of £40,000 or above) in September 2026, seasonally adjusted, as it will be first reported (provisional estimate) in HM Revenue & Customs' monthly release 'Monthly property transactions completed in the UK with value of £40,000 or above'.",
+ "released_at": "2026-10-30T09:30:00+00:00",
+ "started_at": "2026-10-28T11:24:55+00:00",
+ "attempts": [],
+ "state": ".\\results\\agent\\fc_uk_homesales_2026_09\\test4_v214a\\state.json",
+ "usd": 1.6979,
+ "usd_tokens": 0.3179,
+ "settings_thinking": null,
+ "real_use": {
+  "pages_live_dated": 114,
+  "pages_snapshot": 0,
+  "published_check": "no_candidates",
+  "published_early": null
+ },
+ "outcome": "done",
+ "wall_s": 568.5,
+ "finished_at": "2026-10-28T11:34:24+00:00"
+}

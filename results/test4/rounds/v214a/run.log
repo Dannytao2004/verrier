@@ -1,0 +1,12 @@
+{"at": "2026-10-28T11:10:37+00:00", "event": "start", "cid": "fc_uk_carprod_2026_09__agent__off", "as_of": "2026-10-28", "thinking": {}}
+{"at": "2026-10-28T11:16:46+00:00", "event": "end", "cid": "fc_uk_carprod_2026_09__agent__off", "outcome": "done", "wall_s": 368.7, "usd": 1.5458, "error": null}
+{"at": "2026-10-28T11:16:46+00:00", "event": "cost", "cid": "fc_uk_carprod_2026_09__agent__off", "usd": 1.5458, "cumulative_usd": 1.5458}
+{"at": "2026-10-28T11:16:46+00:00", "event": "start", "cid": "fc_uk_carprod_2026_09__agent__think", "as_of": "2026-10-28", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+{"at": "2026-10-28T11:24:55+00:00", "event": "end", "cid": "fc_uk_carprod_2026_09__agent__think", "outcome": "done", "wall_s": 489.4, "usd": 1.6161, "error": null}
+{"at": "2026-10-28T11:24:55+00:00", "event": "cost", "cid": "fc_uk_carprod_2026_09__agent__think", "usd": 1.6161, "cumulative_usd": 3.1619}
+{"at": "2026-10-28T11:24:55+00:00", "event": "start", "cid": "fc_uk_homesales_2026_09__agent__off", "as_of": "2026-10-28", "thinking": {}}
+{"at": "2026-10-28T11:34:24+00:00", "event": "end", "cid": "fc_uk_homesales_2026_09__agent__off", "outcome": "done", "wall_s": 568.5, "usd": 1.6979, "error": null}
+{"at": "2026-10-28T11:34:24+00:00", "event": "cost", "cid": "fc_uk_homesales_2026_09__agent__off", "usd": 1.6979, "cumulative_usd": 4.8598}
+{"at": "2026-10-28T11:34:24+00:00", "event": "start", "cid": "fc_uk_homesales_2026_09__agent__think", "as_of": "2026-10-28", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+{"at": "2026-10-28T11:43:08+00:00", "event": "end", "cid": "fc_uk_homesales_2026_09__agent__think", "outcome": "done", "wall_s": 524.5, "usd": 1.7094, "error": null}
+{"at": "2026-10-28T11:43:08+00:00", "event": "cost", "cid": "fc_uk_homesales_2026_09__agent__think", "usd": 1.7094, "cumulative_usd": 6.5692}

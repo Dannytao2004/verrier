@@ -1,0 +1,55 @@
+[fc_tw_births_2026_09] plan: 7 directions -> approved=True
+[fc_tw_births_2026_09] done in 653.2s; estimate 7,247; usd 1.6034
+[
+ {
+  "id": "fc_tw_births_2026_09",
+  "as_of": "2026-09-08",
+  "answer_value": 7704,
+  "source": "https://www.taipeitimes.com/News/taiwan/archives/2026/10/08/2003865628",
+  "estimate": 7246.86247106728,
+  "p10": 5260.261399305366,
+  "p90": 9983.72736409989,
+  "basis": "blocks",
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": 0,
+  "ablation": false,
+  "pct_err": -0.05933768547932494,
+  "abs_log10_err": 0.026566254639421003,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 7246.86247106728,
+    "pct_err": -0.05933768547932494,
+    "abs_log10_err": 0.026566254639421003
+   },
+   "naive": {
+    "estimate": 11000.0,
+    "pct_err": 0.42782969885773614,
+    "abs_log10_err": 0.1546764110417469
+   },
+   "structured_no_retrieval": null
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 1.6034,
+  "usd_tokens": 0.2834,
+  "wall_s": 653.2
+ }
+]
+
+--- stderr ---

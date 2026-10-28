@@ -1,0 +1,57 @@
+[
+ {
+  "id": "fc_de_cars_2026_09",
+  "as_of": "2026-09-05",
+  "answer_value": 256774,
+  "source": "https://www.kba.de/DE/Presse/Pressemitteilungen/Fahrzeugzulassungen/2026/pm41_2026_n_09_26_pm_komplett.html",
+  "estimate": 253934.6043726069,
+  "p10": 171233.42631058767,
+  "p90": 376578.2457737652,
+  "basis": "monte_carlo",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a2"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.011057956130266722,
+  "abs_log10_err": 0.0048291591258612585,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 253934.6043726069,
+    "pct_err": -0.011057956130266722,
+    "abs_log10_err": 0.0048291591258612585
+   },
+   "naive": {
+    "estimate": 210000.0,
+    "pct_err": -0.1821601875579303,
+    "abs_log10_err": 0.08733175181170402
+   },
+   "structured_no_retrieval": {
+    "estimate": 2337.3841124546584,
+    "pct_err": -0.9908971153136429,
+    "abs_log10_err": 2.0408209587953383
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 1.4569,
+  "usd_tokens": 0.2669,
+  "wall_s": 669.4
+ }
+]

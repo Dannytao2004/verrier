@@ -1,0 +1,164 @@
+{"at": "2026-10-28T10:00:58+00:00", "event": "start", "run": "fc_tw_births_2026_09 off", "args": ["agent", "--question", "fc_tw_births_2026_09"]}
+{"at": "2026-10-28T10:07:42+00:00", "event": "end", "run": "fc_tw_births_2026_09 off", "exit": 0, "wall_s": 404.1}
+{"at": "2026-10-28T10:07:42+00:00", "event": "start", "run": "fc_tw_births_2026_09 think", "args": ["agent", "--question", "fc_tw_births_2026_09"]}
+{"at": "2026-10-28T10:18:37+00:00", "event": "end", "run": "fc_tw_births_2026_09 think", "exit": 0, "wall_s": 654.7}
+{"at": "2026-10-28T10:18:37+00:00", "event": "start", "run": "fc_de_cars_2026_09 off", "args": ["agent", "--question", "fc_de_cars_2026_09"]}
+{"at": "2026-10-28T10:29:48+00:00", "event": "end", "run": "fc_de_cars_2026_09 off", "exit": 0, "wall_s": 671.0}
+{"at": "2026-10-28T10:29:48+00:00", "event": "start", "run": "fc_de_cars_2026_09 think", "args": ["agent", "--question", "fc_de_cars_2026_09"]}
+{"at": "2026-10-28T10:44:13+00:00", "event": "end", "run": "fc_de_cars_2026_09 think", "exit": 0, "wall_s": 865.5}
+{"at": "2026-10-28T10:44:13+00:00", "event": "start", "run": "sponsor_strict off", "args": ["agent", "--ask", "<SPONSOR_Q>"]}
+{"at": "2026-10-28T10:57:33+00:00", "event": "end", "run": "sponsor_strict off", "exit": 0, "wall_s": 799.8}
+{"at": "2026-10-28T10:57:33+00:00", "event": "start", "run": "sponsor_strict think", "args": ["agent", "--ask", "<SPONSOR_Q>"]}
+{"at": "2026-10-28T11:10:36+00:00", "event": "end", "run": "sponsor_strict think", "exit": 0, "wall_s": 782.5}
+batch exit 0
+{"at": "2026-10-28T11:10:37+00:00", "event": "start", "cid": "fc_uk_carprod_2026_09__agent__off", "as_of": "2026-10-28", "thinking": {}}
+[fc_uk_carprod_2026_09] plan: 7 directions -> approved=True
+[fc_uk_carprod_2026_09] done in 368.6s; estimate 53,625; usd 1.5458
+{"at": "2026-10-28T11:16:46+00:00", "event": "end", "cid": "fc_uk_carprod_2026_09__agent__off", "outcome": "done", "wall_s": 368.7, "usd": 1.5458, "error": null}
+{"at": "2026-10-28T11:16:46+00:00", "event": "cost", "cid": "fc_uk_carprod_2026_09__agent__off", "usd": 1.5458, "cumulative_usd": 1.5458}
+{"at": "2026-10-28T11:16:46+00:00", "event": "start", "cid": "fc_uk_carprod_2026_09__agent__think", "as_of": "2026-10-28", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+[fc_uk_carprod_2026_09] plan: 7 directions -> approved=True
+[fc_uk_carprod_2026_09] done in 489.4s; estimate 59,637; usd 1.6161
+{"at": "2026-10-28T11:24:55+00:00", "event": "end", "cid": "fc_uk_carprod_2026_09__agent__think", "outcome": "done", "wall_s": 489.4, "usd": 1.6161, "error": null}
+{"at": "2026-10-28T11:24:55+00:00", "event": "cost", "cid": "fc_uk_carprod_2026_09__agent__think", "usd": 1.6161, "cumulative_usd": 3.1619}
+{"at": "2026-10-28T11:24:55+00:00", "event": "start", "cid": "fc_uk_homesales_2026_09__agent__off", "as_of": "2026-10-28", "thinking": {}}
+[fc_uk_homesales_2026_09] plan: 8 directions -> approved=True
+[fc_uk_homesales_2026_09] done in 568.5s; estimate 91,713; usd 1.6979
+{"at": "2026-10-28T11:34:24+00:00", "event": "end", "cid": "fc_uk_homesales_2026_09__agent__off", "outcome": "done", "wall_s": 568.5, "usd": 1.6979, "error": null}
+{"at": "2026-10-28T11:34:24+00:00", "event": "cost", "cid": "fc_uk_homesales_2026_09__agent__off", "usd": 1.6979, "cumulative_usd": 4.8598}
+{"at": "2026-10-28T11:34:24+00:00", "event": "start", "cid": "fc_uk_homesales_2026_09__agent__think", "as_of": "2026-10-28", "thinking": {"plan": "high", "judge": "high", "repair": "high", "audit": "low", "unit_arbiter": "low"}}
+[fc_uk_homesales_2026_09] plan: 8 directions -> approved=True
+[fc_uk_homesales_2026_09] done in 524.4s; estimate 94,166; usd 1.7094
+{"at": "2026-10-28T11:43:08+00:00", "event": "end", "cid": "fc_uk_homesales_2026_09__agent__think", "outcome": "done", "wall_s": 524.5, "usd": 1.7094, "error": null}
+{"at": "2026-10-28T11:43:08+00:00", "event": "cost", "cid": "fc_uk_homesales_2026_09__agent__think", "usd": 1.7094, "cumulative_usd": 6.5692}
+[
+ {
+  "arm": "naive",
+  "thinking": "off",
+  "n": 7,
+  "n_estimates": 0,
+  "n_scored": 2,
+  "median_abs_pct_err": null,
+  "median_abs_log10_err": null,
+  "within_10pct": 0,
+  "within_5pct": 0,
+  "covered_80": "n/a (no interval)",
+  "usd": 0,
+  "failures": [
+   "fc_cn_profits_2026_09: not run",
+   "fc_tw_visitors_2026_09: not run",
+   "fc_eqnr_prod_2026_q3: not run",
+   "fc_byd_rev_2026_q3: not run",
+   "fc_uk_carprod_2026_09: not run",
+   "fc_uk_mortgages_2026_09: not run",
+   "fc_uk_homesales_2026_09: not run"
+  ]
+ },
+ {
+  "arm": "naive",
+  "thinking": "think",
+  "n": 7,
+  "n_estimates": 0,
+  "n_scored": 2,
+  "median_abs_pct_err": null,
+  "median_abs_log10_err": null,
+  "within_10pct": 0,
+  "within_5pct": 0,
+  "covered_80": "n/a (no interval)",
+  "usd": 0,
+  "failures": [
+   "fc_cn_profits_2026_09: not run",
+   "fc_tw_visitors_2026_09: not run",
+   "fc_eqnr_prod_2026_q3: not run",
+   "fc_byd_rev_2026_q3: not run",
+   "fc_uk_carprod_2026_09: not run",
+   "fc_uk_mortgages_2026_09: not run",
+   "fc_uk_homesales_2026_09: not run"
+  ]
+ },
+ {
+  "arm": "search_direct",
+  "thinking": "off",
+  "n": 7,
+  "n_estimates": 0,
+  "n_scored": 2,
+  "median_abs_pct_err": null,
+  "median_abs_log10_err": null,
+  "within_10pct": 0,
+  "within_5pct": 0,
+  "covered_80": "n/a (no interval)",
+  "usd": 0,
+  "failures": [
+   "fc_cn_profits_2026_09: not run",
+   "fc_tw_visitors_2026_09: not run",
+   "fc_eqnr_prod_2026_q3: not run",
+   "fc_byd_rev_2026_q3: not run",
+   "fc_uk_carprod_2026_09: not run",
+   "fc_uk_mortgages_2026_09: not run",
+   "fc_uk_homesales_2026_09: not run"
+  ]
+ },
+ {
+  "arm": "search_direct",
+  "thinking": "think",
+  "n": 7,
+  "n_estimates": 0,
+  "n_scored": 2,
+  "median_abs_pct_err": null,
+  "median_abs_log10_err": null,
+  "within_10pct": 0,
+  "within_5pct": 0,
+  "covered_80": "n/a (no interval)",
+  "usd": 0,
+  "failures": [
+   "fc_cn_profits_2026_09: not run",
+   "fc_tw_visitors_2026_09: not run",
+   "fc_eqnr_prod_2026_q3: not run",
+   "fc_byd_rev_2026_q3: not run",
+   "fc_uk_carprod_2026_09: not run",
+   "fc_uk_mortgages_2026_09: not run",
+   "fc_uk_homesales_2026_09: not run"
+  ]
+ },
+ {
+  "arm": "agent",
+  "thinking": "off",
+  "n": 7,
+  "n_estimates": 2,
+  "n_scored": 2,
+  "median_abs_pct_err": null,
+  "median_abs_log10_err": null,
+  "within_10pct": 0,
+  "within_5pct": 0,
+  "covered_80": "n/a (no interval)",
+  "usd": 3.2437,
+  "failures": [
+   "fc_cn_profits_2026_09: not run",
+   "fc_tw_visitors_2026_09: not run",
+   "fc_eqnr_prod_2026_q3: not run",
+   "fc_byd_rev_2026_q3: not run",
+   "fc_uk_mortgages_2026_09: not run"
+  ]
+ },
+ {
+  "arm": "agent",
+  "thinking": "think",
+  "n": 7,
+  "n_estimates": 2,
+  "n_scored": 2,
+  "median_abs_pct_err": null,
+  "median_abs_log10_err": null,
+  "within_10pct": 0,
+  "within_5pct": 0,
+  "covered_80": "n/a (no interval)",
+  "usd": 3.3255,
+  "failures": [
+   "fc_cn_profits_2026_09: not run",
+   "fc_tw_visitors_2026_09: not run",
+   "fc_eqnr_prod_2026_q3: not run",
+   "fc_byd_rev_2026_q3: not run",
+   "fc_uk_mortgages_2026_09: not run"
+  ]
+ }
+]
+test4 exit 0

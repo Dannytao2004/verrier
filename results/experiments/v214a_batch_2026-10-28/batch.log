@@ -1,0 +1,12 @@
+{"at": "2026-10-28T10:00:58+00:00", "event": "start", "run": "fc_tw_births_2026_09 off", "args": ["agent", "--question", "fc_tw_births_2026_09"]}
+{"at": "2026-10-28T10:07:42+00:00", "event": "end", "run": "fc_tw_births_2026_09 off", "exit": 0, "wall_s": 404.1}
+{"at": "2026-10-28T10:07:42+00:00", "event": "start", "run": "fc_tw_births_2026_09 think", "args": ["agent", "--question", "fc_tw_births_2026_09"]}
+{"at": "2026-10-28T10:18:37+00:00", "event": "end", "run": "fc_tw_births_2026_09 think", "exit": 0, "wall_s": 654.7}
+{"at": "2026-10-28T10:18:37+00:00", "event": "start", "run": "fc_de_cars_2026_09 off", "args": ["agent", "--question", "fc_de_cars_2026_09"]}
+{"at": "2026-10-28T10:29:48+00:00", "event": "end", "run": "fc_de_cars_2026_09 off", "exit": 0, "wall_s": 671.0}
+{"at": "2026-10-28T10:29:48+00:00", "event": "start", "run": "fc_de_cars_2026_09 think", "args": ["agent", "--question", "fc_de_cars_2026_09"]}
+{"at": "2026-10-28T10:44:13+00:00", "event": "end", "run": "fc_de_cars_2026_09 think", "exit": 0, "wall_s": 865.5}
+{"at": "2026-10-28T10:44:13+00:00", "event": "start", "run": "sponsor_strict off", "args": ["agent", "--ask", "<SPONSOR_Q>"]}
+{"at": "2026-10-28T10:57:33+00:00", "event": "end", "run": "sponsor_strict off", "exit": 0, "wall_s": 799.8}
+{"at": "2026-10-28T10:57:33+00:00", "event": "start", "run": "sponsor_strict think", "args": ["agent", "--ask", "<SPONSOR_Q>"]}
+{"at": "2026-10-28T11:10:36+00:00", "event": "end", "run": "sponsor_strict think", "exit": 0, "wall_s": 782.5}
