@@ -11,6 +11,8 @@ v2.11f：plan 和 approve 之间多一个 existing 节点（现成数据前置�
 
 图里只放可序列化的数据；预算、LLM、哨兵等放在 Context 里，通过闭包交给节点。
 """
+import copy
+import json
 import math
 import operator
 import re
@@ -248,7 +250,12 @@ Your previous reply proposed these methods and assumptions:
 Code found these problems:
 {errors}
 
-Return the complete JSON object again. Keep your assessment and decisions unless the problems show they were wrong. Fix or drop each failing method. Where methods that do execute disagree strongly, decide which input or assumption is wrong and fix or drop that method instead of letting the methods be averaged. Keep at least one credible method that executes under the rules above. Do not repeat a rejected assumption in another wording."""
+Return the complete JSON object again. Keep your assessment and decisions unless the problems show they were wrong.
+Repair, do not replace: for each problem, change only what it names (the input, its unit or period, or the part of the formula that is wrong); a kept data point from the table that fits better may stand in for a wrong input. Keep each method's id; give a new method a new id. Code keeps the methods and assumptions that the problems do not name exactly as they were, and ignores changes to them in your reply; if a named method needs another value for an assumption that other methods also use, add a new assumption with a new id.
+Where methods that execute disagree strongly, find the input that makes them differ. If the evidence shows that input is wrong or measures something other than what the formula needs, fix it. If you cannot show that, keep both methods unchanged: code combines them and the disagreement widens the interval.
+A method that covers only part of the target is never combined on its own: put the parts into one method that sums them (coverage kind "sum"), as the method rules above say.
+Remove a named method only if you can say which of its inputs is wrong and why: list it in "dropped_methods" as {{"id": "...", "wrong_input": "...", "evidence": "..."}}. Code puts back any method removed without such an entry, except methods that code itself rejected (a part of the target, missing data, an unknown id), which you may simply remove or merge.
+Keep at least one credible method that executes under the rules above. Do not repeat a rejected assumption in another wording."""
 # 离散目标的修正轮（v2.3）：这一轮的结果列表通过了就固定不变；被拒了就要裁判在修正回复里给改好的列表
 REPAIR_OUTCOMES_KEPT = """
 
@@ -319,6 +326,184 @@ CONFLICT_RATIO = 3.0   # 能跑的方法之间差到这个倍数以上，就当�
 CONFLICT_TVD = 0.5     # 离散方法的对应规则：两个分布的 total variation distance 超过它（一半以上的概率换了结果）就交回裁判
 
 
+def _inputs_text(m: dict) -> str:
+    """v2.14a：打架时交给裁判看的一条方法的输入（id、代码采样的 P10–P90、单位），好让它看出差在哪个输入。"""
+    def v(x, unit):
+        return "?" if x is None else (f"{100 * x:.3g}%" if unit == "%" else f"{x:,.0f}" if abs(x) >= 1000 else f"{x:.4g}")
+    return "; ".join(f"{d.get('id')} {v(d.get('p10'), d.get('unit'))}..{v(d.get('p90'), d.get('unit'))}"
+                     f"{'' if d.get('unit') in (None, '', '%') else ' ' + str(d['unit'])}" for d in m.get("inputs_detail") or [])
+
+
+def _repair_scope(errors: list, assumptions: list) -> tuple:
+    """v2.14a：这一轮报错点名的范围：(方法 id, 假设 id)。方法：报错里写到的（method X (...): ...）和互相打架的两条；
+    假设：被拒的、报错里直接写到 id 的、理由 / 名字 / 适用条件 / 证伪条件里引用了报错里写到的数据点的（例：p81 被输入核对否了，
+    理由引用 p81 的假设 a2 也算被点名，10-27 sponsor 题）。范围外的方法和假设，修正回复里的改动由 _lock_repair 退回。"""
+    text = "\n".join(str(e) for e in errors)
+    ms = set(re.findall(r"\bmethod (\S+) \(", text))
+    for a, b in re.findall(r"methods disagree: (\S+) gives .*? but (\S+) gives", text):
+        ms |= {a, b}
+    for line in re.findall(r"methods more than \S+ apart from another method: (.*)", text):
+        ms |= set(re.findall(r"(\S+) \(", line))
+    pts = set(re.findall(r"\bp\d+\b", text))
+    asum = set(re.findall(r"\bassumption (\S+) rejected", text)) | set(re.findall(r"\ba\d+\b", text))
+    for a in assumptions or []:
+        blob = " ".join(str(a.get(k) or "") for k in ("rationale", "name", "applies_when", "falsified_by"))
+        if pts & set(re.findall(r"\bp\d+\b", blob)):
+            asum.add(str(a.get("id")))
+    return ms, asum
+
+
+_M_KEYS = ("method", "formula", "params", "inputs", "coverage", "unit")
+_A_KEYS = ("value", "low", "high", "unit")
+
+
+def _same(x: dict, y: dict, keys) -> bool:
+    return all(x.get(k) == y.get(k) for k in keys)
+
+
+def _uses(m: dict, aid: str) -> bool:
+    return re.search(rf"\b{re.escape(aid)}\b", dumps({k: m.get(k) for k in ("formula", "params", "inputs")})) is not None
+
+
+def _input_ids(m: dict) -> frozenset:
+    return frozenset(re.findall(r"\b[pa]\d+\b", dumps({k: m.get(k) for k in ("params", "inputs", "formula")})))
+
+
+def _content(m: dict) -> str:
+    return dumps({k: m.get(k) for k in _M_KEYS})
+
+
+def _pair_methods(prev_m: list, new_m: list) -> dict:
+    """修正前的方法 id -> 回复里对应方法的下标（v2.14a 审查：裁判会重新编号）。先配内容完全相同的（只改了编号），
+    再按输入 id 的重合度从高到低配（重合一半以上 = 同一条路线改过），最后同编号配剩下的；配不上的 = 回复里删了。"""
+    pairs, used = {}, set()
+    for m in prev_m:
+        j = next((j for j, n in enumerate(new_m) if j not in used and _content(n) == _content(m)), None)
+        if j is not None:
+            pairs[str(m.get("id"))] = j
+            used.add(j)
+    cand = []
+    for m in prev_m:
+        if str(m.get("id")) in pairs:
+            continue
+        pi = _input_ids(m)
+        for j, n in enumerate(new_m):
+            ni = _input_ids(n)
+            jac = len(pi & ni) / len(pi | ni) if pi | ni else 0.0
+            cand.append((jac, str(n.get("id")) == str(m.get("id")), str(m.get("id")), j))
+    for jac, _same_id, pid, j in sorted(cand, key=lambda x: (-x[0], not x[1])):
+        if jac >= 0.5 and pid not in pairs and j not in used:
+            pairs[pid] = j
+            used.add(j)
+    for m in prev_m:
+        pid = str(m.get("id"))
+        j = next((j for j, n in enumerate(new_m) if j not in used and str(n.get("id")) == pid), None)
+        if pid not in pairs and j is not None:
+            pairs[pid] = j
+            used.add(j)
+    return pairs
+
+
+def _free(used: set, prefix: str, cap=None):
+    i = 1
+    while f"{prefix}{i}" in used:
+        i += 1
+    return None if cap is not None and i > cap else f"{prefix}{i}"
+
+
+def _rename(m: dict, old: str, new: str) -> dict:
+    return json.loads(re.sub(rf"\b{re.escape(old)}\b", new, json.dumps(m, ensure_ascii=False)))
+
+
+def _lock_repair(prev_m: list, prev_a: list, new_m: list, new_a: list, named_m: set, named_a: set, dropped: list,
+                 deletable=frozenset()) -> tuple:
+    """v2.14a：修正回复回来以后，范围外的部分退回原样（用户 10-27：修复不是删除）。返回 (方法, 假设, 记录)。
+    - 方法按内容配对（_pair_methods）：裁判重新编号不算删除，也不会让同一条路线出现两份；
+    - 没被点名的方法：回复里删了或改了，换回修正前的那一份；
+    - 被点名的方法：可以改；删掉要在 dropped_methods 里写出错的输入和证据，没写就放回去。代码自己判死的方法（只覆盖一部分、
+      缺数据、id 不存在……，deletable）可以直接删；
+    - 放回的方法连同它引用、回复里又没有的假设一起放回；
+    - 没被点名、保留下来的方法用到的假设：回复里删了或改了，换回原样。这个 id 被被点名的方法或新方法拿去另作他用时，旧假设
+      换一个空闲 id（a1..a12）只给没被点名的方法用；没有空闲 id 就收下回复的版本并记下；
+    - 新加的方法和假设照收。放回的都是深拷贝（之后单位核对会原地改方法）。"""
+    why = {str(d.get("id")): d for d in dropped or [] if isinstance(d, dict)
+           and str(d.get("wrong_input") or "").strip() and str(d.get("evidence") or "").strip()}
+    out_m, log = [copy.deepcopy(n) for n in new_m], []
+    pairs = _pair_methods(prev_m, new_m)
+    keep, put_back = [], []   # 没被点名、保留原样的方法（下标）；放回的方法（下标）
+    for m in prev_m:
+        pid = str(m.get("id"))
+        j = pairs.get(pid)
+        if pid not in named_m:
+            if j is None:
+                out_m.append(copy.deepcopy(m))
+                put_back.append(len(out_m) - 1)
+                log.append({"kind": "method", "id": pid, "action": "put back", "reason": "not named in the problems but removed"})
+            else:
+                if _content(m) != _content(new_m[j]):
+                    out_m[j] = {**copy.deepcopy(m), "id": new_m[j].get("id")}
+                    log.append({"kind": "method", "id": pid, "action": "change undone", "reason": "not named in the problems"})
+                keep.append(j)
+        elif j is None:
+            if pid in why:
+                log.append({"kind": "method", "id": pid, "action": "dropped", "reason": f"wrong input {why[pid].get('wrong_input')}: "
+                                                                                     f"{str(why[pid].get('evidence'))[:200]}"})
+            elif pid in deletable:
+                log.append({"kind": "method", "id": pid, "action": "dropped", "reason": "code had rejected it (it could not be repaired as it was)"})
+            else:
+                out_m.append(copy.deepcopy(m))
+                put_back.append(len(out_m) - 1)
+                log.append({"kind": "method", "id": pid, "action": "put back",
+                            "reason": "removed without naming the wrong input and the evidence in dropped_methods"})
+    ids = [str(m.get("id")) for m in out_m]   # 放回的方法撞了编号：换一个空闲的
+    for j in put_back:
+        if ids.count(ids[j]) > 1:
+            new_id = _free(set(ids), "m")
+            out_m[j]["id"], ids[j] = new_id, new_id
+    pa = {str(x.get("id")): x for x in prev_a}
+    na = {str(x.get("id")): x for x in new_a}
+    out_a = [copy.deepcopy(x) for x in new_a]
+    others = [m for j, m in enumerate(out_m) if j not in keep and j not in put_back]   # 被点名的和新加的方法
+    for j in put_back:   # 放回的方法引用、回复里又没有的假设：一起放回
+        for aid in sorted(_input_ids(out_m[j])):
+            if aid in pa and aid not in na and all(str(x.get("id")) != aid for x in out_a):
+                out_a.append(copy.deepcopy(pa[aid]))
+                log.append({"kind": "assumption", "id": aid, "action": "put back", "reason": f"used by the method put back ({out_m[j].get('id')})"})
+    locked = keep + put_back
+    for aid, x in pa.items():
+        users = [out_m[j] for j in locked if _uses(out_m[j], aid)]
+        if not users:
+            continue
+        if aid not in na:   # 回复里删了，可没被点名的方法还在用
+            if all(str(y.get("id")) != aid for y in out_a):
+                out_a.append(copy.deepcopy(x))
+                log.append({"kind": "assumption", "id": aid, "action": "put back", "reason": "used by a method that was not named"})
+            continue
+        if _same(x, na[aid], _A_KEYS):
+            continue
+        if aid in named_a:   # 被点名的假设可以改，但没被点名的方法也跟着变：记一笔
+            log.append({"kind": "assumption", "id": aid, "action": "changed (shared)",
+                        "reason": "named in the problems; also used by " + ", ".join(str(m.get("id")) for m in users)})
+            continue
+        if any(_uses(m, aid) for m in others):   # 这个 id 被拿去另作他用：旧含义换一个空闲 id，只给没被点名的方法
+            fresh = _free({str(y.get("id")) for y in out_a} | set(pa), "a", cap=12)
+            if fresh is None:
+                log.append({"kind": "assumption", "id": aid, "action": "changed (shared)",
+                            "reason": "id reused by a named or new method and no free id left; unnamed methods now use the new value"})
+                continue
+            out_a.append({**copy.deepcopy(x), "id": fresh})
+            for j in locked:
+                if _uses(out_m[j], aid):
+                    out_m[j] = _rename(out_m[j], aid, fresh)
+            log.append({"kind": "assumption", "id": aid, "action": f"kept as {fresh}",
+                        "reason": "id reused with another value by a named or new method; unnamed methods keep the old value under " + fresh})
+            continue
+        k = next(i for i, y in enumerate(out_a) if str(y.get("id")) == aid)
+        out_a[k] = copy.deepcopy(x)
+        log.append({"kind": "assumption", "id": aid, "action": "change undone", "reason": "used by a method that was not named"})
+    return out_m, out_a, log
+
+
 def _problems(jr: dict, out: dict, av: dict, failed: dict, quiet_if_agree: bool = True) -> tuple:
     """(能跑的方法数, 交给裁判的问题清单)：失败的方法和原因、被拒的假设、能跑的方法之间差 CONFLICT_RATIO 倍以上
     （离散方法：分布的 total variation distance 超过 CONFLICT_TVD）。
@@ -334,7 +519,13 @@ def _problems(jr: dict, out: dict, av: dict, failed: dict, quiet_if_agree: bool 
         if hi[1]["estimate"] / lo[1]["estimate"] > CONFLICT_RATIO:
             probs.append(f"methods disagree: {hi[1].get('label') or hi[1]['id']} gives {hi[1]['estimate']:,.0f} but "
                          f"{lo[1].get('label') or lo[1]['id']} gives {lo[1]['estimate']:,.0f} (more than {CONFLICT_RATIO:g}x apart); "
-                         f"at least one route's input or assumption is wrong")
+                         f"at least one route's input or assumption is wrong. Inputs of {hi[1].get('label') or hi[1]['id']}: "
+                         f"{_inputs_text(hi[1])}. Inputs of {lo[1].get('label') or lo[1]['id']}: {_inputs_text(lo[1])}")
+            far = [m for _, m in num if any(max(m["estimate"], o["estimate"]) / min(m["estimate"], o["estimate"]) > CONFLICT_RATIO
+                                            for _, o in num if o is not m)]
+            if len(far) > 2:   # v2.14a 审查：第三条犯同样错的方法也要点名，不然它的修正会被锁退回
+                probs.append(f"methods more than {CONFLICT_RATIO:g}x apart from another method: " + ", ".join(
+                    f"{m.get('label') or m['id']} ({m['estimate']:,.0f})" for m in far))
     dist = [(i, m) for i, m in ok if m.get("distribution")]   # 离散方法：分布之间的 total variation distance（连续值时为空）
     pairs = [(0.5 * sum(abs(a[1]["distribution"][k] - b[1]["distribution"].get(k, 0.0)) for k in a[1]["distribution"]), a, b)
              for n, a in enumerate(dist) for b in dist[n + 1:]]
@@ -746,6 +937,8 @@ def build(ctx: Context):
                 aud = {**(ufail or {}), **audit}
                 failed.update(aud)
                 last["audit_only"] = dict(audit)
+                # v2.14a 审查：代码自己判死的方法（不是模型核对否掉的），修正时可以直接删
+                last["code_dead"] = {str(m.get("id")) for i, m in enumerate(jr["methods"]) if i in failed and i not in aud}
                 n_ok, errs = _problems(jr, out_c, av_c, failed)
                 # v2.11e（D2）：两条以上路线吻合时 _problems 返回空，代码否掉的方法（failed 里不属于 aud 的，也包括 value_check 去掉点之后
                 # 报的「unknown or discarded」）就静默丢了。其中有一条文字在这一轮之前的修正里从没发给过裁判，就把完整清单交回（清单里
@@ -796,6 +989,17 @@ def build(ctx: Context):
                     jr["methods"] = [m for m in out2.get("methods") or [] if isinstance(m, dict)]
                     a2 = out2.get("assumptions")
                     jr["assumptions"] = (a2 if isinstance(a2, list) else [])[:20]
+                    # v2.14a：范围外的改动和没给理由的删除退回原样（修正前的方案 + 这一轮发出去的报错决定范围）
+                    named_m, named_a = _repair_scope(jr["repair"]["errors"], prev[1])
+                    if disc and (oerrs or any(k in out2 for k in OUTCOME_KEYS)):   # 结果列表这一轮在改：方法按新列表重写，不锁
+                        named_m = {str(m.get("id")) for m in prev[0]}
+                    dropped = [x for x in out2.get("dropped_methods") or [] if isinstance(x, dict)]
+                    jr["methods"], jr["assumptions"], lock = _lock_repair(prev[0], prev[1], jr["methods"], jr["assumptions"],
+                                                                          named_m, named_a, dropped, last.get("code_dead") or set())
+                    if dropped:
+                        jr["repair"]["dropped_methods"] = dropped
+                    if lock:
+                        jr["repair"]["scope_lock"] = lock
                     oerrs2 = []
                     if disc:   # 修正回复里的 decisions 只记录、不采用（保留的点仍按第一次回复定）
                         jr["repair"]["decisions_in_reply"] = [x for x in out2.get("decisions") or [] if isinstance(x, dict)]
