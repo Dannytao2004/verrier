@@ -49,7 +49,7 @@ class TestVerrierPage(unittest.TestCase):
                      "/api/result", "/api/saved", "/api/file", "/api/graph", "/api/providers", "/api/key/check"):
             self.assertIn(path, routes)
         for used in ('"/api/runs"', "/api/runs/", "/approve", "/cancel", "/api/result?", '"/api/saved"', "/api/file?", "/api/graph?",
-                     '"/api/providers?usd_cap="', '"/api/key/check"'):   # web-v0.9：模型目录、校验 key
+                     '"/api/providers"', '"?usd_cap="', '"/api/key/check"'):   # web-v0.9：模型目录、校验 key（web-v0.12：上限没设时不带 usd_cap）
             self.assertIn(used, js)
 
     def test_evidence_route_and_link(self):

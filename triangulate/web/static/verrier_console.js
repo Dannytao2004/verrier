@@ -2,7 +2,7 @@
 // 只调用现有 API（/api/runs、/api/result、/api/saved、/api/file、/api/graph），后端逻辑不变；回测表在经典界面（/#/...）。
 // web-v0.9：提问页多了「模型 · key · 上限」：provider、区域（只有 Kimi / GLM）、模型（带每次运行的估计花费，/api/providers）、
 // 你自己的 API key（默认存在这个标签页的 sessionStorage；勾「在这台设备上记住」才放 localStorage，明文）、校验 key（/api/key/check）、
-// 思考档位、花费上限（默认 $2.00）。发起运行时 key 随 POST /api/runs 发给本机服务，只留在这次运行的内存里。
+// 思考档位、花费上限（默认取服务端的 default_usd_cap，web-v0.12 起不再写死）。发起运行时 key 随 POST /api/runs 发给本机服务，只留在这次运行的内存里。
 // 路由：#console（提问）、#console/run/<运行 id>（进度）、#console/result/<题 id>/<tag>（保存的结果）、
 // #console/evidence/<题 id>/<tag>（证据、方法和假设；面板由 verrier_evidence.js 画）、#console/graph/<题 id>/<tag>（依赖图；
 // 图纸由 verrier_graph.js 画）。别的 hash 是页面锚点，控制台关掉。
@@ -219,8 +219,11 @@
   const sget = (kind, k) => { try { const s = stor(kind); return s ? s.getItem(k) : null; } catch (e) { return null; } };
   const sset = (kind, k, v) => { try { const s = stor(kind); if (s) { if (v === null) s.removeItem(k); else s.setItem(k, v); } } catch (e) { /* 存不了就不存 */ } };
   let cat = null, capTimer = null;
-  const cfg = {provider: null, region: null, model: null, thinking: null, cap: 2};
+  // web-v0.12：上限默认取服务端的 default_usd_cap（v2.13b 起 $3：第一轮 10 个方向）。以前写死 2、并存进 localStorage，
+  // 网页运行只开 6 个方向；只有用户自己改过的上限（capUser）才记住，旧版存下的 2 不是用户选的，作废
+  const cfg = {provider: null, region: null, model: null, thinking: null, cap: null, capUser: false};
   try { Object.assign(cfg, JSON.parse(sget("local", CFG_STORE) || "{}")); } catch (e) { /* 坏的就用默认 */ }
+  if (!cfg.capUser) cfg.cap = null;
   const cfgSave = () => sset("local", CFG_STORE, JSON.stringify(cfg));
   const provOf = () => cat.providers.find(p => p.id === cfg.provider);
   const modelOf = () => provOf().models.find(m => m.id === cfg.model);
@@ -255,8 +258,8 @@
           <div class="fine" id="cxKeyNote"></div></dd>
         <dt><label for="cxThink">${T("Thinking", "思考深度")}</label></dt><dd><select id="cxThink"></select><div class="fine" id="cxThinkNote"></div></dd>
         <dt><label for="cxCap">${T("Spending cap", "花费上限")}</label></dt><dd><span class="cx-capin"><span class="lbl">US$</span>
-          <input type="number" id="cxCap" min="0.1" step="0.5" value="2.00" inputmode="decimal"></span>
-          <span class="fine">${T("per run, default $2.00", "每次运行，默认 $2.00")}</span></dd>
+          <input type="number" id="cxCap" min="0.1" step="0.5" value="" inputmode="decimal"></span>
+          <span class="fine" id="cxCapNote"></span></dd>
       </dl>
       <div class="cx-est" id="cxEst"></div></div>`;
   }
@@ -291,6 +294,7 @@
     $("cxThink").innerHTML = cat.thinking_levels.map(lv => { const ok = m.thinking.levels.includes(lv);
       return `<option value="${esc(lv)}"${lv === cfg.thinking ? " selected" : ""}${ok ? "" : " disabled"}>${LV[lv] ? LV[lv].join(" · ") : esc(lv)}${ok ? "" : " — n/a"}</option>`; }).join("");
     if (document.activeElement !== $("cxCap")) $("cxCap").value = Number(cfg.cap).toFixed(2);
+    $("cxCapNote").innerHTML = T(`per run, default ${money(cat.default_usd_cap)}`, `每次运行，默认 ${money(cat.default_usd_cap)}`);
   }
   function priceLine(pr) {
     const u = pr.usd_per_mtok, cny = pr.currency !== "USD" && pr.listed;
@@ -322,7 +326,7 @@
   }
   function cfgRender() { normalize(); cfgSave(); fillSelects(); cfgNotes(); }
   async function loadCatalog(tok) {
-    const c = await api("/api/providers?usd_cap=" + encodeURIComponent(Number(cfg.cap) > 0 ? Number(cfg.cap) : 2));
+    const c = await api("/api/providers" + (Number(cfg.cap) > 0 ? "?usd_cap=" + encodeURIComponent(Number(cfg.cap)) : ""));
     if (tok !== token || !$("cxCfg")) return false;
     cat = c;
     cfgRender();
@@ -340,6 +344,7 @@
       const v = Number($("cxCap").value);
       if (!(v > 0)) return;
       cfg.cap = v;
+      cfg.capUser = true;
       clearTimeout(capTimer);
       capTimer = setTimeout(() => loadCatalog(tok).catch(fail(tok)), 350);
     };

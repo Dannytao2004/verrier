@@ -419,9 +419,9 @@ class TestClassicPageCannotStartRuns(_Client):
 
     def test_console_form(self):
         js = (STATIC / "verrier_console.js").read_text(encoding="utf-8")
-        for s in ('"/api/providers?usd_cap="', '"/api/key/check"', 'type="password" id="cxKey"', 'id="cxRemember"', "sessionStorage",
+        for s in ('"/api/providers"', '"?usd_cap="', '"/api/key/check"', 'type="password" id="cxKey"', 'id="cxRemember"', "sessionStorage",
                   'sset("local", n, v && keep ? v : null)', 'sset("session", n, v && !keep ? v : null)', "api_key: key",
-                  'id="cxProv"', 'id="cxReg"', 'id="cxModel"', 'id="cxThink"', 'id="cxCap"', 'value="2.00"', ' disabled"'):
+                  'id="cxProv"', 'id="cxReg"', 'id="cxModel"', 'id="cxThink"', 'id="cxCap"', 'id="cxCapNote"', 'cat.default_usd_cap', ' disabled"'):
             self.assertIn(s, js)
         self.assertNotIn("TRIANGULATE_KEY_FILE", js)          # 旧的「需要 key 文件、上限 $1.00」说明已换掉
         self.assertNotIn("US$1.00", js)

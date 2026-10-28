@@ -97,8 +97,8 @@
     return `<div class="cx-gw"><div class="cx-gsvg"><svg viewBox="0 0 ${L.width} ${f1(L.height)}" width="${L.width}" height="${f1(L.height)}" role="img" aria-label="Dependency graph">
       ${defs}${head}${L.es.map(edge).join("")}${L.ns.map(node).join("")}</svg>
       <p class="fine">${T("Each body is a node; its size grows with the number of lines it connects. Lines show what feeds what. Dashed: a method that is not in the combined estimate (failed or covers only part of the target), or a point the judge discarded. Red: a published value. Click a body to see its details.",
-        "每个星球是一个节点，连线越多星球越大。连线表示谁用了谁。虚线：没有进入合并估计的方法（失败或只覆盖目标的一部分），或裁判丢弃的数据点。红色：已公布的值。点一个星球看它的详情。")}</p>
-      <aside class="cx-gside" id="cxGside"></aside></div>`;
+        "每个星球是一个节点，连线越多星球越大。连线表示谁用了谁。虚线：没有进入合并估计的方法（失败或只覆盖目标的一部分），或裁判丢弃的数据点。红色：已公布的值。点一个星球看它的详情。")}</p></div>
+      <aside class="cx-gside" id="cxGside"></aside></div>`;   // web-v0.12：补上 .cx-gsvg 的 </div>，详情栏回到右边一列（以前被套进图里、排到图下方）
   }
 
   // ---------- 侧栏：一个节点的详情（dep_graph 的 detail，按键排成表，嵌套的字典和列表画成内嵌的表；不是原样的 JSON） ----------

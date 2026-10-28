@@ -372,7 +372,7 @@ body.mode-ask .est,body.mode-ask .hx-new{display:none}
         <button class="hx-btn" type="button" id="hxCheck">CHECK</button>
         <label class="fine"><input type="checkbox" id="hxRemember"> remember on this device</label> <span id="hxKeyMsg" class="fine"></span></dd>
       <dt>Thinking</dt><dd><select id="hxThink"></select></dd>
-      <dt>Spending cap</dt><dd>US$ <input type="number" id="hxCap" min="0.1" step="0.5" value="2.00" style="width:70px"> <span class="fine">per run</span></dd>
+      <dt>Spending cap</dt><dd>US$ <input type="number" id="hxCap" min="0.1" step="0.5" value="" style="width:70px"> <span class="fine">per run</span></dd>
       </dl><p class="fine">Bring your own key: web runs only use the key entered here, never a key file on the server. It stays in this browser
       (session only unless you tick “remember”) and in the server's memory for this one run.</p>`);
     panel("", `<h3>ESTIMATED COST</h3><div id="hxEst" class="fine">loading models…</div>`);
@@ -383,8 +383,9 @@ body.mode-ask .est,body.mode-ask .hx-new{display:none}
       approval. Field agents search, fetch and extract quoted numbers; code checks every quote, date and unit. A judge proposes methods,
       code computes them and combines independent blocks. Every number on the result screen traces to a quote.</p>`);
 
-    const cfg = { provider: null, region: null, model: null, thinking: null, cap: 2 };
+    const cfg = { provider: null, region: null, model: null, thinking: null, cap: null, capUser: false };   // web-v0.12：同经典版
     try { Object.assign(cfg, JSON.parse(sget("local", CFG_STORE) || "{}")); } catch (e) { /* 用默认 */ }
+    if (!cfg.capUser) cfg.cap = null;
     let cat = null, capT = null;
     const provOf = () => cat.providers.find(p => p.id === cfg.provider), modelOf = () => provOf().models.find(m => m.id === cfg.model);
     const regionOf = m => m.by_region[cfg.region] || Object.values(m.by_region)[0];
@@ -429,14 +430,14 @@ body.mode-ask .est,body.mode-ask .hx-new{display:none}
       sset("local", n, v && keep ? v : null);
       sset("session", n, v && !keep ? v : null);
     }
-    async function loadCat() { cat = await api("/api/providers?usd_cap=" + encodeURIComponent(Number(cfg.cap) > 0 ? Number(cfg.cap) : 2)); render(); }
+    async function loadCat() { cat = await api("/api/providers" + (Number(cfg.cap) > 0 ? "?usd_cap=" + encodeURIComponent(Number(cfg.cap)) : "")); render(); }
     try { await loadCat(); keyLoad(); } catch (e) { $("hxEst").innerHTML = `<span class="bad">${esc(e.message)}</span>`; }
     const changed = (k, keyToo) => ev => { cfg[k] = ev.target.value; render(); if (keyToo) keyLoad(); };
     $("hxProv").onchange = changed("provider", true);
     $("hxReg").onchange = changed("region", true);
     $("hxModel").onchange = changed("model");
     $("hxThink").onchange = changed("thinking");
-    $("hxCap").oninput = () => { const v = Number($("hxCap").value); if (!(v > 0)) return; cfg.cap = v; clearTimeout(capT); capT = setTimeout(() => loadCat().catch(() => {}), 350); };
+    $("hxCap").oninput = () => { const v = Number($("hxCap").value); if (!(v > 0)) return; cfg.cap = v; cfg.capUser = true; clearTimeout(capT); capT = setTimeout(() => loadCat().catch(() => {}), 350); };
     $("hxKey").oninput = keyStore;
     $("hxRemember").onchange = keyStore;
     $("hxCheck").onclick = async () => {
