@@ -254,8 +254,8 @@ body.cx-open nav.links a.cx-nav{background:var(--ink);color:var(--panel)}
 .cx-dp{color:var(--ink2)}
 .cx-nums{display:flex;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:var(--muted);border-top:1px dashed var(--hair);padding-top:5px}
 .cx-nums b{color:var(--ink);font-weight:600}
-/* 任务流程时间轴（verrier_console.js 的 timeline）：8 站横排，轨道线按已完成的站数填墨，当前站红色闪烁 */
-.cx-tl8{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0 10px;padding-top:2px}
+/* 任务流程时间轴（verrier_console.js 的 timeline）：9 站横排（web-v0.14 加了现成数据检查），轨道线按走过的站数填墨，当前站红色闪烁，跳过的站虚线框 */
+.cx-tl8{position:relative;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:0 10px;padding-top:2px}
 .cx-tl8::before,.cx-tl8::after{content:"";position:absolute;left:0;top:15px;height:3px}
 .cx-tl8::before{right:0;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 7px);opacity:.35}
 .cx-tl8::after{width:var(--p);background:var(--ink);transition:width .6s}
@@ -266,9 +266,10 @@ body.cx-open nav.links a.cx-nav{background:var(--ink);color:var(--panel)}
 .cx-sta.st-waiting .n{background:var(--red);border-color:var(--red);color:var(--panel)}
 .cx-sta.cur .n::after{content:"";position:absolute;left:46px;top:12px;width:7px;height:7px;background:var(--red)}
 .cx-sta h4{margin:8px 0 0;font-weight:850;font-stretch:125%;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;line-height:1.25}
-.cx-sta.st-pending h4{color:var(--muted)}
+.cx-sta.st-pending h4,.cx-sta.st-skipped h4{color:var(--muted)}
+.cx-sta.st-skipped .n{border-style:dashed;color:var(--muted)}
 .cx-sta p{margin:3px 0 0;font-size:11.5px;color:var(--ink2);overflow-wrap:anywhere;line-height:1.4;max-height:6.2em;overflow:hidden}
-@media (max-width:1100px){ .cx-tl8{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:14px} .cx-tl8::before,.cx-tl8::after{display:none} }
+@media (max-width:1100px){ .cx-tl8{grid-template-columns:repeat(5,minmax(0,1fr));row-gap:14px} .cx-tl8::before,.cx-tl8::after{display:none} }
 table.cx-t{width:100%;border-collapse:collapse;font-size:13px}
 .cx-t th,.cx-t td{border-bottom:1px solid var(--hair);padding:5px 8px;text-align:left;vertical-align:top}
 .cx-t th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;width:108px;white-space:nowrap}
@@ -589,9 +590,9 @@ body.cx-open .ask{display:none}
         <p class="sub"><span class="en">One question in. One defensible number out.</span><span class="zh">输入一个问题，输出一个经得起追问的数字。</span></p>
         <div class="steps">
           <div class="st"><span class="n">01</span><div><h3><span class="en">Ask</span><span class="zh">提问</span></h3><p><span class="en">Name the number you need — next month's births, this quarter's deliveries, a figure no one reports.</span><span class="zh">说出你要的数字：下个月的出生数、本季度的交付量、没人统计的数据。</span></p></div></div>
-          <div class="st"><span class="n">02</span><div><h3><span class="en">Approve</span><span class="zh">确认</span></h3><p><span class="en">Verrier drafts the estimation routes and sources. You sign off before the field agents go out.</span><span class="zh">Verrier 先拿出推算路线和数据来源，你批准之后才派出取证 agent。</span></p></div></div>
-          <div class="st"><span class="n">03</span><div><h3><span class="en">Gather</span><span class="zh">搜集</span></h3><p><span class="en">Parallel agents read the public record and bring back numbers with verbatim quotes.</span><span class="zh">多个 agent 并行阅读公开记录，带回附原文引用的数字。</span></p></div></div>
-          <div class="st"><span class="n">04</span><div><h3><span class="en">Compute</span><span class="zh">计算</span></h3><p><span class="en">Code — not the model — runs the math: formulas, Monte Carlo, combining the routes.</span><span class="zh">计算交给代码而不是模型：公式、Monte Carlo、多路线合并。</span></p></div></div>
+          <div class="st"><span class="n">02</span><div><h3><span class="en">Approve</span><span class="zh">确认</span></h3><p><span class="en">Verrier checks whether the figure is already out, then drafts the routes. You sign off before the field agents go out.</span><span class="zh">Verrier 先查一次有没有现成数据，再拿出推算路线；你批准之后才派出取证 agent。</span></p></div></div>
+          <div class="st"><span class="n">03</span><div><h3><span class="en">Gather</span><span class="zh">搜集</span></h3><p><span class="en">Three search agents per route run in parallel and their URLs are merged by votes; every number comes back with its verbatim quote.</span><span class="zh">每个方向 3 个搜索 agent 并行，网址按票数合并；带回的每个数字都附原文引用。</span></p></div></div>
+          <div class="st"><span class="n">04</span><div><h3><span class="en">Compute</span><span class="zh">计算</span></h3><p><span class="en">Code — not the model — runs the math: units that carry their period, formulas, Monte Carlo, combining the routes.</span><span class="zh">计算交给代码而不是模型：单位带期间、公式、Monte Carlo、多路线合并。</span></p></div></div>
           <div class="st"><span class="n">05</span><div><h3><span class="en">Deliver</span><span class="zh">交付</span></h3><p><span class="en">An estimate with a range, an evidence ledger and a dependency graph you can audit.</span><span class="zh">带区间的估计，加上可审计的证据账本和依赖图。</span></p></div></div>
         </div>
         <div class="meta"><span class="stencil">LANGGRAPH</span><span class="stencil">PARALLEL AGENTS</span><span class="stencil">HUMAN GATE</span><span class="stencil">≈ US$0.3 / RUN</span></div>

@@ -81,6 +81,7 @@ class WebRun:
         self.approvals = []
         self.target, self.proposed, self.plan_notes = None, [], []
         self.existing = []   # v2.11f：人工确认里给人看的现成数据候选（graph.approve 的 payload）；没找到时是空列表
+        self.existing_events = 0   # web-v0.14：现成数据检查（direction_id = "existing"）的取页、抽取事件数：大于 0 = 这一步跑过
         self.plan_done = False
         self.dirs, self.order = {}, []       # 方向 id -> 进度；批准后的方向（approve 节点会重新编号 d1..dK）+ 第二轮方向
         self.markets = None
@@ -271,7 +272,9 @@ class WebRun:
             d.update(category=x.get("category", ""), hypothesis=str(x.get("hypothesis", ""))[:300], round=rnd)
 
     def _on_event(self, ev: dict):
-        if ev.get("direction_id") == "existing":   # v2.11f：前置步骤的取页、抽取事件不进方向进度（没有新的阶段）
+        if ev.get("direction_id") == "existing":   # v2.11f：前置步骤的取页、抽取事件不进方向进度；web-v0.14 起只记个数（时间轴的现成数据站）
+            with self.lock:
+                self.existing_events += 1
             return
         with self.lock:
             d = self._dir(ev["direction_id"], ev.get("round"))
@@ -340,7 +343,10 @@ class WebRun:
                                     "most_likely": r.get("most_likely"), "most_likely_prob": r.get("most_likely_prob"),
                                     "outcomes": r.get("outcomes"),
                                     "n_computed": sum(1 for m in ms if m.get("estimate") is not None or m.get("distribution")),
-                                    "n_excluded_by_input_audit": len(c.get("excluded_by_input_audit") or [])}
+                                    "n_excluded_by_input_audit": len(c.get("excluded_by_input_audit") or []),
+                                    # web-v0.14：v2.12a 的分块合并（几个块、块间怎么合）
+                                    "n_blocks": (r.get("combination") or {}).get("n_blocks"),
+                                    "block_rule": (r.get("combination") or {}).get("rule_across_blocks")}
                 elif node in ("final", "use_existing"):   # v2.11f：选用现成数据时终稿由 use_existing 写
                     self.final_done = True
 
@@ -367,6 +373,15 @@ class WebRun:
             S.append({"key": key, "label": label, "status": status, "detail": detail})
         add("plan", "规划方向", "done" if self.plan_done else ("running" if st == "planning" else "pending"),
             f"提出 {len(self.proposed)} 个方向" if self.proposed else "")
+        # web-v0.14：v2.11f 的现成数据检查（规划之后、人工确认之前搜一次目标本身）。只对期间已经结束的连续值目标做，别的跳过
+        n_ex = self.existing_events + sum(v for k, v in roles.items() if k.startswith("existing:")) + len(self.existing)
+        if n_ex:
+            add("existing", "现成数据检查", "running" if st == "planning" else "done",
+                "搜一次目标本身" if st == "planning" else
+                (f"找到 {len(self.existing)} 个现成数据，确认时可以选用" if self.existing else "没找到现成数据"))
+        else:
+            add("existing", "现成数据检查", "skipped" if self.plan_done and st != "planning" else "pending",
+                "不适用：只查期间已经结束的连续值目标" if self.plan_done and st != "planning" else "")
         add("approve", "人工确认", "done" if any(a.get("approved") or a.get("use_existing") for a in self.approvals) else
             "waiting" if st == "awaiting_approval" else "pending",
             next((f"选用现成数据 {a['use_existing']}" if a.get("use_existing") else
@@ -386,9 +401,11 @@ class WebRun:
             add(f"judge{rnd}", f"裁判第 {rnd} 轮", "done" if js else "running" if ds and n_done == len(ds) else "pending",
                 js["text"] if js else ("已有调用：" + ", ".join(called) if called else ""))
         c = self.compute
+        rule = {"median": "取中位数", "geometric_mean": "几何平均", "single": "单块"}.get(c.get("block_rule"), c.get("block_rule")) if c else None
         add("compute", "代码计算", "done" if c else "pending",
-            "" if not c else f"{c['n_computed']}/{c['n_methods']} 个方法算出估计" +
-            (f"，{c['n_excluded_by_input_audit']} 个被输入核对排除" if c["n_excluded_by_input_audit"] else ""))
+            "" if not c else f"{c['n_computed']}/{c['n_methods']} 条路线算出估计" +
+            (f" → {c['n_blocks']} 块 → {rule}" if c.get("n_blocks") else "") +
+            (f"，{c['n_excluded_by_input_audit']} 条被输入核对排除" if c["n_excluded_by_input_audit"] else ""))
         add("final", "终稿", "done" if self.final_done else ("running" if c and st == "running" else "pending"))
         return S
 

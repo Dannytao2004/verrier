@@ -49,10 +49,13 @@
     failed: "MISSION FAILED", cancelled: "MISSION ABORTED"};
   const DST = {queued: ["Queued", "排队"], searching: ["Searching", "搜索中"], fetching: ["Fetching", "取页中"], extracting: ["Extracting", "抽取中"],
     done: ["Done", "完成"], stopped: ["Stopped", "中止"]};
-  const SSTAT = {done: ["done", "完成"], running: ["running", "进行中"], waiting: ["waiting for you", "等你确认"], pending: ["pending", "未开始"]};
-  // 运行页的流程时间轴：8 站，由 /api/runs 的 stages（服务端的阶段）和 calls（按角色计的调用次数）推出来，只是大致反映 agent 在做什么：
-  // 单位核对、输入核对和修正都在裁判节点里，服务端没有单独的阶段，按调用次数亮灯
-  const STATIONS = [["plan", ["Plan · lock target", "规划 · 锁定目标"], ["plan"]], ["approve", ["Human gate", "人工确认"], ["approve"]],
+  const SSTAT = {done: ["done", "完成"], running: ["running", "进行中"], waiting: ["waiting for you", "等你确认"], pending: ["pending", "未开始"],
+    skipped: ["skipped", "跳过"]};
+  const passed = s => s.status === "done" || s.status === "skipped";   // web-v0.14：跳过的站也算走过了
+  // 运行页的流程时间轴：9 站，由 /api/runs 的 stages（服务端的阶段）和 calls（按角色计的调用次数）推出来，只是大致反映 agent 在做什么：
+  // 单位核对、输入核对和修正都在裁判节点里，服务端没有单独的阶段，按调用次数亮灯。web-v0.14：加了 v2.11f 的现成数据检查
+  const STATIONS = [["plan", ["Plan · lock target", "规划 · 锁定目标"], ["plan"]],
+    ["existing", ["Existing figure", "现成数据检查"], ["existing"]], ["approve", ["Human gate", "人工确认"], ["approve"]],
     ["field", ["Field agents", "子 agent 取证"], ["subagents1", "subagents2"]], ["judge", ["Judge", "裁判评估"], ["judge1", "judge2"]],
     ["units", ["Unit review", "单位核对"], []], ["audit", ["Input audit · repair", "输入核对 · 修正"], []],
     ["compute", ["Compute (code)", "代码计算"], ["compute"]], ["final", ["Published check · final", "已公布检查 · 终稿"], ["final"]]];
@@ -63,19 +66,19 @@
     const nAud = count(k => k === "audit"), nRep = count(k => k.endsWith(":repair"));
     const computed = (by.get("compute") || {}).status === "done";
     const plain = keys => { const ss = keys.map(k => by.get(k)).filter(Boolean), sts = ss.map(s => s.status);
-      return {status: !sts.length ? "pending" : sts.every(s => s === "done") ? "done" : sts.includes("waiting") ? "waiting"
+      return {status: !sts.length ? "pending" : sts.every(s => s === "skipped") ? "skipped" : sts.every(s => s === "done") ? "done" : sts.includes("waiting") ? "waiting"
         : sts.includes("running") ? "running" : "pending", detail: ss.map(s => esc(s.detail || "")).filter(Boolean).join(" · ")}; };
     const judging = plain(["judge1", "judge2"]).status === "running";   // 单位核对、输入核对都在裁判节点里：裁判站在跑时才按调用次数亮
     const st = STATIONS.map(([key, label, keys]) => {
       if (key === "units") return {key, label, status: computed ? "done" : judging && nChk + nArb ? "running" : "pending",
-        detail: nChk + nArb ? `${T("checks", "核对")} ${nChk} · ${T("arbiter", "裁定")} ${nArb}` : ""};
+        detail: nChk + nArb ? `${T("checks", "核对")} ${nChk} · ${T("arbiter", "裁定")} ${nArb} · ${T("units carry their period; code derives the result unit", "单位带期间，结果单位由代码推")}` : ""};
       if (key === "audit") return {key, label, status: computed ? "done" : judging && nAud + nRep ? "running" : "pending",
         detail: nAud + nRep ? `${T("audits", "输入核对")} ${nAud}${nRep ? ` · ${T("repairs", "修正")} ${nRep}` : ""}` : ""};
       return {key, label, ...plain(keys)};
     });
     // 后一站已经开始时，前面没完成的站都显示成完成（裁判节点要等单位核对、输入核对做完才结束；没做单位核对时那一站算跳过）
     const last = st.map(s => s.status).lastIndexOf("running");
-    st.forEach((s, i) => { if (i < last && s.status !== "done") s.status = "done"; });
+    st.forEach((s, i) => { if (i < last && !passed(s)) s.status = "done"; });
     return st;
   }
   const ACTIVE = ["planning", "awaiting_approval", "running"];
@@ -459,7 +462,7 @@
   }
   function stageKey(r) {
     if (!["planning", "running"].includes(r.status)) return null;
-    const cur = stations(r).find(s => s.status !== "done");
+    const cur = stations(r).find(s => !passed(s));
     if (!cur || cur.key === "approve") return r.status === "planning" ? "plan" : null;
     return cur.key === "field" ? "subagents" : cur.key;
   }
@@ -551,20 +554,23 @@
     };
   }
   function timeline(ss, live) {
-    const cur = live ? ss.findIndex(s => s.status !== "done") : -1, done = ss.filter(s => s.status === "done").length;
+    const cur = live ? ss.findIndex(s => !passed(s)) : -1, done = ss.filter(passed).length;
     return `<div class="cx-tl8" style="--p:${(100 * done / ss.length).toFixed(1)}%">${ss.map((s, i) => `<div class="cx-sta st-${s.status}${i === cur ? " cur" : ""}">
       <span class="n">${String(i + 1).padStart(2, "0")}</span><h4>${T(...s.label)}</h4>
       <p><span class="lbl">${T(...(SSTAT[s.status] || [esc(s.status), esc(s.status)]))}</span>${s.detail ? `<br>${s.detail}` : ""}</p></div>`).join("")}</div>`;
   }
-  function dirCard(d) {
+  function dirCard(d, calls) {
     const st = DST[d.status] || [esc(d.status), esc(d.status)], busy = ["searching", "fetching", "extracting"].includes(d.status);
+    // web-v0.14：v2.13b 每个方向派几个搜索 agent（calls 里 search:<方向>:<j> 的个数），网址按被几个 agent 找到排序、合并后取前 12 个
+    const nAg = Object.keys(calls || {}).filter(k => k.startsWith(`search:${d.id}:`)).length;
     const pg = d.pages || {}, pts = d.n_kept !== null && d.n_kept !== undefined ? d.n_kept : (d.n_points ?? d.n_verified ?? 0);
     const urls = (d.status === "fetching" || d.status === "extracting") ? ` ${esc(d.pages_done ?? 0)}/${esc(d.n_urls ?? "?")}` : "";
     return `<div class="cx-dir${busy ? " busy" : ""}${d.status === "done" ? " ok" : ""}">
       <span class="cx-dh"><b>${esc(d.id)}</b><span class="stencil">${esc(d.category)}</span>${d.round > 1 ? '<span class="lbl">R2</span>' : ""}
         <span class="cx-state">${T(...st)}${urls}</span></span>
       <span>${esc(d.hypothesis)}</span>
-      <span class="cx-nums"><span><b>${esc(pg.snapshot ?? 0)}</b> snap</span><span><b>${esc(pg.live_dated ?? 0)}</b> live</span>
+      <span class="cx-nums">${nAg ? `<span><b>${nAg}</b> ${T("search agents", "个搜索 agent")}</span>` : ""}${d.n_urls !== null && d.n_urls !== undefined ? `<span><b>${esc(d.n_urls)}</b> ${T("URLs merged", "个网址（合并后）")}</span>` : ""}
+        <span><b>${esc(pg.snapshot ?? 0)}</b> snap</span><span><b>${esc(pg.live_dated ?? 0)}</b> live</span>
         <span><b>${esc(pg.dropped ?? 0)}</b> drop</span><span><b>${esc(d.n_extracted ?? 0)}</b> ${T("read", "抽取")}</span>
         <span><b>${esc(pts)}</b> ${T("points", "个点")}</span></span>
       ${d.stopped ? `<span class="fine">${esc(d.stopped)}</span>` : ""}</div>`;
@@ -604,7 +610,7 @@
       body.dataset.run = id;
       body.innerHTML = `<div id="cxRunTop"></div><div id="cxThink"></div><div id="cxRunMain"></div>`;
     }
-    const keep = body.scrollTop, key = stageKey(r), cur = stations(r).find(s => s.status !== "done");
+    const keep = body.scrollTop, key = stageKey(r), cur = stations(r).find(s => !passed(s));
     $("cxRunTop").innerHTML = `<div id="cxStrip">${strip(r)}</div>
       ${r.error ? `<div class="cx-err">${esc(r.error)}</div>` : ""}
       ${r.stopped && !r.error ? `<div class="cx-err">${T("Stopped early (the estimate was computed before it)", "中途停下（估计在这之前已经算出）")}: ${esc(r.stopped)}</div>` : ""}
@@ -613,7 +619,7 @@
     $("cxRunMain").innerHTML = `${picking ? gate(r) : ""}
       <h3 class="cx-h">${T("Mission timeline", "任务流程")}</h3>${timeline(stations(r), active)}
       <div class="cx-grid"><div>
-        ${(r.directions || []).length ? `<h3 class="cx-h">${T("Field agents", "子 agent（各取证方向）")}</h3><div class="cx-dirs">${r.directions.map(dirCard).join("")}</div>` : ""}
+        ${(r.directions || []).length ? `<h3 class="cx-h">${T("Field agents", "子 agent（各取证方向）")}</h3><div class="cx-dirs">${r.directions.map(d => dirCard(d, r.calls)).join("")}</div>` : ""}
         ${r.markets ? `<p class="fine">${T("Prediction markets", "预测市场")}: ${esc(r.markets.n_markets)} · ${esc(r.markets.n_points)} pts. ${esc(r.markets.note || "")}</p>` : ""}
       </div><div>
         <h3 class="cx-h">${T("Target lock", "目标锁定")}</h3>${targetTable(r.target)}
@@ -628,6 +634,13 @@
   }
 
   // ---------- 结果 ----------
+  // web-v0.14：v2.12a 的分块合并，一行写清：几条路线 → 几块 → 块间怎么合（输入重叠一半以上的路线并成一块）
+  const BRULE = {median: ["median", "取中位数"], geometric_mean: ["geometric mean", "几何平均"], single: ["single block", "单块"]};
+  function combLine(cb) {
+    if (!cb || !cb.n_blocks) return "";
+    const nm = (cb.blocks || []).reduce((n, b) => n + (b.members || []).length, 0), rule = BRULE[cb.rule_across_blocks] || [esc(cb.rule_across_blocks), esc(cb.rule_across_blocks)];
+    return `<p class="fine">${T("Combined", "合并")} · ${nm} ${T("routes", "条路线")} → ${esc(cb.n_blocks)} ${T("blocks", "块")} → ${T(...rule)}</p>`;
+  }
   function delivered(r, qid, tag) {
     const e = r.estimate || {}, o = r.official, sh = (r.assumption_share || {}).overall, ev = r.evidence || {}, b = r.budget || {};
     const ms = r.methods || [], d = r.discrete, x = r.existing;   // v2.11f：x = 用户选用的现成数据（没有区间、没有方法）
@@ -637,6 +650,8 @@
         <p class="fine">${T("Not an estimate by Verrier", "不是 Verrier 的估计")} · ${T("source", "出处")}
           ${/^https?:\/\//.test(x.source_url || "") ? `<a href="${esc(x.source_url)}" target="_blank" rel="noopener">${esc(x.domain)}</a>` : esc(x.domain)}</p>`
       : `<div class="lbl">${T("Estimate", "估计")}</div><div class="cx-big">${fmt(e.central)}${bigUnit(e.unit)}</div>
+        ${e.unit_full ? `<p class="fine">${T("Unit", "单位")} · ${esc(e.unit_full)}</p>` : ""}
+        ${combLine(e.combination)}
         <p class="fine">80% model-based [${fmt(e.p10)}, ${fmt(e.p90)}]${e.unit ? " " + esc(e.unit) : ""}${e.basis_text ? " · " + esc(e.basis_text) : ""}</p>`;
     return `<div class="cx-deliv"><div class="bh"><span>R-01 · ${T("Delivered", "已交付")}</span><i class="hz"></i><span class="sp"></span><span>${esc(qid)} / ${esc(tag || "—")}</span></div>
       <div class="bd"><div class="cx-grid"><div>${main}

@@ -386,6 +386,11 @@ class TestApiRuns(unittest.TestCase):
             self.assertEqual(d["n_points"], 5)   # v2.12：假网页多了两个 5 月的点
             self.assertEqual(d["n_kept"], 5)
         self.assertEqual({s["key"]: s["status"] for s in st["stages"]}["final"], "done")
+        # web-v0.14：时间轴第 2 站是现成数据检查；as_of 在目标期末之前，这一步不适用 -> 跳过；代码计算站写出合并方式
+        stg = {s["key"]: s for s in st["stages"]}
+        self.assertEqual([s["key"] for s in st["stages"]][:3], ["plan", "existing", "approve"])
+        self.assertEqual(stg["existing"]["status"], "skipped")
+        self.assertIn("1/1 条路线算出估计 → 1 块 → 单块", stg["compute"]["detail"])
         self.assertAlmostEqual(st["compute"]["central"], 1210.0)
         saved = json.loads((self.tmp / st["qid"] / st["tag"] / "state.json").read_text(encoding="utf-8"))
         self.assertEqual([d["hypothesis"] for d in saved["directions"]], ["h1", "h3"])
@@ -579,6 +584,27 @@ class TestWebDiscrete(unittest.TestCase):
             self.assertEqual((runs[0]["mode"], runs[0]["most_likely"]), ("discrete", HOLD))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestExistingStage(unittest.TestCase):
+    """web-v0.14：时间轴的现成数据站（v2.11f 的前置步骤）：在查、查到、没查到、不适用四种状态。"""
+
+    @staticmethod
+    def stage(status, plan_done=True, events=0, existing=(), roles=None):
+        from types import SimpleNamespace
+        from triangulate.web.runs import WebRun
+        run = SimpleNamespace(status=status, plan_done=plan_done, proposed=[{}], existing=list(existing), existing_events=events,
+                              approvals=[], dirs={}, order=[], judge={}, compute=None, final_done=False)
+        return next(s for s in WebRun._stages(run, roles or {}) if s["key"] == "existing")
+
+    def test_states(self):
+        self.assertEqual(self.stage("planning", plan_done=False)["status"], "pending")
+        self.assertEqual(self.stage("planning", events=2)["status"], "running")
+        found = self.stage("awaiting_approval", events=3, existing=[{"id": "x1"}])
+        self.assertEqual((found["status"], found["detail"]), ("done", "找到 1 个现成数据，确认时可以选用"))
+        self.assertEqual(self.stage("awaiting_approval", events=3)["detail"], "没找到现成数据")
+        self.assertEqual(self.stage("awaiting_approval", roles={"existing:search": 1})["status"], "done")
+        self.assertEqual(self.stage("awaiting_approval")["status"], "skipped")
 
 
 if __name__ == "__main__":
