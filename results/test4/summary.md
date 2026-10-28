@@ -10,8 +10,8 @@
 | naive | think | 7/7 | 2 | 14.1% | 0.058 | 1 | 0 | n/a (no interval) | 0.0041 | — |
 | search_direct | off | 7/7 | 2 | 5.7% | 0.025 | 2 | 1 | n/a (no interval) | 0.1370 | — |
 | search_direct | think | 7/7 | 2 | 2.9% | 0.012 | 2 | 2 | n/a (no interval) | 0.5688 | — |
-| agent | off | 5/7 | 2 | 50.2% | 4.009 | 1 | 1 | 1/2 | 7.9438 | fc_eqnr_prod_2026_q3: done / unit not convertible; fc_uk_homesales_2026_09: done / no estimate |
-| agent | think | 5/7 | 2 | inf | inf | 1 | 1 | 1/1 | 8.9443 | fc_cn_profits_2026_09: done / no estimate; fc_eqnr_prod_2026_q3: done / unit not convertible |
+| agent | off | 6/7 | 2 | 50.2% | 4.009 | 1 | 1 | 1/2 | 7.9438 | fc_uk_homesales_2026_09: done / no estimate |
+| agent | think | 6/7 | 2 | inf | inf | 1 | 1 | 1/1 | 8.9443 | fc_cn_profits_2026_09: done / no estimate |
 
 ## 逐个配置
 
@@ -33,8 +33,8 @@
 | fc_eqnr_prod_2026_q3 | naive | think | 2026-10-27 | done / ok | 2,000,000 | — | — | — | — | — | 0.0005 |  |
 | fc_eqnr_prod_2026_q3 | search_direct | off | 2026-10-27 | done / ok | 2,160,000 | — | — | — | — | — | 0.0212 | 搜索 2 次、结果 URL 20 个、思考块 [0] |
 | fc_eqnr_prod_2026_q3 | search_direct | think | 2026-10-27 | done / ok | 2,160,000 | — | — | — | — | — | 0.0862 | 搜索 8 次、结果 URL 50 个、思考块 [4] |
-| fc_eqnr_prod_2026_q3 | agent | off | 2026-10-27 | done / unit not convertible | — | — | — | — | — | — | 1.3954 | 已公布检查 no_candidates、live 页 58、快照 0；'mboe/d' (mboe / d) cannot be converted to 'boe/d' (boe / d) |
-| fc_eqnr_prod_2026_q3 | agent | think | 2026-10-27 | done / unit not convertible | — | — | — | — | — | — | 1.6371 | 已公布检查 not_confirmed、live 页 59、快照 0；'mboe/d' (mboe / d) cannot be converted to 'boe/d' (boe / d) |
+| fc_eqnr_prod_2026_q3 | agent | off | 2026-10-27 | done / ok | 2,194,560 | — | — | 1,545,835 | 3,115,529 | — | 1.3954 | 见下方打分说明；已公布检查 no_candidates、live 页 58、快照 0 |
+| fc_eqnr_prod_2026_q3 | agent | think | 2026-10-27 | done / ok | 2,148,893 | — | — | 1,413,002 | 3,268,036 | — | 1.6371 | 见下方打分说明；已公布检查 not_confirmed、live 页 59、快照 0 |
 | fc_byd_rev_2026_q3 | naive | off | 2026-10-27 | done / ok | 215,000,000,000 | — | — | — | — | — | 0.0000 |  |
 | fc_byd_rev_2026_q3 | naive | think | 2026-10-27 | done / ok | 215,000,000,000 | — | — | — | — | — | 0.0007 |  |
 | fc_byd_rev_2026_q3 | search_direct | off | 2026-10-27 | done / ok | 205,000,000,000 | — | — | — | — | — | 0.0207 | 搜索 2 次、结果 URL 17 个、思考块 [0] |
@@ -59,6 +59,10 @@
 | fc_uk_homesales_2026_09 | search_direct | think | 2026-10-27 | done / ok | 94,000 | — | — | — | — | — | 0.0835 | 搜索 8 次、结果 URL 41 个、思考块 [4] |
 | fc_uk_homesales_2026_09 | agent | off | 2026-10-27 | done / no estimate | — | — | — | — | — | — | 1.2101 | 已公布检查 no_candidates、live 页 83、快照 0 |
 | fc_uk_homesales_2026_09 | agent | think | 2026-10-27 | done / ok | 94,743 | — | — | 62,382 | 143,890 | — | 1.6631 | 已公布检查 no_candidates、live 页 107、快照 0 |
+
+## 打分说明
+
+- **fc_eqnr_prod_2026_q3**：agent 两个配置的输出单位是 mboe/d（千桶油当量/日，Equinor 报告的写法），终稿 2,195 / 2,149 mboe/d。跑的时候（v2.13b）单位库不认识 mboe，打分换不到计分单位 boe/d，记过「unit not convertible」（BUGS S75）。v2.13c 起单位库按 SPE 惯例读 mboe = 1000 boe，同一份输出按 x1000 换算打分。用户 2026-10-27 定：算。这是打分环节的修正：agent 没有重跑，输出没改。
 
 ## 首发值和参照（去年同期的登记值，不是对照臂）
 

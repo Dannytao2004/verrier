@@ -433,12 +433,12 @@
    "wall_s": 813.1,
    "answer_value": null,
    "scored": false,
-   "estimate": null,
-   "p10": null,
-   "p90": null,
-   "detail": "'mboe/d' (mboe / d) cannot be converted to 'boe/d' (boe / d)",
+   "estimate": 2194559.771041989,
+   "p10": 1545834.6558728167,
+   "p90": 3115528.9282582295,
+   "detail": "",
    "estimate_as_run": 2194.559771041989,
-   "unit_note": "'mboe/d' (mboe / d) cannot be converted to 'boe/d' (boe / d)",
+   "unit_note": "mboe/d -> boe/d x 1000",
    "basis": "blocks",
    "published_check": "no_candidates",
    "pages_live_dated": 58,
@@ -465,7 +465,8 @@
      2152.9625044667746
     ]
    ],
-   "arm_status": "unit not convertible"
+   "arm_status": "ok",
+   "scoring_note": "agent 两个配置的输出单位是 mboe/d（千桶油当量/日，Equinor 报告的写法），终稿 2,195 / 2,149 mboe/d。跑的时候（v2.13b）单位库不认识 mboe，打分换不到计分单位 boe/d，记过「unit not convertible」（BUGS S75）。v2.13c 起单位库按 SPE 惯例读 mboe = 1000 boe，同一份输出按 x1000 换算打分。用户 2026-10-27 定：算。这是打分环节的修正：agent 没有重跑，输出没改。"
   },
   {
    "config": "fc_eqnr_prod_2026_q3__agent__think",
@@ -478,12 +479,12 @@
    "wall_s": 1552.3,
    "answer_value": null,
    "scored": false,
-   "estimate": null,
-   "p10": null,
-   "p90": null,
-   "detail": "'mboe/d' (mboe / d) cannot be converted to 'boe/d' (boe / d)",
+   "estimate": 2148892.9482779177,
+   "p10": 1413001.8801303196,
+   "p90": 3268035.922735412,
+   "detail": "",
    "estimate_as_run": 2148.8929482779176,
-   "unit_note": "'mboe/d' (mboe / d) cannot be converted to 'boe/d' (boe / d)",
+   "unit_note": "mboe/d -> boe/d x 1000",
    "basis": "blocks",
    "published_check": "not_confirmed",
    "pages_live_dated": 59,
@@ -510,7 +511,8 @@
      2193.826335757728
     ]
    ],
-   "arm_status": "unit not convertible"
+   "arm_status": "ok",
+   "scoring_note": "agent 两个配置的输出单位是 mboe/d（千桶油当量/日，Equinor 报告的写法），终稿 2,195 / 2,149 mboe/d。跑的时候（v2.13b）单位库不认识 mboe，打分换不到计分单位 boe/d，记过「unit not convertible」（BUGS S75）。v2.13c 起单位库按 SPE 惯例读 mboe = 1000 boe，同一份输出按 x1000 换算打分。用户 2026-10-27 定：算。这是打分环节的修正：agent 没有重跑，输出没改。"
   },
   {
    "config": "fc_byd_rev_2026_q3__naive__off",
@@ -1199,7 +1201,7 @@
    "arm": "agent",
    "thinking": "off",
    "n": 7,
-   "n_estimates": 5,
+   "n_estimates": 6,
    "n_scored": 2,
    "median_abs_pct_err": 0.5015363504435286,
    "median_abs_log10_err": 4.009212370397872,
@@ -1208,7 +1210,6 @@
    "covered_80": "1/2",
    "usd": 7.9438,
    "failures": [
-    "fc_eqnr_prod_2026_q3: done / unit not convertible",
     "fc_uk_homesales_2026_09: done / no estimate"
    ]
   },
@@ -1216,7 +1217,7 @@
    "arm": "agent",
    "thinking": "think",
    "n": 7,
-   "n_estimates": 5,
+   "n_estimates": 6,
    "n_scored": 2,
    "median_abs_pct_err": null,
    "median_abs_log10_err": null,
@@ -1225,8 +1226,7 @@
    "covered_80": "1/1",
    "usd": 8.9443,
    "failures": [
-    "fc_cn_profits_2026_09: done / no estimate",
-    "fc_eqnr_prod_2026_q3: done / unit not convertible"
+    "fc_cn_profits_2026_09: done / no estimate"
    ]
   }
  ],
