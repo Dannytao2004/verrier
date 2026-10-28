@@ -159,6 +159,10 @@ h1.title{font-weight:850;font-stretch:125%;font-size:min(104px,calc(100cqw / 6.1
 .colo{display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center;margin-top:clamp(10px,1.8vh,16px)}
 .colo svg{width:72px;height:72px}
 .colo p{margin:0 0 3px;font-size:11px;font-stretch:100%;color:var(--muted);line-height:1.45}
+/* web-v0.13：限定条件集中在页面最底部（用户 10-27：营销页，叠甲的放最下面、超小半透明）；右侧先留出 ASK 卡的位置 */
+.fineprint{position:relative;z-index:1;scroll-snap-align:end;padding:18px 380px 22px 64px;font-size:9px;line-height:1.5;color:var(--ink2);opacity:.42;font-stretch:100%}
+.fineprint p{margin:0 0 4px;max-width:150ch}
+@media (max-width:1023px){ .fineprint{padding:16px 20px 120px} }
 
 /* reveal */
 .rv{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
@@ -585,12 +589,12 @@ body.cx-open .ask{display:none}
         <p class="sub"><span class="en">One question in. One defensible number out.</span><span class="zh">输入一个问题，输出一个经得起追问的数字。</span></p>
         <div class="steps">
           <div class="st"><span class="n">01</span><div><h3><span class="en">Ask</span><span class="zh">提问</span></h3><p><span class="en">Name the number you need — next month's births, this quarter's deliveries, a figure no one reports.</span><span class="zh">说出你要的数字：下个月的出生数、本季度的交付量、没人统计的数据。</span></p></div></div>
-          <div class="st"><span class="n">02</span><div><h3><span class="en">Approve</span><span class="zh">确认</span></h3><p><span class="en">Verrier drafts the estimation routes and sources. You sign off before a single search runs.</span><span class="zh">Verrier 先拿出推算路线和数据来源，你批准之后才开始搜索。</span></p></div></div>
+          <div class="st"><span class="n">02</span><div><h3><span class="en">Approve</span><span class="zh">确认</span></h3><p><span class="en">Verrier drafts the estimation routes and sources. You sign off before the field agents go out.</span><span class="zh">Verrier 先拿出推算路线和数据来源，你批准之后才派出取证 agent。</span></p></div></div>
           <div class="st"><span class="n">03</span><div><h3><span class="en">Gather</span><span class="zh">搜集</span></h3><p><span class="en">Parallel agents read the public record and bring back numbers with verbatim quotes.</span><span class="zh">多个 agent 并行阅读公开记录，带回附原文引用的数字。</span></p></div></div>
-          <div class="st"><span class="n">04</span><div><h3><span class="en">Compute</span><span class="zh">计算</span></h3><p><span class="en">Code — not the model — runs the math: formulas, Monte Carlo, weights earned in backtests.</span><span class="zh">计算交给代码而不是模型：公式、Monte Carlo、按回测表现加权。</span></p></div></div>
+          <div class="st"><span class="n">04</span><div><h3><span class="en">Compute</span><span class="zh">计算</span></h3><p><span class="en">Code — not the model — runs the math: formulas, Monte Carlo, combining the routes.</span><span class="zh">计算交给代码而不是模型：公式、Monte Carlo、多路线合并。</span></p></div></div>
           <div class="st"><span class="n">05</span><div><h3><span class="en">Deliver</span><span class="zh">交付</span></h3><p><span class="en">An estimate with a range, an evidence ledger and a dependency graph you can audit.</span><span class="zh">带区间的估计，加上可审计的证据账本和依赖图。</span></p></div></div>
         </div>
-        <div class="meta"><span class="stencil">LANGGRAPH</span><span class="stencil">PARALLEL AGENTS</span><span class="stencil">HUMAN GATE</span><span class="stencil">≈ US$0.3–0.6 / ANSWER</span></div>
+        <div class="meta"><span class="stencil">LANGGRAPH</span><span class="stencil">PARALLEL AGENTS</span><span class="stencil">HUMAN GATE</span><span class="stencil">≈ US$0.3 / RUN</span></div>
       </div>
     </div>
   </div>
@@ -626,7 +630,7 @@ body.cx-open .ask{display:none}
       <div class="bd">
         <div class="eyebrow lbl"><i></i><span class="en">04 · Results</span><span class="zh">04 · 成绩</span></div>
         <h2 class="hl"><span class="en">Closer than asking<br>the model.</span><span class="zh">比直接问模型<br>更准。</span></h2>
-        <p class="sub"><span class="en">On questions it had never seen — code frozen in advance, answers released after the model was trained — Verrier posted the lowest median error.</span><span class="zh">在从没见过的题上——代码事先冻结，答案在模型训练之后才公布——Verrier 的中位误差最低。</span></p>
+        <p class="sub"><span class="en">On questions it had never seen — code frozen in advance, answers released after the model shipped — Verrier posted the lowest median error.</span><span class="zh">在从没见过的题上——代码事先冻结，答案在模型上线之后才公布——Verrier 的中位误差最低。</span></p>
         <div class="trio" id="trio">
           <div class="us"><span class="lbl">VERRIER</span><b>1.1%</b><div class="bar"><i data-w="1.1"></i></div></div>
           <div><span class="lbl"><span class="en">Reasoning, no web</span><span class="zh">只推理不联网</span></span><b>2.5%</b><div class="bar"><i data-w="2.5"></i></div></div>
@@ -656,7 +660,7 @@ body.cx-open .ask{display:none}
           <div class="use"><span class="lbl">U-02</span><h3><span class="en">Macro prints</span><span class="zh">宏观数据</span></h3><p><span class="en">CPI, payrolls, rate decisions — with a probability for every outcome.</span><span class="zh">CPI、非农、议息——给出每种结果的概率。</span></p></div>
           <div class="use"><span class="lbl">U-03</span><h3><span class="en">Local figures</span><span class="zh">地方数据</span></h3><p><span class="en">Births in a county, visitors to a park — numbers no one tracks.</span><span class="zh">某个县的出生数、某个公园的游客——没人统计的数字。</span></p></div>
         </div>
-        <div class="nextm"><span class="stencil">NEXT MISSION</span><span><span class="en">A pre-registered showcase on four new questions is armed.</span><span class="zh">四道新题的预注册展示评测已就位。</span></span></div>
+        <div class="nextm"><span class="stencil">NEXT MISSION</span><span><span class="en">Held-out test 4: seven questions run before their official releases, scored as the numbers come out.</span><span class="zh">留出测试 4：7 道题已在官方首发前跑完，首发一个打分一个。</span></span></div>
         <div class="final">
           <b><span class="en">Have a number nobody publishes?<br>That's Verrier's next mission.</span><span class="zh">有一个没人公布的数字？<br>那就是 Verrier 的下一个任务。</span></b>
           <div class="btns"><a class="btn primary" href="#console"><span class="en">Start a mission</span><span class="zh">开始任务</span><span>→</span></a><button class="btn" type="button" data-replay aria-label="Replay 1846"><span>↻</span></button><a class="btn" href="#s0"><span>↑</span></a></div>
@@ -673,7 +677,7 @@ body.cx-open .ask{display:none}
             <circle cx="128" cy="128" r="9" fill="#151515"/>
           </svg>
           <div>
-            <p><span class="en">VERRIER · research prototype · 2026 · figures as of 16 Oct 2026 · not investment advice.</span><span class="zh">VERRIER · 研究原型 · 2026 · 数字截至 2026 年 10 月 16 日 · 不构成投资建议。</span></p>
+            <p><span class="en">VERRIER · research prototype · 2026 · figures as of 27 Oct 2026 · not investment advice.</span><span class="zh">VERRIER · 研究原型 · 2026 · 数字截至 2026 年 10 月 27 日 · 不构成投资建议。</span></p>
             <p><span class="en">Neptune's rings are named Galle, Le Verrier, Lassell, Arago and Adams — after the people who found it.</span><span class="zh">海王星的光环分别以 Galle、Le Verrier、Lassell、Arago、Adams 命名——正是发现它的那些人。</span></p>
           </div>
         </div>
@@ -681,6 +685,10 @@ body.cx-open .ask{display:none}
     </div>
   </div>
 </section>
+<footer class="fineprint">
+  <p><span class="en">Results: median absolute error against asking the same model directly, same thinking setting. Verrier wins 6 of 8 comparisons: development set v2.11g 3.7% vs 16.1% (14 questions, used during development); held-out 1 1.1% vs 4.0% (3); held-out 2 14.5% vs 22.9% (8); held-out 3 thinking off 3.1% vs 6.1%, thinking on 4.2% vs 2.9% (4); held-out 4 round 1 50.2% / no estimate vs 8.4% / 14.1%, round 2 (agent re-run after fixes) 3.2% / 0.5% (2 scored so far). The three headline figures are held-out test 1.</span><span class="zh">成绩：中位绝对误差，对照是同一模型、同一思考设置下的直接问。8 组对照赢 6 组：开发集 v2.11g 3.7% 对 16.1%（14 题，开发时用过）；留出 1 1.1% 对 4.0%（3 题）；留出 2 14.5% 对 22.9%（8 题）；留出 3 关思考 3.1% 对 6.1%、开思考 4.2% 对 2.9%（4 题）；留出 4 第 1 轮 50.2% / 没出数 对 8.4% / 14.1%，第 2 轮（修代码后重跑 agent）3.2% / 0.5%（目前已打分 2 题）。头部三个数取自留出测试 1。</span></p>
+  <p><span class="en">37.7 s: a single v2.5 run on an already-published question. Backtests read only archived snapshots from before the cutoff and are audited by a sentinel; web search itself cannot be date-limited. Input checks are a separate model call. Cost: about US$0.2–0.4 in tokens per DeepSeek run; the budget also books search calls at an assumed unit price. Intervals are model-based and not calibrated. Figures as of 27 Oct 2026.</span><span class="zh">37.7 秒：v2.5 在一道已公布题上的单次实测。回测只读截止日之前的存档快照，由哨兵审计；网页搜索本身不能限定日期。输入核对是另一次模型调用。费用：DeepSeek 每次运行的 token 约 US$0.2–0.4，预算另按假设单价记搜索费。区间基于模型，未做校准。数字截至 2026 年 10 月 27 日。</span></p>
+</footer>
 </main>
 
 <!-- 06 console：verrier_console.js 渲染（证据页的面板由 verrier_evidence.js 画，依赖图由 verrier_graph.js 画），内容来自现有 API（/api/runs、/api/result、/api/saved、/api/graph） -->
