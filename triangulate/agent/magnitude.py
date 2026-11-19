@@ -85,16 +85,42 @@ def _input_text(d: dict, by_id: dict, kept_a: dict) -> str:
         frac = f" = {a['value'] / 100:g} as a fraction" if a.get("is_pct") else ""
         return f"{iid} = {a['value']:g} {a.get('unit', '')}{frac}".rstrip()
     if d.get("kind") == "point" and iid in by_id:
-        p = by_id[iid]
-        u = str(p.get("unit") or "")
-        frac = f" = {p['value'] / 100:g} as a fraction" if A.is_pct(u) else ""
-        return f"{iid} = {_fmt(p.get('value'))} {u}{frac}".rstrip()
+        return _point_text(by_id[iid])
     return f"{d.get('name')} = {_fmt(d.get('p10'))} ({d.get('kind')})"
+
+
+def _point_text(p: dict) -> str:
+    """点按代码算的时候用的单位写（v2.13a 起是 unit_calc，没有就是 unit）；两者不同时括号里注明原来记的单位。"""
+    u = str(p.get("unit") or "")
+    uc = str(p.get("unit_calc") or "") or u
+    frac = f" = {p['value'] / 100:g} as a fraction" if A.is_pct(uc) else ""
+    note = f" (recorded unit {u})" if u and u != uc else ""
+    return f"{p['id']} = {_fmt(p.get('value'))} {uc}{frac}{note}".rstrip()
+
+
+def _inputs(m: dict, by_id: dict, kept_a: dict) -> str:
+    """一个方法的输入，每个一句；series 这类方法没有逐项输入（inputs_detail），列它用到的点（最多 8 个）。"""
+    if m.get("inputs_detail"):
+        return "; ".join(_input_text(d, by_id, kept_a) for d in m["inputs_detail"])
+    ids = [i for i in m.get("used_ids") or [] if i in by_id][:8]
+    return "; ".join(_point_text(by_id[i]) for i in ids) or "no inputs recorded"
+
+
+def _result_unit(m: dict) -> str:
+    """代码按什么单位读这个方法的结果、换到目标单位乘了多少（compute 的 unit_check）。美国零售 test3：点记的是
+    millions of USD，方法的单位被定成 USD、倍数 1，结果小了 10^6；只写输入的话裁判看不出来（v2.15g，存档重放）。"""
+    uc = m.get("unit_check") or {}
+    if not uc.get("unit"):
+        return ""
+    f = uc.get("factor")
+    return (f"; code reads this method's result in {uc['unit']} and converts it to the target unit {uc.get('target_unit')}"
+            + (f" with factor {f:g}" if isinstance(f, (int, float)) else ""))
 
 
 def check(ref: dict, combined, methods: list, by_id: dict, kept_a: dict) -> tuple:
     """(这次检查的记录, 交给修正轮的问题清单)。combined：能用的方法合并后的中心值；methods：能用的方法（compute 的结果）。
-    合并值偏了才报；点名自己也偏了的方法（都不偏时点名全部能用的方法）。"""
+    合并值偏了才报，点名全部能用的方法（v2.15g：只点名自己也偏的方法，等于告诉裁判粗估落在没点名那条的 1/2 到 2 倍之间；
+    现在只说合并值偏高还是偏低、差 2 倍以上），每条写出代码读到的输入和结果单位。"""
     if (ref or {}).get("status") != "ok":
         return {"status": "not_checked", "reference": ref}, []
     r = ref["estimate"]
@@ -102,13 +128,12 @@ def check(ref: dict, combined, methods: list, by_id: dict, kept_a: dict) -> tupl
            "ratio": (combined / r) if combined else None}
     if rec["status"] != "off":
         return rec, []
-    named = [m for m in methods if off(m.get("estimate"), r)] or list(methods)
-    lines = [f"method {m.get('label') or m.get('id')} ({m.get('method')}): magnitude check: it gives {_fmt(m.get('estimate'))}, "
-             f"more than {RATIO:g}x {_direction(m['estimate'], r)} an independent rough estimate of the target made without "
-             f"this evidence. Re-check the scale of every input (code reads them as: "
-             + "; ".join(_input_text(d, by_id, kept_a) for d in m.get("inputs_detail") or []) +
-             "). Change an input only if its evidence shows it is wrong; if every input is right, keep the method."
-             for m in named if m.get("estimate")]
+    lines = [f"method {m.get('label') or m.get('id')} ({m.get('method')}): magnitude check: the combined estimate of the "
+             f"usable methods ({_fmt(combined)}) is more than {RATIO:g}x {_direction(combined, r)} an independent rough "
+             f"estimate of the target made without this evidence; this method gives {_fmt(m.get('estimate'))}. Re-check the "
+             f"scale of every input (code reads them as: {_inputs(m, by_id, kept_a)}){_result_unit(m)}. Change an input or "
+             "unit only if its evidence shows it is wrong; if everything is right, keep the method."
+             for m in methods if m.get("estimate")]
     return rec, lines
 
 
@@ -127,6 +152,7 @@ def final_note(rec: dict) -> str:
         return ""
     x = rec["ratio"]
     k = x if x >= 1 else 1 / x
-    tried = "one targeted repair did not close the gap" if rec.get("repair_sent") else "no repair round was left to try"
+    tried = ("one targeted repair did not close the gap" if rec.get("repair_sent") else
+             "the judge was not asked to re-check it (it was found after the repair rounds, or no method passed every check)")
     return (f"Magnitude check: this estimate is about {k:,.1f} times {'above' if x >= 1 else 'below'} an independent rough "
             f"estimate made without the evidence; {tried}, so check the inputs above.")

@@ -190,12 +190,16 @@ class TestPercentBelowOne(unittest.TestCase):
         why = r["rejected"][0]["reason"]
         self.assertIn("0.85% = 0.0085 as a fraction", why)
         self.assertIn('write value 85 with unit "%"', why)
-        self.assertIn('(0.0085) with unit "1"', why)
+        self.assertIn('(0.0085) with unit "fraction"', why)
 
     def test_both_rewrites_pass(self):
-        r = AS.validate([_a("a5", 85, "%", 75, 92), _a("a6", 0.0085, "1", 0.007, 0.01)], {"unit": "person"})
+        r = AS.validate([_a("a5", 85, "%", 75, 92), _a("a6", 0.0085, "fraction", 0.007, 0.01)], {"unit": "person"})
         self.assertEqual([a["id"] for a in r["kept"]], ["a5", "a6"])
         self.assertAlmostEqual(r["kept"][0]["p10_used"] * r["kept"][0]["p90_used"], 0.75 * 0.92)
+        # 存档重放：名字指向目标的变化量（英国轿车 9 月同比、LHR 损失）照建议写成 fraction 也能过 target_reason
+        r = AS.validate([_a("a1", 0.0002, "fraction", 0.00001, 0.0012, name="September 2026 YoY change in UK car production")],
+                        {"unit": "car", "what": "cars manufactured in the United Kingdom in September 2026"})
+        self.assertEqual([a["id"] for a in r["kept"]], ["a1"])
 
     def test_percent_one_or_more_and_percentage_points_unchanged(self):
         r = AS.validate([_a("a1", 1.0, "%"), _a("a2", 24.7, "percent"), _a("a3", 0.5, "percentage points", name="change")],
@@ -238,12 +242,27 @@ class TestMagnitudeParts(unittest.TestCase):
         ms, by_id, kept_a = self.bcg()
         rec, lines = MG.check({"status": "ok", "estimate": 10000.0}, 101.0, ms, by_id, kept_a)
         self.assertEqual(rec["status"], "off")
-        self.assertEqual([x.split(" ")[1] for x in lines], ["m1", "m4"])   # m2 和粗估在 2 倍以内：不点名
+        # v2.15g：点名全部能用的方法，只说合并值偏低（不说哪条在 2 倍以内，免得泄露粗估的范围）
+        self.assertEqual([x.split(" ")[1] for x in lines], ["m1", "m4", "m2"])
+        self.assertIn("the combined estimate of the usable methods (101) is more than 2x below", lines[1])
+        self.assertIn("this method gives 101", lines[1])
         self.assertIn("a5 = 0.85 % = 0.0085 as a fraction", lines[1])
         self.assertIn("p317 = 12,103 person", lines[1])
-        self.assertIn("below an independent rough estimate", lines[1])
         self.assertTrue(all("10,000" not in x and "10000" not in x for x in lines))   # 粗估的数不进报错
-        self.assertEqual(G._repair_scope(lines, [])[0], {"m1", "m4"})
+        self.assertEqual(G._repair_scope(lines, [])[0], {"m1", "m4", "m2"})
+
+    def test_result_unit_and_series_inputs_are_spelled_out(self):
+        # 美国零售 test3：p6 记的是 millions of USD，方法的单位被定成 USD、倍数 1；series 方法没有逐项输入
+        by_id = {"p6": {"id": "p6", "value": 763705.0, "unit": "millions of USD"},
+                 "p7": {"id": "p7", "value": 41, "unit": "car", "unit_calc": "car/month"}}
+        ms = [{"id": "m1", "method": "formula_mc", "estimate": 766400.0, "inputs_detail": [{"id": "p6", "kind": "point"}],
+               "unit_check": {"unit": "USD", "target_unit": "USD", "factor": 1.0}},
+              {"id": "m2", "method": "series_auto", "estimate": 770000.0, "used_ids": ["p7", "p6"]}]
+        _, lines = MG.check({"status": "ok", "estimate": 7.4e11}, 768000.0, ms, by_id, {})
+        self.assertIn("p6 = 763,705 millions of USD", lines[0])
+        self.assertIn("code reads this method's result in USD and converts it to the target unit USD with factor 1", lines[0])
+        self.assertIn("p7 = 41 car/month (recorded unit car); p6 = 763,705 millions of USD", lines[1])
+        self.assertNotIn("code reads them as: )", lines[1])
 
     def test_within_ratio_or_no_reference_is_quiet(self):
         ms, by_id, kept_a = self.bcg()
@@ -258,7 +277,8 @@ class TestMagnitudeParts(unittest.TestCase):
         self.assertIn("one targeted repair did not close the gap", note)
         self.assertNotIn("10,000", note)
         # v2.15f：闸门第一次偏出时修正轮已经用完，报错没发出去：终稿不能说修过
-        self.assertIn("no repair round was left", MG.final_note(MG.final_record({"status": "ok", "estimate": 10000.0}, 101.0)))
+        self.assertIn("the judge was not asked to re-check it",
+                      MG.final_note(MG.final_record({"status": "ok", "estimate": 10000.0}, 101.0)))
         self.assertEqual(MG.final_record({"status": "ok", "estimate": 10.0}, None)["status"], "not_checked")
 
 

@@ -79,11 +79,12 @@ def is_change_factor(a: dict) -> bool:
 
 def pct_below_one_reason(a: dict) -> str:
     """v2.15c：单位是 % 的假设写成了小于 1 的数（BCG 11-12：美国占北美写成 0.85 "%"，代码按规定除以 100，结果小了 100 倍）。
-    不猜是哪种意思，交回裁判写清楚：两种读法都写出来，报错里带数值（S88 的教训）。"""
+    不猜是哪种意思，交回裁判写清楚：两种读法都写出来，报错里带数值（S88 的教训）。存档里一半是真的小百分数（sponsor 的比例、
+    FOMC 0.5%），所以两种读法都给。v2.15g：小数的写法建议 unit "fraction"（写 "1" 时名字指向目标的系数会被 target_reason 拒）。"""
     v = a["value"]
     return (f'value {v:g} with unit "%" means {v:g}% = {v / 100:g} as a fraction (code divides a % input by 100); '
             f'if you mean {v * 100:g}%, write value {v * 100:g} with unit "%" and scale low and high the same way; '
-            f'if you mean {v:g}%, write it as a fraction ({v / 100:g}) with unit "1"')
+            f'if you mean {v:g}%, write it as a fraction ({v / 100:g}) with unit "fraction"')
 
 
 def validate(raw, target: dict) -> dict:
