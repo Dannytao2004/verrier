@@ -23,7 +23,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 from .config import API_URL, CALLS, MODEL, THINKING, THINKING_EXTRA_TOKENS, read_key, require_deepseek, thinking_role
-from .providers import DEEPSEEK, role_max_tokens, stop_prefix
+from .providers import DEEPSEEK, role_max_tokens, stop_prefix, tokens_for_model
 
 RETRY_STATUS = {429, 500, 502, 503, 504}
 TOTAL_TIMEOUT_S = 1200
@@ -178,6 +178,34 @@ def server_error_detail(rec: dict) -> str:
     return f" ({rec['server_error_type']}{code}: {rec.get('server_error', '')})"
 
 
+MISSING_BRACE_MSG = "Expecting property name enclosed in double quotes"
+MAX_BRACE_FIXES = 4
+
+
+def close_missing_braces(text: str):
+    """v2.15b（BUGS S25）：裁判长嵌套 JSON 最常见的坏法是某个对象在下一个 `{"id": ...}` 之前少了右花括号
+    （`..."reason."},{"id":"m2"` 处报 Expecting property name）。只修这一种：报错位置是 `{`、它前面最后一个非空白字符是逗号时，
+    在逗号前补一个 `}`，最多补 MAX_BRACE_FIXES 个。返回 (解析出的 dict, 补了几个)；不是这种坏法或补完仍不合法时返回 (None, 0)。"""
+    for n in range(1, MAX_BRACE_FIXES + 1):
+        try:
+            json.loads(text)
+            break
+        except json.JSONDecodeError as e:
+            if e.msg != MISSING_BRACE_MSG or text[e.pos:e.pos + 1] != "{":
+                return None, 0
+            j = len(text[:e.pos].rstrip()) - 1
+            if j < 0 or text[j] != ",":
+                return None, 0
+            text = text[:j] + "}" + text[j:]
+    else:
+        n = MAX_BRACE_FIXES + 1
+    try:
+        out = json.loads(text)
+    except json.JSONDecodeError:
+        return None, 0
+    return (out, n - 1) if isinstance(out, dict) and n > 1 else (None, 0)
+
+
 def check_key(spec, timeout: float = 30) -> dict:
     """v2.10b：用这次运行的 key 调这家的 models 列表（Claude：GET /v1/models；DeepSeek：GET /models），不生成 token。
     返回可以给网页看的 dict：ok、status、error（key_rejected / balance / redirect / http_<code> / bad_response_body / network）、
@@ -256,28 +284,34 @@ class LLM:
         from .agent.pipeline import Budget   # 这里才 import：pipeline 本身 import 本模块
         return Budget.llm_reserve(sum(len(str(m["content"])) for m in messages), out_tokens, self.price_model)
 
-    def effort_and_tokens(self, arm: str, max_tokens: int):
+    def effort_and_tokens(self, arm: str, max_tokens: int, thinking_off: bool = False):
         """(这次调用的思考档位或 None, 实际发出的 max_tokens)。开了思考的调用多给 THINKING_EXTRA_TOKENS（思考 token 计入
-        输出上限）；有 ModelSpec 时不超过模型的最大输出。没有 ModelSpec 时档位来自 TRIANGULATE_THINKING（v2.9a，默认全关）。"""
+        输出上限）；有 ModelSpec 时不超过模型的最大输出。没有 ModelSpec 时档位来自 TRIANGULATE_THINKING（v2.9a，默认全关）。
+        v2.15b：thinking_off = 这一次按「关思考」发（JSON 不合法后的重问）；关不掉思考的模型用最低一档（providers.effort_for）。"""
         role = thinking_role(arm)
         if self.spec is not None:
+            if thinking_off:
+                return tokens_for_model(self.spec.model, "off", role, max_tokens)
             return self.spec.tokens_for(role, max_tokens)
-        effort = THINKING.get(role)
+        effort = None if thinking_off else THINKING.get(role)
         model = getattr(self, "model", MODEL)   # 测试里的假 LLM 可能没设 model
         return effort, role_max_tokens(model, role, max_tokens) + (THINKING_EXTRA_TOKENS if effort else 0)   # v2.13d
 
-    def json_call(self, messages: list, *, arm: str, qid: str, attempt: int, max_tokens: int = 4000):
+    def json_call(self, messages: list, *, arm: str, qid: str, attempt: int, max_tokens: int = 4000,
+                  thinking_off: bool = False):
         """返回 (parsed_dict_or_None, raw_text, error_or_None)，error 只表示模型输出本身的问题。
         传输层失败（超时、5xx、空 body）内部重试最多 3 次，仍失败则抛 TransportError。
-        3xx 跳转不跟随、不重试，直接抛 TransportError（D9）。"""
+        3xx 跳转不跟随、不重试，直接抛 TransportError（D9）。v2.15b：thinking_off 见 effort_and_tokens。"""
         ad = self.adapter
-        effort, out_tokens = self.effort_and_tokens(arm, max_tokens)
+        effort, out_tokens = self.effort_and_tokens(arm, max_tokens, thinking_off)
         url = API_URL if self.spec is None else ad.chat_url(self.spec.region)
         headers, payload = ad.chat_request(self.model, self._auth_key(), messages, max_tokens=out_tokens, effort=effort)
         body = json.dumps(payload).encode("utf-8")
         rec = {"arm": arm, "qid": qid, "attempt": attempt, "model": self.model}
         if effort:
             rec["thinking"] = effort
+        if thinking_off:
+            rec["thinking_off_retry"] = True
         for http_try in range(1, 4):
             started = datetime.now(timezone.utc)
             t0 = time.time()
@@ -353,11 +387,17 @@ class LLM:
             try:
                 out = json.loads(text)
             except json.JSONDecodeError as e:
-                # v2.9b：思考模式下裁判常回不合法的 JSON（finish_reason=stop，没截断）。只多记诊断：长度、出错位置、首尾各 200 字符
-                rec.update(ok=False, error="invalid_json", text_len=len(text), json_error=f"{e.msg} at {e.pos}",
-                           text_head=text[:200], text_tail=text[-200:], text_at_error=text[max(0, e.pos - 100):e.pos + 100])
-                self._log(rec)
-                return None, text, "reply is not valid JSON"
+                # v2.15b：先试定点补右花括号（close_missing_braces）；补好了照常返回，日志记补了几个、原来的报错位置
+                out, n_fixed = close_missing_braces(text)
+                if out is not None:
+                    rec["json_repaired"] = {"braces_inserted": n_fixed, "json_error": f"{e.msg} at {e.pos}"}
+                else:
+                    # v2.9b：思考模式下裁判常回不合法的 JSON（finish_reason=stop，没截断）。只多记诊断：长度、出错位置、首尾各 200 字符
+                    rec.update(ok=False, error="invalid_json", text_len=len(text), json_error=f"{e.msg} at {e.pos}",
+                               text_head=text[:200], text_tail=text[-200:],
+                               text_at_error=text[max(0, e.pos - 100):e.pos + 100])
+                    self._log(rec)
+                    return None, text, "reply is not valid JSON"
             if not isinstance(out, dict):
                 rec.update(ok=False, error="not_an_object")
                 self._log(rec)

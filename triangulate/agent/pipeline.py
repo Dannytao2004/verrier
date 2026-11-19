@@ -328,17 +328,21 @@ class AgentLLM(LLM):
         # v2.13d 起按这个模型自己的角色上限（role_max_tokens）
         reserve_tokens = (role_max_tokens(getattr(self, "model", MODEL), thinking_role(role), max_tokens) if self.spec is None
                           else self.effort_and_tokens(role, max_tokens)[1])
+        thinking_on = bool(self.effort_and_tokens(role, max_tokens)[0])
+        off = False   # v2.15b（BUGS S25）：开了思考的调用回了不合法的 JSON（补括号也补不好）时，重问那一次关掉思考
         for attempt in range(1, tries + 1):
             need = Budget.llm_reserve(sum(len(m["content"]) for m in msgs), reserve_tokens, self.budget.model)
             with self.budget.sem, self.budget.hold(need):
                 try:
-                    out, text, err = self.json_call(msgs, arm=role, qid=qid, attempt=attempt, max_tokens=max_tokens)
+                    out, text, err = self.json_call(msgs, arm=role, qid=qid, attempt=attempt, max_tokens=max_tokens,
+                                                    **({"thinking_off": True} if off else {}))
                 except BalanceExhausted as e:   # v2.10a：余额不足 -> 整次运行停下（预算中止的路径）
                     raise BudgetExceeded(self.budget.halt(str(e))) from None
                 except TransportError as e:
                     return None, f"transport: {e}"
             if out is not None:
                 return out, None
+            off = thinking_on and err == "reply is not valid JSON"
             ask_again = (f"Your reply was cut off at the output limit ({err}). Reply again with one complete, valid JSON "
                          "object that is shorter: keep notes and reasons brief."
                          if "truncated" in (err or "") else f"Your reply was rejected: {err}. Reply again with one valid JSON object.")

@@ -257,9 +257,11 @@ def fake_world(agent_res):
     net, guard = FakeDeepSeek(), W3.NetGuard()
     real_json_call, real_search, real_direct = llm.LLM.json_call, S.Searcher.search, SD.DirectClient.call
 
-    def json_call(self, messages, *, arm, qid, attempt, max_tokens=4000):
+    def json_call(self, messages, *, arm, qid, attempt, max_tokens=4000, **kw):   # v2.15b：thinking_off 照传
         CTX.role, CTX.qid = arm, qid
-        return real_json_call(self, messages, arm=arm, qid=qid, attempt=attempt, max_tokens=max_tokens)
+        if kw.get("thinking_off"):   # v2.15b：JSON 不合法后关思考的重问，记下来（测试按它放行这一次的 disabled）
+            net.__dict__.setdefault("off_retries", []).append((getattr(net, "cid", None), arm))
+        return real_json_call(self, messages, arm=arm, qid=qid, attempt=attempt, max_tokens=max_tokens, **kw)
 
     def search(self, prompt, *, role, qid, max_uses=3, cap=5):
         CTX.role, CTX.qid = role, qid

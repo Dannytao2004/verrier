@@ -186,10 +186,14 @@ class TestFakeEndToEnd(unittest.TestCase):
 
     def test_thinking_flags_per_configuration(self):
         seen = {}
+        off = list(getattr(self.net, "off_retries", []))   # v2.15b：JSON 不合法后关思考重问的那几次
         for cid, role, kind, effort, mt in self.net.requests:
             arm, mode = cid.split("__")[1:]
             base = config.thinking_role(role)
             want = RT.THINKING_ON[arm].get(base) if mode == "think" else None
+            if want and kind == "disabled" and (cid, role) in off:
+                off.remove((cid, role))
+                want = None
             self.assertEqual((kind, effort), ("enabled" if want else "disabled", want), (cid, role))
             # v2.13d：DeepSeek 的裁判 / 修正 / 抽取用模型自己的默认上限（providers.role_max_tokens）
             self.assertEqual(mt, role_max_tokens(config.MODEL, base, config.MAX_TOKENS[base])
