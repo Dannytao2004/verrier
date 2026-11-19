@@ -3,12 +3,20 @@ a 报错里的数字格式；b 裁判 JSON 少右花括号时定点补上，补�
 d 量级闸门（和不联网直接问的粗估比，差 2 倍以上定向修正一次）；e 抽取每页上限 15 -> 30。"""
 import json
 import unittest
+from datetime import date
 from unittest import mock
 
 from triangulate import llm
 from triangulate.agent import assumptions as AS
 from triangulate.agent import graph as G
+from triangulate.agent import magnitude as MG
 from triangulate.agent import pipeline as P
+
+try:
+    import langgraph  # noqa: F401
+    HAVE_LG = True
+except ImportError:
+    HAVE_LG = False
 
 
 def _m(mid, est):
@@ -173,6 +181,149 @@ class TestPercentBelowOne(unittest.TestCase):
         r = AS.validate([_a("a5", 0.85, "%")], {"unit": "person"})
         err = f"assumption a5 rejected: {r['rejected'][0]['reason']}"
         self.assertEqual(G._repair_scope([err], [])[1], {"a5"})
+
+
+class TestMagnitudeParts(unittest.TestCase):
+    """v2.15d：量级闸门的零件。"""
+
+    def test_parse_reply(self):
+        self.assertEqual(MG._parse({"estimate": 60337.4, "unit": "CNY*10**8"}, None, "CNY*10**8")["estimate"], 60337.4)
+        r = MG._parse({"estimate": 6.03e12, "unit": "CNY"}, None, "CNY*10**8")
+        self.assertEqual(r["status"], "ok")
+        self.assertAlmostEqual(r["estimate"], 60300.0)
+        self.assertEqual(MG._parse({"estimate": 5, "unit": "billion USD"}, None, "USD")["status"], "unit_unreconciled")
+        self.assertEqual(MG._parse({"estimate": "about 5", "unit": "USD"}, None, "USD")["status"], "invalid")
+        self.assertEqual(MG._parse(None, "reply is not valid JSON", "USD")["status"], "error")
+
+    def bcg(self):
+        # BCG 11-12 的形状：m1 = 0.069（% 小 100 倍）、m4 = 101、m2 = 15,043；粗估假设是 10,000
+        by_id = {"p1": {"id": "p1", "value": 33.5, "unit": "person"}, "p317": {"id": "p317", "value": 12103, "unit": "person"},
+                 "p224": {"id": "p224", "value": 6.1e9, "unit": "USD"}}
+        kept_a = {"a5": {"id": "a5", "value": 0.85, "unit": "%", "is_pct": True},
+                  "a3": {"id": "a3", "value": 430000, "unit": "USD/person", "is_pct": False}}
+        ms = [{"id": "m1", "method": "formula_mc", "estimate": 0.069,
+               "inputs_detail": [{"id": "p1", "kind": "point"}, {"id": "a5", "kind": "assumption"}]},
+              {"id": "m4", "method": "formula_mc", "estimate": 101.0,
+               "inputs_detail": [{"id": "p317", "kind": "point"}, {"id": "a5", "kind": "assumption"}]},
+              {"id": "m2", "method": "formula_mc", "estimate": 15043.0,
+               "inputs_detail": [{"id": "p224", "kind": "point"}, {"id": "a3", "kind": "assumption"}]}]
+        return ms, by_id, kept_a
+
+    def test_check_names_the_far_methods_and_spells_out_inputs(self):
+        ms, by_id, kept_a = self.bcg()
+        rec, lines = MG.check({"status": "ok", "estimate": 10000.0}, 101.0, ms, by_id, kept_a)
+        self.assertEqual(rec["status"], "off")
+        self.assertEqual([x.split(" ")[1] for x in lines], ["m1", "m4"])   # m2 和粗估在 2 倍以内：不点名
+        self.assertIn("a5 = 0.85 % = 0.0085 as a fraction", lines[1])
+        self.assertIn("p317 = 12,103 person", lines[1])
+        self.assertIn("below an independent rough estimate", lines[1])
+        self.assertTrue(all("10,000" not in x and "10000" not in x for x in lines))   # 粗估的数不进报错
+        self.assertEqual(G._repair_scope(lines, [])[0], {"m1", "m4"})
+
+    def test_within_ratio_or_no_reference_is_quiet(self):
+        ms, by_id, kept_a = self.bcg()
+        self.assertEqual(MG.check({"status": "ok", "estimate": 12000.0}, 15043.0, ms, by_id, kept_a)[1], [])
+        rec, lines = MG.check({"status": "error"}, 101.0, ms, by_id, kept_a)
+        self.assertEqual((rec["status"], lines), ("not_checked", []))
+
+    def test_final_note(self):
+        self.assertEqual(MG.final_note(MG.final_record({"status": "ok", "estimate": 100.0}, 150.0)), "")
+        note = MG.final_note(MG.final_record({"status": "ok", "estimate": 10000.0}, 101.0))
+        self.assertIn("about 99.0 times below", note)
+        self.assertNotIn("10,000", note)
+
+
+MONTHS = ((2023, 6, 30, "June", 1000), (2024, 6, 30, "June", 1100), (2025, 6, 30, "June", 1210),
+          (2025, 5, 31, "May", 1000), (2026, 5, 31, "May", 1000))
+M_A = {"id": "m1", "method": "series_auto", "params": {"target_history": ["p1", "p2", "p3", "p4", "p5"]}}
+M_B = {"id": "m3", "method": "formula_mc", "unit": "widget",
+       "params": {"formula": "c * c / d", "inputs": {"c": {"id": "p3", "role": "June 2025 widgets"},
+                                                     "d": {"id": "p2", "role": "June 2024 widgets"}}}}
+
+
+def run_gate(rough):
+    """裁判层面：单位钉成 widget，两条路线都约 1,200；粗估给 rough（None = 粗估调用失败）。返回 (state, 角色, {角色: user})。"""
+    from langgraph.types import Command
+
+    from triangulate.agent import unit_review as UR
+    ctx = object.__new__(P.Context)
+    ctx.qid, ctx.question, ctx.as_of_s, ctx.as_of = "t", "How many widgets in June 2026?", "2026-06-20", date(2026, 6, 20)
+    ctx.budget, ctx.leak_patterns, ctx.ablate_own_history = P.Budget(), [], False
+    roles, users = [], {}
+
+    class FakeLLM:
+        model = "fake"
+
+        def ask(self, system, user, *, role, qid, max_tokens=4000, tries=2):
+            roles.append(role)
+            users[role] = user
+            if role == "plan":
+                return {"target": {"what": "widgets", "unit": "widget", "unit_canonical": "widget",
+                                   "period_start": "2026-06-01", "period_end": "2026-06-30", "publisher": "X"},
+                        "market_keywords": [], "directions": [{"category": "own_history", "hypothesis": "h",
+                                                               "data_to_find": "f"}]}, None
+            if role.startswith("extract"):
+                return {"points": [{"name": f"widgets {mon} {y}", "value_as_written": f"{v:,}", "unit": "widget",
+                                    "unit_calc": "widget", "period_start": f"{y}-{mo:02d}-01",
+                                    "period_end": f"{y}-{mo:02d}-{d}", "quote": f"{mon} {y}: {v:,} widgets"}
+                                   for y, mo, d, mon, v in MONTHS]}, None
+            if role.startswith("judge"):   # 修正轮原样交回同样的两条路线（输入都对）
+                return {"decisions": [], "extra_directions": [], "methods": [M_A, M_B]}, None
+            if role == MG.ROLE:
+                return ({"estimate": rough, "unit": "widget"}, None) if rough else (None, "reply is not valid JSON")
+            if role == "audit":
+                return {"methods": []}, None
+            if role == "final":
+                return {"answer": "About [[estimate]]."}, None
+            raise AssertionError(role)
+
+    class FakeSearcher:
+        def search(self, prompt, *, role, qid, max_uses=3, cap=5):
+            return {"queries": ["q"], "urls": [f"https://a.org/{role}"], "web_search_requests": 1}
+
+    def fake_fetch(url, as_of, qid, **kw):
+        return {"url": url, "status": "snapshot", "snapshot_ts": "20260601000000", "page_date": "2026-06-01",
+                "text": " ".join(f"{mon} {y}: {v:,} widgets." for y, _, _, mon, v in MONTHS)}
+
+    ctx.llm, ctx.searcher = FakeLLM(), FakeSearcher()
+    with mock.patch.object(P, "fetch_page", fake_fetch), mock.patch.object(UR, "review", lambda *a, **k: None), \
+            mock.patch.object(G, "search_markets", lambda k, a: {"keywords": k, "markets": [], "points": [], "note": "x"}):
+        g = G.build(ctx)
+        cfg = {"configurable": {"thread_id": "t1"}}
+        g.invoke({"qid": "t", "question": ctx.question, "as_of": ctx.as_of_s}, cfg)
+        g.invoke(Command(resume={"approved": True}), cfg)
+        st = dict(g.get_state(cfg).values)
+    return st, roles, users
+
+
+@unittest.skipUnless(HAVE_LG, "langgraph not installed (use .venv)")
+class TestMagnitudeGate(unittest.TestCase):
+    def test_far_off_triggers_exactly_one_repair_and_a_final_note(self):
+        st, roles, users = run_gate(1_200_000)
+        self.assertEqual(roles.count(MG.ROLE), 1)
+        self.assertEqual([r for r in roles if r.startswith("judge")], ["judge:r1", "judge:r1:repair"])
+        rep = users["judge:r1:repair"]
+        self.assertIn("magnitude check", rep)
+        self.assertNotIn("1,200,000", rep)
+        jr = st["judge_rounds"][-1]
+        self.assertTrue(jr["magnitude_repair_sent"])
+        self.assertEqual([c["status"] for c in jr["magnitude_checks"]], ["off", "off"])
+        self.assertEqual(st["compute"]["magnitude"]["status"], "off")
+        self.assertIn("Magnitude check: this estimate is about", st["final"]["text"])
+        self.assertIn("times below", st["final"]["text"])
+        self.assertIsNotNone(st["compute"]["result"]["central"])   # 不准不出数：数照出
+
+    def test_close_reference_changes_nothing(self):
+        st, roles, _ = run_gate(1250)
+        self.assertEqual([r for r in roles if r.startswith("judge")], ["judge:r1"])
+        self.assertEqual(st["compute"]["magnitude"]["status"], "ok")
+        self.assertNotIn("Magnitude check", st["final"]["text"])
+
+    def test_failed_reference_leaves_the_run_alone(self):
+        st, roles, _ = run_gate(None)
+        self.assertEqual([r for r in roles if r.startswith("judge")], ["judge:r1"])
+        self.assertEqual(st["compute"]["magnitude"]["status"], "not_checked")
+        self.assertEqual(roles.count(MG.ROLE), 1)   # 失败也只问一次（缓存），compute 不再问
 
 
 if __name__ == "__main__":

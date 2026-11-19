@@ -301,6 +301,9 @@ class FakeDeepSeek:
         if role == "naive":
             est, unit = NAIVE[qid]
             return {"estimate": est, "unit": unit}
+        if role == "magnitude":   # v2.15d 量级闸门的粗估：同直接问的数，按题目要的单位写
+            est, unit = NAIVE[qid]
+            return {"estimate": est, "unit": unit or TARGETS[qid]["unit_canonical"]}
         if role == "structured":
             return structured_reply(qid)
         if role == "plan":

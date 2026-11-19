@@ -30,6 +30,7 @@ from . import compute as C
 from . import discrete as D
 from . import existing as EX
 from . import jev as J
+from . import magnitude as MG
 from . import published as PB
 from . import qty as Q
 from . import unit_review as UR
@@ -950,6 +951,21 @@ def build(ctx: Context):
                     for i, m in enumerate(out_c.get("methods") or []) if i in failed and i not in aud) if x not in sent]
                 if last["resent"]:
                     errs = _problems(jr, out_c, av_c, failed, quiet_if_agree=False)[1]
+                # v2.15d 量级闸门：能用的方法合并后和一次不联网直接问的粗估差 MG.RATIO 倍以上，点名偏了的方法交回修正一次
+                # （只第一次；之后每次检查只记录）。粗估的数不进报错、不进计算
+                ok_i = [i for i, m in enumerate(out_c.get("methods") or []) if i not in failed and C.produced(m)]
+                if not disc and ok_i:
+                    ref = MG.reference(ctx, state["question"], state["as_of"], target0)
+                    by_live = {p["id"]: p for p in live}
+                    comb = C.run([jr["methods"][i] for i in ok_i], by_live, t, assumptions=av_c,
+                                 only_methods=only).get("result", {}).get("central")
+                    mrec, mlines = MG.check(ref, comb, [out_c["methods"][i] for i in ok_i], by_live,
+                                            {a["id"]: a for a in av_c["kept"]})
+                    jr["magnitude_reference"] = ref
+                    jr.setdefault("magnitude_checks", []).append({k: mrec.get(k) for k in ("status", "estimate", "ratio")})
+                    if mlines and not last.get("gate_sent"):
+                        last["gate_sent"] = jr["magnitude_repair_sent"] = True
+                        errs = list(errs or []) + mlines
                 return aud, n_ok, (vfail + errs if errs else errs)
 
             target = D.with_outcomes(target0, orec_new) if disc else target0
@@ -1062,6 +1078,9 @@ def build(ctx: Context):
         if ov:
             out["audit_overridden"] = [{"label": str(m.get("id", "")), "reason": ov[str(i)]}
                                        for i, m in enumerate(jr.get("methods") or []) if str(i) in ov]
+        if not D.is_discrete(target):   # v2.15d：最终估计再和粗估比一次（裁判检查时已问过就用缓存，不再调用）
+            out["magnitude"] = MG.final_record(MG.reference(ctx, state["question"], state["as_of"], state["plan"]["target"]),
+                                               (out.get("result") or {}).get("central"))
         labels = {m["id"]: m.get("label") for m in out["methods"]}
         for a in av["kept"]:
             a["used_by"] = out["assumptions_used_by"].get(a["id"], [])
@@ -1217,6 +1236,9 @@ def build(ctx: Context):
         if r.get("central") is not None and comp.get("audit_overridden"):   # v2.8l：兜底用了输入核对有异议的方法，终稿写明
             note = (AUDIT_OVERRIDDEN + " ".join(f"{x['label']}: {x['reason']}" for x in comp["audit_overridden"]))[:800]
             text, rendered = text + "\n\n" + note, rendered + "\n\n" + note
+        mnote = MG.final_note(comp.get("magnitude"))   # v2.15d：修正一次后仍和粗估差 2 倍以上，终稿末尾写明（代码写的）
+        if r.get("central") is not None and mnote:
+            text, rendered = text + "\n\n" + mnote, rendered + "\n\n" + mnote
         # model_text（v2.6d，N34）：模型回复的原文（清洗之前），只存进 state，不进终稿
         return {"final": {"template": text, "text": rendered, "placeholders": ph, "digits_removed": digits_removed,
                           "model_error": err, "used_model_text": model_text is not None, "model_text": model_text}}
