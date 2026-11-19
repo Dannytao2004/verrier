@@ -516,16 +516,17 @@ def _problems(jr: dict, out: dict, av: dict, failed: dict, quiet_if_agree: bool 
         probs += [f"assumption {a.get('id')} rejected: {a.get('reason')}" for a in av["rejected"]]
     if len(num) >= 2:
         hi, lo = max(num, key=lambda x: x[1]["estimate"]), min(num, key=lambda x: x[1]["estimate"])
+        # v2.15a：报错里的估计用 _fmt_num（以前 :,.0f 把 0.069 写成「0」，BCG 那次裁判 3 次修正都看不出差在哪）
         if hi[1]["estimate"] / lo[1]["estimate"] > CONFLICT_RATIO:
-            probs.append(f"methods disagree: {hi[1].get('label') or hi[1]['id']} gives {hi[1]['estimate']:,.0f} but "
-                         f"{lo[1].get('label') or lo[1]['id']} gives {lo[1]['estimate']:,.0f} (more than {CONFLICT_RATIO:g}x apart); "
+            probs.append(f"methods disagree: {hi[1].get('label') or hi[1]['id']} gives {_fmt_num(hi[1]['estimate'])} but "
+                         f"{lo[1].get('label') or lo[1]['id']} gives {_fmt_num(lo[1]['estimate'])} (more than {CONFLICT_RATIO:g}x apart); "
                          f"at least one route's input or assumption is wrong. Inputs of {hi[1].get('label') or hi[1]['id']}: "
                          f"{_inputs_text(hi[1])}. Inputs of {lo[1].get('label') or lo[1]['id']}: {_inputs_text(lo[1])}")
             far = [m for _, m in num if any(max(m["estimate"], o["estimate"]) / min(m["estimate"], o["estimate"]) > CONFLICT_RATIO
                                             for _, o in num if o is not m)]
             if len(far) > 2:   # v2.14a 审查：第三条犯同样错的方法也要点名，不然它的修正会被锁退回
                 probs.append(f"methods more than {CONFLICT_RATIO:g}x apart from another method: " + ", ".join(
-                    f"{m.get('label') or m['id']} ({m['estimate']:,.0f})" for m in far))
+                    f"{m.get('label') or m['id']} ({_fmt_num(m['estimate'])})" for m in far))
     dist = [(i, m) for i, m in ok if m.get("distribution")]   # 离散方法：分布之间的 total variation distance（连续值时为空）
     pairs = [(0.5 * sum(abs(a[1]["distribution"][k] - b[1]["distribution"].get(k, 0.0)) for k in a[1]["distribution"]), a, b)
              for n, a in enumerate(dist) for b in dist[n + 1:]]
