@@ -1,0 +1,1 @@
+{"arm": "plan", "qid": "fc_de_cars_2026_09", "attempt": 1, "model": "deepseek-flash", "http": 402, "http_try": 1, "latency_s": 0.64, "at": "2026-11-19T11:44:54+00:00", "ok": false, "error": "http_402"}

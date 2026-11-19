@@ -1,0 +1,1 @@
+{"arm": "plan", "qid": "fc_kr_online_2026_08", "attempt": 1, "model": "deepseek-flash", "http": 402, "http_try": 1, "latency_s": 0.65, "at": "2026-11-19T11:44:59+00:00", "ok": false, "error": "http_402"}

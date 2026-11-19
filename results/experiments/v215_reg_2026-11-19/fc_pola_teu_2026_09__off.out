@@ -1,0 +1,55 @@
+[fc_pola_teu_2026_09] plan: 7 directions -> approved=True
+[fc_pola_teu_2026_09] done in 31.7s; estimate n/a; usd 0.3488
+[
+ {
+  "id": "fc_pola_teu_2026_09",
+  "as_of": "2026-09-10",
+  "answer_value": 1042652,
+  "source": "https://portoflosangeles.org/references/2026-news-releases/news_100926_sept_cargo",
+  "estimate": null,
+  "p10": null,
+  "p90": null,
+  "basis": "no_method",
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": 0,
+  "ablation": false,
+  "pct_err": null,
+  "abs_log10_err": null,
+  "covered_80": null,
+  "arms": {
+   "agent": null,
+   "naive": {
+    "estimate": 780000.0,
+    "pct_err": -0.2519076355294,
+    "abs_log10_err": 0.1260447779330374
+   },
+   "structured_no_retrieval": {
+    "estimate": 779969.603847736,
+    "pct_err": -0.251936788259423,
+    "abs_log10_err": 0.1260617024694751
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 0.3488,
+  "usd_tokens": 0.0288,
+  "wall_s": 31.7
+ }
+]
+
+--- stderr ---

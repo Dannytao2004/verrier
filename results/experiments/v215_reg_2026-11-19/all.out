@@ -1,0 +1,28 @@
+{"at": "2026-11-19T11:14:19+00:00", "event": "start", "run": "fc_kr_births_2026_07 off"}
+{"at": "2026-11-19T11:14:19+00:00", "event": "start", "run": "fc_tw_births_2026_09 off"}
+{"at": "2026-11-19T11:23:07+00:00", "event": "end", "run": "fc_kr_births_2026_07 off", "exit": 0, "wall_s": 527.9}
+{"at": "2026-11-19T11:23:07+00:00", "event": "start", "run": "fc_lhr_pax_2026_09 off"}
+{"at": "2026-11-19T11:25:54+00:00", "event": "end", "run": "fc_tw_births_2026_09 off", "exit": 0, "wall_s": 695.0}
+{"at": "2026-11-19T11:25:54+00:00", "event": "start", "run": "fc_jp_births_2026_07 off"}
+{"at": "2026-11-19T11:35:57+00:00", "event": "end", "run": "fc_jp_births_2026_07 off", "exit": 0, "wall_s": 602.9}
+{"at": "2026-11-19T11:35:57+00:00", "event": "start", "run": "fc_jp_movers_2026_08 off"}
+{"at": "2026-11-19T11:37:14+00:00", "event": "end", "run": "fc_lhr_pax_2026_09 off", "exit": 0, "wall_s": 847.1}
+{"at": "2026-11-19T11:37:14+00:00", "event": "start", "run": "fc_nhs_ae_2026_09 off"}
+{"at": "2026-11-19T11:42:09+00:00", "event": "end", "run": "fc_jp_movers_2026_08 off", "exit": 0, "wall_s": 372.1}
+{"at": "2026-11-19T11:42:09+00:00", "event": "start", "run": "fc_es_transit_2026_08 off"}
+{"at": "2026-11-19T11:44:31+00:00", "event": "end", "run": "fc_nhs_ae_2026_09 off", "exit": 0, "wall_s": 437.1}
+{"at": "2026-11-19T11:44:31+00:00", "event": "start", "run": "fc_pola_teu_2026_09 off"}
+{"at": "2026-11-19T11:44:53+00:00", "event": "end", "run": "fc_es_transit_2026_08 off", "exit": 0, "wall_s": 163.9}
+{"at": "2026-11-19T11:44:53+00:00", "event": "start", "run": "fc_de_cars_2026_09 off"}
+{"at": "2026-11-19T11:44:55+00:00", "event": "end", "run": "fc_de_cars_2026_09 off", "exit": 0, "wall_s": 2.2}
+{"at": "2026-11-19T11:44:55+00:00", "event": "start", "run": "fc_us_starts_2026_08 off"}
+{"at": "2026-11-19T11:44:57+00:00", "event": "end", "run": "fc_us_starts_2026_08 off", "exit": 0, "wall_s": 2.4}
+{"at": "2026-11-19T11:44:57+00:00", "event": "start", "run": "fc_kr_online_2026_08 off"}
+{"at": "2026-11-19T11:45:00+00:00", "event": "end", "run": "fc_kr_online_2026_08 off", "exit": 0, "wall_s": 2.3}
+{"at": "2026-11-19T11:45:00+00:00", "event": "start", "run": "fc_tw_births_2026_09 think"}
+{"at": "2026-11-19T11:45:02+00:00", "event": "end", "run": "fc_tw_births_2026_09 think", "exit": 0, "wall_s": 2.2}
+{"at": "2026-11-19T11:45:02+00:00", "event": "start", "run": "fc_kr_online_2026_08 think"}
+{"at": "2026-11-19T11:45:04+00:00", "event": "end", "run": "fc_kr_online_2026_08 think", "exit": 0, "wall_s": 2.4}
+{"at": "2026-11-19T11:45:04+00:00", "event": "start", "run": "sponsor_strict off"}
+{"at": "2026-11-19T11:45:04+00:00", "event": "end", "run": "fc_pola_teu_2026_09 off", "exit": 0, "wall_s": 33.4}
+{"at": "2026-11-19T11:45:04+00:00", "event": "start", "run": "fc_ca_rail_2026_07 off"}

@@ -1,0 +1,129 @@
+{
+ "qid": "fc_kr_online_2026_08",
+ "question": "Assume today is 2026-09-01. You know nothing published after this date. Estimate the total value of online shopping transactions in South Korea in August 2026, in Korean won (KRW), as it will be first reported in the national statistics agency's monthly Online Shopping Trends release (온라인쇼핑동향, National Data Office, formerly Statistics Korea).",
+ "as_of": "2026-09-01",
+ "plan": {},
+ "existing": {
+  "status": "not_checked",
+  "note": "not checked: the existing-figure step runs only in live use with a human at the approval step (not in backtests, scored, --auto-approve or ablation runs)"
+ },
+ "approval": {
+  "approved": false,
+  "by": "abort"
+ },
+ "directions": [],
+ "results": [],
+ "judge_rounds": [],
+ "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (plan fc_kr_online_2026_08 attempt 1); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+ "started_at": "20261119T114503Z",
+ "wall_s": 0.7,
+ "budget": {
+  "usd_total_assumed": 0.0,
+  "usd_tokens": 0.0,
+  "usd_search_fee_assumed": 0.0,
+  "usd_cap": 3.0,
+  "pages_used": 0,
+  "pages_cap": 156,
+  "round1_pages": 120,
+  "max_directions": 10,
+  "urls_per_direction": 12,
+  "searches_per_direction": 3,
+  "n_calls_logged": 0,
+  "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (plan fc_kr_online_2026_08 attempt 1); the run was stopped without retrying. Top up the DeepSeek account and run again."
+ },
+ "approvals": [],
+ "leakage": {
+  "pages_total": 0,
+  "pages_snapshot": 0,
+  "pages_live_dated": 0,
+  "pages_dropped": 0,
+  "pages_sent_to_extractor": {
+   "total": 0,
+   "snapshot": 0,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "directions_voided": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from.",
+   "The magnitude gate (v2.15d) asks the model once, without retrieval, for a rough estimate; whether the evidence-based estimate is more than 2x above or below it can carry the model's memory of the target into one repair. The rough number itself never enters a computation or a prompt; the estimate before that repair is kept in judge_rounds[-1].magnitude_checks[0]. The gate is off in the own-history ablation."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "v215_reg_think",
+ "settings": {
+  "max_tokens": {
+   "plan": 6000,
+   "extract": 16000,
+   "judge": 24000,
+   "repair": 24000,
+   "audit": 4000,
+   "unit_check": 4000,
+   "unit_arbiter": 4000,
+   "value_check": 2000,
+   "value_reread": 2000,
+   "published": 3000,
+   "early": 3000,
+   "final": 4000,
+   "search": 8192,
+   "naive": 500,
+   "magnitude": 500,
+   "structured": 6000,
+   "search_direct": 4096
+  },
+  "budget_defaults": {
+   "usd": 1.0,
+   "pages": 48,
+   "round1_pages": 40,
+   "llm_concurrency": 8,
+   "extra_directions": 3,
+   "urls_per_direction": 4,
+   "search_max_uses": 3,
+   "max_directions_hard": 16,
+   "searches_per_direction": 1
+  },
+  "budget_run": {
+   "usd": 3.0,
+   "pages": 156,
+   "round1_pages": 120,
+   "urls_per_direction": 12,
+   "searches_per_direction": 3
+  },
+  "interval": {
+   "MIN_WIDTH": 2.0,
+   "MIN_WIDTH_CHANGE": 1.25,
+   "FALLBACK_SIGMA": 0.25,
+   "DEFAULT_REL_U": 0.2,
+   "EPS": 0.01
+  },
+  "max_tokens_model": {
+   "judge": 96000,
+   "repair": 96000,
+   "extract": 64000
+  },
+  "thinking": {
+   "by_role": {
+    "plan": "high",
+    "judge": "high",
+    "repair": "high",
+    "audit": "low",
+    "unit_arbiter": "low"
+   },
+   "extra_max_tokens": 24000
+  }
+ }
+}

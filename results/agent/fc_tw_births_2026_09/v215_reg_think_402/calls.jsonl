@@ -1,0 +1,1 @@
+{"arm": "plan", "qid": "fc_tw_births_2026_09", "attempt": 1, "model": "deepseek-flash", "thinking": "high", "http": 402, "http_try": 1, "latency_s": 0.67, "at": "2026-11-19T11:45:01+00:00", "ok": false, "error": "http_402"}

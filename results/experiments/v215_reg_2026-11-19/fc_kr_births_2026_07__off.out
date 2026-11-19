@@ -1,0 +1,61 @@
+[fc_kr_births_2026_07] plan: 6 directions -> approved=True
+[fc_kr_births_2026_07] done in 526.1s; estimate 24,515; usd 1.2489
+[
+ {
+  "id": "fc_kr_births_2026_07",
+  "as_of": "2026-08-23",
+  "answer_value": 24275,
+  "source": "https://www.koreatimes.co.kr/southkorea/society/20260923/births-up-11-in-july-extending-gains-to-25th-consecutive-month",
+  "estimate": 24514.51993659076,
+  "p10": 17794.29145506589,
+  "p90": 33772.72364224521,
+  "basis": "no_basis",
+  "scored": true,
+  "n_assumptions_used": 1,
+  "assumptions_used": [
+   "a1"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": 0.00986693868551014,
+  "abs_log10_err": 0.004264154375151366,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 24514.51993659076,
+    "pct_err": 0.00986693868551014,
+    "abs_log10_err": 0.004264154375151366
+   },
+   "naive": {
+    "estimate": 19000.0,
+    "pct_err": -0.21730175077239955,
+    "abs_log10_err": 0.10640563762721349
+   },
+   "structured_no_retrieval": {
+    "estimate": 20209.9130731277,
+    "pct_err": -0.16745981161162926,
+    "abs_log10_err": 0.07959479304802192
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": false,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 1.2489,
+  "usd_tokens": 0.1689,
+  "wall_s": 526.1
+ }
+]
+
+--- stderr ---

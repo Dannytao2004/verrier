@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Agent: fc_us_starts_2026_08</title>
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+<style>
+body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:0;color:#222}
+header{padding:12px 18px;border-bottom:1px solid #ddd}
+h1{font-size:17px;margin:0 0 6px} .meta{font-size:13px;color:#444} .meta b{color:#000}
+main{display:flex;height:calc(100vh - 150px);min-height:480px}
+#graph{flex:1;border-right:1px solid #ddd}
+#side{width:420px;overflow:auto;padding:10px 14px;font-size:13px}
+#side pre{white-space:pre-wrap;word-break:break-word;background:#f6f6f6;padding:8px;border-radius:4px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.sw{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid #888}
+</style></head><body>
+<header><h1>Agent: fc_us_starts_2026_08</h1><div class="meta">as_of <b>2026-08-17</b> &middot; estimate <b>n/a</b> &middot; 80% [n/a, n/a] (None) &middot; official value (scoring only) <b>1,275,000</b></div><div class="legend"><span><i class="sw" style="background:#1b7a3a"></i>verified in archived snapshot &lt;= as_of</span><span><i class="sw" style="background:#8fd19e"></i>live page dated &lt;= as_of</span><span><i class="sw" style="background:#bdbdbd"></i>discarded by judge</span><span><i class="sw" style="background:#d93b3b"></i>page excluded: leak sentinel hit</span><span><i class="sw" style="background:#4a7fd6"></i>base-rate direction (kept)</span><span><i class="sw" style="background:#f28e2b"></i>assumption proposed by the judge (not observed)</span><span><i class="sw" style="background:#9e9e9e"></i>method failed</span><span><i class="sw" style="background:#1f2d4d"></i>target</span></div></header>
+<main><div id="graph"></div><div id="side"><p>Click a node to see its details. Levels: sources &rarr; data points and assumptions &rarr; methods &rarr; target.</p>
+<pre id="detail"></pre></div></main>
+<script>
+const G = {"nodes": [{"id": "target", "kind": "target", "label": "target\nn/a", "colour": "#1f2d4d", "detail": {"target": null, "result": {}}}], "edges": []};
+const LEVEL = {source:0, point:1, assumption:1, method:2, target:3};
+const SHAPE = {source:'square', point:'dot', assumption:'diamond', method:'box', target:'star'};
+const nodes = G.nodes.map(n => ({id:n.id, label:n.label, level:LEVEL[n.kind], shape:SHAPE[n.kind],
+  size: n.kind === 'target' ? 26 : 12, color:{background:n.colour, border:'#555'},
+  font:{color: n.kind === 'method' ? '#fff' : '#222', size:12}}));
+const net = new vis.Network(document.getElementById('graph'), {nodes:new vis.DataSet(nodes),
+  edges:new vis.DataSet(G.edges.map(e => ({from:e.from, to:e.to, arrows:'to', color:{color:'#888'}})))},
+  {layout:{hierarchical:{direction:'LR', sortMethod:'directed', levelSeparation:300, nodeSpacing:40}},
+   physics:false, interaction:{hover:true}});
+const byId = Object.fromEntries(G.nodes.map(n => [n.id, n]));
+function show(id){ const n = byId[id]; if (n) document.getElementById('detail').textContent = JSON.stringify(n.detail, null, 2); }
+net.on('click', p => { if (p.nodes.length) show(p.nodes[0]); });
+show('target');
+</script></body></html>

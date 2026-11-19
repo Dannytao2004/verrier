@@ -1,0 +1,623 @@
+{
+ "qid": "fc_pola_teu_2026_09",
+ "question": "Assume today is 2026-09-10. You know nothing published after this date. Estimate the total container volume handled by the Port of Los Angeles in September 2026, in TEUs (twenty-foot equivalent units; loaded and empty imports and exports combined), as it will be first reported in the Port of Los Angeles's monthly cargo news release.",
+ "as_of": "2026-09-10",
+ "plan": {
+  "target": {
+   "what": "Total container volume handled by the Port of Los Angeles (all loaded and empty imports plus loaded and empty exports, i.e., total TEUs) during September 2026, as first reported in the Port's monthly cargo news release",
+   "unit": "TEU (twenty-foot equivalent units), total for the month",
+   "period_start": "2026-09-01",
+   "period_end": "2026-09-30",
+   "publisher": "Port of Los Angeles (Port of LA), monthly cargo news release / TEU statistics",
+   "cadence": "monthly",
+   "caveats": "Target period is future/ongoing relative to the 2026-09-10 cutoff, so no September 2026 actuals exist yet; must be forecast. Working interpretation: total TEUs = loaded imports + loaded exports + empty imports + empty exports, matching the Port's headline 'total TEUs' figure. Alternative definitions",
+   "outcome_type": "continuous",
+   "unit_canonical": "TEU"
+  },
+  "market_keywords": [
+   "port los angeles teu",
+   "la container volume",
+   "september 2026 teu"
+  ],
+  "candidates": [
+   {
+    "id": "c1",
+    "category": "own_history",
+    "perspective": "Port of LA published monthly cargo statistics",
+    "hypothesis": "September 2026 total TEUs will follow the Port's own recent monthly levels and seasonal September pattern; the most recent months before cutoff (through July/August 2026) anchor the level, and prior Septembers give the month-over-month seasonal factor.",
+    "data_to_find": "Port of LA monthly total TEU figures for each month of 2024, 2025, and Jan-Aug 2026 (loaded imports, loaded exports, empties, total); specifically September 2024 and September 2025 totals and the Aug-to-Sep month-over-month ratio in recent years.",
+    "search_hints": [
+     "Port of Los Angeles monthly container statistics 2026 TEU",
+     "Port of LA cargo volume September 2025 total TEU",
+     "Port of Los Angeles July 2026 cargo news release TEU"
+    ],
+    "expected_information": 5,
+    "selected": true
+   },
+   {
+    "id": "c2",
+    "category": "related_series",
+    "perspective": "San Pedro Bay complex / Port of Long Beach",
+    "hypothesis": "LA and Long Beach share the San Pedro Bay gateway; Long Beach monthly TEUs and the LA share of the combined complex provide a cross-check and a bridge if LA's own latest month is missing. LA typically handles roughly half of complex volume.",
+    "data_to_find": "Port of Long Beach monthly total TEUs for 2024-2026 and any combined San Pedro Bay figures; the LA share of the two-port total in recent months.",
+    "search_hints": [
+     "Port of Long Beach monthly TEU 2026",
+     "San Pedro Bay port complex container volume 2026",
+     "LA Long Beach combined TEU share"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c3",
+    "category": "related_series",
+    "perspective": "National inbound container volumes / trade data",
+    "hypothesis": "LA's volume tracks national US container import trends and its share of West Coast/all-US port throughput; applying LA's historical share to a national September 2026 estimate constrains the level.",
+    "data_to_find": "US total container import TEUs by month (e.g., from NRF/Global Port Tracker, Descartes, or Census trade data) for mid-2026 and forecasts for September 2026; LA's share of US container imports in 2025-2026.",
+    "search_hints": [
+     "Global Port Tracker September 2026 forecast imports",
+     "US container imports monthly 2026 TEU",
+     "Port of Los Angeles share of US container imports"
+    ],
+    "expected_information": 4,
+    "selected": true
+   },
+   {
+    "id": "c4",
+    "category": "shocks",
+    "perspective": "Trade policy and tariff timing",
+    "hypothesis": "Tariff deadlines, front-loading, or pull-forward/pull-back of imports around 2025-2026 policy changes can shift September 2026 volumes up or down versus seasonal norms; identifying scheduled tariff events near September 2026 adjusts the forecast.",
+    "data_to_find": "Any tariff or trade-policy effective dates in Aug-Oct 2026, evidence of import front-loading or destocking in mid-2026, and commentary on expected September 2026 container demand.",
+    "search_hints": [
+     "tariff deadline September 2026 imports front-loading",
+     "US import pull-forward 2026 container",
+     "Port of LA 2026 tariff impact cargo"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c5",
+    "category": "forecasts_markets",
+    "perspective": "Industry forecasts and port guidance",
+    "hypothesis": "Published port or industry forecasts for late-2026 container volumes (Port of LA executive commentary, NRF, Drewry, BIMCO) give a directional anchor for September 2026.",
+    "data_to_find": "Any Port of LA executive statements or forecasts about H2 2026 volumes; industry forecasts for Q3/Q4 2026 US container throughput.",
+    "search_hints": [
+     "Port of Los Angeles 2026 cargo forecast outlook",
+     "container shipping outlook Q3 2026 US imports",
+     "Port of LA Seroka 2026 volume comments"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c6",
+    "category": "physical_flow",
+    "perspective": "Vessel calls and terminal throughput capacity",
+    "hypothesis": "Scheduled container vessel calls and terminal capacity utilisation at LA terminals in September 2026 bound achievable throughput; capacity times utilisation times days gives an upper/central estimate.",
+    "data_to_find": "Number and size (TEU capacity) of container vessel calls scheduled at LA terminals in September 2026 (e.g., from port vessel schedules or marine exchange data); typical LA terminal monthly capacity and utilisation.",
+    "search_hints": [
+     "Port of Los Angeles vessel schedule September 2026",
+     "LA terminal container capacity monthly TEU",
+     "Marine Exchange San Pedro Bay vessel arrivals 2026"
+    ],
+    "expected_information": 3,
+    "selected": true
+   },
+   {
+    "id": "c7",
+    "category": "base_rates",
+    "perspective": "Seasonal index construction",
+    "hypothesis": "A stable seasonal index (September total as a ratio to the annual monthly average or to August) applied to the 2026 running level yields September 2026; requires the historical seasonal ratio.",
+    "data_to_find": "Port of LA monthly totals for at least 3-5 years to compute the September seasonal factor (Sep/adjacent months and Sep/annual-average), plus the 2026 year-to-date average monthly level.",
+    "search_hints": [
+     "Port of Los Angeles TEU monthly history 2020 2021 2022 2023",
+     "Port of LA container volume seasonal September",
+     "Port of Los Angeles annual TEU 2025 total"
+    ],
+    "expected_information": 4,
+    "selected": true
+   }
+  ]
+ },
+ "plan_notes": [
+  "plan proposed 7 candidate directions in 6 categories; running 7 (budget cap 10)"
+ ],
+ "existing": {
+  "status": "not_checked",
+  "note": "not checked: the existing-figure step runs only in live use with a human at the approval step (not in backtests, scored, --auto-approve or ablation runs)"
+ },
+ "approval": {
+  "approved": true,
+  "by": "auto-approve"
+ },
+ "directions": [
+  {
+   "id": "d1",
+   "category": "own_history",
+   "perspective": "Port of LA published monthly cargo statistics",
+   "hypothesis": "September 2026 total TEUs will follow the Port's own recent monthly levels and seasonal September pattern; the most recent months before cutoff (through July/August 2026) anchor the level, and prior Septembers give the month-over-month seasonal factor.",
+   "data_to_find": "Port of LA monthly total TEU figures for each month of 2024, 2025, and Jan-Aug 2026 (loaded imports, loaded exports, empties, total); specifically September 2024 and September 2025 totals and the Aug-to-Sep month-over-month ratio in recent years.",
+   "search_hints": [
+    "Port of Los Angeles monthly container statistics 2026 TEU",
+    "Port of LA cargo volume September 2025 total TEU",
+    "Port of Los Angeles July 2026 cargo news release TEU"
+   ],
+   "expected_information": 5,
+   "selected": true,
+   "candidate_id": "c1"
+  },
+  {
+   "id": "d2",
+   "category": "related_series",
+   "perspective": "San Pedro Bay complex / Port of Long Beach",
+   "hypothesis": "LA and Long Beach share the San Pedro Bay gateway; Long Beach monthly TEUs and the LA share of the combined complex provide a cross-check and a bridge if LA's own latest month is missing. LA typically handles roughly half of complex volume.",
+   "data_to_find": "Port of Long Beach monthly total TEUs for 2024-2026 and any combined San Pedro Bay figures; the LA share of the two-port total in recent months.",
+   "search_hints": [
+    "Port of Long Beach monthly TEU 2026",
+    "San Pedro Bay port complex container volume 2026",
+    "LA Long Beach combined TEU share"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c2"
+  },
+  {
+   "id": "d3",
+   "category": "related_series",
+   "perspective": "National inbound container volumes / trade data",
+   "hypothesis": "LA's volume tracks national US container import trends and its share of West Coast/all-US port throughput; applying LA's historical share to a national September 2026 estimate constrains the level.",
+   "data_to_find": "US total container import TEUs by month (e.g., from NRF/Global Port Tracker, Descartes, or Census trade data) for mid-2026 and forecasts for September 2026; LA's share of US container imports in 2025-2026.",
+   "search_hints": [
+    "Global Port Tracker September 2026 forecast imports",
+    "US container imports monthly 2026 TEU",
+    "Port of Los Angeles share of US container imports"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c3"
+  },
+  {
+   "id": "d4",
+   "category": "base_rates",
+   "perspective": "Seasonal index construction",
+   "hypothesis": "A stable seasonal index (September total as a ratio to the annual monthly average or to August) applied to the 2026 running level yields September 2026; requires the historical seasonal ratio.",
+   "data_to_find": "Port of LA monthly totals for at least 3-5 years to compute the September seasonal factor (Sep/adjacent months and Sep/annual-average), plus the 2026 year-to-date average monthly level.",
+   "search_hints": [
+    "Port of Los Angeles TEU monthly history 2020 2021 2022 2023",
+    "Port of LA container volume seasonal September",
+    "Port of Los Angeles annual TEU 2025 total"
+   ],
+   "expected_information": 4,
+   "selected": true,
+   "candidate_id": "c7"
+  },
+  {
+   "id": "d5",
+   "category": "shocks",
+   "perspective": "Trade policy and tariff timing",
+   "hypothesis": "Tariff deadlines, front-loading, or pull-forward/pull-back of imports around 2025-2026 policy changes can shift September 2026 volumes up or down versus seasonal norms; identifying scheduled tariff events near September 2026 adjusts the forecast.",
+   "data_to_find": "Any tariff or trade-policy effective dates in Aug-Oct 2026, evidence of import front-loading or destocking in mid-2026, and commentary on expected September 2026 container demand.",
+   "search_hints": [
+    "tariff deadline September 2026 imports front-loading",
+    "US import pull-forward 2026 container",
+    "Port of LA 2026 tariff impact cargo"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c4"
+  },
+  {
+   "id": "d6",
+   "category": "forecasts_markets",
+   "perspective": "Industry forecasts and port guidance",
+   "hypothesis": "Published port or industry forecasts for late-2026 container volumes (Port of LA executive commentary, NRF, Drewry, BIMCO) give a directional anchor for September 2026.",
+   "data_to_find": "Any Port of LA executive statements or forecasts about H2 2026 volumes; industry forecasts for Q3/Q4 2026 US container throughput.",
+   "search_hints": [
+    "Port of Los Angeles 2026 cargo forecast outlook",
+    "container shipping outlook Q3 2026 US imports",
+    "Port of LA Seroka 2026 volume comments"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c5"
+  },
+  {
+   "id": "d7",
+   "category": "physical_flow",
+   "perspective": "Vessel calls and terminal throughput capacity",
+   "hypothesis": "Scheduled container vessel calls and terminal capacity utilisation at LA terminals in September 2026 bound achievable throughput; capacity times utilisation times days gives an upper/central estimate.",
+   "data_to_find": "Number and size (TEU capacity) of container vessel calls scheduled at LA terminals in September 2026 (e.g., from port vessel schedules or marine exchange data); typical LA terminal monthly capacity and utilisation.",
+   "search_hints": [
+    "Port of Los Angeles vessel schedule September 2026",
+    "LA terminal container capacity monthly TEU",
+    "Marine Exchange San Pedro Bay vessel arrivals 2026"
+   ],
+   "expected_information": 3,
+   "selected": true,
+   "candidate_id": "c6"
+  }
+ ],
+ "results": [
+  {
+   "direction_id": "d1",
+   "round": 1,
+   "search": {
+    "queries": [
+     "Port of Los Angeles monthly container statistics 2026 TEU",
+     "Port of LA cargo volume September 2025 total TEU",
+     "\"Port of Los Angeles\" 2024 container statistics historical TEU September 2024 954,706",
+     "Port of Los Angeles July 2026 cargo volume TEU news release",
+     "Port of Los Angeles monthly container statistics 2026 TEU",
+     "Port of LA cargo volume September 2025 total TEU news release",
+     "Port of Los Angeles July 2026 cargo volume TEU news release",
+     "\"Port of Los Angeles\" September 2024 954,706 TEU total",
+     "Port of Los Angeles monthly container statistics 2026 TEU",
+     "Port of LA cargo volume September 2025 total TEU",
+     "Port of Los Angeles July 2026 cargo volume TEU Seroka news release",
+     "\"Port of Los Angeles\" 2024 Container Statistics total TEUs September 954,706"
+    ],
+    "urls": [
+     "https://portoflosangeles.org/business/statistics/container-statistics",
+     "https://english.news.cn/northamerica/20251016/536c5ce80a8f44beb71a75015b218be0/c.html",
+     "https://www.porttechnology.org/port-of-los-angeles-records-q3-high-despite-september-dip/",
+     "https://www.pmsaship.com/maritime-insights-blog/march2026teusfinal",
+     "https://portoflosangeles.org/business/statistics/container-statistics/historical-teu-statistics-2025",
+     "https://www.pmsaship.com/maritime-insights-blog/september2025teusfinal",
+     "https://www.bairdmaritime.com/shipping/ports/port-of-los-angeles-year-on-year-container-volume-rises-in-may",
+     "https://www.worldports.org/port-of-los-angeles-tops-960k-teus-in-july/",
+     "https://www.freightwaves.com/news/consumer-demand-fires-strong-july-for-la-port",
+     "https://www.ttnews.com/articles/port-los-angeles-july",
+     "https://portoflosangeles.org/references/2024-news-releases/news_101824_sept_cargo",
+     "https://www.pmsaship.com/maritime-insights-blog/initial-port-volumes-for-september-2025"
+    ],
+    "url_votes": {
+     "https://portoflosangeles.org/business/statistics/container-statistics": 3,
+     "https://english.news.cn/northamerica/20251016/536c5ce80a8f44beb71a75015b218be0/c.html": 3,
+     "https://www.porttechnology.org/port-of-los-angeles-records-q3-high-despite-september-dip/": 3,
+     "https://www.pmsaship.com/maritime-insights-blog/march2026teusfinal": 3,
+     "https://portoflosangeles.org/business/statistics/container-statistics/historical-teu-statistics-2025": 2,
+     "https://www.pmsaship.com/maritime-insights-blog/september2025teusfinal": 2,
+     "https://www.bairdmaritime.com/shipping/ports/port-of-los-angeles-year-on-year-container-volume-rises-in-may": 2,
+     "https://www.worldports.org/port-of-los-angeles-tops-960k-teus-in-july/": 2,
+     "https://www.freightwaves.com/news/consumer-demand-fires-strong-july-for-la-port": 2,
+     "https://www.ttnews.com/articles/port-los-angeles-july": 2,
+     "https://portoflosangeles.org/references/2024-news-releases/news_101824_sept_cargo": 1,
+     "https://www.pmsaship.com/maritime-insights-blog/initial-port-volumes-for-september-2025": 1,
+     "https://www.worldports.org/port-of-los-angeles-records-back-to-back-million-teu-months-as-extended-peak-season-redefines-west-coast-gateway-capacity/": 1,
+     "https://en.portnews.ru/news/398127/": 1,
+     "https://www.porttechnology.org/news/cargo-handling/port-of-la-tops-1-million-teus/": 1,
+     "https://www.porttechnology.org/news/cargo-handling/port-of-los-angeles-logs-second-busiest-july-on-record/": 1,
+     "https://gcaptain.com/port-of-los-angeles-nears-1-million-teus-in-second-busiest-july/": 1,
+     "https://www.worldports.org/port-of-los-angeles-posts-best-ever-quarter-despite-september-slowdown/": 1,
+     "https://www.logisticsmgmt.com/topic/tag/POLA%e2%80%8e": 1,
+     "https://www.jctrans.com/en/news/14052/": 1,
+     "https://portoflosangeles.org/business/statistics/container-statistics/historical-teu-statistics-2024": 1,
+     "https://www.worldcargonews.com/ports-terminals/2026/07/june-record-as-imports-surge-at-los-angeles/": 1
+    },
+    "n_searches": 3,
+    "web_search_requests": 12,
+    "usd": 0.009515759999999998,
+    "usd_search_fee_assumed": 0.12,
+    "runs": [
+     {
+      "queries": [
+       "Port of Los Angeles monthly container statistics 2026 TEU",
+       "Port of LA cargo volume September 2025 total TEU",
+       "\"Port of Los Angeles\" 2024 container statistics historical TEU September 2024 954,706",
+       "Port of Los Angeles July 2026 cargo volume TEU news release"
+      ],
+      "urls": [
+       "https://portoflosangeles.org/business/statistics/container-statistics",
+       "https://portoflosangeles.org/business/statistics/container-statistics/historical-teu-statistics-2025",
+       "https://portoflosangeles.org/references/2024-news-releases/news_101824_sept_cargo",
+       "https://www.pmsaship.com/maritime-insights-blog/september2025teusfinal",
+       "https://www.pmsaship.com/maritime-insights-blog/initial-port-volumes-for-september-2025",
+       "https://english.news.cn/northamerica/20251016/536c5ce80a8f44beb71a75015b218be0/c.html",
+       "https://www.porttechnology.org/port-of-los-angeles-records-q3-high-despite-september-dip/",
+       "https://www.pmsaship.com/maritime-insights-blog/march2026teusfinal",
+       "https://www.bairdmaritime.com/shipping/ports/port-of-los-angeles-year-on-year-container-volume-rises-in-may",
+       "https://www.worldports.org/port-of-los-angeles-records-back-to-back-million-teu-months-as-extended-peak-season-redefines-west-coast-gateway-capacity/",
+       "https://en.portnews.ru/news/398127/",
+       "https://www.porttechnology.org/news/cargo-handling/port-of-la-tops-1-million-teus/"
+      ],
+      "web_search_requests": 4
+     },
+     {
+      "queries": [
+       "Port of Los Angeles monthly container statistics 2026 TEU",
+       "Port of LA cargo volume September 2025 total TEU news release",
+       "Port of Los Angeles July 2026 cargo volume TEU news release",
+       "\"Port of Los Angeles\" September 2024 954,706 TEU total"
+      ],
+      "urls": [
+       "https://portoflosangeles.org/business/statistics/container-statistics",
+       "https://www.worldports.org/port-of-los-angeles-tops-960k-teus-in-july/",
+       "https://www.freightwaves.com/news/consumer-demand-fires-strong-july-for-la-port",
+       "https://www.porttechnology.org/news/cargo-handling/port-of-los-angeles-logs-second-busiest-july-on-record/",
+       "https://gcaptain.com/port-of-los-angeles-nears-1-million-teus-in-second-busiest-july/",
+       "https://www.worldports.org/port-of-los-angeles-posts-best-ever-quarter-despite-september-slowdown/",
+       "https://www.porttechnology.org/port-of-los-angeles-records-q3-high-despite-september-dip/",
+       "https://english.news.cn/northamerica/20251016/536c5ce80a8f44beb71a75015b218be0/c.html",
+       "https://www.logisticsmgmt.com/topic/tag/POLA%e2%80%8e",
+       "https://www.pmsaship.com/maritime-insights-blog/march2026teusfinal",
+       "https://www.jctrans.com/en/news/14052/",
+       "https://www.ttnews.com/articles/port-los-angeles-july"
+      ],
+      "web_search_requests": 4
+     },
+     {
+      "queries": [
+       "Port of Los Angeles monthly container statistics 2026 TEU",
+       "Port of LA cargo volume September 2025 total TEU",
+       "Port of Los Angeles July 2026 cargo volume TEU Seroka news release",
+       "\"Port of Los Angeles\" 2024 Container Statistics total TEUs September 954,706"
+      ],
+      "urls": [
+       "https://portoflosangeles.org/business/statistics/container-statistics/historical-teu-statistics-2025",
+       "https://portoflosangeles.org/business/statistics/container-statistics/historical-teu-statistics-2024",
+       "https://www.freightwaves.com/news/consumer-demand-fires-strong-july-for-la-port",
+       "https://www.pmsaship.com/maritime-insights-blog/september2025teusfinal",
+       "https://www.porttechnology.org/port-of-los-angeles-records-q3-high-despite-september-dip/",
+       "https://english.news.cn/northamerica/20251016/536c5ce80a8f44beb71a75015b218be0/c.html",
+       "https://www.worldcargonews.com/ports-terminals/2026/07/june-record-as-imports-surge-at-los-angeles/",
+       "https://www.bairdmaritime.com/shipping/ports/port-of-los-angeles-year-on-year-container-volume-rises-in-may",
+       "https://www.pmsaship.com/maritime-insights-blog/march2026teusfinal",
+       "https://www.worldports.org/port-of-los-angeles-tops-960k-teus-in-july/",
+       "https://portoflosangeles.org/business/statistics/container-statistics",
+       "https://www.ttnews.com/articles/port-los-angeles-july"
+      ],
+      "web_search_requests": 4
+     }
+    ]
+   },
+   "pages": [],
+   "points": [],
+   "dropped_points": [],
+   "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+   "wall_s": 13.7
+  },
+  {
+   "direction_id": "d2",
+   "round": 1,
+   "search": {},
+   "pages": [],
+   "points": [],
+   "dropped_points": [],
+   "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+   "wall_s": 13.2
+  },
+  {
+   "direction_id": "d3",
+   "round": 1,
+   "search": {},
+   "pages": [],
+   "points": [],
+   "dropped_points": [],
+   "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+   "wall_s": 13.7
+  },
+  {
+   "direction_id": "d4",
+   "round": 1,
+   "search": {},
+   "pages": [],
+   "points": [],
+   "dropped_points": [],
+   "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+   "wall_s": 21.5
+  },
+  {
+   "direction_id": "d5",
+   "round": 1,
+   "search": {},
+   "pages": [],
+   "points": [],
+   "dropped_points": [],
+   "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+   "wall_s": 11.0
+  },
+  {
+   "direction_id": "d6",
+   "round": 1,
+   "search": {},
+   "pages": [],
+   "points": [],
+   "dropped_points": [],
+   "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+   "wall_s": 10.2
+  },
+  {
+   "direction_id": "d7",
+   "round": 1,
+   "search": {},
+   "pages": [],
+   "points": [],
+   "dropped_points": [],
+   "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+   "wall_s": 10.2
+  },
+  {
+   "direction_id": "markets",
+   "round": 1,
+   "markets": {
+    "keywords": [
+     "port los angeles teu",
+     "la container volume",
+     "september 2026 teu"
+    ],
+    "markets": [],
+    "points": [],
+    "note": "no matching market created on or before as_of",
+    "n_events_returned": 1
+   },
+   "points": [],
+   "pages": [],
+   "dropped_points": []
+  }
+ ],
+ "judge_rounds": [
+  {
+   "round": 1,
+   "skipped": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again."
+  }
+ ],
+ "points": [],
+ "compute": {
+  "target_year": 2026,
+  "methods": [],
+  "result": {
+   "central": null,
+   "p10": null,
+   "p90": null,
+   "weights": {},
+   "basis": "no_method",
+   "assumption_weight_share": 0,
+   "baseline": null
+  },
+  "rel_uncertainty_formula_inputs": 0.2,
+  "assumption_min_width": 2.0,
+  "assumptions_used_by": {},
+  "excluded_by_input_audit": [],
+  "methods_from_round": null
+ },
+ "assumptions": {
+  "kept": [],
+  "rejected": [],
+  "from_round": null,
+  "min_width": 2.0,
+  "max_per_run": 12,
+  "max_per_method": 6
+ },
+ "published": {
+  "status": "not_checked",
+  "note": "not checked: backtest or scored question (as_of before today, or an official value is registered), so the target cannot have been published by as_of"
+ },
+ "final": {
+  "template": "Estimate: [[estimate]] [[unit]] ([[interval_level]] interval [[p10]] to [[p90]] [[unit]], basis: [[interval_basis]]), from [[n_methods]] method(s) over [[n_points_kept]] kept data points.",
+  "text": "No estimate: the run was stopped before an estimate could be made (insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.).",
+  "placeholders": {
+   "estimate": "n/a",
+   "p10": "n/a",
+   "p90": "n/a",
+   "unit": "TEU",
+   "interval_level": "80% model-based",
+   "interval_basis": "no method produced an estimate, so there is no interval",
+   "n_points_kept": "0",
+   "n_methods": "0"
+  },
+  "digits_removed": 0,
+  "model_error": null,
+  "used_model_text": false,
+  "model_text": null
+ },
+ "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again.",
+ "started_at": "20261119T114432Z",
+ "wall_s": 31.7,
+ "budget": {
+  "usd_total_assumed": 0.3488,
+  "usd_tokens": 0.0288,
+  "usd_search_fee_assumed": 0.32,
+  "usd_cap": 3.0,
+  "pages_used": 1,
+  "pages_cap": 156,
+  "round1_pages": 120,
+  "max_directions": 10,
+  "urls_per_direction": 12,
+  "searches_per_direction": 3,
+  "n_calls_logged": 9,
+  "aborted": "insufficient balance: DeepSeek HTTP 402 Insufficient Balance (search:d2:2 fc_pola_teu_2026_09); the run was stopped without retrying. Top up the DeepSeek account and run again."
+ },
+ "approvals": [
+  {
+   "approved": true,
+   "by": "auto-approve"
+  }
+ ],
+ "leakage": {
+  "pages_total": 0,
+  "pages_snapshot": 0,
+  "pages_live_dated": 0,
+  "pages_dropped": 0,
+  "pages_sent_to_extractor": {
+   "total": 0,
+   "snapshot": 0,
+   "live_dated": 0
+  },
+  "late_dates_in_text_sent": [],
+  "sentinel_hits": [],
+  "points_dated_after_as_of": [],
+  "snapshots_after_as_of": [],
+  "searcher_queries_containing_registered_values": [],
+  "directions_voided": [],
+  "assumptions_containing_registered_values": [],
+  "page_selection": [
+   "searcher_urls"
+  ],
+  "by_construction": [
+   "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result titles, snippets or the searcher's text. This holds by construction and is not measured."
+  ],
+  "residual_risks": [
+   "The searcher sees post-cutoff search results and chooses which URLs are fetched, so page selection can be conditioned on the answer; only the URLs leave the searcher, and in backtests every fetched page is a snapshot dated <= as_of.",
+   "Live pages are used only when as_of is today; in backtests every page is an archived snapshot dated <= as_of.",
+   "The leak sentinel only catches registered official values in common formats, not paraphrased or derived numbers.",
+   "The model's own training data (knowledge cutoff unpublished) can include history before as_of; it cannot include the target if the target was published after the model's release.",
+   "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
+   "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history before as_of; code checks their form, not where the number came from.",
+   "The magnitude gate (v2.15d) asks the model once, without retrieval, for a rough estimate; whether the evidence-based estimate is more than 2x above or below it can carry the model's memory of the target into one repair. The rough number itself never enters a computation or a prompt; the estimate before that repair is kept in judge_rounds[-1].magnitude_checks[0]. The gate is off in the own-history ablation."
+  ]
+ },
+ "model": "deepseek-flash",
+ "tag": "v215_reg",
+ "settings": {
+  "max_tokens": {
+   "plan": 6000,
+   "extract": 16000,
+   "judge": 24000,
+   "repair": 24000,
+   "audit": 4000,
+   "unit_check": 4000,
+   "unit_arbiter": 4000,
+   "value_check": 2000,
+   "value_reread": 2000,
+   "published": 3000,
+   "early": 3000,
+   "final": 4000,
+   "search": 8192,
+   "naive": 500,
+   "magnitude": 500,
+   "structured": 6000,
+   "search_direct": 4096
+  },
+  "budget_defaults": {
+   "usd": 1.0,
+   "pages": 48,
+   "round1_pages": 40,
+   "llm_concurrency": 8,
+   "extra_directions": 3,
+   "urls_per_direction": 4,
+   "search_max_uses": 3,
+   "max_directions_hard": 16,
+   "searches_per_direction": 1
+  },
+  "budget_run": {
+   "usd": 3.0,
+   "pages": 156,
+   "round1_pages": 120,
+   "urls_per_direction": 12,
+   "searches_per_direction": 3
+  },
+  "interval": {
+   "MIN_WIDTH": 2.0,
+   "MIN_WIDTH_CHANGE": 1.25,
+   "FALLBACK_SIGMA": 0.25,
+   "DEFAULT_REL_U": 0.2,
+   "EPS": 0.01
+  },
+  "max_tokens_model": {
+   "judge": 96000,
+   "repair": 96000,
+   "extract": 64000
+  }
+ }
+}

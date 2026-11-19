@@ -1,0 +1,54 @@
+[fc_us_starts_2026_08] done in 0.7s; estimate n/a; usd 0.0
+[
+ {
+  "id": "fc_us_starts_2026_08",
+  "as_of": "2026-08-17",
+  "answer_value": 1275000,
+  "source": "https://www.census.gov/construction/nrc/pdf/newresconst.pdf",
+  "estimate": null,
+  "p10": null,
+  "p90": null,
+  "basis": null,
+  "scored": true,
+  "n_assumptions_used": 0,
+  "assumptions_used": [],
+  "assumption_weight_share": null,
+  "ablation": false,
+  "pct_err": null,
+  "abs_log10_err": null,
+  "covered_80": null,
+  "arms": {
+   "agent": null,
+   "naive": {
+    "estimate": 1350000.0,
+    "pct_err": 0.05882352941176472,
+    "abs_log10_err": 0.024823583725032145
+   },
+   "structured_no_retrieval": {
+    "estimate": 1335707.7804621987,
+    "pct_err": 0.04761394546054798,
+    "abs_log10_err": 0.02020127096382156
+   }
+  },
+  "within_20pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": false,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": false,
+   "naive": false,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 0.0,
+  "usd_tokens": 0.0,
+  "wall_s": 0.7
+ }
+]
+
+--- stderr ---
