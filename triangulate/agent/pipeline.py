@@ -320,8 +320,9 @@ class AgentLLM(LLM):
         if "usd" in rec:
             self.budget.add(rec)
 
-    def ask(self, system: str, user: str, *, role: str, qid: str, max_tokens: int = MAX_TOKENS["final"], tries: int = 2):
-        """返回 (dict|None, error)。输出无效时带着错误信息重试一次。"""
+    def ask(self, system: str, user: str, *, role: str, qid: str, max_tokens: int = MAX_TOKENS["final"], tries: int = 2,
+            shape_check=None):
+        """返回 (dict|None, error)。输出无效时带着错误信息重试一次。shape_check（v2.15f）：见 LLM.json_call。"""
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         err = None
         # 预扣按发出去的 max_tokens 算：有 ModelSpec 时含思考余量；没有时照旧不含思考余量（和 v2.9b 相同），
@@ -335,7 +336,8 @@ class AgentLLM(LLM):
             with self.budget.sem, self.budget.hold(need):
                 try:
                     out, text, err = self.json_call(msgs, arm=role, qid=qid, attempt=attempt, max_tokens=max_tokens,
-                                                    **({"thinking_off": True} if off else {}))
+                                                    **({"thinking_off": True} if off else {}),
+                                                    **({"shape_check": shape_check} if shape_check else {}))
                 except BalanceExhausted as e:   # v2.10a：余额不足 -> 整次运行停下（预算中止的路径）
                     raise BudgetExceeded(self.budget.halt(str(e))) from None
                 except TransportError as e:

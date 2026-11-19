@@ -179,31 +179,56 @@ def server_error_detail(rec: dict) -> str:
 
 
 MISSING_BRACE_MSG = "Expecting property name enclosed in double quotes"
-MAX_BRACE_FIXES = 4
+OBJ_START = re.compile(r'\{\s*"id"\s*:')
+METHOD_START = re.compile(r'\{\s*"id"\s*:\s*"[^"\\]*"\s*,\s*"method"\s*:')   # 方法对象：id 后面紧跟 method（输入项是 id + role）
+MAX_BACK = 20000   # 往回找补括号位置的最大距离（字符）：一个方法对象在存档里最长约 3,000 字符
 
 
-def close_missing_braces(text: str):
-    """v2.15b（BUGS S25）：裁判长嵌套 JSON 最常见的坏法是某个对象在下一个 `{"id": ...}` 之前少了右花括号
-    （`..."reason."},{"id":"m2"` 处报 Expecting property name）。只修这一种：报错位置是 `{`、它前面最后一个非空白字符是逗号时，
-    在逗号前补一个 `}`，最多补 MAX_BRACE_FIXES 个。返回 (解析出的 dict, 补了几个)；不是这种坏法或补完仍不合法时返回 (None, 0)。"""
-    for n in range(1, MAX_BRACE_FIXES + 1):
-        try:
-            json.loads(text)
-            break
-        except json.JSONDecodeError as e:
-            if e.msg != MISSING_BRACE_MSG or text[e.pos:e.pos + 1] != "{":
-                return None, 0
-            j = len(text[:e.pos].rstrip()) - 1
-            if j < 0 or text[j] != ",":
-                return None, 0
-            text = text[:j] + "}" + text[j:]
-    else:
-        n = MAX_BRACE_FIXES + 1
+def _commas(text: str, lo: int, hi: int) -> list:
+    """text[lo:hi] 里字符串外面的逗号位置（lo 处必须在字符串外面）。"""
+    out, in_str, esc = [], False, False
+    for i in range(lo, hi):
+        ch = text[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+        elif ch == '"':
+            in_str = True
+        elif ch == ",":
+            out.append(i)
+    return out
+
+
+def close_missing_braces(text: str, valid):
+    """v2.15b / v2.15f（BUGS S25）：裁判长嵌套 JSON 最常见的坏法：某个对象少了右花括号，解析器到下一个 `{"id": ...}`
+    才发现（Expecting property name）。存档里少的几乎都是里层的括号（某个输入、inputs、params），不是方法自己的：补在报错
+    位置前的逗号前能解析，但 unit、coverage、rationale 会被塞进 params（v2.15f 审查）。所以从报错位置往回，在当前对象
+    （最近一个 `{"id":` 起）里字符串外面的每个逗号前试补一个 `}`，只接受解析成功、而且 valid(对象) 为真的那一个（从近到远
+    第一个）。valid 是调用方给的结构检查（裁判：graph.judge_shape_ok）。返回 (dict, 1)；不是这种坏法、或没有一个位置
+    补完结构对得上时返回 (None, 0)，交给重问。"""
     try:
-        out = json.loads(text)
-    except json.JSONDecodeError:
+        json.loads(text)
         return None, 0
-    return (out, n - 1) if isinstance(out, dict) and n > 1 else (None, 0)
+    except json.JSONDecodeError as e:
+        pos, msg = e.pos, e.msg
+    if msg != MISSING_BRACE_MSG or text[pos:pos + 1] != "{" or not text[:pos].rstrip().endswith(","):
+        return None, 0
+    pat = METHOD_START if METHOD_START.match(text, pos) else OBJ_START   # 下一个是方法：从上一个方法的开头找起
+    starts = [m.start() for m in pat.finditer(text, max(0, pos - MAX_BACK), pos)]
+    if not starts:
+        return None, 0
+    for k in reversed(_commas(text, starts[-1], pos)):
+        try:
+            out = json.loads(text[:k] + "}" + text[k:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(out, dict) and valid(out):
+            return out, 1
+    return None, 0
 
 
 def check_key(spec, timeout: float = 30) -> dict:
@@ -298,10 +323,11 @@ class LLM:
         return effort, role_max_tokens(model, role, max_tokens) + (THINKING_EXTRA_TOKENS if effort else 0)   # v2.13d
 
     def json_call(self, messages: list, *, arm: str, qid: str, attempt: int, max_tokens: int = 4000,
-                  thinking_off: bool = False):
+                  thinking_off: bool = False, shape_check=None):
         """返回 (parsed_dict_or_None, raw_text, error_or_None)，error 只表示模型输出本身的问题。
         传输层失败（超时、5xx、空 body）内部重试最多 3 次，仍失败则抛 TransportError。
-        3xx 跳转不跟随、不重试，直接抛 TransportError（D9）。v2.15b：thinking_off 见 effort_and_tokens。"""
+        3xx 跳转不跟随、不重试，直接抛 TransportError（D9）。v2.15b：thinking_off 见 effort_and_tokens；
+        shape_check（v2.15f）：给了才试补括号（close_missing_braces），只有裁判给，其余角色和基线臂照旧。"""
         ad = self.adapter
         effort, out_tokens = self.effort_and_tokens(arm, max_tokens, thinking_off)
         url = API_URL if self.spec is None else ad.chat_url(self.spec.region)
@@ -387,8 +413,8 @@ class LLM:
             try:
                 out = json.loads(text)
             except json.JSONDecodeError as e:
-                # v2.15b：先试定点补右花括号（close_missing_braces）；补好了照常返回，日志记补了几个、原来的报错位置
-                out, n_fixed = close_missing_braces(text)
+                # v2.15b / v2.15f：给了结构检查时先试补右花括号（close_missing_braces）；补好了照常返回，日志记原来的报错位置
+                out, n_fixed = close_missing_braces(text, shape_check) if shape_check else (None, 0)
                 if out is not None:
                     rec["json_repaired"] = {"braces_inserted": n_fixed, "json_error": f"{e.msg} at {e.pos}"}
                 else:

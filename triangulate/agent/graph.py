@@ -38,7 +38,7 @@ from . import value_check as VC
 from .evidence import period_text
 from .markets import search_markets
 from .outputs import basis_text, combination_details, method_details, unit_full, unit_text
-from .pipeline import BudgetExceeded, Context, dumps, run_direction
+from .pipeline import AgentLLM, BudgetExceeded, Context, dumps, run_direction
 from .prompts import (AUDIT_OUTCOMES, AUDIT_SYSTEM, AUDIT_USER, CHECKLIST, DISCRETE_METHODS_SPEC, DISCRETE_OUTCOMES_DEFINE,
                       DISCRETE_OUTCOMES_GIVEN, DISCRETE_REVISE, DISCRETE_REVISE_DONE, EXTRA_RULE_R1, EXTRA_RULE_R2,
                       FINAL_SYSTEM, FINAL_USER, FINAL_USER_DISCRETE, JUDGE_SYSTEM, JUDGE_USER, METHODS_SPEC, PLAN_SYSTEM,
@@ -136,6 +136,40 @@ def _fmt_num(v):
     if v is None or not isinstance(v, (int, float)) or not math.isfinite(v):
         return "n/a"
     return f"{v:,.0f}" if abs(v) >= 100 else f"{v:.4g}"
+
+
+_METHOD_KEYS = {"id", "method", "label", "params", "unit", "coverage", "rationale"}
+_INPUT_KEYS = {"id", "role", "rel_uncertainty"}
+
+
+def judge_shape_ok(out: dict) -> bool:
+    """v2.15f：补过括号的裁判回复，结构是不是和正常回复一样（llm.close_missing_braces 用它从几个补法里挑）。存档里 1,116 个方法：
+    方法这一层只有 id / method / params / unit / coverage / rationale，每个输入只有 id / role，coverage 里没有方法层的键；
+    假设和点的判定都是平的（值里没有对象）。补错位置时 unit、coverage、rationale 会掉进 params，后面的输入会掉进前一个输入。"""
+    for m in out.get("methods") or []:
+        if not isinstance(m, dict) or not set(m) <= _METHOD_KEYS:
+            return False
+        prm = m.get("params")
+        if prm is not None and (not isinstance(prm, dict) or _METHOD_KEYS & set(prm)):
+            return False
+        for name, val in (prm or {}).items():   # inputs（formula_mc）、probs（outcome_probs）：名字 -> 输入项（存档里只有这两种）
+            if isinstance(val, dict) and not all(isinstance(v, dict) and set(v) <= _INPUT_KEYS for v in val.values()):
+                return False
+            if name == "inputs" and not isinstance(val, dict):
+                return False
+        cov = m.get("coverage")
+        if isinstance(cov, dict) and _METHOD_KEYS & set(cov):
+            return False
+    for key in ("assumptions", "decisions"):
+        for x in out.get(key) or []:
+            if not isinstance(x, dict) or any(isinstance(v, (dict, list)) for v in x.values()):
+                return False
+    return True
+
+
+def _shape_kw(llm) -> dict:
+    """真的 AgentLLM 才传 shape_check（测试里的假 LLM 的 ask 没有这个参数）。"""
+    return {"shape_check": judge_shape_ok} if isinstance(llm, AgentLLM) else {}
 
 
 def _fmt_point(p: dict) -> str:
@@ -883,7 +917,8 @@ def build(ctx: Context):
                 extra_rule=extra_rule)
         judge_user = judge_prompt(orec)
         try:
-            out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=MAX_TOKENS["judge"])
+            out, err = ctx.llm.ask(JUDGE_SYSTEM, judge_user, role=f"judge:r{rnd}", qid=ctx.qid, max_tokens=MAX_TOKENS["judge"],
+                                   **_shape_kw(ctx.llm))
         except BudgetExceeded as e:
             return {**upd, "aborted": str(e), "judge_rounds": [{"round": rnd, "skipped": str(e)}]}
         if out is None:
@@ -954,7 +989,7 @@ def build(ctx: Context):
                 # v2.15d 量级闸门：能用的方法合并后和一次不联网直接问的粗估差 MG.RATIO 倍以上，点名偏了的方法交回修正一次
                 # （只第一次；之后每次检查只记录）。粗估的数不进报错、不进计算
                 ok_i = [i for i, m in enumerate(out_c.get("methods") or []) if i not in failed and C.produced(m)]
-                if not disc and ok_i:
+                if not disc and ok_i and not ablate:   # v2.15f：消融不开（粗估会带回消融拿掉的自身历史）
                     ref = MG.reference(ctx, state["question"], state["as_of"], target0)
                     by_live = {p["id"]: p for p in live}
                     comb = C.run([jr["methods"][i] for i in ok_i], by_live, t, assumptions=av_c,
@@ -963,8 +998,8 @@ def build(ctx: Context):
                                             {a["id"]: a for a in av_c["kept"]})
                     jr["magnitude_reference"] = ref
                     jr.setdefault("magnitude_checks", []).append({k: mrec.get(k) for k in ("status", "estimate", "ratio")})
-                    if mlines and not last.get("gate_sent"):
-                        last["gate_sent"] = jr["magnitude_repair_sent"] = True
+                    if mlines and not last.get("gate_sent"):   # 真的随修正发出去没有，修正循环结束后按 repairs 记
+                        last["gate_sent"] = True
                         errs = list(errs or []) + mlines
                 return aud, n_ok, (vfail + errs if errs else errs)
 
@@ -995,7 +1030,7 @@ def build(ctx: Context):
                 try:
                     out2, err2 = ctx.llm.ask(JUDGE_SYSTEM, repair_user + REPAIR.format(
                         previous=dumps(prev_reply), errors="\n".join(f"- {e}" for e in errs)) + note,
-                        role=f"judge:r{rnd}:repair", qid=ctx.qid, max_tokens=MAX_TOKENS["repair"])
+                        role=f"judge:r{rnd}:repair", qid=ctx.qid, max_tokens=MAX_TOKENS["repair"], **_shape_kw(ctx.llm))
                 except BudgetExceeded as e:
                     out2, err2 = None, str(e)
                 if out2 is None:
@@ -1039,6 +1074,8 @@ def build(ctx: Context):
                     oerrs = oerrs2
                 if out2 is None:
                     break
+            if jr.get("magnitude_checks"):   # v2.15f：闸门的报错有没有真的随一次修正发给裁判
+                jr["magnitude_repair_sent"] = any("magnitude check" in e for r in jr.get("repairs") or [] for e in r["errors"])
             if need_check:
                 # v2.8l（不准不出数）：修正完仍没有方法全部通过，但有方法代码算得出、只是被输入核对（模型调用，误判过多次）否掉，
                 # 就用这些方法出数，异议记在 audit_overridden，终稿末尾写明
@@ -1078,9 +1115,10 @@ def build(ctx: Context):
         if ov:
             out["audit_overridden"] = [{"label": str(m.get("id", "")), "reason": ov[str(i)]}
                                        for i, m in enumerate(jr.get("methods") or []) if str(i) in ov]
-        if not D.is_discrete(target):   # v2.15d：最终估计再和粗估比一次（裁判检查时已问过就用缓存，不再调用）
+        central = (out.get("result") or {}).get("central")
+        if not D.is_discrete(target) and not ablate and central:   # v2.15d：最终估计再和粗估比一次（问过就用缓存，不再调用）
             out["magnitude"] = MG.final_record(MG.reference(ctx, state["question"], state["as_of"], state["plan"]["target"]),
-                                               (out.get("result") or {}).get("central"))
+                                               central, bool(jr.get("magnitude_repair_sent")))
         labels = {m["id"]: m.get("label") for m in out["methods"]}
         for a in av["kept"]:
             a["used_by"] = out["assumptions_used_by"].get(a["id"], [])

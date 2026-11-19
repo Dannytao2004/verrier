@@ -60,7 +60,10 @@ def _parse(out, err, unit: str) -> dict:
     est, u = out.get("estimate"), str(out.get("unit") or "")
     if isinstance(est, bool) or not isinstance(est, (int, float)) or not math.isfinite(est) or est <= 0:
         return {"status": "invalid", "note": f"estimate {est!r} is not a positive number", "reply": out}
-    f, why = (1.0, "") if u == unit else Q.convert_factor(u, unit)
+    try:
+        f, why = (1.0, "") if u == unit else Q.convert_factor(u, unit)
+    except Exception as e:  # noqa: BLE001  pint 的其他异常也只让闸门不起作用（v2.15f 审查）
+        f, why = None, f"{type(e).__name__}: {e}"
     if f is None:
         return {"status": "unit_unreconciled", "note": why[:200], "reply": out}
     return {"status": "ok", "estimate": est * f, "unit": unit, "reply": out}
@@ -109,12 +112,13 @@ def check(ref: dict, combined, methods: list, by_id: dict, kept_a: dict) -> tupl
     return rec, lines
 
 
-def final_record(ref: dict, central) -> dict:
-    if (ref or {}).get("status") != "ok":
-        return {"status": "not_checked", "reference": ref}
+def final_record(ref: dict, central, repair_sent: bool = False) -> dict:
+    """repair_sent：闸门的报错真的随一次修正发给了裁判（v2.15f：第一次偏出在最后一次修正之后时没发出去）。"""
+    if (ref or {}).get("status") != "ok" or not central:
+        return {"status": "not_checked", "reference": ref, "repair_sent": repair_sent}
     r = ref["estimate"]
-    return {"status": "off" if off(central, r) else "ok", "reference": ref, "estimate": central,
-            "ratio": (central / r) if central else None}
+    return {"status": "off" if off(central, r) else "ok", "reference": ref, "estimate": central, "ratio": central / r,
+            "repair_sent": repair_sent}
 
 
 def final_note(rec: dict) -> str:
@@ -123,5 +127,6 @@ def final_note(rec: dict) -> str:
         return ""
     x = rec["ratio"]
     k = x if x >= 1 else 1 / x
+    tried = "one targeted repair did not close the gap" if rec.get("repair_sent") else "no repair round was left to try"
     return (f"Magnitude check: this estimate is about {k:,.1f} times {'above' if x >= 1 else 'below'} an independent rough "
-            "estimate made without the evidence; one targeted repair did not close the gap, so check the inputs above.")
+            f"estimate made without the evidence; {tried}, so check the inputs above.")

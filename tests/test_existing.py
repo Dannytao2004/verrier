@@ -42,10 +42,11 @@ HEAD_KEYS = ("plan", "directions", "approval", "points", "judge_rounds", "comput
 # v2.13a（单位带期间：抽取 prompt 多 unit_calc 和单位规则、裁判表格多一列、单位核对规则改写；终稿先写答案的单位）再登记。
 # 逐键比较三条路径的状态（probes/out/_st_head.json 对 _st_new.json，只在本机）：数字全同，只有终稿多了「Unit of the estimate」
 # 一行和 unit_full 占位符；其余差别都在发出去的 prompt 里。上一版 live_auto 91223122…、backtest 5ffb4c9d…、live_early_stop d6af7b62…
+# v2.15f：compute 的 magnitude 记录多了 repair_sent（上一版 live_auto 6260287c…、backtest b01d9a74…）。
 # v2.15e：抽取 prompt 的上限 15 -> 30（三条路径都发抽取，prompt 变了）；v2.15d：compute 多了 magnitude 记录（这组假题没钉单位，
 # 闸门 not_checked、不发调用）。上一版 live_auto 15270f36…（v2.15d）/ 980cf6d6…、backtest c2030d2f… / d20e30ad…、live_early_stop f3cde67f…
-HEAD_SHA = {"live_auto": "6260287ca2e447ce78d9e1df8869d740f1d41613aac882a7a8000bdd7ac2543f",
-            "backtest": "b01d9a7498b4d51b15a44c11fff4fa824e74527b26aa8f9cf92981c87c201733",
+HEAD_SHA = {"live_auto": "9c664624c931fd86a36a5ce0e7a096f7b13538fd8a084667850d3fb0beff8106",
+            "backtest": "2bf126dc5cbfe6e56f833dd1287552935a6339a51741df3bffdcfb889d2cee79",
             "live_early_stop": "956a9004ff781c39c1eed34d34d6c87a7632c811a4cb230304f479f40a5a92ce"}
 
 

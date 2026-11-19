@@ -38,6 +38,10 @@ RESIDUAL_RISKS = [
     "Wayback snapshots are captured by a third party; a snapshot date <= as_of proves the content existed by then.",
     "Assumption values are proposed by the judge model from its own knowledge, which can include the target's history "
     "before as_of; code checks their form, not where the number came from.",
+    "The magnitude gate (v2.15d) asks the model once, without retrieval, for a rough estimate; whether the evidence-based "
+    "estimate is more than 2x above or below it can carry the model's memory of the target into one repair. The rough "
+    "number itself never enters a computation or a prompt; the estimate before that repair is kept in "
+    "judge_rounds[-1].magnitude_checks[0]. The gate is off in the own-history ablation.",
 ]
 BY_CONSTRUCTION = [
     "Only URLs leave the searcher (code regex); extractor, judge and final prompts never contain search result "

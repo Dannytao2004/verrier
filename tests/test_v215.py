@@ -44,67 +44,92 @@ class TestErrorNumberFormat(unittest.TestCase):
 
 
 GOOD = {"assessment": ["x"], "methods": [
-    {"id": "m1", "method": "formula_mc", "params": {"formula": "a * b", "inputs": {"a": {"id": "p1"}, "b": {"id": "a1"}}},
-     "rationale": "r1"},
-    {"id": "m2", "method": "formula_mc", "params": {"formula": "c", "inputs": {"c": {"id": "p2"}}}, "rationale": "r2"}],
+    {"id": "m1", "method": "formula_mc", "params": {"formula": "a * b", "inputs": {"a": {"id": "p1", "role": "r"},
+                                                                                   "b": {"id": "a1", "role": "s"}}},
+     "unit": "car", "coverage": {"kind": "part", "part": "Bavaria"}, "rationale": "r1"},
+    {"id": "m2", "method": "formula_mc", "params": {"formula": "c", "inputs": {"c": {"id": "p2", "role": "t"}}},
+     "unit": "car", "rationale": "r2"}],
     "assumptions": [{"id": "a1", "value": 0.5}]}
 
 
+def _drop(text: str, marker: str) -> str:
+    """删掉 marker 结尾的那个右花括号（marker 在 text 里唯一）。"""
+    i = text.index(marker) + len(marker) - 1
+    assert text[i] == "}"
+    return text[:i] + text[i + 1:]
+
+
 class TestBraceRepair(unittest.TestCase):
-    """v2.15b：存档里裁判 JSON 损坏、带出错片段的 24 次里 23 次是同一种坏法：方法对象在下一个 {"id": ...} 前少一个右花括号。"""
+    """v2.15b / v2.15f：存档里裁判 JSON 损坏、带出错片段的 24 次里 23 次是同一种报错（下一个 {"id": ...} 处 Expecting property
+    name），而且出错点前面那个 } 在：少的是里层的括号（某个输入、inputs、params），不是方法自己的。v2.15b 补在末尾会让
+    unit / coverage / rationale 掉进 params（审查复现）；v2.15f 在当前方法里逐个逗号试补，只收结构检查通过的。"""
 
-    def broken(self, drop: int):
-        text = json.dumps(GOOD, ensure_ascii=False)
-        cut = text.index(', {"id": "m2"')   # m1 的右花括号就在这前面
-        return text[:cut - drop] + text[cut:] if drop else text
+    def check(self, bad: str, good=GOOD):
+        with self.assertRaises(json.JSONDecodeError) as cm:
+            json.loads(bad)
+        self.assertTrue(cm.exception.msg.startswith("Expecting property name"))
+        return llm.close_missing_braces(bad, G.judge_shape_ok)
 
-    def test_one_missing_brace(self):
-        text = self.broken(1)
-        with self.assertRaises(json.JSONDecodeError):
-            json.loads(text)
-        out, n = llm.close_missing_braces(text)
-        self.assertEqual((out, n), (GOOD, 1))
+    def test_inner_brace_missing_archive_signature(self):
+        for sep in ((",", ":"), (", ", ": ")):
+            text = json.dumps(GOOD, separators=sep)
+            k = sep[1]
+            for marker in ('"role"%s"s"}' % k,                     # 输入 b 没关
+                           '"role"%s"s"}}' % k,                    # inputs 没关
+                           '"role"%s"s"}}}' % k,                   # params 没关
+                           '"Bavaria"}' % ()):                     # coverage 没关
+                bad = _drop(text, marker)
+                self.assertTrue(bad[:bad.index('{"id"%s"m2"' % k)].rstrip().endswith("},") or marker == '"Bavaria"}',
+                                marker)
+                self.assertEqual(self.check(bad), (GOOD, 1), (sep, marker))
 
-    def test_two_missing_braces(self):
-        # params 是 m1 的最后一个键：params 和 m1 本身的右花括号都没写
-        good = {"methods": [{"id": "m1", "params": {"formula": "a", "inputs": {"a": {"id": "p1"}}}},
-                            {"id": "m2", "params": {"formula": "b", "inputs": {"b": {"id": "p2"}}}}]}
-        text = json.dumps(good)
-        cut = text.index(', {"id": "m2"')
-        out, n = llm.close_missing_braces(text[:cut - 2] + text[cut:])
-        self.assertEqual((out, n), (good, 2))
+    def test_method_brace_missing(self):
+        text = json.dumps(GOOD, separators=(",", ":"))
+        self.assertEqual(self.check(_drop(text, '"rationale":"r1"}')), (GOOD, 1))
 
-    def test_compact_form_from_the_archive(self):
-        # 存档 judge:r2 原样的交界没有空格：..."not clean."},{"id":"m3",...；少的是 m2 自己的右花括号
-        good = {"methods": [{"id": "m2", "params": {"formula": "x"}, "rationale": "not clean."},
-                            {"id": "m3", "params": {"formula": "y"}}]}
-        text = json.dumps(good, separators=(",", ":"))
-        bad = text.replace('"not clean."},{', '"not clean.",{')
-        self.assertNotEqual(bad, text)
-        out, n = llm.close_missing_braces(bad)
-        self.assertEqual((out, n), (good, 1))
+    def test_two_missing_braces_go_to_the_retry(self):
+        text = json.dumps(GOOD, separators=(",", ":"))
+        bad = _drop(_drop(text, '"role":"s"}}}'), '"role":"s"}}')
+        self.assertEqual(llm.close_missing_braces(bad, G.judge_shape_ok), (None, 0))
 
     def test_other_breakage_is_left_alone(self):
         # 抽取员那种坏法（多出一个孤立的 null 当键名）不是这一种：不修，照旧交给重问
         text = '{"points": [{"low": null, null: null, "high": null}]}'
-        self.assertEqual(llm.close_missing_braces(text), (None, 0))
-        self.assertEqual(llm.close_missing_braces('{"a": [1, 2,]}'), (None, 0))
+        self.assertEqual(llm.close_missing_braces(text, G.judge_shape_ok), (None, 0))
+        self.assertEqual(llm.close_missing_braces('{"a": [1, 2,]}', G.judge_shape_ok), (None, 0))
 
-    def test_json_call_returns_the_repaired_object(self):
-        bad = self.broken(1)
+    def test_shape_check(self):
+        self.assertTrue(G.judge_shape_ok(GOOD))
+        moved = json.loads(json.dumps(GOOD))
+        moved["methods"][0]["params"]["rationale"] = moved["methods"][0].pop("rationale")
+        self.assertFalse(G.judge_shape_ok(moved))
+        nested = json.loads(json.dumps(GOOD))
+        nested["methods"][0]["params"]["inputs"]["a"]["b"] = nested["methods"][0]["params"]["inputs"].pop("b")
+        self.assertFalse(G.judge_shape_ok(nested))
 
+    def _json_call(self, bad, **kw):
         def fake_post(req, **k):
             reply = {"choices": [{"message": {"content": bad}, "finish_reason": "stop"}], "usage": {}}
             return 200, json.dumps(reply).encode()
 
-        with mock.patch.object(llm, "read_key", return_value="k"),                 mock.patch.object(llm.LLM, "_post", staticmethod(fake_post)), mock.patch.object(llm.LLM, "_log") as log:
-            out, _, err = llm.LLM().json_call([{"role": "user", "content": "json"}], arm="judge:r1", qid="q", attempt=1)
+        with mock.patch.object(llm, "read_key", return_value="k"), \
+                mock.patch.object(llm.LLM, "_post", staticmethod(fake_post)), mock.patch.object(llm.LLM, "_log") as log:
+            out, _, err = llm.LLM().json_call([{"role": "user", "content": "json"}], arm="judge:r1", qid="q", attempt=1,
+                                              **kw)
+        return out, err, log.call_args[0][0]
+
+    def test_json_call_repairs_only_with_a_shape_check(self):
+        bad = _drop(json.dumps(GOOD, separators=(",", ":")), '"role":"s"}}}')
+        out, err, rec = self._json_call(bad, shape_check=G.judge_shape_ok)
         self.assertIsNone(err)
         self.assertEqual(out, GOOD)
-        rec = log.call_args[0][0]
         self.assertTrue(rec["ok"])
         self.assertEqual(rec["json_repaired"]["braces_inserted"], 1)
         self.assertIn("Expecting property name", rec["json_repaired"]["json_error"])
+        out, err, rec = self._json_call(bad)   # 不是裁判（基线、抽取……）：不补，照旧报不合法
+        self.assertIsNone(out)
+        self.assertEqual(err, "reply is not valid JSON")
+        self.assertEqual(rec["error"], "invalid_json")
 
 
 class TestThinkingOffRetry(unittest.TestCase):
@@ -228,9 +253,13 @@ class TestMagnitudeParts(unittest.TestCase):
 
     def test_final_note(self):
         self.assertEqual(MG.final_note(MG.final_record({"status": "ok", "estimate": 100.0}, 150.0)), "")
-        note = MG.final_note(MG.final_record({"status": "ok", "estimate": 10000.0}, 101.0))
+        note = MG.final_note(MG.final_record({"status": "ok", "estimate": 10000.0}, 101.0, repair_sent=True))
         self.assertIn("about 99.0 times below", note)
+        self.assertIn("one targeted repair did not close the gap", note)
         self.assertNotIn("10,000", note)
+        # v2.15f：闸门第一次偏出时修正轮已经用完，报错没发出去：终稿不能说修过
+        self.assertIn("no repair round was left", MG.final_note(MG.final_record({"status": "ok", "estimate": 10000.0}, 101.0)))
+        self.assertEqual(MG.final_record({"status": "ok", "estimate": 10.0}, None)["status"], "not_checked")
 
 
 MONTHS = ((2023, 6, 30, "June", 1000), (2024, 6, 30, "June", 1100), (2025, 6, 30, "June", 1210),
@@ -310,6 +339,8 @@ class TestMagnitudeGate(unittest.TestCase):
         self.assertEqual([c["status"] for c in jr["magnitude_checks"]], ["off", "off"])
         self.assertEqual(st["compute"]["magnitude"]["status"], "off")
         self.assertIn("Magnitude check: this estimate is about", st["final"]["text"])
+        self.assertIn("one targeted repair did not close the gap", st["final"]["text"])
+        self.assertTrue(st["compute"]["magnitude"]["repair_sent"])
         self.assertIn("times below", st["final"]["text"])
         self.assertIsNotNone(st["compute"]["result"]["central"])   # 不准不出数：数照出
 
