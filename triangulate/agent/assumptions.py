@@ -77,6 +77,15 @@ def is_change_factor(a: dict) -> bool:
     return (bool(RATIO_WORDS.search(both)) or is_pct(a.get("unit"))) and bool(CHANGE_WORDS.search(both))
 
 
+def pct_below_one_reason(a: dict) -> str:
+    """v2.15c：单位是 % 的假设写成了小于 1 的数（BCG 11-12：美国占北美写成 0.85 "%"，代码按规定除以 100，结果小了 100 倍）。
+    不猜是哪种意思，交回裁判写清楚：两种读法都写出来，报错里带数值（S88 的教训）。"""
+    v = a["value"]
+    return (f'value {v:g} with unit "%" means {v:g}% = {v / 100:g} as a fraction (code divides a % input by 100); '
+            f'if you mean {v * 100:g}%, write value {v * 100:g} with unit "%" and scale low and high the same way; '
+            f'if you mean {v:g}%, write it as a fraction ({v / 100:g}) with unit "1"')
+
+
 def validate(raw, target: dict) -> dict:
     """raw：裁判 JSON 里的 assumptions 列表。返回 {"kept": [...], "rejected": [...]}，都按原顺序。"""
     kept, rejected, seen = [], [], set()
@@ -103,6 +112,8 @@ def validate(raw, target: dict) -> dict:
             why = "value, low and high must be numbers"
         elif not (0 < a["low"] <= a["value"] <= a["high"]):
             why = "need 0 < low <= value <= high"
+        elif is_pct(a["unit"]) and a["value"] < 1:
+            why = pct_below_one_reason(a)
         else:
             why = target_reason(a, target)
             if why:

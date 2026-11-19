@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 
 from triangulate import llm
+from triangulate.agent import assumptions as AS
 from triangulate.agent import graph as G
 from triangulate.agent import pipeline as P
 
@@ -139,6 +140,39 @@ class TestThinkingOffRetry(unittest.TestCase):
         self.assertEqual(sent["body"]["max_tokens"], 1000)
         self.assertTrue(log.call_args[0][0]["thinking_off_retry"])
         self.assertNotIn("thinking", log.call_args[0][0])
+
+
+
+def _a(aid, value, unit, low=None, high=None, name="US share of North America headcount"):
+    return {"id": aid, "name": name, "unit": unit, "rationale": "r", "value": value,
+            "low": value * 0.9 if low is None else low, "high": value * 1.1 if high is None else high}
+
+
+class TestPercentBelowOne(unittest.TestCase):
+    """v2.15c：单位 % 的假设写成小于 1 的数，交回裁判写清是哪种意思（BCG 11-12：0.85 "%" 被当成 0.0085）。"""
+
+    def test_bcg_case_goes_back_with_both_readings(self):
+        r = AS.validate([_a("a5", 0.85, "%", 0.75, 0.92)], {"unit": "person"})
+        self.assertEqual(r["kept"], [])
+        why = r["rejected"][0]["reason"]
+        self.assertIn("0.85% = 0.0085 as a fraction", why)
+        self.assertIn('write value 85 with unit "%"', why)
+        self.assertIn('(0.0085) with unit "1"', why)
+
+    def test_both_rewrites_pass(self):
+        r = AS.validate([_a("a5", 85, "%", 75, 92), _a("a6", 0.0085, "1", 0.007, 0.01)], {"unit": "person"})
+        self.assertEqual([a["id"] for a in r["kept"]], ["a5", "a6"])
+        self.assertAlmostEqual(r["kept"][0]["p10_used"] * r["kept"][0]["p90_used"], 0.75 * 0.92)
+
+    def test_percent_one_or_more_and_percentage_points_unchanged(self):
+        r = AS.validate([_a("a1", 1.0, "%"), _a("a2", 24.7, "percent"), _a("a3", 0.5, "percentage points", name="change")],
+                        {"unit": "person"})
+        self.assertEqual([a["id"] for a in r["kept"]], ["a1", "a2", "a3"])
+
+    def test_repair_scope_names_only_that_assumption(self):
+        r = AS.validate([_a("a5", 0.85, "%")], {"unit": "person"})
+        err = f"assumption a5 rejected: {r['rejected'][0]['reason']}"
+        self.assertEqual(G._repair_scope([err], [])[1], {"a5"})
 
 
 if __name__ == "__main__":
