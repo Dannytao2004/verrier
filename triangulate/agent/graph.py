@@ -374,6 +374,7 @@ def _repair_scope(errors: list, assumptions: list) -> tuple:
     假设：被拒的、报错里直接写到 id 的、理由 / 名字 / 适用条件 / 证伪条件里引用了报错里写到的数据点的（例：p81 被输入核对否了，
     理由引用 p81 的假设 a2 也算被点名，10-27 sponsor 题）。范围外的方法和假设，修正回复里的改动由 _lock_repair 退回。"""
     text = "\n".join(str(e) for e in errors)
+    text = re.sub(r'reason given: "[^"]*"', 'reason given: ""', text)   # v2.16c：引用的丢弃理由里的 id 不算点名
     ms = set(re.findall(r"\bmethod (\S+) \(", text))
     for a, b in re.findall(r"methods disagree: (\S+) gives .*? but (\S+) gives", text):
         ms |= {a, b}
@@ -437,6 +438,81 @@ def _pair_methods(prev_m: list, new_m: list) -> dict:
             pairs[pid] = j
             used.add(j)
     return pairs
+
+
+_DISCARDED_ID = re.compile(r"\b(p\d+) (?:is )?unknown or discarded")
+
+
+def _explain_discarded(errs: list, methods: list, by_id: dict, this_round: set) -> tuple:
+    """v2.16c（BUGS S84）：失败方法的报错里写明它用到的每个已丢弃的点（compute 只报第一个；series 类遇到丢弃的点只跳过、
+    不报）、是哪一轮丢的、当时写的理由，以及怎么恢复（修正回复的 decisions 里写 keep:true，代码只采用这一种改动）。11-19 NHS
+    急诊：第 2 轮把自己方法的锚点 p61 / p63 丢了（理由写着「kept via m2」），同页重抓的副本 p293 / p295 也以「Duplicate of p61」
+    丢了；修正轮的表格不标丢弃、回复里的 decisions 又不采用，3 次修正在 p61 -> p293 -> p61 之间来回换，没出数。
+    报的就是「unknown or discarded」时整句改写；别的原因失败的方法，原报错后面补上这一段。量级闸门的报错（方法算得出）不动；
+    方法没用到丢弃点的报错原样。理由里的双引号换成单引号，_repair_scope 算范围时跳过引号里的理由（理由里的 m2 / a2 / p70
+    不算点名，v2.16c 审查）。返回 (改写后的报错, 可以恢复的点 id)。"""
+    out, restorable = [], set()
+    for e in errs:
+        m = re.match(r"method (\S+) \(([^)]*)\): ", e)
+        if not m or "magnitude check:" in e:
+            out.append(e)
+            continue
+        hit = _DISCARDED_ID.search(e)
+        pid = hit.group(1) if hit and hit.group(1) in by_id and not by_id[hit.group(1)].get("keep", True) else None
+        meth = next((x for x in methods if str(x.get("label") or x.get("id")) == m.group(1)), None)
+        ids = {i for i in (_input_ids(meth) if meth else ()) if i in by_id and not by_id[i].get("keep", True)}
+        ids = sorted(ids | ({pid} if pid else set()), key=lambda s: int(s[1:]))
+        if not ids:
+            out.append(e)
+            continue
+        parts = []
+        for i in ids:
+            when = "your decisions in this round" if i in this_round else "an earlier round"
+            why = str(by_id[i].get("judge_reason") or "").replace('"', "'")[:200]
+            parts.append(f'{i} (discarded by {when}; reason given: "{why}")')
+        restorable |= set(ids)
+        how = (f'For each one: if it is the right value for this input, restore it by adding {{"id": "{ids[0]}", "keep": true, '
+               '"reason": "..."} to "decisions" in this reply (code accepts only these restores); otherwise replace it with a '
+               'kept data point from the table.')
+        if pid:
+            out.append(f"method {m.group(1)} ({m.group(2)}): it uses discarded data points, so code cannot compute it: "
+                       + "; ".join(parts) + ". " + how)
+        else:
+            out.append(f"{e} It also uses discarded data points: " + "; ".join(parts) + ". " + how)
+    return out, restorable
+
+
+def _restore_points(reply: dict, restorable: set, by_id: dict, decisions: list, attempt: int) -> list:
+    """v2.16c：修正回复的 decisions 里，对报错点名的已丢弃点写 keep:true 的，恢复成保留（其他 decisions 改动照旧不采用）。
+    点上记 restored_in_repair（第几次修正、原来的丢弃理由）；这一轮 decisions 里的那一条改成 keep:true，原理由存 discard_reason。"""
+    decs = {str(d.get("id")): d for d in decisions or [] if isinstance(d, dict)}
+    got = []
+    for x in reply.get("decisions") or []:
+        pid = str(x.get("id")) if isinstance(x, dict) else ""
+        if pid not in restorable or x.get("keep") is not True or by_id[pid].get("keep", True):
+            continue
+        p = by_id[pid]
+        rec = {"id": pid, "reason": str(x.get("reason") or "")[:300], "discard_reason": p.get("judge_reason", "")}
+        p["keep"], p["judge_reason"] = True, rec["reason"]
+        p["restored_in_repair"] = {"attempt": attempt, "discard_reason": rec["discard_reason"]}
+        if pid in decs:
+            decs[pid].update(keep=True, reason=rec["reason"], restored_in_repair=attempt, discard_reason=rec["discard_reason"])
+        got.append(rec)
+    return got
+
+
+def _undo_restores(restored: list, by_id: dict, decisions: list):
+    """修完的方法一个都跑不了、退回原方案时，这次修正恢复的点也退回丢弃。"""
+    decs = {str(d.get("id")): d for d in decisions or [] if isinstance(d, dict)}
+    for r in restored:
+        p = by_id[r["id"]]
+        p["keep"], p["judge_reason"] = False, r["discard_reason"]
+        p.pop("restored_in_repair", None)
+        d = decs.get(r["id"])
+        if d is not None and d.get("restored_in_repair"):
+            d.update(keep=False, reason=r["discard_reason"])
+            d.pop("restored_in_repair", None)
+            d.pop("discard_reason", None)
 
 
 def _free(used: set, prefix: str, cap=None):
@@ -957,6 +1033,7 @@ def build(ctx: Context):
             only = None if disc else (AB.ALLOWED_METHODS if ablate else None)   # 消融只针对连续值目标
 
             last = {}   # v2.8l：最近一次 check 里只被输入核对否掉的方法（代码算得出），兜底时用
+            by_shown = {p["id"]: p for p in shown}   # v2.16c：同一批点对象，恢复时原地改 keep
 
             def check(t):
                 # v2.8o：方法用到的点先逐个核对抽取员读的数（模型只回 true / false，没过就重读，最多三次）；没过的点算的时候去掉
@@ -981,9 +1058,11 @@ def build(ctx: Context):
                 # 报的「unknown or discarded」）就静默丢了。其中有一条文字在这一轮之前的修正里从没发给过裁判，就把完整清单交回（清单里
                 # 也带着输入核对和单位核对的异议）；按文字去重，仍受 MAX_REPAIRS 约束，不另加守卫（决定 10）
                 sent = {e for r in jr.get("repairs") or [] for e in r["errors"]}
-                last["resent"] = [] if errs else [x for x in (
-                    f"method {m.get('label') or m.get('id')} ({m.get('method')}): {failed[i]}"
-                    for i, m in enumerate(out_c.get("methods") or []) if i in failed and i not in aud) if x not in sent]
+                cand = [f"method {m.get('label') or m.get('id')} ({m.get('method')}): {failed[i]}"
+                        for i, m in enumerate(out_c.get("methods") or []) if i in failed and i not in aud]
+                if not disc:   # v2.16c：发出去的是改写后的文字，去重也按改写后的比
+                    cand = _explain_discarded(cand, jr["methods"], by_shown, set(dec))[0]
+                last["resent"] = [] if errs else [x for x in cand if x not in sent]
                 if last["resent"]:
                     errs = _problems(jr, out_c, av_c, failed, quiet_if_agree=False)[1]
                 # v2.15d 量级闸门：能用的方法合并后和一次不联网直接问的粗估差 MG.RATIO 倍以上，点名偏了的方法交回修正一次
@@ -1001,6 +1080,9 @@ def build(ctx: Context):
                     if mlines and not last.get("gate_sent"):   # 真的随修正发出去没有，修正循环结束后按 repairs 记
                         last["gate_sent"] = True
                         errs = list(errs or []) + mlines
+                last["restorable"] = set()
+                if errs and not disc:   # v2.16c（S84）：用到已丢弃点的方法，报错写明是哪些点、丢弃理由、怎么恢复
+                    errs, last["restorable"] = _explain_discarded(errs, jr["methods"], by_shown, set(dec))
                 return aud, n_ok, (vfail + errs if errs else errs)
 
             target = D.with_outcomes(target0, orec_new) if disc else target0
@@ -1052,6 +1134,10 @@ def build(ctx: Context):
                         jr["repair"]["dropped_methods"] = dropped
                     if lock:
                         jr["repair"]["scope_lock"] = lock
+                    restored = [] if disc else _restore_points(out2, last.get("restorable") or set(), by_shown,
+                                                               jr["decisions"], attempt + 1)
+                    if restored:   # v2.16c（S84）
+                        jr["repair"]["restored_points"] = restored
                     oerrs2 = []
                     if disc:   # 修正回复里的 decisions 只记录、不采用（保留的点仍按第一次回复定）
                         jr["repair"]["decisions_in_reply"] = [x for x in out2.get("decisions") or [] if isinstance(x, dict)]
@@ -1066,6 +1152,9 @@ def build(ctx: Context):
                         if n_ok2 == 0 and n_ok > 0:
                             jr["methods"], jr["assumptions"], aud, orec_new = prev
                             jr["repair"]["reverted"] = "repaired methods could not execute; kept the original ones"
+                            if restored:
+                                _undo_restores(restored, by_shown, jr["decisions"])
+                                jr["repair"]["restores_undone"] = True
                             break
                         n_ok, errs = n_ok2, oerrs2 + errs_after
                     else:
