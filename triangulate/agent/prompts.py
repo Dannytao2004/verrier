@@ -130,7 +130,7 @@ EXTRACT_USER = """Context: an analyst is estimating "{what}" (unit: {unit}; peri
 This document was collected for the direction: {hypothesis}
 Data wanted: {data_to_find}
 
-Extract up to 30 relevant numeric facts. Prioritise facts that supply a missing input to the requested estimation route.
+Extract up to 15 relevant numeric facts. Prioritise facts that supply a missing input to the requested estimation route.
 
 Useful facts may include:
 - direct observations and partial totals;

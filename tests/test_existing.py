@@ -45,9 +45,11 @@ HEAD_KEYS = ("plan", "directions", "approval", "points", "judge_rounds", "comput
 # v2.15f：compute 的 magnitude 记录多了 repair_sent（上一版 live_auto 6260287c…、backtest b01d9a74…）。
 # v2.15e：抽取 prompt 的上限 15 -> 30（三条路径都发抽取，prompt 变了）；v2.15d：compute 多了 magnitude 记录（这组假题没钉单位，
 # 闸门 not_checked、不发调用）。上一版 live_auto 15270f36…（v2.15d）/ 980cf6d6…、backtest c2030d2f… / d20e30ad…、live_early_stop f3cde67f…
-HEAD_SHA = {"live_auto": "9c664624c931fd86a36a5ce0e7a096f7b13538fd8a084667850d3fb0beff8106",
-            "backtest": "2bf126dc5cbfe6e56f833dd1287552935a6339a51741df3bffdcfb889d2cee79",
-            "live_early_stop": "956a9004ff781c39c1eed34d34d6c87a7632c811a4cb230304f479f40a5a92ce"}
+# v2.16a：抽取上限退回 15（11-19 回归 6 次：方法用到的 23 个点没有一个排在页内第 16 位以后，点却多了约一半）。进程内把这一句
+# 换回 30，三条都等于上一版的值（live_auto 9c664624…、backtest 2bf126dc…、live_early_stop 956a9004…），所以只有这一句变了
+HEAD_SHA = {"live_auto": "c8bb9a63135b51425aaa54cb2ac65aab7121beacf427ded080110aac9ada2d4c",
+            "backtest": "d26038f727e1d64d5de30bc1d6956ee44d06be9bd11bbe750677a4402a5a7931",
+            "live_early_stop": "f3cde67fad0e808c441992428b2fd2105b068273bd0b8d8ee2a5328d90307002"}
 
 
 class Harness:
