@@ -127,6 +127,7 @@ class TestBraceRepair(unittest.TestCase):
         self.assertTrue(rec["ok"])
         self.assertEqual(rec["json_repaired"]["braces_inserted"], 1)
         self.assertIn("Expecting property name", rec["json_repaired"]["json_error"])
+        self.assertEqual(rec["text"], bad)   # v2.16e：补过的也存原文
         out, err, rec = self._json_call(bad)   # 不是裁判（基线、抽取……）：不补，照旧报不合法
         self.assertIsNone(out)
         self.assertEqual(err, "reply is not valid JSON")

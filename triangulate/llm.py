@@ -450,6 +450,7 @@ class LLM:
                 out, n_fixed = close_missing_braces(text, shape_check) if shape_check else (None, 0)
                 if out is not None:
                     rec["json_repaired"] = {"braces_inserted": n_fixed, "json_error": f"{e.msg} at {e.pos}"}
+                    rec["text"] = text   # v2.16e：补过的回复也存原文，补得对不对事后能逐字核对（11-24 日本搬家补了 2 个，原文没存）
                 else:
                     # v2.9b：思考模式下裁判常回不合法的 JSON（finish_reason=stop，没截断）。只多记诊断：长度、出错位置、首尾各 200 字符
                     # v2.16b：另存完整原始回复（text）。11-19 日本搬家裁判第二次回复正是补括号要处理的报错却没补上，只有首尾和出错点
