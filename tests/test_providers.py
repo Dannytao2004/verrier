@@ -37,6 +37,20 @@ GOLDEN_CANDIDATES = {"provider": "deepseek", "by_query": [
     {"query": "widgets 2024", "urls": [], "error": "max_uses_exceeded"}]}
 
 
+def _without_raw_text(lines: list) -> list:
+    """v2.16b（有意的差别）：不合法 JSON 的日志行最后多一个 text（完整原始回复）。去掉它以后逐字节比，并核对它就是回复原文
+    （text_head / text_tail 是它的首尾）。"""
+    out = []
+    for line in lines:
+        r = json.loads(line)
+        if r.get("error") == "invalid_json" and "text" in r:
+            t = r.pop("text")
+            assert t.startswith(r["text_head"]) and t.endswith(r["text_tail"]) and len(t) == r["text_len"], line
+            line = json.dumps(r, ensure_ascii=False)
+        out.append(line)
+    return out
+
+
 def _without_candidates(case: dict) -> tuple:
     """(去掉 candidates 之后的 case, 去掉的 candidates)：只动 CANDIDATES 里写明的那一个返回值。"""
     case = copy.deepcopy(case)
@@ -55,7 +69,10 @@ class TestGoldenDefaultPath(unittest.TestCase):
         new = GD.capture()
         self.assertEqual(old["model"], new["model"])
         self.assertEqual([c["case"] for c in old["cases"]], [c["case"] for c in new["cases"]])
+        raw = [c["case"] for c in new["cases"] if any('"error": "invalid_json"' in x and '"text": ' in x for x in c["log"])]
+        self.assertIn("json_invalid", raw)   # v2.16b 的差别确实出现了（不合法 JSON 的那几个 case）
         for o, n in zip(old["cases"], new["cases"]):
+            n = {**n, "log": _without_raw_text(n["log"])}
             with self.subTest(case=o["case"]):
                 self.assertEqual(GD.dumps(o["requests"]), GD.dumps(n["requests"]))   # URL、请求头、请求体字节、超时
                 self.assertEqual(o["log"], n["log"])                                 # calls.jsonl 行（at / latency 除外）

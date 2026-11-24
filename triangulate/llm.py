@@ -419,9 +419,11 @@ class LLM:
                     rec["json_repaired"] = {"braces_inserted": n_fixed, "json_error": f"{e.msg} at {e.pos}"}
                 else:
                     # v2.9b：思考模式下裁判常回不合法的 JSON（finish_reason=stop，没截断）。只多记诊断：长度、出错位置、首尾各 200 字符
+                    # v2.16b：另存完整原始回复（text）。11-19 日本搬家裁判第二次回复正是补括号要处理的报错却没补上，只有首尾和出错点
+                    # 附近的片段，查不出少了几个括号、少在哪；只在不合法时存，正常回复不存
                     rec.update(ok=False, error="invalid_json", text_len=len(text), json_error=f"{e.msg} at {e.pos}",
                                text_head=text[:200], text_tail=text[-200:],
-                               text_at_error=text[max(0, e.pos - 100):e.pos + 100])
+                               text_at_error=text[max(0, e.pos - 100):e.pos + 100], text=text)
                     self._log(rec)
                     return None, text, "reply is not valid JSON"
             if not isinstance(out, dict):

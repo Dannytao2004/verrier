@@ -130,6 +130,10 @@ class TestBraceRepair(unittest.TestCase):
         self.assertIsNone(out)
         self.assertEqual(err, "reply is not valid JSON")
         self.assertEqual(rec["error"], "invalid_json")
+        self.assertEqual(rec["text"], bad)   # v2.16b：不合法时存完整原始回复
+        out, err, rec = self._json_call(json.dumps(GOOD))
+        self.assertTrue(rec["ok"])
+        self.assertNotIn("text", rec)   # 正常回复不存
 
 
 class TestThinkingOffRetry(unittest.TestCase):
