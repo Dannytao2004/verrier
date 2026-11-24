@@ -203,31 +203,64 @@ def _commas(text: str, lo: int, hi: int) -> list:
     return out
 
 
+MISSING_COMMA_MSG = "Expecting ',' delimiter"
+MAX_BRACES = 3       # v2.16d：一份回复最多补几个右花括号
+MAX_FRONTIER = 200   # v2.16d：每一层最多带多少个「补了以后能越过出错点、后面还少括号」的半成品进下一层
+
+
+def _brace_spots(text: str, pos: int, msg: str):
+    """报错 -> 试补右花括号的位置（从近到远）；不是下面两种少括号的报错时返回 None。当前对象从最近一个方法开头算（下一个
+    不是方法、或附近没有方法时，从最近一个 `{"id":` 算）。
+    (1) Expecting property name，出错点是逗号后面的 `{`：下一个对象开头才发现（v2.15b）。当前对象里字符串外面的每个逗号前。
+    (2) Expecting ',' delimiter，出错点是 `]`：数组最后一个对象少括号，到数组收尾才发现（v2.16d；11-19、11-24 日本搬家的
+        最后一个方法）。`]` 前面（对象自己的括号），再加当前对象里每个逗号前。"""
+    lo = max(0, pos - MAX_BACK)
+    if msg == MISSING_BRACE_MSG and text[pos:pos + 1] == "{" and text[:pos].rstrip().endswith(","):
+        pat, extra = (METHOD_START if METHOD_START.match(text, pos) else OBJ_START), []
+    elif msg == MISSING_COMMA_MSG and text[pos:pos + 1] == "]":
+        pat, extra = (METHOD_START if METHOD_START.search(text, lo, pos) else OBJ_START), [pos]
+    else:
+        return None
+    starts = [m.start() for m in pat.finditer(text, lo, pos)]
+    if not starts:
+        return None
+    return extra + list(reversed(_commas(text, starts[-1], pos)))
+
+
 def close_missing_braces(text: str, valid):
     """v2.15b / v2.15f（BUGS S25）：裁判长嵌套 JSON 最常见的坏法：某个对象少了右花括号，解析器到下一个 `{"id": ...}`
     才发现（Expecting property name）。存档里少的几乎都是里层的括号（某个输入、inputs、params），不是方法自己的：补在报错
     位置前的逗号前能解析，但 unit、coverage、rationale 会被塞进 params（v2.15f 审查）。所以从报错位置往回，在当前对象
     （最近一个 `{"id":` 起）里字符串外面的每个逗号前试补一个 `}`，只接受解析成功、而且 valid(对象) 为真的那一个（从近到远
-    第一个）。valid 是调用方给的结构检查（裁判：graph.judge_shape_ok）。返回 (dict, 1)；不是这种坏法、或没有一个位置
-    补完结构对得上时返回 (None, 0)，交给重问。"""
+    第一个）。valid 是调用方给的结构检查（裁判：graph.judge_shape_ok）。
+    v2.16d（BUGS S92）：一份回复可以少不止一个（11-24 日本搬家按原文查清：m2、m3 都把 params 的收尾写成 `}}`），最后一个方法
+    少括号时报的是另一种错（_brace_spots 的 (2)）。按补的个数一层层试：先试所有补一个的位置（和 v2.15f 完全相同），都不行
+    再试补两个，最多 MAX_BRACES 个；补了以后没在更前面出错、后面（或同一处）又报少括号的，才带进下一层。先找到的补得最少。
+    返回 (dict, 补了几个)；不是这种坏法、或补不出结构对得上的，返回 (None, 0)，交给重问。"""
     try:
         json.loads(text)
         return None, 0
     except json.JSONDecodeError as e:
-        pos, msg = e.pos, e.msg
-    if msg != MISSING_BRACE_MSG or text[pos:pos + 1] != "{" or not text[:pos].rstrip().endswith(","):
-        return None, 0
-    pat = METHOD_START if METHOD_START.match(text, pos) else OBJ_START   # 下一个是方法：从上一个方法的开头找起
-    starts = [m.start() for m in pat.finditer(text, max(0, pos - MAX_BACK), pos)]
-    if not starts:
-        return None, 0
-    for k in reversed(_commas(text, starts[-1], pos)):
-        try:
-            out = json.loads(text[:k] + "}" + text[k:])
-        except json.JSONDecodeError:
-            continue
-        if isinstance(out, dict) and valid(out):
-            return out, 1
+        layer = [(text, e.pos, e.msg)]
+    seen = set()
+    for n in range(1, MAX_BRACES + 1):
+        nxt = []
+        for t, pos, msg in layer:
+            for k in _brace_spots(t, pos, msg) or []:
+                t2 = t[:k] + "}" + t[k:]
+                try:
+                    out = json.loads(t2)
+                except json.JSONDecodeError as e2:
+                    h = hash(t2)
+                    if e2.pos >= pos + 1 and h not in seen and len(nxt) < MAX_FRONTIER:   # 没在更前面出错（两层括号少在同一处时，补一个后出错点不动）
+                        seen.add(h)
+                        nxt.append((t2, e2.pos, e2.msg))
+                    continue
+                if isinstance(out, dict) and valid(out):
+                    return out, n
+        layer = nxt
+        if not layer:
+            break
     return None, 0
 
 

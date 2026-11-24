@@ -1,5 +1,6 @@
 """v2.16（2026-11-24，11-19 回归前 6 次的分析之后）：a 抽取上限退回 15；b 不合法 JSON 存完整原始回复（测试在 test_v215 /
 test_providers）；c S84：修正报错写明方法用到的已丢弃点和丢弃理由，修正回复只采用对这些点的 keep:true。"""
+import json
 import unittest
 from datetime import date
 from unittest import mock
@@ -14,6 +15,55 @@ try:
     HAVE_LG = True
 except ImportError:
     HAVE_LG = False
+
+
+THREE = {"assessment": ["x"], "decisions": [{"id": "p9", "keep": False, "reason": "r"}],
+         "assumptions": [{"id": "a1", "value": 0.5, "unit": "ratio"}], "methods": [
+             {"id": f"m{k}", "method": "formula_mc",
+              "params": {"formula": f"p{k} * a1", "inputs": {f"p{k}": {"id": f"p{k}", "role": "level"},
+                                                             "a1": {"id": "a1", "role": "factor"}}},
+              "unit": "person/month", "coverage": {"kind": "full"}, "rationale": f"route {k}"} for k in (1, 2, 3)]}
+
+
+def _no_params_brace(text: str, mids) -> str:
+    """删掉这些方法 params 的右括号（`}, "unit"` 前面那个）：11-24 日本搬家原文的坏法。"""
+    for mid in sorted(mids, reverse=True):
+        a = text.index('{"id": "%s", "method"' % mid)
+        j = text.index('}, "unit"', a)
+        text = text[:j] + text[j + 1:]
+    return text
+
+
+class TestBraceRepairLayers(unittest.TestCase):
+    """v2.16d（S92）：一份回复少不止一个括号、最后一个方法少括号。"""
+
+    def setUp(self):
+        from triangulate import llm
+        self.llm = llm
+        self.text = json.dumps(THREE, separators=(", ", ": "))
+
+    def fix(self, bad):
+        return self.llm.close_missing_braces(bad, G.judge_shape_ok)
+
+    def test_last_method_reports_at_the_closing_bracket(self):
+        bad = _no_params_brace(self.text, ["m3"])
+        with self.assertRaises(json.JSONDecodeError) as cm:
+            json.loads(bad)
+        self.assertEqual((cm.exception.msg, bad[cm.exception.pos]), ("Expecting ',' delimiter", "]"))
+        self.assertEqual(self.fix(bad), (THREE, 1))
+
+    def test_every_method_missing_its_params_brace(self):
+        self.assertEqual(self.fix(_no_params_brace(self.text, ["m2", "m3"])), (THREE, 2))   # 11-24 原文的样子
+        self.assertEqual(self.fix(_no_params_brace(self.text, ["m1", "m2", "m3"])), (THREE, 3))
+
+    def test_more_than_max_braces_goes_to_the_retry(self):
+        bad = _no_params_brace(self.text, ["m1", "m2", "m3"])
+        a = bad.index('"route 1"}')   # 再删 m1 自己的括号：共 4 个
+        bad = bad[:a + 9] + bad[a + 10:]
+        self.assertEqual(self.fix(bad), (None, 0))
+
+    def test_comma_error_elsewhere_is_left_alone(self):
+        self.assertEqual(self.fix('{"methods": [{"id": "m1", "method": "x" "params": {}}]}'), (None, 0))
 
 
 class TestExtractCap(unittest.TestCase):

@@ -87,10 +87,11 @@ class TestBraceRepair(unittest.TestCase):
         text = json.dumps(GOOD, separators=(",", ":"))
         self.assertEqual(self.check(_drop(text, '"rationale":"r1"}')), (GOOD, 1))
 
-    def test_two_missing_braces_go_to_the_retry(self):
+    def test_two_missing_braces_in_one_method(self):
+        # v2.15f：交给重问；v2.16d（S92）起一层层补，补两个也能补回原样
         text = json.dumps(GOOD, separators=(",", ":"))
         bad = _drop(_drop(text, '"role":"s"}}}'), '"role":"s"}}')
-        self.assertEqual(llm.close_missing_braces(bad, G.judge_shape_ok), (None, 0))
+        self.assertEqual(llm.close_missing_braces(bad, G.judge_shape_ok), (GOOD, 2))
 
     def test_other_breakage_is_left_alone(self):
         # 抽取员那种坏法（多出一个孤立的 null 当键名）不是这一种：不修，照旧交给重问
