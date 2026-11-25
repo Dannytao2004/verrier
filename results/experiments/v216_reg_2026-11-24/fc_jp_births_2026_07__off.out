@@ -1,0 +1,63 @@
+[fc_jp_births_2026_07] plan: 6 directions -> approved=True
+[fc_jp_births_2026_07] done in 542.7s; estimate 59,901; usd 1.3518
+[
+ {
+  "id": "fc_jp_births_2026_07",
+  "as_of": "2026-08-25",
+  "answer_value": 62479,
+  "source": "https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/s2026/07.html",
+  "estimate": 59900.50754330768,
+  "p10": 38899.34547823708,
+  "p90": 92239.87601419332,
+  "basis": "blocks",
+  "scored": true,
+  "n_assumptions_used": 3,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.04126974594171362,
+  "abs_log10_err": 0.018303567649832358,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 59900.50754330768,
+    "pct_err": -0.04126974594171362,
+    "abs_log10_err": 0.018303567649832358
+   },
+   "naive": {
+    "estimate": 65000.0,
+    "pct_err": 0.04034955745130353,
+    "abs_log10_err": 0.017179286765247475
+   },
+   "structured_no_retrieval": {
+    "estimate": 60995.88860668152,
+    "pct_err": -0.023737758179844137,
+    "abs_log10_err": 0.010433507253840606
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "usd_total_assumed": 1.3518,
+  "usd_tokens": 0.1918,
+  "wall_s": 542.7
+ }
+]
+
+--- stderr ---
