@@ -403,7 +403,7 @@ def _emit(ctx, **event):
             pass
 
 
-def verify_point(raw: dict, text_n: str, as_of: date, page_date, page_published, url: str = "") -> tuple:
+def verify_point(raw: dict, text_n: str, as_of: date, page_date, page_published, url: str = "", numfmt=None) -> tuple:
     """返回 (point|None, reason)。quote 逐字在页面里、value_as_written 在 quote 里、数字和倍数由代码解析、日期 <= as_of。
     v2.11d：page_published = 页面自己声明的发布日期（fetch.page_published，没有就是 None）。期初、期末都空的点用它当
     period_end（period_start 留空），标 period_source = page_date，不做期间年份检查；页面也没有日期就照旧丢。"""
@@ -425,13 +425,15 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, page_published,
     # 「males had four ... three slices」因此丢过）用抽取员给的 number（区间给 low / high），算之前由模型逐个核对
     # （value_check.py）。用户 10-18 选的：探针里模型核对阿拉伯数字会错放（4,774.10 读成 477410）也会误杀，单词写法 5 轮全对
     reading, lo_v, hi_v = None, None, None
+    # v2.17a（BUGS S24）：所在页面的数字写法（调用方每页判一次传进来；没传就在这里判）。"eu" 页面上 212.563 = 212,563
+    fmt, lang = numfmt or ev.page_number_format(text_n, url)
     try:
-        value, is_pct = ev.parse_value(vw, sw)
+        value, is_pct = ev.parse_value(vw, sw, fmt)
     except ValueError as e:
         if not ev.has_reading(raw):
             return None, f"number: {e}"
         try:
-            value, lo_v, hi_v, is_pct, reading = ev.read_reading(raw, vw, sw)
+            value, lo_v, hi_v, is_pct, reading = ev.read_reading(raw, vw, sw, fmt)
         except ValueError as e2:
             return None, f"number: {e2}"
     if cut := ev.cjk_fragment(q, vw, sw):   # v2.6e：只写了更大的中日韩数字的一截（1億3000万 里的 1億3000）就丢，不静默读错
@@ -485,6 +487,8 @@ def verify_point(raw: dict, text_n: str, as_of: date, page_date, page_published,
         point.update(reading=reading, value_check="pending")
         if lo_v is not None:
             point.update(value_low=lo_v, value_high=hi_v)
+    if fmt != "en":   # v2.17a：按欧式（或混用页面的规则）读的点记下来，核对和 ledger 用；英式页面的点不加这个键
+        point["number_format"] = {"format": fmt, "lang": lang}
     return point, ""
 
 
@@ -552,11 +556,14 @@ def _process_page(ctx: Context, target: dict, d: dict, round_no: int, page: dict
     text_n = ev.norm(sent)
     raws = (res or {}).get("points") or []
     page["n_points_raw"] = len(raws) if isinstance(raws, list) else 0
+    numfmt = ev.page_number_format(text_n, page["url"])   # v2.17a：每页判一次数字写法，这一页的点都按它读
+    if numfmt[0] != "en":
+        page["number_format"] = {"format": numfmt[0], "lang": numfmt[1]}
     new = []
     for j, r in enumerate(raws if isinstance(raws, list) else []):
         pd = date.fromisoformat(page["page_date"]) if page.get("page_date") else None
         pp = date.fromisoformat(page["page_published"]) if page.get("page_published") else None
-        p, why = verify_point(r, text_n, ctx.as_of, pd, pp, url=page["url"])
+        p, why = verify_point(r, text_n, ctx.as_of, pd, pp, url=page["url"], numfmt=numfmt)
         if p is not None and getattr(ctx, "exclude", None):   # v2.11f：用户排除的现成数据：同一个数、期间重叠的点不当证据
             from .existing import EXCLUDED, excluded_by   # 这里才 import：existing 本身 import 本模块
             x = excluded_by(p, ctx.exclude)

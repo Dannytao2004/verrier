@@ -172,7 +172,68 @@ _STEMS = _alt(EN_SCALES)
 _BAD_ILLION = re.compile(r"^\+?\s*-?\s*(?<![A-Za-z])([A-Za-z]*illions?)\b")              # 表里没有的 -illion 词（septillion）
 _ORDINAL = re.compile(rf"^\+?\s*-?\s*((?:{_STEMS})ths?)\b", re.I)                         # 序数 / 分数（millionth）
 _FOREIGN = re.compile(rf"^\+?\s*-?\s*({_FOREIGN_SCALE})\b\.?", re.I)
-_DOT_THOUSANDS = re.compile(r"\d{1,3}(?:\.\d{3}){2,}(?!\d)")  # 1.234.567（欧式千分位）：不猜，直接报错
+_DOT_THOUSANDS = re.compile(r"\d{1,3}(?:\.\d{3}){2,}(?!\d)")  # 1.234.567（欧式千分位）：英式页面上不猜，直接报错
+
+# ---------- v2.17a（BUGS S24）：数字写法按页面定 ----------
+# 德、荷、意、西、葡等语言用「.」分千位、「,」作小数点：KBA 的「212.563 neue Autos」是 212,563 辆，以前读成 212.563
+# （11-25 v2.16 回归德国新车 -99.9%）。每个页面判一次（page_number_format），只在判成欧式的页面上换读法，别的页面
+# 读法一个字都不变。判法：页面语言（py3langid，按页面正文）属于用点分千位的语言 = 欧式；说西语但网址是写 1,234.5 的
+# 国家（墨西哥、中美洲、加勒比）不算；页面里又有英式的无歧义写法（1,234,567、1,234.5）= 混用：有歧义的数（212.563、2,5）
+# 丢掉，不猜，其余照英式读。
+EU_DOT_LANGS = frozenset({"de", "nl", "it", "es", "pt", "da", "id", "tr", "el", "vi", "ro", "hr", "sl", "sr", "is", "ca",
+                          "gl", "eu", "lb"})
+EN_STYLE_SPANISH_TLDS = frozenset({"mx", "gt", "hn", "ni", "sv", "pa", "do", "pr", "cu"})
+# 英式的无歧义写法：1,234,567、1,234.5，以及点后不是正好三位数字的小数点（4.60%、54.3K、3.14159）。欧式写法里点后面只会是
+# 三位一组；24.11.2026、1.10. 这种日期（点后面又接点）不算。存档重放：es.tradingeconomics.com、rentechdigital.com 这类
+# 语言识别成西语 / 意大利语、数字却是英式的页面，没有这一条会被判成欧式，4.60% 读不了
+_EN_ONLY = re.compile(r"(?<![\d.,])\d{1,3}(?:,\d{3}){2,}(?![.,]?\d)|(?<![\d.,])\d{1,3}(?:,\d{3})+\.\d+(?![.,]?\d)"
+                      r"|(?<![\d.,])\d+\.(?:\d{1,2}|\d{4,})(?![\d.])")
+_NUM_EU = re.compile(r"(?<![\d.,])[-+]?(?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d+)?(?!\d)")
+_BAD_EU_DOT = re.compile(r"\d\.(?!\d{3}(?!\d))")            # 欧式页面上「.」后面不是正好三位数字：不是千分位
+# 混用页面上逐个数判：只有欧式才说得通的写法（1.234.567、1.234,5、0,24——逗号后面不是三位，英式里不成立）按欧式读；
+# 「点 + 正好三位」（212.563）两种读法都说得通，丢掉；其余照英式读（和以前一样）
+_EU_UNAMBIGUOUS = re.compile(r"\d\.\d{3}(?:\.\d{3})+(?!\d)|\d\.\d{3},\d|\d,(?!\d{3}(?!\d))\d")
+_DOT3 = re.compile(r"\d\.\d{3}(?!\d)")
+_COMMA3 = re.compile(r"\d,\d{3}(?!\d)")
+_DOT3_COMMA = re.compile(r"\d\.\d{3},\d")
+LANG_SAMPLE_CHARS = 20000
+
+
+def page_number_format(text_n: str, url: str = "") -> tuple:
+    """返回 (写法, 语言)：写法是 "en"（1,234.5，默认，读法和以前相同）、"eu"（1.234,5）或 "mixed"（两种无歧义写法都有）。
+    语言识别失败、库不在时按 "en"（和以前相同）。"""
+    sample = text_n[:LANG_SAMPLE_CHARS]
+    try:
+        import py3langid
+        lang = py3langid.classify(sample)[0] if sample.strip() else ""
+    except Exception:  # noqa: BLE001  识别不了就按原来的读法
+        return "en", ""
+    if lang not in EU_DOT_LANGS:
+        return "en", lang
+    host = (re.match(r"^[a-z]+://([^/:?#]+)", (url or "").lower()) or [None, ""])[1]
+    if lang == "es" and host.rsplit(".", 1)[-1] in EN_STYLE_SPANISH_TLDS:
+        return "en", lang
+    # 用点分千位的语言、页面上又有英式的无歧义写法（1,234,567）：可能是英文表格，也可能两种都有，212.563 分不清，算混用
+    if _EN_ONLY.search(text_n):
+        return "mixed", lang
+    return "eu", lang
+
+
+def to_en_style(s: str, fmt: str = "en") -> str:
+    """把写法里的数字换成 1,234.5 的写法（之后照原来的规则读）。fmt 是 page_number_format 的结果；"en" 原样返回。"""
+    if fmt == "eu":
+        if _BAD_EU_DOT.search(s):
+            raise ValueError("'.' on a European-format page must group thousands (212.563 = 212,563)")
+        # 「逗号 + 正好三位」（1,234）也可能是英式千分位：存档重放里 actuia.com（识别成西语）的「220,000 GPUs」会被读成 220，不猜
+        if _COMMA3.search(s) and not _DOT3_COMMA.search(s):
+            raise ValueError("',' + three digits on a European-format page could also be an English thousands separator")
+        return _NUM_EU.sub(lambda m: m.group().replace(".", "").replace(",", "."), s)
+    if fmt == "mixed":
+        if _EU_UNAMBIGUOUS.search(s):
+            return to_en_style(s, "eu")
+        if _DOT3.search(s):
+            raise ValueError("ambiguous separators: '.' + three digits on a page that uses both 1.234 and 1,234 styles")
+    return s
 ABBREVIATIONS = set(EN_ABBR)
 SCALE_WORDS = {*EN_SCALES, *EN_STACKED}
 HEADER_WINDOW_CHARS = 3000
@@ -339,7 +400,7 @@ def _tail_error(tail: str, consumed: bool) -> str:
     return ""
 
 
-def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
+def parse_value(value_as_written: str, scale_word: str = "", fmt: str = "en") -> tuple:
     """返回 (数值, 是否百分数)。数值 = 原文数字 x 倍数；只做这一次乘法。
     倍数可来自原文数字本身（"4.8 million"、"3409万"）或模型填的 scale_word；两者都有且不一致就报错。
     v2.6e：中日韩复合写法（519万548 = 5,190,548）是各段之和（_cjk_sum）；scale_word 里倍数字后面的单位先去掉
@@ -349,7 +410,8 @@ def parse_value(value_as_written: str, scale_word: str = "") -> tuple:
     $1.2-billion、缩写 bn / tn / mln / MM ...；confirm-only 记号（T、Q、京、경）要 scale_word 确认；认得出但读不了的
     倍数（septillion、millionth、Millionen、3 million billion、1千兆、垓）报错；复合词连写（3천억、1조 2천억）读成和；
     韩文一组之内的 N천M（22조 4천802억、7천478）先换成阿拉伯数字；货币符号前面的负号（-$1.2B、negative US$5.9 billion）算负数。"""
-    s = _kr_groups(norm(value_as_written))
+    # v2.17a：fmt = 所在页面的数字写法（page_number_format）；"eu" 页面上先把 1.234,5 换成 1,234.5，再照下面的规则读
+    s = to_en_style(_kr_groups(norm(value_as_written)), fmt)
     if _DOT_THOUSANDS.search(s):
         raise ValueError("ambiguous separators: '.' used as a thousands separator")
     if _MEGA_UNIT.search(s) or _MEGA_UNIT.match(norm(scale_word)):
@@ -598,12 +660,15 @@ def written_number(value_as_written: str, scale_word: str = "") -> str:
     return split_multiplier(value_as_written, "" if norm(scale_word).lower() in PERCENT else scale_word)[0]
 
 
-def read_reading(raw: dict, value_as_written: str, scale_word: str = "") -> tuple:
+def read_reading(raw: dict, value_as_written: str, scale_word: str = "", fmt: str = "en") -> tuple:
     """返回 (value, low, high, is_pct, reading)：value / low / high 已乘 scale_word 的倍数（区间时 value = 中点，没有区间时
     low = high = None）；reading 是抽取员读的数本身（不乘倍数），交给核对模型看。
-    原文写法上的两条旧检查照旧：欧式千分位（1.234.567）、「兆」后面紧跟 SI 单位（兆瓦）不猜，报错。"""
+    原文写法上的两条旧检查照旧：欧式千分位（1.234.567）、「兆」后面紧跟 SI 单位（兆瓦）不猜，报错。
+    v2.17a：fmt = 所在页面的数字写法；"eu" 页面上欧式千分位是正常写法，抽取员读的每个数必须等于代码按欧式读出的某个数
+    （写法里有阿拉伯数字时；1.200–1.500 读成 1.2..1.5 报错）。"""
     s, swn = norm(value_as_written), norm(scale_word).lower()
-    if _DOT_THOUSANDS.search(s):
+    s_en = to_en_style(s, fmt)
+    if _DOT_THOUSANDS.search(s_en):
         raise ValueError("ambiguous separators: '.' used as a thousands separator")
     if _MEGA_UNIT.search(s) or _MEGA_UNIT.match(swn):
         raise ValueError("ambiguous '兆' before an SI unit: 10^12 or mega-")
@@ -618,9 +683,25 @@ def read_reading(raw: dict, value_as_written: str, scale_word: str = "") -> tupl
         lo, hi = _reading_num(lo, "low"), _reading_num(hi, "high")
         if not lo < hi:
             raise ValueError("range low must be below high")
+        _eu_reading_matches(s_en, fmt, {"low": lo, "high": hi})
         return (lo + hi) / 2 * f, lo * f, hi * f, is_pct, {"low": lo, "high": hi}
     n = _reading_num(raw.get("number"), "number")
+    _eu_reading_matches(s_en, fmt, {"number": n})
     return n * f, None, None, is_pct, {"number": n}
+
+
+def _eu_reading_matches(s_en: str, fmt: str, reading: dict):
+    """v2.17a：欧式页面上，写法里有阿拉伯数字时，抽取员读的数必须等于代码读出的某个数（不乘倍数）。数之间夹着词的复合
+    写法（84 millones 176 mil 999 = 84,176,999）不比：读数本来就不等于其中任何一段，照旧交给核对模型。"""
+    if fmt != "eu":
+        return
+    toks = list(_NUM.finditer(s_en))
+    if any(re.search(r"[^\W\d_]", s_en[a.end():b.start()]) for a, b in zip(toks, toks[1:])):
+        return
+    nums = [abs(float(t.group().replace(",", ""))) for t in toks]   # 正负号可以写成词（minus 0,1）：只比绝对值
+    for k, v in reading.items():
+        if nums and not any(math.isclose(abs(v), x, rel_tol=1e-9, abs_tol=1e-12) for x in nums):
+            raise ValueError(f"{k} {v:g} does not match the number written on this European-format page")
 
 
 def _cjk_reads(quote_n: str, vw: str, cj: str):

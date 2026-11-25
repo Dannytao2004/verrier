@@ -63,7 +63,7 @@ def check_point(llm, qid: str, p: dict) -> dict:
             try:
                 if out is None:
                     raise ValueError(err or "no reply")
-                got = ev.read_reading(out, p.get("value_as_written", ""), p.get("scale_word", ""))
+                got = ev.read_reading(out, p.get("value_as_written", ""), p.get("scale_word", ""), _fmt(p))
             except ValueError as e:
                 rec["tries"].append({"reread_error": str(e)[:200]})
                 continue
@@ -75,10 +75,15 @@ def check_point(llm, qid: str, p: dict) -> dict:
         rec["tries"].append({"reading": reading, "match": ok})
         if ok:
             if k:
-                v, lo, hi, _, _ = ev.read_reading(reading, p.get("value_as_written", ""), p.get("scale_word", ""))
+                v, lo, hi, _, _ = ev.read_reading(reading, p.get("value_as_written", ""), p.get("scale_word", ""), _fmt(p))
                 rec.update(value=v, value_low=lo, value_high=hi)
             return {**rec, "status": "ok", "reading": reading}
     return {**rec, "status": "failed"}
+
+
+def _fmt(p: dict) -> str:
+    """v2.17a：点所在页面的数字写法（pipeline.verify_point 记的 number_format；英式页面的点没有这个键）。"""
+    return (p.get("number_format") or {}).get("format", "en")
 
 
 def _apply(p: dict, rec: dict):
