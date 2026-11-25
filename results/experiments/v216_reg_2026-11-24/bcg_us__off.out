@@ -1,0 +1,19 @@
+[bcg_us_2026] plan: 8 directions -> approved=True
+[bcg_us_2026] done in 869.0s; estimate 9,106; usd 1.4912
+The best computed estimate is 9,106 person (80% model-based interval 5,720 to 14,497 person) for total BCG US headcount (all staff levels) as a stock during 2026. The estimate combines two blocks: a Revelio-based top-down route (m1 9,469, weight 25%; scope-corrected variant m2 7,530, weight 25%) and an independent route multiplying BCG's disclosed global headcount (33,500 person) by an assumed US share (m3 9,820, weight 50%). The only observed inputs are 11,429 person for North America and 33,500 person globally; the US share of North America (0.85), the Revelio-to-BCG scope factor (0.8), and the US share of global headcount (0.3) are analyst assumptions. The two blocks were combined because they bracket the answer from different directions, not because they are independent. The largest risk is the assumed US share of global headcount, since BCG does not disclose US headcount. The most useful missing evidence would be an official US or North America headcount disclosure.
+
+Unit of the estimate: person (total for 2026-01-01 to 2026-12-31).
+
+Key assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):
+- a1 US share of BCG North America workforce: 0.85 [n], range 0.5874 to 1.175 (range widened by code); used by m1, m2. Overturned by: Evidence that BCG Canada/Mexico together exceed ~[n] of North America headcount.
+- a2 Revelio-to-BCG scope adjustment factor: 0.8 [n], range 0.5612 to 1.122 (range widened by code); used by m2. Overturned by: Evidence that Revelio's overcount is concentrated in non-US regions (e.g., India), which would make the US adjustment factor closer to [n].
+- a3 US share of BCG global headcount: 0.3 [n], range 0.2078 to 0.4157 (range widened by code); used by m3. Overturned by: A disclosed BCG US headcount or US revenue share materially outside [n]-[n] of global.
+
+Method details (computed by code):
+- m1 formula_mc: p32 * a1; Monte Carlo P10 to P90 6,392 to 14,093; result unit person converted to person; own 80% width x/÷1.48 (Monte Carlo of the formula inputs)
+- m2 formula_mc: p32 * a1 * a2; Monte Carlo P10 to P90 4,454 to 12,808; result unit person converted to person; own 80% width x/÷1.70 (Monte Carlo of the formula inputs)
+- m3 formula_mc: p12 * a3; Monte Carlo P10 to P90 6,628 to 14,511; result unit person converted to person; own 80% width x/÷1.48 (Monte Carlo of the formula inputs)
+- Combination: 2 block(s), equal weight per block (methods whose inputs overlap by at least half form one block; backtest errors set widths, not weights): B1 = m1 + m2, geometric mean of methods sharing a1, p32: 8,444 (width x/÷1.70, Monte Carlo of the formula inputs); B2 = m3: 9,820 (width x/÷1.48, Monte Carlo of the formula inputs). Estimate = the geometric mean of the two blocks.
+- Interval: root mean square of the block widths x/÷1.59; Birge ratio 0.29 (not above one, so no widening); final width x/÷1.59.
+
+--- stderr ---
