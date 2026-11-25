@@ -98,11 +98,11 @@ qty 的自然语言解析（约 500 行）不断冒出边角问题。现在的�
 
 | 阶段 | tag | 内容 | G2（prompt sha256） | 状态（2026-10-17 下午） |
 |---|---|---|---|---|
-| U0 | `v2.7a` | `agent/qty.py` 和单元测试；requirements.txt 加 pint。不接入任何流程 | 不变 | 完成 `v2.7a`（`ed95ee8`）；G2 仍是 `bbcfa3b1…` |
-| U1 | `v2.7b` | 规划钉死单位（prompt、代码检查、重问一次、plan note） | 变，登记 | 完成 `v2.7b`（`26eac2c`） |
-| U2 | `v2.7c` | formula_mc 量纲检查和单位换算、百分数守卫、常数单位、AUDIT 加单位一项、JUDGE / METHODS_SPEC 的说明和回复示例 | 变 | 完成 `v2.7c`（`310a8a5`），按文首「2026-10-17 修订」的简单版：方法声明结果单位，代码换算 |
-| U3 | `v2.7d` | 方法层覆盖范围（coverage、合并排除、修正提示、sum 的假设上限、AUDIT 加覆盖一项） | 变 | 完成 `v2.7d`（`c44fa74`）；sum 的假设上限 8 不变，每次运行的假设 id 在 `v2.8d` 放到 a1..a12（BUGS.md S1） |
-| U4 | `v2.7e` | 显示单位（终稿 `[[unit]]`、控制台、经典界面、ledger、graph.html、results JSON） | 变 | 完成 `v2.7e`（`f1ac7b0`）；终稿重复单位在 `v2.8d` 改了 prompt（BUGS.md S4） |
+| U0 | `v2.7a` | `agent/qty.py` 和单元测试；requirements.txt 加 pint。不接入任何流程 | 不变 | 完成 `v2.7a`（`bfa8825`）；G2 仍是 `bbcfa3b1…` |
+| U1 | `v2.7b` | 规划钉死单位（prompt、代码检查、重问一次、plan note） | 变，登记 | 完成 `v2.7b`（`e60e921`） |
+| U2 | `v2.7c` | formula_mc 量纲检查和单位换算、百分数守卫、常数单位、AUDIT 加单位一项、JUDGE / METHODS_SPEC 的说明和回复示例 | 变 | 完成 `v2.7c`（`5df9238`），按文首「2026-10-17 修订」的简单版：方法声明结果单位，代码换算 |
+| U3 | `v2.7d` | 方法层覆盖范围（coverage、合并排除、修正提示、sum 的假设上限、AUDIT 加覆盖一项） | 变 | 完成 `v2.7d`（`5fad7fb`）；sum 的假设上限 8 不变，每次运行的假设 id 在 `v2.8d` 放到 a1..a12（BUGS.md S1） |
+| U4 | `v2.7e` | 显示单位（终稿 `[[unit]]`、控制台、经典界面、ledger、graph.html、results JSON） | 变 | 完成 `v2.7e`（`b81384f`）；终稿重复单位在 `v2.8d` 改了 prompt（BUGS.md S4） |
 
 状态的写法：「完成 `tag`」= 过了 G1–G8 并打了 tag；「受阻」= 停在审查，没提交；「未开始」。
 
@@ -121,7 +121,7 @@ U0–U4 都已提交（见上表）。第一次真实运行是冻结前的冒烟
 
 **完成 1 个阶段（U0 = `v2.7a`），U1 受阻，U2–U4 未开始。** `v2.7b`–`v2.7e` 都不存在。
 
-**U0 / `v2.7a`（`ed95ee8`，完成）**：新模块 `triangulate/agent/qty.py`、`tests/test_qty.py`（28 条），requirements.txt 加 `pint==0.26.1` 和它的依赖
+**U0 / `v2.7a`（`bfa8825`，完成）**：新模块 `triangulate/agent/qty.py`、`tests/test_qty.py`（28 条），requirements.txt 加 `pint==0.26.1` 和它的依赖
 `flexcache==0.3`、`flexparser==0.4`、`platformdirs==4.13.3`。没有接入任何流程：在 `v2.7a` 上没有一处 import `qty`，**agent 的行为和 web-v0.5 相同**
 （披萨题现在重跑，终稿仍然没有单位、m1 的 11 % 仍然不除以 100、m3 仍然和全量路线等权平均）。
 第三轮审查退回的第 1、3 条在提交前改了（第 2 条是 U0.md 的措辞，只在 BUGS.md Q2 写全）：`/` 后面的连字符基数（`USD/1000-person`、`USD/1-person`、`birth/1000-person`）现在报

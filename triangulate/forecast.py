@@ -118,7 +118,7 @@ QUESTIONS += [
 ]
 for _q in QUESTIONS[2:]:
     _q.update(answer_unit="", strict=False)
-# 留出测试 2（2026-10-18 选定，代码冻结在 frozen-v2.8r = 616271c，在任何模型调用之前提交；见 EVAL_TEST2_PLAN.md）。
+# 留出测试 2（2026-10-18 选定，代码冻结在 frozen-v2.8r = c64d3a3，在任何模型调用之前提交；见 EVAL_TEST2_PLAN.md）。
 # 选题标准同上（公布日 2026-09-11..10-17、as_of = 公布日前约 30 天、领域不和前 11 题重复），数值和公布日都由一个找题、
 # 一个复查的 agent 打开官方发布页核过。answer_unit 按题给（基线臂的量纲检查用；计数题留空，等于无量纲计数）。
 # leak_values = 真值 + 同一序列里公布日晚于 as_of 的已知官方值。

@@ -1,6 +1,6 @@
 """v2.10a：provider adapter 层（目前只有 DeepSeek）和每次运行的 ModelSpec。全部离线：假 urlopen、假 key，不读 key 文件。
 
-- 没有 ModelSpec 的默认路径（命令行、回测、基线）：请求（URL、请求头、请求体字节）和 calls.jsonl 行与 HEAD b01734d 逐字节相同
+- 没有 ModelSpec 的默认路径（命令行、回测、基线）：请求（URL、请求头、请求体字节）和 calls.jsonl 行与 HEAD f7b091b 逐字节相同
   （tests/golden/deepseek_requests_head.json），有意的差别是 402 现在抛 BalanceExhausted，以及 v2.11c 起成功的搜索的返回值多一个
   candidates（CANDIDATES 里的 4 个 case；请求、日志不变）；
 - 有 ModelSpec 的 DeepSeek 运行：请求体和默认路径相同，只是 key / 模型 / 思考档位按 spec；

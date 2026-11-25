@@ -1,6 +1,6 @@
 """补充运行（不在预注册里，不进成功标准）：arm (3) 联网直接答，只把 max_tokens 从 4096 提到 32000，其他不变。
 
-起因：正式运行（results/forecast/raw/search_direct/，提交 428ba24）两题都在第 1 次调用里搜了 6 次后撞上 max_tokens=4096，
+起因：正式运行（results/forecast/raw/search_direct/，提交 7569da7）两题都在第 1 次调用里搜了 6 次后撞上 max_tokens=4096，
 没有最后的文字；4096 是实现时定的，预注册没有规定。每题只跑一次，结果不论好坏都报告。已有保存的记录就跳过。
 用法：TRIANGULATE_KEY_FILE=<key 文件> .venv/Scripts/python.exe probes/search_direct_supp.py
 """

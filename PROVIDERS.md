@@ -165,7 +165,7 @@ agent 里 `AgentLLM.ask` 和 `run_direction` 的搜索把它变成 `Budget.halt(
 
 - 金样本：`tests/golden_deepseek.py` 的 `capture()` 用假 urlopen 跑 24 组固定输入（json_call 的各种回复和错误、思考开关、AgentLLM.ask 带错误重问、
   Searcher、基线 DirectClient），记 URL、请求头、请求体、超时、calls.jsonl 行（at / latency 换成占位符）和返回值。
-  `tests/golden/deepseek_requests_head.json` 是在 HEAD `b01734d` 的导出上生成的（`git archive b01734d triangulate | tar -x -C probes/out/_old_v2_9b`，
+  `tests/golden/deepseek_requests_head.json` 是在 HEAD `f7b091b` 的导出上生成的（`git archive f7b091b triangulate | tar -x -C probes/out/_old_v2_9b`，
   再 `python tests/golden_deepseek.py probes/out/_old_v2_9b tests/golden/deepseek_requests_head.json`），重生成逐字节相同。
   `tests/test_providers.py` 在新代码上逐字节比较：24 组的请求和日志全部相同；只有 `json_402`、`search_402` 两组的返回值有意不同（改成抛 `BalanceExhausted`）。
   变异检查：只调换请求体两个键的顺序、或改一个请求头的一个字符，测试都失败。

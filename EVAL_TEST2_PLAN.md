@@ -10,7 +10,7 @@
 
 ## 代码
 
-- **冻结的代码：tag `frozen-v2.8r` = `v2.8r` = `616271c`。** agent 代码（`triangulate/agent/`）在它之后没有改动。
+- **冻结的代码：tag `frozen-v2.8r` = `v2.8r` = `c64d3a3`。** agent 代码（`triangulate/agent/`）在它之后没有改动。
 - 本提交只往题库 `triangulate/forecast.py` 加了 8 道题（数据），并加了本文件。
 
 ## 题目（`set: "test2"`）
