@@ -30,3 +30,11 @@
 {"at": "2026-11-25T04:53:42+00:00", "event": "end", "run": "fc_pola_teu_2026_09 off", "exit": 0, "wall_s": 645.2}
 {"at": "2026-11-25T04:56:48+00:00", "event": "end", "run": "fc_es_transit_2026_08 off", "exit": 0, "wall_s": 831.2}
 {"at": "2026-11-25T04:56:48+00:00", "event": "group_end", "group": 4}
+{"at": "2026-11-25T04:58:08+00:00", "event": "group_start", "group": 5, "runs": ["fc_ca_rail_2026_07 off", "fc_hk_visitors_2026_09 off", "fc_kr_online_2026_08 off"], "code": "v2.17a-6-g909cdec"}
+{"at": "2026-11-25T04:58:08+00:00", "event": "start", "run": "fc_ca_rail_2026_07 off"}
+{"at": "2026-11-25T04:58:08+00:00", "event": "start", "run": "fc_hk_visitors_2026_09 off"}
+{"at": "2026-11-25T04:58:08+00:00", "event": "start", "run": "fc_kr_online_2026_08 off"}
+{"at": "2026-11-25T05:07:59+00:00", "event": "end", "run": "fc_ca_rail_2026_07 off", "exit": 0, "wall_s": 590.3}
+{"at": "2026-11-25T05:10:18+00:00", "event": "end", "run": "fc_kr_online_2026_08 off", "exit": 0, "wall_s": 729.4}
+{"at": "2026-11-25T05:10:57+00:00", "event": "end", "run": "fc_hk_visitors_2026_09 off", "exit": 0, "wall_s": 768.5}
+{"at": "2026-11-25T05:10:57+00:00", "event": "group_end", "group": 5}
