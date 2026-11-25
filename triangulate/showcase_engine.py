@@ -1,4 +1,4 @@
-# showcase1 打分专用的冻结 engine：commit d79db02 的 triangulate/engine.py 逐字拷贝（只加了这两行注释）。
+# showcase1 打分专用的冻结 engine：commit f1ac7b0 的 triangulate/engine.py 逐字拷贝（只加了这两行注释）。
 # 预注册展示集（results/showcase/summary.json）每次打分都用它重算结构化臂；不要改，engine.py 的修改不进这里。
 """structured arm 的计算端：校验模型给的结构 -> 单位换算 -> Monte Carlo -> 聚合 -> 敏感度 -> world model 状态。
 

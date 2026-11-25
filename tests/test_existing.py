@@ -1,6 +1,6 @@
 """v2.11f 现成数据前置步骤（existing.py）。全部离线：假模型、假搜索、假网页（复用 test_live 的 UK 新车注册题）。
 - 只在真实使用、有人确认、连续值目标、目标期末 <= as_of 时跑；回测、--auto-approve、消融、离散、未来期间不发任何调用；
-- 回测和 --auto-approve 的路径和 HEAD（b421318）逐字节相同（test_live.live_graph 的调用和 state 的 sha256，改前算好写死）；
+- 回测和 --auto-approve 的路径和 HEAD（0766ca8）逐字节相同（test_live.live_graph 的调用和 state 的 sha256，改前算好写死）；
 - 候选在同一个人工确认里；选用 -> 不跑路线、终稿由代码写；排除 -> 原流程里同值、期间重叠的点丢掉并写进终稿；没找到 -> 和今天相同。"""
 import hashlib
 import json
@@ -30,9 +30,9 @@ PRE = {"https://smmt.example.co.uk/official": [(TL.TOTAL, 350518, "2026-09-01", 
                                                ("UK new car registrations, September 2025", 312891, "2025-09-01", "2025-09-30")],
        "https://analyst.example.org/est": [(CONSENSUS, 345000, "2026-09-01", "2026-09-30")]}
 PRE_ROLES = ("existing:search", "extract:existing", "existing:published", "existing:check")
-# HEAD b421318（改前）上 test_live.live_graph 三条路径的 sha256：排序后的 (role, user) 加 state 的这些键（probes/out/v211f/head_sha.py）
+# HEAD 0766ca8（改前）上 test_live.live_graph 三条路径的 sha256：排序后的 (role, user) 加 state 的这些键（probes/out/v211f/head_sha.py）
 # v2.12 重新登记：假裁判改用 series_auto、新闻页多两个 8 月的点、合并规则和终稿的方法细节都变了（existing 步骤本身没改）。
-# b421318 上的值是 live_auto fcf8a78c…、backtest 3b62e930…、live_early_stop cf1767ee…
+# 0766ca8 上的值是 live_auto fcf8a78c…、backtest 3b62e930…、live_early_stop cf1767ee…
 # v2.12d（审查修正）又登记一次：series_auto 的结果多了 seasonal_baseline、window_month_ids、yoy 的 base_value，对照多了点 id，
 # 终稿和终稿 prompt 的方法细节多写了同比对的值、逐月的点和校准表 id；数字、existing 步骤都没变（逐键比较：probes/out/v212d_existing_sha_diff.txt，只在本机）。
 # v2.12c 工作区上的值是 live_auto 95447ed8…、backtest d706917c…；live_early_stop 没有方法，不变

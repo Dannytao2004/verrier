@@ -16,7 +16,7 @@ from triangulate.report import _clean
 
 ROOT = Path(__file__).resolve().parents[1]
 SAVED = sorted((ROOT / "results" / "forecast" / "raw" / "structured").glob("*.json"))
-FROZEN_AT = "d79db02"   # showcase1 打分时的 engine.py
+FROZEN_AT = "f1ac7b0"   # showcase1 打分时的 engine.py
 
 
 def _inp(name, lo, hi, unit="", value=None):

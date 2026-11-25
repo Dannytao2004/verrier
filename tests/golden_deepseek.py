@@ -2,9 +2,9 @@
 
 capture() 用假 urlopen 跑一组固定输入（json_call、AgentLLM.ask、Searcher.search、基线的 DirectClient.call），记下
 每个请求的 URL、方法、请求头、请求体字节、超时，每行日志（只把 at / latency_s 换成占位符），以及返回值或异常。
-不联网、不读 key 文件（read_key 换成假 key）。tests/golden/deepseek_requests_head.json 是在 HEAD 6eee720（v2.9b）
+不联网、不读 key 文件（read_key 换成假 key）。tests/golden/deepseek_requests_head.json 是在 HEAD b01734d（v2.9b）
 的导出上跑出来的：
-  git archive 6eee720 triangulate | tar -x -C probes/out/_old_v2_9b
+  git archive b01734d triangulate | tar -x -C probes/out/_old_v2_9b
   .venv/Scripts/python.exe tests/golden_deepseek.py probes/out/_old_v2_9b tests/golden/deepseek_requests_head.json
 tests/test_provider_golden.py 在现在的代码上再跑一次 capture()，和这份文件逐字节比较。
 v2.13d：DeepSeek 的裁判 / 修正 / 抽取默认上限放宽（providers.DEEPSEEK_MAX_TOKENS）以后，这份文件里只有 json_extract_off_while_thinking

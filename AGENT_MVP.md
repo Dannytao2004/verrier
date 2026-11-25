@@ -156,7 +156,7 @@ URL 数按「每方向 5 个名额」计；同一个 URL 被几个方向重复�
 - 加权：没回测的方法取有回测方法权重的中位数（不打折），全都没回测就等权；每个方法的权重依据记在 `weight_basis`。
 - 消融 `--ablate-own-history`（`agent/ablation.py`）：不跑 own_history 方向；名字里有目标实体锚词（这里是 yellowstone）且名字或单位有目标单位词干（recre、visit）的点、以及 own_history 方向的点，不进裁判的表格；只允许 formula_mc。
 - 输出：state.json 的 `assumptions`（保留 / 拒绝及原因），账本的 Assumptions 一节，graph.html 里橙色菱形的假设节点，最终答案末尾代码生成的「Key assumptions」。
-- 运行中发现并修了一个 bug（`6455757`）：被 max_tokens 截断的回复先被当成 JSON 解析，所以总报「不是合法 JSON」，截断分支永远走不到，重试也没要求写短。8 月完整那次因此失败，修好后按预注册第 6 节重跑；第一次的记录在 `results/agent/fc_yell_2026_08/v2/run1_judge_truncated/`。
+- 运行中发现并修了一个 bug（`157f093`）：被 max_tokens 截断的回复先被当成 JSON 解析，所以总报「不是合法 JSON」，截断分支永远走不到，重试也没要求写短。8 月完整那次因此失败，修好后按预注册第 6 节重跑；第一次的记录在 `results/agent/fc_yell_2026_08/v2/run1_judge_truncated/`。
 
 ### 结果
 

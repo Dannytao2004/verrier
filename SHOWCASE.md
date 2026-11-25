@@ -1,12 +1,12 @@
 # SHOWCASE：展示集结果（showcase1，中期）
 
-预注册：`EVAL_SHOWCASE_PLAN.md`（tag `showcase-prereg`，442a12f）。运行日期 2026-10-16（UTC）。机读汇总：`results/showcase/summary.json`
+预注册：`EVAL_SHOWCASE_PLAN.md`（tag `showcase-prereg`，f69d15f）。运行日期 2026-10-16（UTC）。机读汇总：`results/showcase/summary.json`
 （`.venv/Scripts/python.exe -m triangulate showcase` 离线重建）。网页：回测页（`#/backtests`）的「展示集」一节。
 
 - agent：代码与 `showcase-prereg` 相同（`git diff showcase-prereg HEAD -- triangulate/agent` 为空，即 v2.5.2），`--auto-approve`，tag `showcase1`，
   每题一次。已公布题是回测模式（只用日期 <= as_of 的 Wayback 快照），未公布题是真实使用（as_of = 2026-10-16，直接抓 live 页）。
 - (1) 直接问、(2) 不联网结构化：`python -m triangulate forecast`，prompt 没改，09:05–09:06 UTC，每题一次。
-- (3) 联网直接答：代码 3d57649（tag `showcase-arm3`），只跑 2 道未公布题，09:05–09:06 UTC。
+- (3) 联网直接答：代码 7caa325（tag `showcase-arm3`），只跑 2 道未公布题，09:05–09:06 UTC。
 - (4) 预测市场：agent 自带的市场工具（Polymarket Gamma public-search）的结果。
 - 「去年同月」不是对照，下面不列（数据仍在 `forecast.py` 和 `results/` 的文件里）。
 
@@ -100,9 +100,9 @@
 - **预注册运行（正式结果）**：两题都**没有估计**。第 1 次调用搜了 6 次（max_uses 写的是 5，服务端计了 6 次），累计输出约 6,900 token 后
   `stop_reason = max_tokens`，最后一个工具块之后没有文字。`max_tokens = 4096` 是写代码时定的，预注册没有规定这个参数，是实现上的失误。
   按预注册重试一次（不带工具）：两题的模型都没给 JSON，而是把一次 web_search 调用写成了文本（`<｜｜DSML｜｜ calls>…`）。记录：
-  `results/forecast/raw/search_direct/`（提交 0bc9c4b）。
+  `results/forecast/raw/search_direct/`（提交 428ba24）。
 - **补充运行（不在预注册里，不进成功标准）**：只把 `max_tokens` 提到 32000，别的都不变，每题一次（`probes/search_direct_supp.py`，代码
-  447c66a，09:08–09:10 UTC，结果在正式结果提交之后单独提交 b31f922）。两题第一次就给出了数：JNTO 3,050,000、韩国 23,300（各搜 6 次）。
+  b7f07c2，09:08–09:10 UTC，结果在正式结果提交之后单独提交 72ddf2d）。两题第一次就给出了数：JNTO 3,050,000、韩国 23,300（各搜 6 次）。
   这一步**违反了预注册「不为改善结果重跑」的字面规则**。做它是因为：正式结果在这一 arm 上没有信息量；未公布题只有公布前、同一个 as_of
   跑才有意义。公布后补充运行的结果照样报告，不论好坏。不想要它，删掉这一列即可，正式比较不受影响。
 
