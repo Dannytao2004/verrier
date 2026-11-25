@@ -110,9 +110,13 @@ def main():
                      f"{x['gate']} {x['gate_checks']} | {f(x['gate_ratio'], 2)} | {x['n_repairs']} | {len(x['pct_rejections'])} | "
                      f"{', '.join(x['restored']) or '—'} | {x['braces_inserted'] or '—'} | "
                      f"{x['n_points']} / {x['n_pages']} / {x['pages_at_15']} | {f(x['judge_prompt_tokens_max'])} | {f(x['usd'], 2)} |")
+    # 执行方式（PLAN.md）：最多 5 组 = 15 次，排在最后的没跑（status missing）。汇总只算跑了的回归题，v2.11g 取同样这些题
+    skipped = [x["run"] for x in reg if x.get("status") == "missing"]
+    reg = [x for x in reg if x.get("status") != "missing"]
     n_ok = sum(1 for x in reg if x.get("status") == "ok")
     old_ids = [x["dir"].split("/")[0] for x in reg]
-    lines += ["", f"- 回归 14 题出数 {n_ok}/14（v2.11g：{sum(1 for q in old_ids if OLD[q].get('estimate'))}/14）；"
+    lines += ["", f"- 按执行方式没跑：{skipped}；下面只算跑了的 {len(reg)} 道回归题（v2.11g 取同样的题）",
+              f"- 回归题出数 {n_ok}/{len(reg)}（v2.11g：{sum(1 for q in old_ids if OLD[q].get('estimate'))}/{len(reg)}）；"
               f"中位绝对误差 {pc(agg(reg, 'err'))}（v2.11g {pc(med([abs(OLD[q]['pct_err']) if OLD[q].get('pct_err') is not None else math.inf for q in old_ids]))}，没出数记 inf）；"
               f"±10% 内 {sum(1 for x in reg if x.get('err') is not None and abs(x['err']) <= .1)}（v2.11g {sum(1 for q in old_ids if OLD[q].get('pct_err') is not None and abs(OLD[q]['pct_err']) <= .1)}）；"
               f"区间盖住 {sum(1 for x in reg if x.get('covered'))}/{sum(1 for x in reg if x.get('covered') is not None)}",
