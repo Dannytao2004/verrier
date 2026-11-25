@@ -1,102 +1,137 @@
-# triangulate-agent
+# Verrier
 
-A backtest **probe** for a triangulation / estimation agent. The LLM only proposes structure; Python does every number.
+**Estimates official numbers before they are published, from public data. The model proposes the reasoning; Python computes every number; every input traces back to a quoted source.**
 
-- The model proposes three estimation paths per question (top-down, bottom-up, proxy). Each path is a formula over named inputs. Each input has a value, unit, 80% range (low/high) and provenance (`sourced` with a source and quote, or `assumption` with a rationale).
-- Python parses the formulas with a whitelist evaluator (no `eval`), converts units with an explicit unit table, propagates uncertainty by Monte Carlo (lognormal inputs, fixed seed), aggregates paths by the median of path medians, reports an 80% interval, and flags paths more than one order of magnitude from the aggregate.
-- Every question gets a world-model state JSON and a dependency graph (target, paths, inputs). Node colour shows status, input node size shows sensitivity.
-- The probe compares this structured arm with a naive arm (the model gives one number) on 20 realFP Fermi questions. The pre-registered plan is in `PROBE_PLAN.md`; results, in Chinese, are in `PROBE.md`.
+Ask *"How many babies were born in South Korea in July 2026?"* a month before the statistics office publishes the figure. Verrier pins down exactly what is being asked, sends search agents out in several directions, and extracts each number together with its unit, period and the sentence it came from. A judge model then writes independent estimation routes as formulas over those numbers. Code checks every route, runs it, and combines the routes into an estimate with an 80% interval. The final text is written around placeholders that code fills in, so every number in the answer comes from the computation.
 
-The probe (`select`, `run`, `demo`, `report`, `forecast`) uses the standard library only (Python 3.12+).
-The research agent (`agent`, see `AGENT_MVP.md`) needs `langgraph` and `trafilatura`: create `.venv` with
-`py -3.14 -m venv .venv` and `.venv/Scripts/python.exe -m pip install -r requirements.txt`.
+Named after Urbain Le Verrier, who in 1846 worked out where Neptune had to be before anyone had seen it.
 
-## Commands
+## Example
 
-```
-python -m triangulate select      # pick the 20 questions from data/raw (see DATA.md to download)
-python -m triangulate run         # both arms on the 20 questions, then the report
-python -m triangulate demo        # structured arm on the finance demo question, then the report
-python -m triangulate report      # offline: rebuild states, graphs and tables from saved replies
-python -m unittest                # tests: evaluator, Monte Carlo aggregation, graph sensitivity, units, agent code
-.venv/Scripts/python.exe -m triangulate agent --ask "How many ... in ...?"        # research agent on any question (as_of = today)
-.venv/Scripts/python.exe -m triangulate agent --ask "..." --as-of 2026-08-15      # same, standing on an earlier date (backtest mode)
-.venv/Scripts/python.exe -m triangulate agent --auto-approve --tag post_review    # backtest on the two forecast questions
-.venv/Scripts/python.exe -m triangulate agent --auto-approve --tag v2 --ablate-own-history  # ablation: no own history (tag v2_noown)
-.venv/Scripts/python.exe -m triangulate agent-score [--tag post_review]           # offline: score saved backtest runs
-.venv/Scripts/python.exe probes/recompute_saved_runs.py                           # offline: saved runs under the current compute code
-.venv/Scripts/python.exe probes/recheck_continuous.py                             # offline: the 7 dev/test runs recompute to the saved estimates
-.venv/Scripts/python.exe probes/plan_only.py <out_dir>                            # plan node only for the 7 dev/test questions (outcome_type check)
-.venv/Scripts/python.exe probes/replay_judge_outcomes.py                          # offline: saved FOMC judge evidence through the v2.3 outcome-list checks
+```sh
+python -m triangulate agent --question fc_kr_births_2026_07 --auto-approve
 ```
 
-## Showcase (2026-10-16, interim)
+The run stands on 2026-08-23. Statistics Korea published the figure on 2026-09-23. Output, from a real run on v2.16e (`results/agent/fc_kr_births_2026_07/v216_reg/`):
 
-Four pre-registered questions (`EVAL_SHOWCASE_PLAN.md`, tag `showcase-prereg`): two already published (backtest) and two not yet published (live). Arms: the agent, naive, no-retrieval structured, and (unpublished questions only) DeepSeek with server-side web search answering directly (`triangulate/search_direct.py`, `python -m triangulate forecast --search-direct`). `python -m triangulate showcase` rebuilds `results/showcase/summary.json` offline. Results, failures and deviations from the plan: `SHOWCASE.md` (in Chinese).
+```text
+The best computed estimate for live births occurring in South Korea during July 2026, as first published in
+Statistics Korea's monthly Population Trends release, is 24,625 person (80% model-based interval 17,875 to
+33,925 person).
 
-## Discrete targets (v2.2; outcome lists from the judge since v2.3)
+Evidence: the observed anchor is July 2025 births of 21,803 live births. Two YoY-scaling routes apply growth
+factors of 1.12 (range 1.006 to 1.257) and 1.13 (range 1.015 to 1.269), giving 24,518 person and 24,733 person.
+Both factors are analyst assumptions, not observations, and both routes share the same KOSTAT monthly source,
+so they are not independent. ...
 
-Some targets can only take one of a few values (a policy rate after one meeting, an election winner, a yes/no event); an expected value such as 4.11% would be an impossible answer. The plan marks such a target `outcome_type: "discrete"` with an optional `outcome_kind` hint (for example "policy rate in fixed steps") and does not list outcomes. Since v2.3 the judge defines the outcome list in its first round, after the evidence is in: `outcomes` (2-6 mutually exclusive `{label, value}`; for numbers the lowest carries `le` and the highest `ge`, two merged tails that make the list exhaustive) and `outcomes_basis` (the kept point ids it relies on). Code checks the list (unique labels, 2-6, the two tails, whose labels must say "or lower" / "or higher" since v2.3.1, every basis id a kept point) and sends a failing list back in the repair round; later rounds reuse it, and the judge may revise it once with a reason (`state.json` -> `outcomes`). The judge then has one method, `outcome_probs`: each outcome's probability references a kept data point (market-implied or published probabilities preferred) or an assumption, one outcome may take the remainder, and an outcome with no input gets probability 0 (listed in the method's notes). Code converts percentages to fractions, checks each probability is in [0, 1], checks the sum (others <= 1.02 with a remainder; [0.9, 1.1] without, then normalised), pools several methods by an equal-weight linear average, and reports every outcome's probability and the most likely outcome (`central` = its value when numeric; no interval). The input audit (one row per probability input) and the judge repair round apply. Since v2.2.1: every method needs at least one kept data point; one id gives the probability of one outcome only; a data point used as a probability must be named as one (probability, odds, chance or likelihood in its name or unit), and percentage-point or basis-point changes are rejected; two methods whose distributions differ by a total variation distance above 0.5 go back to the judge; the input audit also checks the remainder outcome; a scored (backtest) question stays continuous unless it is marked `outcome_type: "discrete"`; scoring maps a true value beyond a merged tail ("X or lower") to that tail. Code: `triangulate/agent/discrete.py`.
-
-Optional Jev arm (`triangulate/agent/jev.py`): when `TYPESAFE_KEY_FILE` names a file with a line `TYPESAFE_API_KEY=...`, code writes a plain evidence brief from the kept points and asks TypeSafe's Jev once (official endpoint `https://api.typesafe.ai/v1/systemone`, one choice question). Its distribution is stored as a separate arm (`state.json` → `jev`), shown beside the agent's in the ledger, `graph.html` and the web result page, and never pooled into the agent's answer. Without the variable the arm is recorded as `not_configured`. Jev tokens are logged with an estimated cost at the listed price ($0.042 per million input tokens, output free; docs.typesafe.ai/models, checked 2026-10-15).
-
-Status (2026-10-15): five live runs of the FOMC question (`results/agent/ask_0e2d5021/discrete1`, `2`, `4`, `5`, `6`) found the right evidence (current upper bound 4.00%; CME FedWatch readings on pages dated 2026-10-14, which conflict: hold 56.3% and 25bp hike 43.7% from two sources, 25bp hike 53.7% from CNBC) but ended without an estimate. discrete5: the outcome list, fixed at planning time before any search, did not contain the current rate (hence v2.3). discrete6 (v2.3): the judge's first reply in each round left out the outcome list, and each repaired list cited basis ids that the round's first reply had discarded (the repair prompt did not say which ids were discarded), so code rejected both. v2.3.1 (offline fixes, no live run yet) names the discarded ids in the repair prompt, rewrites the method notes after an accepted revision, requires tail labels to say "or lower" / "or higher", and gives the Jev arm the tail meaning. Causes and open problems are in `NEXT.md`. The Jev arm has only been tested offline.
-
-The DeepSeek key is read at run time from the file in `TRIANGULATE_KEY_FILE` (default `./.env`, git-ignored). The file must contain one line `DEEPSEEK_API_KEY=...`. The key is never printed or logged.
-
-`run` and `demo` skip questions that already have saved replies. Use `--force` to call the model again (this costs money and changes results).
-
-## Already-published targets (v2.4, live use only)
-
-When the agent runs on today's date and the question has no registered official value, a kept data point may already be the target value (same entity, measure and period, published on or before as_of). Code proposes candidates (kept points whose period matches the target period, whose name contains one of the target's entity words and shares a stem with the target's measure, with the same % / non-% unit, that are not named as a forecast, probability or change, and, since v2.4.1, whose page date (for a snapshot, the capture date) and stated publication date are not before the end of the target period and whose quote does not call the number a forecast or expectation in the clause that holds it). The entity test is only a coarse filter: entity words are the capitalised names and acronyms in the target's description, without a leading measure name ("Real GDP of France" gives only "france") and without the publisher's name or acronym from outside the first clause ("as reported by SMMT"); other entities can still pass (for example when the measure is an acronym elsewhere in the description, or when no entity word is found, which the check notes as "no entity constraint"), and only the model check rejects them. One model call marks each candidate `target` or `different` and writes no numbers. If the confirmed values agree (within 0.5%), the result is that value, marked `published` with its source and date (`state.json` -> `published`; `compute.result.basis = "published"`); the estimation methods are still computed and listed for reference (`compute.estimate_result`) but not blended, and code writes the final answer. A discrete target whose published value falls in one of the judge's outcomes is reported as resolved. Confirmed values that disagree are reported as a conflict next to the estimate. Backtests never run the check (the target is published after as_of there); the 7 dev/test runs recompute identically and the continuous-path prompt hash is unchanged. Code: `triangulate/agent/published.py`.
-
-Live check (2026-10-16, `results/agent/ask_a63174a0/published1`): "How many new cars were registered in the UK in September 2026, as reported by SMMT?" was reported as published, 350,536 (SMMT preliminary figure via fleetnews.co.uk and tradingeconomics.com; the estimation methods gave 352,638 for reference), $0.46, 27 minutes. An earlier snapshot of the same article said 350,518; which figure is SMMT's final one was not checked. Open problems are in `NEXT.md`.
-
-## Live use: direct page fetch and early stop (v2.5)
-
-In live use (as_of today, no registered answer) every URL is fetched as the live page only (`fetch.fetch_live`): no Wayback Machine request at all (v2.5.2: as_of >= today is checked again at each fetch, so a run that crosses midnight or is approved on a later day fetches its remaining pages through the snapshot-only path), short timeouts (15 s per page, 10 s for robots.txt), no retries. A direction's URLs are fetched at the same time; the per-host limit (request starts at least 1 s apart, or the robots.txt Crawl-delay) and robots.txt still apply, and the live-page checks are unchanged (a readable date <= as_of, no later explicit date in the text), as are the quote, number, scale and period-year checks. After each page, its verified points go through the already-published candidate rules and, when there are candidates, the same confirmation call (`published.EarlyWatch`, continuous targets only). The first check that confirms a published value stops the other sub-agents; the judge and the estimation methods are skipped, and the final answer, written by code, reports the value with its source and says that no estimate was made. If the confirmed values disagree, the early check is switched off and the run continues as before. If a check fails (transport error or invalid reply), its candidates are sent again with the next page's check (v2.5.2), so a later confirmation cannot hide a disagreeing value on the failed page. Backtests (as_of before today, or a registered answer) keep the snapshot-only fetcher unchanged (prompt hash and the 7 dev/test recomputations identical).
-
-Live check (2026-10-16, `results/agent/ask_a63174a0/published2`, code v2.5): the same UK question was reported as published, 350,536 (fleetnews.co.uk live page dated 2026-10-05, "Preliminary figures from the Society of Motor Manufacturers and Traders"), stopped after the first confirming page: 37.7 s and $0.38 (of which $0.30 is the assumed search fee), against 1,632 s and $0.46 for published1. Most of the remaining time is the plan (13.5 s) and search (13 s) model calls. Which page's version is reported depends on which extraction finishes first (another page in the same run said 350,518); see `NEXT.md`.
-
-## Web UI (local)
-
-```
-.venv/Scripts/python.exe -m triangulate serve               # http://127.0.0.1:8770/ (binds 127.0.0.1 only)
-.venv/Scripts/python.exe -m triangulate serve --port 8771   # another port
+Method details (computed by code):
+- m1 formula_mc: p16 * a1; Monte Carlo P10 to P90 19,811 to 30,446; result unit (person/month) * 1 month
+  converted to person; own 80% width x/÷1.38 (no error evidence, code's default width)
 ```
 
-Browsing saved runs works offline. Starting a run needs the key file (`TRIANGULATE_KEY_FILE`) and network; set the variable in the environment of the server process. Code: `triangulate/web/` (FastAPI, `static/` is plain HTML + JS, no build step).
+Official figure: **24,275**. Error **+1.4%**, inside the interval.
 
-| page | shows |
+Every run leaves a complete record in `results/agent/<id>/<tag>/`:
+
+| file | what it holds |
 |---|---|
-| 新问题 (`#/`) | form: question + optional as_of (empty = today, live use; earlier date = backtest mode). The run plans, then stops for approval. At most 2 unfinished runs per server. |
-| run progress (`#/run/<id>`) | status (planning / awaiting_approval / running / done / failed / cancelled), elapsed time, dollars spent (tokens + assumed search fee), the pinned target, the proposed directions with checkboxes (unchecked ones are dropped through the existing resume-with-directions path), per-direction progress (searching / fetching n pages / extracting / done: k points kept), judge rounds, input audit and repair, compute, final; cancel button. Results go to `results/agent/<qid>/web_<UTC time>/`. Runs live in server memory; after a restart only the saved files remain. |
-| 已保存的运行 (`#/saved`) | every `results/agent/**/state.json` (backtests, `--ask`, web runs) by question id and tag |
-| result (`#/result?qid=&tag=`) | estimate and 80% interval (discrete runs: most likely outcome and an outcome-probability table with per-method and Jev columns); final answer; "证据 vs 假设" (assumption share, warning above 50%); methods (formula, each input with its role and the evidence it points to, estimate, weight, errors incl. input-audit exclusions and repair rounds); assumptions (value, judge range, range used after widening, rationale, applies_when, falsified_by, used by); kept / discarded evidence with source and Wayback snapshot links; leakage audit; links to `graph.html` and `ledger.md`. Official value and error only for backtest questions. |
-| 回测 (`#/backtests`) | development set (Yellowstone Aug/Sep at v21b, JNTO and Korea at v21d) and held-out test (test1): official value, agent estimate, % error, interval, coverage, assumption share, and the naive and no-retrieval structured baselines (the same-month-last-year baseline is no longer shown, since 2026-10-16; its data stays in the files). Showcase section (web-v0.3): the four showcase questions from `results/showcase/summary.json`, all arms, coverage, market-tool result and the interim pre-registered criteria |
+| `ledger.md` | every data point: value, unit, period, source URL, the quoted sentence, and whether the judge kept it and why |
+| `graph.html` | the computation as an interactive graph, from sources to the estimate |
+| `state.json` | the full run state: plan, every judge round, every repair and check, the Monte Carlo result |
+| `calls.jsonl` | every model call, with tokens and cost |
 
-Assumption share (read-only, computed from the saved state, never written back): for each `formula_mc` method, sigma_ln = ln(P90/P10) / (2 x 1.2816) per sampled input; share = sum of assumption sigma_ln^2 / sum over all sampled inputs; series methods count 0; overall = weight average over the methods that produced an estimate. It is an exact log-variance split only for pure products / ratios with each input used once; with sums, `mean()` or powers it is an approximation.
+## Results
 
-## Layout
+The held-out test was pre-registered before any model call (tag `test1-prereg`). The code was frozen at `v2.1c` and the test used three official monthly figures released after the model's training cutoff:
+
+| | Taiwan births, Sep 2026 | Heathrow passengers, Sep 2026 | Japan births, Jul 2026 | median abs. error |
+|---|---|---|---|---|
+| **Verrier** | +1.1% | +3.0% | +0.8% | **1.1%** |
+| Model answers directly, no web | +42.8% | +0.3% | +4.0% | 4.0% |
+| Model writes a structured estimate, no web | no answer | −2.5% | −2.4% | 2.4% |
+
+All three official values fell inside Verrier's 80% interval. The scores are in `results/agent/summary_test1.json`.
+
+Later backtests and the fixed regressions run for new versions are pre-registered the same way. Plans, scoring scripts and scores are in `EVAL_*.md`, `results/experiments/` and `results/agent/summary_*.json`.
+
+## How it works
+
+```mermaid
+flowchart LR
+  Q[Question + as-of date] --> P[Plan: pin the target's definition, unit and period; choose search directions]
+  P --> X{Already published?}
+  X -- no --> A[Approval]
+  A --> S[3 search agents per direction: fetch pages, extract numbers with their quotes]
+  S --> J[Judge: keep or discard points, write estimation routes as formulas]
+  J --> C[Checks in code]
+  C -- problems --> R[Targeted repair, up to 3 rounds]
+  R --> C
+  C --> M[Monte Carlo + combination]
+  M --> F[Final text from placeholders]
+```
+
+What code does, so the model doesn't have to be trusted:
+
+- **Every number is computed.** Formulas are evaluated by a whitelist parser (no `eval`). Units are converted with a unit library, including per-period rates converted to totals. Intervals come from Monte Carlo sampling of each input's range.
+- **Every input is checked against its source.** The extracted number is re-read from the quoted sentence. Three checker calls and an arbiter review the unit of each route's result. An input audit asks whether each input measures what the formula needs.
+- **Order-of-magnitude gate.** The combined estimate is compared with an independent rough estimate. If it is more than 2× off, the routes go back once with the exact way code read each input.
+- **Repairs fix, they don't delete.** A repair may only change what an error names. Removing a route requires naming the wrong input and the evidence.
+- **Honest combination.** Routes that share most of their inputs count as one block, and blocks get equal weight. The interval widens when blocks disagree by more than their own widths.
+- **No peeking in backtests.** Pages are fetched as they stood on the as-of date (Wayback snapshots). A leak sentinel catches the registered official value if it shows up anyway.
+
+## Quick start
+
+Tested on Python 3.14.
+
+```sh
+git clone https://github.com/Dannytao2004/verrier.git
+cd verrier
+python -m venv .venv
+.venv/Scripts/activate          # macOS / Linux: source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Put your DeepSeek key in a file as `DEEPSEEK_API_KEY=sk-...`. By default this is `./.env`; set `TRIANGULATE_KEY_FILE` to use another path. The key is read from that file only and never written into results.
+
+Ask any question about a number that hasn't been published:
+
+```sh
+python -m triangulate agent --ask "How many passengers will Heathrow handle in December 2026?" --as-of 2026-11-25
+```
+
+The command line shows the plan and waits for your approval. At DeepSeek off-peak prices a run uses about $0.2–0.5 of tokens, plus web-search fees.
+
+You can also use the local web UI:
+
+```sh
+python -m triangulate serve        # http://127.0.0.1:8770/verrier
+```
+
+The web UI takes your own key for DeepSeek, Claude, GPT, Kimi or GLM (`PROVIDERS.md`). The key stays in memory for that run only.
+
+Tests run offline, with no network and no key:
+
+```sh
+python -m unittest discover -s tests
+```
+
+## Repository layout
 
 | path | content |
 |---|---|
-| `triangulate/expr.py` | whitelist expression evaluator (scalar, vector, dimension inference) |
-| `triangulate/units.py` | explicit unit table and unit-string parser |
-| `triangulate/mc.py` | lognormal sampling, path distributions, aggregation |
-| `triangulate/engine.py` | validates the model's structure and builds the world-model state |
-| `triangulate/graph.py` | dependency graph and per-input sensitivity |
-| `triangulate/arms.py`, `prompts.py`, `llm.py` | the two arms, prompts, DeepSeek client with per-call logging |
-| `triangulate/report.py`, `viewer.py` | offline metrics, tables and HTML graph pages |
-| `results/` | `summary.json`, `per_question.json`, `report_tables.md`, `calls.jsonl`, `demo/` |
-| `triangulate/agent/` | research agent: LangGraph graph, searcher (URLs only), Wayback fetcher (backtests) and live fetcher (live use, v2.5), extractor checks, judge, method library, assumption inputs for formula_mc (`assumptions.py`), own-history ablation (`ablation.py`), discrete targets (`discrete.py`), optional Jev arm (`jev.py`), already-published targets in live use (`published.py`) |
-| `results/agent/<id>/[<tag>/]` | `state.json`, `calls.jsonl`, `ledger.md`, `graph.html` per run; raw pages stay in `data/raw/agent/` (local only) |
-| `docs/graphs/` | `index.html`, the finance demo graph; realFP question pages under `realfp/` (local only) |
+| `triangulate/agent/` | the agent: LangGraph pipeline (`graph.py`), prompts, search and fetch, value check, unit review, input audit, magnitude gate, method library and compute |
+| `triangulate/` | shared core: expression evaluator, units, Monte Carlo, model client and provider adapters, baseline arms |
+| `triangulate/web/` | local web UI |
+| `probes/` | experiment, replay and regression scripts |
+| `results/` | every saved run and score |
+| `tests/` | unit and integration tests (offline) |
+| `NEXT.md`, `BUGS.md` | development log and issue tracker |
+| `EVAL_*.md`, `FORECAST.md` | pre-registered evaluation plans and question-selection rules |
 
-## Data and licence
+## Data
 
-realFP comes from allenai/fermi, which has no licence file. Question text and answers are therefore kept out of git (see `DATA.md`). Only question ids and metrics are committed.
+The realFP benchmark comes from allenai/fermi, which has no license file, so its question text and answers are kept out of git (`DATA.md`). Only question ids and metrics are committed. Saved runs include short quotes from the web pages they cite, with links to the source or its Wayback snapshot.
 
-## Viewing the graphs
+## License
 
-Open `docs/graphs/index.html` in a browser. Pages load vis-network 9.1.9 from jsDelivr, so they need an internet connection. Click a node to see its details.
+No license is granted yet; all rights reserved. The files `triangulate/web/static/verrier_halo*` derive from HALOFLUX and stay under the PolyForm Noncommercial License (`triangulate/web/static/haloflux_LICENSE.txt`).
