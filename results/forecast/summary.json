@@ -512,29 +512,29 @@
    "pct_err": -0.0254446622462986
   },
   "naive": {
-   "status": "unit_unreconciled",
-   "estimate": null,
-   "pct_err": null,
-   "log10_err": null,
+   "status": "ok",
+   "estimate": 32000000.0,
+   "pct_err": 0.009884146406313077,
+   "log10_err": 0.004271554512966554,
    "attempts": 1
   },
   "structured": {
-   "estimate": null,
-   "pct_err": null,
-   "log10_err": null,
-   "p10": null,
-   "p90": null,
-   "covered_80": false,
-   "n_valid_paths": 0,
+   "estimate": 29629606.7917277,
+   "pct_err": -0.06492280739941803,
+   "log10_err": -0.029152535719261217,
+   "p10": 23705367.157881383,
+   "p90": 37137232.695728734,
+   "covered_80": true,
+   "n_valid_paths": 2,
    "attempts": 2,
    "paths": {
     "p1": [
      "top_down",
-     null
+     28806808.41194775
     ],
     "p2": [
      "bottom_up",
-     null
+     30475906.46203896
     ],
     "p3": [
      "proxy",
@@ -542,9 +542,7 @@
     ]
    },
    "remaining_errors": [
-    "path p1: dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)",
-    "path p2: dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)",
-    "path p3: dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+    "path p3: dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs mass (kg)"
    ]
   }
  },
@@ -692,40 +690,36 @@
    "pct_err": -0.016361648859268607
   },
   "naive": {
-   "status": "unit_unreconciled",
-   "estimate": null,
-   "pct_err": null,
-   "log10_err": null,
+   "status": "ok",
+   "estimate": 410000.0,
+   "pct_err": -0.09640678444232875,
+   "log10_err": -0.04402703854951383,
    "attempts": 1
   },
   "structured": {
-   "estimate": null,
-   "pct_err": null,
-   "log10_err": null,
-   "p10": null,
-   "p90": null,
+   "estimate": 3962.1692971349657,
+   "pct_err": -0.9912678309858974,
+   "log10_err": -2.0588778669640715,
+   "p10": 3264.2328046456137,
+   "p90": 411802.47568796814,
    "covered_80": false,
-   "n_valid_paths": 0,
+   "n_valid_paths": 3,
    "attempts": 2,
    "paths": {
     "p1": [
      "top_down",
-     null
+     3962.1692971349667
     ],
     "p2": [
      "bottom_up",
-     null
+     389964.3126390099
     ],
     "p3": [
      "proxy",
-     null
+     3459.991872467226
     ]
    },
-   "remaining_errors": [
-    "path p1: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)",
-    "path p2: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)",
-    "path p3: dimension mismatch: the formula gives mass * length**2 per time**2 (kg*m**2*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
-   ]
+   "remaining_errors": []
   }
  },
  {

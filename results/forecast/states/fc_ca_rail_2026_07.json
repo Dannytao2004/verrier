@@ -2,8 +2,8 @@
  "qid": "fc_ca_rail_2026_07",
  "question": "Assume today is 2026-08-29. You know nothing published after this date. Estimate the total freight carried by Canadian railways in July 2026, in tonnes, as it will be first reported by Statistics Canada in its monthly Railway carloadings release (total traffic carried, Canada).",
  "target": {
-  "unit": "",
-  "dims": "dimensionless",
+  "unit": "tonne",
+  "dims": "kg",
   "definition": "Total freight carried by Canadian railways (all traffic, Canada) during July 2026, in tonnes, as first reported by Statistics Canada's monthly Railway carloadings release."
  },
  "inputs": [
@@ -33,8 +33,8 @@
     "p1"
    ],
    "n_dependents": 1,
-   "sensitivity": null,
-   "sensitivity_path_max": null
+   "sensitivity": 0.07195328784214006,
+   "sensitivity_path_max": 0.1439065756842801
   },
   {
    "name": "july_seasonal_factor",
@@ -62,8 +62,8 @@
     "p1"
    ],
    "n_dependents": 1,
-   "sensitivity": null,
-   "sensitivity_path_max": null
+   "sensitivity": 0.0414871175323821,
+   "sensitivity_path_max": 0.0829742350647642
   },
   {
    "name": "months_per_year",
@@ -91,8 +91,8 @@
     "p1"
    ],
    "n_dependents": 1,
-   "sensitivity": null,
-   "sensitivity_path_max": null
+   "sensitivity": 0.0,
+   "sensitivity_path_max": 0.0
   },
   {
    "name": "period_length",
@@ -121,8 +121,8 @@
     "p2"
    ],
    "n_dependents": 2,
-   "sensitivity": null,
-   "sensitivity_path_max": null
+   "sensitivity": 0.0,
+   "sensitivity_path_max": 0.0
   },
   {
    "name": "weekly_carloads",
@@ -152,8 +152,8 @@
     "p2"
    ],
    "n_dependents": 1,
-   "sensitivity": null,
-   "sensitivity_path_max": null
+   "sensitivity": 0.07745097999287154,
+   "sensitivity_path_max": 0.15490195998574308
   },
   {
    "name": "weeks_per_month",
@@ -181,8 +181,8 @@
     "p2"
    ],
    "n_dependents": 1,
-   "sensitivity": null,
-   "sensitivity_path_max": null
+   "sensitivity": 0.0,
+   "sensitivity_path_max": 0.0
   },
   {
    "name": "tonnes_per_carload",
@@ -212,8 +212,8 @@
     "p2"
    ],
    "n_dependents": 1,
-   "sensitivity": null,
-   "sensitivity_path_max": null
+   "sensitivity": 0.07745097999287154,
+   "sensitivity_path_max": 0.15490195998574308
   },
   {
    "name": "canada_gdp",
@@ -339,9 +339,7 @@
    "description": "Allocate annual Canadian rail tonnage down to the July period using a seasonal factor.",
    "formula": "annual_rail_tonnes * period_length / months_per_year * july_seasonal_factor",
    "output_unit": "tonne",
-   "issues": [
-    "dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)"
-   ],
+   "issues": [],
    "uses": [
     "annual_rail_tonnes",
     "july_seasonal_factor",
@@ -349,7 +347,13 @@
     "period_length"
    ],
    "dims": "kg",
-   "status": "invalid"
+   "status": "valid",
+   "median": 28806808.41194775,
+   "p10": 23708080.692276966,
+   "p90": 34783276.80945917,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": -0.012230743860064144
   },
   {
    "id": "p2",
@@ -357,9 +361,7 @@
    "description": "Count weekly loaded carloads, convert to the monthly period, multiply by average tonnes per car.",
    "formula": "weekly_carloads * weeks_per_month * period_length * tonnes_per_carload",
    "output_unit": "tonne",
-   "issues": [
-    "dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)"
-   ],
+   "issues": [],
    "uses": [
     "period_length",
     "tonnes_per_carload",
@@ -367,7 +369,13 @@
     "weeks_per_month"
    ],
    "dims": "kg",
-   "status": "invalid"
+   "status": "valid",
+   "median": 30475906.46203896,
+   "p10": 23694226.605813045,
+   "p90": 39161571.708984874,
+   "n_nonfinite": 0,
+   "n_nonpositive": 0,
+   "log10_vs_central": 0.012230743860064446
   },
   {
    "id": "p3",
@@ -376,7 +384,7 @@
    "formula": "canada_gdp * rail_tonnes_per_gdp * year_length * july_share_of_year",
    "output_unit": "tonne",
    "issues": [
-    "dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+    "dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs mass (kg)"
    ],
    "uses": [
     "canada_gdp",
@@ -389,9 +397,7 @@
   }
  ],
  "errors": [
-  "path p1: dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)",
-  "path p2: dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)",
-  "path p3: dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+  "path p3: dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs mass (kg)"
  ],
  "warnings": [
   "path p3: declared output_unit 'tonne' (kg) differs from computed kg*s**-2; computed one is used"
@@ -402,13 +408,13 @@
   "input_distribution": "lognormal, low/high = P10/P90"
  },
  "result": {
-  "central": null,
-  "p10": null,
-  "p90": null,
-  "unit": "",
-  "n_valid_paths": 0,
+  "central": 29629606.7917277,
+  "p10": 23705367.157881383,
+  "p90": 37137232.695728734,
+  "unit": "tonne",
+  "n_valid_paths": 2,
   "outliers": [],
-  "path_spread_oom": null
+  "path_spread_oom": 0.024461487720127906
  },
  "graph": {
   "nodes": [
@@ -416,49 +422,45 @@
     "id": "target",
     "kind": "target",
     "label": "target",
-    "status": "failed",
+    "status": "estimated",
     "definition": "Total freight carried by Canadian railways (all traffic, Canada) during July 2026, in tonnes, as first reported by Statistics Canada's monthly Railway carloadings release.",
-    "unit": "",
-    "central": null,
-    "p10": null,
-    "p90": null,
-    "n_valid_paths": 0,
+    "unit": "tonne",
+    "central": 29629606.7917277,
+    "p10": 23705367.157881383,
+    "p90": 37137232.695728734,
+    "n_valid_paths": 2,
     "outliers": []
    },
    {
     "id": "path:p1",
     "kind": "path",
     "label": "p1 top_down",
-    "status": "invalid",
+    "status": "valid",
     "method": "top_down",
     "description": "Allocate annual Canadian rail tonnage down to the July period using a seasonal factor.",
     "formula": "annual_rail_tonnes * period_length / months_per_year * july_seasonal_factor",
     "output_unit": "tonne",
-    "issues": [
-     "dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)"
-    ],
-    "median": null,
-    "p10": null,
-    "p90": null,
-    "log10_vs_central": null,
+    "issues": [],
+    "median": 28806808.41194775,
+    "p10": 23708080.692276966,
+    "p90": 34783276.80945917,
+    "log10_vs_central": -0.012230743860064144,
     "n_dependents": 1
    },
    {
     "id": "path:p2",
     "kind": "path",
     "label": "p2 bottom_up",
-    "status": "invalid",
+    "status": "valid",
     "method": "bottom_up",
     "description": "Count weekly loaded carloads, convert to the monthly period, multiply by average tonnes per car.",
     "formula": "weekly_carloads * weeks_per_month * period_length * tonnes_per_carload",
     "output_unit": "tonne",
-    "issues": [
-     "dimension mismatch: the formula gives mass (kg), but the target needs a pure number, a count or a share (dimensionless)"
-    ],
-    "median": null,
-    "p10": null,
-    "p90": null,
-    "log10_vs_central": null,
+    "issues": [],
+    "median": 30475906.46203896,
+    "p10": 23694226.605813045,
+    "p90": 39161571.708984874,
+    "log10_vs_central": 0.012230743860064446,
     "n_dependents": 1
    },
    {
@@ -471,7 +473,7 @@
     "formula": "canada_gdp * rail_tonnes_per_gdp * year_length * july_share_of_year",
     "output_unit": "tonne",
     "issues": [
-     "dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs a pure number, a count or a share (dimensionless)"
+     "dimension mismatch: the formula gives mass per time**2 (kg*s**-2), but the target needs mass (kg)"
     ],
     "median": null,
     "p10": null,
@@ -499,8 +501,8 @@
      "p1"
     ],
     "n_dependents": 1,
-    "sensitivity": null,
-    "sensitivity_path_max": null
+    "sensitivity": 0.07195328784214006,
+    "sensitivity_path_max": 0.1439065756842801
    },
    {
     "id": "input:july_seasonal_factor",
@@ -522,8 +524,8 @@
      "p1"
     ],
     "n_dependents": 1,
-    "sensitivity": null,
-    "sensitivity_path_max": null
+    "sensitivity": 0.0414871175323821,
+    "sensitivity_path_max": 0.0829742350647642
    },
    {
     "id": "input:months_per_year",
@@ -545,8 +547,8 @@
      "p1"
     ],
     "n_dependents": 1,
-    "sensitivity": null,
-    "sensitivity_path_max": null
+    "sensitivity": 0.0,
+    "sensitivity_path_max": 0.0
    },
    {
     "id": "input:period_length",
@@ -569,8 +571,8 @@
      "p2"
     ],
     "n_dependents": 2,
-    "sensitivity": null,
-    "sensitivity_path_max": null
+    "sensitivity": 0.0,
+    "sensitivity_path_max": 0.0
    },
    {
     "id": "input:weekly_carloads",
@@ -594,8 +596,8 @@
      "p2"
     ],
     "n_dependents": 1,
-    "sensitivity": null,
-    "sensitivity_path_max": null
+    "sensitivity": 0.07745097999287154,
+    "sensitivity_path_max": 0.15490195998574308
    },
    {
     "id": "input:weeks_per_month",
@@ -617,8 +619,8 @@
      "p2"
     ],
     "n_dependents": 1,
-    "sensitivity": null,
-    "sensitivity_path_max": null
+    "sensitivity": 0.0,
+    "sensitivity_path_max": 0.0
    },
    {
     "id": "input:tonnes_per_carload",
@@ -642,8 +644,8 @@
      "p2"
     ],
     "n_dependents": 1,
-    "sensitivity": null,
-    "sensitivity_path_max": null
+    "sensitivity": 0.07745097999287154,
+    "sensitivity_path_max": 0.15490195998574308
    },
    {
     "id": "input:canada_gdp",
@@ -743,7 +745,7 @@
     "source": "path:p1",
     "target": "target",
     "kind": "aggregated_into",
-    "included": false
+    "included": true
    },
    {
     "source": "input:annual_rail_tonnes",
@@ -769,7 +771,7 @@
     "source": "path:p2",
     "target": "target",
     "kind": "aggregated_into",
-    "included": false
+    "included": true
    },
    {
     "source": "input:period_length",
