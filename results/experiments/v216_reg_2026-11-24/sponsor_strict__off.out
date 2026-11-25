@@ -1,0 +1,18 @@
+[sponsor_strict_2026] plan: 8 directions -> approved=True
+[sponsor_strict_2026] done in 1045.0s; estimate 196,101; usd 1.7013
+The best computed estimate is 196,101 posting (80% model-based interval 48,485 to 793,149 posting) for distinct U.S. job postings published in calendar year 2026 for new-graduate roles (summer internships plus full-time entry-level positions for new bachelor's or master's graduates with [n]–[n] years of experience) in professional white-collar occupations whose posting text explicitly states visa sponsorship. The estimate comes from a single method (196,101 posting, weight 100%): FY[n] new H-[n]B initial-employment approvals of 114,806 H-1B petition multiplied by a postings-per-approval ratio of 3 (range 1 to 10) and a 2026 change factor of 0.6 (range 0.25 to 1.2). Only the approvals figure is observed; the ratio and change factor are analyst assumptions, so the interval reflects input uncertainty, not demonstrated accuracy. The main risk is that many sponsorship-stating postings (especially internships) never generate a petition, or that the fee-driven decline differs from assumed. Better evidence on postings-per-approval and on 2026 sponsorship-tag trends would most improve the estimate.
+
+Unit of the estimate: posting (distinct job posting; total for 2026-01-01 to 2026-12-31).
+
+Key assumptions (proposed by the analyst model, not observed; code samples each one between the bounds shown):
+- a4 Ratio of sponsorship-stating postings to new H-[n]B initial-employment approvals: 3 posting/petition, range 1 to 10; used by m1. Overturned by: Evidence that sponsorship-stating postings per approval are below [n] or above [n].
+- a5 2026 change factor in sponsorship-stating postings vs FY[n] baseline: 0.6 dimensionless, range 0.25 to 1.2; used by m1. Overturned by: A board's before/after count showing sponsorship-stating postings flat or up in 2026.
+
+Method details (computed by code):
+- m1 formula_mc: p56 * a4 * a5; Monte Carlo P10 to P90 48,266 to 789,570; result unit (posting/year) * 1 year converted to posting; own 80% width x/÷4.04 (Monte Carlo of the formula inputs)
+- Combination: 1 block(s), equal weight per block (methods whose inputs overlap by at least half form one block; backtest errors set widths, not weights): B1 = m1: 196,101 (width x/÷4.04, Monte Carlo of the formula inputs). Estimate = the only block.
+- Interval: one block, so the interval is that block's own width (x/÷4.04).
+
+Magnitude check: this estimate is about 4.4 times above an independent rough estimate made without the evidence; one targeted repair did not close the gap, so check the inputs above.
+
+--- stderr ---

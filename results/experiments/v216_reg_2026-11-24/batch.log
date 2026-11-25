@@ -6,3 +6,11 @@
 {"at": "2026-11-25T00:06:10+00:00", "event": "end", "run": "fc_de_cars_2026_09 off", "exit": 0, "wall_s": 878.5}
 {"at": "2026-11-25T00:06:26+00:00", "event": "end", "run": "fc_kr_births_2026_07 off", "exit": 0, "wall_s": 894.6}
 {"at": "2026-11-25T00:06:26+00:00", "event": "group_end", "group": 1}
+{"at": "2026-11-25T04:00:21+00:00", "event": "group_start", "group": 2, "runs": ["fc_tw_births_2026_09 off", "sponsor_strict off", "fc_ca_rail_2026_07 think"], "code": "v2.17a-3-gf2b5715"}
+{"at": "2026-11-25T04:00:21+00:00", "event": "start", "run": "fc_tw_births_2026_09 off"}
+{"at": "2026-11-25T04:00:21+00:00", "event": "start", "run": "sponsor_strict off"}
+{"at": "2026-11-25T04:00:21+00:00", "event": "start", "run": "fc_ca_rail_2026_07 think"}
+{"at": "2026-11-25T04:12:05+00:00", "event": "end", "run": "fc_tw_births_2026_09 off", "exit": 0, "wall_s": 703.6}
+{"at": "2026-11-25T04:15:09+00:00", "event": "end", "run": "fc_ca_rail_2026_07 think", "exit": 0, "wall_s": 887.2}
+{"at": "2026-11-25T04:17:49+00:00", "event": "end", "run": "sponsor_strict off", "exit": 0, "wall_s": 1047.6}
+{"at": "2026-11-25T04:17:49+00:00", "event": "group_end", "group": 2}

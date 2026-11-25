@@ -1,0 +1,67 @@
+[fc_ca_rail_2026_07] plan: 7 directions -> approved=True
+[fc_ca_rail_2026_07] done in 884.5s; estimate 30,306,851; usd 1.4408
+[
+ {
+  "id": "fc_ca_rail_2026_07",
+  "as_of": "2026-08-29",
+  "answer_value": 31686803,
+  "source": "https://www150.statcan.gc.ca/n1/daily-quotidien/260928/dq260928a-eng.htm",
+  "estimate": 30306850.59121439,
+  "p10": 20809881.639288582,
+  "p90": 44137934.50050552,
+  "basis": "blocks",
+  "scored": true,
+  "n_assumptions_used": 7,
+  "assumptions_used": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "a5",
+   "a6",
+   "a7"
+  ],
+  "assumption_weight_share": 1.0,
+  "ablation": false,
+  "pct_err": -0.043549751888368515,
+  "abs_log10_err": 0.01933761584320944,
+  "covered_80": true,
+  "arms": {
+   "agent": {
+    "estimate": 30306850.59121439,
+    "pct_err": -0.043549751888368515,
+    "abs_log10_err": 0.01933761584320944
+   },
+   "naive": {
+    "estimate": 32000000.0,
+    "pct_err": 0.009884146406313077,
+    "abs_log10_err": 0.004271554512966554
+   },
+   "structured_no_retrieval": {
+    "estimate": 29629606.7917277,
+    "pct_err": -0.06492280739941803,
+    "abs_log10_err": 0.029152535719261217
+   }
+  },
+  "within_20pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_10pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": true
+  },
+  "within_5pct": {
+   "agent": true,
+   "naive": true,
+   "structured_no_retrieval": false
+  },
+  "usd_total_assumed": 1.4408,
+  "usd_tokens": 0.2308,
+  "wall_s": 884.5
+ }
+]
+
+--- stderr ---
