@@ -1,0 +1,12 @@
+[
+ {
+  "reference_run": "fc_kr_births_2026_07/v21c",
+  "mechanism": "M7 v2.1c-pre averaging with a 7x-off assumption route",
+  "reason": "not re-runnable as the same configuration: the run started on an uncommitted working tree (f5fe773 + unknown edits; DATA_NOTES.md section 9 override, check/CHECK.md fix F2)"
+ },
+ {
+  "reference_run": "fc_cn_profits_2026_09/test4",
+  "mechanism": "M2 S66 multiplier (亿元) left in the point unit",
+  "reason": "not re-runnable as the same configuration: the archive run was real-use mode on its own day (as_of 2026-10-24, 40 live-dated pages, 0 snapshots); any run now with as_of 2026-10-24 is a backtest (Wayback snapshots only), i.e. a fetch-mode toggle"
+ }
+]

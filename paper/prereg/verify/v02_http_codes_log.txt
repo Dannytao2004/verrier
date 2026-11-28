@@ -1,0 +1,13 @@
+[0] run dirs with state.json: 233
+[1] http codes over all calls: {200: 14671, 402: 7}
+[2] runs containing each http code, by estimate: {200: {'no_est': 41, 'with_est': 187}, 402: {'no_est': 7}}
+[3] call error strings: [('invalid_json', 79), ('truncated', 13), ('URLError', 12), ('http_402', 7), ('ConnectionResetError', 1)]
+[4] classify_infra over archive dirs: {None: 226, 'http_402': 7}
+    http_402: 7 runs, with estimate 0
+       fc_de_cars_2026_09\v215_reg_402  has_estimate=False
+       fc_es_transit_2026_08\v215_reg_402  has_estimate=False
+       fc_kr_online_2026_08\v215_reg_402  has_estimate=False
+       fc_kr_online_2026_08\v215_reg_think_402  has_estimate=False
+       fc_pola_teu_2026_09\v215_reg_402  has_estimate=False
+       fc_tw_births_2026_09\v215_reg_think_402  has_estimate=False
+       fc_us_starts_2026_08\v215_reg_402  has_estimate=False

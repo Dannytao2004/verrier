@@ -1,0 +1,66 @@
+{
+ "v2.17a": {
+  "slug": "v217a",
+  "tree_commit": "HEAD",
+  "code_commit": "2c69959840b3d3c0470c643c1294e754d5128c0b",
+  "path": "D:/triangulate-agent",
+  "note": "main checkout; triangulate/ differs from tag v2.17a only in two comment lines (forecast.py line 121, showcase_engine.py line 1)",
+  "margin_min": 27
+ },
+ "v2.1*": {
+  "slug": "v21s",
+  "tree_commit": "2bbe8aef41e35c4c85f784d97edde38e2137e493",
+  "code_commit": "2bbe8aef41e35c4c85f784d97edde38e2137e493",
+  "path": "D:/triangulate-agent-rep/v21s",
+  "note": "untagged commit 'v2.1: allow change factors ...' (before the v2.1 tag's fix)",
+  "margin_min": 71
+ },
+ "v2.1b": {
+  "slug": "v21b",
+  "tree_commit": "66e70a8808fbcdafc1cef920132c50cd64faf1c3",
+  "code_commit": "66e70a8808fbcdafc1cef920132c50cd64faf1c3",
+  "path": "D:/triangulate-agent-rep/v21b",
+  "note": "tag v2.1b",
+  "margin_min": 62
+ },
+ "v2.8r": {
+  "slug": "v28r",
+  "tree_commit": "48e6b45082d5165c8693e11dbd52be866bfbe363",
+  "code_commit": "c64d3a30056d02cf40d51e55ebd5b1d3d4607539",
+  "path": "D:/triangulate-agent-rep/v28r",
+  "note": "tag v2.8r / frozen-v2.8r = c64d3a3; tree 48e6b45 adds only BUGS.md",
+  "margin_min": 20
+ },
+ "v2.11f": {
+  "slug": "v211f",
+  "tree_commit": "8e3b64ed321da839e1718e020c79ac79c808e36a",
+  "code_commit": "8e3b64ed321da839e1718e020c79ac79c808e36a",
+  "path": "D:/triangulate-agent-rep/v211f",
+  "note": "tag v2.11f",
+  "margin_min": 20
+ },
+ "v2.11g": {
+  "slug": "v211g",
+  "tree_commit": "1ff32f6ab07226b348cd1732065c1c7d98712dc6",
+  "code_commit": "1ff32f6ab07226b348cd1732065c1c7d98712dc6",
+  "path": "D:/triangulate-agent-rep/v211g",
+  "note": "tag v2.11g",
+  "margin_min": 20
+ },
+ "v2.12a": {
+  "slug": "v212a",
+  "tree_commit": "cf3413e49bb0e99d6847c24110a75de2fcfce1c9",
+  "code_commit": "cf3413e49bb0e99d6847c24110a75de2fcfce1c9",
+  "path": "D:/triangulate-agent-rep/v212a",
+  "note": "tag v2.12a",
+  "margin_min": 20
+ },
+ "v2.16e": {
+  "slug": "v216e",
+  "tree_commit": "31e0021dd5cb313aa7911b9d7866a8be91ad4d71",
+  "code_commit": "b77e098b6816f3714205b99d3266612d8f4665c0",
+  "path": "D:/triangulate-agent-rep/v216e",
+  "note": "tag v2.16e = b77e098; tree 31e0021 adds only probes/run_v216_groups.py",
+  "margin_min": 23
+ }
+}

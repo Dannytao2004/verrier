@@ -1,0 +1,63 @@
+rows 233
+[1] scored runs 115 scored questions 23
+    fc_ca_rail_2026_07 set= test2 runs_with_truth= 7 scored= 6
+    fc_cn_profits_2026_09 set= test4 runs_with_truth= 4 scored= 3
+    fc_cn_retail_2026_04 set= test3 runs_with_truth= 2 scored= 2
+    fc_de_cars_2026_09 set= test2 runs_with_truth= 10 scored= 9
+    fc_es_transit_2026_08 set= test2 runs_with_truth= 6 scored= 1
+    fc_hk_visitors_2026_09 set= test2 runs_with_truth= 5 scored= 5
+    fc_jnto_2026_08 set= dev runs_with_truth= 7 scored= 5
+    fc_jp_births_2026_07 set= test runs_with_truth= 6 scored= 6
+    fc_jp_movers_2026_08 set= showcase runs_with_truth= 8 scored= 6
+    fc_kr_births_2026_07 set= dev runs_with_truth= 13 scored= 11
+    fc_kr_online_2026_08 set= test2 runs_with_truth= 8 scored= 6
+    fc_lhr_pax_2026_09 set= test runs_with_truth= 7 scored= 7
+    fc_nhs_ae_2026_09 set= showcase runs_with_truth= 6 scored= 5
+    fc_nz_exports_2026_03 set= test3 runs_with_truth= 2 scored= 2
+    fc_pola_teu_2026_09 set= test2 runs_with_truth= 6 scored= 5
+    fc_tw_births_2026_09 set= test runs_with_truth= 9 scored= 7
+    fc_tw_visitors_2026_09 set= test4 runs_with_truth= 4 scored= 4
+    fc_uk_insolv_2026_08 set= test3 runs_with_truth= 2 scored= 2
+    fc_us_gen_2026_07 set= test2 runs_with_truth= 4 scored= 2
+    fc_us_retail_2026_06 set= test3 runs_with_truth= 2 scored= 2
+    fc_us_starts_2026_08 set= test2 runs_with_truth= 6 scored= 5
+    fc_yell_2026_08 set= dev runs_with_truth= 11 scored= 8
+    fc_yell_2026_09 set= dev runs_with_truth= 9 scored= 6
+[2] catastrophic scored runs 14 on 8 questions
+    fc_cn_profits_2026_09/test4 | ver v2.12a | commit cf3413e49b | think False | noown False | started 2026-10-24T05:00:55+00:00 | role heldout_prereg_frozen | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_de_cars_2026_09/test2 | ver v2.8r | commit c64d3a3005 | think False | noown False | started 2026-10-19T08:34:42+00:00 | role heldout_prereg_frozen | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_de_cars_2026_09/v211_reg | ver v2.11f | commit 8e3b64ed32 | think False | noown False | started 2026-10-23T02:06:29+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_de_cars_2026_09/v211g_reg | ver v2.11g | commit 1ff32f6ab0 | think False | noown False | started 2026-10-23T04:22:16+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_de_cars_2026_09/v216_reg | ver v2.16e | commit b77e098b68 | think False | noown False | started 2026-11-24T23:51:33+00:00 | role in_sample_prereg_regression | regime post_v2.13b_3x12 | n_same_cfg 1 | config_flags 
+    fc_jnto_2026_08/v21_noown | ver v2.1* | commit 2bbe8aef41 | think False | noown True | started 2026-10-15T09:24:11+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags noown_ablation
+    fc_jnto_2026_08/v21b | ver v2.1b | commit 66e70a8808 | think False | noown False | started 2026-10-15T10:20:28+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_jp_movers_2026_08/v211_reg | ver v2.11f | commit 8e3b64ed32 | think False | noown False | started 2026-10-23T02:49:44+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_kr_births_2026_07/v21 | ver v2.1* | commit 2bbe8aef41 | think False | noown False | started 2026-10-15T09:24:11+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_kr_births_2026_07/v21_noown | ver v2.1* | commit 2bbe8aef41 | think False | noown True | started 2026-10-15T09:24:11+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags noown_ablation
+    fc_kr_births_2026_07/v21c | ver v2.1c-pre | commit 0d5c68c00c | think False | noown False | started 2026-10-15T11:13:20+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_lhr_pax_2026_09/v211_reg | ver v2.11f | commit 8e3b64ed32 | think False | noown False | started 2026-10-23T02:44:51+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_us_retail_2026_06/test3 | ver v2.12a | commit cf3413e49b | think False | noown False | started 2026-10-23T23:22:14+00:00 | role heldout_prereg_frozen | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags 
+    fc_yell_2026_09/v21_noown | ver v2.1* | commit 2bbe8aef41 | think False | noown True | started 2026-10-15T09:24:11+00:00 | role in_sample_dev | regime pre_v2.13b_1x4 | n_same_cfg 1 | config_flags noown_ablation
+[3] all runs of catastrophic questions by config_key (has_truth runs)
+    fc_cn_profits_2026_09 {'v2.12a|think=False|noown=False|deepseek-flash': 1, 'v2.12a|think=True|noown=False|deepseek-flash': 1, 'v2.12e*|think=True|noown=False|deepseek-flash': 1, 'v2.12e*|think=False|noown=False|deepseek-flash': 1}
+    fc_de_cars_2026_09 {'v2.8r|think=False|noown=False|deepseek-flash': 1, 'v2.9b|think=True|noown=False|deepseek-flash': 1, 'v2.11f|think=False|noown=False|deepseek-flash': 1, 'v2.11g|think=False|noown=False|deepseek-flash': 1, 'v2.14a|think=False|noown=False|deepseek-flash': 1, 'v2.14a|think=True|noown=False|deepseek-flash': 1, 'v2.15g|think=False|noown=False|deepseek-flash': 1, 'v2.16e|think=False|noown=False|deepseek-flash': 1, 'v2.17a|think=True|noown=False|deepseek-flash': 1, 'v2.17a|think=False|noown=False|deepseek-flash': 1}
+    fc_jnto_2026_08 {'v2.9b|think=True|noown=False|deepseek-flash': 1, 'v2.1*|think=False|noown=False|deepseek-flash': 1, 'v2.1*|think=False|noown=True|deepseek-flash': 1, 'v2.1b|think=False|noown=False|deepseek-flash': 1, 'v2.1b|think=False|noown=True|deepseek-flash': 1, 'v2.1c|think=False|noown=False|deepseek-flash': 1, 'v2.1c|think=False|noown=True|deepseek-flash': 1}
+    fc_jp_movers_2026_08 {'v2.5.2|think=False|noown=False|deepseek-flash': 1, 'v2.9b|think=True|noown=False|deepseek-flash': 1, 'v2.11f|think=False|noown=False|deepseek-flash': 1, 'v2.11g|think=False|noown=False|deepseek-flash': 2, 'v2.15g|think=False|noown=False|deepseek-flash': 1, 'v2.16b|think=False|noown=False|deepseek-flash': 1, 'v2.16d|think=False|noown=False|deepseek-flash': 1}
+    fc_kr_births_2026_07 {'v2.9b|think=True|noown=False|deepseek-flash': 1, 'v2.1*|think=False|noown=False|deepseek-flash': 1, 'v2.11f|think=False|noown=False|deepseek-flash': 1, 'v2.11g|think=False|noown=False|deepseek-flash': 1, 'v2.15g|think=False|noown=False|deepseek-flash': 1, 'v2.16e|think=False|noown=False|deepseek-flash': 1, 'v2.1*|think=False|noown=True|deepseek-flash': 1, 'v2.1b|think=False|noown=False|deepseek-flash': 1, 'v2.1b|think=False|noown=True|deepseek-flash': 1, 'v2.1c-pre|think=False|noown=False|deepseek-flash': 1, 'v2.1c-pre|think=False|noown=True|deepseek-flash': 1, 'v2.1c|think=False|noown=False|deepseek-flash': 1, 'v2.1c|think=False|noown=True|deepseek-flash': 1}
+    fc_lhr_pax_2026_09 {'v2.1c|think=False|noown=False|deepseek-flash': 1, 'v2.9b|think=True|noown=False|deepseek-flash': 1, 'v2.11f|think=False|noown=False|deepseek-flash': 1, 'v2.11g|think=False|noown=False|deepseek-flash': 2, 'v2.15g|think=False|noown=False|deepseek-flash': 1, 'v2.17a|think=False|noown=False|deepseek-flash': 1}
+    fc_us_retail_2026_06 {'v2.12a|think=False|noown=False|deepseek-flash': 1, 'v2.12a|think=True|noown=False|deepseek-flash': 1}
+    fc_yell_2026_09 {'v2.4|think=False|noown=False|deepseek-flash': 1, 'v1-mvp+16b0e88|think=False|noown=False|deepseek-flash': 1, 'v2.9b|think=True|noown=False|deepseek-flash': 1, 'v2-assumptions|think=False|noown=False|deepseek-flash': 1, 'v2.1*|think=False|noown=False|deepseek-flash': 1, 'v2.1*|think=False|noown=True|deepseek-flash': 1, 'v2.1b|think=False|noown=False|deepseek-flash': 1, 'v2.1b|think=False|noown=True|deepseek-flash': 1, 'v2-assumptions|think=False|noown=True|deepseek-flash': 1}
+[4] v2.17a runs on scored questions (code_version == v2.17a)
+    fc_ca_rail_2026_07/v216_reg think False scored True started 2026-11-25T04:58:10+00:00 usd_tokens 0.2168 usd_total 1.6568 usd_search 1.44 wall_s 588.1 has_est True cat False
+    fc_ca_rail_2026_07/v216_reg_think think True scored True started 2026-11-25T04:00:24+00:00 usd_tokens 0.2308 usd_total 1.4408 usd_search 1.21 wall_s 884.5 has_est True cat False
+    fc_de_cars_2026_09/v216_reg_think think True scored True started 2026-11-25T04:20:49+00:00 usd_tokens 0.3413 usd_total 1.7513 usd_search 1.41 wall_s 1222.0 has_est True cat False
+    fc_de_cars_2026_09/v217a_try think False scored True started 2026-11-25T03:08:51+00:00 usd_tokens 0.6236 usd_total 1.9936 usd_search 1.37 wall_s 537.9 has_est True cat False
+    fc_es_transit_2026_08/v216_reg think False scored False started 2026-11-25T04:42:59+00:00 usd_tokens 0.2198 usd_total 1.5698 usd_search 1.35 wall_s 828.6 has_est False cat 
+    fc_hk_visitors_2026_09/v216_reg think False scored True started 2026-11-25T04:58:10+00:00 usd_tokens 0.1468 usd_total 1.2568 usd_search 1.11 wall_s 766.4 has_est True cat False
+    fc_jp_births_2026_07/v216_reg think False scored True started 2026-11-25T04:20:49+00:00 usd_tokens 0.1918 usd_total 1.3518 usd_search 1.16 wall_s 542.7 has_est True cat False
+    fc_kr_online_2026_08/v216_reg think False scored True started 2026-11-25T04:58:10+00:00 usd_tokens 0.2435 usd_total 1.5135 usd_search 1.27 wall_s 727.4 has_est True cat False
+    fc_lhr_pax_2026_09/v216_reg think False scored True started 2026-11-25T04:20:49+00:00 usd_tokens 0.1814 usd_total 1.4514 usd_search 1.27 wall_s 466.6 has_est True cat False
+    fc_pola_teu_2026_09/v216_reg think False scored True started 2026-11-25T04:42:59+00:00 usd_tokens 0.1706 usd_total 1.4406 usd_search 1.27 wall_s 642.6 has_est True cat False
+    fc_tw_births_2026_09/v216_reg think False scored True started 2026-11-25T04:00:24+00:00 usd_tokens 0.2138 usd_total 1.5138 usd_search 1.3 wall_s 700.9 has_est True cat False
+    fc_us_starts_2026_08/v216_reg think False scored True started 2026-11-25T04:42:59+00:00 usd_tokens 0.1813 usd_total 1.3813 usd_search 1.2 wall_s 576.1 has_est True cat False
+    sponsor_strict_2026/v216 think False scored False started 2026-11-25T04:00:24+00:00 usd_tokens 0.2213 usd_total 1.7013 usd_search 1.48 wall_s 1045.0 has_est True cat 

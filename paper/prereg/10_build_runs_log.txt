@@ -1,0 +1,105 @@
+margin v2.17a : archived thinking-off wall max  17.4 min (n=11) -> 27 min
+margin v2.1*  : archived thinking-off wall max  47.1 min (n=8) -> 71 min
+margin v2.1b  : archived thinking-off wall max  41.0 min (n=8) -> 62 min
+margin v2.8r  : archived thinking-off wall max   7.8 min (n=15) -> 20 min
+margin v2.11f : archived thinking-off wall max   6.6 min (n=16) -> 20 min
+margin v2.11g : archived thinking-off wall max   6.7 min (n=17) -> 20 min
+margin v2.12a : archived thinking-off wall max   5.4 min (n=6) -> 20 min
+margin v2.16e : archived thinking-off wall max  14.9 min (n=3) -> 23 min
+pool B cells: 12 excluded: ['fc_kr_births_2026_07/v21c', 'fc_cn_profits_2026_09/test4']
+runs per (pool, round): {('A', 1): 23, ('A', 2): 23, ('A', 3): 23, ('B', 1): 12, ('B', 2): 12, ('B', 3): 0} total 93
+pool B cells by version: {'v2.17a': 0, 'v2.1*': 4, 'v2.1b': 1, 'v2.8r': 1, 'v2.11f': 3, 'v2.11g': 1, 'v2.12a': 1, 'v2.16e': 1}
+wrote runs.json, excluded_cells.json, worktrees.json
+  r1 # 1 A fc_hk_visitors_2026_09   v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 # 2 B fc_de_cars_2026_09       v2.11f  noown=False tag=repB_v211f_r1          root=D:/triangulate-agent-rep/v211f margin=20
+  r1 # 3 B fc_jnto_2026_08          v2.1b   noown=False tag=repB_v21b_r1           root=D:/triangulate-agent-rep/v21b margin=62
+  r1 # 4 A fc_kr_online_2026_08     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 # 5 A fc_cn_retail_2026_04     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 # 6 A fc_es_transit_2026_08    v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 # 7 A fc_nz_exports_2026_03    v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 # 8 A fc_pola_teu_2026_09      v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 # 9 A fc_us_gen_2026_07        v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #10 A fc_yell_2026_08          v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #11 B fc_de_cars_2026_09       v2.11g  noown=False tag=repB_v211g_r1          root=D:/triangulate-agent-rep/v211g margin=20
+  r1 #12 A fc_tw_visitors_2026_09   v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #13 B fc_kr_births_2026_07     v2.1*   noown=True  tag=repB_v21s_r1_noown     root=D:/triangulate-agent-rep/v21s margin=71
+  r1 #14 A fc_kr_births_2026_07     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #15 B fc_de_cars_2026_09       v2.8r   noown=False tag=repB_v28r_r1           root=D:/triangulate-agent-rep/v28r margin=20
+  r1 #16 B fc_de_cars_2026_09       v2.16e  noown=False tag=repB_v216e_r1          root=D:/triangulate-agent-rep/v216e margin=23
+  r1 #17 A fc_jp_movers_2026_08     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #18 A fc_us_retail_2026_06     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #19 B fc_lhr_pax_2026_09       v2.11f  noown=False tag=repB_v211f_r1          root=D:/triangulate-agent-rep/v211f margin=20
+  r1 #20 A fc_tw_births_2026_09     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #21 B fc_kr_births_2026_07     v2.1*   noown=False tag=repB_v21s_r1           root=D:/triangulate-agent-rep/v21s margin=71
+  r1 #22 A fc_de_cars_2026_09       v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #23 B fc_jnto_2026_08          v2.1*   noown=True  tag=repB_v21s_r1_noown     root=D:/triangulate-agent-rep/v21s margin=71
+  r1 #24 B fc_us_retail_2026_06     v2.12a  noown=False tag=repB_v212a_r1          root=D:/triangulate-agent-rep/v212a margin=20
+  r1 #25 A fc_cn_profits_2026_09    v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #26 A fc_yell_2026_09          v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #27 A fc_uk_insolv_2026_08     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #28 A fc_lhr_pax_2026_09       v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #29 B fc_yell_2026_09          v2.1*   noown=True  tag=repB_v21s_r1_noown     root=D:/triangulate-agent-rep/v21s margin=71
+  r1 #30 A fc_nhs_ae_2026_09        v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #31 A fc_us_starts_2026_08     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #32 A fc_ca_rail_2026_07       v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #33 A fc_jnto_2026_08          v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #34 A fc_jp_births_2026_07     v2.17a  noown=False tag=rep217a_r1             root=D:/triangulate-agent margin=27
+  r1 #35 B fc_jp_movers_2026_08     v2.11f  noown=False tag=repB_v211f_r1          root=D:/triangulate-agent-rep/v211f margin=20
+  r2 # 1 A fc_yell_2026_09          v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 # 2 A fc_lhr_pax_2026_09       v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 # 3 B fc_de_cars_2026_09       v2.16e  noown=False tag=repB_v216e_r2          root=D:/triangulate-agent-rep/v216e margin=23
+  r2 # 4 A fc_tw_visitors_2026_09   v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 # 5 A fc_de_cars_2026_09       v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 # 6 B fc_lhr_pax_2026_09       v2.11f  noown=False tag=repB_v211f_r2          root=D:/triangulate-agent-rep/v211f margin=20
+  r2 # 7 A fc_us_retail_2026_06     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 # 8 A fc_nz_exports_2026_03    v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 # 9 A fc_yell_2026_08          v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #10 B fc_kr_births_2026_07     v2.1*   noown=False tag=repB_v21s_r2           root=D:/triangulate-agent-rep/v21s margin=71
+  r2 #11 B fc_de_cars_2026_09       v2.8r   noown=False tag=repB_v28r_r2           root=D:/triangulate-agent-rep/v28r margin=20
+  r2 #12 B fc_kr_births_2026_07     v2.1*   noown=True  tag=repB_v21s_r2_noown     root=D:/triangulate-agent-rep/v21s margin=71
+  r2 #13 A fc_uk_insolv_2026_08     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #14 A fc_pola_teu_2026_09      v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #15 A fc_jp_movers_2026_08     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #16 B fc_jnto_2026_08          v2.1b   noown=False tag=repB_v21b_r2           root=D:/triangulate-agent-rep/v21b margin=62
+  r2 #17 A fc_jp_births_2026_07     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #18 B fc_jp_movers_2026_08     v2.11f  noown=False tag=repB_v211f_r2          root=D:/triangulate-agent-rep/v211f margin=20
+  r2 #19 A fc_es_transit_2026_08    v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #20 A fc_tw_births_2026_09     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #21 A fc_cn_retail_2026_04     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #22 A fc_ca_rail_2026_07       v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #23 A fc_us_starts_2026_08     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #24 A fc_jnto_2026_08          v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #25 A fc_hk_visitors_2026_09   v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #26 B fc_de_cars_2026_09       v2.11g  noown=False tag=repB_v211g_r2          root=D:/triangulate-agent-rep/v211g margin=20
+  r2 #27 B fc_de_cars_2026_09       v2.11f  noown=False tag=repB_v211f_r2          root=D:/triangulate-agent-rep/v211f margin=20
+  r2 #28 A fc_kr_births_2026_07     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #29 A fc_nhs_ae_2026_09        v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #30 B fc_yell_2026_09          v2.1*   noown=True  tag=repB_v21s_r2_noown     root=D:/triangulate-agent-rep/v21s margin=71
+  r2 #31 B fc_us_retail_2026_06     v2.12a  noown=False tag=repB_v212a_r2          root=D:/triangulate-agent-rep/v212a margin=20
+  r2 #32 A fc_kr_online_2026_08     v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #33 A fc_us_gen_2026_07        v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r2 #34 B fc_jnto_2026_08          v2.1*   noown=True  tag=repB_v21s_r2_noown     root=D:/triangulate-agent-rep/v21s margin=71
+  r2 #35 A fc_cn_profits_2026_09    v2.17a  noown=False tag=rep217a_r2             root=D:/triangulate-agent margin=27
+  r3 # 1 A fc_nhs_ae_2026_09        v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 # 2 A fc_jp_births_2026_07     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 # 3 A fc_uk_insolv_2026_08     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 # 4 A fc_jp_movers_2026_08     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 # 5 A fc_pola_teu_2026_09      v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 # 6 A fc_nz_exports_2026_03    v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 # 7 A fc_tw_visitors_2026_09   v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 # 8 A fc_jnto_2026_08          v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 # 9 A fc_tw_births_2026_09     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #10 A fc_yell_2026_08          v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #11 A fc_us_starts_2026_08     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #12 A fc_de_cars_2026_09       v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #13 A fc_us_retail_2026_06     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #14 A fc_ca_rail_2026_07       v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #15 A fc_yell_2026_09          v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #16 A fc_hk_visitors_2026_09   v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #17 A fc_cn_retail_2026_04     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #18 A fc_kr_births_2026_07     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #19 A fc_lhr_pax_2026_09       v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #20 A fc_kr_online_2026_08     v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #21 A fc_cn_profits_2026_09    v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #22 A fc_us_gen_2026_07        v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27
+  r3 #23 A fc_es_transit_2026_08    v2.17a  noown=False tag=rep217a_r3             root=D:/triangulate-agent margin=27

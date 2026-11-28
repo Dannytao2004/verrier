@@ -1,0 +1,273 @@
+====================================================================================================
+v2.1* code 2bbe8ae tree 2bbe8ae
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', 'PRICES = {"deepseek-flash": {"offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20)}}']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: <no match>
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"', 'if self.aborted or self.usd + self.reserved + amount > self.usd_cap:']
+  pipeline search fee: ['from .search import SEARCH_FEE_ASSUMED_USD, Searcher', 'self.usd_search_fee = 0.0', 'return self.usd_tokens + self.usd_search_fee', 'self.usd_search_fee += float(rec.get("usd_search_fee_assumed") or 0)']
+  search.py endpoint: ['"""SEARCHER：DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。', 'SEARCH_URL = "https://api.deepseek.com/anthropic/v1/messages"', 'def anthropic_usage_to_cost(usage: dict, t: datetime, model: str = MODEL) -> float:']
+  forecast fc_jnto_2026_08 -> {"id": "fc_jnto_2026_08", "as_of": "2026-08-16", "released": "2026-09-16", "answer_value": 3098900,
+  forecast fc_kr_births_2026_07 -> {"id": "fc_kr_births_2026_07", "as_of": "2026-08-23", "released": "2026-09-23", "answer_value": 24275,
+  forecast fc_yell_2026_09 -> {"id": "fc_yell_2026_09", "month": "September 2026", "as_of": "2026-09-06", "released": "2026-10-06",
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.1b code 66e70a8 tree 66e70a8
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', 'PRICES = {"deepseek-flash": {"offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20)}}']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: <no match>
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"', 'if self.aborted or self.usd + self.reserved + amount > self.usd_cap:']
+  pipeline search fee: ['from .search import SEARCH_FEE_ASSUMED_USD, Searcher', 'self.usd_search_fee = 0.0', 'return self.usd_tokens + self.usd_search_fee', 'self.usd_search_fee += float(rec.get("usd_search_fee_assumed") or 0)']
+  search.py endpoint: ['"""SEARCHER：DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。', 'SEARCH_URL = "https://api.deepseek.com/anthropic/v1/messages"', 'def anthropic_usage_to_cost(usage: dict, t: datetime, model: str = MODEL) -> float:']
+  forecast fc_jnto_2026_08 -> {"id": "fc_jnto_2026_08", "as_of": "2026-08-16", "released": "2026-09-16", "answer_value": 3098900,
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.1c-pre (base f5fe773) code f5fe773 tree f5fe773
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', 'PRICES = {"deepseek-flash": {"offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20)}}']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: <no match>
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"', 'if self.aborted or self.usd + self.reserved + amount > self.usd_cap:']
+  pipeline search fee: ['from .search import SEARCH_FEE_ASSUMED_USD, Searcher', 'self.usd_search_fee = 0.0', 'return self.usd_tokens + self.usd_search_fee', 'self.usd_search_fee += float(rec.get("usd_search_fee_assumed") or 0)']
+  search.py endpoint: ['"""SEARCHER：DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。', 'SEARCH_URL = "https://api.deepseek.com/anthropic/v1/messages"', 'def anthropic_usage_to_cost(usage: dict, t: datetime, model: str = MODEL) -> float:']
+  forecast fc_kr_births_2026_07 -> {"id": "fc_kr_births_2026_07", "as_of": "2026-08-23", "released": "2026-09-23", "answer_value": 24275,
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.8r code c64d3a3 tree 48e6b45
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]', 'q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', 'PRICES = {"deepseek-flash": {"offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20)}}']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: <no match>
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"', 'if self.aborted or self.usd + self.reserved + amount > self.usd_cap:']
+  pipeline search fee: ['from .search import SEARCH_FEE_ASSUMED_USD, Searcher', 'self.usd_search_fee = 0.0', 'return self.usd_tokens + self.usd_search_fee', 'self.usd_search_fee += float(rec.get("usd_search_fee_assumed") or 0)']
+  search.py endpoint: ['"""SEARCHER：DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。', 'SEARCH_URL = "https://api.deepseek.com/anthropic/v1/messages"', 'def anthropic_usage_to_cost(usage: dict, t: datetime, model: str = MODEL) -> float:']
+  forecast fc_de_cars_2026_09 -> {"id": "fc_de_cars_2026_09", "set": "test2", "as_of": "2026-09-05", "released": "2026-10-05", "answer_value": 256774,
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.11f code 8e3b64e tree 8e3b64e
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]', 'q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', '"deepseek-flash": {"provider": "deepseek", "offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20),']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: # 环境变量 TRIANGULATE_THINKING，例如 "plan=high,judge=high,repair=high,audit=low,unit_arbiter=low"。
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'int(self.ROUND1_USD_SHARE * self.usd_cap / self.typical_direction_usd(self.model or MODEL))))', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"']
+  pipeline search fee: ['from ..providers import reserve_chars_per_token, search_fee_usd, tokens_for_model', 'self.usd_search_fee = 0.0', '+ profile.get("searches", 0) * search_fee_usd(model))', 'return self.usd_tokens + self.usd_search_fee']
+  search.py endpoint: ['"""SEARCHER：默认是 DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。v2.10a：请求格式、解析和计价交给', 'v2.10b：Claude 走官方 api.anthropic.com 的同一个工具；回复是 pause_turn 时续上（见 Searcher.search）。', 'v2.10c：GPT 走 OpenAI Responses API 的 hosted web_search（解析见 providers.openai_search_unpack）。']
+  forecast fc_de_cars_2026_09 -> {"id": "fc_de_cars_2026_09", "set": "test2", "as_of": "2026-09-05", "released": "2026-10-05", "answer_value": 256774,
+  forecast fc_lhr_pax_2026_09 -> {"id": "fc_lhr_pax_2026_09", "set": "test", "as_of": "2026-09-12", "released": "2026-10-12", "answer_value": 7180000,
+  forecast fc_jp_movers_2026_08 -> {"id": "fc_jp_movers_2026_08", "set": "showcase", "as_of": "2026-08-29", "released": "2026-09-29", "answer_value": 356920,
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.11g code 1ff32f6 tree 1ff32f6
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]', 'q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', '"deepseek-flash": {"provider": "deepseek", "offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20),']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: # 环境变量 TRIANGULATE_THINKING，例如 "plan=high,judge=high,repair=high,audit=low,unit_arbiter=low"。
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'int(self.ROUND1_USD_SHARE * self.usd_cap / self.typical_direction_usd(self.model or MODEL))))', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"']
+  pipeline search fee: ['from ..providers import reserve_chars_per_token, search_fee_usd, tokens_for_model', 'self.usd_search_fee = 0.0', '+ profile.get("searches", 0) * search_fee_usd(model))', 'return self.usd_tokens + self.usd_search_fee']
+  search.py endpoint: ['"""SEARCHER：默认是 DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。v2.10a：请求格式、解析和计价交给', 'v2.10b：Claude 走官方 api.anthropic.com 的同一个工具；回复是 pause_turn 时续上（见 Searcher.search）。', 'v2.10c：GPT 走 OpenAI Responses API 的 hosted web_search（解析见 providers.openai_search_unpack）。']
+  forecast fc_de_cars_2026_09 -> {"id": "fc_de_cars_2026_09", "set": "test2", "as_of": "2026-09-05", "released": "2026-10-05", "answer_value": 256774,
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.12a code cf3413e tree cf3413e
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]', 'q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', '"deepseek-flash": {"provider": "deepseek", "offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20),']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: # 环境变量 TRIANGULATE_THINKING，例如 "plan=high,judge=high,repair=high,audit=low,unit_arbiter=low"。
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'int(self.ROUND1_USD_SHARE * self.usd_cap / self.typical_direction_usd(self.model or MODEL))))', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"']
+  pipeline search fee: ['from ..providers import reserve_chars_per_token, search_fee_usd, tokens_for_model', 'self.usd_search_fee = 0.0', '+ profile.get("searches", 0) * search_fee_usd(model))', 'return self.usd_tokens + self.usd_search_fee']
+  search.py endpoint: ['"""SEARCHER：默认是 DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。v2.10a：请求格式、解析和计价交给', 'v2.10b：Claude 走官方 api.anthropic.com 的同一个工具；回复是 pause_turn 时续上（见 Searcher.search）。', 'v2.10c：GPT 走 OpenAI Responses API 的 hosted web_search（解析见 providers.openai_search_unpack）。']
+  forecast fc_us_retail_2026_06 -> {"id": "fc_us_retail_2026_06", "set": "test3", "as_of": "2026-06-18", "released": "2026-07-16", "answer_value": 768553000000,
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.12a (cn_profits tree) code cf3413e tree f5099a4
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]', 'q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', '"deepseek-flash": {"provider": "deepseek", "offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20),']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: # 环境变量 TRIANGULATE_THINKING，例如 "plan=high,judge=high,repair=high,audit=low,unit_arbiter=low"。
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'int(self.ROUND1_USD_SHARE * self.usd_cap / self.typical_direction_usd(self.model or MODEL))))', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"']
+  pipeline search fee: ['from ..providers import reserve_chars_per_token, search_fee_usd, tokens_for_model', 'self.usd_search_fee = 0.0', '+ profile.get("searches", 0) * search_fee_usd(model))', 'return self.usd_tokens + self.usd_search_fee']
+  search.py endpoint: ['"""SEARCHER：默认是 DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。v2.10a：请求格式、解析和计价交给', 'v2.10b：Claude 走官方 api.anthropic.com 的同一个工具；回复是 pause_turn 时续上（见 Searcher.search）。', 'v2.10c：GPT 走 OpenAI Responses API 的 hosted web_search（解析见 providers.openai_search_unpack）。']
+  forecast fc_cn_profits_2026_09 -> {"id": "fc_cn_profits_2026_09", "set": "test4", "as_of": None, "question": None,
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.16e code b77e098 tree 31e0021
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]', 'q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', '"deepseek-flash": {"provider": "deepseek", "offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20),']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: # 环境变量 TRIANGULATE_THINKING，例如 "plan=high,judge=high,repair=high,audit=low,unit_arbiter=low"。
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'int(self.ROUND1_USD_SHARE * self.usd_cap', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"']
+  pipeline search fee: ['from ..providers import reserve_chars_per_token, role_max_tokens, search_fee_usd, tokens_for_model', 'self.usd_search_fee = 0.0', '+ profile.get("searches", 0) * search_fee_usd(model))', 'return self.usd_tokens + self.usd_search_fee']
+  search.py endpoint: ['"""SEARCHER：默认是 DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。v2.10a：请求格式、解析和计价交给', 'v2.10b：Claude 走官方 api.anthropic.com 的同一个工具；回复是 pause_turn 时续上（见 Searcher.search）。', 'v2.10c：GPT 走 OpenAI Responses API 的 hosted web_search（解析见 providers.openai_search_unpack）。']
+  forecast fc_de_cars_2026_09 -> {"id": "fc_de_cars_2026_09", "set": "test2", "as_of": "2026-09-05", "released": "2026-10-05", "answer_value": 256774,
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']
+====================================================================================================
+v2.17a code 2c69959 tree HEAD
+  agent-code diff code..tree: <none>
+  CLI "--question" -> g.add_argument("--question", action="append", default=[], help="backtest question id (repeatable); default: all")
+  CLI "--tag" -> g.add_argument("--tag", default="", help="write results to results/agent/<id>/<tag>/ (keeps earlier runs)")
+  CLI "--auto-approve" -> g.add_argument("--auto-approve", action="store_true", help="approve the plan without asking (backtests)")
+  CLI "--ablate-own-history" -> g.add_argument("--ablate-own-history", action="store_true",
+  CLI "--ask" -> g.add_argument("--ask", default=None, help="any question about a number you cannot obtain (no scoring)")
+  CLI "--as-of" -> g.add_argument("--as-of", default=None, help="date the agent stands on (YYYY-MM-DD); default today")
+  CLI "--id" -> g.add_argument("--id", default=None, help="result folder name for --ask (default: derived from the question)")
+  run.py RES: RES = RESULTS / "agent"
+  run.py out_dir: ['out_dir = RES / q["id"] / tag if tag else RES / q["id"]', 'q, g, cfg, ctx, out_dir = h["q"], h["g"], h["cfg"], h["ctx"], h["out_dir"]']
+  run.py ablation_tag: ['def ablation_tag(tag: str) -> str:', '"""消融运行的结果单独放：tag 不以 noown 结尾就补上（v2 -> v2_noown；空 -> noown），不会覆盖正常运行。"""', 'return tag if tag.endswith("noown") else (f"{tag}_noown" if tag else "noown")']
+  run.py calls rename: calls.rename(out_dir / f"calls.before_{stamp}.jsonl")
+  run.py summary file: name = f"summary_{tag}.json" if tag else "summary.json"
+  config KEY_FILE: KEY_FILE = Path(os.environ.get("TRIANGULATE_KEY_FILE", str(ROOT / ".env")))
+  config MODEL: MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")
+  config API_URL: API_URL = "https://api.deepseek.com/chat/completions"
+  config deepseek-flash price: ['MODEL = os.environ.get("TRIANGULATE_MODEL", "deepseek-flash")', '"deepseek-flash": {"provider": "deepseek", "offpeak": (0.003, 0.15, 0.60), "peak": (0.006, 0.30, 1.20),']
+  config is_peak body: return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+  config THINKING env: # 环境变量 TRIANGULATE_THINKING，例如 "plan=high,judge=high,repair=high,audit=low,unit_arbiter=low"。
+  config CONCURRENCY: MAX_CONCURRENCY = int(os.environ.get("TRIANGULATE_CONCURRENCY", "4"))
+  pipeline RUN_USD_CAP: ['self.usd_cap, self.pages_cap, self.round1_pages = usd, pages, round1_pages', 'int(self.ROUND1_USD_SHARE * self.usd_cap', 'if self.usd > self.usd_cap and not self.aborted:', 'self.aborted = f"usd cap {self.usd_cap} exceeded ({self.usd:.4f})"']
+  pipeline search fee: ['from ..providers import reserve_chars_per_token, role_max_tokens, search_fee_usd, tokens_for_model', 'self.usd_search_fee = 0.0', '+ profile.get("searches", 0) * search_fee_usd(model))', 'return self.usd_tokens + self.usd_search_fee']
+  search.py endpoint: ['"""SEARCHER：默认是 DeepSeek 的 Anthropic 兼容接口 + 服务端 web_search 工具。v2.10a：请求格式、解析和计价交给', 'v2.10b：Claude 走官方 api.anthropic.com 的同一个工具；回复是 pause_turn 时续上（见 Searcher.search）。', 'v2.10c：GPT 走 OpenAI Responses API 的 hosted web_search（解析见 providers.openai_search_unpack）。']
+  fetch.py cache: ['CACHE = RAW_AGENT / "_cache"']

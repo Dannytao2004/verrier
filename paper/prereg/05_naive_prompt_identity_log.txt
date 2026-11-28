@@ -1,0 +1,8 @@
+HEAD config naive max_tokens line: ['    "naive": 500,            # arm (1) 直接问']
+2026-10-15T05:51:38+00:00 commit 3a9cca5 identical to HEAD: {'NAIVE_SYSTEM': True, 'USER': True, 'unit_display': True, '_messages': True} | naive max_tokens line: <none>
+2026-10-15T09:23:35+00:00 commit 2bbe8ae identical to HEAD: {'NAIVE_SYSTEM': True, 'USER': True, 'unit_display': True, '_messages': True} | naive max_tokens line: <none>
+2026-10-15T18:35:03+00:00 commit 9797df8 identical to HEAD: {'NAIVE_SYSTEM': True, 'USER': True, 'unit_display': True, '_messages': True} | naive max_tokens line: <none>
+2026-10-16T09:05:17+00:00 commit ecf5a15 identical to HEAD: {'NAIVE_SYSTEM': True, 'USER': True, 'unit_display': True, '_messages': True} | naive max_tokens line: <none>
+2026-10-19T08:47:53+00:00 commit 48e6b45 identical to HEAD: {'NAIVE_SYSTEM': True, 'USER': True, 'unit_display': True, '_messages': True} | naive max_tokens line: ['"naive": 500,            # arm (1) 直接问']
+2026-10-23T23:14:27+00:00 commit cf3413e identical to HEAD: {'NAIVE_SYSTEM': True, 'USER': True, 'unit_display': True, '_messages': True} | naive max_tokens line: ['"naive": 500,            # arm (1) 直接问']
+2026-10-24T05:00:01+00:00 commit f5099a4 identical to HEAD: {'NAIVE_SYSTEM': True, 'USER': True, 'unit_display': True, '_messages': True} | naive max_tokens line: ['"naive": 500,            # arm (1) 直接问']

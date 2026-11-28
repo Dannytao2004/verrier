@@ -1,0 +1,35 @@
+== 1ff32f6ab0 2026-10-22T22:40:50-05:00 v2.11g: share-of-period totals are counts in unit review; CJK compound
+   copy 28d973ffbe: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+   copy d727f9c2a1: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+   copy fbedc55f30: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+== 2bbe8aef41 2026-10-15T04:23:28-05:00 v2.1: allow change factors and shares as assumptions, code calendar co
+   copy c97016713e: triangulate/ tree identical
+== 2c69959840 2026-11-24T20:42:54-06:00 v2.17a: number format decided per page (S24): '.' groups thousands on 
+   copy 92ede20904: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 6 changed lines, 0 non-comment
+== 31e0021dd5 2026-11-24T17:51:26-06:00 probes/run_v216_groups.py: run the v2.16 regression in the pre-registe
+   copy 7d42fd8e10: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 10 changed lines, 0 non-comment
+   copy 7d730bd49f: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 10 changed lines, 0 non-comment
+   copy a8d9bde09d: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 6 changed lines, 0 non-comment
+== 48e6b45082 2026-10-19T03:18:18-05:00 BUGS: attribute S23 (Mexico) root cause to S24 number formats; extend 
+   copy 18f55c984d: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+   copy 3fda35ed96: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+   copy 6ba0e0f206: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+== 66e70a8808 2026-10-15T05:20:26-05:00 v2.1b: independent input audit (role vs evidence) before compute; keep
+   copy 8f30cd7d42: triangulate/ tree identical
+== 8e3b64ed32 2026-10-22T20:04:24-05:00 v2.11f: existing-data pre-step before data gathering
+   copy 0c94159696: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+   copy 997cf467cb: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+   copy fc68d6f697: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+== b77e098b68 2026-11-24T17:36:27-06:00 v2.16e: keep the raw reply for repaired judge JSON too
+   copy 1e4f2b5241: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 6 changed lines, 0 non-comment
+   copy ddadbf958b: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 10 changed lines, 0 non-comment
+   copy eb1634c525: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 10 changed lines, 0 non-comment
+== c64d3a3005 2026-10-18T17:29:00-05:00 v2.8r: a point's number and unit are paired; a multiplier lives in one
+   copy 258a53dd9c: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+   copy 616271c159: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+   copy d207527c8a: triangulate/ differs in ['triangulate/agent/compute.py']: 2 changed lines, 0 non-comment
+== cf3413e49b 2026-10-23T18:04:33-05:00 v2.12a: held-out test 3 runner, four new questions, big-number leak fo
+   copy 338416f816: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 4 changed lines, 0 non-comment
+   copy 417afa71bf: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 4 changed lines, 0 non-comment
+   copy c1b20f7a5e: triangulate/ differs in ['triangulate/agent/compute.py', 'triangulate/forecast.py']: 4 changed lines, 0 non-comment
+[1] 10 batch commits, 24 other copies; every copy has the same triangulate/ code (differences in comment lines only): True

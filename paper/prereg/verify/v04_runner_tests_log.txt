@@ -1,0 +1,97 @@
+PASS pending_infra lists the 402 run and the interrupted run
+   round 2 prerequisites: ["round 1 has 2 infrastructure failures or interrupted runs without their once-only re-run (--round 1 --rerun-infra) or an abandoned cell: ['fc_hk_visitors_2026_09/rep217a_r1', 'fc_kr_online_2026_08/rep217a_r1']"]
+PASS round 2 blocked while round-1 infra re-runs are pending
+PASS --rerun-infra plans exactly the two runs under their rerun_tag
+PASS the interrupted run is logged as infra_interrupted
+PASS a start younger than 2 x timeout is not re-run
+   round 2 prerequisites after the re-runs: []
+PASS round 2 allowed after the re-runs (30 h gap, different day)
+PASS abandoned cells clear the pending list
+PASS Mon 00:35 + 20 min ok, + 27 min not ok (peak 01:00)
+PASS is_peak Mon 01:00 True, Sat 02:00 False
+   classify_infra over 233 archive dirs: {None: 226, 'http_402': 7}
+PASS archive: only the 7 *_402 runs are infra
+PASS 400 on one call of a run with an estimate is an outcome
+PASS 400 on a run without an estimate is api_rejected_400
+   call_facts(fc_lhr_pax_2026_09/v216_reg): {'http_codes': {'200': 99}, 'plan_prompt_tokens': 1801}
+PASS call_facts finds the plan prompt tokens
+{
+ "decided_at": "2026-11-27T22:14:59+00:00",
+ "checked_at": "2026-11-27T22:14:37+00:00",
+ "decision": "GO",
+ "hits": 0,
+ "p_shift_one_sided": 1.0,
+ "n_shift": 0,
+ "median_e_old": 0.11096809707685741,
+ "median_e_new": 0.11096809707685741,
+ "n_identical_answers": 23,
+ "n_prompt_tokens_differ": 0,
+ "tokenizer_or_hosted_request_changed": false,
+ "excluded_questions": []
+}
+PASS identical answers -> GO, 23 identical, 0 hits
+{
+ "decided_at": "2026-11-27T22:14:59+00:00",
+ "checked_at": "2026-11-27T22:14:37+00:00",
+ "decision": "STOP",
+ "hits": 4,
+ "p_shift_one_sided": 0.0625,
+ "n_shift": 4,
+ "median_e_old": 0.11096809707685741,
+ "median_e_new": 0.0606404873269067,
+ "n_identical_answers": 19,
+ "n_prompt_tokens_differ": 0,
+ "tokenizer_or_hosted_request_changed": false,
+ "excluded_questions": []
+}
+PASS 4 exact-truth answers -> STOP (hits 4)
+{
+ "decided_at": "2026-11-27T22:14:59+00:00",
+ "checked_at": "2026-11-27T22:14:37+00:00",
+ "decision": "EXCLUDE",
+ "hits": 1,
+ "p_shift_one_sided": 0.5,
+ "n_shift": 1,
+ "median_e_old": 0.11096809707685741,
+ "median_e_new": 0.10137600265278474,
+ "n_identical_answers": 22,
+ "n_prompt_tokens_differ": 0,
+ "tokenizer_or_hosted_request_changed": false,
+ "excluded_questions": [
+  "fc_de_cars_2026_09"
+ ]
+}
+PASS 1 exact-truth answer -> EXCLUDE that question
+{
+ "decided_at": "2026-11-27T22:14:59+00:00",
+ "checked_at": "2026-11-27T22:14:37+00:00",
+ "decision": "STOP",
+ "hits": 4,
+ "p_shift_one_sided": 0.0625,
+ "n_shift": 4,
+ "median_e_old": 0.11096809707685741,
+ "median_e_new": 0.0606404873269067,
+ "n_identical_answers": 19,
+ "n_prompt_tokens_differ": 23,
+ "tokenizer_or_hosted_request_changed": true,
+ "excluded_questions": []
+}
+PASS tokenizer change: shift test still uses all 23, flag set
+{
+ "decided_at": "2026-11-27T22:14:59+00:00",
+ "checked_at": "2026-11-27T22:14:37+00:00",
+ "decision": "EXCLUDE",
+ "hits": 0,
+ "p_shift_one_sided": 1.0,
+ "n_shift": 0,
+ "median_e_old": 0.11096809707685741,
+ "median_e_new": 0.1124604885764443,
+ "n_identical_answers": 22,
+ "n_prompt_tokens_differ": 0,
+ "tokenizer_or_hosted_request_changed": false,
+ "excluded_questions": [
+  "fc_ca_rail_2026_07"
+ ]
+}
+PASS an invalid new answer -> EXCLUDE that question
+ALL PASS

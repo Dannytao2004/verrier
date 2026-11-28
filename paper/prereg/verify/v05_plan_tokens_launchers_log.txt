@@ -1,0 +1,37 @@
+[b] first plan-call prompt_tokens within same-configuration archive cells (thinking-off; version, question)
+    fc_jp_movers_2026_08     v2.11g|think=False|noown=False|deepseek-flash [('fc_jp_movers_2026_08/v211g_check', 1824), ('fc_jp_movers_2026_08/v211g_reg', 1824)]
+    fc_kr_online_2026_08     v2.11g|think=False|noown=False|deepseek-flash [('fc_kr_online_2026_08/v211g_check', 1838), ('fc_kr_online_2026_08/v211g_reg', 1838)]
+    fc_lhr_pax_2026_09       v2.11g|think=False|noown=False|deepseek-flash [('fc_lhr_pax_2026_09/v211g_check', 1801), ('fc_lhr_pax_2026_09/v211g_reg', 1801)]
+    cells with >= 2 runs: 3; equal plan prompt_tokens: 3
+    reference values for the pool-B cells (original catastrophic run):
+      fc_de_cars_2026_09/test2             plan prompt_tokens = 1825
+      fc_de_cars_2026_09/v211_reg          plan prompt_tokens = 1825
+      fc_de_cars_2026_09/v211g_reg         plan prompt_tokens = 1825
+      fc_de_cars_2026_09/v216_reg          plan prompt_tokens = 1825
+      fc_jnto_2026_08/v21_noown            plan prompt_tokens = 1478
+      fc_jnto_2026_08/v21b                 plan prompt_tokens = 1478
+      fc_jp_movers_2026_08/v211_reg        plan prompt_tokens = 1824
+      fc_kr_births_2026_07/v21             plan prompt_tokens = 1474
+      fc_kr_births_2026_07/v21_noown       plan prompt_tokens = 1474
+      fc_lhr_pax_2026_09/v211_reg          plan prompt_tokens = 1801
+      fc_us_retail_2026_06/test3           plan prompt_tokens = 1862
+      fc_yell_2026_09/v21_noown            plan prompt_tokens = 1474
+    v2.17a archive runs (pool-A references):
+      fc_ca_rail_2026_07/v216_reg          plan prompt_tokens = 1818
+      fc_de_cars_2026_09/v217a_try         plan prompt_tokens = 1825
+      fc_es_transit_2026_08/v216_reg       plan prompt_tokens = 1840
+      fc_hk_visitors_2026_09/v216_reg      plan prompt_tokens = 1818
+      fc_jp_births_2026_07/v216_reg        plan prompt_tokens = 1816
+      fc_kr_online_2026_08/v216_reg        plan prompt_tokens = 1838
+      fc_lhr_pax_2026_09/v216_reg          plan prompt_tokens = 1801
+      fc_pola_teu_2026_09/v216_reg         plan prompt_tokens = 1830
+      fc_tw_births_2026_09/v216_reg        plan prompt_tokens = 1805
+      fc_us_starts_2026_08/v216_reg        plan prompt_tokens = 1840
+[c] launchers of the v2.1* / v2.1b originals
+    tag v21        : started_at values ['20261015T092411Z']
+    tag v21_noown  : started_at values ['20261015T092411Z']
+    tag v21b       : started_at values ['20261015T102028Z']
+    tag v21b_noown : started_at values ['20261015T102028Z']
+    run_v21.log: 8 plan lines, 8 'done in' lines (several questions interleaved in one log)
+    run_v21b.log: 8 plan lines, 8 'done in' lines (several questions interleaved in one log)
+    probes/run_v2_backtests.py at 2bbe8ae uses ThreadPoolExecutor: True | docstring mentions shared net.LIMITER: True

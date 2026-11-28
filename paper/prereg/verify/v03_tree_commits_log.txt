@@ -1,0 +1,34 @@
+fc_de_cars_2026_09/test2             start=2026-10-19T08:34:42+00:00 tree=48e6b45 code=c64d3a3 exists=True on_main=True latest_before(author)=48e6b45 latest_before(committer)=48e6b45 match_author=True match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): triangulate/forecast.py | 148 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 148 insertions(+)
+fc_de_cars_2026_09/v211_reg          start=2026-10-23T02:06:29+00:00 tree=8e3b64e code=8e3b64e exists=True on_main=True latest_before(author)=d28f96b latest_before(committer)=8e3b64e match_author=False match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_de_cars_2026_09/v211g_reg         start=2026-10-23T04:22:16+00:00 tree=1ff32f6 code=1ff32f6 exists=True on_main=True latest_before(author)=d28f96b latest_before(committer)=1ff32f6 match_author=False match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_de_cars_2026_09/v216_reg          start=2026-11-24T23:51:33+00:00 tree=31e0021 code=b77e098 exists=True on_main=True latest_before(author)=d28f96b latest_before(committer)=31e0021 match_author=False match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_jnto_2026_08/v21_noown            start=2026-10-15T09:24:11+00:00 tree=2bbe8ae code=2bbe8ae exists=True on_main=True latest_before(author)=2bbe8ae latest_before(committer)=2bbe8ae match_author=True match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_jnto_2026_08/v21b                 start=2026-10-15T10:20:28+00:00 tree=66e70a8 code=66e70a8 exists=True on_main=True latest_before(author)=66e70a8 latest_before(committer)=66e70a8 match_author=True match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_jp_movers_2026_08/v211_reg        start=2026-10-23T02:49:44+00:00 tree=8e3b64e code=8e3b64e exists=True on_main=True latest_before(author)=d28f96b latest_before(committer)=8e3b64e match_author=False match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_kr_births_2026_07/v21             start=2026-10-15T09:24:11+00:00 tree=2bbe8ae code=2bbe8ae exists=True on_main=True latest_before(author)=2bbe8ae latest_before(committer)=2bbe8ae match_author=True match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_kr_births_2026_07/v21_noown       start=2026-10-15T09:24:11+00:00 tree=2bbe8ae code=2bbe8ae exists=True on_main=True latest_before(author)=2bbe8ae latest_before(committer)=2bbe8ae match_author=True match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_lhr_pax_2026_09/v211_reg          start=2026-10-23T02:44:51+00:00 tree=8e3b64e code=8e3b64e exists=True on_main=True latest_before(author)=d28f96b latest_before(committer)=8e3b64e match_author=False match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_us_retail_2026_06/test3           start=2026-10-23T23:22:14+00:00 tree=cf3413e code=cf3413e exists=True on_main=True latest_before(author)=d28f96b latest_before(committer)=cf3413e match_author=False match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+fc_yell_2026_09/v21_noown            start=2026-10-15T09:24:11+00:00 tree=2bbe8ae code=2bbe8ae exists=True on_main=True latest_before(author)=2bbe8ae latest_before(committer)=2bbe8ae match_author=True match_committer=True
+    agent-code diff code..tree (incl. __main__, forecast, units, arms): <none>
+HEAD:triangulate 7eaec1e42547889eb7b911fd6cd69ced854f33bf  v2.17a:triangulate f3cad700d9da1c7db19e6058c537d69037c97f6c
+diff v2.17a HEAD -- triangulate: triangulate/forecast.py        | 2 +-
+ triangulate/showcase_engine.py | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+diff v2.17a HEAD -- triangulate, non-comment changed lines:
+    COMMENT -# 留出测试 2（2026-10-18 选定，代码冻结在 frozen-v2.8r = 616271c，在任何模型调用之前提交；见 EVAL_TEST2_PLAN.md）。
+    COMMENT +# 留出测试 2（2026-10-18 选定，代码冻结在 frozen-v2.8r = c64d3a3，在任何模型调用之前提交；见 EVAL_TEST2_PLAN.md）。
+    COMMENT -# showcase1 打分专用的冻结 engine：commit f1ac7b0 的 triangulate/engine.py 逐字拷贝（只加了这两行注释）。
+    COMMENT +# showcase1 打分专用的冻结 engine：commit b81384f 的 triangulate/engine.py 逐字拷贝（只加了这两行注释）。

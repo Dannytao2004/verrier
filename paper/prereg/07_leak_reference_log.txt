@@ -1,0 +1,24 @@
+fc_ca_rail_2026_07 | results/forecast/raw/naive/fc_ca_rail_2026_07.json | at 2026-10-19T08:47:53+00:00 | ptok 209 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_cn_profits_2026_09 | results/test4/raw/naive_off/fc_cn_profits_2026_09.json | at 2026-10-24T05:00:01+00:00 | ptok 254 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.with_as_of(question_template, as_of) 2026-10-24
+fc_cn_retail_2026_04 | results/test3/raw/naive_off/fc_cn_retail_2026_04.json | at 2026-10-23T23:14:17+00:00 | ptok 250 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_de_cars_2026_09 | results/forecast/raw/naive/fc_de_cars_2026_09.json | at 2026-10-19T08:47:53+00:00 | ptok 224 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_es_transit_2026_08 | results/forecast/raw/naive/fc_es_transit_2026_08.json | at 2026-10-19T08:47:53+00:00 | ptok 238 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_hk_visitors_2026_09 | results/forecast/raw/naive/fc_hk_visitors_2026_09.json | at 2026-10-19T08:47:53+00:00 | ptok 217 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_jnto_2026_08 | results/forecast/raw/naive/fc_jnto_2026_08.json | at 2026-10-15T09:23:35+00:00 | ptok 212 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_jp_births_2026_07 | results/forecast/raw/naive/fc_jp_births_2026_07.json | at 2026-10-15T18:35:03+00:00 | ptok 214 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_jp_movers_2026_08 | results/forecast/raw/naive/fc_jp_movers_2026_08.json | at 2026-10-16T09:05:17+00:00 | ptok 224 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_kr_births_2026_07 | results/forecast/raw/naive/fc_kr_births_2026_07.json | at 2026-10-15T09:23:35+00:00 | ptok 208 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_kr_online_2026_08 | results/forecast/raw/naive/fc_kr_online_2026_08.json | at 2026-10-19T08:47:53+00:00 | ptok 229 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_lhr_pax_2026_09 | results/forecast/raw/naive/fc_lhr_pax_2026_09.json | at 2026-10-15T18:35:03+00:00 | ptok 199 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_nhs_ae_2026_09 | results/forecast/raw/naive/fc_nhs_ae_2026_09.json | at 2026-10-16T09:05:17+00:00 | ptok 225 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_nz_exports_2026_03 | results/test3/raw/naive_off/fc_nz_exports_2026_03.json | at 2026-10-23T23:14:44+00:00 | ptok 217 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_pola_teu_2026_09 | results/forecast/raw/naive/fc_pola_teu_2026_09.json | at 2026-10-19T08:47:53+00:00 | ptok 229 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_tw_births_2026_09 | results/forecast/raw/naive/fc_tw_births_2026_09.json | at 2026-10-15T18:35:03+00:00 | ptok 203 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_tw_visitors_2026_09 | results/test4/raw/naive_off/fc_tw_visitors_2026_09.json | at 2026-10-24T05:11:12+00:00 | ptok 237 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.with_as_of(question_template, as_of) 2026-10-24
+fc_uk_insolv_2026_08 | results/test3/raw/naive_off/fc_uk_insolv_2026_08.json | at 2026-10-23T23:14:39+00:00 | ptok 253 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_us_gen_2026_07 | results/forecast/raw/naive/fc_us_gen_2026_07.json | at 2026-10-19T08:47:53+00:00 | ptok 240 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_us_retail_2026_06 | results/test3/raw/naive_off/fc_us_retail_2026_06.json | at 2026-10-23T23:14:27+00:00 | ptok 252 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_us_starts_2026_08 | results/forecast/raw/naive/fc_us_starts_2026_08.json | at 2026-10-19T08:47:53+00:00 | ptok 245 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_yell_2026_08 | results/forecast/raw/naive/fc_yell_2026_08.json | at 2026-10-15T05:51:38+00:00 | ptok 208 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+fc_yell_2026_09 | results/forecast/raw/naive/fc_yell_2026_09.json | at 2026-10-15T05:51:38+00:00 | ptok 208 | n_att1 1 | final_attempt 1 | problems [] | think {} | forecast.QUESTIONS[question] None
+questions with a reference: 23 of 23

@@ -1,0 +1,82 @@
+[0] runs.csv rows: 233
+[1] scored runs: 115  questions: 23
+     ['fc_ca_rail_2026_07', 'fc_cn_profits_2026_09', 'fc_cn_retail_2026_04', 'fc_de_cars_2026_09', 'fc_es_transit_2026_08', 'fc_hk_visitors_2026_09', 'fc_jnto_2026_08', 'fc_jp_births_2026_07', 'fc_jp_movers_2026_08', 'fc_kr_births_2026_07', 'fc_kr_online_2026_08', 'fc_lhr_pax_2026_09', 'fc_nhs_ae_2026_09', 'fc_nz_exports_2026_03', 'fc_pola_teu_2026_09', 'fc_tw_births_2026_09', 'fc_tw_visitors_2026_09', 'fc_uk_insolv_2026_08', 'fc_us_gen_2026_07', 'fc_us_retail_2026_06', 'fc_us_starts_2026_08', 'fc_yell_2026_08', 'fc_yell_2026_09']
+[2] catastrophic (flag): 14  (recomputed |ln err|>ln2): 14  same set: True
+    questions with a catastrophic run: 8
+    fc_cn_profits_2026_09/test4                   ver=v2.12a                 commit=cf3413e49b think=False noown=False conf=date-based                     ln_err=-18.460 n_same_cfg_scored=1 key=v2.12a|think=False|noown=False|deepseek-flash
+    fc_de_cars_2026_09/test2                      ver=v2.8r                  commit=c64d3a3005 think=False noown=False conf=date-based                     ln_err=-6.940 n_same_cfg_scored=1 key=v2.8r|think=False|noown=False|deepseek-flash
+    fc_de_cars_2026_09/v211_reg                   ver=v2.11f                 commit=8e3b64ed32 think=False noown=False conf=date-based                     ln_err=-6.984 n_same_cfg_scored=1 key=v2.11f|think=False|noown=False|deepseek-flash
+    fc_de_cars_2026_09/v211g_reg                  ver=v2.11g                 commit=1ff32f6ab0 think=False noown=False conf=date-based                     ln_err=-1.180 n_same_cfg_scored=1 key=v2.11g|think=False|noown=False|deepseek-flash
+    fc_de_cars_2026_09/v216_reg                   ver=v2.16e                 commit=b77e098b68 think=False noown=False conf=date-based                     ln_err=-6.962 n_same_cfg_scored=1 key=v2.16e|think=False|noown=False|deepseek-flash
+    fc_jnto_2026_08/v21_noown                     ver=v2.1*                  commit=2bbe8aef41 think=False noown=True  conf=date-based                     ln_err=-6.267 n_same_cfg_scored=1 key=v2.1*|think=False|noown=True|deepseek-flash
+    fc_jnto_2026_08/v21b                          ver=v2.1b                  commit=66e70a8808 think=False noown=False conf=date-based                     ln_err=+1.040 n_same_cfg_scored=1 key=v2.1b|think=False|noown=False|deepseek-flash
+    fc_jp_movers_2026_08/v211_reg                 ver=v2.11f                 commit=8e3b64ed32 think=False noown=False conf=date-based                     ln_err=-1.044 n_same_cfg_scored=1 key=v2.11f|think=False|noown=False|deepseek-flash
+    fc_kr_births_2026_07/v21                      ver=v2.1*                  commit=2bbe8aef41 think=False noown=False conf=date-based                     ln_err=-2.041 n_same_cfg_scored=1 key=v2.1*|think=False|noown=False|deepseek-flash
+    fc_kr_births_2026_07/v21_noown                ver=v2.1*                  commit=2bbe8aef41 think=False noown=True  conf=date-based                     ln_err=-11.986 n_same_cfg_scored=1 key=v2.1*|think=False|noown=True|deepseek-flash
+    fc_kr_births_2026_07/v21c                     ver=v2.1c-pre              commit=0d5c68c00c think=False noown=False conf=override (documented)          ln_err=-1.041 n_same_cfg_scored=1 key=v2.1c-pre|think=False|noown=False|deepseek-flash
+    fc_lhr_pax_2026_09/v211_reg                   ver=v2.11f                 commit=8e3b64ed32 think=False noown=False conf=date-based                     ln_err=-0.820 n_same_cfg_scored=1 key=v2.11f|think=False|noown=False|deepseek-flash
+    fc_us_retail_2026_06/test3                    ver=v2.12a                 commit=cf3413e49b think=False noown=False conf=date-based                     ln_err=-13.818 n_same_cfg_scored=1 key=v2.12a|think=False|noown=False|deepseek-flash
+    fc_yell_2026_09/v21_noown                     ver=v2.1*                  commit=2bbe8aef41 think=False noown=True  conf=date-based                     ln_err=-12.882 n_same_cfg_scored=1 key=v2.1*|think=False|noown=True|deepseek-flash
+[3] scored with estimate: 115  without: 0
+[4] scored (question, config) cells: 112  size distribution: Counter({1: 109, 2: 3})
+     multi: v2.11g|think=False|noown=False|deepseek-flash||fc_jp_movers_2026_08 2
+     multi: v2.11g|think=False|noown=False|deepseek-flash||fc_kr_online_2026_08 2
+     multi: v2.11g|think=False|noown=False|deepseek-flash||fc_lhr_pax_2026_09 2
+[5] thinking among scored: Counter({'False': 88, 'True': 27})
+    model among scored: Counter({'deepseek-flash': 115})
+[6] runs.json: 93  A: 69  B: 24
+    pool A questions == scored questions: True  repeats per question: Counter({3: 23})
+    pool A thinking: Counter({False: 69})  noown: Counter({False: 69})  versions: Counter({'v2.17a': 69})
+    pool A tags per round: [((1, 'rep217a_r1'), 23), ((2, 'rep217a_r2'), 23), ((3, 'rep217a_r3'), 23)]
+    pool B reference runs (n repeats): {'fc_de_cars_2026_09/v211_reg': 2, 'fc_jnto_2026_08/v21b': 2, 'fc_de_cars_2026_09/v211g_reg': 2, 'fc_kr_births_2026_07/v21_noown': 2, 'fc_de_cars_2026_09/test2': 2, 'fc_de_cars_2026_09/v216_reg': 2, 'fc_lhr_pax_2026_09/v211_reg': 2, 'fc_kr_births_2026_07/v21': 2, 'fc_jnto_2026_08/v21_noown': 2, 'fc_us_retail_2026_06/test3': 2, 'fc_yell_2026_09/v21_noown': 2, 'fc_jp_movers_2026_08/v211_reg': 2}
+    pool B refs all catastrophic: True  catastrophic not in pool B: ['fc_cn_profits_2026_09/test4', 'fc_kr_births_2026_07/v21c']
+[7] pool-B same-configuration check (runs.json vs runs.csv reference row)
+    fc_de_cars_2026_09/test2                 tag=repB_v28r_r1           r1 think False/False ok=True noown False/False ok=True code c64d3a3/c64d3a3005 ok=True ver v2.8r/v2.8r model=deepseek-flash
+    fc_de_cars_2026_09/test2                 tag=repB_v28r_r2           r2 think False/False ok=True noown False/False ok=True code c64d3a3/c64d3a3005 ok=True ver v2.8r/v2.8r model=deepseek-flash
+    fc_de_cars_2026_09/v211_reg              tag=repB_v211f_r1          r1 think False/False ok=True noown False/False ok=True code 8e3b64e/8e3b64ed32 ok=True ver v2.11f/v2.11f model=deepseek-flash
+    fc_de_cars_2026_09/v211_reg              tag=repB_v211f_r2          r2 think False/False ok=True noown False/False ok=True code 8e3b64e/8e3b64ed32 ok=True ver v2.11f/v2.11f model=deepseek-flash
+    fc_de_cars_2026_09/v211g_reg             tag=repB_v211g_r1          r1 think False/False ok=True noown False/False ok=True code 1ff32f6/1ff32f6ab0 ok=True ver v2.11g/v2.11g model=deepseek-flash
+    fc_de_cars_2026_09/v211g_reg             tag=repB_v211g_r2          r2 think False/False ok=True noown False/False ok=True code 1ff32f6/1ff32f6ab0 ok=True ver v2.11g/v2.11g model=deepseek-flash
+    fc_de_cars_2026_09/v216_reg              tag=repB_v216e_r1          r1 think False/False ok=True noown False/False ok=True code b77e098/b77e098b68 ok=True ver v2.16e/v2.16e model=deepseek-flash
+    fc_de_cars_2026_09/v216_reg              tag=repB_v216e_r2          r2 think False/False ok=True noown False/False ok=True code b77e098/b77e098b68 ok=True ver v2.16e/v2.16e model=deepseek-flash
+    fc_jnto_2026_08/v21_noown                tag=repB_v21s_r1_noown     r1 think False/False ok=True noown True/True ok=True code 2bbe8ae/2bbe8aef41 ok=True ver v2.1*/v2.1* model=deepseek-flash
+    fc_jnto_2026_08/v21_noown                tag=repB_v21s_r2_noown     r2 think False/False ok=True noown True/True ok=True code 2bbe8ae/2bbe8aef41 ok=True ver v2.1*/v2.1* model=deepseek-flash
+    fc_jnto_2026_08/v21b                     tag=repB_v21b_r1           r1 think False/False ok=True noown False/False ok=True code 66e70a8/66e70a8808 ok=True ver v2.1b/v2.1b model=deepseek-flash
+    fc_jnto_2026_08/v21b                     tag=repB_v21b_r2           r2 think False/False ok=True noown False/False ok=True code 66e70a8/66e70a8808 ok=True ver v2.1b/v2.1b model=deepseek-flash
+    fc_jp_movers_2026_08/v211_reg            tag=repB_v211f_r1          r1 think False/False ok=True noown False/False ok=True code 8e3b64e/8e3b64ed32 ok=True ver v2.11f/v2.11f model=deepseek-flash
+    fc_jp_movers_2026_08/v211_reg            tag=repB_v211f_r2          r2 think False/False ok=True noown False/False ok=True code 8e3b64e/8e3b64ed32 ok=True ver v2.11f/v2.11f model=deepseek-flash
+    fc_kr_births_2026_07/v21                 tag=repB_v21s_r1           r1 think False/False ok=True noown False/False ok=True code 2bbe8ae/2bbe8aef41 ok=True ver v2.1*/v2.1* model=deepseek-flash
+    fc_kr_births_2026_07/v21                 tag=repB_v21s_r2           r2 think False/False ok=True noown False/False ok=True code 2bbe8ae/2bbe8aef41 ok=True ver v2.1*/v2.1* model=deepseek-flash
+    fc_kr_births_2026_07/v21_noown           tag=repB_v21s_r1_noown     r1 think False/False ok=True noown True/True ok=True code 2bbe8ae/2bbe8aef41 ok=True ver v2.1*/v2.1* model=deepseek-flash
+    fc_kr_births_2026_07/v21_noown           tag=repB_v21s_r2_noown     r2 think False/False ok=True noown True/True ok=True code 2bbe8ae/2bbe8aef41 ok=True ver v2.1*/v2.1* model=deepseek-flash
+    fc_lhr_pax_2026_09/v211_reg              tag=repB_v211f_r1          r1 think False/False ok=True noown False/False ok=True code 8e3b64e/8e3b64ed32 ok=True ver v2.11f/v2.11f model=deepseek-flash
+    fc_lhr_pax_2026_09/v211_reg              tag=repB_v211f_r2          r2 think False/False ok=True noown False/False ok=True code 8e3b64e/8e3b64ed32 ok=True ver v2.11f/v2.11f model=deepseek-flash
+    fc_us_retail_2026_06/test3               tag=repB_v212a_r1          r1 think False/False ok=True noown False/False ok=True code cf3413e/cf3413e49b ok=True ver v2.12a/v2.12a model=deepseek-flash
+    fc_us_retail_2026_06/test3               tag=repB_v212a_r2          r2 think False/False ok=True noown False/False ok=True code cf3413e/cf3413e49b ok=True ver v2.12a/v2.12a model=deepseek-flash
+    fc_yell_2026_09/v21_noown                tag=repB_v21s_r1_noown     r1 think False/False ok=True noown True/True ok=True code 2bbe8ae/2bbe8aef41 ok=True ver v2.1*/v2.1* model=deepseek-flash
+    fc_yell_2026_09/v21_noown                tag=repB_v21s_r2_noown     r2 think False/False ok=True noown True/True ok=True code 2bbe8ae/2bbe8aef41 ok=True ver v2.1*/v2.1* model=deepseek-flash
+[8] duplicate (qid, tag): []
+    duplicate (qid, rerun_tag): []
+    batch tags already present in results/agent: []
+[9] per round: [((1, 'A'), 23), ((1, 'B'), 12), ((2, 'A'), 23), ((2, 'B'), 12), ((3, 'A'), 23)]
+    round 1: order_in_round 1..35 contiguous: True
+    round 2: order_in_round 1..35 contiguous: True
+    round 3: order_in_round 1..23 contiguous: True
+[10] noown tag suffix ok: True True
+     B tags: ['repB_v211f_r1', 'repB_v211f_r2', 'repB_v211g_r1', 'repB_v211g_r2', 'repB_v212a_r1', 'repB_v212a_r2', 'repB_v216e_r1', 'repB_v216e_r2', 'repB_v21b_r1', 'repB_v21b_r2', 'repB_v21s_r1', 'repB_v21s_r1_noown', 'repB_v21s_r2', 'repB_v21s_r2_noown', 'repB_v28r_r1', 'repB_v28r_r2']
+     B rerun tags: ['repB_v211f_r1_rerun', 'repB_v211f_r2_rerun', 'repB_v211g_r1_rerun', 'repB_v211g_r2_rerun', 'repB_v212a_r1_rerun', 'repB_v212a_r2_rerun', 'repB_v216e_r1_rerun', 'repB_v216e_r2_rerun', 'repB_v21b_r1_rerun', 'repB_v21b_r2_rerun', 'repB_v21s_r1_rerun', 'repB_v21s_r1_rerun_noown', 'repB_v21s_r2_rerun', 'repB_v21s_r2_rerun_noown', 'repB_v28r_r1_rerun', 'repB_v28r_r2_rerun']
+[11] scored runs on v2.17a*: 11
+     fc_ca_rail_2026_07/v216_reg              think=False noown=False est=True started=2026-11-25T04:58:10+00:00 ver=v2.17a
+     fc_ca_rail_2026_07/v216_reg_think        think=True noown=False est=True started=2026-11-25T04:00:24+00:00 ver=v2.17a
+     fc_de_cars_2026_09/v216_reg_think        think=True noown=False est=True started=2026-11-25T04:20:49+00:00 ver=v2.17a
+     fc_de_cars_2026_09/v217a_try             think=False noown=False est=True started=2026-11-25T03:08:51+00:00 ver=v2.17a
+     fc_hk_visitors_2026_09/v216_reg          think=False noown=False est=True started=2026-11-25T04:58:10+00:00 ver=v2.17a
+     fc_jp_births_2026_07/v216_reg            think=False noown=False est=True started=2026-11-25T04:20:49+00:00 ver=v2.17a
+     fc_kr_online_2026_08/v216_reg            think=False noown=False est=True started=2026-11-25T04:58:10+00:00 ver=v2.17a
+     fc_lhr_pax_2026_09/v216_reg              think=False noown=False est=True started=2026-11-25T04:20:49+00:00 ver=v2.17a
+     fc_pola_teu_2026_09/v216_reg             think=False noown=False est=True started=2026-11-25T04:42:59+00:00 ver=v2.17a
+     fc_tw_births_2026_09/v216_reg            think=False noown=False est=True started=2026-11-25T04:00:24+00:00 ver=v2.17a
+     fc_us_starts_2026_08/v216_reg            think=False noown=False est=True started=2026-11-25T04:42:59+00:00 ver=v2.17a
+[12] catastrophic among scored with estimate: 14 / 115
+     questions with >=3 scored estimates: 17  >=2 core estimates: 21
+     questions with >=3 scored runs (any): 17

@@ -1,0 +1,416 @@
+[
+ {
+  "qid": "fc_ca_rail_2026_07",
+  "source": "results/forecast/raw/naive/fc_ca_rail_2026_07.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-19T08:47:53+00:00",
+  "archived_prompt_tokens": 209,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 32000000.0,
+   "unit": "tonne"
+  },
+  "attempt1_problems": [],
+  "target_unit": "tonne",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_cn_profits_2026_09",
+  "source": "results/test4/raw/naive_off/fc_cn_profits_2026_09.json",
+  "calls_source": "results/test4/raw/naive_off/fc_cn_profits_2026_09.calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-24T05:00:01+00:00",
+  "archived_prompt_tokens": 254,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 5400000000000.0,
+   "unit": "CNY"
+  },
+  "attempt1_problems": [],
+  "target_unit": "CNY",
+  "question_from": "forecast.with_as_of(question_template, as_of)",
+  "as_of_for_template": "2026-10-24"
+ },
+ {
+  "qid": "fc_cn_retail_2026_04",
+  "source": "results/test3/raw/naive_off/fc_cn_retail_2026_04.json",
+  "calls_source": "results/test3/raw/naive_off/fc_cn_retail_2026_04.calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-23T23:14:17+00:00",
+  "archived_prompt_tokens": 250,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 3750000000000.0,
+   "unit": "CNY"
+  },
+  "attempt1_problems": [],
+  "target_unit": "CNY",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_de_cars_2026_09",
+  "source": "results/forecast/raw/naive/fc_de_cars_2026_09.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-19T08:47:53+00:00",
+  "archived_prompt_tokens": 224,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 210000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_es_transit_2026_08",
+  "source": "results/forecast/raw/naive/fc_es_transit_2026_08.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-19T08:47:53+00:00",
+  "archived_prompt_tokens": 238,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 480000000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_hk_visitors_2026_09",
+  "source": "results/forecast/raw/naive/fc_hk_visitors_2026_09.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-19T08:47:53+00:00",
+  "archived_prompt_tokens": 217,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 3200000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_jnto_2026_08",
+  "source": "results/forecast/raw/naive/fc_jnto_2026_08.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-15T09:23:35+00:00",
+  "archived_prompt_tokens": 212,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 3400000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_jp_births_2026_07",
+  "source": "results/forecast/raw/naive/fc_jp_births_2026_07.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-15T18:35:03+00:00",
+  "archived_prompt_tokens": 214,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 65000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_jp_movers_2026_08",
+  "source": "results/forecast/raw/naive/fc_jp_movers_2026_08.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-16T09:05:17+00:00",
+  "archived_prompt_tokens": 224,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 400000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_kr_births_2026_07",
+  "source": "results/forecast/raw/naive/fc_kr_births_2026_07.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-15T09:23:35+00:00",
+  "archived_prompt_tokens": 208,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 19000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_kr_online_2026_08",
+  "source": "results/forecast/raw/naive/fc_kr_online_2026_08.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-19T08:47:53+00:00",
+  "archived_prompt_tokens": 229,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 21500000000000.0,
+   "unit": "KRW"
+  },
+  "attempt1_problems": [],
+  "target_unit": "KRW",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_lhr_pax_2026_09",
+  "source": "results/forecast/raw/naive/fc_lhr_pax_2026_09.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-15T18:35:03+00:00",
+  "archived_prompt_tokens": 199,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 7200000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_nhs_ae_2026_09",
+  "source": "results/forecast/raw/naive/fc_nhs_ae_2026_09.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-16T09:05:17+00:00",
+  "archived_prompt_tokens": 225,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 2100000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_nz_exports_2026_03",
+  "source": "results/test3/raw/naive_off/fc_nz_exports_2026_03.json",
+  "calls_source": "results/test3/raw/naive_off/fc_nz_exports_2026_03.calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-23T23:14:44+00:00",
+  "archived_prompt_tokens": 217,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 6500000000.0,
+   "unit": "NZD"
+  },
+  "attempt1_problems": [],
+  "target_unit": "NZD",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_pola_teu_2026_09",
+  "source": "results/forecast/raw/naive/fc_pola_teu_2026_09.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-19T08:47:53+00:00",
+  "archived_prompt_tokens": 229,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 780000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_tw_births_2026_09",
+  "source": "results/forecast/raw/naive/fc_tw_births_2026_09.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-15T18:35:03+00:00",
+  "archived_prompt_tokens": 203,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 11000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_tw_visitors_2026_09",
+  "source": "results/test4/raw/naive_off/fc_tw_visitors_2026_09.json",
+  "calls_source": "results/test4/raw/naive_off/fc_tw_visitors_2026_09.calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-24T05:11:12+00:00",
+  "archived_prompt_tokens": 237,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 650000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.with_as_of(question_template, as_of)",
+  "as_of_for_template": "2026-10-24"
+ },
+ {
+  "qid": "fc_uk_insolv_2026_08",
+  "source": "results/test3/raw/naive_off/fc_uk_insolv_2026_08.json",
+  "calls_source": "results/test3/raw/naive_off/fc_uk_insolv_2026_08.calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-23T23:14:39+00:00",
+  "archived_prompt_tokens": 253,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 2100,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_us_gen_2026_07",
+  "source": "results/forecast/raw/naive/fc_us_gen_2026_07.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-19T08:47:53+00:00",
+  "archived_prompt_tokens": 240,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 410000,
+   "unit": "GWh"
+  },
+  "attempt1_problems": [],
+  "target_unit": "GWh",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_us_retail_2026_06",
+  "source": "results/test3/raw/naive_off/fc_us_retail_2026_06.json",
+  "calls_source": "results/test3/raw/naive_off/fc_us_retail_2026_06.calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-23T23:14:27+00:00",
+  "archived_prompt_tokens": 252,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 735000000000.0,
+   "unit": "USD"
+  },
+  "attempt1_problems": [],
+  "target_unit": "USD",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_us_starts_2026_08",
+  "source": "results/forecast/raw/naive/fc_us_starts_2026_08.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-19T08:47:53+00:00",
+  "archived_prompt_tokens": 245,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 1350000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_yell_2026_08",
+  "source": "results/forecast/raw/naive/fc_yell_2026_08.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-15T05:51:38+00:00",
+  "archived_prompt_tokens": 208,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 850000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ },
+ {
+  "qid": "fc_yell_2026_09",
+  "source": "results/forecast/raw/naive/fc_yell_2026_09.json",
+  "calls_source": "results/forecast/calls.jsonl",
+  "n_attempt1_calls_logged": 1,
+  "archived_at": "2026-10-15T05:51:38+00:00",
+  "archived_prompt_tokens": 208,
+  "archived_thinking": {},
+  "final_attempt": 1,
+  "attempt1_reply": {
+   "estimate": 720000,
+   "unit": ""
+  },
+  "attempt1_problems": [],
+  "target_unit": "",
+  "question_from": "forecast.QUESTIONS[question]",
+  "as_of_for_template": null
+ }
+]

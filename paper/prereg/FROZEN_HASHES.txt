@@ -1,0 +1,29 @@
+# SHA-256 of the tier-3 pre-registration artifacts, computed 2026-11-27T21:17:07Z before any run, leak check or O2 lookup.
+# PREREG.md hash appended below by p_prereg after its last edit.
+d546eefec0fc0d3cf9badd72fc373fff8a676de64c0e229bfa3fcdf1b2e52344 *paper/_tools/run_repeats.py
+7e210a22ec5484415b52501ef4f6d7b9df7e6db7206a5140355a587192584b49 *paper/prereg/runs.json
+f0279a79243c45726c355e4774e2b3c74311c91a3e7d5df912153156d03cfbf0 *paper/prereg/worktrees.json
+14d7b68a7bcf1fc87bd053f0b9c09915265cdcc1399536c726cb90ef930dcc53 *paper/prereg/excluded_cells.json
+05cbedec6e0d3ce6c0ed9aa6204f5703e6db6fed180090811066be7e700bec10 *paper/prereg/leak_reference.json
+da90645acdc1d8125546139decd8c4e1517bd91dbcdab629bbe198c21add25bf *paper/prereg/prospective_runs.json
+7ee8d97ed5c23da9df5932f348ac09a4c50d5af91ffdbfbb2efaf6dff4d20a47 *paper/prereg/o2_score.py
+57ebdadc31bd20cf62b48409be8060aa409cad3735977ccc6cb7f521bf0cbf88 *paper/prereg/10_build_runs.py
+8224c76ab4ab5f5bbd13a8ea08af56e98a1d5aab4f6a5927450bbc6f4e55b689 *paper/analysis/data/runs.csv
+# git: HEAD 2f9fd9166a02282121baf2dfeb6342eb5f0ae053; HEAD:triangulate 7eaec1e42547889eb7b911fd6cd69ced854f33bf; v2.17a^{commit}:triangulate f3cad700d9da1c7db19e6058c537d69037c97f6c
+7b60b6fd009e0842ab718b75dd37f7aec79bcac1677b8c6355c4d97e91924de2 *paper/prereg/PREREG.md
+a90aec24d98e4bfebd37eab47cf89bb022bfa98587c8f18a6325f1125ba78c5d *paper/prereg/04_cost_cap.py
+# appended 2026-11-27T21:21:46Z
+
+# after v_prereg review (2026-11-27T22:23:04Z): SHA-256 of every file listed above, recomputed after the review edits (PREREG.md, run_repeats.py changed; the rest unchanged)
+5d88a6679b3684d4c7d170f44b1f261e122b14fb00f886ab9c3b80fbe9f406c5 *paper/_tools/run_repeats.py
+7e210a22ec5484415b52501ef4f6d7b9df7e6db7206a5140355a587192584b49 *paper/prereg/runs.json
+f0279a79243c45726c355e4774e2b3c74311c91a3e7d5df912153156d03cfbf0 *paper/prereg/worktrees.json
+14d7b68a7bcf1fc87bd053f0b9c09915265cdcc1399536c726cb90ef930dcc53 *paper/prereg/excluded_cells.json
+05cbedec6e0d3ce6c0ed9aa6204f5703e6db6fed180090811066be7e700bec10 *paper/prereg/leak_reference.json
+da90645acdc1d8125546139decd8c4e1517bd91dbcdab629bbe198c21add25bf *paper/prereg/prospective_runs.json
+7ee8d97ed5c23da9df5932f348ac09a4c50d5af91ffdbfbb2efaf6dff4d20a47 *paper/prereg/o2_score.py
+57ebdadc31bd20cf62b48409be8060aa409cad3735977ccc6cb7f521bf0cbf88 *paper/prereg/10_build_runs.py
+8224c76ab4ab5f5bbd13a8ea08af56e98a1d5aab4f6a5927450bbc6f4e55b689 *paper/analysis/data/runs.csv
+dc7323b9b4fb12b19e4d7e350766e390b8f3ce2e8d8672a4a232155c1f7999f2 *paper/prereg/PREREG.md
+a90aec24d98e4bfebd37eab47cf89bb022bfa98587c8f18a6325f1125ba78c5d *paper/prereg/04_cost_cap.py
+# git: HEAD 2f9fd9166a02282121baf2dfeb6342eb5f0ae053; HEAD:triangulate 7eaec1e42547889eb7b911fd6cd69ced854f33bf; v2.17a^{commit}:triangulate f3cad700d9da1c7db19e6058c537d69037c97f6c

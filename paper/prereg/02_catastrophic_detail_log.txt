@@ -1,0 +1,140 @@
+== fc_jnto_2026_08/v21_noown
+   code_version v2.1* code_commit 2bbe8aef41 confidence: date-based
+   evidence: latest agent-code commit before started_at: 2bbe8ae 'v2.1: allow change factors and shares as assumptions, code calendar co'
+   started 2026-10-15T09:24:11+00:00 | latest commit before start (HEAD history): 2bbe8ae 2026-10-15T04:23:28-05:00 v2.1: allow change factors and shares as assumptions, code calendar constants, one judge repair round; add
+   state keys: ['ablation', 'approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'qid', 'question', 'results', 'started_at', 'tag', 'wall_s']
+   qid fc_jnto_2026_08 as_of 2026-08-16 tag v21_noown model deepseek-flash
+   question: Assume today is 2026-08-16. You know nothing published after this date. Estimate the number of foreign visitor arrivals to Japan in August 2026, as it will be f
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: []
+   ablation: {"own_history": true, "dropped_candidate_directions": ["c1"], "dropped_extra_directions": [], "entity_anchors": ["japan"
+== fc_kr_births_2026_07/v21
+   code_version v2.1* code_commit 2bbe8aef41 confidence: date-based
+   evidence: latest agent-code commit before started_at: 2bbe8ae 'v2.1: allow change factors and shares as assumptions, code calendar co'
+   started 2026-10-15T09:24:11+00:00 | latest commit before start (HEAD history): 2bbe8ae 2026-10-15T04:23:28-05:00 v2.1: allow change factors and shares as assumptions, code calendar constants, one judge repair round; add
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'qid', 'question', 'results', 'started_at', 'tag', 'wall_s']
+   qid fc_kr_births_2026_07 as_of 2026-08-23 tag v21 model deepseek-flash
+   question: Assume today is 2026-08-23. You know nothing published after this date. Estimate the number of live births in South Korea in July 2026, as it will be first repo
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: []
+   ablation: None
+== fc_kr_births_2026_07/v21_noown
+   code_version v2.1* code_commit 2bbe8aef41 confidence: date-based
+   evidence: latest agent-code commit before started_at: 2bbe8ae 'v2.1: allow change factors and shares as assumptions, code calendar co'
+   started 2026-10-15T09:24:11+00:00 | latest commit before start (HEAD history): 2bbe8ae 2026-10-15T04:23:28-05:00 v2.1: allow change factors and shares as assumptions, code calendar constants, one judge repair round; add
+   state keys: ['ablation', 'approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'qid', 'question', 'results', 'started_at', 'tag', 'wall_s']
+   qid fc_kr_births_2026_07 as_of 2026-08-23 tag v21_noown model deepseek-flash
+   question: Assume today is 2026-08-23. You know nothing published after this date. Estimate the number of live births in South Korea in July 2026, as it will be first repo
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: []
+   ablation: {"own_history": true, "dropped_candidate_directions": ["c1"], "dropped_extra_directions": [], "entity_anchors": ["korea"
+== fc_yell_2026_09/v21_noown
+   code_version v2.1* code_commit 2bbe8aef41 confidence: date-based
+   evidence: latest agent-code commit before started_at: 2bbe8ae 'v2.1: allow change factors and shares as assumptions, code calendar co'
+   started 2026-10-15T09:24:11+00:00 | latest commit before start (HEAD history): 2bbe8ae 2026-10-15T04:23:28-05:00 v2.1: allow change factors and shares as assumptions, code calendar constants, one judge repair round; add
+   state keys: ['ablation', 'approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'qid', 'question', 'results', 'started_at', 'tag', 'wall_s']
+   qid fc_yell_2026_09 as_of 2026-09-06 tag v21_noown model deepseek-flash
+   question: Assume today is 2026-09-06. You know nothing published after this date. Estimate the number of recreation visits to Yellowstone National Park in September 2026,
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: []
+   ablation: {"own_history": true, "dropped_candidate_directions": ["c1"], "dropped_extra_directions": [], "entity_anchors": ["yellow
+== fc_jnto_2026_08/v21b
+   code_version v2.1b code_commit 66e70a8808 confidence: date-based
+   evidence: latest agent-code commit before started_at: 66e70a8 'v2.1b: independent input audit (role vs evidence) before compute; keep'
+   started 2026-10-15T10:20:28+00:00 | latest commit before start (HEAD history): 66e70a8 2026-10-15T05:20:26-05:00 v2.1b: independent input audit (role vs evidence) before compute; keep first v2.1 round results
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'qid', 'question', 'results', 'started_at', 'tag', 'wall_s']
+   qid fc_jnto_2026_08 as_of 2026-08-16 tag v21b model deepseek-flash
+   question: Assume today is 2026-08-16. You know nothing published after this date. Estimate the number of foreign visitor arrivals to Japan in August 2026, as it will be f
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: []
+   ablation: None
+== fc_kr_births_2026_07/v21c
+   code_version v2.1c-pre code_commit 0d5c68c00c confidence: override (documented)
+   evidence: override: state.json was added in the v2.1c code commit 0d5c68c itself; run started 11:13Z, 12 min before that commit (11:25Z), 8 s after the last committed agent code f5fe773 (tag v2.1b-year). The tree did not yet contain v2.1c's main change (send the judge back when executable routes disagree > 3x
+   started 2026-10-15T11:13:20+00:00 | latest commit before start (HEAD history): f5fe773 2026-10-15T06:13:12-05:00 v2.1b results; drop data points whose period year appears neither in the page text nor in its URL
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'qid', 'question', 'results', 'started_at', 'tag', 'wall_s']
+   qid fc_kr_births_2026_07 as_of 2026-08-23 tag v21c model deepseek-flash
+   question: Assume today is 2026-08-23. You know nothing published after this date. Estimate the number of live births in South Korea in July 2026, as it will be first repo
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: []
+   ablation: None
+== fc_de_cars_2026_09/test2
+   code_version v2.8r code_commit c64d3a3005 confidence: date-based
+   evidence: latest agent-code commit before started_at: c64d3a3 'v2.8r: a point's number and unit are paired; a multiplier lives in one'
+   started 2026-10-19T08:34:42+00:00 | latest commit before start (HEAD history): 48e6b45 2026-10-19T03:18:18-05:00 BUGS: attribute S23 (Mexico) root cause to S24 number formats; extend S24
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'published', 'qid', 'question', 'results', 'settings', 'started_at', 'tag', 'wall_s']
+   qid fc_de_cars_2026_09 as_of 2026-09-05 tag test2 model deepseek-flash
+   question: Assume today is 2026-09-05. You know nothing published after this date. Estimate the number of new passenger cars (Pkw) registered in Germany in September 2026,
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'directions_voided', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: ['budget_defaults', 'interval', 'max_tokens']
+   ablation: None
+== fc_de_cars_2026_09/v211_reg
+   code_version v2.11f code_commit 8e3b64ed32 confidence: date-based
+   evidence: latest agent-code commit before started_at: 8e3b64e 'v2.11f: existing-data pre-step before data gathering'
+   started 2026-10-23T02:06:29+00:00 | latest commit before start (HEAD history): 8e3b64e 2026-10-22T20:04:24-05:00 v2.11f: existing-data pre-step before data gathering
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'existing', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'published', 'qid', 'question', 'results', 'settings', 'started_at', 'tag', 'wall_s']
+   qid fc_de_cars_2026_09 as_of 2026-09-05 tag v211_reg model deepseek-flash
+   question: Assume today is 2026-09-05. You know nothing published after this date. Estimate the number of new passenger cars (Pkw) registered in Germany in September 2026,
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'directions_voided', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: ['budget_defaults', 'interval', 'max_tokens']
+   ablation: None
+== fc_lhr_pax_2026_09/v211_reg
+   code_version v2.11f code_commit 8e3b64ed32 confidence: date-based
+   evidence: latest agent-code commit before started_at: 8e3b64e 'v2.11f: existing-data pre-step before data gathering'
+   started 2026-10-23T02:44:51+00:00 | latest commit before start (HEAD history): 8e3b64e 2026-10-22T20:04:24-05:00 v2.11f: existing-data pre-step before data gathering
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'existing', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'published', 'qid', 'question', 'results', 'settings', 'started_at', 'tag', 'wall_s']
+   qid fc_lhr_pax_2026_09 as_of 2026-09-12 tag v211_reg model deepseek-flash
+   question: Assume today is 2026-09-12. You know nothing published after this date. Estimate the number of passengers at London Heathrow Airport in September 2026, as repor
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'directions_voided', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: ['budget_defaults', 'interval', 'max_tokens']
+   ablation: None
+== fc_jp_movers_2026_08/v211_reg
+   code_version v2.11f code_commit 8e3b64ed32 confidence: date-based
+   evidence: latest agent-code commit before started_at: 8e3b64e 'v2.11f: existing-data pre-step before data gathering'
+   started 2026-10-23T02:49:44+00:00 | latest commit before start (HEAD history): 8e3b64e 2026-10-22T20:04:24-05:00 v2.11f: existing-data pre-step before data gathering
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'existing', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'published', 'qid', 'question', 'results', 'settings', 'started_at', 'tag', 'wall_s']
+   qid fc_jp_movers_2026_08 as_of 2026-08-29 tag v211_reg model deepseek-flash
+   question: Assume today is 2026-08-29. You know nothing published after this date. Estimate the number of people who moved between municipalities within Japan in August 20
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'directions_voided', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: ['budget_defaults', 'interval', 'max_tokens']
+   ablation: None
+== fc_de_cars_2026_09/v211g_reg
+   code_version v2.11g code_commit 1ff32f6ab0 confidence: date-based
+   evidence: latest agent-code commit before started_at: 1ff32f6 'v2.11g: share-of-period totals are counts in unit review; CJK compound'
+   started 2026-10-23T04:22:16+00:00 | latest commit before start (HEAD history): 1ff32f6 2026-10-22T22:40:50-05:00 v2.11g: share-of-period totals are counts in unit review; CJK compounds with their last scale word parse b
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'existing', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'published', 'qid', 'question', 'results', 'settings', 'started_at', 'tag', 'wall_s']
+   qid fc_de_cars_2026_09 as_of 2026-09-05 tag v211g_reg model deepseek-flash
+   question: Assume today is 2026-09-05. You know nothing published after this date. Estimate the number of new passenger cars (Pkw) registered in Germany in September 2026,
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'directions_voided', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: ['budget_defaults', 'interval', 'max_tokens']
+   ablation: None
+== fc_us_retail_2026_06/test3
+   code_version v2.12a code_commit cf3413e49b confidence: date-based
+   evidence: latest agent-code commit before started_at: cf3413e 'v2.12a: held-out test 3 runner, four new questions, big-number leak fo'
+   started 2026-10-23T23:22:14+00:00 | latest commit before start (HEAD history): cf3413e 2026-10-23T18:04:33-05:00 v2.12a: held-out test 3 runner, four new questions, big-number leak forms
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'existing', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'published', 'qid', 'question', 'results', 'settings', 'started_at', 'tag', 'wall_s']
+   qid fc_us_retail_2026_06 as_of 2026-06-18 tag test3 model deepseek-flash
+   question: Assume today is 2026-06-18. You know nothing published after this date. Estimate total U.S. retail and food services sales for June 2026 (seasonally adjusted an
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'directions_voided', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: ['budget_defaults', 'interval', 'max_tokens']
+   ablation: None
+== fc_cn_profits_2026_09/test4
+   code_version v2.12a code_commit cf3413e49b confidence: date-based
+   evidence: latest agent-code commit before started_at: cf3413e 'v2.12a: held-out test 3 runner, four new questions, big-number leak fo'
+   started 2026-10-24T05:00:55+00:00 | latest commit before start (HEAD history): f5099a4 2026-10-23T23:53:09-05:00 test4: runner with direct-ask-with-web arm; register Q1/Q2 (China profits, Taiwan visitors)
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'existing', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'published', 'qid', 'question', 'results', 'settings', 'started_at', 'tag', 'wall_s']
+   qid fc_cn_profits_2026_09 as_of 2026-10-24 tag test4 model deepseek-flash
+   question: Assume today is 2026-10-24. You know nothing published after this date. Estimate the total profits of China's industrial enterprises above designated size (规模以上
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'directions_voided', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: ['budget_defaults', 'interval', 'max_tokens']
+   ablation: None
+== fc_de_cars_2026_09/v216_reg
+   code_version v2.16e code_commit b77e098b68 confidence: date-based
+   evidence: latest agent-code commit before started_at: b77e098 'v2.16e: keep the raw reply for repaired judge JSON too'
+   started 2026-11-24T23:51:33+00:00 | latest commit before start (HEAD history): 31e0021 2026-11-24T17:51:26-06:00 probes/run_v216_groups.py: run the v2.16 regression in the pre-registered groups of 3 (off-peak with a 20-
+   state keys: ['approval', 'approvals', 'as_of', 'assumptions', 'budget', 'compute', 'directions', 'existing', 'final', 'judge_rounds', 'leakage', 'model', 'plan', 'plan_notes', 'points', 'published', 'qid', 'question', 'results', 'settings', 'started_at', 'tag', 'wall_s']
+   qid fc_de_cars_2026_09 as_of 2026-09-05 tag v216_reg model deepseek-flash
+   question: Assume today is 2026-09-05. You know nothing published after this date. Estimate the number of new passenger cars (Pkw) registered in Germany in September 2026,
+   leakage keys: ['assumptions_containing_registered_values', 'by_construction', 'directions_voided', 'late_dates_in_text_sent', 'page_selection', 'pages_dropped', 'pages_live_dated', 'pages_sent_to_extractor', 'pages_snapshot', 'pages_total', 'points_dated_after_as_of', 'residual_risks', 'searcher_queries_containing_registered_values', 'sentinel_hits', 'snapshots_after_as_of']
+   settings keys: ['budget_defaults', 'budget_run', 'interval', 'max_tokens', 'max_tokens_model']
+   ablation: None

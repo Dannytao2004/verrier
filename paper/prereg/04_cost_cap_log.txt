@@ -1,0 +1,37 @@
+[1] per code version (deepseek-flash, non-web CLI runs): n, usd_tokens median/max, usd_total max, usd_cap values, cap aborts, wall_s median/max
+   v2.1*      n= 8 tok_med=0.10665 tok_max=0.1386 total_max=0.5812 caps=[1.0] cap_aborts=[] wall_med=2618.4 wall_max=2825.8
+   v2.1b      n= 8 tok_med=0.058050000000000004 tok_max=0.0637 total_max=0.5386 caps=[1.0] cap_aborts=[] wall_med=2321.75 wall_max=2460.9
+   v2.1c-pre  n= 2 tok_med=0.0563 tok_max=0.0576 total_max=0.4976 caps=[1.0] cap_aborts=[] wall_med=442.95 wall_max=462.2
+   v2.1c      n= 7 tok_med=0.0582 tok_max=0.076 total_max=0.536 caps=[1.0] cap_aborts=[] wall_med=531.6 wall_max=1456.4
+   v2.8r      n=15 tok_med=0.1372 tok_max=0.2401 total_max=0.7101 caps=[1.0] cap_aborts=[] wall_med=376.8 wall_max=468.9
+   v2.11f     n=16 tok_med=0.1652 tok_max=0.3296 total_max=0.8696 caps=[1.0] cap_aborts=[] wall_med=230.05 wall_max=397.9
+   v2.11g     n=17 tok_med=0.0827 tok_max=0.1621 total_max=0.6056 caps=[1.0] cap_aborts=[] wall_med=197.4 wall_max=402.5
+   v2.12a     n=12 tok_med=0.09004999999999999 tok_max=0.152 total_max=0.6302 caps=[1.0] cap_aborts=[] wall_med=308.5 wall_max=1106.1
+   v2.13b     n=10 tok_med=0.27885 tok_max=0.3641 total_max=1.7441 caps=[3.0] cap_aborts=[] wall_med=552.7 wall_max=1552.3
+   v2.14a     n=10 tok_med=0.28959999999999997 tok_max=0.4004 total_max=1.8272 caps=[3.0] cap_aborts=[] wall_med=610.85 wall_max=863.9
+   v2.15g     n=13 tok_med=0.1466 tok_max=0.3989 total_max=1.7511 caps=[3.0] cap_aborts=[] wall_med=162.1 wall_max=845.2
+   v2.16e     n= 3 tok_med=0.1902 tok_max=0.2741 total_max=1.5041 caps=[3.0] cap_aborts=[] wall_med=876.3 wall_max=892.5
+   v2.17a     n=13 tok_med=0.2168 tok_max=0.6236 total_max=1.9936 caps=[3.0] cap_aborts=[] wall_med=700.9 wall_max=1222.0
+[2] all deepseek CLI runs with a 'usd cap' abort anywhere in the archive
+   count 0
+[3] searcher calls (kind == search, ok) in post_v2.13b_3x12 runs: per-call input+cache tokens and usd, before vs after the billing change
+   before: n_calls=669 median_tokens=27746 median_usd=0.003346 median_searches=4 max_usd=0.025689
+   after: n_calls=773 median_tokens=30075 median_usd=0.00374 median_searches=4 max_usd=0.051603
+[4] v2.17a + v2.16e regression runs (tag v216_reg*, results/agent/*/v216_reg*/calls.jsonl): token fee = sum(usd), wall_s, searches
+   fc_ca_rail_2026_07/v216_reg                ver=v2.17a  think=False fee=0.2168 wall_s=588.1 searches=144 usd_total=1.6568
+   fc_ca_rail_2026_07/v216_reg_think          ver=v2.17a  think=True  fee=0.2308 wall_s=884.5 searches=121 usd_total=1.4408
+   fc_de_cars_2026_09/v216_reg                ver=v2.16e  think=False fee=0.2741 wall_s=876.3 searches=123 usd_total=1.5041
+   fc_de_cars_2026_09/v216_reg_think          ver=v2.17a  think=True  fee=0.3413 wall_s=1222.0 searches=141 usd_total=1.7513
+   fc_es_transit_2026_08/v216_reg             ver=v2.17a  think=False fee=0.2198 wall_s=828.6 searches=135 usd_total=1.5698
+   fc_hk_visitors_2026_09/v216_reg            ver=v2.17a  think=False fee=0.1468 wall_s=766.4 searches=111 usd_total=1.2568
+   fc_jp_births_2026_07/v216_reg              ver=v2.17a  think=False fee=0.1918 wall_s=542.7 searches=116 usd_total=1.3518
+   fc_kr_births_2026_07/v216_reg              ver=v2.16e  think=False fee=0.1902 wall_s=892.5 searches=123 usd_total=1.4202
+   fc_kr_online_2026_08/v216_reg              ver=v2.17a  think=False fee=0.2435 wall_s=727.4 searches=127 usd_total=1.5135
+   fc_lhr_pax_2026_09/v216_reg                ver=v2.17a  think=False fee=0.1814 wall_s=466.6 searches=127 usd_total=1.4514
+   fc_pola_teu_2026_09/v216_reg               ver=v2.17a  think=False fee=0.1706 wall_s=642.6 searches=127 usd_total=1.4406
+   fc_tw_births_2026_09/v216_reg              ver=v2.17a  think=False fee=0.2138 wall_s=700.9 searches=130 usd_total=1.5138
+   fc_us_starts_2026_08/v216_reg              ver=v2.17a  think=False fee=0.1813 wall_s=576.1 searches=120 usd_total=1.3813
+   n=13 fee median=0.2138 max=0.3413 sum=2.8020; wall median=12.1 min max=20.4 min; searches median=127
+[5] deepseek CLI runs (non-web) by recorded usd_cap: count, max usd_total (cap aborts: see [2], 0)
+   usd_cap=1.0: n=158 max usd_total=0.8696 (ask_88baf0ee/v211f_smoke)
+   usd_cap=3.0: n=52 max usd_total=1.9936 (fc_de_cars_2026_09/v217a_try)
